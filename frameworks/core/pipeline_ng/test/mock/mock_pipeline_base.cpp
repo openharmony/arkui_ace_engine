@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,17 @@
 
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
+#include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NODE_ID = 143;
 } // namespace
 RefPtr<MockPipelineBase> MockPipelineBase::pipeline_;
+uint64_t UITaskScheduler::frameId_ = 0;
 
 void MockPipelineBase::SetUp()
 {
@@ -142,11 +145,19 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
 
+void PipelineContext::OnLayoutCompleted(const std::string& componentId) {}
+
+void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
+
+void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
+
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload() {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
+
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
@@ -205,6 +216,8 @@ bool PipelineContext::OnBackPressed()
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
+void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
@@ -246,6 +259,10 @@ void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
+
+void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange) {}
+
 void PipelineContext::FlushPipelineImmediately() {}
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
@@ -257,7 +274,11 @@ void PipelineContext::DumpPipelineInfo() const {}
 
 void PipelineContext::AddVisibleAreaChangeNode(
     const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
-{}
+{
+    CHECK_NULL_VOID(callback);
+    callback(false, 0.0);
+    callback(true, ratio);
+}
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
@@ -286,25 +307,19 @@ void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
-
-SafeAreaInsets PipelineContext::GetSystemSafeArea() const
-{
-    return {};
-}
-
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
-
-SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
-{
-    return {};
-}
-
-void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback) {}
+void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
+void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
-    return {};
+    // top inset = 1
+    return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
+
+void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+
+void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -375,6 +390,8 @@ void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskT
 
 void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
 
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;
@@ -387,6 +404,10 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 }
 
 void PipelineBase::Destroy() {}
+bool PipelineBase::MaybeRelease()
+{
+    return AceType::MaybeRelease();
+}
 
 void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 

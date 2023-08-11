@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,10 +26,12 @@ public:
     void SetPanelType(PanelType type) override;
     void SetPanelMode(PanelMode mode) override;
     void SetHasDragBar(bool hasDragBar) override;
+    void SetCustomHeight(const CalcDimension& customHeight) override;
     void SetMiniHeight(const Dimension& miniHeight) override;
     void SetHalfHeight(const Dimension& halfHeight) override;
     void SetFullHeight(const Dimension& fullHeight) override;
     void SetIsShow(bool isShow) override;
+    void SetShowCloseIcon(bool showCloseIcon) override;
     void SetBackgroundMask(const Color& backgroundMask) override;
     void SetBackgroundColor(const Color& backgroundColor) override;
     void SetOnSizeChange(ChangeEvent&& changeEvent) override;

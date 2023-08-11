@@ -16,17 +16,24 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_LOCAL_STORAGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_LOCAL_STORAGE_H
 
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 
 namespace OHOS::Ace::Framework {
-class JSLocalStorage {
+class JSLocalStorage : public AceType {
+    DECLARE_ACE_TYPE(JSLocalStorage, AceType);
 public:
     JSLocalStorage();
-    ~JSLocalStorage() = default;
+    ~JSLocalStorage();
 
     static void JSBind(BindingTarget globalObj);
     static void GetShared(const JSCallbackInfo& info);
+
+    static void ConstructorCallback(const JSCallbackInfo& args);
+    static void DestructorCallback(JSLocalStorage* instance);
 
     static void AddStorage(int32_t key, const JSRef<JSObject>& value);
     static void RemoveStorage(int32_t key);

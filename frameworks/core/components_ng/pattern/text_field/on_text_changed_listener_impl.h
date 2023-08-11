@@ -38,9 +38,13 @@ public:
     void HandleSetSelection(int32_t start, int32_t end) override;
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) override;
+    std::u16string GetLeftTextOfCursor(int32_t number) override;
+    std::u16string GetRightTextOfCursor(int32_t number) override;
+    int32_t GetTextIndexAtCursor() override;
 
 private:
     void PostTaskToUI(const std::function<void()>& task);
+    void PostSyncTaskToUI(const std::function<void()>& task);
     void HandleKeyboardStatus(MiscServices::KeyboardStatus status);
     void HandleFunctionKey(MiscServices::FunctionKey functionKey);
 

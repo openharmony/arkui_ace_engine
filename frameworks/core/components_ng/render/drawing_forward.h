@@ -27,6 +27,14 @@ class Pen;
 class Brush;
 class Path;
 enum class PathOp;
+class Bitmap;
+class DrawCmdList;
+class RoundRect;
+class Data;
+class Image;
+class ColorSpace;
+class Picture;
+struct BitmapFormat;
 } // namespace Drawing
 } // namespace OHOS::Rosen
 namespace OHOS::Ace {
@@ -38,6 +46,14 @@ using RSPen = Rosen::Drawing::Pen;
 using RSBrush = Rosen::Drawing::Brush;
 using RSPath = Rosen::Drawing::Path;
 using RSPathOp = Rosen::Drawing::PathOp;
+using RSBitmap = Rosen::Drawing::Bitmap;
+using RSDrawCmdList = Rosen::Drawing::DrawCmdList;
+using RSRoundRect = Rosen::Drawing::RoundRect;
+using RSData = Rosen::Drawing::Data;
+using RSImage = Rosen::Drawing::Image;
+using RSColorSpace = Rosen::Drawing::ColorSpace;
+using RSPicture = Rosen::Drawing::Picture;
+using RSBitmapFormat = Rosen::Drawing::BitmapFormat;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

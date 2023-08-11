@@ -68,6 +68,10 @@ JSRef<JSVal> LoadImageSuccEventToJSValue(const LoadImageSuccessEvent& eventInfo)
     obj->SetProperty("componentWidth", eventInfo.GetComponentWidth());
     obj->SetProperty("componentHeight", eventInfo.GetComponentHeight());
     obj->SetProperty("loadingStatus", eventInfo.GetLoadingStatus());
+    obj->SetProperty("contentWidth", eventInfo.GetContentWidth());
+    obj->SetProperty("contentHeight", eventInfo.GetContentHeight());
+    obj->SetProperty("contentOffsetX", eventInfo.GetContentOffsetX());
+    obj->SetProperty("contentOffsetY", eventInfo.GetContentOffsetY());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -163,12 +167,11 @@ void JSImage::OnError(const JSCallbackInfo& args)
 
 void JSImage::OnFinish(const JSCallbackInfo& info)
 {
-    LOGD("JSImage OnFinish");
-    if (!info[0]->IsFunction()) {
-        LOGE("info[0] is not a function.");
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsFunction()) {
         return;
     }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(tmpInfo));
     auto onFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Image.onFinish");
@@ -180,7 +183,6 @@ void JSImage::OnFinish(const JSCallbackInfo& info)
 void JSImage::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
 
@@ -197,7 +199,6 @@ void JSImage::Create(const JSCallbackInfo& info)
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
         if (notSupport) {
-            LOGE("Not supported src : %{public}s when form render", src.c_str());
             src.clear();
         }
     }
@@ -222,23 +223,6 @@ void JSImage::Create(const JSCallbackInfo& info)
     }
 
     ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName);
-}
-
-// Interim programme
-void JSImage::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
-{
-    if (!jsValue->IsObject() || jsValue->IsString()) {
-        return;
-    }
-    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
-    if (!jsObj->IsUndefined()) {
-        JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
-        JSRef<JSVal> module = jsObj->GetProperty("moduleName");
-        if (bundle->IsString() && module->IsString()) {
-            bundleName = bundle->ToString();
-            moduleName = module->ToString();
-        }
-    }
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
@@ -359,31 +343,34 @@ void JSImage::SetAutoResize(bool autoResize)
 
 void JSImage::SetSyncLoad(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsBoolean()) {
-        LOGE("info[0] is not a Boolean.");
+    if (info.Length() < 1) {
         return;
     }
-    ImageModel::GetInstance()->SetSyncMode(info[0]->ToBoolean());
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsBoolean()) {
+        return;
+    }
+    ImageModel::GetInstance()->SetSyncMode(tmpInfo->ToBoolean());
 }
 
 void JSColorFilter::ConstructorCallback(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
-        LOGE("The argv is wrong, it it supposed to have at least 1 argument");
         return;
     }
-    if (!args[0]->IsArray()) {
-        LOGE("jscallback is not object or array");
+    auto tmpInfo = args[0];
+    if (!tmpInfo->IsArray()) {
+        LOGD("jscallback is not object or array");
         return;
     }
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(args[0]);
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGE("arg length illegal");
+        LOGI("arg length illegal");
         return;
     }
     auto jscolorfilter = Referenced::MakeRefPtr<JSColorFilter>();
     if (jscolorfilter == nullptr) {
-        LOGE("make jscolorfilter object failed");
+        LOGW("make jscolorfilter object failed");
         return;
     }
     std::vector<float> colorfilter;
@@ -411,13 +398,16 @@ void JSColorFilter::DestructorCallback(JSColorFilter* obj)
 
 void JSImage::SetColorFilter(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsArray()) {
-        LOGE("The arg is wrong, it is supposed to have 1 arguments");
+    if (info.Length() != 1) {
         return;
     }
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsArray()) {
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
     if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGE("arg length illegal");
+        LOGW("arg length illegal");
         return;
     }
     std::vector<float> colorfilter;
@@ -428,7 +418,7 @@ void JSImage::SetColorFilter(const JSCallbackInfo& info)
         }
     }
     if (colorfilter.size() != COLOR_FILTER_MATRIX_SIZE) {
-        LOGE("colorfilter length illegal");
+        LOGI("colorfilter length illegal");
         return;
     }
     ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
@@ -468,10 +458,6 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSImage>::StaticMethod("draggable", &JSImage::JsSetDraggable);
     JSClass<JSImage>::StaticMethod("onDragStart", &JSImage::JsOnDragStart);
-    JSClass<JSImage>::StaticMethod("onDragEnter", &JSImage::JsOnDragEnter);
-    JSClass<JSImage>::StaticMethod("onDragMove", &JSImage::JsOnDragMove);
-    JSClass<JSImage>::StaticMethod("onDragLeave", &JSImage::JsOnDragLeave);
-    JSClass<JSImage>::StaticMethod("onDrop", &JSImage::JsOnDrop);
     JSClass<JSImage>::StaticMethod("copyOption", &JSImage::SetCopyOption);
     // override method
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
@@ -491,7 +477,6 @@ void JSImage::JsSetDraggable(bool draggable)
 void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 {
     if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
         return;
     }
     RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
@@ -502,7 +487,6 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
 
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
-            LOGE("builder param is not an object.");
             return itemInfo;
         }
         if (ParseAndUpdateDragItemInfo(ret, itemInfo)) {
@@ -520,68 +504,6 @@ void JSImage::JsOnDragStart(const JSCallbackInfo& info)
         return itemInfo;
     };
     ImageModel::GetInstance()->SetOnDragStart(std::move(onDragStartId));
-}
-
-void JSImage::JsOnDragEnter(const JSCallbackInfo& info)
-{
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
-        return;
-    }
-    auto jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragEnter");
-        func->Execute(info, extraParams);
-    };
-    ImageModel::GetInstance()->SetOnDragEnter(std::move(onDragEnterId));
-}
-
-void JSImage::JsOnDragMove(const JSCallbackInfo& info)
-{
-    if (info.Length() != 1 || !info[0]->IsFunction()) {
-        LOGW("argument is invalid");
-        return;
-    }
-    auto jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
-                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragMove");
-        func->Execute(info, extraParams);
-    };
-    ImageModel::GetInstance()->SetOnDragMove(std::move(onDragMoveId));
-}
-
-void JSImage::JsOnDragLeave(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    auto jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragLeave");
-        func->Execute(info, extraParams);
-    };
-    ImageModel::GetInstance()->SetOnDragLeave(std::move(onDragLeaveId));
-}
-
-void JSImage::JsOnDrop(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    auto jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDrop");
-        func->Execute(info, extraParams);
-    };
-    ImageModel::GetInstance()->SetOnDrop(std::move(onDropId));
 }
 
 void JSImage::SetCopyOption(const JSCallbackInfo& info)

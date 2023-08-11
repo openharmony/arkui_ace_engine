@@ -28,6 +28,8 @@ using JSVal = JsiValue;
 using JSObject = JsiObject;
 using JSFunc = JsiFunction;
 using JSArray = JsiArray;
+using JSArrayBuffer = JsiArrayBuffer;
+using JSUint8ClampedArray = JsiUint8ClampedArray;
 using JSString = JsiString;
 using JSCallbackInfo = JsiCallbackInfo;
 using JSGCMarkCallbackInfo = JsiGCMarkCallbackInfo;
@@ -43,6 +45,7 @@ inline auto ToJSValue(T&& val)
 };
 
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info);
+Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info);
 
 #endif
 

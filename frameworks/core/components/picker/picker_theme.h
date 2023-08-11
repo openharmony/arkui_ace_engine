@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/picker/picker_data.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -130,6 +131,10 @@ public:
             theme->dividerThickness_ = pattern->GetAttr<Dimension>("divider_thickness", 2.0_px);
             theme->paddingHorizontal_ = pattern->GetAttr<Dimension>("padding_horizontal", 24.0_vp);
             theme->contentMarginVertical_ = pattern->GetAttr<Dimension>("content_margin_vertical", 8.0_vp);
+            theme->lunarswitchTextSize_ =
+                pattern->GetAttr<Dimension>("lunarswitch_text_size", theme->lunarswitchTextSize_);
+            theme->lunarswitchTextColor_ =
+                pattern->GetAttr<Color>("lunarswitch_text_color", theme->lunarswitchTextColor_);
         }
 
     private:
@@ -253,6 +258,10 @@ public:
         theme->disappearOptionStyle_ = disappearOptionStyle_;
         theme->pressColor_ = pressColor_;
         theme->hoverColor_ = hoverColor_;
+        theme->lunarswitchTextColor_ = lunarswitchTextColor_;
+        theme->lunarswitchTextSize_ = lunarswitchTextSize_;
+        theme->defaultStartDate_ = defaultStartDate_;
+        theme->defaultEndDate_ = defaultEndDate_;
         return theme;
     }
 
@@ -475,12 +484,34 @@ public:
         return contentMarginVertical_;
     }
 
+    const Dimension& GetLunarSwitchTextSize() const
+    {
+        return lunarswitchTextSize_;
+    }
+
+    const Color& GetLunarSwitchTextColor() const
+    {
+        return lunarswitchTextColor_;
+    }
+
+    const PickerDate& GetDefaultStartDate() const
+    {
+        return defaultStartDate_;
+    }
+
+    const PickerDate& GetDefaultEndDate() const
+    {
+        return defaultEndDate_;
+    }
+
 private:
     PickerTheme() = default;
 
     Color focusColor_;
     Color hoverColor_;
     Color pressColor_;
+    Color lunarswitchTextColor_;
+
     Radius focusRadius_;
     uint32_t showOptionCount_ = 0;
     bool showButtons_ = false;
@@ -533,6 +564,10 @@ private:
 
     Dimension paddingHorizontal_;
     Dimension contentMarginVertical_;
+    Dimension lunarswitchTextSize_;
+
+    PickerDate defaultStartDate_ = PickerDate(1970, 1, 1);
+    PickerDate defaultEndDate_ = PickerDate(2100, 12, 31);
 };
 
 } // namespace OHOS::Ace

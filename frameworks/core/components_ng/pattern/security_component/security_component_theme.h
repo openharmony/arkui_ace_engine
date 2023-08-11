@@ -205,13 +205,13 @@ private:
         theme->saveDescriptions_.emplace_back(
             securityComponentPattern->GetAttr<std::string>("description_download", ""));
         theme->saveDescriptions_.emplace_back(
-            securityComponentPattern->GetAttr<std::string>("description_download_files", ""));
+            securityComponentPattern->GetAttr<std::string>("description_download_file", ""));
         theme->saveDescriptions_.emplace_back(
             securityComponentPattern->GetAttr<std::string>("description_save", ""));
         theme->saveDescriptions_.emplace_back(
-            securityComponentPattern->GetAttr<std::string>("description_save_images", ""));
+            securityComponentPattern->GetAttr<std::string>("description_save_image", ""));
         theme->saveDescriptions_.emplace_back(
-            securityComponentPattern->GetAttr<std::string>("description_save_files", ""));
+            securityComponentPattern->GetAttr<std::string>("description_save_file", ""));
         theme->saveDescriptions_.emplace_back(
             securityComponentPattern->GetAttr<std::string>("description_download_and_share", ""));
         theme->saveDescriptions_.emplace_back(

@@ -30,10 +30,16 @@ public:
     {
         CHECK_NULL_VOID(rectProperty_);
 
+#ifndef USE_ROSEN_DRAWING
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /*unused*/) {} };
         RSCanvas rsCanvas(&skCanvas);
         CHECK_NULL_VOID(&rsCanvas);
         paintTask_(rectProperty_->Get(), rsCanvas);
+#else
+        CHECK_NULL_VOID(context.canvas);
+        CHECK_NULL_VOID(paintTask_);
+        paintTask_(rectProperty_->Get(), *context.canvas);
+#endif
     }
 
     void SetSelectRect(const RectF& rect)

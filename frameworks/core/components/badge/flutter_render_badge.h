@@ -37,6 +37,8 @@ private:
     Size CalculateTextSize(const std::string& text, const TextStyle& textStyle,
         RefPtr<RenderText>& renderText) override;
     void PaintText(const Offset& textOffset, RenderContext& context) const;
+    void SetBoundaryForNumericalBadge(
+        double& boundaryStartX, double& boundaryStartY, const Offset& offset);
     void DrawCircleBadge(flutter::Canvas& canvas, const Offset& offset);
     void DrawNumericalBadge(flutter::Canvas& canvas, const Offset& offset);
     void RenderBadgeBoundary(SkCanvas* canvas, double startX, double startY, double width, double height);

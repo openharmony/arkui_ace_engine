@@ -35,30 +35,11 @@ constexpr int32_t TOUCH_DURATION = 250;
 
 void ButtonPattern::OnAttachToFrameNode()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    SetDefaultAttributes(host, pipeline);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
-}
-
-void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline)
-{
-    auto renderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-
-    // Init button default style
-    buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
-    renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
 }
 
 void ButtonPattern::UpdateTextLayoutProperty(
@@ -90,6 +71,12 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetMaxLines().has_value()) {
         textLayoutProperty->UpdateMaxLines(layoutProperty->GetMaxLines().value());
     }
+    if (layoutProperty->GetMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+    }
+    if (layoutProperty->GetMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+    }
     if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
         textLayoutProperty->UpdateHeightAdaptivePolicy(layoutProperty->GetHeightAdaptivePolicy().value());
     }
@@ -114,6 +101,11 @@ void ButtonPattern::InitButtonLabel()
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
+    auto buttonRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(buttonRenderContext);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }
@@ -124,6 +116,7 @@ void ButtonPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitButtonLabel();
+    HandleBackgroundColor();
     HandleEnabled();
     InitHoverEvent();
     InitTouchEvent();
@@ -216,9 +209,29 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (enabled) {
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->AnimateHoverEffectBoard(isHover);
+    }
+}
+
+void ButtonPattern::HandleBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->AnimateHoverEffectBoard(isHover);
+    if (!renderContext->HasBackgroundColor()) {
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
+    }
 }
 
 void ButtonPattern::HandleEnabled()
@@ -266,4 +279,28 @@ void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
 }
 
+void ButtonPattern::OnColorConfigurationUpdate()
+{
+    auto node = GetHost();
+    if (isColorUpdateFlag_) {
+        node->SetNeedCallChildrenUpdate(false);
+        return;
+    }
+    node->SetNeedCallChildrenUpdate(false);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto buttonLayoutProperty = node->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto color = buttonTheme->GetBgColor();
+    renderContext->UpdateBackgroundColor(color);
+    auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto textStyle = buttonTheme->GetTextStyle();
+    textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
+    textNode->MarkDirtyNode();
+}
 } // namespace OHOS::Ace::NG

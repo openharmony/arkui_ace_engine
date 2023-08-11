@@ -249,6 +249,11 @@ public:
         return false;
     }
 
+    int32_t GetDragRecordSize() override
+    {
+        return 1;
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -324,12 +329,20 @@ public:
     {
         selectPopupMenuShowing_ = showing;
     }
+    void SetCurrentStartHandleDragging(bool isStartHandle)
+    {
+        isCurrentStartHandleDragging_ = isStartHandle;
+    }
+    void UpdateSelectHandleInfo();
+    bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
+    bool IsImageDrag();
     DragRet GetDragAcceptableStatus();
+    Offset GetDragOffset() const;
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -391,6 +404,7 @@ private:
     void OnScrollBarColorUpdate(const std::string& value);
 
     void InitEvent();
+    void InitFeatureParam();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
@@ -403,6 +417,7 @@ private:
     void HandleDragStart(int32_t x, int32_t y);
     void HandleDragEnd(int32_t x, int32_t y);
     void HandleDragCancel();
+    void ClearDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
@@ -516,9 +531,11 @@ private:
     bool isEnhanceSurface_ = false;
     bool isAllowWindowOpenMethod_ = false;
     OffsetF webOffset_;
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
+    bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
@@ -526,8 +543,11 @@ private:
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
     bool isVisible_ = true;
+    bool isVisibleActiveEnable_ = true;
+    bool isMemoryLevelEnable_ = true;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
+    std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

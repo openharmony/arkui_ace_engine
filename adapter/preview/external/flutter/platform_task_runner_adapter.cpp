@@ -16,28 +16,30 @@
 #include "adapter/preview/external/flutter/platform_task_runner_adapter.h"
 
 #include "flutter/fml/time/time_point.h"
+#include "jsapp/rich/external/EventHandler.h"
+
 namespace flutter {
 
 PlatformTaskRunnerAdapter::PlatformTaskRunnerAdapter(bool useCurrentEventRunner) : fml::TaskRunner(nullptr) {}
 
 void PlatformTaskRunnerAdapter::PostTask(fml::closure task)
 {
-    MainEventLoop::GetInstance().PostTask(std::move(task), fml::TimePoint::Now());
+    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task));
 }
 
 void PlatformTaskRunnerAdapter::PostTaskForTime(fml::closure task, fml::TimePoint target_time)
 {
-    MainEventLoop::GetInstance().PostTask(std::move(task), target_time);
+    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), target_time.ToEpochDelta().ToMilliseconds());
 }
 
 void PlatformTaskRunnerAdapter::PostDelayedTask(fml::closure task, fml::TimeDelta delay)
 {
-    MainEventLoop::GetInstance().PostTask(std::move(task), fml::TimePoint::Now() + delay);
+    OHOS::AppExecFwk::EventHandler::PostTask(std::move(task), delay.ToMilliseconds());
 }
 
 bool PlatformTaskRunnerAdapter::RunsTasksOnCurrentThread()
 {
-    return MainEventLoop::GetInstance().RunsTasksOnCurrentThread();
+    return OHOS::AppExecFwk::EventHandler::IsCurrentRunnerThread();
 }
 
 fml::TaskQueueId PlatformTaskRunnerAdapter::GetTaskQueueId()

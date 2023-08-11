@@ -20,6 +20,8 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
@@ -29,6 +31,7 @@
 #include "core/common/manager_interface.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
@@ -327,9 +330,9 @@ void PipelineBase::NotifyDestroyEventDismiss() const
 void PipelineBase::NotifyDispatchTouchEventDismiss(const TouchEvent& event) const
 {
     CHECK_RUN_ON(UI);
-    for (auto& iterDispatchTouchEventHander : dispatchTouchEventHandler_) {
-        if (iterDispatchTouchEventHander) {
-            iterDispatchTouchEventHander(event);
+    for (auto& iterDispatchTouchEventHandler : dispatchTouchEventHandler_) {
+        if (iterDispatchTouchEventHandler) {
+            iterDispatchTouchEventHandler(event);
         }
     }
 }
@@ -392,7 +395,13 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
     auto frontend = weakFrontend_.Upgrade();
     CHECK_NULL_VOID(frontend);
-    auto& windowConfig = frontend->GetWindowConfig();
+    CHECK_NULL_VOID(taskExecutor_);
+    WindowConfig windowConfig;
+    taskExecutor_->PostSyncTask(
+        [frontend, &windowConfig] {
+            windowConfig = frontend->GetWindowConfig();
+        },
+        TaskExecutor::TaskType::JS);
     if (windowConfig.designWidth <= 0) {
         LOGE("the frontend design width <= 0");
         return;
@@ -486,8 +495,10 @@ void PipelineBase::PrepareOpenImplicitAnimation()
     pendingImplicitLayout_.push(false);
     pendingImplicitRender_.push(false);
 
-    // flush ui tasks before open implict animation
-    FlushUITasks();
+    // flush ui tasks before open implicit animation
+    if (!isReloading_ && !IsLayouting()) {
+        FlushUITasks();
+    }
 #endif
 }
 
@@ -502,7 +513,9 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     // layout or render the views immediately to animate all related views, if layout or render updates are pending in
     // the animation closure
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
-        FlushUITasks();
+        if (!isReloading_ && !IsLayouting()) {
+            FlushUITasks();
+        }
     }
     if (!pendingImplicitLayout_.empty()) {
         pendingImplicitLayout_.pop();
@@ -596,14 +609,38 @@ void PipelineBase::RemoveTouchPipeline(const WeakPtr<PipelineBase>& context)
 void PipelineBase::OnVirtualKeyboardAreaChange(
     Rect keyboardArea, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-        return;
+    auto currentContainer = Container::Current();
+    if (currentContainer && !currentContainer->IsSubContainer()) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
+        if (subwindow && subwindow->GetShown()) {
+            // subwindow is shown, main window no need to handle the keyboard event
+            return;
+        }
     }
     double keyboardHeight = keyboardArea.Height();
+    if (windowManager_ && windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        if (windowManager_->GetWindowType() == WindowType::WINDOW_TYPE_UNDEFINED ||
+            (windowManager_->GetWindowType() > WindowType::WINDOW_TYPE_APP_END &&
+                windowManager_->GetWindowType() != WindowType::WINDOW_TYPE_FLOAT)) {
+            LOGW("this window type: %{public}d do not need avoid virtual keyboard.",
+                static_cast<int32_t>(windowManager_->GetWindowMode()));
+            return;
+        }
+        keyboardHeight = ModifyKeyboardHeight(keyboardHeight);
+    }
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight)) {
         return;
     }
     OnVirtualKeyboardHeightChange(keyboardHeight, rsTransaction);
+}
+
+double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
+{
+    auto windowRect = GetCurrentWindowRect();
+    auto deviceHeight = SystemProperties::GetDeviceHeight();
+    return keyboardHeight > 0.0 && keyboardHeight - (deviceHeight - windowRect.Bottom()) > 0.0
+               ? keyboardHeight - (deviceHeight - windowRect.Bottom())
+               : 0.0;
 }
 
 void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
@@ -619,6 +656,13 @@ Rect PipelineBase::GetCurrentWindowRect() const
         return window_->GetCurrentWindowRect();
     }
     return {};
+}
+
+bool PipelineBase::HasFloatTitle() const
+{
+    CHECK_NULL_RETURN_NOLOG(windowManager_, false);
+    return GetWindowModal() == WindowModal::CONTAINER_MODAL &&
+           windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 }
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
@@ -692,6 +736,19 @@ void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
     subWindowVsyncCallbacks_.erase(subWindowId);
 }
 
+bool PipelineBase::MaybeRelease()
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        LOGI("Destroy Pipeline on UI thread.");
+        return true;
+    } else {
+        LOGI("Post Destroy Pipeline Task to UI thread.");
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI);
+    }
+}
+
 void PipelineBase::Destroy()
 {
     CHECK_RUN_ON(UI);
@@ -713,6 +770,7 @@ void PipelineBase::Destroy()
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
     etsCardTouchEventCallback_.clear();
+    formLinkInfoMap_.clear();
     LOGI("PipelineBase::Destroy end.");
 }
 } // namespace OHOS::Ace

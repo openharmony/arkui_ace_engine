@@ -18,24 +18,44 @@
 
 #include "base/want/want_wrap.h"
 
+#include <string>
+
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
 #include "want.h"
 
 namespace OHOS::Ace {
+class WantParamsWrapOhos : public WantParamsWrap {
+    DECLARE_ACE_TYPE(WantParamsWrapOhos, WantParamsWrap);
+public:
+    WantParamsWrapOhos(NativeEngine* engine, NativeValue* value);
+    ~WantParamsWrapOhos() = default;
+    const AAFwk::WantParams& GetWantParams() const
+    {
+        return params_;
+    }
+private:
+    AAFwk::WantParams params_;
+};
 
 class WantWrapOhos : public WantWrap {
     DECLARE_ACE_TYPE(WantWrapOhos, WantWrap)
 
 public:
     WantWrapOhos(NativeEngine* engine, NativeValue* value);
+    WantWrapOhos(const std::string& bundleName, const std::string& abilityName);
     ~WantWrapOhos() = default;
     void SetWantParamsFromWantWrap(void* want) override;
     std::string ToString() const override;
+    void SetWantParam(const std::map<std::string, std::string>& params) override;
+
+    const AAFwk::Want& GetWant() const
+    {
+        return want_;
+    }
+
 private:
     AAFwk::Want want_;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_WANT_WRAP_OHOS_H

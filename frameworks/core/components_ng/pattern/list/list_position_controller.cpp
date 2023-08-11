@@ -31,28 +31,10 @@ void ListPositionController::JumpTo(int32_t index, bool smooth, ScrollAlign alig
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
     CHECK_NULL_VOID_NOLOG(listPattern);
     LOGW("jumpTo is not supported now");
-    listPattern->ScrollToIndex(index, smooth, align);
-}
-
-bool ListPositionController::AnimateTo(
-    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    if (listPattern && listPattern->GetAxis() != Axis::NONE) {
-        if (position.Unit() == DimensionUnit::PERCENT) {
-            LOGW("not support percent dimension now");
-            return false;
-        }
-        if (Positive(duration)) {
-            listPattern->AnimateTo(position.ConvertToPx(), duration, curve);
-        } else {
-            listPattern->ScrollTo(position.ConvertToPx(), smooth);
-        }
-        return true;
+    if (align == ScrollAlign::NONE) {
+        align = ScrollAlign::START;
     }
-    return false;
+    listPattern->ScrollToIndex(index, smooth, align);
 }
 
 void ListPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
@@ -63,15 +45,6 @@ void ListPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
     CHECK_NULL_VOID(listPattern);
     auto offset = listPattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
     listPattern->ScrollBy(static_cast<float>(offset));
-}
-
-Axis ListPositionController::GetScrollDirection() const
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(pattern, Axis::NONE);
-    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    CHECK_NULL_RETURN_NOLOG(listPattern, Axis::NONE);
-    return listPattern->GetAxis();
 }
 
 void ListPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
@@ -92,21 +65,6 @@ void ListPositionController::ScrollPage(bool reverse, bool smooth)
     if (listPattern && listPattern->GetAxis() != Axis::NONE) {
         listPattern->ScrollPage(reverse);
     }
-}
-
-Offset ListPositionController::GetCurrentOffset() const
-{
-    auto pattern = scroll_.Upgrade();
-    auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
-    CHECK_NULL_RETURN_NOLOG(listPattern, Offset::Zero());
-    auto pxOffset = listPattern->GetCurrentOffset();
-    // need to reverse the coordinate
-    auto x = Dimension(pxOffset.GetX(), DimensionUnit::PX);
-    auto y = Dimension(pxOffset.GetY(), DimensionUnit::PX);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, Offset::Zero());
-    Offset offset(pipeline->ConvertPxToVp(x), pipeline->ConvertPxToVp(y));
-    return offset;
 }
 
 bool ListPositionController::IsAtEnd() const

@@ -57,6 +57,21 @@ void BadgeModelNG::Create(BadgeParameters& badgeParameters)
     } else {
         layoutProperty->UpdateBadgePosition(badgeTheme->GetBadgePosition());
     }
+    if (badgeParameters.badgePositionX.has_value()) {
+        layoutProperty->UpdateBadgePositionX(badgeParameters.badgePositionX.value());
+    } else {
+        layoutProperty->UpdateBadgePositionX(badgeTheme->GetBadgePositionX());
+    }
+    if (badgeParameters.badgePositionY.has_value()) {
+        layoutProperty->UpdateBadgePositionY(badgeParameters.badgePositionY.value());
+    } else {
+        layoutProperty->UpdateBadgePositionY(badgeTheme->GetBadgePositionY());
+    }
+    if (badgeParameters.isPositionXy.has_value()) {
+        layoutProperty->UpdateIsPositionXy(badgeParameters.isPositionXy.value());
+    } else {
+        layoutProperty->UpdateIsPositionXy(badgeTheme->GetIsPositionXy());
+    }
     UpdateBadgeStyle(badgeParameters, frameNode);
 }
 

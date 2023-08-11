@@ -29,9 +29,7 @@ void DragDropProxy::OnTextDragStart(const std::string& extraInfo)
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
-#ifndef ENABLE_DRAG_FRAMEWORK
     manager->AddDataToClipboard(extraInfo);
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropProxy::OnDragStart(
@@ -43,11 +41,10 @@ void DragDropProxy::OnDragStart(
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
 
-    manager->OnDragStart(
-        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), frameNode);
-#ifndef ENABLE_DRAG_FRAMEWORK
+    manager->OnDragStart(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+                             info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
+        frameNode);
     manager->AddDataToClipboard(extraInfo);
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void DragDropProxy::OnDragMove(const GestureEvent& info)
@@ -65,8 +62,9 @@ void DragDropProxy::OnDragMove(const GestureEvent& info)
     manager->GetExtraInfoFromClipboard(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
 
-    manager->OnDragMove(
-        static_cast<float>(info.GetGlobalPoint().GetX()), static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
+    manager->OnDragMove(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+                            info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
+        extraInfo);
 }
 
 void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
@@ -76,14 +74,19 @@ void DragDropProxy::OnDragEnd(const GestureEvent& info, bool isTextDragEnd)
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(manager->CheckDragDropProxy(id_));
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::string extraInfo = manager->GetExtraInfo();
+#else
     std::string extraInfo;
     manager->GetExtraInfoFromClipboard(extraInfo);
+#endif // ENABLE_DRAG_FRAMEWORK
     if (isTextDragEnd) {
         manager->OnTextDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
             static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
     } else {
-        manager->OnDragEnd(static_cast<float>(info.GetGlobalPoint().GetX()),
-            static_cast<float>(info.GetGlobalPoint().GetY()), extraInfo);
+        manager->OnDragEnd(Point(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
+                               info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY()),
+            extraInfo);
     }
 #ifndef ENABLE_DRAG_FRAMEWORK
     manager->RestoreClipboardData();

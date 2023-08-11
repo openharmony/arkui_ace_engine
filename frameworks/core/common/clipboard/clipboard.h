@@ -19,6 +19,7 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
+#include "core/common/clipboard/paste_data.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
@@ -36,6 +37,14 @@ public:
     virtual void GetPixelMapData(
         const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) = 0;
     virtual void HasData(const std::function<void(bool hasData)>& callback) = 0;
+    virtual void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) = 0;
+    virtual void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) = 0;
+    virtual void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) = 0;
+    virtual void SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption = CopyOptions::Distributed) = 0;
+    virtual void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+        const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+        const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) = 0;
+    virtual RefPtr<PasteDataMix> CreatePasteDataMix() = 0;
     virtual void Clear() = 0;
 
 protected:

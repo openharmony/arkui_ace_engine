@@ -20,6 +20,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -42,6 +43,7 @@ public:
         paintProperty->propGradientColor_ = CloneGradientColor();
         paintProperty->propPaintShadow_ = ClonePaintShadow();
         paintProperty->propProgressStatus_ = CloneProgressStatus();
+        paintProperty->propEnableSmoothEffect_ = CloneEnableSmoothEffect();
         return paintProperty;
     }
 
@@ -56,6 +58,7 @@ public:
         ResetGradientColor();
         ResetPaintShadow();
         ResetProgressStatus();
+        ResetEnableSmoothEffect();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -81,6 +84,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, EnableRingScanEffect, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, EnableLinearScanEffect, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, EnableShowText, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, StrokeRadius, Dimension, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_MEASURE);
@@ -89,6 +93,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientColor, Gradient, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PaintShadow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ProgressStatus, ProgressStatus, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableSmoothEffect, bool, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

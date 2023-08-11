@@ -316,7 +316,7 @@ RefPtr<Curve> CreateCurve(const std::function<float(float)>& jsFunc)
     if (jsFunc) {
         return AceType::MakeRefPtr<CustomCurve>(jsFunc);
     }
-    return Curves::EASE;
+    return Curves::EASE_IN_OUT;
 }
 
 RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault)
@@ -329,7 +329,7 @@ RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault)
     if (curve) {
         return curve;
     }
-    return useDefault? Curves::EASE : nullptr;
+    return useDefault? Curves::EASE_IN_OUT : nullptr;
 }
 
 // used for declarative only

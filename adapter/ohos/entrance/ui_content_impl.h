@@ -42,6 +42,8 @@ public:
 
     // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
+    void Initialize(
+        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -86,7 +88,7 @@ public:
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
     void UpdateFormData(const std::string& data) override;
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
-    void ReloadForm() override;
+    void ReloadForm(const std::string& url) override;
 
     void SetFormWidth(float width) override
     {
@@ -107,6 +109,7 @@ public:
 
     void SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback) override;
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
+    void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override;
 
     void OnFormSurfaceChange(float width, float height) override;
 
@@ -148,6 +151,9 @@ public:
         const std::vector<std::string>& assetBasePaths) override;
     NativeValue* GetUIContext() override;
     void SetIsFocusActive(bool isFocusActive) override;
+
+    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks) override;
+    void CloseModalUIExtension(int32_t sessionId) override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

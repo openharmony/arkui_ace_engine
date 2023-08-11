@@ -30,6 +30,9 @@ struct BadgeParameters {
     std::optional<int> badgeCount;
     std::optional<int> badgeMaxCount;
     std::optional<int> badgePosition;
+    std::optional<bool> isPositionXy;
+    std::optional<Dimension> badgePositionX;
+    std::optional<Dimension> badgePositionY;
 
     std::optional<Color> badgeColor;
     std::optional<Color> badgeTextColor;

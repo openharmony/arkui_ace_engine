@@ -33,7 +33,7 @@ bool FormRenderGroup(const std::string data, size_t size)
     AAFwk::Want want;
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     fromGroup->AddForm(want, formJsInfo);
-    fromGroup->ReloadForm();
+    fromGroup->ReloadForm(formJsInfo);
     auto id = size % u16m;
     fromGroup->DeleteForm(std::to_string(id));
     return true;

@@ -31,6 +31,8 @@ public:
     void SetColumnEnd(int32_t value) override;
     void SetForceRebuild(bool value) override;
     void SetSelectable(bool value) override;
+    void SetSelected(bool selected) override {};
+    void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) override {};
     void SetOnSelect(std::function<void(bool)>&& onSelect) override;
 };
 

@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 #include <optional>
+#include <securec.h>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -125,16 +126,22 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     if (callback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
             [callback, overlayId, isSelectAll](GestureEvent& /*info*/) {
-                if (callback) {
-                    callback();
-                }
-                // close text overlay.
                 auto pipeline = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetSelectOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
+                auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
+                CHECK_NULL_VOID(selectOverlay);
+                auto isDoingAnimation = selectOverlay->GetAnimationStatus();
+                CHECK_NULL_VOID(!isDoingAnimation);
+                auto isExtensionMenu = selectOverlay->GetIsExtensionMenu();
+                CHECK_NULL_VOID(!isExtensionMenu);
+                if (callback) {
+                    callback();
+                }
+                // close text overlay.
                 if (!isSelectAll) {
-                    overlayManager->DestroySelectOverlay(overlayId);
+                    overlayManager->DestroySelectOverlay(overlayId, true);
                 }
             });
     } else {
@@ -317,7 +324,140 @@ void SetOptionsAction(const std::vector<RefPtr<FrameNode>>& options)
 
 SelectOverlayNode::SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
     : FrameNode("SelectOverlay", ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<SelectOverlayPattern>(info))
-{}
+{
+    stateFuncs_[FrameNodeStatus::VISIBLE] = &SelectOverlayNode::DispatchVisibleState;
+    stateFuncs_[FrameNodeStatus::VISIBLETOGONE] = &SelectOverlayNode::DispatchVisibleToGoneState;
+    stateFuncs_[FrameNodeStatus::GONE] = &SelectOverlayNode::DispatchGoneState;
+    stateFuncs_[FrameNodeStatus::GONETOVISIBLE] = &SelectOverlayNode::DispatchGoneToVisibleState;
+}
+
+void SelectOverlayNode::DispatchVisibleState(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    AnimationOption option;
+    option.SetDuration(MENU_HIDE_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+
+    switch (trigger) {
+        case FrameNodeTrigger::HIDE:
+            SetFrameNodeStatus(type, FrameNodeStatus::VISIBLETOGONE);
+            AnimationUtils::Animate(
+                option,
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->SetFrameNodeOpacity(type, 0.0);
+                },
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
+                });
+            break;
+        case FrameNodeTrigger::SHOW:
+        case FrameNodeTrigger::SHOWN:
+        case FrameNodeTrigger::HIDDEN:
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::DispatchVisibleToGoneState(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    AnimationOption option;
+    option.SetDuration(MENU_SHOW_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+
+    switch (trigger) {
+        case FrameNodeTrigger::SHOW:
+            SetFrameNodeStatus(type, FrameNodeStatus::GONETOVISIBLE);
+            SetFrameNodeVisibility(type, VisibleType::VISIBLE);
+            AnimationUtils::Animate(
+                option,
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->SetFrameNodeOpacity(type, 1.0);
+                },
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->ExecuteOverlayStatus(type, FrameNodeTrigger::SHOWN);
+                });
+            break;
+        case FrameNodeTrigger::HIDDEN:
+            SetFrameNodeStatus(type, FrameNodeStatus::GONE);
+            SetFrameNodeVisibility(type, VisibleType::GONE);
+            break;
+        case FrameNodeTrigger::SHOWN:
+        case FrameNodeTrigger::HIDE:
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::DispatchGoneState(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    AnimationOption option;
+    option.SetDuration(MENU_SHOW_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+
+    switch (trigger) {
+        case FrameNodeTrigger::SHOW:
+            SetFrameNodeStatus(type, FrameNodeStatus::GONETOVISIBLE);
+            SetFrameNodeVisibility(type, VisibleType::VISIBLE);
+            AnimationUtils::Animate(
+                option,
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->SetFrameNodeOpacity(type, 1.0);
+                },
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->ExecuteOverlayStatus(type, FrameNodeTrigger::SHOWN);
+                });
+            break;
+        case FrameNodeTrigger::SHOWN:
+        case FrameNodeTrigger::HIDE:
+        case FrameNodeTrigger::HIDDEN:
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::DispatchGoneToVisibleState(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    AnimationOption option;
+    option.SetDuration(MENU_HIDE_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+
+    switch (trigger) {
+        case FrameNodeTrigger::SHOWN:
+            SetFrameNodeStatus(type, FrameNodeStatus::VISIBLE);
+            break;
+        case FrameNodeTrigger::HIDE:
+            SetFrameNodeStatus(type, FrameNodeStatus::VISIBLETOGONE);
+            AnimationUtils::Animate(
+                option,
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->SetFrameNodeOpacity(type, 0.0);
+                },
+                [weak = WeakClaim(this), type]() {
+                    auto node = weak.Upgrade();
+                    CHECK_NULL_VOID(node);
+                    node->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
+                });
+            break;
+        case FrameNodeTrigger::SHOW:
+        case FrameNodeTrigger::HIDDEN:
+            break;
+        default:
+            break;
+    }
+}
 
 RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
@@ -377,6 +517,7 @@ void SelectOverlayNode::MoreAnimation()
     isExtensionMenu_ = true;
 
     extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
+    extensionMenuStatus_ = FrameNodeStatus::VISIBLE;
     AnimationOption extensionOption;
     extensionOption.SetDuration(ANIMATION_DURATION2);
     extensionOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -607,6 +748,7 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
         CHECK_NULL_VOID(extensionMenuContext);
 
         extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        extensionMenuStatus_ = FrameNodeStatus::GONE;
         extensionMenuContext->UpdateOpacity(0.0);
 
         extensionMenuContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
@@ -635,6 +777,7 @@ void SelectOverlayNode::CreateToolBar()
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
+    selectMenu_->GetRenderContext()->UpdateOpacity(0.0);
     selectMenu_->GetRenderContext()->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
     selectMenuInner_->GetRenderContext()->UpdateOpacity(1.0);
     selectMenuInner_->GetRenderContext()->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
@@ -661,8 +804,10 @@ void SelectOverlayNode::CreateToolBar()
 
     if (info->menuInfo.menuIsShow) {
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        selectMenuStatus_ = FrameNodeStatus::VISIBLE;
     } else {
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        selectMenuStatus_ = FrameNodeStatus::GONE;
     }
 
     selectMenuInner_->MountToParent(selectMenu_);
@@ -691,6 +836,7 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
 bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocatedSize)
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
+    memset_s(isShowInDefaultMenu_, sizeof(isShowInDefaultMenu_), 0, sizeof(isShowInDefaultMenu_));
     if (info->menuInfo.showCut) {
         float buttonWidth = 0.0f;
         auto button = BuildButton(
@@ -796,6 +942,13 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
     if (menuItemChanged) {
         selectMenuInner_->Clean();
+        selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (isExtensionMenu_) {
+            MoreOrBackAnimation(false);
+        }
+        auto selectProperty = selectMenu_->GetLayoutProperty();
+        CHECK_NULL_VOID(selectProperty);
+        selectProperty->ClearUserDefinedIdealSize(true, false);
         bool isDefaultOverMaxWidth = false;
         float allocatedSize = 0.0f;
         float maxWidth = 0.0f;
@@ -817,6 +970,15 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
                 button->MountToParent(selectMenuInner_);
             }
         }
+        if (backButton_) {
+            isExtensionMenu_ = false;
+            RemoveChild(backButton_);
+            backButton_.Reset();
+        }
+        if (extensionMenu_) {
+            RemoveChild(extensionMenu_);
+            extensionMenu_.Reset();
+        }
         if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
             auto backButton = BuildMoreOrBackButton(GetId(), true);
             backButton->MountToParent(selectMenuInner_);
@@ -825,6 +987,7 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
             if (!backButton_) {
                 backButton_ = BuildMoreOrBackButton(id, false);
                 CHECK_NULL_VOID(backButton_);
+                backButton_->GetRenderContext()->UpdateOpacity(0.0);
                 backButton_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 backButton_->MountToParent(Claim(this));
             }
@@ -832,28 +995,28 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
         AddExtensionMenuOptions(info->menuOptionItems, extensionOptionStartIndex);
     }
     if (info->menuInfo.menuDisable) {
-        selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
     } else if (info->menuInfo.menuIsShow) {
-        selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
     } else {
-        selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
     }
     selectMenu_->MarkModifyDone();
     if (isExtensionMenu_ && extensionMenu_) {
         if (info->menuInfo.menuDisable) {
-            extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, FrameNodeTrigger::HIDE);
             if (backButton_) {
-                backButton_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+                ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, FrameNodeTrigger::HIDE);
             }
         } else if (info->menuInfo.menuIsShow) {
-            extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, FrameNodeTrigger::SHOW);
             if (backButton_) {
-                backButton_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+                ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, FrameNodeTrigger::SHOW);
             }
         } else {
-            extensionMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, FrameNodeTrigger::HIDE);
             if (backButton_) {
-                backButton_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+                ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, FrameNodeTrigger::HIDE);
             }
         }
         extensionMenu_->MarkModifyDone();
@@ -870,13 +1033,20 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     auto menuWrapper = MenuView::Create(std::move(params), -1);
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
-    menuWrapper->RemoveChild(menu);
-    menuWrapper.Reset();
     // set click position to menu
     CHECK_NULL_RETURN(menu, nullptr);
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
-    props->UpdateMenuOffset(info->rightClickOffset + GetPageOffset());
+    OffsetF pageOffset;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    auto isContainerModal = pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        pageOffset = GetPageOffset();
+    }
+    props->UpdateMenuOffset(info->rightClickOffset + pageOffset);
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
@@ -886,7 +1056,11 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ElementRegister::GetInstance()->AddUINode(menu);
 
-    return menu;
+    auto gestureEventHub = menuWrapper->GetOrCreateGestureEventHub();
+    if (gestureEventHub) {
+        gestureEventHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+    }
+    return menuWrapper;
 }
 
 bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
@@ -895,13 +1069,14 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
     CHECK_NULL_RETURN(pattern, false);
 
     std::vector<RectF> rects;
-    rects.emplace_back(pattern->GetHandleRegion(true));
-    rects.emplace_back(pattern->GetHandleRegion(false));
+    auto offset = GetGeometryNode() ? GetGeometryNode()->GetFrameOffset() : OffsetF();
+    rects.emplace_back(pattern->GetHandleRegion(true) + offset);
+    rects.emplace_back(pattern->GetHandleRegion(false) + offset);
     if (selectMenu_ && selectMenu_->GetGeometryNode()) {
-        rects.emplace_back(selectMenu_->GetGeometryNode()->GetFrameRect());
+        rects.emplace_back(selectMenu_->GetGeometryNode()->GetFrameRect() + offset);
     }
     if (extensionMenu_ && extensionMenu_->GetGeometryNode()) {
-        rects.emplace_back(extensionMenu_->GetGeometryNode()->GetFrameRect());
+        rects.emplace_back(extensionMenu_->GetGeometryNode()->GetFrameRect() + offset);
     }
 
     for (const auto& rect : rects) {
@@ -911,6 +1086,173 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
         }
     }
     return false;
+}
+
+void SelectOverlayNode::SetClosedByGlobalEvent(bool closedByGlobalEvent)
+{
+    auto selectOverlayPattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(selectOverlayPattern);
+    selectOverlayPattern->SetClosedByGlobalTouchEvent(closedByGlobalEvent);
+}
+
+void SelectOverlayNode::ShowSelectOverlay(bool animation)
+{
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    if (animation) {
+        AnimationOption option;
+        option.SetDuration(MENU_SHOW_ANIMATION_DURATION);
+        option.SetCurve(Curves::SHARP);
+
+        AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            node->SetSelectMenuOpacity(1.0);
+            node->SetExtensionMenuOpacity(1.0);
+            node->SetBackButtonOpacity(1.0);
+        });
+    } else {
+        SetSelectMenuOpacity(1.0);
+        SetExtensionMenuOpacity(1.0);
+        SetBackButtonOpacity(1.0);
+    }
+
+    pattern->SetHasShowAnimation(animation);
+}
+
+void SelectOverlayNode::HideSelectOverlay(const std::function<void()>& callback)
+{
+    AnimationOption handleOption;
+    handleOption.SetDuration(HANDLE_ANIMATION_DURATION);
+    handleOption.SetCurve(Curves::SHARP);
+
+    AnimationUtils::Animate(handleOption, [weak = WeakClaim(this)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pattern = node->GetPattern<SelectOverlayPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto contentModifier = pattern->GetContentModifier();
+        CHECK_NULL_VOID(contentModifier);
+        contentModifier->SetHandleOpacity(0.0);
+    });
+
+    AnimationOption overlayOption;
+    overlayOption.SetDuration(MENU_HIDE_ANIMATION_DURATION);
+    overlayOption.SetCurve(Curves::SHARP);
+
+    AnimationUtils::Animate(
+        overlayOption,
+        [weak = WeakClaim(this)]() {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            node->SetSelectMenuOpacity(0.0);
+            node->SetExtensionMenuOpacity(0.0);
+            node->SetBackButtonOpacity(0.0);
+            auto pattern = node->GetPattern<SelectOverlayPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto overlayModifier = pattern->GetOverlayModifier();
+            CHECK_NULL_VOID(overlayModifier);
+            overlayModifier->SetCirclesAndBackArrowOpacity(0.0);
+        },
+        callback);
+}
+
+void SelectOverlayNode::ExecuteOverlayStatus(FrameNodeType type, FrameNodeTrigger trigger)
+{
+    FrameNodeStatus status = FrameNodeStatus::VISIBLE;
+    switch (type) {
+        case FrameNodeType::SELECTMENU:
+            status = selectMenuStatus_;
+            break;
+        case FrameNodeType::EXTENSIONMENU:
+            status = extensionMenuStatus_;
+            break;
+        case FrameNodeType::BACKBUTTON:
+            status = backButtonStatus_;
+            break;
+        default:
+            break;
+    }
+
+    auto stateFuncIter = stateFuncs_.find(status);
+    if (stateFuncIter != stateFuncs_.end()) {
+        auto stateFunc = stateFuncIter->second;
+        CHECK_NULL_VOID(stateFunc);
+        (this->*stateFunc)(type, trigger);
+    }
+}
+
+void SelectOverlayNode::SetFrameNodeStatus(FrameNodeType type, FrameNodeStatus status)
+{
+    switch (type) {
+        case FrameNodeType::SELECTMENU:
+            selectMenuStatus_ = status;
+            break;
+        case FrameNodeType::EXTENSIONMENU:
+            extensionMenuStatus_ = status;
+            break;
+        case FrameNodeType::BACKBUTTON:
+            backButtonStatus_ = status;
+            break;
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::SetFrameNodeVisibility(FrameNodeType type, VisibleType visibleType)
+{
+    switch (type) {
+        case FrameNodeType::SELECTMENU:
+            selectMenu_->GetLayoutProperty()->UpdateVisibility(visibleType);
+            break;
+        case FrameNodeType::EXTENSIONMENU:
+            extensionMenu_->GetLayoutProperty()->UpdateVisibility(visibleType);
+            break;
+        case FrameNodeType::BACKBUTTON:
+            backButton_->GetLayoutProperty()->UpdateVisibility(visibleType);
+            break;
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::SetFrameNodeOpacity(FrameNodeType type, float opacity)
+{
+    switch (type) {
+        case FrameNodeType::SELECTMENU:
+            SetSelectMenuOpacity(opacity);
+            break;
+        case FrameNodeType::EXTENSIONMENU:
+            SetExtensionMenuOpacity(opacity);
+            break;
+        case FrameNodeType::BACKBUTTON:
+            SetBackButtonOpacity(opacity);
+            break;
+        default:
+            break;
+    }
+}
+
+void SelectOverlayNode::SetSelectMenuOpacity(float value)
+{
+    CHECK_NULL_VOID(selectMenu_);
+    CHECK_NULL_VOID(selectMenu_->GetRenderContext());
+    selectMenu_->GetRenderContext()->UpdateOpacity(value);
+}
+
+void SelectOverlayNode::SetExtensionMenuOpacity(float value)
+{
+    CHECK_NULL_VOID(extensionMenu_);
+    CHECK_NULL_VOID(extensionMenu_->GetRenderContext());
+    extensionMenu_->GetRenderContext()->UpdateOpacity(value);
+}
+
+void SelectOverlayNode::SetBackButtonOpacity(float value)
+{
+    CHECK_NULL_VOID(backButton_);
+    CHECK_NULL_VOID(backButton_->GetRenderContext());
+    backButton_->GetRenderContext()->UpdateOpacity(value);
 }
 
 } // namespace OHOS::Ace::NG

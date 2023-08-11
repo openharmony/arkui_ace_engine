@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -46,7 +47,7 @@ void BuildTitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const
         return;
     }
     if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        navDestinationNode->RemoveChild(titleBarNode->GetTitle());
+        titleBarNode->RemoveChild(titleBarNode->GetTitle());
     }
     titleBarNode->SetTitle(navDestinationNode->GetTitle());
     titleBarNode->AddChild(titleBarNode->GetTitle());
@@ -66,7 +67,7 @@ void BuildSubtitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, co
         return;
     }
     if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        navDestinationNode->RemoveChild(titleBarNode->GetSubtitle());
+        titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
     }
     titleBarNode->SetSubtitle(navDestinationNode->GetSubtitle());
     titleBarNode->AddChild(titleBarNode->GetSubtitle());
@@ -125,5 +126,15 @@ void NavDestinationPattern::OnModifyDone()
         }
     }
     MountTitleBar(hostNode);
+    auto navDestinationContext = hostNode->GetRenderContext();
+    CHECK_NULL_VOID(navDestinationContext);
+    if (!(navDestinationContext->GetBackgroundColor().has_value())) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        if (theme) {
+            navDestinationContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

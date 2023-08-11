@@ -39,6 +39,8 @@ constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
     auto columnNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
@@ -49,7 +51,9 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
     CHECK_NULL_VOID(stackNode);
     auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
     CHECK_NULL_VOID(floatingTitleNode);
-    windowMode_ = PipelineContext::GetCurrentContext()->GetWindowManager()->GetWindowMode();
+    auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    windowMode_ = windowManager->GetWindowMode();
     hasDeco_ = hasDeco;
     LOGI("ShowTitle isShow: %{public}d, windowMode: %{public}d, hasDeco: %{public}d", isShow, windowMode_, hasDeco_);
     if (!hasDeco_) {
@@ -57,7 +61,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
     }
 
     // set container window show state to RS
-    PipelineContext::GetCurrentContext()->SetContainerWindow(isShow);
+    pipelineContext->SetContainerWindow(isShow);
 
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
@@ -191,7 +195,8 @@ void ContainerModalPattern::InitContainerEvent()
                                      MouseInfo& info) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
-        if (info.GetAction() != MouseAction::MOVE || !container->hasDeco_) {
+        auto action = info.GetAction();
+        if ((action != MouseAction::MOVE && action != MouseAction::WINDOW_LEAVE) || !container->hasDeco_) {
             return;
         }
         if (info.GetLocalLocation().GetY() <= MOUSE_MOVE_POPUP_DISTANCE && container->CanShowFloatingTitle()) {
@@ -200,7 +205,7 @@ void ContainerModalPattern::InitContainerEvent()
             AnimationUtils::Animate(option, [context]() { context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f }); });
         }
 
-        if (info.GetLocalLocation().GetY() >= titlePopupDistance &&
+        if ((info.GetLocalLocation().GetY() >= titlePopupDistance || action == MouseAction::WINDOW_LEAVE) &&
             floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
             AnimationUtils::Animate(
                 option,
@@ -402,7 +407,7 @@ void ContainerModalPattern::SetAppTitle(const std::string& title)
 
     auto floatingNode = AceType::DynamicCast<FrameNode>(GetHost()->GetChildren().back());
     CHECK_NULL_VOID(floatingNode);
-    auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, TITLE_LABEL_INDEX));
+    auto floatingTitleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, TITLE_LABEL_INDEX));
     floatingTitleLabel->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(title);
     floatingTitleLabel->MarkModifyDone();
     floatingTitleLabel->MarkDirtyNode();

@@ -102,6 +102,9 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         touchPoint.tiltY, pointerEvent->GetDeviceId(), pointerEvent->GetTargetDisplayId(), SourceType::NONE,
         touchPoint.sourceTool };
     event.pointerEvent = pointerEvent;
+#ifdef SECURITY_COMPONENT_ENABLE
+    event.enhanceData = pointerEvent->GetEnhanceData();
+#endif
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -146,7 +149,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     return event;
 }
 
-void GetMouseEventAction(int32_t action, MouseEvent& events)
+void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardWindow)
 {
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
@@ -167,12 +170,21 @@ void GetMouseEventAction(int32_t action, MouseEvent& events)
 #ifdef ENABLE_DRAG_FRAMEWORK
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
             events.action = MouseAction::PRESS;
+            if (isScenceBoardWindow) {
+                events.pullAction = MouseAction::PULL_DOWN;
+            }
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
             events.action = MouseAction::MOVE;
+            if (isScenceBoardWindow) {
+                events.pullAction = MouseAction::PULL_MOVE;
+            }
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
             events.action = MouseAction::RELEASE;
+            if (isScenceBoardWindow) {
+                events.pullAction = MouseAction::PULL_UP;
+            }
             break;
 #endif // ENABLE_DRAG_FRAMEWORK
         default:
@@ -205,7 +217,8 @@ void GetMouseEventButton(int32_t button, MouseEvent& events)
     }
 }
 
-void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events)
+void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MouseEvent& events, bool isScenceBoardWindow)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
@@ -214,13 +227,13 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
         LOGE("get pointer: %{public}d item failed.", pointerID);
         return;
     }
-
+    events.id = pointerID;
     events.x = item.GetWindowX();
     events.y = item.GetWindowY();
     events.screenX = item.GetDisplayX();
     events.screenY = item.GetDisplayY();
     int32_t orgAction = pointerEvent->GetPointerAction();
-    GetMouseEventAction(orgAction, events);
+    GetMouseEventAction(orgAction, events, isScenceBoardWindow);
     int32_t orgButton = pointerEvent->GetButtonId();
     GetMouseEventButton(orgButton, events);
     int32_t orgDevice = pointerEvent->GetSourceType();
@@ -244,9 +257,12 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, M
     TimeStamp time(microseconds);
     events.time = time;
     events.pointerEvent = pointerEvent;
-    LOGD("ConvertMouseEvent: (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
+#ifdef SECURITY_COMPONENT_ENABLE
+    events.enhanceData = pointerEvent->GetEnhanceData();
+#endif
+    LOGD("ConvertMouseEvent: id: %{public}d (x,y): (%{public}f,%{public}f). Button: %{public}d. Action: %{public}d. "
          "DeviceType: %{public}d. PressedButton: %{public}d. Time: %{public}lld",
-        events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
+        events.id, events.x, events.y, events.button, events.action, events.sourceType, events.pressedButtons,
         (long long)pointerEvent->GetActionTime());
 }
 
@@ -281,6 +297,8 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.id = item.GetPointerId();
     event.x = static_cast<float>(item.GetWindowX());
     event.y = static_cast<float>(item.GetWindowY());
+    event.screenX = static_cast<float>(item.GetDisplayX());
+    event.screenY = static_cast<float>(item.GetDisplayY());
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
@@ -305,6 +323,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 {
     event.rawKeyEvent = keyEvent;
     event.code = static_cast<KeyCode>(keyEvent->GetKeyCode());
+    event.keyIntention = static_cast<KeyIntention>(keyEvent->GetKeyIntention());
     if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_UP) {
         event.action = KeyAction::UP;
     } else if (keyEvent->GetKeyAction() == OHOS::MMI::KeyEvent::KEY_ACTION_DOWN) {
@@ -329,23 +348,25 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 
 void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    LOGD("point source: %{public}d", pointerEvent->GetSourceType());
-    auto actionId = pointerEvent->GetPointerId();
-    MMI::PointerEvent::PointerItem item;
-    if (pointerEvent->GetPointerItem(actionId, item)) {
-        LOGD("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d, pressure: "
-             "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
-            actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(), item.GetPressure(),
-            item.GetTiltX(), item.GetTiltY());
-    }
-    auto ids = pointerEvent->GetPointerIds();
-    for (auto&& id : ids) {
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("point source: %{public}d", pointerEvent->GetSourceType());
+        auto actionId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem item;
-        if (pointerEvent->GetPointerItem(id, item)) {
-            LOGD("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
-                 "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
-                actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(), item.GetTiltX(),
-                item.GetTiltY());
+        if (pointerEvent->GetPointerItem(actionId, item)) {
+            LOGI("action point info: id: %{public}d, x: %{public}d, y: %{public}d, action: %{public}d, pressure: "
+                "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(), item.GetPressure(),
+                item.GetTiltX(), item.GetTiltY());
+        }
+        auto ids = pointerEvent->GetPointerIds();
+        for (auto&& id : ids) {
+            MMI::PointerEvent::PointerItem item;
+            if (pointerEvent->GetPointerItem(id, item)) {
+                LOGI("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
+                     "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                    actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(),
+                    item.GetTiltX(), item.GetTiltY());
+            }
         }
     }
 }

@@ -48,11 +48,13 @@ public:
         value->propLanes_ = CloneLanes();
         value->propLaneMinLength_ = CloneLaneMinLength();
         value->propLaneMaxLength_ = CloneLaneMaxLength();
+        value->propLaneGutter_ = CloneLaneGutter();
         value->propListItemAlign_ = CloneListItemAlign();
         value->propCachedCount_ = CloneCachedCount();
         value->propStickyStyle_ = CloneStickyStyle();
         value->propScrollSnapAlign_ = CloneScrollSnapAlign();
         value->propEditMode_ = CloneEditMode();
+        value->propScrollEnabled_ = CloneScrollEnabled();
         return value;
     }
 
@@ -67,16 +69,20 @@ public:
         ResetLanes();
         ResetLaneMinLength();
         ResetLaneMaxLength();
+        ResetLaneGutter();
         ResetListItemAlign();
         ResetCachedCount();
         ResetStickyStyle();
         ResetScrollSnapAlign();
         ResetEditMode();
+        ResetScrollEnabled();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
+
+    void ScrollSnapPropToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE);
@@ -86,12 +92,14 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Lanes, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMinLength, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneMaxLength, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneGutter, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, V2::StickyStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, V2::ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ChainAnimation, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

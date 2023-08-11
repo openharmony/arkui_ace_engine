@@ -26,6 +26,8 @@ void FormLinkModelNG::Create(const std::string& action)
     auto* stack = ViewStackProcessor::GetInstance();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::FORM_LINK_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<FormLinkPattern>(); });
+    auto pattern = frameNode->GetPattern<FormLinkPattern>();
+    pattern->SetAction(action);
     stack->Push(frameNode);
 }
 } // namespace OHOS::Ace::NG

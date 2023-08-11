@@ -65,10 +65,12 @@ common_sources = [
 
   # mock
   "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
+  "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
   "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
   "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_media_player_creator.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+  "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
   "$ace_root/test/unittest/core/pipeline/mock_event_manager.cpp",
 
   # self

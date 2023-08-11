@@ -505,4 +505,26 @@ void JSPlugin::JSBind(BindingTarget globalObj)
     JSClass<JSPlugin>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
+void JSUIExtension::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSUIExtension>::Declare("UIExtensionComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSUIExtension>::StaticMethod("create", &JSUIExtension::Create, opt);
+    JSClass<JSUIExtension>::StaticMethod("onRemoteReady", &JSUIExtension::Mock);
+    JSClass<JSUIExtension>::StaticMethod("onReceive", &JSUIExtension::Mock);
+    JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::Mock);
+    JSClass<JSUIExtension>::StaticMethod("onRelease", &JSUIExtension::Mock);
+    JSClass<JSUIExtension>::StaticMethod("onError", &JSUIExtension::Mock);
+    JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSUIExtension::Create(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    CreateMockComponent("UIExtensionComponent");
+}
+
+void JSUIExtension::Mock(const JSCallbackInfo& info) {}
 } // namespace OHOS::Ace::Framework

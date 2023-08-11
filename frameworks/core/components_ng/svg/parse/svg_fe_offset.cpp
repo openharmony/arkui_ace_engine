@@ -38,16 +38,26 @@ SvgFeOffset::SvgFeOffset() : SvgFe()
     declaration_->InitializeStyle();
 }
 
+#ifndef USE_ROSEN_DRAWING
 void SvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
     ColorInterpolationType& currentColor) const
+#else
+void SvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
+    ColorInterpolationType& currentColor) const
+#endif
 {
     auto declaration = AceType::DynamicCast<SvgFeOffsetDeclaration>(declaration_);
     CHECK_NULL_VOID_NOLOG(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     imageFilter = SkOffsetImageFilter::Make(declaration->GetDx(), declaration->GetDy(), imageFilter);
 #else
     imageFilter = SkImageFilters::Offset(declaration->GetDx(), declaration->GetDy(), imageFilter);
+#endif
+#else
+    imageFilter =
+        RSRecordingImageFilter::CreateOffsetImageFilter(declaration->GetDx(), declaration->GetDy(), imageFilter);
 #endif
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
 }

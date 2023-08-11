@@ -27,6 +27,18 @@
 #include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace {
+class ACE_FORCE_EXPORT NapiAsyncEvnet {
+public:
+    NapiAsyncEvnet(napi_env env, napi_value callback);
+    ~NapiAsyncEvnet();
+    napi_value Call(int32_t argc, napi_value* argv);
+    napi_env GetEnv();
+
+private:
+    napi_env env_;
+    napi_ref ref_;
+};
+
 class ACE_FORCE_EXPORT CommonNapiUtils {
 public:
     static napi_value CreateInt32(napi_env env, int32_t code);
@@ -54,9 +66,10 @@ public:
     static bool IsArray(napi_env env, napi_value value);
     static void SetSelementToArray(napi_env env, napi_value array, int index, napi_value value);
     static napi_value CreateArray(napi_env env);
-    static Color ParseNapiColor(napi_env env, napi_value value);
+    static Color ParseColor(napi_env env, napi_value value);
     static std::unique_ptr<JsonValue> PutJsonValue(napi_env env, napi_value value, std::string& key);
-    static RefPtr<ThemeConstants> GetThemeConstantsNapi(const std::string& bundleName, const std::string& moduleName);
+    static RefPtr<ThemeConstants> GetThemeConstants(const std::string& bundleName, const std::string& moduleName);
+    static CalcDimension GetDimensionResult(napi_env env, napi_value value);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAPI_COMMON_UTILS_COMMON_NAPI_UTILS_H

@@ -255,6 +255,7 @@ bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskE
 {
     LOGI("JsFrontend initialize begin.");
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::JS);
     InitializeFrontendDelegate(taskExecutor);
     auto weakEngine = AceType::WeakClaim(AceType::RawPtr(jsEngine_));
@@ -715,6 +716,20 @@ void JsFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
     if (delegate_) {
         delegate_->OnSurfaceChanged();
+    }
+}
+
+void JsFrontend::OnLayoutCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnLayoutCompleted(componentId);
+    }
+}
+
+void JsFrontend::OnDrawCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnDrawCompleted(componentId);
     }
 }
 

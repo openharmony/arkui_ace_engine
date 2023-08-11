@@ -1088,13 +1088,10 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> JsiPaEngine::Query(const Ur
         LOGE("JsiPaEngine nativeValue is nullptr");
         return resultSet;
     }
-    auto nativeObject = rdbResultSetProxyGetNativeObject_(env, reinterpret_cast<napi_value>(nativeValue));
-    if (nativeObject == nullptr) {
+    resultSet = rdbResultSetProxyGetNativeObject_(env, reinterpret_cast<napi_value>(nativeValue));
+    if (resultSet == nullptr) {
         LOGE("JsiPaEngine AbsSharedResultSet from JS to Native failed");
-        return resultSet;
     }
-
-    resultSet.reset(nativeObject);
     return resultSet;
 }
 
@@ -1346,7 +1343,7 @@ void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
     auto func = GetPaFunc("onCreate");
     auto result = CallFuncWithDefaultThis(func, argv);
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
-    if (arkJSRuntime->HasPendingException()) {
+    if (arkJSRuntime->HasPendingException() || result->IsUndefined(runtime)) {
         LOGE("JsiPaEngine CallFunc FAILED!");
         return;
     }

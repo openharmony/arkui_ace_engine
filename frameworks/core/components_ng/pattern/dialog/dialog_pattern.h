@@ -28,11 +28,11 @@
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-class DialogPattern : public Pattern {
-    DECLARE_ACE_TYPE(DialogPattern, Pattern);
+class DialogPattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -79,9 +79,19 @@ public:
         return title_;
     }
 
+    const std::string& GetSubtitle()
+    {
+        return subtitle_;
+    }
+
     const std::string& GetMessage()
     {
         return message_;
+    }
+
+    const RefPtr<UINode>& GetCustomNode()
+    {
+        return customNode_;
     }
 
     void SetOpenAnimation(const std::optional<AnimationOption>& openAnimation)
@@ -102,6 +112,18 @@ public:
         return closeAnimation_;
     }
 
+    void SetDialogProperties(const DialogProperties& param)
+    {
+        dialogProperties_ = param;
+    }
+
+    const DialogProperties& GetDialogProperties() const
+    {
+        return dialogProperties_;
+    }
+
+    void OnColorConfigurationUpdate() override;
+
 private:
     void OnModifyDone() override;
 
@@ -113,8 +135,13 @@ private:
     void PopDialog(int32_t buttonIdx);
 
     // set render context properties of content frame
-    void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode);
-
+    void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);
+    RefPtr<FrameNode> BuildMainTitle(const DialogProperties& dialogProperties);
+    RefPtr<FrameNode> BuildSubTitle(const DialogProperties& dialogProperties);
+    void ParseButtonFontColorAndBgColor(
+        const ButtonInfo& params, std::string& textColor, std::optional<Color>& bgColor);
+    void SetButtonTextOpacity(const RefPtr<FrameNode>& textNode, bool enabled);
+    void SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled);
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> CreateDialogScroll(const DialogProperties& dialogProps);
@@ -148,6 +175,11 @@ private:
     // XTS inspector values
     std::string message_;
     std::string title_;
+    std::string subtitle_;
+
+    DialogProperties dialogProperties_;
+    RefPtr<FrameNode> menuNode_;
+    bool isFirstDefaultFocus_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 };

@@ -20,6 +20,26 @@
 #include "napi_common_want.h"
 
 namespace OHOS::Ace {
+RefPtr<WantParamsWrap> WantParamsWrap::CreateWantWrap(NativeEngine* engine, NativeValue* value)
+{
+    return AceType::MakeRefPtr<WantParamsWrapOhos>(engine, value);
+}
+WantParamsWrapOhos::WantParamsWrapOhos(NativeEngine* engine, NativeValue* value)
+{
+    AppExecFwk::UnwrapWantParams(
+        reinterpret_cast<napi_env>(engine), reinterpret_cast<napi_value>(value), params_);
+}
+
+NativeValue* WantWrap::ConvertToNativeValue(const OHOS::AAFwk::Want& want, NativeEngine* engine)
+{
+    return reinterpret_cast<NativeValue*>(OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(engine), want));
+}
+
+NativeValue* WantWrap::ConvertParamsToNativeValue(const OHOS::AAFwk::WantParams& wantParams, NativeEngine* engine)
+{
+    return reinterpret_cast<NativeValue*>(
+        OHOS::AppExecFwk::WrapWantParams(reinterpret_cast<napi_env>(engine), wantParams));
+}
 
 RefPtr<WantWrap> WantWrap::CreateWantWrap(void* nativeEngine, void* nativeValue)
 {
@@ -33,11 +53,21 @@ RefPtr<WantWrap> WantWrap::CreateWantWrap(void* nativeEngine, void* nativeValue)
     return AceType::MakeRefPtr<WantWrapOhos>(engine, value);
 }
 
+RefPtr<WantWrap> WantWrap::CreateWantWrap(const std::string& bundleName, const std::string& abilityName)
+{
+    return AceType::MakeRefPtr<WantWrapOhos>(bundleName, abilityName);
+}
+
 WantWrapOhos::WantWrapOhos(NativeEngine* engine, NativeValue* value)
 {
     OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(engine),
                                  reinterpret_cast<napi_value>(value),
                                  want_);
+}
+
+WantWrapOhos::WantWrapOhos(const std::string& bundleName, const std::string& abilityName)
+{
+    want_.SetElementName(bundleName, abilityName);
 }
 
 void WantWrapOhos::SetWantParamsFromWantWrap(void* want)
@@ -48,9 +78,15 @@ void WantWrapOhos::SetWantParamsFromWantWrap(void* want)
     destWant->SetParams(params);
 }
 
+void WantWrapOhos::SetWantParam(const std::map<std::string, std::string>& params)
+{
+    for (const auto& param : params) {
+        want_.SetParam(param.first, param.second);
+    }
+}
+
 std::string WantWrapOhos::ToString() const
 {
     return want_.ToString();
 }
-
 } // namespace OHOS::Ace

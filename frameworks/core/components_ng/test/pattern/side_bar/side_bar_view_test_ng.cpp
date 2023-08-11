@@ -177,8 +177,8 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg004, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
     auto row = FrameNode::CreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -187,8 +187,8 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg004, TestSize.Level1)
 
     RefPtr<GeometryNode> rowGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     rowGeometryNode->Reset();
-    RefPtr<LayoutWrapper> rowLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(row, rowGeometryNode, row->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> rowLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(row, rowGeometryNode, row->GetLayoutProperty());
     EXPECT_NE(rowLayoutWrapper, nullptr);
     auto rowPattern = row->GetPattern<LinearLayoutPattern>();
     EXPECT_NE(rowPattern, nullptr);
@@ -215,8 +215,8 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg004, TestSize.Level1)
 
     RefPtr<GeometryNode> siderBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     siderBarGeometryNode->Reset();
-    RefPtr<LayoutWrapper> sideBarLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(siderBar, siderBarGeometryNode, siderBar->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> sideBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(siderBar, siderBarGeometryNode, siderBar->GetLayoutProperty());
     EXPECT_NE(sideBarLayoutWrapper, nullptr);
     auto siderBarPattern = siderBar->GetPattern<SideBarContainerPattern>();
     EXPECT_NE(siderBarPattern, nullptr);
@@ -240,8 +240,8 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg004, TestSize.Level1)
 
     RefPtr<GeometryNode> dividerNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     dividerNodeGeometryNode->Reset();
-    RefPtr<LayoutWrapper> dividerNodeLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(dividerNode, dividerNodeGeometryNode, dividerNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> dividerNodeLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dividerNode, dividerNodeGeometryNode, dividerNode->GetLayoutProperty());
     EXPECT_NE(dividerNodeLayoutWrapper, nullptr);
     auto dividerNodePattern = dividerNode->GetPattern<DividerPattern>();
     EXPECT_NE(dividerNodePattern, nullptr);
@@ -265,8 +265,8 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg004, TestSize.Level1)
 
     RefPtr<GeometryNode> imgNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     imgNodeGeometryNode->Reset();
-    RefPtr<LayoutWrapper> imgNodeLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(imgNode, imgNodeGeometryNode, imgNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> imgNodeLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(imgNode, imgNodeGeometryNode, imgNode->GetLayoutProperty());
     EXPECT_NE(imgNodeLayoutWrapper, nullptr);
     auto imgNodePattern = imgNode->GetPattern<ImagePattern>();
     EXPECT_NE(imgNodePattern, nullptr);
@@ -348,8 +348,8 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg005, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
     auto row = FrameNode::CreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -393,7 +393,6 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg005, TestSize.Level1)
     EXPECT_NE(sideBarContainerLayoutAlgorithm, nullptr);
     sideBarContainerLayoutAlgorithm->SetRealDividerWidth(REAL_WIDTH);
     sideBarContainerLayoutAlgorithm->GetRealDividerWidth();
-    sideBarContainerPattern->UpdateResponseRegion(sideBarContainerLayoutAlgorithm);
     sideBarContainerPattern->AddDividerHotZoneRect(sideBarContainerLayoutAlgorithm);
 }
 
@@ -411,8 +410,8 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg006, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
     auto row = FrameNode::CreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -456,7 +455,6 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg006, TestSize.Level1)
     EXPECT_NE(sideBarContainerLayoutAlgorithm, nullptr);
     sideBarContainerLayoutAlgorithm->SetRealDividerWidth(REAL_WIDTH);
     sideBarContainerLayoutAlgorithm->GetRealDividerWidth();
-    sideBarContainerPattern->UpdateResponseRegion(sideBarContainerLayoutAlgorithm);
     sideBarContainerPattern->AddDividerHotZoneRect(sideBarContainerLayoutAlgorithm);
 }
 
@@ -474,8 +472,8 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg007, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
     auto sideBarContainerPattern = AceType::DynamicCast<SideBarContainerPattern>(frameNode->GetPattern());
     EXPECT_NE(sideBarContainerPattern, nullptr);
@@ -495,7 +493,6 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg007, TestSize.Level1)
     EXPECT_NE(sideBarContainerLayoutAlgorithm, nullptr);
     sideBarContainerLayoutAlgorithm->SetRealDividerWidth(REAL_WIDTH);
     sideBarContainerLayoutAlgorithm->GetRealDividerWidth();
-    sideBarContainerPattern->UpdateResponseRegion(sideBarContainerLayoutAlgorithm);
     sideBarContainerPattern->AddDividerHotZoneRect(sideBarContainerLayoutAlgorithm);
 }
 
@@ -639,5 +636,21 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg013, TestSize.Level1)
     pattern->SetHasControlButton(true);
     SideBarContainerModelInstance.Pop();
     EXPECT_TRUE(pattern->HasControlButton());
+}
+
+/**
+ * @tc.name: SideBarViewTestNg014
+ * @tc.desc: Test SideBar Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarViewTestNg, SideBarViewTestNg014, TestSize.Level1)
+{
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->minPlatformVersion_ = 12;
+    SideBarContainerModelInstance.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -43,8 +43,7 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
     double distanceNumber = panGestureOption->GetDistance();
     int32_t fingersNumber = panGestureOption->GetFingers();
 
-    double distance = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : distanceNumber;
-    distance_ = context->NormalizeToPx(Dimension(distance, DimensionUnit::VP));
+    distance_ = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceNumber;
     fingers_ = fingersNumber <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingersNumber;
     fingers_ = fingers_ > MAX_PAN_FINGERS ? DEFAULT_PAN_FINGER : fingers_;
 
@@ -100,11 +99,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
-
-    if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
-        return;
-    }
 
     if (fingers_ > MAX_PAN_FINGERS) {
         LOGI("fingers_ is larger than max fingers");
@@ -170,6 +164,10 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGI("pan recognizer receives %{public}d touch up event", event.id);
+    if (currentFingers_ < fingers_) {
+        LOGW("PanGesture current finger number is less than requiried finger number.");
+        return;
+    }
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
@@ -211,6 +209,10 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch move event");
+    if (currentFingers_ < fingers_) {
+        LOGW("PanGesture current finger number is less than requiried finger number.");
+        return;
+    }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     delta_ = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
@@ -349,18 +351,22 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
             totalDistance -= each_point_move;
         }
     }
-    if (GreatNotEqual(totalDistance, distance_) && totalFingers >= fingers_) {
-        return true;
-    } else {
-        return false;
+    auto judgeDistance = distance_;
+    if (deviceType_ == SourceType::MOUSE && isForDrag_) {
+        judgeDistance = DRAG_PAN_DISTANCE_MOUSE;
     }
+    return GreatNotEqual(totalDistance, judgeDistance) && totalFingers >= fingers_;
 }
 
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
 {
+    auto judgeDistance = distance_;
+    if (deviceType_ == SourceType::MOUSE && isForDrag_) {
+        judgeDistance = DRAG_PAN_DISTANCE_MOUSE;
+    }
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
         double offset = averageDistance_.GetDistance();
-        if (fabs(offset) < distance_) {
+        if (fabs(offset) < judgeDistance) {
             return GestureAcceptResult::DETECTING;
         }
         return GestureAcceptResult::ACCEPT;
@@ -369,7 +375,7 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
         if ((direction_.type & PanDirection::HORIZONTAL) != 0) {
             double offset = averageDistance_.GetX();
-            if (fabs(offset) < distance_) {
+            if (fabs(offset) < judgeDistance) {
                 return GestureAcceptResult::DETECTING;
             }
             if ((direction_.type & PanDirection::LEFT) == 0 && offset < 0) {
@@ -384,7 +390,7 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     }
     if ((direction_.type & PanDirection::VERTICAL) != 0) {
         double offset = averageDistance_.GetY();
-        if (fabs(offset) < distance_) {
+        if (fabs(offset) < judgeDistance) {
             return GestureAcceptResult::DETECTING;
         }
         if ((direction_.type & PanDirection::UP) == 0) {
@@ -430,15 +436,20 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetDelta(delta_);
         info.SetMainDelta(mainDelta_);
         if (inputEventType_ == InputEventType::AXIS) {
+            info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
             info.SetVelocity(Velocity());
             info.SetMainVelocity(0.0);
             info.SetSourceTool(lastAxisEvent_.sourceTool);
         } else {
+            info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
             info.SetVelocity(velocityTracker_.GetVelocity());
             info.SetMainVelocity(velocityTracker_.GetMainAxisVelocity());
             info.SetSourceTool(lastTouchEvent_.sourceTool);
         }
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetInputEventType(inputEventType_);
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {

@@ -120,4 +120,9 @@ void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& cl
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, std::move(clickFunc), PropertyInfo::NONE);
 }
 
+void SpanModelNG::ClearOnClick()
+{
+    ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE);
+}
+
 } // namespace OHOS::Ace::NG

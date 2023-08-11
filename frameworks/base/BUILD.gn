@@ -57,6 +57,7 @@ template("ace_base_source_set") {
       "log/dump_log.cpp",
       "log/jank_frame_report.cpp",
       "memory/memory_monitor.cpp",
+      "perfmonitor/perf_monitor.cpp",
       "ressched/ressched_report.cpp",
       "subwindow/subwindow_manager.cpp",
       "thread/background_task_executor.cpp",
@@ -86,7 +87,7 @@ template("ace_base_source_set") {
     if (is_cross_platform_build) {
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
     } else {
-      external_deps += [ "graphic_standard:librender_service_client" ]
+      external_deps += [ "graphic_2d:librender_service_client" ]
     }
 
     # curl download manager
@@ -169,6 +170,7 @@ foreach(item, ace_platforms) {
 
     if (platform == "ohos") {
       external_deps = [
+        "hichecker:libhichecker",
         "init:libbeget_proxy",
         "init:libbegetutil",
       ]

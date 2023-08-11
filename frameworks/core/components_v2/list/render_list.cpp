@@ -912,7 +912,7 @@ Size RenderList::SetItemsPositionForLaneList(double mainSize)
         firstDisplayIndex_ = firstIdx;
         lastDisplayIndex_ = lastIdx;
         ResumeEventCallback(component_, &ListComponent::GetOnScrollIndex, static_cast<int32_t>(firstDisplayIndex_),
-            static_cast<int32_t>(lastDisplayIndex_));
+            static_cast<int32_t>(lastDisplayIndex_), static_cast<int32_t>(midDisplayIndex_));
     }
 
     // Disable sticky mode while expand all items
@@ -1053,7 +1053,7 @@ Size RenderList::SetItemsPosition(double mainSize)
         firstDisplayIndex_ = firstIdx;
         lastDisplayIndex_ = lastIdx;
         ResumeEventCallback(component_, &ListComponent::GetOnScrollIndex, static_cast<int32_t>(firstDisplayIndex_),
-            static_cast<int32_t>(lastDisplayIndex_));
+            static_cast<int32_t>(lastDisplayIndex_), static_cast<int32_t>(midDisplayIndex_));
     }
 
     // Disable sticky mode while expand all items

@@ -31,7 +31,9 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
         float crossSize = crossSizeOptional.value();
         groupLayoutConstraint_.maxSize.SetCrossSize(crossSize, axis);
         if (lanes_ > 1) {
-            crossSize /= lanes_;
+            float laneGutter = GetLaneGutter();
+            crossSize = (crossSize + laneGutter) / lanes_ - laneGutter;
+            crossSize = crossSize <= 0 ? 1 : crossSize;
         }
         if (maxLaneLength_.has_value() && maxLaneLength_.value() < crossSize) {
             crossSize = maxLaneLength_.value();
@@ -43,6 +45,25 @@ void ListLanesLayoutAlgorithm::UpdateListItemConstraint(
             contentConstraint.minSize.SetCrossSize(minLaneLength_.value(), axis);
         }
     }
+}
+
+float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper,
+    const LayoutConstraintF& layoutConstraint, Axis axis, int32_t childIndex)
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
+    CHECK_NULL_RETURN(wrapper, 0.0f);
+    bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    if (isGroup) {
+        auto listLayoutProperty =
+            AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        // true: layout forward, true: layout all group items.
+        SetListItemGroupParam(wrapper, 0.0f, true, listLayoutProperty, true);
+        wrapper->Measure(groupLayoutConstraint_);
+    } else {
+        wrapper->Measure(layoutConstraint);
+    }
+    float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
+    return mainLen;
 }
 
 int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
@@ -59,7 +80,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         }
         isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         if (isGroup && cnt > 0) {
-            LayoutWrapper::RemoveChildInRenderTree(wrapper);
+            wrapper->SetActive(false);
             isGroup = false;
             break;
         }
@@ -68,7 +89,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
         if (isGroup) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, startPos, true, listLayoutProperty, false);
+            SetListItemGroupParam(wrapper, startPos, true, listLayoutProperty, GroupNeedAllLayout());
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -106,7 +127,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         }
         isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         if (isGroup && cnt > 0) {
-            LayoutWrapper::RemoveChildInRenderTree(wrapper);
+            wrapper->SetActive(false);
             isGroup = false;
             break;
         }
@@ -116,7 +137,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
         if (isGroup) {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItemGroup:%d", currentIndex);
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, endPos, false, listLayoutProperty, false);
+            SetListItemGroupParam(wrapper, endPos, false, listLayoutProperty, GroupNeedAllLayout());
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -137,7 +158,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
 }
 
 int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minLaneLength,
-    std::optional<float>& maxLaneLength, int32_t lanes, std::optional<float> crossSizeOptional)
+    std::optional<float>& maxLaneLength, int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter)
 {
     if (lanes < 1) {
         return 1;
@@ -168,8 +189,8 @@ int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minL
     // when list's width is 120, lanes_ = 3
     // when list's width is 80, lanes_ = 2
     // when list's width is 70, lanes_ = 1
-    float maxLanes = crossSize / minLaneLength.value();
-    float minLanes = crossSize / maxLaneLength.value();
+    float maxLanes = (crossSize + laneGutter) / (minLaneLength.value() + laneGutter);
+    float minLanes = (crossSize + laneGutter) / (maxLaneLength.value() + laneGutter);
     // let's considerate scenarios when maxCrossSize > 0
     // now it's guaranteed that [minLaneLength_] <= [maxLaneLength_], i.e., maxLanes >= minLanes > 0
     // there are 3 scenarios:
@@ -196,7 +217,7 @@ int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minL
     }
     lanes = 1;
     LOGE("unexpected situation, set lanes to 1, maxLanes: %{public}f, minLanes: %{public}f, minLaneLength_: "
-            "%{public}f, maxLaneLength_: %{public}f",
+         "%{public}f, maxLaneLength_: %{public}f",
         maxLanes, minLanes, minLaneLength.value(), maxLaneLength.value());
     return lanes;
 }
@@ -209,18 +230,25 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
     int32_t lanes = layoutProperty->GetLanes().value_or(1);
     lanes = lanes > 1 ? lanes : 1;
     if (layoutProperty->GetLaneMinLength().has_value()) {
-        minLaneLength_ = ConvertToPx(
-            layoutProperty->GetLaneMinLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
+        minLaneLength_ =
+            ConvertToPx(layoutProperty->GetLaneMinLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
     }
     if (layoutProperty->GetLaneMaxLength().has_value()) {
-        maxLaneLength_ = ConvertToPx(
-            layoutProperty->GetLaneMaxLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
+        maxLaneLength_ =
+            ConvertToPx(layoutProperty->GetLaneMaxLength().value(), layoutConstraint.scaleProperty, mainPercentRefer);
     }
-    lanes_ = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional);
+    float laneGutter = 0.0f;
+    if (layoutProperty->GetLaneGutter().has_value()) {
+        laneGutter = ConvertToPx(
+            layoutProperty->GetLaneGutter().value(), layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0))
+                .value();
+        SetLaneGutter(laneGutter);
+    }
+    lanes_ = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional, laneGutter);
 }
 
-void ListLanesLayoutAlgorithm::ModifyLaneLength(std::optional<float>& minLaneLength,
-    std::optional<float>& maxLaneLength, float crossSize)
+void ListLanesLayoutAlgorithm::ModifyLaneLength(
+    std::optional<float>& minLaneLength, std::optional<float>& maxLaneLength, float crossSize)
 {
     if (GreatNotEqual(minLaneLength.value(), maxLaneLength.value())) {
         LOGI("minLaneLength: %{public}f is greater than maxLaneLength: %{public}f, assign minLaneLength to"
@@ -240,13 +268,13 @@ float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float 
 
 int32_t ListLanesLayoutAlgorithm::FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index)
 {
-    auto wrapper  = layoutWrapper->GetOrCreateChildByIndex(index, false);
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, false);
     CHECK_NULL_RETURN_NOLOG(wrapper, index);
     if (wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
         return index;
     }
     for (int32_t idx = index; idx > startIndex; idx--) {
-        auto wrapper  = layoutWrapper->GetOrCreateChildByIndex(idx - 1, false);
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(idx - 1, false);
         CHECK_NULL_RETURN_NOLOG(wrapper, idx);
         if (wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             return idx;
@@ -291,22 +319,5 @@ int32_t ListLanesLayoutAlgorithm::GetLanesFloor(LayoutWrapper* layoutWrapper, in
     return index;
 }
 
-void ListLanesLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount)
-{
-    auto range = layoutWrapper->GetLazyBuildRange();
-    auto itemPosition = GetItemPosition();
-    if (!itemPosition.empty() && range.first >= 0) {
-        auto startNode = itemPosition.begin();
-        if ((startNode->first >= range.first && startNode->first < range.second) && startNode->second.isGroup) {
-            layoutWrapper->SetCacheCount(cachedCount);
-            return;
-        }
-        auto endNode = itemPosition.rbegin();
-        if ((endNode->first >= range.first && endNode->first < range.second) && endNode->second.isGroup) {
-            layoutWrapper->SetCacheCount(cachedCount);
-            return;
-        }
-    }
-    layoutWrapper->SetCacheCount(cachedCount * GetLanes());
-}
+void ListLanesLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount) {}
 } // namespace OHOS::Ace::NG

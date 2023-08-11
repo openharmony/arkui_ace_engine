@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace {
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) const
 {
 #ifndef NEW_SKIA
@@ -31,5 +32,11 @@ void RosenRenderSvgFeOffset::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter) 
     imageFilter = SkImageFilters::Offset(dx_, dy_, imageFilter);
 #endif
 }
+#else
+void RosenRenderSvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter) const
+{
+    imageFilter = RSRecordingImageFilter::CreateOffsetImageFilter(dx_, dy_, imageFilter);
+}
+#endif
 
 } // namespace OHOS::Ace

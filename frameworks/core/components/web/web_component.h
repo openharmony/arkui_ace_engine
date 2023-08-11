@@ -752,6 +752,21 @@ public:
         onContextMenuImpl_ = std::move(onContextMenuImpl);
     }
 
+    using OnContextMenuHideImpl = std::function<void(const BaseEventInfo* info)>;
+    void OnContextMenuHide(const BaseEventInfo* info) const
+    {
+        if (onContextMenuHideImpl_) {
+            onContextMenuHideImpl_(info);
+        }
+    }
+    void SetOnContextMenuHide(OnContextMenuHideImpl&& onContextMenuHideImpl)
+    {
+        if (onContextMenuHideImpl == nullptr) {
+            return;
+        }
+        onContextMenuHideImpl_ = std::move(onContextMenuHideImpl);
+    }
+
     using OnUrlLoadInterceptImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnUrlLoadIntercept(const BaseEventInfo* info) const
     {
@@ -921,6 +936,17 @@ public:
         return onPreKeyEvent_;
     }
 
+    void SetOverScrollId(const EventMarker& overScrollId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetOverScrollId(overScrollId);
+    }
+
+    const EventMarker& GetOverScrollId() const
+    {
+        return declaration_->GetOverScrollId();
+    }
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -944,6 +970,7 @@ private:
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
     OnSslSelectCertRequestImpl onSslSelectCertRequestImpl_;
     OnContextMenuImpl onContextMenuImpl_;
+    OnContextMenuHideImpl onContextMenuHideImpl_;
     OnInterceptRequestImpl onInterceptRequestImpl_ = nullptr;
     OnProgressChangeImpl onProgressChangeImpl_ = nullptr;
     OnWindowNewImpl onWindowNewImpl_ = nullptr;

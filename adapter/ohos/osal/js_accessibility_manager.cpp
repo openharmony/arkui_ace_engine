@@ -544,7 +544,7 @@ void FindText(const RefPtr<NG::UINode>& node, const std::string& text, std::list
 
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     if (frameNode && !frameNode->IsInternal()) {
-        if (frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText().find(text) !=
+        if (frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText().find(text) !=
             std::string::npos) {
             LOGI("FindText find nodeId(%{public}d)", frameNode->GetAccessibilityId());
             nodeList.push_back(frameNode);
@@ -581,17 +581,80 @@ RefPtr<NG::FrameNode> GetInspectorById(const RefPtr<NG::FrameNode>& root, int32_
     return nullptr;
 }
 
-void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int32_t>& children, int32_t pageId)
+void GetFrameNodeParent(const RefPtr<NG::UINode>& uiNode, RefPtr<NG::FrameNode>& parent)
 {
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+        if (!frameNode->IsInternal()) {
+            parent = frameNode;
+            return;
+        }
+    }
+    auto parentNode = uiNode->GetParent();
+    GetFrameNodeParent(parentNode, parent);
+}
+
+bool CheckFrameNodeByAccessibilityLevel(const RefPtr<NG::FrameNode>& frameNode, bool isParent)
+{
+    bool ret = false;
+    CHECK_NULL_RETURN(frameNode, false);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    auto uiNode = frameNode->GetParent();
+    RefPtr<NG::FrameNode> parentNode;
+    if (uiNode != nullptr) {
+        GetFrameNodeParent(uiNode, parentNode);
+    }
+
+    if (isParent) {
+        if (accessibilityProperty->GetAccessibilityLevel() == IMPORTANT_NO_HIDE_DES) {
+            ret = false;
+            return ret;
+        }
+        if (!parentNode) {
+            if (accessibilityProperty->IsAccessibilityGroup()) {
+                ret = false;
+            } else {
+                ret = true;
+            }
+        } else {
+            if (accessibilityProperty->IsAccessibilityGroup()) {
+                ret = false;
+            } else {
+                ret = CheckFrameNodeByAccessibilityLevel(parentNode, true);
+            }
+        }
+    } else {
+        if (accessibilityProperty->GetAccessibilityLevel() == IMPORTANT_YES) {
+            ret = true;
+            if (!parentNode) {
+                return ret;
+            }
+            auto parentAccessibilityProperty = parentNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            if (parentAccessibilityProperty->IsAccessibilityGroup()) {
+                ret = false;
+            } else {
+                ret = CheckFrameNodeByAccessibilityLevel(parentNode, true);
+            }
+        } else {
+            ret = false;
+        }
+    }
+    return ret;
+}
+
+void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int32_t>& children, int32_t pageId)
+{
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+        CHECK_NULL_VOID_NOLOG(frameNode->IsActive());
         if (uiNode->GetTag() == "stage") {
         } else if (uiNode->GetTag() == "page") {
             if (uiNode->GetPageId() != pageId) {
                 return;
             }
-        } else {
-            auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
-            if (!frameNode->IsInternal()) {
+        } else if (!frameNode->IsInternal()) {
+            if (CheckFrameNodeByAccessibilityLevel(frameNode, false)) {
                 children.emplace_back(uiNode->GetAccessibilityId());
                 return;
             }
@@ -608,7 +671,10 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG:
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
         if (!frameNode->IsInternal()) {
-            children.emplace_back(frameNode);
+            if (CheckFrameNodeByAccessibilityLevel(frameNode, false)) {
+                children.emplace_back(frameNode);
+                return;
+            }
         }
     } else {
         for (const auto& frameChild : uiNode->GetChildren()) {
@@ -636,7 +702,7 @@ void FillEventInfo(const RefPtr<NG::FrameNode>& node, AccessibilityEventInfo& ev
     eventInfo.SetPageId(node->GetPageId());
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    eventInfo.AddContent(accessibilityProperty->GetText());
+    eventInfo.AddContent(accessibilityProperty->GetAccessibilityText());
     eventInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
     eventInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     eventInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
@@ -706,7 +772,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID_NOLOG(accessibilityProperty);
 
-    nodeInfo.SetContent(accessibilityProperty->GetText());
+    nodeInfo.SetContent(accessibilityProperty->GetAccessibilityText());
     if (accessibilityProperty->HasRange()) {
         RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
         nodeInfo.SetRange(rangeInfo);
@@ -765,10 +831,6 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
 {
     CHECK_NULL_VOID_NOLOG(node);
-    NG::RectF rect;
-    if (node->IsActive()) {
-        rect = node->GetTransformRectRelativeToWindow();
-    }
     nodeInfo.SetParent(GetParentId(node));
     std::vector<int32_t> children;
     for (const auto& item : node->GetChildren()) {
@@ -787,6 +849,7 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
+        auto rect = node->GetTransformRectRelativeToWindow();
         auto left = rect.Left() + commonProperty.windowLeft;
         auto top = rect.Top() + commonProperty.windowTop;
         auto right = rect.Right() + commonProperty.windowLeft;
@@ -811,18 +874,35 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
     UpdateAccessibilityElementInfo(node, nodeInfo);
 }
 
+bool CanAccessibilityFocusedNG(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return !node->IsRootNode() &&
+           node->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE &&
+           accessibilityProperty->GetAccessibilityLevel() != IMPORTANT_NO &&
+           accessibilityProperty->GetAccessibilityLevel() != IMPORTANT_NO_HIDE_DES;
+}
 // focus move search
 void AddFocusableNode(std::list<RefPtr<NG::FrameNode>>& nodeList, const RefPtr<NG::FrameNode>& node)
 {
-    nodeList.emplace_back(node);
-
-    std::list<RefPtr<NG::FrameNode>> children;
-    for (const auto& child : node->GetChildren()) {
-        GetFrameNodeChildren(child, children);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    const std::string level = accessibilityProperty->GetAccessibilityLevel();
+    if (CanAccessibilityFocusedNG(node)) {
+        nodeList.emplace_back(node);
     }
 
-    for (const auto& child : children) {
-        AddFocusableNode(nodeList, child);
+    if (!accessibilityProperty->IsAccessibilityGroup() && level != IMPORTANT_NO_HIDE_DES) {
+        std::list<RefPtr<NG::FrameNode>> children;
+        for (const auto& child : node->GetChildren()) {
+            GetFrameNodeChildren(child, children);
+        }
+
+        for (const auto& child : children) {
+            AddFocusableNode(nodeList, child);
+        }
     }
 }
 
@@ -1633,6 +1713,13 @@ static void DumpTreeNG(
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetAccessibilityId()));
     DumpLog::GetInstance().AddDesc("compid: " + node->GetInspectorId().value_or(""));
     DumpLog::GetInstance().AddDesc("text: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());
+    DumpLog::GetInstance().AddDesc(
+        "accessibilityText: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText());
+    DumpLog::GetInstance().AddDesc(
+        "accessibilityGroup: " +
+        std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsAccessibilityGroup()));
+    DumpLog::GetInstance().AddDesc(
+        "accessibilityLevel: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityLevel());
     DumpLog::GetInstance().AddDesc("top: " + std::to_string(rect.Top() + commonProperty.windowTop));
     DumpLog::GetInstance().AddDesc("left: " + std::to_string(rect.Left() + commonProperty.windowLeft));
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(rect.Width()));
@@ -1756,13 +1843,13 @@ RefPtr<PipelineBase> JsAccessibilityManager::GetPipelineByWindowId(const int32_t
     auto context = context_.Upgrade();
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
         CHECK_NULL_RETURN_NOLOG(context, nullptr);
-        if (context->GetWindowId() == windowId) {
+        if (context->GetWindowId() == static_cast<uint32_t>(windowId)) {
             return context;
         }
         for (auto& subContext : GetSubPipelineContexts()) {
             context = subContext.Upgrade();
             CHECK_NULL_RETURN_NOLOG(context, nullptr);
-            if (context->GetWindowId() == windowId) {
+            if (context->GetWindowId() == static_cast<uint32_t>(windowId)) {
                 return context;
             }
         }

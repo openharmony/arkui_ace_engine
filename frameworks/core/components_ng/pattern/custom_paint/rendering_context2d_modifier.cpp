@@ -29,6 +29,8 @@ RenderingContext2DModifier::RenderingContext2DModifier()
 
 void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
 {
+    ACE_SCOPED_TRACE("RenderingContext2DModifier::onDraw");
+#ifndef USE_ROSEN_DRAWING
     auto skCanvas = drawingContext.canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
 
     auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
@@ -43,7 +45,24 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     if (drawCmdList->GetSize() == 0) {
         return;
     }
+    recordingCanvas->GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());
+    recordingCanvas->GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
     drawCmdList->Playback(*skCanvas);
     rsRecordingCanvas_->Clear();
+#else
+    if (!rsRecordingCanvas_) {
+        return;
+    }
+
+    auto recordingCanvas = drawingContext.canvas;
+    auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
+    if (!drawCmdList) {
+        return;
+    }
+    if (drawCmdList->GetData().second == 0) {
+        return;
+    }
+    drawCmdList->Playback(recordingCanvas);
+#endif
 }
 } // namespace OHOS::Ace::NG

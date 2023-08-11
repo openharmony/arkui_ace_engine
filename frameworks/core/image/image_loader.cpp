@@ -22,9 +22,11 @@
 #include <string_view>
 #include <unistd.h>
 
-#ifndef USE_ROSEN_DRAWING
 #include "include/codec/SkCodec.h"
 #include "include/utils/SkBase64.h"
+
+#ifdef USE_ROSEN_DRAWING
+#include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #endif
 
 #include "base/image/image_source.h"
@@ -163,7 +165,11 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& u
 #ifndef USE_ROSEN_DRAWING
         return SkData::MakeFromFILE(file.get());
 #else
-    // TODO Drawing : SkData::MakeFromFILE()
+        auto skData = SkData::MakeFromFILE(file.get());
+        CHECK_NULL_RETURN(skData, nullptr);
+        auto rsData = std::make_shared<RSData>();
+        rsData->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(skData);
+        return rsData;
 #endif
     }
     return nullptr;
@@ -179,7 +185,7 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(imageCache, nullptr);
-    auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetSrc());
+    auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetKey());
     CHECK_NULL_RETURN_NOLOG(cacheData, nullptr);
     // TODO: add adapter layer and use [SkiaCachedImageData] there
 #ifndef USE_ROSEN_DRAWING
@@ -187,8 +193,9 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     CHECK_NULL_RETURN(skiaCachedImageData, nullptr);
     return skiaCachedImageData->imageData;
 #else
-    // TODO Drawing : depend on flutter
-    return nullptr;
+    auto rosenCachedImageData = AceType::DynamicCast<RosenCachedImageData>(cacheData);
+    CHECK_NULL_RETURN(rosenCachedImageData, nullptr);
+    return rosenCachedImageData->imageData;
 #endif
 }
 
@@ -215,48 +222,49 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 #ifndef USE_ROSEN_DRAWING
     auto skdata = AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
     CHECK_NULL_RETURN(skdata, nullptr);
-#else
-    // TODO Drawing : depend on flutter
-#endif
     return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skdata));
+#else
+    auto rsdata = AceType::DynamicCast<RosenCachedImageData>(data)->imageData;
+    CHECK_NULL_RETURN(rsdata, nullptr);
+    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsdata));
+#endif
 }
 
 // NG ImageLoader entrance
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
 {
     ACE_FUNCTION_TRACE();
-    if (imageSourceInfo.IsPixmap()) {
-        return LoadDecodedImageData(imageSourceInfo, context);
+    if (src.IsPixmap()) {
+        return LoadDecodedImageData(src, context);
     }
 #ifndef USE_ROSEN_DRAWING
     sk_sp<SkData> skData;
     do {
-        skData = ImageLoader::QueryImageDataFromImageCache(imageSourceInfo);
+        skData = ImageLoader::QueryImageDataFromImageCache(src);
         if (skData) {
             break;
         }
-        skData = LoadImageData(imageSourceInfo, context);
+        skData = LoadImageData(src, context);
         CHECK_NULL_RETURN(skData, nullptr);
-        // TODO: add adapter layer and use [SkiaCachedImageData] there
         ImageLoader::CacheImageDataToImageCache(
-            imageSourceInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(skData));
+            src.GetKey(), AceType::MakeRefPtr<SkiaCachedImageData>(skData));
     } while (0);
+    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skData));
 #else
-    std::shared_ptr<RSData> drawingData;
+    std::shared_ptr<RSData> rsData = nullptr;
     do {
-        drawingData = ImageLoader::QueryImageDataFromImageCache(imageSourceInfo);
-        if (drawingData) {
+        rsData = ImageLoader::QueryImageDataFromImageCache(src);
+        if (rsData) {
             break;
         }
-        drawingData = LoadImageData(imageSourceInfo, context);
-        CHECK_NULL_RETURN(drawingData, nullptr);
-        // TODO: add adapter layer and use [DrawingCachedImageData] there
+        rsData = LoadImageData(src, context);
+        CHECK_NULL_RETURN(rsData, nullptr);
         ImageLoader::CacheImageDataToImageCache(
-            imageSourceInfo.GetSrc(), AceType::MakeRefPtr<DrawingCachedImageData>(drawingData));
+            src.GetKey(), AceType::MakeRefPtr<RosenCachedImageData>(rsData));
     } while (0);
+    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsData));
 #endif
-    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skData));
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -297,8 +305,8 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
             strerror(errno), src.c_str());
         return nullptr;
     }
-#ifndef USE_ROSEN_DRAWING
     auto result = SkData::MakeFromFileName(realPath);
+#ifndef USE_ROSEN_DRAWING
 #ifdef PREVIEW
     // on Windows previewer, SkData::MakeFromFile keeps the file open during SkData's lifetime
     // return a copy to release the file handle
@@ -308,7 +316,16 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
     return result;
 #endif
 #else
-    // TODO Drawing : SkData::MakeFromFILE()
+    CHECK_NULL_RETURN(result, nullptr);
+    auto rsData = std::make_shared<RSData>();
+#ifdef PREVIEW
+    // on Windows previewer, SkData::MakeFromFile keeps the file open during Drawing::Data's lifetime
+    // return a copy to release the file handle
+    return rsData->BuildWithCopy(result->data(), result->size()) ? rsData : nullptr;
+#else
+    rsData->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(result);
+    return rsData;
+#endif
 #endif
 }
 
@@ -340,18 +357,15 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
     CHECK_NULL_RETURN(fd >= 0, nullptr);
 #ifndef USE_ROSEN_DRAWING
     auto data = SkData::MakeFromFD(fd);
-#else
-    auto data = std::make_shared<RSData>();
-    // TODO DRAWING for MakeFromFD
-#endif
     close(fd);
     CHECK_NULL_RETURN(data, nullptr);
-    BackgroundTaskExecutor::GetInstance().PostTask(
-        [src, data]() {
-            // cache file content
-            ImageCache::WriteCacheFile(src, data->data(), data->size());
-        },
-        BgTaskPriority::LOW);
+#else
+    auto skData = SkData::MakeFromFD(fd);
+    close(fd);
+    CHECK_NULL_RETURN(skData, nullptr);
+    auto data = std::make_shared<RSData>();
+    data->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(skData);
+#endif
     return data;
 }
 
@@ -397,7 +411,8 @@ std::shared_ptr<RSData> AssetImageLoader::LoadImageData(
     return SkData::MakeWithCopy(data, dataSize);
 #else
     auto drawingData = std::make_shared<RSData>();
-    return drawingData->BuildWithCopy(data, dataSize);
+    drawingData->BuildWithCopy(data, dataSize);
+    return drawingData;
 #endif
 }
 
@@ -497,14 +512,18 @@ std::shared_ptr<RSData> InternalImageLoader::LoadImageData(
     return SkData::MakeWithCopy(internalData, imageSize);
 #else
     auto drawingData = std::make_shared<RSData>();
-    return drawingData->BuildWithCopy(internalData, imageSize);
-
+    drawingData->BuildWithCopy(internalData, imageSize);
+    return drawingData;
 #endif
 }
 
 #ifndef USE_ROSEN_DRAWING
 sk_sp<SkData> Base64ImageLoader::LoadImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+#else
+std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+#endif
 {
     std::string_view base64Code = GetBase64ImageCode(imageSourceInfo.GetSrc());
     if (base64Code.size() == 0) {
@@ -519,8 +538,14 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
 
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkData> resData = SkData::MakeUninitialized(outputLen);
     void* output = resData->writable_data();
+#else
+    auto resData = std::make_shared<RSData>();
+    resData->BuildUninitialized(outputLen);
+    void* output = resData->WritableData();
+#endif
     error = SkBase64::Decode(base64Code.data(), base64Code.size(), output, &outputLen);
     if (error != SkBase64::Error::kNoError) {
         LOGE("error base64 image code!");
@@ -536,7 +561,12 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
     }
     auto base64Data = base64Decoder.getData();
     const uint8_t* imageData = reinterpret_cast<uint8_t*>(base64Data);
+#ifndef USE_ROSEN_DRAWING
     auto resData = SkData::MakeWithCopy(imageData, base64Decoder.getDataSize());
+#else
+    auto resData = std::make_shared<RSData>();
+    resData->BuildWithCopy(imageData, base64Decoder.getDataSize());
+#endif
     // in SkBase64, the fData is not deleted after decoded.
     if (base64Data != nullptr) {
         delete[] base64Data;
@@ -545,9 +575,6 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
     return resData;
 #endif
 }
-#else
-    // TODO Drawing : SkBase64
-#endif
 
 std::string_view Base64ImageLoader::GetBase64ImageCode(const std::string& uri)
 {
@@ -609,19 +636,19 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
 #endif
 {
     auto uri = imageSourceInfo.GetSrc();
-
+    auto bundleName = imageSourceInfo.GetBundleName();
+    auto moudleName = imageSourceInfo.GetModuleName();
     auto themeManager = PipelineBase::CurrentThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
-    auto themeConstants =
-        themeManager->GetThemeConstants(imageSourceInfo.GetBundleName(), imageSourceInfo.GetModuleName());
+    auto themeConstants = themeManager->GetThemeConstants();
     CHECK_NULL_RETURN(themeConstants, nullptr);
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
     if (GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
-        if (!themeConstants->GetRawFileData(rawFile, dataLen, data)) {
-            LOGE("get image data by name failed, uri:%{private}s, rawFile:%{public}s", uri.c_str(), rawFile.c_str());
+        if (!themeConstants->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
+            LOGW("get image data by name failed, uri:%{private}s, rawFile:%{public}s", uri.c_str(), rawFile.c_str());
             return nullptr;
         }
 #ifndef USE_ROSEN_DRAWING
@@ -629,12 +656,13 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
 #else
         auto drawingData = std::make_shared<RSData>();
         drawingData->BuildWithCopy(data.get(), dataLen);
+        return drawingData;
 #endif
     }
     uint32_t resId = 0;
     if (GetResourceId(uri, resId)) {
-        if (!themeConstants->GetMediaData(resId, dataLen, data)) {
-            LOGE("get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(), resId);
+        if (!themeConstants->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
+            LOGW("get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(), resId);
             return nullptr;
         }
 #ifndef USE_ROSEN_DRAWING
@@ -642,12 +670,13 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
 #else
         auto drawingData = std::make_shared<RSData>();
         drawingData->BuildWithCopy(data.get(), dataLen);
+        return drawingData;
 #endif
     }
     std::string resName;
     if (GetResourceName(uri, resName)) {
-        if (!themeConstants->GetMediaData(resName, dataLen, data)) {
-            LOGE("get image data by name failed, uri:%{private}s, resName:%{public}s", uri.c_str(), resName.c_str());
+        if (!themeConstants->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
+            LOGW("get image data by name failed, uri:%{private}s, resName:%{public}s", uri.c_str(), resName.c_str());
             return nullptr;
         }
 #ifndef USE_ROSEN_DRAWING
@@ -655,9 +684,10 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
 #else
         auto drawingData = std::make_shared<RSData>();
         drawingData->BuildWithCopy(data.get(), dataLen);
+        return drawingData;
 #endif
     }
-    LOGE("load image data failed, as uri is invalid:%{private}s", uri.c_str());
+    LOGW("load image data failed, as uri is invalid:%{private}s", uri.c_str());
     return nullptr;
 }
 
@@ -673,7 +703,7 @@ std::shared_ptr<RSData> DecodedDataProviderImageLoader::LoadImageData(
 }
 
 // return orientation of pixmap for cache key
-const std::string& DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
+std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageSourceInfo& src)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, "");
@@ -770,6 +800,7 @@ std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
         }
     }
 
+    std::unique_lock<std::mutex> lock(mtx_);
 #ifndef USE_ROSEN_DRAWING
     auto skData = SkData::MakeWithCopy(data_.data(), data_.size());
     return skData;

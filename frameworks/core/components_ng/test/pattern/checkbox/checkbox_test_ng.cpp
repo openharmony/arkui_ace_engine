@@ -257,11 +257,11 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest005, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. Create LayoutWrapper and set checkBoxLayoutAlgorithm.
+     * @tc.steps: step2. Create LayoutWrapperNode and set checkBoxLayoutAlgorithm.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(checkBoxPattern, nullptr);
     auto checkBoxLayoutAlgorithm = checkBoxPattern->CreateLayoutAlgorithm();
@@ -794,11 +794,11 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. Create LayoutWrapper and set checkBoxLayoutAlgorithm.
+     * @tc.steps: step2. Create LayoutWrapperNode and set checkBoxLayoutAlgorithm.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(checkBoxPattern, nullptr);
     auto checkBoxLayoutAlgorithm =
@@ -935,7 +935,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest027, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
 
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto layoutAlgorithm = AceType::MakeRefPtr<CheckBoxLayoutAlgorithm>();
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =

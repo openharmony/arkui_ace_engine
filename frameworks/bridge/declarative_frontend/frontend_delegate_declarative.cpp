@@ -114,7 +114,8 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const UpdatePageCallback& updatePageCallback, const ResetStagingPageCallback& resetLoadingPageCallback,
     const DestroyPageCallback& destroyPageCallback, const DestroyApplicationCallback& destroyApplicationCallback,
     const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
-    const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
+    const MediaQueryCallback& mediaQueryCallback, const LayoutInspectorCallback& layoutInpsectorCallback,
+    const DrawInspectorCallback& drawInpsectorCallback, const RequestAnimationCallback& requestAnimationCallback,
     const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
     const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
@@ -127,9 +128,9 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       asyncEvent_(asyncEventCallback), syncEvent_(syncEventCallback), updatePage_(updatePageCallback),
       resetStagingPage_(resetLoadingPageCallback), destroyPage_(destroyPageCallback),
       destroyApplication_(destroyApplicationCallback), updateApplicationState_(updateApplicationStateCallback),
-      timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback),
-      requestAnimationCallback_(requestAnimationCallback), jsCallback_(jsCallback),
-      onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
+      timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback), layoutInspectorCallback_(layoutInpsectorCallback),
+      drawInspectorCallback_(drawInpsectorCallback), requestAnimationCallback_(requestAnimationCallback),
+      jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
       onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveAbilityState_(onSaveAbilityStateCallBack),
       onRestoreAbilityState_(onRestoreAbilityStateCallBack), onNewWant_(onNewWantCallBack),
       onMemoryLevel_(onMemoryLevelCallBack), onStartContinuationCallBack_(onStartContinuationCallBack),
@@ -617,7 +618,13 @@ void FrontendDelegateDeclarative::CallPopPage()
 
 void FrontendDelegateDeclarative::ResetStagingPage()
 {
-    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS);
+    if (resetStagingPage_) {
+        taskExecutor_->PostTask(
+            [resetStagingPage = resetStagingPage_] { resetStagingPage(); },
+            TaskExecutor::TaskType::JS);
+    } else {
+        LOGE("resetStagingPage_ is null");
+    }
 }
 
 void FrontendDelegateDeclarative::OnApplicationDestroy(const std::string& packageName)
@@ -1458,6 +1465,47 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .content = dialogAttr.message,
+        .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
+        .maskRect = dialogAttr.maskRect,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .content = dialogAttr.message,
+        .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
+        .onStatusChanged = std::move(onStatusChanged),
+        .maskRect = dialogAttr.maskRect,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
@@ -1786,10 +1834,10 @@ void FrontendDelegateDeclarative::OnSurfaceChanged()
         mediaQueryInfo_->SetIsInit(false);
     }
     mediaQueryInfo_->EnsureListenerIdValid();
-    OnMediaQueryUpdate();
+    OnMediaQueryUpdate(true);
 }
 
-void FrontendDelegateDeclarative::OnMediaQueryUpdate()
+void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
 {
     auto containerId = Container::CurrentId();
     if (containerId < 0) {
@@ -1823,14 +1871,37 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
         delegate->mediaQueryInfo_->ResetListenerId();
     };
     auto container = Container::Current();
-    if (!container) {
-        return;
-    }
-    if (container->IsUseStageModel()) {
+    if (container && container->IsUseStageModel() && isSynchronous) {
         callback();
         return;
     }
     taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->layoutInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnPageReady(

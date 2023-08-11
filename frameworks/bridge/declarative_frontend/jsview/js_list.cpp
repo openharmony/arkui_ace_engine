@@ -63,8 +63,12 @@ void JSList::SetDirection(int32_t direction)
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
 }
 
-void JSList::SetScrollBar(int32_t scrollBar)
+void JSList::SetScrollBar(const JSCallbackInfo& info)
 {
+    // default value 1 represents scrollBar DisplayMode::AUTO.
+    int32_t scrollBar = 1;
+    ParseJsInteger<int32_t>(info[0], scrollBar);
+    scrollBar = scrollBar < 0 ? 1 : scrollBar;
     ListModel::GetInstance()->SetScrollBar(static_cast<DisplayMode>(scrollBar));
 }
 
@@ -192,6 +196,16 @@ void JSList::SetLanes(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() >= 2 && !(info[1]->IsNull())) { /* 2: parameter count */
+        CalcDimension laneGutter;
+        if (JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
+            if (laneGutter.IsNegative()) {
+                laneGutter.Reset();
+            }
+        }
+        ListModel::GetInstance()->SetLaneGutter(laneGutter);
+    }
+
     int32_t laneNum = 1;
     if (ParseJsInteger<int32_t>(info[0], laneNum)) {
         // when [lanes] is set, [laneConstrain_] of list component will be reset to std::nullopt
@@ -296,6 +310,11 @@ void JSList::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSList::SetScrollEnabled(const JSCallbackInfo& args)
+{
+    ListModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
+}
+
 void JSList::ScrollCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -308,6 +327,16 @@ void JSList::ScrollCallback(const JSCallbackInfo& args)
         ListModel::GetInstance()->SetOnScroll(std::move(onScroll));
     }
     args.ReturnSelf();
+}
+
+void JSList::SetFriction(const JSCallbackInfo& info)
+{
+    double friction = -1.0;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+        LOGW("Friction params invalid,can not convert to double");
+        friction = -1.0;
+    }
+    ListModel::GetInstance()->SetFriction(friction);
 }
 
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
@@ -394,9 +423,9 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
         auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
-                                 const int32_t start, const int32_t end) {
+                                 const int32_t start, const int32_t end, const int32_t center) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(start, end);
+            auto params = ConvertToJSValues(start, end, center);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
         };
@@ -601,7 +630,9 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
     JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
+    JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);
+    JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
 
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

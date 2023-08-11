@@ -44,7 +44,7 @@ void JSWindowScene::Create(const JSCallbackInfo& info)
         return;
     }
 
-    auto persistentId = static_cast<uint64_t>(info[0]->ToNumber<double>());
+    auto persistentId = static_cast<int32_t>(info[0]->ToNumber<double>());
     NG::WindowSceneModel::Create(persistentId);
 }
 } // namespace OHOS::Ace::Framework

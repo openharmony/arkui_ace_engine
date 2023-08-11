@@ -28,6 +28,10 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
+
 
 namespace OHOS::Ace {
 class BorderImagePainter : public virtual AceType {
@@ -80,7 +84,7 @@ private:
 #else
     std::shared_ptr<RSImage> image_;
 #endif
-    
+
     double imageWidth_ = 0.0;
     double imageHeight_ = 0.0;
     double imageCenterWidth_ = 0.0;

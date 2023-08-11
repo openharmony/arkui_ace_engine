@@ -28,11 +28,15 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/animation/scroll_motion.cpp",
+    "$ace_root/frameworks/core/animation/spring_curve.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
     "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
@@ -42,11 +46,13 @@ ohos_unittest("stepper_pattern_test_ng") {
     # select_overlay
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
 
     # flex
@@ -104,8 +110,10 @@ ohos_unittest("stepper_pattern_test_ng") {
 
     #mock
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/stepper/stepper_accessibility_property.cpp",
@@ -185,6 +193,7 @@ ohos_unittest("stepper_pattern_test_ng") {
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
@@ -199,6 +208,7 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/syntax/mock_for_each_node.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
   ]
 

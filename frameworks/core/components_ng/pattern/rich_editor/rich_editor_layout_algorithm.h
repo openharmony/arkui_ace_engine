@@ -28,6 +28,16 @@ public:
     RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren, const RefPtr<Paragraph>& paragraph);
     ~RichEditorLayoutAlgorithm() override;
 
+    const OffsetF& GetParentGlobalOffset() const
+    {
+        return parentGlobalOffset_;
+    }
+
+    void Layout(LayoutWrapper* layoutWrapper) override;
+
+private:
+    OffsetF parentGlobalOffset_;
+
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

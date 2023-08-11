@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 class JSPatternLock : public JSViewAbstract {
@@ -38,6 +39,7 @@ public:
 
 protected:
     static void SetPatternComplete(const JSCallbackInfo& info);
+    static void SetDotConnected(const JSCallbackInfo& info);
 
 private:
     static void SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::V2::PatternLockComponent>& patternLock);
@@ -52,6 +54,7 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSPatternLockController* controller);
     void Reset(const JSCallbackInfo& args);
+    void SetChallengeResult(const JSCallbackInfo& args);
     void SetController(const RefPtr<V2::PatternLockController>& controller)
     {
         controller_ = controller;

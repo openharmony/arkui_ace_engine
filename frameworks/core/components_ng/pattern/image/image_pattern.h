@@ -40,6 +40,11 @@ public:
     ImagePattern() = default;
     ~ImagePattern() override = default;
 
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
+    {
+        return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -70,7 +75,12 @@ public:
         return { FocusType::NODE, false };
     }
 
-    void CreateObscuredImageIfNeed();
+    const RefPtr<CanvasImage>& GetCanvasImage()
+    {
+        return image_;
+    }
+
+    void CreateObscuredImage();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
@@ -118,7 +128,7 @@ private:
 
     void OnModifyDone() override;
 
-    void PaintImage(RenderContext* renderContext, const OffsetF& offset);
+    void OnLanguageConfigurationUpdate() override;
 
     void OnImageDataReady();
     void OnImageLoadFail();
@@ -140,6 +150,8 @@ private:
     void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
+    RectF CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode);
 
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();

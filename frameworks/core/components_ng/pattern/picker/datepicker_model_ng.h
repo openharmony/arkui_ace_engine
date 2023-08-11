@@ -32,6 +32,7 @@ public:
     void SetSelectedDate(const PickerDate& value) override;
     void SetShowLunar(bool lunar) override;
     void SetOnChange(DateChangeEvent&& onChange) override;
+    void SetOnDateChange(DateChangeEvent&& onChange) override;
     void SetSelectedTime(const PickerTime& selectedTime) override {};
     void SetHour24(bool value) override {};
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
@@ -49,7 +50,8 @@ class ACE_EXPORT DatePickerDialogModelNG : public DatePickerDialogModel {
 public:
     void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, DatePickerType pickerType) override;
+        std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onDateAccept,
+        std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType) override;
 };
 } // namespace OHOS::Ace::NG
 

@@ -107,7 +107,48 @@ public:
         isInitialSubtitle_ = isInitialSubtitle;
     }
 
+    void ProcessTittleDragStart(float offset);
+    void ProcessTittleDragUpdate(float offset);
+    void ProcessTittleDragEnd();
+    
+    float GetCurrentOffset()
+    {
+        return tempTitleBarHeight_ - defaultTitleBarHeight_;
+    }
+
+    void SetOverDragOffset(float overDragOffset)
+    {
+        overDragOffset_ = overDragOffset;
+    }
+
+    float GetOverDragOffset() const
+    {
+        return overDragOffset_;
+    }
+    
+    bool IsTitleDraggedDown()
+    {
+        return GreatNotEqual(tempTitleBarHeight_, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) ?
+            true : false;
+    }
+
+    NavigationTitleMode GetNavigationTitleMode() const
+    {
+        return titleMode_;
+    }
+
 private:
+    void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
+
+    void ClearDragState();
+    float GetSubtitleOpacity();
+    float GetFontSize();
+    float GetMappedOffset(float offset);
+    void SpringAnimation(float startPos, float endPos);
+    void UpdateScaleByDragOverDragOffset(float overDragOffset);
+    void AnimateTo(float offset);
+    void SetTitleStyleByOffset(float offset);
+
     void OnAttachToFrameNode() override;
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
@@ -129,9 +170,14 @@ private:
     float GetSubTitleOffsetY();
     void UpdateTitleFontSize(const Dimension& tempTitleFontSize);
     void UpdateSubTitleOpacity(const double &value);
+    void UpdateTitleModeChange();
 
     RefPtr<PanEvent> panEvent_;
+    RefPtr<SpringMotion> springMotion_;
+    RefPtr<Animator> springController_;
+    RefPtr<Animator> animator_;
 
+    float overDragOffset_ = 0.0f;
     float maxTitleBarHeight_ = 0.0f;
     float defaultTitleBarHeight_ = 0.0f;
     float tempTitleBarHeight_ = 0.0f;
@@ -158,6 +204,8 @@ private:
     float initialSubtitleOffsetY_ = 0.0f;
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
+
+    NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 };
 
 } // namespace OHOS::Ace::NG

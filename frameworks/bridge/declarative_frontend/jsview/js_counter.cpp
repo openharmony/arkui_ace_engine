@@ -66,6 +66,9 @@ void JSCounter::JSBind(BindingTarget globalObj)
     JSClass<JSCounter>::StaticMethod("controlWidth", &JSCounter::JSControlWidth);
     JSClass<JSCounter>::StaticMethod("state", &JSCounter::JSStateChange);
     JSClass<JSCounter>::StaticMethod("backgroundColor", &JSCounter::JsBackgroundColor);
+    JSClass<JSCounter>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSCounter>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSCounter>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCounter>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -75,7 +78,9 @@ void JSCounter::JsEnableDec(const JSCallbackInfo& args)
         LOGW("Must contain at least 1 argument");
         return;
     }
-    if (args[0]->IsBoolean()) {
+    if (!args[0]->IsBoolean()) {
+        CounterModel::GetInstance()->SetEnableDec(true);
+    } else {
         CounterModel::GetInstance()->SetEnableDec(args[0]->ToBoolean());
     }
 }
@@ -86,7 +91,9 @@ void JSCounter::JsEnableInc(const JSCallbackInfo& args)
         LOGW("Must contain at least 1 argument");
         return;
     }
-    if (args[0]->IsBoolean()) {
+    if (!args[0]->IsBoolean()) {
+        CounterModel::GetInstance()->SetEnableInc(true);
+    } else {
         CounterModel::GetInstance()->SetEnableInc(args[0]->ToBoolean());
     }
 }

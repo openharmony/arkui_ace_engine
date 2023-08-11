@@ -34,6 +34,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float DEVICE_WIDTH = 480.f;
+constexpr float DEVICE_HEIGHT = 800.f;
 constexpr int32_t STATE_DEFAULT = 0;
 constexpr int32_t STATE_START = 1;
 constexpr int32_t STATE_PAUSED = 2;
@@ -63,6 +65,18 @@ class ImageAnimatorTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
+    static void SetWidth(const Dimension& width);
+    static void SetHeight(const Dimension& height);
+    void GetInstance();
+    RefPtr<LayoutWrapperNode> RunMeasureAndLayout(float width = DEVICE_WIDTH, float height = DEVICE_HEIGHT);
+    void CreateImageAnimator(int32_t number = 1);
+
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<ImageAnimatorPattern> pattern_;
+    RefPtr<ImageAnimatorEventHub> eventHub_;
+    RefPtr<LayoutProperty> layoutProperty_;
 };
 
 void ImageAnimatorTestNg::SetUpTestCase()
@@ -73,6 +87,83 @@ void ImageAnimatorTestNg::SetUpTestCase()
 void ImageAnimatorTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
+}
+
+void ImageAnimatorTestNg::SetUp() {}
+
+void ImageAnimatorTestNg::TearDown()
+{
+    frameNode_ = nullptr;
+    pattern_ = nullptr;
+    eventHub_ = nullptr;
+    layoutProperty_ = nullptr;
+}
+
+void ImageAnimatorTestNg::SetWidth(const Dimension& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+}
+
+void ImageAnimatorTestNg::SetHeight(const Dimension& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
+}
+
+void ImageAnimatorTestNg::GetInstance()
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    pattern_ = frameNode_->GetPattern<ImageAnimatorPattern>();
+    eventHub_ = frameNode_->GetEventHub<ImageAnimatorEventHub>();
+    layoutProperty_ = frameNode_->GetLayoutProperty();
+}
+
+RefPtr<LayoutWrapperNode> ImageAnimatorTestNg::RunMeasureAndLayout(float width, float height)
+{
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    if (NonNegative(width) && NonNegative(height)) {
+        LayoutConstraint.selfIdealSize = { width, height };
+    } else if (NonNegative(width)) {
+        LayoutConstraint.selfIdealSize = { width, std::nullopt };
+    } else if (NonNegative(height)) {
+        LayoutConstraint.selfIdealSize = { std::nullopt, height };
+    }
+    LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    layoutWrapper->Measure(LayoutConstraint);
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
+    return layoutWrapper;
+}
+
+void ImageAnimatorTestNg::CreateImageAnimator(int32_t number)
+{
+    ImageAnimatorModelNG ImageAnimatorModelNG;
+    ImageAnimatorModelNG.Create();
+    std::vector<ImageProperties> images;
+    for (int32_t index = 0; index < number; index++) {
+        ImageProperties imageProperties;
+        imageProperties.src = IMAGE_SRC_URL;
+        imageProperties.width = IMAGE_WIDTH;
+        imageProperties.height = IMAGE_HEIGHT;
+        imageProperties.top = IMAGE_TOP;
+        imageProperties.left = IMAGE_LEFT;
+        images.push_back(imageProperties);
+    }
+    ImageAnimatorModelNG.SetImages(std::move(images));
+    ImageAnimatorModelNG.SetState(STATE_START);
+    ImageAnimatorModelNG.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
+    GetInstance();
+    RunMeasureAndLayout();
 }
 
 /**
@@ -688,5 +779,106 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest010, TestSize.Level1)
     EXPECT_EQ(calcLayoutConstraint->selfIdealSize->Width()->ToString(), IMAGE_WIDTH.ToString());
     EXPECT_EQ(calcLayoutConstraint->selfIdealSize->Height()->ToString(), IMAGE_HEIGHT.ToString());
     EXPECT_EQ(imageLayoutProperty->GetMeasureType(), MeasureType::MATCH_CONTENT);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest011
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. images size is 0.
+     * @tc.expected: do nothing
+     */
+    CreateImageAnimator(0);
+
+    /**
+     * @tc.steps: step2. SetShowingIndex() greater than images size-1.
+     * @tc.expected: nowImageIndex_ not change
+     */
+    CreateImageAnimator(1);
+    pattern_->SetShowingIndex(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+
+    /**
+     * @tc.steps: step3. SetShowingIndex().
+     * @tc.expected: nowImageIndex_ is change
+     */
+    CreateImageAnimator(2);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+    pattern_->SetShowingIndex(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+
+    /**
+     * @tc.steps: step4. images Unit is PERCENT
+     * @tc.expected: host size not change
+     */
+    ImageAnimatorModelNG ImageAnimatorModelNG_1;
+    ImageAnimatorModelNG_1.Create();
+    std::vector<ImageProperties> images_1;
+    ImageProperties imageProperties_1;
+    imageProperties_1.src = IMAGE_SRC_URL;
+    imageProperties_1.width = Dimension(0.1, DimensionUnit::PERCENT);
+    imageProperties_1.height = Dimension(0.1, DimensionUnit::PERCENT);
+    imageProperties_1.top = IMAGE_TOP;
+    imageProperties_1.left = IMAGE_LEFT;
+    images_1.push_back(imageProperties_1);
+    ImageAnimatorModelNG_1.SetImages(std::move(images_1));
+    ImageAnimatorModelNG_1.SetState(STATE_START);
+    ImageAnimatorModelNG_1.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG_1.SetIteration(ITERATION_DEFAULT);
+    GetInstance();
+    RunMeasureAndLayout();
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(DEVICE_WIDTH, DEVICE_HEIGHT));
+
+    /**
+     * @tc.steps: step5. images has PERCENT width/height
+     * @tc.expected: if host has no set width/height, would effected by largest images size
+     */
+    ImageAnimatorModelNG ImageAnimatorModelNG_2;
+    ImageAnimatorModelNG_2.Create();
+    std::vector<ImageProperties> images_2;
+    ImageProperties imageProperties_2;
+    imageProperties_2.src = IMAGE_SRC_URL;
+    imageProperties_2.width =  Dimension(100);
+    imageProperties_2.height =  Dimension(100);
+    imageProperties_2.top = IMAGE_TOP;
+    imageProperties_2.left = IMAGE_LEFT;
+    images_2.push_back(imageProperties_2);
+    ImageProperties imageProperties_3;
+    imageProperties_3.src = IMAGE_SRC_URL;
+    imageProperties_3.width =  Dimension(50);
+    imageProperties_3.height =  Dimension(150);
+    imageProperties_3.top = IMAGE_TOP;
+    imageProperties_3.left = IMAGE_LEFT;
+    images_2.push_back(imageProperties_3);
+    ImageAnimatorModelNG_2.SetImages(std::move(images_2));
+    ImageAnimatorModelNG_2.SetState(STATE_START);
+    ImageAnimatorModelNG_2.SetIsReverse(ISREVERSE_DEFAULT);
+    ImageAnimatorModelNG_2.SetIteration(ITERATION_DEFAULT);
+    GetInstance();
+    RunMeasureAndLayout();
+
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, std::nullopt));
+    pattern_->AdaptSelfSize();
+    auto idealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_EQ(idealSize->Width().value(), CalcLength(100));
+    EXPECT_EQ(idealSize->Height().value(), CalcLength(150));
+
+    layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize->Reset();
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(DEVICE_WIDTH), std::nullopt));
+    pattern_->AdaptSelfSize();
+    idealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_EQ(idealSize->Width().value(), CalcLength(DEVICE_WIDTH));
+    EXPECT_EQ(idealSize->Height().value(), CalcLength(150));
+
+    layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize->Reset();
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEVICE_HEIGHT)));
+    pattern_->AdaptSelfSize();
+    idealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_EQ(idealSize->Width().value(), CalcLength(100));
+    EXPECT_EQ(idealSize->Height().value(), CalcLength(DEVICE_HEIGHT));
 }
 } // namespace OHOS::Ace::NG

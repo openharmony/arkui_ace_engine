@@ -44,13 +44,18 @@ public:
         return false;
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+
     void OnAttachToFrameNode() override
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->GetRenderContext()->UpdateClipEdge(true);
     }
-    
+
     void BeforeCreateLayoutWrapper() override
     {
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
@@ -126,6 +131,36 @@ public:
         return labelStyle_;
     }
 
+    void SetPadding(const PaddingProperty& padding)
+    {
+        padding_ = padding;
+    }
+
+    const PaddingProperty& GetPadding() const
+    {
+        return padding_;
+    }
+
+    void SetSymmetricExtensible(bool isExtensible)
+    {
+        bottomTabBarStyle_.symmetricExtensible = isExtensible;
+    }
+
+    void SetLayoutMode(LayoutMode layoutMode)
+    {
+        bottomTabBarStyle_.layoutMode = layoutMode;
+    }
+
+    void SetVerticalAlign(FlexAlign verticalAlign)
+    {
+        bottomTabBarStyle_.verticalAlign = verticalAlign;
+    }
+
+    const BottomTabBarStyle& GetBottomTabBarStyle() const
+    {
+        return bottomTabBarStyle_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;
@@ -133,6 +168,8 @@ private:
     SelectedMode selectedMode_ = SelectedMode::INDICATOR;
     BoardStyle boardStyle_;
     LabelStyle labelStyle_;
+    PaddingProperty padding_;
+    BottomTabBarStyle bottomTabBarStyle_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };

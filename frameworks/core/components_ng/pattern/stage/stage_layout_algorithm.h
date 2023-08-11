@@ -21,6 +21,8 @@
 #include "core/components_ng/property/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
+// not in use
+// Stage using default BoxLayoutAlgorithm
 class StageLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(StageLayoutAlgorithm, BoxLayoutAlgorithm);
 

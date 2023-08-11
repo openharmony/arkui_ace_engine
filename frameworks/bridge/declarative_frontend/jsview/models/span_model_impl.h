@@ -40,6 +40,7 @@ public:
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
     void SetOnClick(std::function<void(const BaseEventInfo*)>&& click) override;
+    void ClearOnClick() override {};
 
 private:
     static RefPtr<TextSpanComponent> GetComponent();

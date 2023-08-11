@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #ifdef SECURITY_COMPONENT_ENABLE
+#include "core/components_ng/pattern/security_component/security_component_probe.h"
 #include "location_button.h"
 #include "paste_button.h"
 #include "save_button.h"
@@ -34,11 +35,13 @@ public:
     static int32_t UnregisterSecurityComponent(int32_t scId);
     static int32_t ReportSecurityComponentClickEvent(int32_t scId, RefPtr<FrameNode>& node, GestureEvent& event);
 #ifdef SECURITY_COMPONENT_ENABLE
-    static OHOS::Security::SecurityComponent::SecCompUiRegister uiRegister;
-
-private:
+    static bool InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node);
     static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
     static bool GetWindowRect(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompRect& winRect);
+    static OHOS::Security::SecurityComponent::SecCompUiRegister uiRegister;
+    static SecurityComponentProbe probe;
+
+private:
     static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckBrightness(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty>& layoutProperty);
@@ -50,7 +53,6 @@ private:
     static bool CheckSepia(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckHueRotate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckColorBlend(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckClipEdge(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckClipMask(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckForegroundColor(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckSphericalEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
@@ -58,9 +60,10 @@ private:
     static bool CheckPixelStretchEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckRenderEffect(RefPtr<FrameNode>& node);
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node);
+    static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect);
+    static double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
-    static bool InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node);
 #endif
 };
 } // namespace OHOS::Ace

@@ -23,6 +23,10 @@ int32_t g_id = 0;
 } // namespace
 
 RefPtr<MockContainer> MockContainer::container_;
+bool Frontend::MaybeRelease()
+{
+    return AceType::MaybeRelease();
+}
 
 int32_t Container::CurrentId()
 {

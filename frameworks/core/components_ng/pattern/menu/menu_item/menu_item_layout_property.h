@@ -32,6 +32,7 @@ struct MenuItemLabelFontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontWeight, FontWeight);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelItalicFontStyle, Ace::FontStyle);
 };
 
@@ -86,12 +87,15 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(LabelFontStyle, MenuItemLabelFontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelFontColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelFontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelFontFamily, std::vector<std::string>,
+        PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(LabelFontStyle, LabelItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -118,6 +122,7 @@ public:
             V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::REGULAR)).c_str());
         contentFontJsonObject->Put("style",
             V2::ConvertWrapFontStyleToStirng(GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
+        contentFontJsonObject->Put("family", V2::ConvertFontFamily(GetFontFamilyValue({})).c_str());
         json->Put("contentFont", contentFontJsonObject);
         json->Put("contentFontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str());
         auto labelFontJsonObject = JsonUtil::Create(true);
@@ -126,6 +131,7 @@ public:
             V2::ConvertWrapFontWeightToStirng(GetLabelFontWeight().value_or(FontWeight::REGULAR)).c_str());
         labelFontJsonObject->Put("style",
             V2::ConvertWrapFontStyleToStirng(GetLabelItalicFontStyle().value_or(Ace::FontStyle::NORMAL)).c_str());
+        labelFontJsonObject->Put("family", V2::ConvertFontFamily(GetLabelFontFamilyValue({})).c_str());
         json->Put("labelFont", labelFontJsonObject);
         auto defaultLabelFontColor = theme ? theme->GetSecondaryFontColor() : Color::GRAY;
         json->Put("labelFontColor", GetLabelFontColor().value_or(defaultLabelFontColor).ColorToString().c_str());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LOADING_PROGRESS_H
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -27,6 +28,7 @@ public:
 
     static void SetColor(const JSCallbackInfo& info);
     static void SetForegroundColor(const JSCallbackInfo& info);
+    static void SetEnableLoading(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

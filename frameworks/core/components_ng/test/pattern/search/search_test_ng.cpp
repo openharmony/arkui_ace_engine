@@ -39,11 +39,11 @@
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -125,8 +125,8 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto searchPattern = AceType::DynamicCast<SearchPattern>(frameNode->GetPattern());
     ASSERT_NE(searchPattern, nullptr);
     auto searchLayoutAlgorithm = searchPattern->CreateLayoutAlgorithm();
@@ -138,8 +138,8 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     RefPtr<GeometryNode> textFieldNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> textFieldNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(textFieldFrameNode,
-        textFieldNodeGeometryNode, textFieldFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> textFieldNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        textFieldFrameNode, textFieldNodeGeometryNode, textFieldFrameNode->GetLayoutProperty());
     ASSERT_NE(textFieldNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(textFieldNodeLayoutWrapper);
 
@@ -148,8 +148,8 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
     ASSERT_NE(imageFrameNode, nullptr);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     RefPtr<GeometryNode> imageNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> imageNodeLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(imageFrameNode, imageNodeGeometryNode, imageFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> imageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        imageFrameNode, imageNodeGeometryNode, imageFrameNode->GetLayoutProperty());
     ASSERT_NE(imageNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(imageNodeLayoutWrapper);
 
@@ -158,8 +158,8 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
     ASSERT_NE(cancelImageFrameNode, nullptr);
     auto cancelImageLayoutProperty = cancelImageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     RefPtr<GeometryNode> cancelImageNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> cancelImageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(cancelImageFrameNode,
-        cancelImageNodeGeometryNode, cancelImageFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> cancelImageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        cancelImageFrameNode, cancelImageNodeGeometryNode, cancelImageFrameNode->GetLayoutProperty());
     ASSERT_NE(cancelImageNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(cancelImageNodeLayoutWrapper);
 
@@ -168,8 +168,8 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
     ASSERT_NE(cancelButtonFrameNode, nullptr);
     auto cancelButtonLayoutProperty = cancelButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     RefPtr<GeometryNode> cancelButtonNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> cancelButtonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(cancelButtonFrameNode,
-        cancelButtonNodeGeometryNode, cancelButtonFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> cancelButtonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        cancelButtonFrameNode, cancelButtonNodeGeometryNode, cancelButtonFrameNode->GetLayoutProperty());
     ASSERT_NE(cancelButtonNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(cancelButtonNodeLayoutWrapper);
 
@@ -178,8 +178,8 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
     ASSERT_NE(buttonFrameNode, nullptr);
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     RefPtr<GeometryNode> buttonNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> buttonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(buttonFrameNode,
-        buttonNodeGeometryNode, buttonFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> buttonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        buttonFrameNode, buttonNodeGeometryNode, buttonFrameNode->GetLayoutProperty());
     ASSERT_NE(buttonNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(buttonNodeLayoutWrapper);
 
@@ -261,8 +261,8 @@ HWTEST_F(SearchTestNg, Measure002, TestSize.Level1)
     ASSERT_NE(searchLayoutAlgorithm, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
     searchLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     searchLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
@@ -437,7 +437,8 @@ HWTEST_F(SearchTestNg, Pattern001, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     DirtySwapConfig config;
     auto touchCallback = [](TouchEventInfo& info) {};
@@ -493,15 +494,15 @@ HWTEST_F(SearchTestNg, Pattern002, TestSize.Level1)
     DirtySwapConfig config;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
     // textField Wrapper
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     ASSERT_NE(textFieldFrameNode, nullptr);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     RefPtr<GeometryNode> textFieldNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> textFieldNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> textFieldNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         textFieldFrameNode, textFieldNodeGeometryNode, textFieldFrameNode->GetLayoutProperty());
     ASSERT_NE(textFieldNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(textFieldNodeLayoutWrapper);
@@ -511,8 +512,8 @@ HWTEST_F(SearchTestNg, Pattern002, TestSize.Level1)
     ASSERT_NE(imageFrameNode, nullptr);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     RefPtr<GeometryNode> imageNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> imageNodeLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(imageFrameNode, imageNodeGeometryNode, imageFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> imageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        imageFrameNode, imageNodeGeometryNode, imageFrameNode->GetLayoutProperty());
     ASSERT_NE(imageNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(imageNodeLayoutWrapper);
 
@@ -521,7 +522,7 @@ HWTEST_F(SearchTestNg, Pattern002, TestSize.Level1)
     ASSERT_NE(cancelImageFrameNode, nullptr);
     auto cancelImageLayoutProperty = cancelImageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     RefPtr<GeometryNode> cancelImageNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> cancelImageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> cancelImageNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         cancelImageFrameNode, cancelImageNodeGeometryNode, cancelImageFrameNode->GetLayoutProperty());
     ASSERT_NE(cancelImageNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(cancelImageNodeLayoutWrapper);
@@ -531,7 +532,7 @@ HWTEST_F(SearchTestNg, Pattern002, TestSize.Level1)
     ASSERT_NE(cancelButtonFrameNode, nullptr);
     auto cancelButtonLayoutProperty = cancelButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     RefPtr<GeometryNode> cancelButtonNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> cancelButtonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> cancelButtonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         cancelButtonFrameNode, cancelButtonNodeGeometryNode, cancelButtonFrameNode->GetLayoutProperty());
     ASSERT_NE(cancelButtonNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(cancelButtonNodeLayoutWrapper);
@@ -541,7 +542,7 @@ HWTEST_F(SearchTestNg, Pattern002, TestSize.Level1)
     ASSERT_NE(buttonFrameNode, nullptr);
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     RefPtr<GeometryNode> buttonNodeGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> buttonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> buttonNodeLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         buttonFrameNode, buttonNodeGeometryNode, buttonFrameNode->GetLayoutProperty());
     ASSERT_NE(buttonNodeLayoutWrapper, nullptr);
     layoutWrapper->AppendChild(buttonNodeLayoutWrapper);
@@ -800,6 +801,7 @@ HWTEST_F(SearchTestNg, SetSearchSrcPath001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     SetIconTheme();
+    SetSearchTheme();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetSearchSrcPath("");
@@ -834,6 +836,7 @@ HWTEST_F(SearchTestNg, SetRightIconSrcPath001, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     SetIconTheme();
+    SetSearchTheme();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     searchModelInstance.SetRightIconSrcPath("");
@@ -1007,13 +1010,8 @@ HWTEST_F(SearchTestNg, SetPlaceholderFont001, TestSize.Level1)
     searchModelInstance.SetPlaceholderFont(font);
     EXPECT_EQ(textFieldLayoutProperty->GetPreferredPlaceholderLineHeightNeedToUpdate(), true);
 
-    std::vector<std::string> fontFamilies {"Georgia", "Serif"};
-    Font otherFont {
-        FontWeight::W200,
-        Dimension(12),
-        OHOS::Ace::FontStyle::ITALIC,
-        fontFamilies
-    };
+    std::vector<std::string> fontFamilies { "Georgia", "Serif" };
+    Font otherFont { FontWeight::W200, Dimension(12), OHOS::Ace::FontStyle::ITALIC, fontFamilies };
     searchModelInstance.SetPlaceholderFont(otherFont);
     EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderFontWeight(), FontWeight::W200);
 }
@@ -1036,13 +1034,8 @@ HWTEST_F(SearchTestNg, SetTextFont001, TestSize.Level1)
     searchModelInstance.SetTextFont(font);
     EXPECT_EQ(textFieldLayoutProperty->GetPreferredPlaceholderLineHeightNeedToUpdate(), true);
 
-    std::vector<std::string> fontFamilies {"Georgia", "Serif"};
-    Font otherFont {
-        FontWeight::W200,
-        Dimension(12),
-        OHOS::Ace::FontStyle::ITALIC,
-        fontFamilies
-    };
+    std::vector<std::string> fontFamilies { "Georgia", "Serif" };
+    Font otherFont { FontWeight::W200, Dimension(12), OHOS::Ace::FontStyle::ITALIC, fontFamilies };
     searchModelInstance.SetTextFont(otherFont);
     EXPECT_EQ(textFieldLayoutProperty->GetFontWeight(), FontWeight::W200);
 }
@@ -1061,6 +1054,8 @@ HWTEST_F(SearchTestNg, SetTextAlign001, TestSize.Level1)
     ASSERT_NE(textFieldChild, nullptr);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(textFieldLayoutProperty, nullptr);
+    searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
+    EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
     searchModelInstance.SetTextAlign(OHOS::Ace::TextAlign::CENTER);
     EXPECT_EQ(textFieldLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::CENTER);
 }
@@ -1121,13 +1116,8 @@ HWTEST_F(SearchTestNg, SetOnSubmit001, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     searchModelInstance.SetOnSubmit([&](const std::string& title) {
         if (title == "SetOnSubmit") {
-            std::vector<std::string> fontFamilies {"Georgia", "Serif"};
-            Font otherFont {
-                FontWeight::W200,
-                Dimension(12),
-                OHOS::Ace::FontStyle::ITALIC,
-                fontFamilies
-            };
+            std::vector<std::string> fontFamilies { "Georgia", "Serif" };
+            Font otherFont { FontWeight::W200, Dimension(12), OHOS::Ace::FontStyle::ITALIC, fontFamilies };
             searchModelInstance.SetTextFont(otherFont);
             EXPECT_EQ(textFieldLayoutProperty->GetFontWeight(), FontWeight::W200);
         }
@@ -1153,17 +1143,17 @@ HWTEST_F(SearchTestNg, SetOn001, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     /**
      * SetOnCopy
-    */
+     */
     searchModelInstance.SetOnCopy([](const std::string& title) {});
     eventHub->FireOnCopy("");
     /**
      * SetOnCut
-    */
+     */
     searchModelInstance.SetOnCut([](const std::string& title) {});
     eventHub->FireOnCut("");
     /**
      * SetOnPaste
-    */
+     */
     searchModelInstance.SetOnPaste([](const std::string& title) {});
     eventHub->FireOnPaste("");
 }
@@ -1201,7 +1191,7 @@ HWTEST_F(SearchTestNg, AddChildToGroup001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     ASSERT_NE(textFieldChild, nullptr);
-    
+
     auto searchNode = AceType::MakeRefPtr<SearchNode>(
         "Search", ViewStackProcessor::GetInstance()->ClaimNodeId(), AceType::MakeRefPtr<SearchPattern>());
     auto tempFrameNode = AceType::MakeRefPtr<FrameNode>("TEMP", -1, AceType::MakeRefPtr<Pattern>());
@@ -1365,6 +1355,12 @@ HWTEST_F(SearchTestNg, Pattern011, TestSize.Level1)
      * @tc.step: step2. call GetOnHoverEventFunc()(false).
      * @tc.expected: isHover_ is false.
      */
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<SearchTheme>();
+    checkboxTheme->searchButtonSpace_ = 0.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
     pattern->hoverEvent_->GetOnHoverEventFunc()(false);
     EXPECT_FALSE(pattern->isHover_);
     MouseInfo mouseInfo;

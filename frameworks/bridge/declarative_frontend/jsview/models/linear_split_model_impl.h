@@ -24,6 +24,7 @@ class LinearSplitModelImpl : public OHOS::Ace::LinearSplitModel {
 public:
     void Create(NG::SplitType splitType) override;
     void SetResizeable(NG::SplitType splitType, bool resizeable) override;
+    void SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider) override;
 };
 
 } // namespace OHOS::Ace::Framework

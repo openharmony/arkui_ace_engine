@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,9 @@ ACE_EXPORT extern const char STAGE_ETS_TAG[];
 ACE_EXPORT extern const char PAGE_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
+
+ACE_EXPORT extern const char ATOMIC_SERVICE_ETS_TAG[];
+ACE_EXPORT extern const char APP_BAR_ETS_TAG[];
 // js custom view
 ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_VIEW_COMPONENT_TAG[];
@@ -196,6 +199,7 @@ ACE_EXPORT extern const char NAVIGATOR_ETS_TAG[];
 // panel
 ACE_EXPORT extern const char PANEL_COMPONENT_TAG[];
 ACE_EXPORT extern const char PANEL_ETS_TAG[];
+ACE_EXPORT extern const char PANEL_CLOSE_ICON_ETS_TAG[];
 
 // pattern-lock
 ACE_EXPORT extern const char PATTERN_LOCK_COMPONENT_TAG[];
@@ -297,6 +301,10 @@ ACE_EXPORT extern const char SCROLL_ETS_TAG[];
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[];
 ACE_EXPORT extern const char CALENDAR_ETS_TAG[];
 
+// calendarPicker
+ACE_EXPORT extern const char CALENDAR_PICKER_COMPONENT_TAG[];
+ACE_EXPORT extern const char CALENDAR_PICKER_ETS_TAG[];
+
 // badge
 ACE_EXPORT extern const char BADGE_COMPONENT_TAG[];
 ACE_EXPORT extern const char BADGE_ETS_TAG[];
@@ -344,6 +352,11 @@ ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[];
 // sheet
 ACE_EXPORT extern const char SHEET_COMPONENT_TAG[];
 ACE_EXPORT extern const char SHEET_ETS_TAG[];
+ACE_EXPORT extern const char SHEET_MASK_TAG[];
+ACE_EXPORT extern const char SHEET_PAGE_TAG[];
+
+// full screen modal
+ACE_EXPORT extern const char MODAL_PAGE_TAG[];
 
 // hyperlink
 ACE_EXPORT extern const char HYPERLINK_COMPONENT_TAG[];
@@ -520,15 +533,18 @@ ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
 
 // LocationButton
-ACE_EXPORT extern const char SEC_LOCATION_BUTTON_COMPONENT_TAG[];
-ACE_EXPORT extern const char SEC_LOCATION_BUTTON_ETS_TAG[];
+ACE_EXPORT extern const char LOCATION_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char LOCATION_BUTTON_ETS_TAG[];
 
 // PasteButton
-ACE_EXPORT extern const char SEC_PASTE_BUTTON_COMPONENT_TAG[];
-ACE_EXPORT extern const char SEC_PASTE_BUTTON_ETS_TAG[];
+ACE_EXPORT extern const char PASTE_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char PASTE_BUTTON_ETS_TAG[];
 
 // SaveButton
-ACE_EXPORT extern const char SEC_SAVE_BUTTON_COMPONENT_TAG[];
-ACE_EXPORT extern const char SEC_SAVE_BUTTON_ETS_TAG[];
+ACE_EXPORT extern const char SAVE_BUTTON_COMPONENT_TAG[];
+ACE_EXPORT extern const char SAVE_BUTTON_ETS_TAG[];
+
+// Keyboard
+ACE_EXPORT extern const char KEYBOARD_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

@@ -69,7 +69,10 @@ constexpr float FULL_OPACITY = 255.0f;
 constexpr float TWO = 2.0f;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
-    : date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+    : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
+      offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
+      contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
+      date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE)),
       centerDeviation_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       cometOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_OPACITY_SCALE)),
@@ -77,6 +80,9 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
       sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)), loadingProgressOwner_(loadingProgressOwner)
 {
+    AttachProperty(enableLoading_);
+    AttachProperty(offset_);
+    AttachProperty(contentSize_);
     AttachProperty(date_);
     AttachProperty(color_);
     AttachProperty(centerDeviation_);
@@ -88,8 +94,11 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
 
 void LoadingProgressModifier::onDraw(DrawingContext& context)
 {
+    if (!enableLoading_->Get()) {
+        return;
+    }
     float date = date_->Get();
-    auto diameter = std::min(context.width, context.height);
+    auto diameter = std::min(contentSize_->Get().Width(), contentSize_->Get().Height());
     RingParam ringParam;
     ringParam.strokeWidth = LoadingProgressUtill::GetRingStrokeWidth(diameter) * sizeScale_->Get();
     ringParam.radius = LoadingProgressUtill::GetRingRadius(diameter) * sizeScale_->Get();
@@ -133,7 +142,10 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     pen.SetWidth(ringParam.strokeWidth);
     pen.SetAntiAlias(true);
     canvas.AttachPen(pen);
-    canvas.DrawCircle({ context.width * HALF, context.height * HALF + ringParam.movement }, ringParam.radius);
+    canvas.DrawCircle(
+        { offset_->Get().GetX() + contentSize_->Get().Width() * HALF,
+            offset_->Get().GetY() + contentSize_->Get().Height() * HALF + ringParam.movement },
+        ringParam.radius);
     canvas.DetachPen();
     canvas.Restore();
 }
@@ -143,18 +155,18 @@ void LoadingProgressModifier::DrawOrbit(
 {
     auto pointCounts = cometParam.pointCount;
     auto& canvas = context.canvas;
-    float width_ = context.width;
-    float height_ = context.height;
+    float width = contentSize_->Get().Width();
+    float height = contentSize_->Get().Height();
     double angle = TOTAL_ANGLE * date / FULL_COUNT;
-    auto* camera_ = new RSCamera3D();
-    camera_->Save();
-    camera_->RotateYDegrees(ROTATEY);
-    camera_->RotateXDegrees(ROTATEX);
-    camera_->RotateZDegrees(ROTATEZ);
+    RSCamera3D camera;
+    camera.Save();
+    camera.RotateYDegrees(ROTATEY);
+    camera.RotateXDegrees(ROTATEX);
+    camera.RotateZDegrees(ROTATEZ);
     RSMatrix matrix;
-    camera_->ApplyToMatrix(matrix);
-    camera_->Restore();
-    auto center = RSPoint(width_ / 2, height_ / 2);
+    camera.ApplyToMatrix(matrix);
+    camera.Restore();
+    auto center = RSPoint(offset_->Get().GetX() + width / 2, offset_->Get().GetY() + height / 2);
     RSBrush brush;
     brush.SetAntiAlias(true);
     canvas.Save();

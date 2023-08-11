@@ -17,7 +17,6 @@
 
 namespace OHOS::Ace::NG {
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
-void GridPattern::OnAttachToFrameNode() {}
 void GridPattern::OnModifyDone() {}
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
@@ -41,6 +40,19 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep /* step */, const Weak
     return nullptr;
 }
 
+
+int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
+{
+    return -1;
+}
+
+void GridPattern::ScrollToFocusNodeIndex(int32_t index) {}
+
+bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
+{
+    return false;
+}
+
 CanvasDrawFunction GridPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* paintWrapper */)
 {
     return [](RSCanvas& canvas) {};
@@ -52,6 +64,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 }
 
 void GridPattern::UpdateScrollBarOffset() {}
+
+void GridPattern::OnScrollEndCallback() {}
 
 bool GridPattern::OnScrollCallback(float offset, int32_t source)
 {
@@ -74,4 +88,31 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
 {
     return { 0, 0 };
 }
+
+float GridPattern::EstimateHeight() const
+{
+    return 0.0f;
+}
+
+float GridPattern::GetTotalHeight() const
+{
+    return 0.0f;
+}
+
+void GridPattern::OnAnimateStop() {}
+
+void GridPattern::ScrollTo(float position) {}
+
+void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth) {}
+
+void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
+
+void GridPattern::ClearMultiSelect() {};
+
+bool GridPattern::IsItemSelected(const MouseInfo& info)
+{
+    return false;
+}
+
+void GridPattern::DumpInfo() {}
 } // namespace OHOS::Ace::NG

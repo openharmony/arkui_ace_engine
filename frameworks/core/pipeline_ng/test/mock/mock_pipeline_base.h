@@ -59,6 +59,9 @@ public:
     MOCK_METHOD2(ShowContainerTitle, void(bool isShow, bool hasDeco));
     MOCK_METHOD4(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type,
                                        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
+    MOCK_METHOD1(OnLayoutCompleted, void(const std::string& componentId));
+    MOCK_METHOD1(OnDrawCompleted, void(const std::string& componentId));
+    MOCK_METHOD1(SetNeedRenderNode, void(const RefPtr<FrameNode>& node));
     MOCK_METHOD2(OnSurfacePositionChanged, void(int32_t posX, int32_t posY));
     MOCK_METHOD1(OnSurfaceDensityChanged, void(double density));
     MOCK_METHOD2(OnSystemBarHeightChanged, void(double statusBar, double navigationBar));
@@ -83,7 +86,7 @@ public:
     MOCK_METHOD0(FlushReloadTransition, void());
     MOCK_METHOD1(NotifyMemoryLevel, void(int32_t level));
     MOCK_METHOD0(FlushMessages, void());
-    MOCK_METHOD0(FlushUITasks, void());
+    MOCK_METHOD1(AddAnimationClosure, void(std::function<void()>&& animation));
     MOCK_CONST_METHOD1(OnDumpInfo, bool(const std::vector<std::string>& params));
     MOCK_METHOD2(FlushVsync, void(uint64_t nanoTimestamp, uint32_t frameCount));
     MOCK_METHOD3(SetRootRect, void(double width, double height, double offset));
@@ -97,11 +100,10 @@ public:
     MOCK_METHOD1(RestoreNodeInfo, void(std::unique_ptr<JsonValue> nodeInfo));
     MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
     MOCK_METHOD1(UpdateSystemSafeArea, void(const SafeAreaInsets& systemSafeArea));
-    MOCK_CONST_METHOD0(GetSystemSafeArea, SafeAreaInsets());
     MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
-    MOCK_CONST_METHOD0(GetCutoutSafeArea, SafeAreaInsets());
-    MOCK_CONST_METHOD0(GetViewSafeArea, SafeAreaInsets());
     static RefPtr<MockPipelineBase> pipeline_;
+
+    void FlushUITasks() {}
 
 protected:
     double dipScale_ = 1.0;

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
@@ -38,9 +39,6 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
         auto indexerChildNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(indexerChildNode);
-        auto textLayoutProperty = indexerChildNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(arrayValue[index]);
         frameNode->AddChild(indexerChildNode);
     }
     stack->Push(frameNode);
@@ -185,14 +183,22 @@ void IndexerModelNG::SetSelected(int32_t selected)
     }
 }
 
-void IndexerModelNG::SetPopupPositionX(const Dimension& popupPositionX)
+void IndexerModelNG::SetPopupPositionX(const std::optional<Dimension>& popupPositionXOpt)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionX);
+    if (popupPositionXOpt.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionXOpt.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionX, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
-void IndexerModelNG::SetPopupPositionY(const Dimension& popupPositionY)
+void IndexerModelNG::SetPopupPositionY(const std::optional<Dimension>& popupPositionYOpt)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionY);
+    if (popupPositionYOpt.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionYOpt.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionY, PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void IndexerModelNG::SetPopupItemBackground(const std::optional<Color>& popupItemBackground)

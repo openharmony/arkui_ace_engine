@@ -320,7 +320,8 @@ HWTEST_F(SelectOverlayTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
      * @tc.steps: step2. Call OnDirtyLayoutWrapperSwap function.
      * @tc.expected: return false
      */
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     DirtySwapConfig config;
     config.skipMeasure = true;
     EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
@@ -597,7 +598,7 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout001, TestSize.Level1)
          * @tc.expected: layoutWrapper and layoutAlgorithm are created successfully
          */
         auto layoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+            AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
         auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
         ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
         layoutWrapper->SetLayoutAlgorithm(
@@ -613,8 +614,8 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout001, TestSize.Level1)
             selectOverlayNode->AddChild(item);
             RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
             firstGeometryNode->Reset();
-            RefPtr<LayoutWrapper> firstLayoutWrapper =
-                AceType::MakeRefPtr<LayoutWrapper>(item, firstGeometryNode, item->GetLayoutProperty());
+            RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+                AceType::MakeRefPtr<LayoutWrapperNode>(item, firstGeometryNode, item->GetLayoutProperty());
             EXPECT_FALSE(firstLayoutWrapper == nullptr);
             auto itemPattern = item->GetPattern<MenuPattern>();
             EXPECT_FALSE(itemPattern == nullptr);
@@ -790,8 +791,8 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout002, TestSize.Level1)
          * @tc.steps: step3. Get layoutWrapper and layoutAlgorithm.
          * @tc.expected: layoutWrapper and layoutAlgorithm are created successfully
          */
-        LayoutWrapper* layoutWrapper =
-            new LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        LayoutWrapperNode* layoutWrapper =
+            new LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
         auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
         ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
         layoutWrapper->SetLayoutAlgorithm(
@@ -806,8 +807,8 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout002, TestSize.Level1)
         selectOverlayNode->AddChild(item);
         RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
         itemGeometryNode->Reset();
-        RefPtr<LayoutWrapper> itemLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(item, itemGeometryNode, item->GetLayoutProperty());
+        RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(item, itemGeometryNode, item->GetLayoutProperty());
         EXPECT_FALSE(itemLayoutWrapper == nullptr);
         auto itemPattern = item->GetPattern<MenuPattern>();
         EXPECT_FALSE(itemPattern == nullptr);
@@ -825,7 +826,40 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout002, TestSize.Level1)
          */
         EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
         selectOverlayLayoutAlgorithm->Layout(layoutWrapper);
-        EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(0)->isActive_);
+        EXPECT_FALSE(layoutWrapper->isActive_);
     }
+}
+/**
+ * @tc.name: SetHasShowAnimation001
+ * @tc.desc: Test SelectOverlayPattern SetHasShowAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SetHasShowAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern.
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. call SetHasShowAnimation functions with true.
+     * @tc.expected: The branch of function runs correctly
+     */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    pattern->SetHasShowAnimation(true);
+    EXPECT_EQ(pattern->hasShowAnimation_, true);
 }
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,10 @@
 
 #include "frameworks/core/components/shape/rosen_render_shape_container.h"
 
+#ifdef USE_ROSEN_DRAWING
+#include "include/core/SkVertices.h"
+#endif
+
 #include "render_service_client/core/ui/rs_node.h"
 #include "securec.h"
 
@@ -119,16 +123,8 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
     if (!canvas_) {
         return;
     }
+    auto tmpCanvas = std::make_unique<RSRecordingCanvas>(GetLayoutSize().Width(), GetLayoutSize().Height());
     if (mesh_.size() == 0) {
-        RSBitmapFormat format {
-            RSColorType::COLORTYPE_RGBA_8888,
-            RSAlphaType::ALPHATYPE_UNPREMUL,
-        };
-        offBitmap_.Build(GetLayoutSize().Width(), GetLayoutSize().Height(), format);
-        offBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
-        offCanvas_ = std::make_unique<RSCanvas>();
-        offCanvas_->Bind(offBitmap_);
-
         double viewBoxWidth = NormalizePercentToPx(viewBox_.Width(), false);
         double viewBoxHeight = NormalizePercentToPx(viewBox_.Height(), true);
         double viewBoxLeft = NormalizePercentToPx(viewBox_.Left(), false);
@@ -137,20 +133,31 @@ void RosenRenderShapeContainer::Paint(RenderContext& context, const Offset& offs
             double scale = std::min(GetLayoutSize().Width() / viewBoxWidth, GetLayoutSize().Height() / viewBoxHeight);
             double tx = GetLayoutSize().Width() * 0.5 - (viewBoxWidth * 0.5 + viewBoxLeft) * scale;
             double ty = GetLayoutSize().Height() * 0.5 - (viewBoxHeight * 0.5 + viewBoxTop) * scale;
-            offCanvas_->Scale(scale, scale);
-            offCanvas_->Translate(tx, ty);
+            tmpCanvas->Scale(scale, scale);
+            tmpCanvas->Translate(tx, ty);
         }
         const auto& children = GetChildren();
         for (const auto& item : SortChildrenByZIndex(children)) {
             Offset childOffset = offset;
             RefPtr<RosenRenderShape> renderShape = GetShapeChild(item, childOffset);
+            //type
             if (renderShape) {
-                renderShape->PaintOnCanvas(offCanvas_.get(), childOffset);
+                renderShape->PaintOnCanvas(tmpCanvas.get(), childOffset);
                 continue;
             }
             RenderNode::Paint(context, offset);
         }
         if (column_ == 0 && row_ == 0) {
+            RSBitmapFormat format {
+                RSColorType::COLORTYPE_RGBA_8888,
+                RSAlphaType::ALPHATYPE_UNPREMUL,
+            };
+            offBitmap_.Build(GetLayoutSize().Width(), GetLayoutSize().Height(), format);
+            offBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+            offCanvas_ = std::make_unique<RSCanvas>();
+            offCanvas_->Bind(offBitmap_);
+            auto cmdList = tmpCanvas->GetDrawCmdList();
+            cmdList->Playback(*offCanvas_);
             canvas_->DrawBitmap(offBitmap_, 0, 0);
         }
     } else {
@@ -271,7 +278,6 @@ void RosenRenderShapeContainer::DrawBitmapMesh(RSBitmap& bitmap, int column, int
     const int vertCounts = (column + 1) * (row + 1);
     int32_t size = 6;
     const int indexCount = column * row * size;
-#ifndef USE_ROSEN_DRAWING
     uint32_t flags = SkVertices::kHasTexCoords_BuilderFlag;
     if (colors) {
         flags |= SkVertices::kHasColors_BuilderFlag;
@@ -287,28 +293,12 @@ void RosenRenderShapeContainer::DrawBitmapMesh(RSBitmap& bitmap, int column, int
     }
     SkPoint* texsPoint = builder.texCoords();
     uint16_t* indices = builder.indices();
+#ifndef USE_ROSEN_DRAWING
     const SkScalar height = SkIntToScalar(bitmap.height());
     const SkScalar width = SkIntToScalar(bitmap.width());
 #else
-    int flags = static_cast<int>(RSVertices::BuilderFlags::BUILDERFLAGS_TEXCOORDS);
-    if (colors) {
-        flags |= static_cast<int>(RSVertices::BuilderFlags::BUILDERFLAGS_COLORS);
-    }
-    RSVertices::Builder builder(RSVertexMode::VERTEXMODE_TRIANGLES, vertCounts, indexCount, flags);
-    if (memcpy_s(builder.Positions(), vertCounts * sizeof(RSPoint),
-        vertices, vertCounts * sizeof(RSPoint)) != 0) {
-        return;
-    }
-    if (colors) {
-        if (memcpy_s(
-            builder.Colors(), vertCounts * sizeof(RSColor), colors, vertCounts * sizeof(RSColor)) != 0) {
-            return;
-        }
-    }
-    RSPoint* texsPoint = builder.TexCoords();
-    uint16_t* indices = builder.Indices();
-    const RSScalar height = IntToScalar(bitmap.GetHeight());
-    const RSScalar width = IntToScalar(bitmap.GetWidth());
+    const SkScalar height = SkIntToScalar(bitmap.GetHeight());
+    const SkScalar width = SkIntToScalar(bitmap.GetWidth());
 #endif
 
     if (row == 0) {
@@ -319,24 +309,15 @@ void RosenRenderShapeContainer::DrawBitmapMesh(RSBitmap& bitmap, int column, int
         LOGE("column is zero");
         return;
     }
-#ifndef USE_ROSEN_DRAWING
     const SkScalar dy = height / row;
     const SkScalar dx = width / column;
 
     SkPoint* texsPit = texsPoint;
     SkScalar y = 0;
-#else
-    const RSScalar dy = height / row;
-    const RSScalar dx = width / column;
-
-    RSPoint* texsPit = texsPoint;
-    RSScalar y = 0;
-#endif
     for (int i = 0; i <= row; i++) {
         if (i == row) {
             y = height;  // to ensure numerically we hit h exactly
         }
-#ifndef USE_ROSEN_DRAWING
         SkScalar x = 0;
         for (int j = 0; j < column; j++) {
             texsPit->set(x, y);
@@ -344,15 +325,6 @@ void RosenRenderShapeContainer::DrawBitmapMesh(RSBitmap& bitmap, int column, int
             x += dx;
         }
         texsPit->set(width, y);
-#else
-        RSScalar x = 0;
-        for (int j = 0; j < column; j++) {
-            texsPit->Set(x, y);
-            texsPit += 1;
-            x += dx;
-        }
-        texsPit->Set(width, y);
-#endif
         texsPit += 1;
         y += dy;
     }
@@ -394,15 +366,13 @@ void RosenRenderShapeContainer::DrawBitmapMesh(RSBitmap& bitmap, int column, int
     if (brush) {
         tempBrush = *brush;
     }
-    RSImage image;
-    image.BuildFromBitmap(bitmap);
-    auto sampling = RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
-    RSMatrix matrix;
+    auto image = std::make_shared<RSImage>();
+    image->BuildFromBitmap(bitmap);
     auto shader = RSShaderEffect::CreateImageShader(
-        image, RSTileMode::CLAMP, RSTileMode::CLAMP, sampling, matrix);
+        *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), RSMatrix());
     tempBrush.SetShaderEffect(shader);
     canvas_->AttachBrush(tempBrush);
-    canvas_->DrawVertices(builder, RSBlendMode::MODULATE);
+    LOGE("Drawing is not supported");
     canvas_->DetachBrush();
 #endif // USE_ROSEN_DRAWING
 }

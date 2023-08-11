@@ -104,10 +104,12 @@ Size RosenRenderShape::CreateRect()
     std::vector<RSPoint> fRadii = { { topLeftRadiusX, topLeftRadiusY }, { topRightRadiusX, topRightRadiusY },
         { bottomRightRadiusX, bottomRightRadiusY }, { bottomLeftRadiusX, bottomLeftRadiusY } };
     path_.Reset();
-    RSRoundRect roundRect;
-    roundRect.SetRectRadii(rect, fRadii);
+    RSRoundRect roundRect(rect, fRadii);
     path_.AddRoundRect(roundRect);
-    auto drRect = path_.GetBounds();
+    auto cmdList = path_.GetCmdList();
+    auto path = cmdList->Playback();
+    auto drRect = path->GetBounds();
+
     return Size(drRect.GetRight(), drRect.GetBottom());
 #endif
 }
@@ -233,7 +235,10 @@ Size RosenRenderShape::CreatePath()
     }
     return Size(right, bottom);
 #else
-    auto rect = path_.GetBounds();
+    auto cmdList = path_.GetCmdList();
+    auto path = cmdList->Playback();
+    auto rect = path->GetBounds();
+
     auto right = rect.GetRight();
     auto bottom = rect.GetBottom();
     if (NearZero(right) && NearZero(bottom)) {
@@ -272,8 +277,9 @@ void RosenRenderShape::PaintOnCanvas(SkCanvas* skCanvas, const Offset& offset)
 #else
 void RosenRenderShape::PaintOnCanvas(RSCanvas* canvas, const Offset& offset)
 {
-    RSPath path = path_;
-    path_.Offset(offset.GetX(), offset.GetY());
+    RSRecordingPath path;
+    path.AddPath(path_);
+    path.Offset(offset.GetX(), offset.GetY());
     RosenSvgPainter::SetFillStyle(canvas, path, fillState_, UINT8_MAX, antiAlias_.second);
     DrawStroke(canvas, path);
 }
@@ -307,12 +313,12 @@ void RosenRenderShape::DrawStroke(RSCanvas* canvas, const RSPath& path)
         strokePen.SetWidth(NormalizePercentToPx(strokeState_.GetLineWidth(), false));
         if (!strokeState_.GetStrokeDashArray().empty()) {
             auto lineDashState = strokeState_.GetStrokeDashArray();
-            RSscalar intervals[lineDashState.size()];
+            std::vector<RSScalar> intervals(lineDashState.size());
             for (size_t i = 0; i < lineDashState.size(); ++i) {
-                intervals[i] = DoubleToScalar(NormalizePercentToPx(lineDashState[i], false));
+                intervals[i] = static_cast<RSScalar>(NormalizePercentToPx(lineDashState[i], false));
             }
-            RSscalar phase = DoubleToScalar(NormalizePercentToPx(strokeState_.GetStrokeDashOffset(), false));
-            strokePen.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
+            RSScalar phase = static_cast<RSScalar>(NormalizePercentToPx(strokeState_.GetStrokeDashOffset(), false));
+            strokePen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
         }
         canvas->AttachPen(strokePen);
         canvas->DrawPath(path);

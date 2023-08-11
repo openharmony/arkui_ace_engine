@@ -92,6 +92,7 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         translate.SetY((1.0 + align.GetVertical()) *
                        (size.Height() - child->GetGeometryNode()->GetMarginFrameSize().Height()) / MULTIPLE);
         child->GetGeometryNode()->SetMarginFrameOffset(translate + paddingOffset);
+        child->Layout();
     }
 }
 } // namespace OHOS::Ace::NG

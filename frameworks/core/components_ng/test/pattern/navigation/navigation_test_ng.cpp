@@ -18,6 +18,7 @@
 #define protected public
 #define private public
 #include "base/json/json_util.h"
+#include "base/test/mock/mock_task_executor.h"
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -29,6 +30,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -65,8 +67,12 @@ const std::string TEST_TAG = "test";
 constexpr Dimension SPLIT_WIDTH = 520.0_vp;
 constexpr Dimension STACK_WIDTH = 510.0_vp;
 constexpr float HEIGHT = 1000.0f;
+constexpr float FLOAT_260 = 260.0f;
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH_PER = Dimension(0.2, DimensionUnit::PERCENT);
+constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH_PER = Dimension(0.5, DimensionUnit::PERCENT);
+constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH_PER = Dimension(0.3, DimensionUnit::PERCENT);
 } // namespace
 
 class NavigationTestNg : public testing::Test {
@@ -74,7 +80,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     void MockPipelineContextGetTheme();
-    static void RunMeasureAndLayout(RefPtr<LayoutWrapper>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
+    static void RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
 };
 
 void NavigationTestNg::SetUpTestSuite()
@@ -87,7 +93,7 @@ void NavigationTestNg::TearDownTestSuite()
     MockPipelineBase::TearDown();
 }
 
-void NavigationTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapper>& layoutWrapper, float width)
+void NavigationTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& layoutWrapper, float width)
 {
     layoutWrapper->SetActive();
     layoutWrapper->SetRootMeasureNode();
@@ -183,7 +189,8 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest003, TestSize.Level1)
     pattern->OnModifyDone();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
 
     DirtySwapConfig config;
@@ -228,7 +235,8 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest004, TestSize.Level1)
     pattern->OnModifyDone();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
 
     DirtySwapConfig config;
@@ -464,8 +472,13 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
     pattern->OnModifyDone();
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
     // SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
     navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
@@ -473,31 +486,28 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
-
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
     // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
     pattern->OnModifyDone();
     auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper2, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
-
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
     // SetUsrNavigationMode:AUTO, expect navigationMode_:STACK in SPLIT_WIDTH case after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
     pattern->OnModifyDone();
     auto layoutWrapper3 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper3, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper3);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
-
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
     // SetUsrNavigationMode:AUTO, expect navigationMode_:SPILT in SPLIT_WIDTH case after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
     pattern->OnModifyDone();
     auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 
 /**
@@ -530,7 +540,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_007, TestSize.Level1)
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
     // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
     navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
@@ -538,7 +548,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_007, TestSize.Level1)
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
     // SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
@@ -546,7 +556,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_007, TestSize.Level1)
     auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper2, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
     // SetUsrNavigationMode:AUTO, expect navigationMode_:STACK in SPLIT_WIDTH case after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
@@ -554,15 +564,15 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_007, TestSize.Level1)
     auto layoutWrapper3 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper3, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper3);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
-    // SetUsrNavigationMode:AUTO, expect navigationMode_:SPILT in SPLIT_WIDTH case after OnModifyDone
+    // SetUsrNavigationMode:AUTO, expect navigationMode_:SPLIT in SPLIT_WIDTH case after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
     pattern->OnModifyDone();
     auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 
 /**
@@ -601,7 +611,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_008, TestSize.Level1)
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
     // SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
@@ -674,7 +684,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_009, TestSize.Level1)
     auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper2, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
     // SetUsrNavigationMode:AUTO, expect navigationMode_:STACK in SPLIT_WIDTH case after OnModifyDone
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
@@ -690,7 +700,238 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_009, TestSize.Level1)
     auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper4, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_011
+ * @tc.desc: Test Navigation OnHover
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode and pattern.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetUsrNavigationMode(NavigationMode::AUTO);
+    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnHover(true);
+    pattern->OnHover(false);
+    /**
+     * @tc.steps: step2. check pattern
+     * @tc.expected: pattern is not nullptr.
+     */
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_012
+ * @tc.desc: Test Navigation AddDividerHotZoneRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    /**
+     * @tc.steps: step2. create navbar frameNode.
+     */
+    auto navBar = FrameNode::CreateFrameNode(
+        V2::NAVBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigationPattern>());
+    ASSERT_NE(navBar, nullptr);
+    navBar->MountToParent(frameNode);
+    /**
+     * @tc.steps: step3. create navigationPattern.
+     */
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(frameNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navLayoutAlgorithm = navigationPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(navLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(navLayoutAlgorithm));
+    LayoutConstraintF LayoutConstraintVaildSize;
+    LayoutConstraintVaildSize.selfIdealSize.SetSize(SizeF(1000000, 1000000));
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildSize);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    auto navigationLayoutAlgorithm =
+        AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    navigationPattern->AddDividerHotZoneRect(navigationLayoutAlgorithm);
+    navigationPattern->realDividerWidth_ = 2.0f;
+    navigationPattern->AddDividerHotZoneRect(navigationLayoutAlgorithm);
+    /**
+     * @tc.steps: step4. check navigationLayoutAlgorithm
+     * @tc.expected: navigationLayoutAlgorithm is not nullptr.
+     */
+    EXPECT_NE(navigationLayoutAlgorithm, nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_013
+ * @tc.desc: Test Navigation HandleDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Navigation ,then get pattern.
+     */
+    auto pattern = AceType::MakeRefPtr<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+    auto layoutProperty = pattern->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    pattern->HandleDragStart();
+    pattern->HandleDragEnd();
+    /**
+     * @tc.steps: step2. check pattern->preNavBarWidth_.
+     * @tc.expected: preNavBarWidth_ is correct.
+     */
+    EXPECT_EQ(pattern->preNavBarWidth_, 360.0);
+    pattern->preNavBarWidth_ = 0;
+    pattern->HandleDragUpdate(FLOAT_260);
+    EXPECT_EQ(pattern->realNavBarWidth_, 0.0);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_014
+ * @tc.desc: Test Navigation Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode and pattern.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    navigationLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto navigationLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(navigationLayoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. get geometryNode .
+     * @tc.expected: layoutWrapper is not nullptr.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    navigationLayoutProperty->UpdateMinNavBarWidth(DEFAULT_MIN_NAV_BAR_WIDTH_PER);
+    navigationLayoutProperty->UpdateMaxNavBarWidth(DEFAULT_MAX_NAV_BAR_WIDTH_PER);
+    navigationLayoutProperty->UpdateMinContentWidth(DEFAULT_MIN_CONTENT_WIDTH_PER);
+    navigationLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_NE(layoutWrapper, nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_015
+ * @tc.desc: Test NavigationPattern hoverEvent_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode and pattern.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    /**
+     * @tc.steps: step2. get inputHub.
+     * @tc.expected: hoverEvent_ is not nullptr.
+     */
+    auto hub = host->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+    auto inputHub = hub->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
+    pattern->InitDividerMouseEvent(inputHub);
+    ASSERT_NE(pattern->hoverEvent_, nullptr);
+    pattern->hoverEvent_->GetOnHoverEventFunc()(false);
+    EXPECT_NE(pattern->hoverEvent_, nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_016
+ * @tc.desc: Test NavigationPattern dragEvent_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create model, frameNode and pattern.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<NavigationPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.width_ = 10.0;
+    layoutConstraint.selfIdealSize.height_ = 10.0;
+    navigationLayoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    /**
+     * @tc.steps: step2. get gestureHub.
+     * @tc.expected: pattern is not nullptr.
+     */
+    auto hub = host->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    pattern->InitDragEvent(gestureHub);
+    ASSERT_NE(pattern->dragEvent_, nullptr);
+    GestureEvent event;
+    pattern->dragEvent_->GetActionStartEventFunc()(event);
+    pattern->dragEvent_->GetActionUpdateEventFunc()(event);
+    pattern->dragEvent_->GetActionEndEventFunc()(event);
+    pattern->dragEvent_->GetActionCancelEventFunc()();
+    EXPECT_NE(pattern->dragEvent_, nullptr);
 }
 
 /**
@@ -719,22 +960,24 @@ HWTEST_F(NavigationTestNg, NavigationLayoutTest_001, TestSize.Level1)
     navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
     navigationLayoutProperty->UpdateContentConstraint();
 
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
     // SetUsrNavigationMode:STACK, expect navigationMode_:STACK
     navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
     // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
     auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper2, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 }
 
 /**
@@ -763,22 +1006,24 @@ HWTEST_F(NavigationTestNg, NavigationLayoutTest_002, TestSize.Level1)
     navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
     navigationLayoutProperty->UpdateContentConstraint();
 
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 
     // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT
     navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
     auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper1, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
 
     // SetUsrNavigationMode:STACK, expect navigationMode_:STACK
     navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
     auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
     ASSERT_NE(layoutWrapper2, nullptr);
     NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
-    EXPECT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 
 /**
@@ -903,23 +1148,15 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
      * @tc.steps: step2. set properties of layoutProperty, test OnModifyDone.
      * @tc.expected: check whether the properties is correct.
      */
-    layoutProperty->propDestinationChange_ = false;
-    pattern->GetTitleBarRenderContext();
-    ASSERT_FALSE(layoutProperty->propDestinationChange_.value());
-
-    layoutProperty->propDestinationChange_ = true;
-    pattern->GetTitleBarRenderContext();
-    ASSERT_TRUE(layoutProperty->propDestinationChange_.value());
-
     pattern->navigationMode_ = NavigationMode::AUTO;
     pattern->DoAnimation(NavigationMode::AUTO);
     ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
     pattern->navigationMode_ = NavigationMode::SPLIT;
     pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
     pattern->navigationMode_ = NavigationMode::STACK;
     pattern->DoAnimation(NavigationMode::AUTO);
-    ASSERT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+    ASSERT_EQ(pattern->navigationMode_, NavigationMode::AUTO);
     pattern->navigationMode_ = NavigationMode::STACK;
     pattern->DoAnimation(NavigationMode::STACK);
     ASSERT_EQ(pattern->navigationMode_, NavigationMode::STACK);
@@ -927,20 +1164,6 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     ASSERT_EQ(pattern->navigationStack_, nullptr);
     pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     ASSERT_NE(pattern->navigationStack_, nullptr);
-    pattern->preNavPathList_.emplace_back(std::make_pair("test3", tempNode));
-    pattern->navPathList_.emplace_back(std::make_pair("test", tempNode));
-    pattern->navPathList_.emplace_back(std::make_pair("test4", tempNode));
-    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test", tempNode));
-    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test3", nullptr));
-    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test2", nullptr));
-    pattern->OnModifyDone();
-
-    pattern->navPathList_.clear();
-    pattern->navigationStack_->navPathList_.clear();
-    pattern->navPathList_.emplace_back(std::make_pair("test", nullptr));
-    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test2", nullptr));
-    pattern->navigationStack_->navPathList_.emplace_back(std::make_pair("test", tempNode));
-    pattern->OnModifyDone();
     /**
      * @tc.steps: step3. construct layoutWrapper and set properties of layoutProperty, test OnDirtyLayoutWrapperSwap.
      * @tc.expected: check whether the properties is correct.
@@ -948,7 +1171,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     auto geometryNode = navigation->geometryNode_;
     auto layout = navigation->GetLayoutProperty<NavigationLayoutProperty>();
     auto layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(AceType::WeakClaim(AceType::RawPtr(navigation)), geometryNode, layout);
+        AceType::MakeRefPtr<LayoutWrapperNode>(AceType::WeakClaim(AceType::RawPtr(navigation)), geometryNode, layout);
     auto algorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
     layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
@@ -960,7 +1183,6 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     config.skipMeasure = false;
     config.frameSizeChange = true;
 
-    layout->propUsrNavigationMode_ = NavigationMode::AUTO;
     pattern->navigationMode_ = NavigationMode::SPLIT;
     layout->propVisibility_ = VisibleType::INVISIBLE;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
@@ -970,7 +1192,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
     layout->propHideNavBar_ = true;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ASSERT_EQ(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.value(), VisibleType::GONE);
+    ASSERT_FALSE(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.has_value());
 }
 
 /**
@@ -996,7 +1218,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     navigation->navBarNode_ = navBarNode;
     auto geometryNode = navigation->geometryNode_;
     auto navigationLayoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(navigation)), geometryNode, navigationLayoutProperty);
 
     auto algorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
@@ -1011,7 +1233,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     ASSERT_EQ(navigation->children_.size(), 1);
     auto navBarGeometryNode = navBarNode->geometryNode_;
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    auto navBarWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto navBarWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(navBarNode)), navBarGeometryNode, navBarLayoutProperty);
     layoutWrapper->childrenMap_[0] = navBarWrapper;
     layoutWrapper->currentChildCount_ = 1;
@@ -1021,7 +1243,6 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     algorithm->Layout(AceType::RawPtr(layoutWrapper));
 
     navigationLayoutProperty->propNavBarPosition_ = NavBarPosition::START;
-    navigationLayoutProperty->propDestinationChange_ = true;
     navigationLayoutProperty->propNavigationMode_ = NavigationMode::STACK;
     navigation->isModeChange_ = true;
     algorithm->Layout(AceType::RawPtr(layoutWrapper));
@@ -1036,7 +1257,7 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     ASSERT_EQ(navigation->children_.size(), 2);
     auto dividerGeometryNode = dividerNode->geometryNode_;
     auto dividerLayoutProperty = dividerNode->GetLayoutProperty<NavBarLayoutProperty>();
-    auto dividerWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto dividerWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(dividerNode)), dividerGeometryNode, dividerLayoutProperty);
     layoutWrapper->childrenMap_[1] = dividerWrapper;
     layoutWrapper->currentChildCount_ = 2;
@@ -1053,15 +1274,13 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     ASSERT_EQ(navigation->children_.size(), 3);
     auto contentGeometryNode = contentNode->geometryNode_;
     auto contentLayoutProperty = contentNode->GetLayoutProperty<NavBarLayoutProperty>();
-    auto contentWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto contentWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(contentNode)), contentGeometryNode, contentLayoutProperty);
     layoutWrapper->childrenMap_[2] = contentWrapper;
     layoutWrapper->currentChildCount_ = 3;
-    navigationLayoutProperty->propDestinationChange_ = true;
     navigationLayoutProperty->propNavigationMode_ = NavigationMode::STACK;
     algorithm->Layout(AceType::RawPtr(layoutWrapper));
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::STACK);
-    ASSERT_EQ(navigationLayoutProperty->propDestinationChange_.value(), true);
 
     navigationLayoutProperty->propNavigationMode_ = NavigationMode::SPLIT;
     navigationLayoutProperty->propNavBarPosition_ = NavBarPosition::END;
@@ -1088,28 +1307,19 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
 
-    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::SPLIT;
     algorithm->navigationMode_ = NavigationMode::SPLIT;
-    algorithm->usrNavigationMode_ = NavigationMode::SPLIT;
     auto tempAlgorithm = AceType::MakeRefPtr<NavigationLayoutAlgorithm>();
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tempAlgorithm);
     layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_NE(layoutWrapper->layoutAlgorithm_, nullptr);
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
-    ASSERT_EQ(algorithm->usrNavigationMode_, NavigationMode::SPLIT);
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
     ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
 
     navigation->contentNode_ =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 66, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
-    navigationLayoutProperty->propDestinationChange_ = false;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
-    ASSERT_EQ(navigationLayoutProperty->propDestinationChange_.value(), false);
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::STACK);
-    ASSERT_EQ(algorithm->usrNavigationMode_, NavigationMode::STACK);
-    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::STACK);
+    ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
 }
 
 /**
@@ -1251,6 +1461,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG004, TestSize.Level1)
     model.SetTitleMode(NavigationTitleMode::MINI);
     navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
     model.SetTitleMode(NavigationTitleMode::FREE);
-    ASSERT_EQ(navBarNode->propBackButtonNodeOperation_.value(), ChildNodeOperation::REMOVE);
+    ASSERT_FALSE(navBarNode->propBackButtonNodeOperation_.has_value());
 }
 } // namespace OHOS::Ace::NG

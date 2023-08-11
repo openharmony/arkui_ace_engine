@@ -286,6 +286,8 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
 
     std::string ret;
     UnicodeString2String(simpleStr, ret);
+
+    delete(timeZone);
     return ret;
 }
 
@@ -306,6 +308,8 @@ std::string Localization::FormatDuration(uint32_t duration, const std::string& f
 
     std::string ret;
     UnicodeString2String(simpleStr, ret);
+
+    delete(timeZone);
     return ret;
 }
 

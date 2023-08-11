@@ -15,7 +15,9 @@
 
 #include "frameworks/core/components/svg/parse/svg_svg.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/pathops/SkPathOps.h"
+#endif
 
 #include "frameworks/core/components/svg/render_svg.h"
 
@@ -94,6 +96,7 @@ RefPtr<RenderNode> SvgSvg::CreateRender(
     return renderBox;
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgSvg::AsPath(const Size& viewPort) const
 {
     SkPath path;
@@ -103,5 +106,16 @@ SkPath SvgSvg::AsPath(const Size& viewPort) const
     }
     return path;
 }
+#else
+RSPath SvgSvg::AsPath(const Size& viewPort) const
+{
+    RSPath path;
+    for (const auto& child : children_) {
+        RSPath childPath = child->AsPath(viewPort);
+        path.Op(path, childPath, RSPathOp::UNION);
+    }
+    return path;
+}
+#endif
 
 } // namespace OHOS::Ace

@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 // PagePattern is the base class for page render node.
-class LinearLayoutPattern : public Pattern {
+class LinearLayoutPattern : virtual public Pattern {
     DECLARE_ACE_TYPE(LinearLayoutPattern, Pattern);
 
 public:

@@ -262,6 +262,29 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebAccessRequest> request_;
 };
 
+class WebScreenCaptureRequestOhos : public WebScreenCaptureRequest {
+    DECLARE_ACE_TYPE(WebScreenCaptureRequestOhos, WebScreenCaptureRequest)
+
+public:
+    WebScreenCaptureRequestOhos(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request)
+        : request_(request) {}
+
+    void Deny() const override;
+
+    std::string GetOrigin() const override;
+
+    void SetCaptureMode(int32_t mode) override;
+
+    void SetSourceId(int32_t sourceId) override;
+
+    void Grant() const override;
+
+private:
+    std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest> request_;
+
+    OHOS::NWeb::NWebScreenCaptureConfig config_;
+};
+
 class WebWindowNewHandlerOhos : public WebWindowNewHandler {
     DECLARE_ACE_TYPE(WebWindowNewHandlerOhos, WebWindowNewHandler)
 
@@ -472,6 +495,7 @@ public:
     void OnFocus();
     void OnBlur();
     void OnPermissionRequestPrompt(const std::shared_ptr<OHOS::NWeb::NWebAccessRequest>& request);
+    void OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebScreenCaptureAccessRequest>& request);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
     void OnQuickMenuDismissed();
@@ -535,6 +559,7 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isRefreshed);
     bool OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info);
     bool OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
+    void OnContextMenuHide(const std::string& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
     bool OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void OnResourceLoad(const std::string& url);
@@ -545,6 +570,7 @@ public:
     bool OnDragAndDropData(const void* data, size_t len, int width, int height);
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
+    bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
     void UpdateDragCursor(NWeb::NWebDragData::DragOperation op)
     {
@@ -564,8 +590,9 @@ public:
         OHOS::NWeb::ImageAlphaType alphaType);
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
     void OnAudioStateChanged(bool audible);
-    void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs);
+    void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs);
     void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
+    void OnOverScroll(float xOffset, float yOffset);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -723,6 +750,8 @@ private:
     EventCallbackV2 onTouchIconUrlV2_;
     EventCallbackV2 onAudioStateChangedV2_;
     EventCallbackV2 onFirstContentfulPaintV2_;
+    EventCallbackV2 onOverScrollV2_;
+    EventCallbackV2 onScreenCaptureRequestV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;
@@ -748,8 +777,9 @@ private:
     int32_t parentNWebId_ = -1;
     bool needResizeAtFirst_ = false;
     int32_t backgroundColor_ = 0xffffffff;
-    int32_t rosenWindowId_ = -1;
+    uint32_t rosenWindowId_ = 0;
     RefPtr<WebDelegateObserver> observer_;
+    std::shared_ptr<Rosen::RSNode> rsNode_;
 #endif
 };
 

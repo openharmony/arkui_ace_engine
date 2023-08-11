@@ -76,6 +76,11 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+    void SetIsSpringEffect(bool isSpringEffect)
+    {
+        isSpringEffect_ = isSpringEffect;
+    }
+
     void SetIndex(int32_t index)
     {
         jumpIndex_ = index;
@@ -134,13 +139,15 @@ public:
 
     int32_t GetStartIndex() const
     {
-        return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
+        return itemPosition_.empty() ? -1 : itemPosition_.begin()->first;
     }
 
     int32_t GetEndIndex() const
     {
-        return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
+        return itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
     }
+
+    int32_t GetMidIndex();
 
     int32_t GetMaxListItemIndex() const
     {
@@ -184,11 +191,6 @@ public:
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
-    std::list<WeakPtr<FrameNode>>& GetItemGroupList()
-    {
-        return itemGroupList_;
-    }
-
     void SetChainOffsetCallback(std::function<float(int32_t)> func)
     {
         chainOffsetFunc_ = std::move(func);
@@ -224,16 +226,34 @@ public:
     void HandleJumpAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
         int32_t& startIndex, int32_t& endIndex, float& startPos, float& endPos);
 
+    void HandleJumpEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+
     bool NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
         int32_t startIndex, int32_t endIndex);
 
-    float GetCenterItemHeight(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
+    virtual float MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+        Axis axis, int32_t childIndex);
+
+    bool GroupNeedAllLayout()
+    {
+        return targetIndex_.has_value() && scrollAlign_ == ScrollAlign::CENTER;
+    }
 
     virtual int32_t GetLanes() const
     {
         return 1;
     }
-    
+
+    void SetLaneGutter(float laneGutter)
+    {
+        laneGutter_ = laneGutter;
+    }
+
+    float GetLaneGutter() const
+    {
+        return laneGutter_;
+    }
+
     void OffScreenLayoutDirection();
 
     ScrollAutoType GetScrollAutoType() const
@@ -281,7 +301,6 @@ private:
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
-    void CreateItemGroupList(LayoutWrapper* layoutWrapper);
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
     void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
@@ -307,6 +326,7 @@ private:
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
     bool canOverScroll_ = false;
+    bool isSpringEffect_ = false;
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
 
@@ -322,9 +342,9 @@ private:
     float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
+    float laneGutter_ = 0.0f;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
-    std::list<WeakPtr<FrameNode>> itemGroupList_;
 
     std::function<float(int32_t)> chainOffsetFunc_;
     float chainInterval_ = 0.0f;

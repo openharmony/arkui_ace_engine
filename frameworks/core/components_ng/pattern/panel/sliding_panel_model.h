@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,10 +37,12 @@ public:
     virtual void SetPanelType(PanelType type) = 0;
     virtual void SetPanelMode(PanelMode mode) = 0;
     virtual void SetHasDragBar(bool hasDragBar) = 0;
+    virtual void SetCustomHeight(const CalcDimension& customHeight) {};
     virtual void SetMiniHeight(const Dimension& miniHeight) = 0;
     virtual void SetHalfHeight(const Dimension& halfHeight) = 0;
     virtual void SetFullHeight(const Dimension& fullHeight) = 0;
     virtual void SetIsShow(bool isShow) = 0;
+    virtual void SetShowCloseIcon(bool showCloseIcon) {};
     virtual void SetBackgroundMask(const Color& backgroundMask) = 0;
     virtual void SetBackgroundColor(const Color& backgroundColor) = 0;
     virtual void SetOnSizeChange(std::function<void(const BaseEventInfo*)>&& changeEvent) = 0;

@@ -79,10 +79,7 @@ public:
         forceRebuild_ = forceRebuild;
     }
 
-    void SetSelectable(bool selectable)
-    {
-        selectable_ = selectable;
-    }
+    void SetSelectable(bool selectable);
 
     bool ForceRebuild() const
     {
@@ -111,6 +108,11 @@ public:
     bool IsSelected() const
     {
         return isSelected_;
+    }
+
+    void SetSelected(bool selected)
+    {
+        isSelected_ = selected;
     }
 
 protected:

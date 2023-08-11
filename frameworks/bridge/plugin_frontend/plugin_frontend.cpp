@@ -176,6 +176,7 @@ void PluginFrontend::Destroy()
 bool PluginFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor)
 {
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::JS_PLUGIN);
     InitializeFrontendDelegate(taskExecutor);
     taskExecutor->PostSyncTask(
@@ -647,6 +648,16 @@ void PluginFrontend::OnSurfaceChanged(int32_t width, int32_t height)
 {
     CHECK_NULL_VOID_NOLOG(delegate_);
     delegate_->OnSurfaceChanged();
+}
+
+void PluginFrontend::OnLayoutCompleted(const std::string& componentId)
+{
+    CHECK_NULL_VOID_NOLOG(delegate_);
+}
+
+void PluginFrontend::OnDrawCompleted(const std::string& componentId)
+{
+    CHECK_NULL_VOID_NOLOG(delegate_);
 }
 
 void PluginFrontend::DumpFrontend() const

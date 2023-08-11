@@ -49,6 +49,11 @@ ohos_unittest("for_each_syntax_test_ng") {
     "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
 
     # components_ng_layout
     "$ace_root/frameworks/core/components_ng/layout/box_layout_algorithm.cpp",

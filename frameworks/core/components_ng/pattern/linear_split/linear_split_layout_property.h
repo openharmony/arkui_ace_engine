@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_SPLIT_LINEAR_SPLIT_LAYOUT_PROPERTY_H
 
+#include "linear_split_model.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +33,7 @@ public:
         auto value = MakeRefPtr<LinearSplitLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propResizeable_ = CloneResizeable();
+        value->propDivider_ = CloneDivider();
         return value;
     }
 
@@ -39,15 +41,26 @@ public:
     {
         LayoutProperty::Reset();
         ResetResizeable();
+        ResetDivider();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
         json->Put("resizeable", propResizeable_.value_or(false) ? "true" : "false");
+        if (propDivider_.has_value()) {
+            auto divider = JsonUtil::Create(true);
+            divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
+            divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
+            json->Put("divider", divider);
+        } else {
+            auto divider = JsonUtil::Create(true);
+            json->Put("divider", divider);
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Resizeable, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, ItemDivider, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(LinearSplitLayoutProperty);

@@ -31,16 +31,31 @@ public:
     ~SvgFe() override = default;
     static RefPtr<SvgNode> Create();
 
+#ifndef USE_ROSEN_DRAWING
     static void ConverImageFilterColor(
         sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& src, const ColorInterpolationType& dst);
 
     static sk_sp<SkImageFilter> MakeImageFilter(const FeInType& in, sk_sp<SkImageFilter>& imageFilter);
 
     void GetImageFilter(sk_sp<SkImageFilter>& imageFilter, ColorInterpolationType& currentColor);
+#else
+    static void ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter,
+        const ColorInterpolationType& src, const ColorInterpolationType& dst);
+
+    static std::shared_ptr<RSImageFilter> MakeImageFilter(
+        const FeInType& in, std::shared_ptr<RSImageFilter>& imageFilter);
+
+    void GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor);
+#endif
 
 protected:
+#ifndef USE_ROSEN_DRAWING
     virtual void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
         const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const {}
+#else
+    virtual void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
+        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const {}
+#endif
 };
 
 } // namespace OHOS::Ace::NG

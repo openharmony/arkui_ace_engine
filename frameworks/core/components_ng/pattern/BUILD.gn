@@ -21,6 +21,7 @@ build_component_ng("pattern_ng") {
     "action_sheet/action_sheet_model_ng.cpp",
     "animator/animator_model_ng.cpp",
     "app_bar/app_bar_view.cpp",
+    "app_bar/atomic_service_pattern.cpp",
     "badge/badge_accessibility_property.cpp",
     "badge/badge_layout_algorithm.cpp",
     "badge/badge_layout_property.cpp",
@@ -45,6 +46,11 @@ build_component_ng("pattern_ng") {
     "calendar/calendar_month_pattern.cpp",
     "calendar/calendar_paint_method.cpp",
     "calendar/calendar_pattern.cpp",
+    "calendar_picker/calendar_dialog_pattern.cpp",
+    "calendar_picker/calendar_dialog_view.cpp",
+    "calendar_picker/calendar_picker_layout_algorithm.cpp",
+    "calendar_picker/calendar_picker_model_ng.cpp",
+    "calendar_picker/calendar_picker_pattern.cpp",
     "canvas_context/offscreen_context_model_ng.cpp",
     "canvas_renderer/canvas_renderer_model_ng.cpp",
     "checkbox/checkbox_accessibility_property.cpp",
@@ -102,6 +108,7 @@ build_component_ng("pattern_ng") {
     "flex/flex_model_ng.cpp",
     "flex/wrap_layout_algorithm.cpp",
     "form_link/form_link_model_ng.cpp",
+    "form_link/form_link_pattern.cpp",
     "gauge/gauge_accessibility_property.cpp",
     "gauge/gauge_layout_algorithm.cpp",
     "gauge/gauge_model_ng.cpp",
@@ -208,6 +215,7 @@ build_component_ng("pattern_ng") {
     "navigation/nav_bar_layout_algorithm.cpp",
     "navigation/nav_bar_node.cpp",
     "navigation/nav_bar_pattern.cpp",
+    "navigation/navigation_content_layout_algorithm.cpp",
     "navigation/navigation_group_node.cpp",
     "navigation/navigation_layout_algorithm.cpp",
     "navigation/navigation_model_ng.cpp",
@@ -216,6 +224,8 @@ build_component_ng("pattern_ng") {
     "navigation/title_bar_layout_algorithm.cpp",
     "navigation/title_bar_node.cpp",
     "navigation/title_bar_pattern.cpp",
+    "navigation/tool_bar_layout_algorithm.cpp",
+    "navigation/tool_bar_node.cpp",
     "navigator/navigator_event_hub.cpp",
     "navigator/navigator_model_ng.cpp",
     "navigator/navigator_pattern.cpp",
@@ -233,10 +243,13 @@ build_component_ng("pattern_ng") {
     "option/option_view.cpp",
     "overlay/modal_presentation_pattern.cpp",
     "overlay/overlay_manager.cpp",
+    "overlay/popup_base_pattern.cpp",
     "overlay/sheet_drag_bar_paint_method.cpp",
     "overlay/sheet_drag_bar_pattern.cpp",
     "overlay/sheet_presentation_pattern.cpp",
     "overlay/sheet_view.cpp",
+    "panel/close_icon_layout_algorithm.cpp",
+    "panel/close_icon_pattern.cpp",
     "panel/drag_bar_layout_algorithm.cpp",
     "panel/drag_bar_paint_method.cpp",
     "panel/drag_bar_pattern.cpp",
@@ -244,11 +257,6 @@ build_component_ng("pattern_ng") {
     "panel/sliding_panel_model_ng.cpp",
     "panel/sliding_panel_node.cpp",
     "panel/sliding_panel_pattern.cpp",
-    "patternlock/patternlock_layout_algorithm.cpp",
-    "patternlock/patternlock_model_ng.cpp",
-    "patternlock/patternlock_modifier.cpp",
-    "patternlock/patternlock_paint_method.cpp",
-    "patternlock/patternlock_pattern.cpp",
     "picker/date_time_animation_controller.cpp",
     "picker/datepicker_accessibility_property.cpp",
     "picker/datepicker_column_accessibility_property.cpp",
@@ -299,6 +307,7 @@ build_component_ng("pattern_ng") {
     "scroll/effect/scroll_fade_effect.cpp",
     "scroll/effect/scroll_fade_painter.cpp",
     "scroll/inner/scroll_bar.cpp",
+    "scroll/inner/scroll_bar_overlay_modifier.cpp",
     "scroll/inner/scroll_bar_painter.cpp",
     "scroll/scroll_accessibility_property.cpp",
     "scroll/scroll_layout_algorithm.cpp",
@@ -312,6 +321,7 @@ build_component_ng("pattern_ng") {
     "scroll_bar/scroll_bar_layout_algorithm.cpp",
     "scroll_bar/scroll_bar_model_ng.cpp",
     "scroll_bar/scroll_bar_pattern.cpp",
+    "scrollable/scrollable_controller.cpp",
     "scrollable/scrollable_paint_property.cpp",
     "scrollable/scrollable_pattern.cpp",
     "search/search_event_hub.cpp",
@@ -324,6 +334,7 @@ build_component_ng("pattern_ng") {
     "select/select_layout_algorithm.cpp",
     "select/select_model_ng.cpp",
     "select/select_pattern.cpp",
+    "select_overlay/select_overlay_content_modifier.cpp",
     "select_overlay/select_overlay_layout_algorithm.cpp",
     "select_overlay/select_overlay_modifier.cpp",
     "select_overlay/select_overlay_node.cpp",
@@ -347,6 +358,7 @@ build_component_ng("pattern_ng") {
     "shape/shape_paint_property.cpp",
     "side_bar/side_bar_container_layout_algorithm.cpp",
     "side_bar/side_bar_container_model_ng.cpp",
+    "side_bar/side_bar_container_paint_method.cpp",
     "side_bar/side_bar_container_pattern.cpp",
     "slider/slider_accessibility_property.cpp",
     "slider/slider_content_modifier.cpp",
@@ -408,6 +420,7 @@ build_component_ng("pattern_ng") {
     "text/text_pattern.cpp",
     "text/text_styles.cpp",
     "text_clock/text_clock_accessibility_property.cpp",
+    "text_clock/text_clock_layout_algorithm.cpp",
     "text_clock/text_clock_layout_property.cpp",
     "text_clock/text_clock_model_ng.cpp",
     "text_clock/text_clock_pattern.cpp",
@@ -469,12 +482,19 @@ build_component_ng("pattern_ng") {
     "xcomponent/xcomponent_pattern.cpp",
   ]
 
+  standard_input_sources =
+      [ "rich_editor/on_rich_editor_changed_listener_impl.cpp" ]
+  standard_input_deps = [
+    "hilog:libhilog",
+    "imf:inputmethod_client",
+    "input:libmmi-client",
+  ]
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
   }
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_standard:librender_service_client" ]
+    external_deps = [ "graphic_2d:librender_service_client" ]
   } else if (is_cross_platform_build) {
     deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }
@@ -488,8 +508,11 @@ build_component_ng("pattern_ability_component_ng") {
   ]
 
   external_deps = [
+    "ability_runtime:abilitykit_native",
     "input:libmmi-client",
+    "napi:ace_napi",
     "window_manager:scene_session",
+    "window_manager:scene_session_manager",
   ]
 
   part_name = ace_engine_part
@@ -507,6 +530,6 @@ build_component_ng("pattern_model_component_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_standard:librender_service_client" ]
+    external_deps = [ "graphic_2d:librender_service_client" ]
   }
 }

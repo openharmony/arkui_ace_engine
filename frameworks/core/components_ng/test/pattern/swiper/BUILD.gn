@@ -18,7 +18,15 @@ ace_unittest("swiper_test_ng") {
   flutter_skia = true
   render = true
   sources = [
+    "$ace_root/frameworks/core/animation/spring_curve.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
+
+    # custom
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_base.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_pattern.cpp",
 
     # text
     "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view.cpp",
@@ -52,6 +60,7 @@ ace_unittest("swiper_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_property.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_accessibility_property.cpp",

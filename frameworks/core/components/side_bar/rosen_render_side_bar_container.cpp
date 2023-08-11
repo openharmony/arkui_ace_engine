@@ -17,6 +17,8 @@
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPath.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 #include "render_service_client/core/ui/rs_node.h"
 
@@ -39,8 +41,7 @@ void RosenRenderSideBarContainer::Paint(RenderContext& context, const Offset& of
     rsNode->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 #else
     RSRecordingPath dPath;
-    dPath.AddRect(RSRect(paintRect.GetLeft(), paintRect.GetTop(),
-        paintRect.GetWidth() + paintRect.GetLeft(), paintRect.GetHeight()));
+    dPath.AddRect(RSRect(paintRect.Left(), paintRect.Top(), paintRect.Right(), paintRect.Bottom()));
     rsNode->SetClipBounds(Rosen::RSPath::CreateRSPath(dPath));
 #endif
 

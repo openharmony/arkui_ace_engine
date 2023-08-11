@@ -98,12 +98,7 @@ public:
         }
     }
 
-    void FireRecycleSelf()
-    {
-        if (recycleCustomNodeFunc_) {
-            recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));
-        }
-    }
+    void FireRecycleSelf();
 
     void SetRecycleFunction(std::function<void(RefPtr<CustomNodeBase>)>&& recycleCustomNode)
     {
@@ -132,6 +127,18 @@ public:
     void ResetRecycle()
     {
         recycleRenderFunc_ = nullptr;
+    }
+
+    void SetSetActiveFunc(std::function<void(bool)>&& func)
+    {
+        setActiveFunc_ = std::move(func);
+    }
+
+    void FireSetActiveFunc(bool active)
+    {
+        if (setActiveFunc_) {
+            setActiveFunc_(active);
+        }
     }
 
     void Reset()
@@ -170,6 +177,7 @@ private:
     std::function<void(int32_t)> forceNodeUpdateFunc_;
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
     std::function<void()> recycleRenderFunc_;
+    std::function<void(bool)> setActiveFunc_;
     bool needRebuild_ = false;
 };
 } // namespace OHOS::Ace::NG

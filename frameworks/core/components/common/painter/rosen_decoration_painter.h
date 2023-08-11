@@ -27,10 +27,14 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/image/render_image.h"
-#include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #ifndef USE_ROSEN_DRAWING
+#include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "include/core/SkRefCnt.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 class SkPath;
 class SkPaint;
 class SkRRect;
@@ -45,8 +49,13 @@ class Border;
 class Offset;
 class Size;
 
+#ifndef USE_ROSEN_DRAWING
 class RosenDecorationPainter : public virtual NG::SkiaDecorationPainter {
     DECLARE_ACE_TYPE(RosenDecorationPainter, NG::SkiaDecorationPainter);
+#else
+class RosenDecorationPainter : public virtual NG::DrawingDecorationPainter {
+    DECLARE_ACE_TYPE(RosenDecorationPainter, NG::DrawingDecorationPainter);
+#endif
 
 public:
     RosenDecorationPainter(
@@ -54,7 +63,7 @@ public:
     ~RosenDecorationPainter() override = default;
 
 #ifndef USE_ROSEN_DRAWING
-    static void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas);
+    static void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint = nullptr);
 
     static void PaintShadow(const SkPath& path, const Shadow& shadow, const std::shared_ptr<RSNode>& rsNode);
 
@@ -104,9 +113,8 @@ public:
     void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context,
         const std::shared_ptr<RSImage>& image);
     void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context);
-    static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize,
-        const Offset& position, const Offset& extraOffset, RSCanvas* canvas,
-        const std::shared_ptr<RSImage>& image, double dipScale);
+    static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize, const Offset& position,
+        RSCanvas* canvas, const std::shared_ptr<RSImage>& image, double dipScale);
 #endif
 
     static void PaintBoxShadows(const std::vector<Shadow>& shadows, const std::shared_ptr<RSNode>& rsNode);

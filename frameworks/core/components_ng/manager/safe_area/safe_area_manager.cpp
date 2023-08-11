@@ -14,7 +14,9 @@
  */
 #include "safe_area_manager.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
 {
@@ -34,6 +36,22 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
+bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
+{
+    uint32_t bottom;
+    if (systemSafeArea_.bottom_.IsValid()) {
+        bottom = systemSafeArea_.bottom_.start;
+    } else {
+        bottom = PipelineContext::GetCurrentRootHeight();
+    }
+    SafeAreaInsets::Inset inset = { .start = bottom - keyboardHeight, .end = bottom };
+    if (inset == keyboardInset_) {
+        return false;
+    }
+    keyboardInset_ = inset;
+    return true;
+}
+
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
@@ -44,5 +62,47 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
         res = res.Combine(systemSafeArea_);
     }
     return res;
+}
+
+bool SafeAreaManager::SetIsFullScreen(bool value)
+{
+    if (isFullScreen_ == value) {
+        return false;
+    }
+    isFullScreen_ = value;
+    return true;
+}
+
+bool SafeAreaManager::SetIgnoreSafeArea(bool value)
+{
+    if (ignoreSafeArea_ == value) {
+        return false;
+    }
+    ignoreSafeArea_ = value;
+    return true;
+}
+
+SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
+{
+    if (ignoreSafeArea_ || !isFullScreen_) {
+        return {};
+    }
+    return systemSafeArea_;
+}
+
+SafeAreaInsets SafeAreaManager::GetCutoutSafeArea() const
+{
+    if (ignoreSafeArea_ || !isFullScreen_) {
+        return {};
+    }
+    return cutoutSafeArea_;
+}
+
+SafeAreaInsets SafeAreaManager::GetSafeArea() const
+{
+    if (ignoreSafeArea_ || !isFullScreen_) {
+        return {};
+    }
+    return systemSafeArea_.Combine(cutoutSafeArea_);
 }
 } // namespace OHOS::Ace::NG

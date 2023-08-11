@@ -15,7 +15,11 @@ import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
-component_plugins = [ "qrcode" ]
+component_plugins = [
+  "qrcode",
+  "relative_container",
+  "patternlock",
+]
 
 template("build_component_plugin") {
   forward_variables_from(invoker, "*")
@@ -72,7 +76,9 @@ template("build_component_plugin") {
       }
 
       deps = []
-      deps += invoker.deps
+      if (defined(invoker.deps)) {
+        deps += invoker.deps
+      }
 
       if (defined(invoker.public_configs)) {
         public_configs = []
@@ -91,13 +97,16 @@ template("build_component_plugin") {
 
       # using graphcis_2d drawing lib
       include_dirs = [
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
         "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+        "//foundation/graphic/graphic_2d/rosen/modules",
         "//third_party/bounds_checking_function/include",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
       ]
 
       if (ace_use_new_skia) {

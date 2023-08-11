@@ -42,8 +42,9 @@
 namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
-constexpr double DEFAULT_PAN_DISTANCE = 5.0;
-constexpr double DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
+constexpr Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
+constexpr double DRAG_PAN_DISTANCE_MOUSE = 1.0;
+constexpr Dimension DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 300.0;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 100;
@@ -195,7 +196,7 @@ public:
 
 private:
     PanDirection direction_;
-    double distance_ = DEFAULT_PAN_DISTANCE;
+    double distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();
     int32_t fingers_ = 1;
     std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc> onPanFingersIds_;
     std::unordered_map<typename OnPanDirectionFunc::IdType, OnPanDirectionFunc> onPanDirectionIds_;
@@ -246,9 +247,13 @@ enum class DragRet {
     ENABLE_DROP,
     DISABLE_DROP,
 };
+enum class DragBehavior {
+    COPY = 0,
+    MOVE = 1,
+};
 #endif
 
-class DragEvent : public AceType {
+class ACE_FORCE_EXPORT DragEvent : public AceType {
     DECLARE_ACE_TYPE(DragEvent, AceType)
 
 public:
@@ -263,6 +268,26 @@ public:
     RefPtr<PasteData> GetPasteData() const
     {
         return pasteData_;
+    }
+
+    double GetScreenX() const
+    {
+        return screenX_;
+    }
+
+    double GetScreenY() const
+    {
+        return screenY_;
+    }
+
+    void SetScreenX(double x)
+    {
+        screenX_ = x;
+    }
+
+    void SetScreenY(double y)
+    {
+        screenY_ = y;
     }
 
     double GetX() const
@@ -326,6 +351,10 @@ public:
 
     bool IsUseCustomAnimation();
 
+    void SetUdKey(const std::string udKey);
+
+    std::string GetUdKey();
+
     void SetDragInfo(const RefPtr<UnifiedData>& dragInfo);
 
     RefPtr<UnifiedData>& GetDragInfo();
@@ -333,10 +362,26 @@ public:
     void SetCopy(bool copy);
 
     bool IsCopy();
+
+    void SetIsGetDataSuccess(bool isGetDataSuccess);
+
+    bool IsGetDataSuccess();
 #endif
+
+    void SetVelocity(const Velocity& velocity)
+    {
+        velocity_ = velocity;
+    }
+
+    const Velocity& GetVelocity() const
+    {
+        return velocity_;
+    }
 
 private:
     RefPtr<PasteData> pasteData_;
+    double screenX_ = 0.0;
+    double screenY_ = 0.0;
     double x_ = 0.0;
     double y_ = 0.0;
     std::string description_;
@@ -344,12 +389,15 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<UnifiedData> unifiedData_;
     std::map<std::string, int64_t> summary_;
+    std::string udKey_ = "";
     DragRet dragRet_;
     Rect previewRect_;
     bool useCustomAnimation_ = false;
+    bool isGetDataSuccess_ = false;
     RefPtr<UnifiedData> dragInfo_;
     bool copy_ = true;
 #endif
+    Velocity velocity_;
 };
 
 struct FingerInfo {
@@ -637,6 +685,16 @@ public:
     {
         return secCompHandleEvent_;
     }
+
+    void SetEnhanceData(std::vector<uint8_t> enhanceData)
+    {
+        enhanceData_ = enhanceData;
+    }
+
+    std::vector<uint8_t> GetEnhanceData() const
+    {
+        return enhanceData_;
+    }
 #endif
 private:
     bool repeat_ = false;
@@ -656,6 +714,7 @@ private:
 #ifdef SECURITY_COMPONENT_ENABLE
     double displayX_ = 0.0;
     double displayY_ = 0.0;
+    std::vector<uint8_t> enhanceData_;
     std::shared_ptr<JsonValue> secCompHandleEvent_;
 #endif
     Point globalPoint_;

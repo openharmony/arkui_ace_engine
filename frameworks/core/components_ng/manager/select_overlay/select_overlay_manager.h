@@ -28,6 +28,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,12 +42,12 @@ public:
 
     // Create and display selection pop-ups.
     RefPtr<SelectOverlayProxy> CreateAndShowSelectOverlay(
-        const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host);
+        const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host, bool animation = false);
 
     // Destroy the pop-up interface and delete the pop-up information.
-    void DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy);
-    void DestroySelectOverlay(int32_t overlayId);
-    void DestroySelectOverlay();
+    void DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy, bool animation = false);
+    void DestroySelectOverlay(int32_t overlayId, bool animation = false);
+    void DestroySelectOverlay(bool animation = false);
 
     bool HasSelectOverlay(int32_t overlayId);
 
@@ -56,8 +57,25 @@ public:
 
     bool IsSameSelectOverlayInfo(const SelectOverlayInfo& info);
 
+    void SetOnTouchTestResults(const std::vector<std::string>& touchTestResults)
+    {
+        touchTestResults_ = touchTestResults;
+    }
+
+    void HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset);
+
+    void MarkDirty(PropertyChangeFlag flag);
+
 private:
-    void DestroyHelper(const RefPtr<FrameNode>& overlay);
+    void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);
+
+    void Destroy(const RefPtr<FrameNode>& overlay);
+
+    bool IsTouchInCallerArea() const;
+
+    void NotifyOverlayClosed(bool closedByGlobalEvent = false);
+
+    RefPtr<FrameNode> GetCallerHost() const;
 
     WeakPtr<FrameNode> rootNodeWeak_;
 
@@ -65,6 +83,9 @@ private:
     WeakPtr<SelectionHost> host_;
 
     SelectOverlayInfo selectOverlayInfo_;
+
+    std::vector<TouchEvent> touchDownPoints_;
+    std::vector<std::string> touchTestResults_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayManager);
 };

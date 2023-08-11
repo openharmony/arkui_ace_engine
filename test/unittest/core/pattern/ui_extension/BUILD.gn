@@ -29,6 +29,7 @@ ace_unittest("ui_extension_test_ng") {
     "ability_runtime:abilitykit_native",
     "input:libmmi-client",
     "ipc:ipc_single",
+    "napi:ace_napi",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:scene_session",

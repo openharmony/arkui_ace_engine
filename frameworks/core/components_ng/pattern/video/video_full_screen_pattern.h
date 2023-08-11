@@ -46,6 +46,11 @@ public:
         return videoPattern_.Upgrade();
     }
 
+    const RefPtr<VideoPattern> GetVideoPattern()
+    {
+        return videoPattern_.Upgrade();
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return eventHub_;
@@ -57,6 +62,23 @@ public:
     }
 
     void UpdateState();
+
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        auto videoPattern = videoPattern_.Upgrade();
+        if (!videoPattern) {
+            return MakeRefPtr<VideoLayoutProperty>();
+        }
+        return videoPattern->GetLayoutProperty<VideoLayoutProperty>()->Clone();
+    }
+
+    bool IsFullScreen() override
+    {
+        // full screen state check from origin video fullScreenNodeId_
+        auto videoPattern = videoPattern_.Upgrade();
+        CHECK_NULL_RETURN(videoPattern, false);
+        return videoPattern->IsFullScreen();
+    }
 
 private:
     WeakPtr<VideoPattern> videoPattern_;

@@ -26,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
@@ -41,6 +42,7 @@
 
 namespace OHOS::Rosen {
 class DrawCmdList;
+enum class Gravity;
 }
 
 namespace OHOS::Ace::NG {
@@ -50,6 +52,8 @@ class FrameNode;
 class Modifier;
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
+
+inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
 // RenderContext is used for render node to paint.
 class RenderContext : public virtual AceType {
@@ -103,7 +107,7 @@ public:
 
     virtual void OnModifyDone() {}
 
-    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS };
+    enum class ContextType : int8_t { CANVAS, ROOT, SURFACE, EFFECT, EXTERNAL, INCREMENTAL_CANVAS, HARDWARE_SURFACE };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -137,6 +141,8 @@ public:
     {}
 
     virtual void ClearFocusState() {}
+
+    virtual void CreateBackgroundPixelMap(const RefPtr<FrameNode>& value) {}
 
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
@@ -190,6 +196,7 @@ public:
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
+    virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
     virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
@@ -220,6 +227,20 @@ public:
     {
         return {};
     }
+
+    // get position property
+    virtual RectF GetPropertyOfPosition()
+    {
+        return {};
+    }
+
+    // stop the property animation and get the current paint rect.
+    virtual OffsetF GetShowingTranslateProperty()
+    {
+        return OffsetF();
+    }
+    // update translateXY in backend.
+    virtual void UpdateTranslateInXY(const OffsetF& offset) {}
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
@@ -269,6 +290,10 @@ public:
     {
         return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
     }
+    std::optional<EffectOption> GetBackgroundEffect() const
+    {
+        return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
+    }
     std::optional<BlurStyleOption> GetFrontBlurStyle() const
     {
         return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;
@@ -298,6 +323,7 @@ public:
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}
+    virtual void OnRenderFitUpdate(RenderFit renderFit) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
@@ -316,7 +342,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, DimensionOffset);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, TranslateOptions);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector5F);
 
     // Foreground
     ACE_DEFINE_PROPERTY_GROUP(Foreground, ForegroundProperty);
@@ -345,6 +371,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColorFlag, bool);
 
+    // CustomBackground
+    ACE_DEFINE_PROPERTY_GROUP(CustomBackground, CustomBackgroundProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundPixelMap, RefPtr<PixelMap>);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundAlign, Alignment);
+
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontBrightness, Dimension);
@@ -356,6 +387,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpRate, float);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
 
     // BorderRadius.
@@ -413,7 +446,11 @@ public:
     // obscured
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Obscured, std::vector<ObscuredReasons>);
 
-    virtual void SetOverrideContentRect(const std::optional<RectF>& rect) {}
+    // renderFit
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
+
+    virtual void SetUsingContentRectForRenderFrame(bool value) {}
+    virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
 protected:
     RenderContext() = default;
@@ -430,6 +467,9 @@ protected:
     virtual void OnForegroundColorUpdate(const Color& value) {}
     virtual void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) {}
 
+    virtual void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) {}
+    virtual void OnBackgroundAlignUpdate(const Alignment& align) {}
+
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}
     virtual void OnHasBorderImageSliceUpdate(bool tag) {}
@@ -444,7 +484,7 @@ protected:
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
 
-    virtual void OnTransformRotateUpdate(const Vector4F& value) {}
+    virtual void OnTransformRotateUpdate(const Vector5F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
@@ -468,6 +508,8 @@ protected:
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
+    virtual void OnDynamicLightUpRateUpdate(const float rate) {}
+    virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}

@@ -40,6 +40,12 @@ void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {}
 
+void Scrollable::UpdateScrollSnapStartOffset(double offset)
+{}
+
+void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity)
+{}
+
 void Scrollable::SetAxis(Axis axis)
 {}
 
@@ -47,4 +53,6 @@ bool Scrollable::IsSpringStopped() const
 {
     return true;
 }
+
+void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity) {}
 } // namespace OHOS::Ace

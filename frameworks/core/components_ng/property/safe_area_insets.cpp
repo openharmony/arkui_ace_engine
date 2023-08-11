@@ -17,8 +17,6 @@
 
 #include <string>
 
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 SafeAreaInsets SafeAreaInsets::Combine(const SafeAreaInsets& other) const
 {
@@ -44,6 +42,11 @@ Inset SafeAreaInsets::Inset::Combine(const Inset& other) const
     return res;
 }
 
+bool SafeAreaInsets::IsValid() const
+{
+    return top_.IsValid() || left_.IsValid() || right_.IsValid() || bottom_.IsValid();
+}
+
 std::string Inset::ToString() const
 {
     using std::to_string;
@@ -54,5 +57,10 @@ std::string SafeAreaInsets::ToString() const
 {
     return "SafeAreaInsets left_: " + left_.ToString() + ", top_: " + top_.ToString() +
            ", right_: " + right_.ToString() + ", bottom_: " + bottom_.ToString();
+}
+
+bool SafeAreaInsets::Inset::IsOverlapped(float pos) const
+{
+    return IsValid() && pos >= static_cast<float>(start) && pos <= static_cast<float>(end);
 }
 } // namespace OHOS::Ace::NG

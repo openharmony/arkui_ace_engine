@@ -57,7 +57,7 @@ public:
 
 protected:
     void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) override;
-    void OnDetach(const RefPtr<RosenRenderContext>& context) override;
+    void OnDetach(RosenRenderContext* context) override;
     void OnAppear() override
     {
         isActive_ = false;
@@ -107,10 +107,12 @@ RosenOpacityTransitionEffect::PropertyTransitionEffectTemplate();
 class RosenPivotTransitionEffect final : public RosenTransitionEffect {
 public:
     RosenPivotTransitionEffect() = default;
-    RosenPivotTransitionEffect(const Dimension& centerX, const Dimension& centerY);
+    RosenPivotTransitionEffect(const Dimension& centerX, const Dimension& centerY,
+        const Dimension& centerZ = Dimension(0.0));
     ~RosenPivotTransitionEffect() override = default;
 
-    void SetPivot(Dimension centerX, Dimension centerY);
+    void SetPivot(const Dimension& centerX, const Dimension& centerY, const Dimension& centerZ = Dimension(0.0,
+        DimensionUnit::VP));
 
 private:
     void OnUpdateTransitionContext(
@@ -118,6 +120,7 @@ private:
 
     Dimension centerX_ { 0.5_pct };
     Dimension centerY_ { 0.5_pct };
+    Dimension centerZ_ { 0.0_vp };
     DECLARE_ACE_TYPE(RosenPivotTransitionEffect, RosenTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenPivotTransitionEffect);
 };
@@ -143,7 +146,7 @@ public:
 
 protected:
     void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) override;
-    void OnDetach(const RefPtr<RosenRenderContext>& context) override;
+    void OnDetach(RosenRenderContext* context) override;
     void OnAppear() override;
     void OnDisappear(bool activeTransition) override;
     void OnUpdateTransitionContext(
@@ -235,7 +238,7 @@ protected:
     {
         std::apply([&](auto&&... effect) { (effect.Attach(context, activeTransition), ...); }, effects_);
     }
-    void OnDetach(const RefPtr<RosenRenderContext>& context) override
+    void OnDetach(RosenRenderContext* context) override
     {
         std::apply([&](auto&&... effect) { (effect.Detach(context), ...); }, effects_);
     }
@@ -263,15 +266,18 @@ private:
 using InternalRotationXEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationXModifier, float>;
 using InternalRotationYEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationYModifier, float>;
 using InternalRotationZEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationModifier, float>;
+using InternalCameraDistanceEffect = PropertyTransitionEffectTemplate<Rosen::RSCameraDistanceModifier, float>;
 template<>
 InternalRotationXEffect::PropertyTransitionEffectTemplate();
 template<>
 InternalRotationYEffect::PropertyTransitionEffectTemplate();
 template<>
 InternalRotationZEffect::PropertyTransitionEffectTemplate();
+template<>
+InternalCameraDistanceEffect::PropertyTransitionEffectTemplate();
 class RosenRotation3DTransitionEffect final
     : public RosenCompositeTransitionEffect<InternalRotationXEffect, InternalRotationYEffect, InternalRotationZEffect,
-          RosenPivotTransitionEffect> {
+          RosenPivotTransitionEffect, InternalCameraDistanceEffect> {
 public:
     explicit RosenRotation3DTransitionEffect(const RotateOptions& options);
     ~RosenRotation3DTransitionEffect() override = default;

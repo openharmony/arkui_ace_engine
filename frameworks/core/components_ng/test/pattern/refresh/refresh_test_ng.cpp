@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #define private public
+#define protected public
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -31,6 +32,8 @@
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components_ng/test/pattern/test_ng.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
@@ -40,31 +43,17 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float CONTAINER_WIDTH = 300.0f;
-constexpr float CONTAINER_HEIGHT = 300.0f;
-const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
-
-constexpr float IDEAL_WIDTH = 300.0f;
-constexpr float IDEAL_HEIGHT = 300.0f;
-const SizeF IDEAL_SIZE(IDEAL_WIDTH, IDEAL_HEIGHT);
-
-constexpr float MAX_WIDTH = 400.0f;
-constexpr float MAX_HEIGHT = 400.0f;
-const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
-
 constexpr float CUSTOM_NODE_WIDTH = 100.f;
 constexpr float CUSTOM_NODE_HEIGHT = 10.f;
 } // namespace
-class RefreshTestNg : public testing::Test {
+class RefreshTestNg : public testing::Test, public TestNG {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
-    void RunMeasureAndLayout();
     void CreateRefreshNodeAndInitParam();
-    RefPtr<FrameNode> GetChildFrameNode(int32_t index);
     RefPtr<FrameNode> CreateCustomNode();
 
     RefPtr<FrameNode> frameNode_;
@@ -78,6 +67,9 @@ public:
 void RefreshTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RefreshTheme>()));
 }
 
 void RefreshTestNg::TearDownTestCase()
@@ -108,21 +100,6 @@ void RefreshTestNg::GetInstance()
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<RefreshAccessibilityProperty>();
 }
 
-void RefreshTestNg::RunMeasureAndLayout()
-{
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
-    layoutWrapper->SetActive();
-    layoutWrapper->SetRootMeasureNode();
-    LayoutConstraintF LayoutConstraint;
-    LayoutConstraint.parentIdealSize = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
-    LayoutConstraint.percentReference = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
-    LayoutConstraint.selfIdealSize = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
-    LayoutConstraint.maxSize = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
-    layoutWrapper->Measure(LayoutConstraint);
-    layoutWrapper->Layout();
-    layoutWrapper->MountToHostOnMainThread();
-}
-
 void RefreshTestNg::CreateRefreshNodeAndInitParam()
 {
     RefreshModelNG modelNG;
@@ -138,12 +115,6 @@ void RefreshTestNg::CreateRefreshNodeAndInitParam()
     modelNG.SetProgressColor(Color(0xf0000000));
     modelNG.SetProgressBackgroundColor(Color(0xf0000000));
     modelNG.SetTextStyle(TextStyle());
-}
-
-RefPtr<FrameNode> RefreshTestNg::GetChildFrameNode(int32_t index)
-{
-    auto child = frameNode_->GetChildAtIndex(index);
-    return AceType::DynamicCast<FrameNode>(child);
 }
 
 RefPtr<FrameNode> RefreshTestNg::CreateCustomNode()
@@ -175,7 +146,7 @@ HWTEST_F(RefreshTestNg, Drag001, TestSize.Level1)
     modelNG.SetOnStateChange(std::move(onStateChangeEvent));
     modelNG.SetOnRefreshing(std::move(onRefreshingEvent));
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. HandleDrag to refresh, and set IsRefreshing to false by front end
@@ -244,7 +215,7 @@ HWTEST_F(RefreshTestNg, Drag002, TestSize.Level1)
     modelNG.SetTextStyle(TextStyle());
     modelNG.Pop();
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. HandleDrag to refresh, and set IsRefreshing to false by front end
@@ -311,7 +282,7 @@ HWTEST_F(RefreshTestNg, Drag003, TestSize.Level1)
     modelNG.SetTextStyle(TextStyle());
     modelNG.Pop();
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
     
     pattern_->HandleDragStart();
 
@@ -359,11 +330,11 @@ HWTEST_F(RefreshTestNg, Pattern001, TestSize.Level1)
      * @tc.expected: would not replace node
      */
     pattern_->AddCustomBuilderNode(builder_1);
-    EXPECT_EQ(GetChildFrameNode(0), builder_1);
+    EXPECT_EQ(GetChildFrameNode(frameNode_, 0), builder_1);
 
     auto builder_2 = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
     pattern_->AddCustomBuilderNode(builder_2);
-    EXPECT_EQ(GetChildFrameNode(0), builder_2);
+    EXPECT_EQ(GetChildFrameNode(frameNode_, 0), builder_2);
 }
 
 /**
@@ -380,7 +351,7 @@ HWTEST_F(RefreshTestNg, AttrRefreshing001, TestSize.Level1)
     modelNG.SetTextStyle(TextStyle());
     modelNG.Pop();
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. IsRefreshing: true -> false
@@ -411,7 +382,7 @@ HWTEST_F(RefreshTestNg, AttrRefreshing002, TestSize.Level1)
     modelNG.SetTextStyle(TextStyle());
     modelNG.Pop();
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. IsRefreshing: true -> false
@@ -517,7 +488,7 @@ HWTEST_F(RefreshTestNg, RefreshAccessibility001, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     GetInstance();
-    RunMeasureAndLayout();
+    RunMeasureAndLayout(frameNode_);
 
     /**
      * @tc.steps: step1. When IsScrollable() == true
@@ -558,7 +529,7 @@ HWTEST_F(RefreshTestNg, PerformActionTest001, TestSize.Level1)
     RefreshModelNG refreshModelNG;
     refreshModelNG.Create();
     GetInstance();
-    RunMeasureAndLayout(); // trigger SetAccessibilityAction()
+    RunMeasureAndLayout(frameNode_); // trigger SetAccessibilityAction()
 
     /**
      * @tc.steps: step1. pattern->IsRefreshing() == false

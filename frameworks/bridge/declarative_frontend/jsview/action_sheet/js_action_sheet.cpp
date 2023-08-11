@@ -59,6 +59,14 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 } // namespace
 
+static void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
+{
+    if (styleValue >= static_cast<int32_t>(DialogButtonStyle::DEFAULT) &&
+        styleValue <= static_cast<int32_t>(DialogButtonStyle::HIGHTLIGHT)) {
+        buttonInfo.dlgButtonStyle = static_cast<DialogButtonStyle>(styleValue);
+    }
+}
+
 ActionSheetInfo ParseSheetInfo(const JSCallbackInfo& args, JSRef<JSVal> val)
 {
     ActionSheetInfo sheetInfo;
@@ -118,6 +126,13 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         properties.title = title;
     }
 
+    // Parse subtitle.
+    auto subtitleValue = obj->GetProperty("subtitle");
+    std::string subtitle;
+    if (ParseJsString(subtitleValue, subtitle)) {
+        properties.subtitle = subtitle;
+    }
+
     // Parses message.
     auto messageValue = obj->GetProperty("message");
     std::string message;
@@ -150,7 +165,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         JSRef<JSVal> value = confirmObj->GetProperty("value");
         std::string buttonValue;
         if (ParseJsString(value, buttonValue)) {
-            ButtonInfo buttonInfo = { .text = buttonValue, .textColor = "blue" };
+            ButtonInfo buttonInfo = { .text = buttonValue };
             JSRef<JSVal> actionValue = confirmObj->GetProperty("action");
             // parse confirm action
             if (actionValue->IsFunction()) {
@@ -170,7 +185,29 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
                 };
                 ActionSheetModel::GetInstance()->SetConfirm(gestureEvent, eventFunc, buttonInfo, properties);
             }
-            properties.buttons.emplace_back(buttonInfo);
+
+            // Parse enabled
+            auto enabledValue = confirmObj->GetProperty("enabled");
+            if (enabledValue->IsBoolean()) {
+                buttonInfo.enabled = enabledValue->ToBoolean();
+            }
+
+            // Parse defaultFocus
+            auto defaultFocusValue = confirmObj->GetProperty("defaultFocus");
+            if (defaultFocusValue->IsBoolean()) {
+                buttonInfo.defaultFocus = defaultFocusValue->ToBoolean();
+            }
+
+            // Parse style
+            auto style = confirmObj->GetProperty("style");
+            if (style->IsNumber()) {
+                auto styleValue = style->ToNumber<int32_t>();
+                SetParseStyle(buttonInfo, styleValue);
+            }
+
+            if (buttonInfo.IsValid()) {
+                properties.buttons.emplace_back(buttonInfo);
+            }
         }
     }
 
@@ -210,6 +247,13 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         auto dyValue = offsetObj->GetProperty("dy");
         ParseJsDimensionVp(dyValue, dy);
         properties.offset = DimensionOffset(dx, dy);
+    }
+
+    // Parse maskRect.
+    auto maskRectValue = obj->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        properties.maskRect = maskRect;
     }
 
     // Parses gridCount.

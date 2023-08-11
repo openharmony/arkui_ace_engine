@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <optional>
 
 #include "base/geometry/offset.h"
+#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -26,6 +27,7 @@
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 void CalendarPattern::OnAttachToFrameNode()
@@ -87,6 +89,10 @@ void CalendarPattern::OnModifyDone()
     FlushFocus(preMonth_);
     FlushFocus(currentMonth_);
     FlushFocus(nextMonth_);
+    if (currentPattern->IsCalendarDialog()) {
+        FlushDialogData();
+        UpdateTitleNode();
+    }
 
     // Initialize the calendar.
     if (initialize_) {
@@ -128,6 +134,7 @@ void CalendarPattern::OnModifyDone()
     auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto currentIndex = swiperPattern->GetCurrentIndex();
+    currentMonthIndex_ = currentIndex;
     LOGI("The current index is %{public}d", currentIndex);
 
     // Set calendat data according to the index.
@@ -195,7 +202,6 @@ void CalendarPattern::FireRequestData(MonthState monthState)
     CHECK_NULL_VOID(host);
     auto eventHub = GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto onRequest = eventHub->GetOnRequestDataEvent();
     auto json = JsonUtil::Create(true);
     if (monthState == MonthState::PRE_MONTH) {
         json->Put("MonthState", 1);
@@ -208,7 +214,7 @@ void CalendarPattern::FireRequestData(MonthState monthState)
     }
     json->Put("currentYear", calendarDay_.month.year);
     json->Put("currentMonth", calendarDay_.month.month);
-    onRequest(json->ToString());
+    eventHub->UpdateRequestDataEvent(json->ToString());
 }
 
 void CalendarPattern::FireGoToRequestData(int32_t year, int32_t month, int32_t day)
@@ -255,6 +261,7 @@ void CalendarPattern::JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr
     auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto currentIndex = swiperPattern->GetCurrentIndex();
+    currentMonthIndex_ = currentIndex;
     if (goTo_) {
         JumpTo(currentMonth_);
     }
@@ -328,6 +335,44 @@ void CalendarPattern::FlushFocus(ObtainedMonth& obtainedMonth)
     if (!flag) {
         obtainedMonth.days[0].focused = true;
     }
+}
+
+void CalendarPattern::FlushDialogData()
+{
+    FlushDialogMonthData(preMonth_);
+    FlushDialogMonthData(currentMonth_);
+    FlushDialogMonthData(nextMonth_);
+}
+
+void CalendarPattern::FlushDialogMonthData(ObtainedMonth& obtainedMonth)
+{
+    if (obtainedMonth.days.empty()) {
+        return;
+    }
+    for (auto& day : obtainedMonth.days) {
+        day.isSelected = day.month.year == static_cast<int32_t>(selectedDay_.GetYear()) &&
+                         day.month.month == static_cast<int32_t>(selectedDay_.GetMonth()) &&
+                         day.day == static_cast<int32_t>(selectedDay_.GetDay());
+    }
+}
+
+void CalendarPattern::UpdateTitleNode()
+{
+    if (!HasTitleNode()) {
+        return;
+    }
+    auto textTitleNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, GetTitleId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_VOID(textTitleNode);
+    auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    DateTime date;
+    date.year = currentMonth_.year;
+    date.month = currentMonth_.month - 1; // W3C's month start from 0 to 11
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->FormatDateTime(date, "YYYYMM"));
+    textTitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textTitleNode->MarkModifyDone();
 }
 
 void CalendarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

@@ -40,7 +40,7 @@ public:
     void Execute(TouchEventInfo& info);
 
 private:
-    JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo);
+    JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info);
     JSRef<JSObject> CreateJSEventInfo(TouchEventInfo& info);
 };
 

@@ -20,6 +20,7 @@
 
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_dispatcher_interface.h"
+
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_manager_resource.h"
 #include "core/components/form/resource/form_request_data.h"
@@ -45,13 +46,14 @@ public:
         std::function<void(int64_t, const std::string&, const std::string&, const std::string&)>;
     using OnFormUpdateCallbackForJava = std::function<void(int64_t, const std::string&)>;
     using OnFormAcquiredCallback = std::function<void(int64_t, const std::string&, const std::string&,
-        const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&,
-        const AppExecFwk::FormJsInfo&, const FrontendType& frontendType, const FrontendType& uiSyntax)>;
+        const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&, const AppExecFwk::FormJsInfo&,
+        const FrontendType& frontendType, const FrontendType& uiSyntax)>;
     using OnFormUpdateCallback =
         std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
+    using OnFormLinkInfoUpdateCallback = std::function<void(const std::vector<std::string>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
-    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&)>;
+    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, bool)>;
     using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
     using ActionEventHandle = std::function<void(const std::string&)>;
     using UnTrustFormCallback = std::function<void()>;
@@ -80,17 +82,18 @@ public:
     void AddFormUninstallCallback(const OnFormUninstallCallback& callback);
     void AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback);
     void AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback);
+    void AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback);
     void AddActionEventHandle(const ActionEventHandle& callback);
     void AddUnTrustFormCallback(const UnTrustFormCallback& callback);
     void AddSnapshotCallback(SnapshotCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
-    void DispatchPointerEvent(
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void AddRenderDelegate();
     void RegisterRenderDelegateEvent();
     void OnFormError(const std::string& code, const std::string& msg);
+    void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
     void ReleaseRenderer();
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
@@ -124,6 +127,7 @@ private:
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;
     OnFormAcquiredCallback onFormAcquiredCallback_;
     OnFormUpdateCallback onFormUpdateCallback_;
+    OnFormLinkInfoUpdateCallback onFormLinkInfoUpdateCallback_;
     OnFormErrorCallback onFormErrorCallback_;
     OnFormUninstallCallback onFormUninstallCallback_;
     OnFormSurfaceNodeCallback onFormSurfaceNodeCallback_;

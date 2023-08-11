@@ -39,6 +39,7 @@ public:
     void SetLineHeight(const Dimension& value) override;
     // TODO: add extra event for span.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
+    void ClearOnClick() override;
 };
 } // namespace OHOS::Ace::NG
 

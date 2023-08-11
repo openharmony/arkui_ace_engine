@@ -51,6 +51,11 @@ public:
         return MakeRefPtr<GaugeAccessibilityProperty>();
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+    }
+
     void OnModifyDone() override;
 
 private:

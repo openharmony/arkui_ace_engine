@@ -18,6 +18,8 @@
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
 #include "include/effects/SkGradientShader.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -196,7 +198,14 @@ void RosenRenderPatternLock::PaintLockLine(RSCanvas* canvas, const Offset& offse
     int offsetIntY = static_cast<int>(offset.GetY() - half);
     std::unique_ptr<RSRect> rect = std::make_unique<RSRect>(
         RSRect(offsetIntX, offsetIntY, offsetIntX + realSizeInt, offsetIntY + realSizeInt));
+#ifndef USE_ROSEN_DRAWING
     canvas->SaveLayerAlpha(*rect, pathColor_.GetAlpha());
+#else
+    RSBrush tempBrush;
+    tempBrush.SetAlpha(pathColor_.GetAlpha());
+    RSSaveLayerOps slo(rect.get(), &tempBrush);
+    canvas->SaveLayer(slo);
+#endif
     RSPen penStroke;
     penStroke.SetAntiAlias(true);
     penStroke.SetCapStyle(RSPen::CapStyle::ROUND_CAP);

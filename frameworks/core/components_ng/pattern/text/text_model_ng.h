@@ -49,6 +49,7 @@ public:
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     // TODO: add extra event for text.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
+    void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;

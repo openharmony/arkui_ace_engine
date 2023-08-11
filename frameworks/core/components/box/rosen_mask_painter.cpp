@@ -72,7 +72,6 @@ void RosenMaskPainter::LoadSVGImage(const WeakPtr<PipelineContext>& context)
         loadStatus_ = LoadStatus::UNLOADED;
         return;
     }
-#ifndef USE_ROSEN_DRAWING
     auto successCallback = [rsPainter = Claim(this)](const sk_sp<SkSVGDOM>& svgDom) {
         if (svgDom) {
             rsPainter->skiaDom_ = svgDom;
@@ -82,17 +81,6 @@ void RosenMaskPainter::LoadSVGImage(const WeakPtr<PipelineContext>& context)
             }
         }
     };
-#else
-    auto successCallback = [rsPainter = Claim(this)](const std::shared_ptr<RSSVGDOM>& svgDom) {
-        if (svgDom) {
-            rsPainter->svgDom_ = svgDom;
-            rsPainter->loadStatus_ = LoadStatus::LOADSUCCESS;
-            if (rsPainter->parent_) {
-                rsPainter->parent_->MarkNeedLayout(true);
-            }
-        }
-    };
-#endif
     auto failedCallback = [rsPainter = Claim(this)]() {
         rsPainter->loadStatus_ = LoadStatus::LOADFAIL;
         LOGE("Create imageProvider fail! mask image is %{private}s", rsPainter->maskImage_.c_str());
@@ -215,11 +203,7 @@ bool RosenMaskPainter::GetGradientPaint(const Rect& paintRect, RSBrush& brush)
 
 bool RosenMaskPainter::UpadteSVGImageDom(double& x, double& y)
 {
-#ifndef USE_ROSEN_DRAWING
     if (!skiaDom_) {
-#else
-    if (!svgDom_) {
-#endif
         LOGW("dom is not ready.");
         return false;
     }
@@ -227,11 +211,7 @@ bool RosenMaskPainter::UpadteSVGImageDom(double& x, double& y)
     x = 0.0f;
     y = 0.0f;
     Size boxSize = parent_->GetLayoutSize();
-#ifndef USE_ROSEN_DRAWING
     Size svgSize = Size(skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
-#else
-    Size svgSize = Size(svgDom_->GetContainerSize().Width(), svgDom_->GetContainerSize().Height());
-#endif
     if (boxSize.IsInfinite() || !boxSize.IsValid()) {
         if (svgSize.IsInfinite() || !svgSize.IsValid()) {
             return false;
@@ -257,11 +237,7 @@ bool RosenMaskPainter::UpadteSVGImageDom(double& x, double& y)
     if (svgSize.Width() <= 0 || svgSize.Height() <= 0) {
         int32_t width = static_cast<int32_t>(boxSize.Width());
         int32_t height = static_cast<int32_t>(boxSize.Height());
-#ifndef USE_ROSEN_DRAWING
         skiaDom_->setContainerSize({ width, height });
-#else
-        svgDom_->SetContainerSize(RSSize(width, height));
-#endif
     }
 
     lastFile_ = file_;
@@ -370,7 +346,7 @@ std::shared_ptr<Rosen::RSMask> RosenMaskPainter::GetRSMask(const Rect& paintRect
         double x = 0.0f;
         double y = 0.0f;
         if (UpadteSVGImageDom(x, y)) {
-            rsMask = Rosen::RSMask::CreateSVGMask(x, y, scaleX_, scaleY_, svgDom_);
+            rsMask = Rosen::RSMask::CreateSVGMask(x, y, scaleX_, scaleY_, skiaDom_);
         }
     } else if (IsColorGradient()) {
         RSBrush brush;

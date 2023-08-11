@@ -32,6 +32,7 @@ using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
+constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
 
 enum class FocusType : int32_t {
     DISABLE = 0,
@@ -57,6 +58,8 @@ enum class FocusStep : int32_t {
     UP_END = 0x4,
     RIGHT_END = 0X13,
     DOWN_END = 0x14,
+    SHIFT_TAB = 0x5,
+    TAB = 0x15,
 };
 
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
@@ -403,7 +406,9 @@ class ACE_EXPORT FocusHub : public virtual AceType {
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
         : eventHub_(eventHub), focusable_(focusable), focusType_(type)
-    {}
+    {
+        MarkRootFocusNeedUpdate();
+    }
     ~FocusHub() override = default;
 
     void SetFocusStyleType(FocusStyleType type)
@@ -507,6 +512,7 @@ public:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool RequestFocusImmediately();
     void RequestFocus() const;
+    void RequestFocusWithDefaultFocusFirstly() const;
     void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
@@ -514,14 +520,8 @@ public:
     void LostSelfFocus();
     void RemoveSelf();
     void RemoveChild(const RefPtr<FocusHub>& focusNode);
-    bool GoToNextFocusLinear(bool reverse, const RectF& rect = RectF());
-    bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect);
-
-    bool AcceptFocusOfLastFocus();
-    bool AcceptFocusByRectOfLastFocus(const RectF& rect);
-    bool AcceptFocusByRectOfLastFocusNode(const RectF& rect);
-    bool AcceptFocusByRectOfLastFocusScope(const RectF& rect);
-    bool AcceptFocusByRectOfLastFocusFlex(const RectF& rect);
+    bool GoToNextFocusLinear(FocusStep step, const RectF& rect = RectF());
+    bool TryRequestFocus(const RefPtr<FocusHub>& focusNode, const RectF& rect, FocusStep step = FocusStep::NONE);
 
     void CollectTabIndexNodes(TabIndexNodeList& tabIndexNodes);
     bool GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t tabNodeIdx);
@@ -573,6 +573,9 @@ public:
     {
         return currentFocus_;
     }
+    bool IsCurrentFocusWholePath();
+
+    void MarkRootFocusNeedUpdate();
 
     void ClearUserOnFocus()
     {
@@ -824,6 +827,11 @@ public:
         return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
     }
 
+    static inline bool IsFocusStepTab(FocusStep step)
+    {
+        return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_TAB) == MASK_FOCUS_STEP_TAB;
+    }
+
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
 protected:
@@ -831,8 +839,16 @@ protected:
     bool OnKeyEventNode(const KeyEvent& keyEvent);
     bool OnKeyEventScope(const KeyEvent& keyEvent);
 
+    bool AcceptFocusOfSpecifyChild(FocusStep step);
+    bool AcceptFocusOfLastFocus();
+    bool AcceptFocusByRectOfLastFocus(const RectF& rect);
+    bool AcceptFocusByRectOfLastFocusNode(const RectF& rect);
+    bool AcceptFocusByRectOfLastFocusScope(const RectF& rect);
+    bool AcceptFocusByRectOfLastFocusFlex(const RectF& rect);
+
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
     bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
+    bool FocusToHeadOrTailChild(bool isHead);
 
     void OnFocus();
     void OnFocusNode();
@@ -851,6 +867,10 @@ private:
     bool CalculatePosition();
 
     void SetScopeFocusAlgorithm();
+
+    void SetLastFocusNodeIndex(const RefPtr<FocusHub>& focusNode);
+
+    void ScrollToLastFocusIndex() const;
 
     void CheckFocusStateStyle(bool onFocus);
 
@@ -873,6 +893,7 @@ private:
     WeakPtr<EventHub> eventHub_;
 
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
+    int32_t lastFocusNodeIndex_ { -1 };
 
     bool focusable_ { true };
     bool parentFocusable_ { true };

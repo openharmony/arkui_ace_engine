@@ -162,6 +162,7 @@ template("declarative_js_engine") {
       "jsview/js_button.cpp",
       "jsview/js_calendar.cpp",
       "jsview/js_calendar_controller.cpp",
+      "jsview/js_calendar_picker.cpp",
       "jsview/js_canvas.cpp",
       "jsview/js_canvas_gradient.cpp",
       "jsview/js_canvas_image_data.cpp",
@@ -179,7 +180,6 @@ template("declarative_js_engine") {
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
-      "jsview/js_distributed.cpp",
       "jsview/js_divider.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_environment.cpp",
@@ -209,6 +209,7 @@ template("declarative_js_engine") {
       "jsview/js_list_item_group.cpp",
       "jsview/js_loading_progress.cpp",
       "jsview/js_local_storage.cpp",
+      "jsview/js_location_button.cpp",
       "jsview/js_marquee.cpp",
       "jsview/js_matrix2d.cpp",
       "jsview/js_menu.cpp",
@@ -223,6 +224,7 @@ template("declarative_js_engine") {
       "jsview/js_offscreen_rendering_context.cpp",
       "jsview/js_page_transition.cpp",
       "jsview/js_pan_handler.cpp",
+      "jsview/js_paste_button.cpp",
       "jsview/js_path.cpp",
       "jsview/js_path2d.cpp",
       "jsview/js_pattern_lock.cpp",
@@ -242,14 +244,12 @@ template("declarative_js_engine") {
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
+      "jsview/js_save_button.cpp",
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
       "jsview/js_sec_button_base.cpp",
-      "jsview/js_sec_location_button.cpp",
-      "jsview/js_sec_paste_button.cpp",
-      "jsview/js_sec_save_button.cpp",
       "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
@@ -438,7 +438,10 @@ template("declarative_js_engine") {
         "jsview/models/ability_component_model_impl.cpp",
       ]
 
-      external_deps += [ "window_manager:scene_session" ]
+      external_deps += [
+        "input:libmmi-client",
+        "window_manager:scene_session",
+      ]
     }
 
     if (defined(config.web_components_support) &&
@@ -542,14 +545,14 @@ template("declarative_js_engine") {
           config.plugin_components_support) {
         if (!use_mingw_win && !use_mac && !use_linux) {
           external_deps += [
-            "multimedia_image_framework:image",
-            "multimedia_image_framework:image_native",
+            "image_framework:image",
+            "image_framework:image_native",
           ]
         }
       } else {
         external_deps += [
-          "multimedia_image_framework:image",
-          "multimedia_image_framework:image_native",
+          "image_framework:image",
+          "image_framework:image_native",
         ]
       }
 
@@ -624,6 +627,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_button.cpp",
       "jsview/js_calendar.cpp",
       "jsview/js_calendar_controller.cpp",
+      "jsview/js_calendar_picker.cpp",
       "jsview/js_canvas.cpp",
       "jsview/js_canvas_gradient.cpp",
       "jsview/js_canvas_image_data.cpp",
@@ -683,7 +687,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_page_transition.cpp",
       "jsview/js_path.cpp",
       "jsview/js_path2d.cpp",
-      "jsview/js_pattern_lock.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
       "jsview/js_progress.cpp",
@@ -692,7 +695,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_rect.cpp",
       "jsview/js_recycle_view.cpp",
       "jsview/js_refresh.cpp",
-      "jsview/js_relative_container.cpp",
       "jsview/js_render_image.cpp",
       "jsview/js_rendering_context.cpp",
       "jsview/js_rendering_context_settings.cpp",
@@ -738,7 +740,11 @@ template("declarative_js_engine_ng") {
     ]
 
     if (!defined(config.use_components_lib) || !config.use_components_lib) {
-      sources += [ "jsview/js_qrcode.cpp" ]
+      sources += [
+        "jsview/js_pattern_lock.cpp",
+        "jsview/js_qrcode.cpp",
+        "jsview/js_relative_container.cpp",
+      ]
     }
 
     if (defined(config.video_components_support) &&

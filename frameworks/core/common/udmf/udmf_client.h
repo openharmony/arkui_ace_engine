@@ -19,12 +19,13 @@
 #include <map>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
 #include "core/common/frontend.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/form/resource/form_request_data.h"
 
 namespace OHOS::Ace {
-class UdmfClient : public AceType {
+class ACE_FORCE_EXPORT UdmfClient : public AceType {
     DECLARE_ACE_TYPE(UdmfClient, AceType);
 
 public:
@@ -48,8 +49,9 @@ public:
         const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent) = 0;
     virtual void AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) = 0;
     virtual void AddImageRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& uri) = 0;
-    virtual void AddTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) = 0;
-    virtual std::string GetSingleTextRecord(const RefPtr<UnifiedData>& unifiedData) = 0;
+    virtual void AddPlainTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) = 0;
+    virtual std::string GetSinglePlainTextRecord(const RefPtr<UnifiedData>& unifiedData) = 0;
+    virtual std::vector<std::string> GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData) = 0;
     virtual int32_t GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData, std::string& uri) = 0;
 };
 } // namespace OHOS::Ace

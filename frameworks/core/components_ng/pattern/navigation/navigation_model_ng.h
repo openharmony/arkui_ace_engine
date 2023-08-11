@@ -41,6 +41,7 @@ public:
     bool NeedSetItems() override;
 
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
@@ -48,6 +49,9 @@ public:
     void SetUsrNavigationMode(NG::NavigationMode mode) override;
     void SetNavBarPosition(NG::NavBarPosition mode) override;
     void SetNavBarWidth(const Dimension& value) override;
+    void SetMinNavBarWidth(const Dimension& value) override;
+    void SetMaxNavBarWidth(const Dimension& value) override;
+    void SetMinContentWidth(const Dimension& value) override;
     void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) override;
     void SetNavigationMode(NG::NavigationMode mode) override;
     void SetNavDestination(std::function<void(std::string)>&& builder) override;

@@ -172,6 +172,7 @@ ohos_unittest("ImageCompressorTest") {
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components/display/display_component.cpp",

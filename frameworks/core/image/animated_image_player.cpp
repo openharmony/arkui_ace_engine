@@ -24,6 +24,9 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/render/canvas_image.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
@@ -135,7 +138,11 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
     return SkImage::MakeFromBitmap(bitmap);
 }
 #else
-    // TODO Drawing : SkCodec
+std::shared_ptr<RSImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
+{
+    LOGE("Drawing is not supported");
+    return std::make_shared<RSImage>();
+}
 #endif
 
 bool AnimatedImagePlayer::CopyTo(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src)

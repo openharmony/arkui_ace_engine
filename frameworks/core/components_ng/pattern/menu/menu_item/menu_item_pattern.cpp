@@ -32,7 +32,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -84,7 +83,21 @@ void UpdateFontColor(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayout
     }
 }
 
-void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& size, const Color& color)
+void UpdateFontFamily(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+    const std::optional<std::vector<std::string>>& fontFamilies)
+{
+    std::vector<std::string> emptyFontfamily;
+    if (fontFamilies.has_value()) {
+        textProperty->UpdateFontFamily(fontFamilies.value());
+    } else if (menuProperty && menuProperty->GetFontFamily().has_value()) {
+        textProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
+    } else {
+        textProperty->UpdateFontFamily(emptyFontfamily);
+    }
+}
+
+void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& horizontalSize,
+    const Dimension& verticalSize, const Color& color)
 {
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetSrc(src);
@@ -94,7 +107,7 @@ void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimens
     CHECK_NULL_VOID(props);
     props->UpdateImageSourceInfo(imageSourceInfo);
     props->UpdateAlignment(Alignment::CENTER);
-    CalcSize idealSize = { CalcLength(size), CalcLength(size) };
+    CalcSize idealSize = { CalcLength(horizontalSize), CalcLength(verticalSize) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     props->UpdateCalcLayoutProperty(layoutConstraint);
@@ -112,10 +125,10 @@ void MenuItemPattern::OnMountToParentDone()
 
 void MenuItemPattern::OnAttachToFrameNode()
 {
+    RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
-    RegisterOnKeyEvent();
 }
 
 void CustomMenuItemPattern::OnAttachToFrameNode()
@@ -231,7 +244,7 @@ void MenuItemPattern::ShowSubMenu()
 
     auto focusHub = subMenu->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocus();
+    focusHub->RequestFocusWithDefaultFocusFirstly();
     parentMenuPattern->SetShowedSubMenu(subMenu);
 }
 
@@ -528,7 +541,8 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetMenuIconColor());
+    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
+        selectTheme->GetMenuIconColor());
 
     auto renderContext = selectIcon_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -562,7 +576,9 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    UpdateIconSrc(iconNode, iconSrc, selectTheme->GetIconSideLength(), selectTheme->GetMenuIconColor());
+    auto iconWidth = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconWidth();
+    auto iconHeight = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconHeight();
+    UpdateIconSrc(iconNode, iconSrc, iconWidth, iconHeight, selectTheme->GetMenuIconColor());
 
     iconNode->MountToParent(row, ((isStart && selectIcon_) || (!isStart && label_)) ? 1 : 0);
     iconNode->MarkModifyDone();
@@ -604,6 +620,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
     UpdateFontColor(
         textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+    auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
+    UpdateFontFamily(textProperty, menuProperty, fontFamily);
     textProperty->UpdateContent(content);
     textProperty->UpdateMaxLines(1);
     textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);

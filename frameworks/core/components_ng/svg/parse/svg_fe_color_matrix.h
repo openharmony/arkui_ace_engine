@@ -30,8 +30,13 @@ public:
 
     void OnInitStyle() override;
 
+#ifndef USE_ROSEN_DRAWING
     void OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
         const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const override;
+#else
+    void OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
+        const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const override;
+#endif
 
 private:
     float matrix_[20] = {}; // 5 * 4 matrix

@@ -71,6 +71,7 @@ public:
     std::unique_ptr<DrawableDescriptor> GetBackground();
     std::unique_ptr<DrawableDescriptor> GetMask();
     std::shared_ptr<Media::PixelMap> GetPixelMap() override;
+    static std::string GetStaticMaskClipPath();
 
 private:
     friend class ImageConverter;

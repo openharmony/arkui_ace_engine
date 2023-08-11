@@ -28,10 +28,7 @@ public:
     ~TextTimerLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
-    void Layout(LayoutWrapper* layoutWrapper) override;
 
-private:
-    static void PerformLayout(LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(TextTimerLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

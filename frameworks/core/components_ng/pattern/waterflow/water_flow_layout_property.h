@@ -37,6 +37,7 @@ public:
         ResetColumnsGap();
         ResetRowsGap();
         ResetWaterflowDirection();
+        ResetScrollEnabled();
         itemLayoutConstraint_.reset();
     }
 
@@ -127,6 +128,8 @@ public:
     {
         return itemLayoutConstraint_ != nullptr;
     }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutProperty);

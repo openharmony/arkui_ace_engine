@@ -104,11 +104,6 @@ public:
         return nullptr;
     }
 
-    virtual bool NeedOverridePaintRect()
-    {
-        return false;
-    }
-
     virtual std::optional<RectF> GetOverridePaintRect() const
     {
         return std::nullopt;
@@ -220,6 +215,11 @@ public:
         return false;
     }
 
+    virtual bool UsResRegion()
+    {
+        return true;
+    }
+
     std::optional<SizeF> GetHostFrameSize() const
     {
         auto frameNode = frameNode_.Upgrade();
@@ -313,6 +313,13 @@ public:
         return false;
     }
 
+    virtual int32_t GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
+    {
+        return -1;
+    }
+
+    virtual void ScrollToFocusNodeIndex(int32_t index) {}
+
     // out of viewport or visible is none or gone.
     virtual void OnInActive() {}
     virtual void OnActive() {}
@@ -348,15 +355,21 @@ public:
         return layoutProperty->HasAspectRatio();
     }
 
-    virtual void OnTouchTestHit() {}
+    virtual void OnTouchTestHit(SourceType hitTestType) {}
 
+    virtual int32_t GetDragRecordSize()
+    {
+        return -1;
+    }
+
+    virtual void OnLanguageConfigurationUpdate() {}
+    virtual void OnColorConfigurationUpdate() {}
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
-
-private:
+    
     WeakPtr<FrameNode> frameNode_;
-
+private:
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };
 } // namespace OHOS::Ace::NG

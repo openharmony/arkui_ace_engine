@@ -19,6 +19,8 @@
 #include "include/core/SkClipOp.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkRRect.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/components/align/render_align.h"

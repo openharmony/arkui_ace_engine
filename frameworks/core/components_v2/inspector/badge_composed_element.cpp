@@ -71,19 +71,31 @@ std::string BadgeComposedElement::GetMaxCount(void) const
 std::string BadgeComposedElement::GetBadgePosition(void) const
 {
     auto renderBadge = GetRenderBadge();
-    if (renderBadge) {
-        switch (renderBadge->GetBadgeComponent()->GetBadgePosition()) {
-            case BadgePosition::RIGHT_TOP:
-                return std::string("BadgePosition.RightTop");
-            case BadgePosition::RIGHT:
-                return std::string("BadgePosition.Right");
-            case BadgePosition::LEFT:
-                return std::string("BadgePosition.Left");
-            default:
-                break;
+    auto badgeComponent = renderBadge->GetBadgeComponent();
+    if (!badgeComponent->IsPositionXy()) {
+        if (renderBadge) {
+            switch (renderBadge->GetBadgeComponent()->GetBadgePosition()) {
+                case BadgePosition::RIGHT_TOP:
+                    return std::string("BadgePosition.RightTop");
+                case BadgePosition::RIGHT:
+                    return std::string("BadgePosition.Right");
+                case BadgePosition::LEFT:
+                    return std::string("BadgePosition.Left");
+                default:
+                    break;
+            }
         }
+        return std::string("-");
+    } else {
+        auto jsonValue = JsonUtil::Create(true);
+        if (renderBadge) {
+            if (badgeComponent) {
+                jsonValue->Put("x", badgeComponent->GetBadgePositionX().ToString().c_str());
+                jsonValue->Put("y", badgeComponent->GetBadgePositionY().ToString().c_str());
+            }
+        }
+        return jsonValue->ToString();
     }
-    return std::string("-");
 }
 
 std::string BadgeComposedElement::GetLabel(void) const

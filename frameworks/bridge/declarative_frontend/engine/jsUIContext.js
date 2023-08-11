@@ -30,22 +30,41 @@ class Font {
     }
 }
 
-class Mediaquery {
+class MediaQuery {
     /**
-     * Construct new instance of Mediaquery.
+     * Construct new instance of MediaQuery.
      * initialzie with instanceId.
      * @param instanceId obtained on the c++ side.
      * @since 10
      */
     constructor(instanceId) {
         this.instanceId_ = instanceId;
-        this.ohos_mediaquery = globalThis.requireNapi('mediaquery');
+        this.ohos_mediaQuery = globalThis.requireNapi('mediaquery');
     }
     matchMediaSync(condition) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let mediaQueryListener = this.ohos_mediaquery.matchMediaSync(condition);
+        let mediaQueryListener = this.ohos_mediaQuery.matchMediaSync(condition);
         __JSScopeUtil__.restoreInstanceId();
         return mediaQueryListener;
+    }
+}
+
+class UIInspector {
+    /**
+     * Construct new instance of ArkUIInspector.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 10
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_UIInspector  = globalThis.requireNapi('arkui.inspector');
+    }
+    createComponentObserver(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let componentObserver = this.ohos_UIInspector.createComponentObserver(id);
+        __JSScopeUtil__.restoreInstanceId();
+        return componentObserver;
     }
 }
 
@@ -83,11 +102,22 @@ class UIContext {
         return this.promptAction_;
     }
 
-    getMediaquery() {
-        this.mediaquery_ = new Mediaquery(this.instanceId_);
-        return this.mediaquery_;
+    getMediaQuery() {
+        this.mediaQuery_ = new MediaQuery(this.instanceId_);
+        return this.mediaQuery_;
     }
 
+    getUIInspector(){
+        this.UIInspector_ = new UIInspector(this.instanceId_);
+        return this.UIInspector_;
+    }
+
+    getComponentUtils() {
+        if(this.componentUtils_ == null) {
+            this.componentUtils_ = new ComponentUtils(this.instanceId_);
+        }
+        return this.componentUtils_;
+    }
     animateTo(value, event) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         Context.animateTo(value, event);
@@ -130,6 +160,24 @@ class UIContext {
             callback();
         }
         __JSScopeUtil__.restoreInstanceId();
+    }
+}
+class ComponentUtils {
+    /**
+     * Construct new instance of ComponentUtils.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 10
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+        this.ohos_componentUtils = globalThis.requireNapi('componentUtils');
+    }
+    getRectangleById(id) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let componentInformation = this.ohos_componentUtils.getRectangleById(id);
+        __JSScopeUtil__.restoreInstanceId();
+        return componentInformation;
     }
 }
 

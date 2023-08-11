@@ -206,6 +206,11 @@ void SliderModelNG::ResetTrackBorderRadius()
     ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius);
 }
 
+void SliderModelNG::ResetBlockSize()
+{
+    ACE_RESET_LAYOUT_PROPERTY(SliderLayoutProperty, BlockSize);
+}
+
 void SliderModelNG::ResetBlockType()
 {
     ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockType);

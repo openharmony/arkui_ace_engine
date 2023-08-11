@@ -63,6 +63,9 @@ public:
     void SetVisible(bool isVisible);
     void SetRingSweepEffect(bool value);
     void SetLinearSweepEffect(bool value);
+    void SetIsItalic(bool isItalic);
+    void SetSmoothEffect(bool value);
+    void SetStrokeRadius(float strokeRaidus);
 
 private:
     void ContentDrawWithFunction(DrawingContext& context);
@@ -103,6 +106,7 @@ private:
     void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     Gradient CreateCapsuleGradient() const;
     bool PostTask(const TaskExecutor::Task& task);
+    Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
@@ -114,6 +118,7 @@ private:
     RefPtr<AnimatablePropertyFloat> sweepingDate_;
     RefPtr<AnimatablePropertyFloat> trailingHeadDate_;
     RefPtr<AnimatablePropertyFloat> trailingTailDate_;
+    RefPtr<AnimatablePropertyFloat> strokeRadius_;
 
     // no Animatable
     RefPtr<PropertyOffsetF> offset_;
@@ -128,6 +133,8 @@ private:
     RefPtr<PropertyBool> linearSweepEffect_;
     RefPtr<PropertyBool> paintShadow_;
     RefPtr<PropertyInt> progressStatus_;
+    RefPtr<PropertyBool> isItalic_;
+    RefPtr<PropertyBool> smoothEffect_;
 
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;

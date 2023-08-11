@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/components/common/properties/text_style.h"
 #include "core/components/picker/picker_data.h"
 
 namespace OHOS::Ace::NG {
@@ -35,6 +36,8 @@ struct PickerTextStyle {
     std::optional<Color> textColor;
     std::optional<Dimension> fontSize;
     std::optional<FontWeight> fontWeight;
+    std::optional<std::vector<std::string>> fontFamily;
+    std::optional<Ace::FontStyle> fontStyle;
 };
 struct PickerTextProperties {
     PickerTextStyle disappearTextStyle_;
@@ -64,6 +67,7 @@ struct TextCascadePickerOptionsAttr {
 
 struct DatePickerSettingData {
     bool isLunar;
+    bool lunarswitch;
     bool showTime;
     bool useMilitary;
     std::map<std::string, PickerDate> datePickerProperty;

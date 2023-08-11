@@ -28,6 +28,8 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
 
 void TextPattern::HandleOnSelectAll() {}
 
+void TextPattern::HandleOnCopy() {}
+
 void TextPattern::OnModifyDone() {}
 
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -66,6 +68,8 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 {
     return {};
 }
+
+void TextPattern::OnColorConfigurationUpdate() {}
 
 void TextPattern::InitSurfaceChangedCallback() {}
 void TextPattern::OnAttachToFrameNode() {}

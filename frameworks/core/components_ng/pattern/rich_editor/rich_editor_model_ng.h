@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_MODEL_NG_H
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorModelNG : public OHOS::Ace::RichEditorModel {
@@ -24,6 +25,15 @@ public:
     void Create() override;
     RefPtr<RichEditorControllerBase> GetRichEditorController() override;
     void SetOnReady(std::function<void()>&& func) override;
+    void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
+    void SetAboutToIMEInput(std::function<bool(const RichEditorInsertValue&)>&& func) override;
+    void SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func) override;
+    void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
+    void SetOnDeleteComplete(std::function<void()>&& func) override;
+    void SetCustomKeyboard(std::function<void()>&& func) override;
+
+private:
+    void SetDraggable(bool draggable);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_MODEL_NG_H

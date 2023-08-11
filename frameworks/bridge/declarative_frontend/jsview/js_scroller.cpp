@@ -61,6 +61,8 @@ constexpr ScrollAlign ALIGN_TABLE[] = {
     ScrollAlign::AUTO,
 };
 
+const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
+
 } // namespace
 
 void JSScroller::JSBind(BindingTarget globalObj)
@@ -100,8 +102,11 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     Dimension xOffset;
     Dimension yOffset;
-    if (!ConvertFromJSValue(obj->GetProperty("xOffset"), xOffset) ||
-        !ConvertFromJSValue(obj->GetProperty("yOffset"), yOffset)) {
+    auto xOffsetStr = obj->GetProperty("xOffset");
+    auto yOffsetStr = obj->GetProperty("yOffset");
+    if (!std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX) ||
+        !std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX) || !ConvertFromJSValue(xOffsetStr, xOffset) ||
+        !ConvertFromJSValue(yOffsetStr, yOffset) || xOffset.IsNegative() || yOffset.IsNegative()) {
         LOGW("Failed to parse param 'xOffset' or 'yOffset'");
         return;
     }
@@ -176,7 +181,7 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
 {
     int32_t index = 0;
     bool smooth = false;
-    ScrollAlign align = ScrollAlign::START;
+    ScrollAlign align = ScrollAlign::NONE;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], index) || index < 0) {
         LOGW("Invalid params");
         return;

@@ -497,11 +497,7 @@ void RenderSideBarContainer::UpdateRenderImage()
             imageComponent->SetSrc(sideBar_->GetSwitchIcon());
         }
     }
-#ifndef USE_ROSEN_DRAWING
     imageComponent->SetUseSkiaSvg(false);
-#else
-    imageComponent->SetUseDrawingSvg(false);
-#endif
     imageComponent->SetImageFit(ImageFit::FILL);
     renderImage->Update(imageComponent);
 }

@@ -319,4 +319,19 @@ void ProgressModelNG::SetLinearSweepingEffect(bool value)
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableLinearScanEffect, value);
 }
 
+void ProgressModelNG::SetSmoothEffect(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, value);
+}
+
+void ProgressModelNG::SetStrokeRadius(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, value);
+}
+
+void ProgressModelNG::ResetStrokeRadius()
+{
+    ACE_RESET_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius);
+}
+
 } // namespace OHOS::Ace::NG

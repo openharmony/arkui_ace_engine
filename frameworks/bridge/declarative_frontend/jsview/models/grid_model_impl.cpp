@@ -22,6 +22,8 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/ace_application_info.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -130,12 +132,23 @@ void GridModelImpl::SetCachedCount(int32_t value)
     grid->SetCachedCount(value);
 }
 
-void GridModelImpl::SetIsRTL(bool rightToLeft)
+void GridModelImpl::SetIsRTL(TextDirection direction)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);
     CHECK_NULL_VOID(grid);
-    grid->SetRightToLeft(rightToLeft);
+    bool isRtl;
+    switch (direction) {
+        case TextDirection::RTL:
+            isRtl = true;
+            break;
+        case TextDirection::LTR:
+            isRtl = false;
+            break;
+        default:
+            isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    }
+    grid->SetRightToLeft(isRtl);
 }
 
 void GridModelImpl::SetLayoutDirection(FlexDirection value)
@@ -218,7 +231,7 @@ void GridModelImpl::SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>
 }
 
 void GridModelImpl::SetOnScrollBarUpdate(
-    std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, float)>&& value)
+    std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>&& value)
 {}
 
 void GridModelImpl::SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value)

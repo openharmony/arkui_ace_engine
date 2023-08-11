@@ -19,6 +19,8 @@
 
 #include "gtest/gtest.h"
 
+#include "core/common/window_animation_config.h"
+
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
@@ -42,6 +44,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -57,7 +60,6 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -289,10 +291,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg003, TestSize.Level1)
      * @tc.steps2: Add dirty layout and render nodes to taskScheduler_ to test functions
      *             FlushLayoutTask and FlushRenderTask of the UITaskScheduler.
      */
-    context_->taskScheduler_.AddDirtyLayoutNode(frameNode_);
-    context_->taskScheduler_.dirtyLayoutNodes_[frameNode_->GetPageId()].emplace(nullptr);
-    context_->taskScheduler_.AddDirtyRenderNode(frameNode_);
-    context_->taskScheduler_.dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
+    context_->taskScheduler_->AddDirtyLayoutNode(frameNode_);
+    context_->taskScheduler_->dirtyLayoutNodes_[frameNode_->GetPageId()].emplace(nullptr);
+    context_->taskScheduler_->AddDirtyRenderNode(frameNode_);
+    context_->taskScheduler_->dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
 
     /**
      * @tc.steps3: Call the function FlushVsync with isEtsCard=true.
@@ -401,11 +403,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     context_->FlushFocus();
     EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
 
-     /**
-     * @tc.steps5: set stageManager_ and stageNode_, stageNode_'s child,
-                create frameNode_1's focusHub and call SetIsDefaultHasFocused with true
-     * @tc.expected: RequestDefaultFocus returns false.
-     */
+    /**
+    * @tc.steps5: set stageManager_ and stageNode_, stageNode_'s child,
+               create frameNode_1's focusHub and call SetIsDefaultHasFocused with true
+    * @tc.expected: RequestDefaultFocus returns false.
+    */
     context_->stageManager_->stageNode_ = frameNode_;
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
@@ -471,6 +473,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg007, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     /**
      * @tc.steps2: Call the function SetupRootElement with isJsCard_ = true.
      * @tc.expected: The stageManager_ is non-null.
@@ -1450,7 +1453,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
      * @tc.expected: the return is same as expectation.
      */
     context_->textFieldManager_ = nullptr;
-    // the first arg is rootHeigth_, the second arg is the parameter of founction,
+    // the first arg is rootHeight_, the second arg is the parameter of function,
     // the third arg is the expectation returns
     std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, -100 } };
     for (int turn = 0; turn < params.size(); turn++) {
@@ -1468,7 +1471,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     ASSERT_NE(context_->rootNode_, nullptr);
     // the first arg is manager->height_, the second arg is manager->position_.deltaY_
     // the third arg is rootHeight_, the forth arg is context_->rootNode_->geometryNode_->frame_.rect_.y_
-    // the fifth arg is the parameter of founction, the sixth arg is the expectation returns
+    // the fifth arg is the parameter of function, the sixth arg is the expectation returns
     params = { { 10, 100, 300, 0, 50, 0 }, { 10, 100, 300, 100, 100, 100 }, { 30, 100, 300, 100, 50, 100 },
         { 50, 290, 400, 100, 200, -145 }, { -1000, 290, 400, 100, 200, 100 } };
     for (int turn = 0; turn < params.size(); turn++) {
@@ -1713,20 +1716,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
     frameNode_3->layoutProperty_ = AceType::MakeRefPtr<ImageLayoutProperty>();
     auto rt = context_->GetNavDestinationBackButtonNode();
     EXPECT_EQ(rt, nullptr);
-    /**
-     * @tc.steps3: set propVisibility_ equals GONE and call GetNavDestinationBackButtonNode.
-     * @tc.expected: rt is nullptr.
-     */
-    frameNode_3->layoutProperty_->propVisibility_ = VisibleType::GONE;
-    rt = context_->GetNavDestinationBackButtonNode();
-    EXPECT_EQ(rt, nullptr);
-    /**
-     * @tc.steps4: set propVisibility_ equals VISIBLE and call GetNavDestinationBackButtonNode.
-     * @tc.expected: rt is not nullptr.
-     */
-    frameNode_3->layoutProperty_->propVisibility_ = VisibleType::VISIBLE;
-    rt = context_->GetNavDestinationBackButtonNode();
-    EXPECT_NE(rt, nullptr);
 }
 
 /**
@@ -1838,10 +1827,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg037, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     bool flag = false;
-    auto callback = [&flag](int32_t input_1, int32_t input_2, int32_t input_3, int32_t input_4) { flag = !flag; };
+    auto callback = [&flag](int32_t input_1, int32_t input_2, int32_t input_3, int32_t input_4,
+                        WindowSizeChangeReason type) { flag = !flag; };
     context_->surfaceChangedCallbackMap_[0] = callback;
     context_->surfaceChangedCallbackMap_[1] = nullptr;
-    context_->ExecuteSurfaceChangedCallbacks(0, 0);
+    context_->ExecuteSurfaceChangedCallbacks(0, 0, WindowSizeChangeReason::ROTATION);
     EXPECT_TRUE(flag);
 }
 
@@ -1919,6 +1909,57 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNg041
+ * @tc.desc: Test the function OnLayoutCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg041, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: frontend-ptr is non-null.
+     */
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context_, nullptr);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps2: test the function OnLayoutCompleted by TEST_TAG.
+     * @tc.expected: frontend componentId_ is TEST_TAG
+     */
+    context_->OnLayoutCompleted(TEST_TAG);
+    EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
+    context_->weakFrontend_.Reset();
+}
+
+/**
+ * @tc.name: PipelineContextTestNg042
+ * @tc.desc: Test the function OnDrawCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg042, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: frontend-ptr is non-null.
+     */
+
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context_, nullptr);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps4: test the function OnDrawCompleted by TEST_TAG.
+     * @tc.expected: frontend componentId_ is TEST_TAG
+     */
+    context_->OnDrawCompleted(TEST_TAG);
+    EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
+    context_->weakFrontend_.Reset();
+}
+
+/**
  * @tc.name: UITaskSchedulerTestNg001
  * @tc.desc: Test FlushLayoutTask.
  * @tc.type: FUNC
@@ -1958,35 +1999,35 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg001, TestSize.Level1)
     taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     taskScheduler.FlushLayoutTask(false);
-    EXPECT_EQ(frameInfo.layoutInfos_.size(), 0);
-
-    /**
-     * @tc.steps6: add layoutNode again and set isLayoutDirtyMarked_ true  and recall FlushLayoutTask with false .
-     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 1.
-     */
-    taskScheduler.AddDirtyLayoutNode(frameNode2);
-    frameNode2->isLayoutDirtyMarked_ = true;
-    taskScheduler.FlushLayoutTask(false);
     EXPECT_EQ(frameInfo.layoutInfos_.size(), 1);
 
     /**
-     * @tc.steps7: add layoutNode again and call FlushLayoutTask with true .
+     * @tc.steps6: add layoutNode again and set isLayoutDirtyMarked_ true  and recall FlushLayoutTask with false .
      * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 2.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     frameNode2->isLayoutDirtyMarked_ = true;
-    taskScheduler.FlushLayoutTask(true);
+    taskScheduler.FlushLayoutTask(false);
     EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
 
     /**
+     * @tc.steps7: add layoutNode again and call FlushLayoutTask with true .
+     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 3.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    frameNode2->isLayoutDirtyMarked_ = true;
+    taskScheduler.FlushLayoutTask(true);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 3);
+
+    /**
      * @tc.steps8: finish FinishRecordFrameInfo and do step7.
-     * @tc.expected: frame info stop record frameInfo.layoutInfos_.size is 2.
+     * @tc.expected: frame info stop record frameInfo.layoutInfos_.size is 3.
      */
     taskScheduler.FinishRecordFrameInfo();
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     frameNode2->isLayoutDirtyMarked_ = true;
     taskScheduler.FlushLayoutTask(true);
-    EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 3);
 }
 
 /**
@@ -2088,7 +2129,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg004, TestSize.Level1)
      * @tc.expected: NeedAdditionalLayout return true.
      */
     auto frameNode3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 3, nullptr);
-    auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode3);
+    auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>("test", frameNode3);
     geometryTransition->hasOutAnim_ = true;
     geometryTransition->inNode_ = frameNode2;
     geometryTransition->outNode_ = frameNode3;

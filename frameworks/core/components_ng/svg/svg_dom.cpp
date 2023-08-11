@@ -268,7 +268,7 @@ bool SvgDom::IsStatic()
 }
 
 void SvgDom::DrawImage(
-    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color)
+    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>&)
 {
     CHECK_NULL_VOID_NOLOG(root_);
     canvas.Save();
@@ -276,7 +276,7 @@ void SvgDom::DrawImage(
     FitImage(canvas, imageFit, layout);
     FitViewPort(layout);
     // draw svg tree
-    root_->Draw(canvas, layout, color);
+    root_->Draw(canvas, layout, fillColor_);
     canvas.Restore();
 }
 

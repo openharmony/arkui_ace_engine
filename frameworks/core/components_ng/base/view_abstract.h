@@ -43,8 +43,8 @@
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
-#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
 struct OptionParam {
@@ -53,15 +53,12 @@ struct OptionParam {
     std::function<void()> action;
 
     OptionParam() = default;
-    OptionParam(
-        const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(iconParam),
-          action(actionParam) {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+        : value(valueParam), icon(iconParam), action(actionParam)
+    {}
     OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
-        : value(valueParam),
-          icon(""),
-          action(actionParam) {}
+        : value(valueParam), icon(""), action(actionParam)
+    {}
 
     ~OptionParam() = default;
 };
@@ -74,6 +71,7 @@ struct MenuParam {
     std::function<void()> onDisappear;
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
+    bool isAboveApps = false;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -85,17 +83,20 @@ public:
     static void SetMinHeight(const CalcLength& minHeight);
     static void SetMaxWidth(const CalcLength& maxWidth);
     static void SetMaxHeight(const CalcLength& maxHeight);
+    static void ResetMinSize(bool resetWidth);
+    static void ResetMaxSize(bool resetWidth);
 
     static void SetAspectRatio(float ratio);
     static void SetLayoutWeight(int32_t value);
     static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color& color);
-    static void SetBackgroundImage(const std::string& src);
+    static void SetBackgroundImage(const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat);
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
+    static void SetBackgroundEffect(const EffectOption& effectOption);
     static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle);
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
@@ -123,9 +124,13 @@ public:
     static void SetHasBorderImageRepeat(bool tag);
     static void SetBorderImageGradient(const NG::Gradient& gradient);
 
+    // customBackground
+    static void SetBackgroundAlign(const Alignment& align);
+
     // decoration
     static void SetBackdropBlur(const Dimension& radius);
     static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
+    static void SetDynamicLightUp(float rate, float lightUpDegree);
     static void SetFrontBlur(const Dimension& radius);
     static void SetBackShadow(const Shadow& shadow);
 
@@ -160,12 +165,14 @@ public:
     static void SetZIndex(int32_t value);
     // renderGroup
     static void SetRenderGroup(bool isRenderGroup);
+    // renderFit, i.e. gravity
+    static void SetRenderFit(RenderFit renderFit);
 
     // transform
     static void SetScale(const NG::VectorF& value);
     static void SetPivot(const DimensionOffset& value);
     static void SetTranslate(const NG::TranslateOptions& value);
-    static void SetRotate(const NG::Vector4F& value);
+    static void SetRotate(const NG::Vector5F& value);
 
     static void SetTransformMatrix(const Matrix4& matrix);
 
@@ -193,6 +200,7 @@ public:
     static void SetOnVisibleChange(
         std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList);
     static void SetResponseRegion(const std::vector<DimensionRect>& responseRegion);
+    static void SetMouseResponseRegion(const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
     static void SetDraggable(bool draggable);
@@ -240,7 +248,7 @@ public:
     // sharedTransition
     static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     // geometryTransition
-    static void SetGeometryTransition(const std::string& id);
+    static void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false);
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape>& basicShape);
     static void SetClipEdge(bool isClip);
@@ -277,15 +285,16 @@ public:
     static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
 
     // custom animatable property
-    static void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent);
+    static void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
     static void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     static void CreateAnimatableArithmeticProperty(const std::string& propertyName,
         RefPtr<CustomAnimatableArithmetic>& value,
         std::function<void(const RefPtr<CustomAnimatableArithmetic>&)>& onCallbackEvent);
-    static void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-        RefPtr<CustomAnimatableArithmetic>& value);
+    static void UpdateAnimatableArithmeticProperty(
+        const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value);
     static void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts);
+
 private:
     static void AddDragFrameNodeToManager();
 };

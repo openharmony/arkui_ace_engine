@@ -33,6 +33,28 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
+                         const RefPtr<DialogTheme>& theme)
+{
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        properties.alignment = DialogAlignment::BOTTOM;
+    } else {
+        properties.alignment = DialogAlignment::CENTER;
+    }
+    if (textPickerDialog.alignment.has_value()) {
+        properties.alignment = textPickerDialog.alignment.value();
+    }
+    properties.customStyle = false;
+    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    if (textPickerDialog.offset.has_value()) {
+        properties.offset = textPickerDialog.offset.value();
+    }
+
+    properties.maskRect = textPickerDialog.maskRect;
+}
+}
+
 void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnKind)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -42,7 +64,6 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetColumnsKind(columnKind);
-
     CHECK_NULL_VOID(pickerTheme);
     uint32_t showCount = pickerTheme->GetShowOptionCount();
 
@@ -69,16 +90,22 @@ void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTh
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, selectedStyle.GetTextColor());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight, selectedStyle.GetFontWeight());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontFamily, selectedStyle.GetFontFamilies());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontStyle, selectedStyle.GetFontStyle());
 
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearColor, disappearStyle.GetTextColor());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearWeight, disappearStyle.GetFontWeight());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontFamily, disappearStyle.GetFontFamilies());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontStyle, disappearStyle.GetFontStyle());
 
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, normalStyle.GetFontSize());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color, normalStyle.GetTextColor());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight, normalStyle.GetFontWeight());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontFamily, normalStyle.GetFontFamilies());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle, normalStyle.GetFontStyle());
 
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, true);
 }
@@ -207,6 +234,10 @@ void TextPickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerT
         TextPickerLayoutProperty, DisappearColor, value.textColor.value_or(disappearStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, DisappearWeight, value.fontWeight.value_or(disappearStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearFontFamily, value.fontFamily.value_or(disappearStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearFontStyle, value.fontStyle.value_or(disappearStyle.GetFontStyle()));
 }
 
 void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
@@ -222,6 +253,10 @@ void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerThem
         TextPickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, FontFamily, value.fontFamily.value_or(normalStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, FontStyle, value.fontStyle.value_or(normalStyle.GetFontStyle()));
 }
 
 void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
@@ -237,6 +272,10 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
         TextPickerLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedWeight, value.fontWeight.value_or(selectedStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedFontFamily, value.fontFamily.value_or(selectedStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
 void TextPickerModelNG::SetOnCascadeChange(TextCascadeChangeEvent&& onChange)
@@ -471,13 +510,7 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     dialogCancelEvent["cancelId"] = func;
     DialogProperties properties;
     ButtonInfo buttonInfo;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        properties.alignment = DialogAlignment::BOTTOM;
-    } else {
-        properties.alignment = DialogAlignment::CENTER;
-    }
-    properties.customStyle = false;
-    properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    SetDialogProperties(properties, textPickerDialog, theme);
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

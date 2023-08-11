@@ -55,8 +55,11 @@ public:
         }
         return tabBarItemId_.value();
     }
+
 private:
     void ProcessTabBarItem();
+    std::string ConvertFlexAlignToString(FlexAlign verticalAlign) const;
+    std::string ConvertLayoutModeToString(LayoutMode layoutMode) const;
 
     std::optional<int32_t> tabBarItemId_;
     ACE_DISALLOW_COPY_AND_MOVE(TabContentNode);

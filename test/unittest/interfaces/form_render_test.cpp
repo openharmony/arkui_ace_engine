@@ -139,8 +139,8 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
      * @tc.steps: step6. call formRenderer's ReloadForm
      * @tc.expected: step6. uiContent's relevant methods are called
      */
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), ReloadForm()).WillOnce(Return());
-    formRendererGroup->ReloadForm();
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), ReloadForm(_)).WillOnce(Return());
+    formRendererGroup->ReloadForm(formJsInfo);
 
     /**
      * @tc.steps: step7. delete formRenderer whose compId not exists

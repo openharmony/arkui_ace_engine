@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/base/ui_node.h"
 
 #include <memory>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
@@ -37,7 +37,7 @@ thread_local int32_t UINode::currentAccessibilityId_ = 0;
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
-    if (SystemProperties::IsPerformanceCheckEnabled()) {
+    if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
         nodeInfo_ = std::make_unique<PerformanceCheckNode>();
         nodeInfo_->codeRow = pos.first;
@@ -84,8 +84,9 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d",
-            (*it)->GetId(), child->GetId());
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
+             "%{public}d",
+            (*it)->GetId(), child->GetTag().c_str(), child->GetId());
         return;
     }
 
@@ -111,11 +112,11 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     if ((*iter)->OnRemoveFromParent(allowTransition)) {
         // OnRemoveFromParent returns true means the child can be removed from tree immediately.
         RemoveDisappearingChild(child);
-        MarkNeedSyncRenderTree();
     } else {
         // else move child into disappearing children, skip syncing render tree
         AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
+    MarkNeedSyncRenderTree(true);
     auto result = children_.erase(iter);
     return result;
 }
@@ -171,7 +172,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     }
 
     auto iter = RemoveChild(oldNode);
-    DoAddChild(iter, newNode);
+    DoAddChild(iter, newNode, false, false);
 }
 
 void UINode::Clean(bool cleanDirectly, bool allowTransition)
@@ -198,9 +199,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
         ++index;
     }
     children_.clear();
-    if (needSyncRenderTree) {
-        MarkNeedSyncRenderTree();
-    }
+    MarkNeedSyncRenderTree(true);
 }
 
 void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently)
@@ -212,6 +211,20 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
     }
     if (parent->GetPageId() != 0) {
         SetHostPageId(parent->GetPageId());
+    }
+}
+
+void UINode::UpdateConfigurationUpdate(const OnConfigurationChange& configurationChange)
+{
+    OnConfigurationUpdate(configurationChange);
+    if (needCallChildrenUpdate_) {
+        auto children = GetChildren();
+        for (const auto& child : children) {
+            if (!child) {
+                continue;
+            }
+            child->UpdateConfigurationUpdate(configurationChange);
+        }
     }
 }
 
@@ -233,16 +246,17 @@ void UINode::ResetParent()
     depth_ = -1;
 }
 
-void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
+void UINode::DoAddChild(
+    std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool allowTransition)
 {
     children_.insert(it, child);
 
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
     if (!silently && onMainTree_) {
-        child->AttachToMainTree();
+        child->AttachToMainTree(!allowTransition);
     }
-    MarkNeedSyncRenderTree();
+    MarkNeedSyncRenderTree(true);
 }
 
 RefPtr<FrameNode> UINode::GetFocusParent() const
@@ -303,6 +317,7 @@ void UINode::AttachToMainTree(bool recursive)
         return;
     }
     onMainTree_ = true;
+    isRemoving_ = false;
     OnAttachToMainTree(recursive);
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -317,6 +332,7 @@ void UINode::DetachFromMainTree(bool recursive)
         return;
     }
     onMainTree_ = false;
+    isRemoving_ = true;
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -367,7 +383,7 @@ void UINode::MovePosition(int32_t slot)
         children.remove(self);
     }
     children.insert(it, self);
-    parentNode->MarkNeedSyncRenderTree();
+    parentNode->MarkNeedSyncRenderTree(true);
 }
 
 void UINode::UpdateLayoutPropertyFlag()
@@ -399,11 +415,11 @@ void UINode::MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag)
     }
 }
 
-void UINode::MarkNeedSyncRenderTree()
+void UINode::MarkNeedSyncRenderTree(bool needRebuild)
 {
     auto parent = parent_.Upgrade();
     if (parent) {
-        parent->MarkNeedSyncRenderTree();
+        parent->MarkNeedSyncRenderTree(needRebuild);
     }
 }
 
@@ -419,6 +435,12 @@ void UINode::OnDetachFromMainTree(bool) {}
 void UINode::OnAttachToMainTree(bool)
 {
     useOffscreenProcess_ = false;
+    decltype(attachToMainTreeTasks_) tasks(std::move(attachToMainTreeTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
 }
 
 void UINode::DumpTree(int32_t depth)
@@ -430,21 +452,23 @@ void UINode::DumpTree(int32_t depth)
         DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(children_.size()));
     }
 
-    for (const auto& item : children_) {
+    for (const auto& item : GetChildren()) {
         item->DumpTree(depth + 1);
     }
 }
 
-void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
+void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
 {
     for (const auto& child : children_) {
-        child->AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+        if (!child->IsInDestroying()) {
+            child->AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+        }
     }
 }
 
 void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->OnGenerateOneDepthVisibleFrame(visibleList);
     }
 }
@@ -452,7 +476,7 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
 void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {
     // normal child
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
     // disappearing children
@@ -463,7 +487,7 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
 
 void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
 {
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->OnGenerateOneDepthAllFrame(visibleList);
     }
 }
@@ -551,7 +575,7 @@ int32_t UINode::GetChildIndexById(int32_t id)
     return -1;
 }
 
-RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
+RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     if (GetChildren().empty()) {
         return nullptr;
@@ -585,9 +609,29 @@ void UINode::SetActive(bool active)
     }
 }
 
+void UINode::SetJSViewActive(bool active)
+{
+    for (const auto& child : children_) {
+        child->SetJSViewActive(active);
+    }
+}
+
 void UINode::OnVisibleChange(bool isVisible)
 {
+    UpdateChildrenVisible(isVisible);
+}
+
+void UINode::UpdateChildrenVisible(bool isVisible) const
+{
     for (const auto& child : GetChildren()) {
+        if (InstanceOf<FrameNode>(child)) {
+            auto childLayoutProperty = DynamicCast<FrameNode>(child)->GetLayoutProperty();
+            if (childLayoutProperty &&
+                childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+                // child is invisible, no need to update visible state.
+                continue;
+            }
+        }
         child->OnVisibleChange(isVisible);
     }
 }
@@ -685,7 +729,7 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
 void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
 {
     // populating with visible children
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
     // inserting disappearing children
@@ -738,4 +782,54 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
         child->GetPerformanceCheckData(nodeMap);
     }
 }
+
+RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
+{
+    if (id.empty()) {
+        return nullptr;
+    }
+    for (auto& [node, index] : disappearingChildren_) {
+        if (node->GetInspectorIdValue("") == id) {
+            return node;
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index)
+{
+    for (const auto& child : children_) {
+        uint32_t count = static_cast<uint32_t>(child->FrameCount());
+        if (count > index) {
+            return child->GetFrameChildByIndex(index);
+        }
+        index -= count;
+    }
+    return nullptr;
+}
+
+void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
+{
+    if (isAll) {
+        for (const auto& child : children_) {
+            child->DoRemoveChildInRenderTree(index, isAll);
+        }
+        return;
+    }
+    for (const auto& child : children_) {
+        uint32_t count = static_cast<uint32_t>(child->FrameCount());
+        if (count > index) {
+            return child->DoRemoveChildInRenderTree(index);
+        }
+        index -= count;
+    }
+}
+
+void UINode::OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
+{
+    for (const auto& child : GetChildren()) {
+        child->OnSetCacheCount(cacheCount, itemConstraint);
+    }
+}
+
 } // namespace OHOS::Ace::NG

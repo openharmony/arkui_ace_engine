@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -80,9 +81,19 @@ public:
         return sideBarOffset_;
     }
 
+    SideBarContainerType GetSideBarContainerType() const
+    {
+        return type_;
+    }
+
     void SetSideBarContainerType(SideBarContainerType type)
     {
         type_ = type;
+    }
+
+    void SetControlButtonClick(bool value)
+    {
+        isControlButtonClick_ = value;
     }
 
     Dimension GetAdjustMaxSideBarWidth() const
@@ -93,6 +104,41 @@ public:
     Dimension GetAdjustMinSideBarWidth() const
     {
         return adjustMinSideBarWidth_;
+    }
+
+    void SetMinSideBarWidth(float minSideBarWidth)
+    {
+        minSideBarWidth_ = minSideBarWidth;
+    }
+
+    void SetMaxSideBarWidth(float maxSideBarWidth)
+    {
+        maxSideBarWidth_ = maxSideBarWidth;
+    }
+
+    void SetMinContentWidth(float minContentWidth)
+    {
+        minContentWidth_ = minContentWidth;
+    }
+
+    void SetTypeUpdateWidth(float typeUpdateWidth)
+    {
+        typeUpdateWidth_ = typeUpdateWidth;
+    }
+
+    void SetPattern(const WeakPtr<Pattern>& pattern)
+    {
+        pattern_ = pattern;
+    }
+
+    void SetControlImageWidth(const Dimension& width)
+    {
+        controlImageWidth_ = width;
+    }
+
+    void SetControlImageHeight(const Dimension& height)
+    {
+        controlImageHeight_ = height;
     }
 
 private:
@@ -109,26 +155,43 @@ private:
     void LayoutSideBarContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& contentLayoutWrapper);
     void LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& dividerLayoutWrapper);
     void InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth);
-    void AutoMode(LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
-    void AutoChangeSideBarWidth(
-        LayoutWrapper* layoutWrapper, float parentWidth, float minSideBarWidthPx, float dividerStrokeWidthPx);
+    void AutoMode(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth);
+    void AutoChangeSideBarWidth(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth);
     void UpdateDefaultValueByVersion();
     SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     void AdjustMinAndMaxSideBarWidth(LayoutWrapper* layoutWrapper);
     RefPtr<LayoutWrapper> GetSideBarLayoutWrapper(LayoutWrapper* layoutWrapper) const;
+    void GetAllPropertyValue(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth);
+    void InitSideBarWidth(float parentWidth);
+    void MeasureRealSideBarWidth(float parentWidth);
+    void MeasureTypeUpdateWidth();
+    void MeasureRealPropertyValue(bool setMinSideBarWidth, bool setMaxSideBarWidth, bool setSideBarWidth,
+        bool setMinContentWidth, float paretWidth);
 
     float currentOffset_ = 0.0f;
-    float realSideBarWidth_ = 0.0f;
+    float realSideBarWidth_ = -1.0f;
     float realSideBarHeight_ = 0.0f;
     float realDividerWidth_ = 0.0f;
-    float minContentWidth_ = 0.0f;
+    float minContentWidth_ = -1.0f;
+    float minSideBarWidth_ = -1.0f;
+    float maxSideBarWidth_ = -1.0f;
+
+    float defaultRealSideBarWidth_ = 0.0f;
+    float defaultMinSideBarWidth_ = 0.0f;
+    float defaultMaxSideBarWidth_ = 0.0f;
+    float defaultMinContentWidth_ = 0.0f;
+    float typeUpdateWidth_ = 0.0f;
+    WeakPtr<Pattern> pattern_;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
     bool needInitRealSideBarWidth_ = true;
     OffsetF sideBarOffset_;
     SideBarContainerType type_ = SideBarContainerType::EMBED;
+    bool isControlButtonClick_ = false;
 
     Dimension adjustMaxSideBarWidth_;
     Dimension adjustMinSideBarWidth_;
+    Dimension controlImageWidth_;
+    Dimension controlImageHeight_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerLayoutAlgorithm);
 };

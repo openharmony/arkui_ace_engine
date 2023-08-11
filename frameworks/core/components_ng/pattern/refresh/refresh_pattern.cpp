@@ -82,9 +82,8 @@ void RefreshPattern::OnModifyDone()
         CustomBuilderReset();
     } else if (!progressChild_) {
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
-        LoadingProgressReset();
     }
-    if (isRefreshing_ != refreshingProp) {
+    if (layoutProperty->GetIsCustomBuilderExistValue() || isRefreshing_ != refreshingProp) {
         if (refreshingProp) {
             QuickStartFresh();
         } else {
@@ -121,7 +120,9 @@ void RefreshPattern::QuickStartFresh()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetIsCustomBuilderExistValue()) {
         CustomBuilderAppear();
-        TriggerRefresh();
+        if (!isRefreshing_) {
+            TriggerRefresh();
+        }
         return;
     }
     ReplaceLoadingProgressNode();
@@ -135,7 +136,6 @@ void RefreshPattern::QuickEndFresh()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetIsCustomBuilderExistValue()) {
         CustomBuilderExit();
-        TriggerFinish();
         return;
     }
     LoadingProgressExit();
@@ -239,8 +239,8 @@ void RefreshPattern::ReplaceLoadingProgressNode()
     CHECK_NULL_VOID(loadingProgressChild);
     host->AddChild(loadingProgressChild);
     progressChild_ = loadingProgressChild;
-    host->RebuildRenderContextTree();
     LoadingProgressReset();
+    host->RebuildRenderContextTree();
 }
 
 void RefreshPattern::LoadingProgressReset()
@@ -323,10 +323,9 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         gestureHub->RemovePanEvent(panEvent_);
     }
 
-    float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
 void RefreshPattern::HandleDragStart()
@@ -358,7 +357,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
 
     scrollOffset_.SetY(GetScrollOffset(delta));
     if (customBuilder_) {
-        CheckCustomBuilderDragUpdateStage();
+        HandleCustomBuilderDragUpdateStage();
         return;
     }
     CHECK_NULL_VOID(progressChild_);
@@ -427,8 +426,6 @@ float RefreshPattern::GetFadeAwayRatio()
 
 void RefreshPattern::TransitionPeriodAnimation()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     CHECK_NULL_VOID(progressChild_);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
@@ -438,25 +435,31 @@ void RefreshPattern::TransitionPeriodAnimation()
     progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::FOLLOW_TO_RECYCLE));
     progressPaintProperty->UpdateRefreshTransitionRatio(0.0f);
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    pipeline->FlushUITasks();
-
-    auto curve = AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
-    AnimationOption option;
-    option.SetDuration(FOLLOW_TO_RECYCLE_DURATION);
-    option.SetCurve(curve);
-    option.SetIteration(1);
-
-    AnimationUtils::OpenImplicitAnimation(option, curve, [weak = AceType::WeakClaim(this)]() {
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineContext::GetCurrentContext());
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->LoadingProgressRecycle();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto curve = AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
+        AnimationOption option;
+        option.SetDuration(FOLLOW_TO_RECYCLE_DURATION);
+        option.SetCurve(curve);
+        option.SetIteration(1);
+
+        AnimationUtils::OpenImplicitAnimation(option, curve, [weak]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->LoadingProgressRecycle();
+        });
+        auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+        pattern->scrollOffset_.SetY(distance);
+        pattern->UpdateLoadingMarginTop(distance);
+        pattern->progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        pipeline->FlushUITasks();
+        AnimationUtils::CloseImplicitAnimation();
     });
-    auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-    scrollOffset_.SetY(distance);
-    UpdateLoadingMarginTop(distance);
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    pipeline->FlushUITasks();
-    AnimationUtils::CloseImplicitAnimation();
 }
 
 void RefreshPattern::LoadingProgressAppear()
@@ -466,19 +469,23 @@ void RefreshPattern::LoadingProgressAppear()
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::RECYCLE));
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineContext::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
-    pipeline->FlushUITasks();
-
-    AnimationOption option;
-    option.SetDuration(LOADING_EXIT_DURATION);
-    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-    AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);
-    scrollOffset_.SetY(TRIGGER_REFRESH_DISTANCE.ConvertToPx());
-    UpdateLoadingProgress(STATE_PROGRESS_RECYCLE, 1.0f);
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    pipeline->FlushUITasks();
-    AnimationUtils::CloseImplicitAnimation();
+    pipeline->AddAnimationClosure([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        AnimationOption option;
+        option.SetDuration(LOADING_EXIT_DURATION);
+        auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+        AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);
+        pattern->scrollOffset_.SetY(TRIGGER_REFRESH_DISTANCE.ConvertToPx());
+        pattern->UpdateLoadingProgress(STATE_PROGRESS_RECYCLE, 1.0f);
+        pattern->progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        pipeline->FlushUITasks();
+        AnimationUtils::CloseImplicitAnimation();
+    });
 }
 
 void RefreshPattern::LoadingProgressExit()
@@ -517,7 +524,7 @@ void RefreshPattern::HandleDragEnd()
     }
     auto triggerRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
     if (customBuilder_) {
-        CheckCustomBuilderDragEndStage();
+        HandleCustomBuilderDragEndStage();
         return;
     }
     if (scrollOffset_.GetY() >= triggerRefreshDistance) {
@@ -593,7 +600,6 @@ void RefreshPattern::ResetLoadingProgressColor()
     auto paintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateColor(theme->GetProgressColor());
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder) const
@@ -666,7 +672,7 @@ void RefreshPattern::CustomBuilderExit()
         std::move(finishCallback));
 }
 
-void RefreshPattern::CheckCustomBuilderDragUpdateStage()
+void RefreshPattern::HandleCustomBuilderDragUpdateStage()
 {
     CHECK_NULL_VOID(customBuilder_);
     auto host = GetHost();
@@ -696,7 +702,7 @@ void RefreshPattern::CheckCustomBuilderDragUpdateStage()
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void RefreshPattern::CheckCustomBuilderDragEndStage()
+void RefreshPattern::HandleCustomBuilderDragEndStage()
 {
     CHECK_NULL_VOID(customBuilder_);
     auto host = GetHost();
@@ -719,7 +725,7 @@ void RefreshPattern::CheckCustomBuilderDragEndStage()
         CustomBuilderExit();
         scrollOffset_.SetY(0.0f);
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void RefreshPattern::CustomBuilderReset()
@@ -733,7 +739,7 @@ void RefreshPattern::CustomBuilderReset()
     CHECK_NULL_VOID(customBuilder_);
     scrollOffset_.SetY(0.0f);
     UpdateCustomBuilderProperty(RefreshState::STATE_LOADING, 0.0f);
-    customBuilder_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    customBuilder_->MarkDirtyNode();
 }
 
 void RefreshPattern::UpdateCustomBuilderProperty(RefreshState state, float ratio)
@@ -806,30 +812,6 @@ float RefreshPattern::GetCustomBuilderOpacityRatio()
             (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - TRIGGER_LOADING_DISTANCE.ConvertToPx());
     }
     return std::clamp(static_cast<float>(opacityRatio), 0.0f, 1.0f);
-}
-
-bool RefreshPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* changeConfig */)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    auto paintProperty = GetPaintProperty<RefreshRenderProperty>();
-    CHECK_NULL_RETURN(paintProperty, false);
-    auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
-    if (customBuilder_ && layoutProperty->GetIsCustomBuilderExistValue(false)) {
-        if (refreshingProp) {
-            auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-            if (NearZero(static_cast<double>(customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height()))) {
-                return false;
-            }
-            isRefreshing_ = true;
-            scrollOffset_.SetY(distance + customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height());
-            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        }
-    }
-    return false;
 }
 
 void RefreshPattern::UpdateLoadingMarginTop(float top)

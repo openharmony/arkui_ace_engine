@@ -15,15 +15,17 @@
 
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
+#include "base/log/ace_trace.h"
+#include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,7 +45,8 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
     return node;
 }
 
-void LazyForEachNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
+void LazyForEachNode::AdjustLayoutWrapperTree(
+    const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
 {
     CHECK_NULL_VOID(builder_);
     auto lazyLayoutWrapperBuilder = MakeRefPtr<LazyLayoutWrapperBuilder>(builder_, WeakClaim(this));
@@ -53,6 +56,13 @@ void LazyForEachNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& paren
     lazyLayoutWrapperBuilder->UpdateIndexRange(startIndex_, endIndex_, ids_);
     lazyLayoutWrapperBuilder->UpdateForceFlag(forceMeasure, forceLayout);
     parent->SetLayoutWrapperBuilder(lazyLayoutWrapperBuilder);
+}
+
+void LazyForEachNode::BuildAllChildren()
+{
+    for (int i = 0; i < FrameCount(); i++) {
+        GetFrameChildByIndex(i);
+    }
 }
 
 void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newEndIndex,
@@ -107,186 +117,89 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
     LOGD("cachedItems size is %{public}d", static_cast<int32_t>(newIds.size()));
 }
 
-void LazyForEachNode::PostIdleTask(
-    std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint, bool longPredictTask)
+void LazyForEachNode::PostIdleTask()
 {
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    predictItems_ = std::move(items);
-    itemConstraint_ = itemConstraint;
-    useLongPredictTask_ = longPredictTask;
-    if (needPredict) {
+    if (needPredict_) {
         return;
     }
-    needPredict = true;
+    needPredict_ = true;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(this)](int64_t deadline, bool canUseLongPredictTask) {
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
-        node->needPredict = false;
-        ACE_SCOPED_TRACE("LazyForEach predict size[%zu]", node->predictItems_.size());
-        decltype(node->predictItems_) items(std::move(node->predictItems_));
-        decltype(node->itemConstraint_) itemConstraint(node->itemConstraint_);
-        bool useLongPredictTask = node->useLongPredictTask_;
-        node->useLongPredictTask_ = false;
-        node->itemConstraint_.reset();
-        auto item = items.begin();
-        while (item != items.end()) {
-            auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
-            if ((GetSysTimestamp() > deadline) || (useLongPredictTask && !canRunLongPredictTask)) {
-                std::list<int32_t> predictItems;
-                predictItems.insert(predictItems.begin(), item, items.end());
-                node->PostIdleTask(std::move(predictItems), itemConstraint, useLongPredictTask);
-                return;
+        node->needPredict_ = false;
+        ACE_SCOPED_TRACE(
+            "LazyForEach predict [%d-%d] cache size [%d]", node->startIndex_, node->endIndex_, node->cacheCount_);
+        auto canRunLongPredictTask = node->requestLongPredict_ && canUseLongPredictTask;
+        if (node->builder_) {
+            auto preBuildResult = node->builder_->PreBuild(node->startIndex_, node->endIndex_, node->cacheCount_,
+                deadline, node->itemConstraint_, canRunLongPredictTask);
+            if (!preBuildResult) {
+                node->PostIdleTask();
             }
-            auto itemInfo = node->builder_->CreateChildByIndex(*item);
-            node->builder_->SetCacheItemInfo(*item, itemInfo.first);
-            auto uiNode = itemInfo.second;
-            if (uiNode) {
-                ViewStackProcessor::GetInstance()->SetPredict(true);
-                uiNode->Build();
-                ViewStackProcessor::GetInstance()->SetPredict(false);
-            }
-            // if itemConstraint is provided, just call cache layout and render.
-            if (itemConstraint) {
-                RefPtr<FrameNode> frameNode = DynamicCast<FrameNode>(uiNode);
-                while (!frameNode) {
-                    uiNode = uiNode->GetFirstChild();
-                    if (!uiNode) {
-                        break;
-                    }
-                    frameNode = DynamicCast<FrameNode>(uiNode);
-                }
-                if (frameNode) {
-                    frameNode->GetGeometryNode()->SetParentLayoutConstraint(itemConstraint.value());
-                    FrameNode::ProcessOffscreenNode(frameNode);
-                }
-            }
-            item++;
         }
         node->requestLongPredict_ = false;
+        node->itemConstraint_.reset();
     });
 }
 
+void LazyForEachNode::PostIdleTask(
+    std::list<int32_t>&& items, const std::optional<LayoutConstraintF>& itemConstraint, bool longPredictTask)
+{}
+
 void LazyForEachNode::OnDataReloaded()
 {
-    startIndex_ = -1;
-    endIndex_ = -1;
-    ids_.clear();
+    ACE_SCOPED_TRACE("OnDataReloaded");
+    children_.clear();
+    if (builder_) {
+        builder_->OnDataReloaded();
+    }
+
     NotifyDataCountChanged(0);
+    MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void LazyForEachNode::OnDataAdded(size_t index)
 {
+    ACE_SCOPED_TRACE("OnDataAdded");
     auto insertIndex = static_cast<int32_t>(index);
+    if (builder_) {
+        builder_->OnDataAdded(index);
+    }
+    children_.clear();
     NotifyDataCountChanged(insertIndex);
-    // check if insertIndex is in the range [startIndex_, endIndex_ + 1]
-    if ((insertIndex < startIndex_)) {
-        LOGI("insertIndex is out of begin range, ignored, %{public}d, %{public}d", insertIndex, startIndex_);
-        startIndex_++;
-        endIndex_++;
-        return;
-    }
-    if (insertIndex > (endIndex_ + 1)) {
-        LOGI("insertIndex is out of end range, ignored, %{public}d, %{public}d", insertIndex, endIndex_);
-        return;
-    }
-    if (insertIndex == startIndex_) {
-        // insert at begin.
-        ids_.emplace_front(std::nullopt);
-    } else if (insertIndex == (endIndex_ + 1)) {
-        // insert at end.
-        ids_.emplace_back(std::nullopt);
-    } else {
-        // insert at middle.
-        auto iter = ids_.begin();
-        std::advance(iter, index - startIndex_);
-        ids_.insert(iter, std::nullopt);
-    }
-    endIndex_++;
-
+    MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void LazyForEachNode::OnDataDeleted(size_t index)
 {
+    ACE_SCOPED_TRACE("OnDataDeleted");
     auto deletedIndex = static_cast<int32_t>(index);
+    if (builder_) {
+        builder_->OnDataDeleted(index);
+    }
+    children_.clear();
     NotifyDataCountChanged(deletedIndex);
-    if (deletedIndex > endIndex_) {
-        LOGI("deletedIndex is out of end range, ignored, %{public}d, %{public}d", deletedIndex, endIndex_);
-        return;
-    }
-    if (deletedIndex < startIndex_) {
-        LOGI("deletedIndex is out of begin range, ignored, %{public}d, %{public}d", deletedIndex, startIndex_);
-        startIndex_--;
-        endIndex_--;
-        return;
-    }
-    if (deletedIndex == startIndex_) {
-        // delete at begin.
-        ids_.pop_front();
-    } else if (deletedIndex == endIndex_) {
-        // delete at end.
-        ids_.pop_back();
-    } else {
-        // delete at middle.
-        auto iter = ids_.begin();
-        std::advance(iter, index - startIndex_);
-        ids_.erase(iter);
-    }
-    endIndex_--;
-
+    MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void LazyForEachNode::OnDataChanged(size_t index)
 {
-    auto changeIndex = static_cast<int32_t>(index);
-    if ((changeIndex < startIndex_) || (changeIndex > endIndex_)) {
-        LOGI("changeIndex is out of range, ignored, %{public}d, %{public}d, %{public}d", changeIndex, startIndex_,
-            endIndex_);
-        return;
+    if (builder_) {
+        builder_->OnDataChanged(index);
     }
-    auto iter = ids_.begin();
-    std::advance(iter, index - startIndex_);
-    *iter = std::nullopt;
+    children_.clear();
+    MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void LazyForEachNode::OnDataMoved(size_t from, size_t to)
 {
-    auto fromIndex = static_cast<int32_t>(from);
-    auto toIndex = static_cast<int32_t>(to);
-    NotifyDataCountChanged(startIndex_ + std::min(fromIndex, toIndex));
-    auto fromOutOfRange = (fromIndex < startIndex_) || (fromIndex > endIndex_);
-    auto toOutOfRange = (toIndex < startIndex_) || (toIndex > endIndex_);
-    if (fromOutOfRange && toOutOfRange) {
-        LOGI("both out of range, ignored");
-        return;
-    }
-
-    if (fromOutOfRange && !toOutOfRange) {
-        auto iter = ids_.begin();
-        std::advance(iter, toIndex - startIndex_);
-        *iter = std::nullopt;
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-        return;
-    }
-    if (!fromOutOfRange && toOutOfRange) {
-        auto iter = ids_.begin();
-        std::advance(iter, fromIndex - startIndex_);
-        *iter = std::nullopt;
-        MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-        return;
-    }
-    auto formIter = ids_.begin();
-    std::advance(formIter, fromIndex - startIndex_);
-    auto toIter = ids_.begin();
-    std::advance(toIter, toIndex - startIndex_);
-    auto temp = *formIter;
-    *formIter = *toIter;
-    *toIter = temp;
-    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    // TODO: data move
 }
 
 void LazyForEachNode::NotifyDataCountChanged(int32_t index)
@@ -296,4 +209,73 @@ void LazyForEachNode::NotifyDataCountChanged(int32_t index)
         parent->ChildrenUpdatedFrom(index);
     }
 }
+
+void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
+{
+    if (needMarkParent_) {
+        UINode::MarkNeedSyncRenderTree(needRebuild);
+    }
+}
+
+RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index)
+{
+    if (index < static_cast<uint32_t>(FrameCount())) {
+        auto child = builder_->CreateChildByIndex(index);
+        if (child.second) {
+            child.second->SetJSViewActive(true);
+            if (child.second->GetDepth() != GetDepth() + 1) {
+                child.second->SetDepth(GetDepth() + 1);
+            }
+            MarkNeedSyncRenderTree();
+            children_.clear();
+            child.second->SetParent(WeakClaim(this));
+            if (IsOnMainTree()) {
+                child.second->AttachToMainTree();
+            }
+            PostIdleTask();
+            return child.second->GetFrameChildByIndex(0);
+        }
+    }
+    return nullptr;
+}
+
+void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
+{
+    if (!builder_) {
+        return;
+    }
+    ACE_SCOPED_TRACE("DoRemoveChildInRenderTree %u, %d", index, isAll);
+    children_.clear();
+    if (isAll) {
+        builder_->RemoveAllChild();
+        MarkNeedSyncRenderTree();
+        PostIdleTask();
+        return;
+    }
+    builder_->RemoveChildByIndex(index);
+    MarkNeedSyncRenderTree();
+    PostIdleTask();
+}
+
+const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
+{
+    if (children_.empty()) {
+        auto items = builder_->GetItems();
+        int32_t startIndex = -1;
+        int32_t endIndex = -1;
+        if (!items.empty()) {
+            for (const auto& item : items) {
+                children_.push_back(item.second);
+            }
+            startIndex = items.begin()->first;
+            endIndex = items.rbegin()->first;
+        }
+        if (startIndex != startIndex_ || endIndex != endIndex_) {
+            startIndex_ = startIndex;
+            endIndex_ = endIndex;
+        }
+    }
+    return children_;
+}
+
 } // namespace OHOS::Ace::NG

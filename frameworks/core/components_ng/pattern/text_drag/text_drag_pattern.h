@@ -72,6 +72,8 @@ public:
     ~TextDragPattern() override = default;
 
     static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
+    static RefPtr<FrameNode> CreateDragNode(
+        const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren);
 
     void Initialize(const ParagraphT& paragraph, const TextDragData& data)
     {
@@ -145,18 +147,59 @@ public:
 
     std::shared_ptr<RSPath> GenerateBackgroundPath(float offset);
 
+    void SetImageChildren(const std::list<RefPtr<FrameNode>>& imageChildren)
+    {
+        imageChildren_ = imageChildren;
+    }
+
+    const std::list<RefPtr<FrameNode>>& GetImageChildren()
+    {
+        return imageChildren_;
+    }
+
+    void InitSpanImageLayout(
+        const std::list<RefPtr<FrameNode>>& imageChildren, const std::vector<Rect>& rectsForPlaceholders)
+    {
+        imageChildren_ = imageChildren;
+        rectsForPlaceholders_ = rectsForPlaceholders;
+    }
+
+    OffsetF GetContentOffset()
+    {
+        return contentOffset_;
+    }
+
+    void SetContentOffset(OffsetF contentOffset)
+    {
+        contentOffset_ = contentOffset;
+    }
+
+    const std::vector<Rect>& GetRectsForPlaceholders()
+    {
+        return rectsForPlaceholders_;
+    }
+
 private:
-    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& hostPattern, RefPtr<RenderContext>& dragContext);
+    void SetLastLineHeight(float lineHeight)
+    {
+        lastLineHeight_ = lineHeight;
+    }
+
+    static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& hostPattern, RefPtr<FrameNode>& dragContext);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset);
     void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
 
-    RefPtr<TextDragOverlayModifier> overlayModifier_;
+    float lastLineHeight_ = 0.0f;
+    OffsetF contentOffset_;
     ParagraphT paragraph_;
     TextDragData textDragData_;
     std::shared_ptr<RSPath> clipPath_;
     std::shared_ptr<RSPath> backGroundPath_;
+    std::list<RefPtr<FrameNode>> imageChildren_;
+    std::vector<Rect> rectsForPlaceholders_;
+    RefPtr<TextDragOverlayModifier> overlayModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragPattern);
 };

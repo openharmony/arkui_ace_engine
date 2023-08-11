@@ -21,9 +21,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
-
 using ChangeAndSubmitEvent = std::function<void(const std::string)>;
-
 class SearchEventHub : public EventHub {
     DECLARE_ACE_TYPE(SearchEventHub, EventHub)
 

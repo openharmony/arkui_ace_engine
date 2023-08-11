@@ -26,7 +26,10 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr double PRIMARY_RGBA_OPACITY = 0.9f;
+constexpr double SECONDARY_RGBA_OPACITY = 0.6f;
+} // namespace
 /**
  * DialogTheme defines color and styles of DialogComponent. DialogTheme should be built
  * using DialogTheme::Builder.
@@ -52,6 +55,8 @@ public:
             theme->titleTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_DIALOG_TITLE_TEXT_FONTSIZE));
             theme->titleTextStyle_.SetFontWeight(
                 FontWeight(themeConstants->GetInt(THEME_DIALOG_TITLE_TEXT_FONTWEIGHT)));
+            theme->subtitleTextStyle_.SetTextColor(themeConstants->GetColor(THEME_DIALOG_TITLE_TEXT_COLOR));
+            theme->subtitleTextStyle_.SetFontSize(themeConstants->GetDimension(THEME_OHOS_TEXT_SIZE_SUBTITLE3));
             theme->titleMinFontSize_ = themeConstants->GetDimension(THEME_DIALOG_TITLE_TEXT_FONTSIZE_MIN);
             theme->contentMinFontSize_ = themeConstants->GetDimension(THEME_DIALOG_CONTENT_TEXT_FONTSIZE_MIN);
             auto titleMaxLines = themeConstants->GetInt(THEME_DIALOG_TITLE_TEXT_MAX_LINES);
@@ -132,8 +137,14 @@ public:
                 return;
             }
             theme->backgroundColor_ = dialogPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color(0xd9ffffff));
-            theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
+            auto textColor = dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK);
+            auto textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_primary", PRIMARY_RGBA_OPACITY);
+            theme->titleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
             theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
+            textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_secondary", SECONDARY_RGBA_OPACITY);
+            theme->subtitleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
+            theme->subtitleTextStyle_.SetFontSize(
+                dialogPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp));
             theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
             theme->contentTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("content_text_font_size", 16.0_fp));
             theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
@@ -144,6 +155,15 @@ public:
 
             auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 24.0_vp);
             theme->contentAdjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
+            theme->defaultPaddingBottomFixed_ =
+                dialogPattern->GetAttr<Dimension>("default_padding_bottom_fixed", 24.0_vp);
+            theme->buttonHighlightBgColor_ =
+                dialogPattern->GetAttr<Color>("button_bg_highlight_color", Color(0xff007dff));
+            theme->buttonHighlightFontColor_ = dialogPattern->GetAttr<Color>("first_button_text_color", Color::WHITE);
+            theme->buttonDefaultBgColor_ = dialogPattern->GetAttr<Color>("button_default_bg_color", Color::TRANSPARENT);
+            theme->buttonDefaultFontColor_ =
+                dialogPattern->GetAttr<Color>("button_default_font_color", Color(0xff007dff));
+
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
@@ -203,6 +223,11 @@ public:
     const TextStyle& GetTitleTextStyle() const
     {
         return titleTextStyle_;
+    }
+
+    const TextStyle& GetSubTitleTextStyle() const
+    {
+        return subtitleTextStyle_;
     }
 
     const Dimension& GetTitleMinFontSize() const
@@ -303,6 +328,26 @@ public:
     const Color& GetButtonClickedColor() const
     {
         return buttonClickedColor_;
+    }
+
+    const Color& GetButtonHighlightBgColor() const
+    {
+        return buttonHighlightBgColor_;
+    }
+
+    const Color& GetButtonHighlightFontColor() const
+    {
+        return buttonHighlightFontColor_;
+    }
+
+    const Color& GetButtonDefaultBgColor() const
+    {
+        return buttonDefaultBgColor_;
+    }
+
+    const Color& GetButtonDefaultFontColor() const
+    {
+        return buttonDefaultFontColor_;
     }
 
     double GetFrameStart() const
@@ -425,6 +470,11 @@ public:
         return buttonMinTextSize_;
     }
 
+    const Dimension& GetDefaultPaddingBottomFixed()
+    {
+        return defaultPaddingBottomFixed_;
+    }
+
 protected:
     DialogTheme() = default;
 
@@ -432,6 +482,7 @@ private:
     Radius radius_;
     Color backgroundColor_;
     TextStyle titleTextStyle_;
+    TextStyle subtitleTextStyle_;
     TextStyle contentTextStyle_;
     Dimension titleMinFontSize_;
     Dimension contentMinFontSize_;
@@ -452,6 +503,10 @@ private:
     Dimension dividerBetweenButtonWidth_;
     Color buttonBackgroundColor_;
     Color buttonClickedColor_;
+    Color buttonHighlightBgColor_;
+    Color buttonHighlightFontColor_;
+    Color buttonDefaultBgColor_;
+    Color buttonDefaultFontColor_;
     Color emphasizeButtonTextColor_;
     Dimension translateValue_;
     double frameStart_ = 0.0;
@@ -480,6 +535,7 @@ private:
     Dimension buttonMinTextSize_;
     Dimension minButtonWidth_;
     Dimension maxButtonWidth_;
+    Dimension defaultPaddingBottomFixed_;
 };
 
 } // namespace OHOS::Ace

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -102,11 +103,6 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     auto renderCtx = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
     config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
-    // scale for recordingCanvas: take padding into account
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto contentSize = paintWrapper->GetContentSize();
-    config.scaleX_ = contentSize.Width() / frameSize.Width();
-    config.scaleY_ = contentSize.Height() / frameSize.Height();
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper);
@@ -116,16 +112,18 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
 CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_RETURN(canvasImage_, nullptr);
-    auto offset = paintWrapper->GetContentOffset();
     auto contentSize = paintWrapper->GetContentSize();
 
     // update render props to ImagePaintConfig
     auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(props, nullptr);
     UpdatePaintConfig(props, paintWrapper);
+    auto&& fillColor = props->GetSvgFillColor();
+    if (InstanceOf<SvgCanvasImage>(canvasImage_) && fillColor) {
+        DynamicCast<SvgCanvasImage>(canvasImage_)->SetFillColor(fillColor);
+    }
     ImagePainter imagePainter(canvasImage_);
-    return
-        [imagePainter, offset, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, contentSize); };
+    return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };
 }
 
 CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)

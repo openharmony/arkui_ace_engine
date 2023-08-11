@@ -139,6 +139,11 @@ public:
         return instanceId_;
     }
 
+    RefPtr<AceType> GetViewNode() const
+    {
+        return viewNode_.Upgrade();
+    }
+
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;

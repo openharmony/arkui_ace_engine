@@ -165,6 +165,11 @@ void WaterFlowModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     pattern->SetNestedScroll(nestedOpt);
 }
 
+void WaterFlowModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
 void WaterFlowModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -190,5 +195,14 @@ void WaterFlowModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFra
     auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
+}
+
+void WaterFlowModelNG::SetFriction(double friction)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFriction(friction);
 }
 } // namespace OHOS::Ace::NG

@@ -62,10 +62,14 @@ public:
     virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
     virtual void SetOnChange(std::function<void(const std::string&)>&& onChange);
+    virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
+    virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);
     virtual void SetOnCut(std::function<void(const std::string&)>&& func);
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func);
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
+    virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
+    virtual void SetCustomKeyboard(const std::function<void ()> &&buildFunc);
 
 private:
     static std::unique_ptr<SearchModel> instance_;

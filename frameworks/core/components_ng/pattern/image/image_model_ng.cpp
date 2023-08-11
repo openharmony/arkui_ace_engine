@@ -114,14 +114,6 @@ void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& siz
 
 void ImageModelNG::SetImageFill(const Color& color)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(color);
-        ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
-    }
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
 }

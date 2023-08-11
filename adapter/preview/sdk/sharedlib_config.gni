@@ -58,7 +58,7 @@ common_bin = [
   {
     label = "//third_party/cJSON:cjson"
     subsystem_name = "thirdparty"
-    part_name = "cjson"
+    part_name = "cJSON"
   },
   {
     label = "//third_party/icu/icu4c:shared_icui18n"
@@ -80,22 +80,22 @@ common_bin = [
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context"
     subsystem_name = "graphic"
-    part_name = "graphic_standard"
+    part_name = "graphic_2d"
   },
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base"
     subsystem_name = "graphic"
-    part_name = "graphic_standard"
+    part_name = "graphic_2d"
   },
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client"
     subsystem_name = "graphic"
-    part_name = "graphic_standard"
+    part_name = "graphic_2d"
   },
   {
     label = "//third_party/flutter/glfw:glfw"
     subsystem_name = "graphic"
-    part_name = "graphic_standard"
+    part_name = "graphic_2d"
   },
   {
     label = "//third_party/flutter/build/skia:skia_shared"
@@ -142,16 +142,21 @@ common_bin = [
   {
     label = label_hilog
     subsystem_name = "hiviewdfx"
-    part_name = "hilog_native"
+    part_name = "hilog"
   },
   {
-    label = "//foundation/arkui/ace_engine/adapter/preview/build:libace"
+    label = "//foundation/arkui/ace_engine/build:libace"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
   {
     label =
         "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor:drawable_descriptor"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -162,20 +167,42 @@ if (defined(use_new_skia) && use_new_skia) {
     {
       label = "//third_party/skia:skia_canvaskit"
       subsystem_name = "thirdparty"
-      part_name = "third_party_skia"
+      part_name = "skia"
     },
   ]
 }
 
 napi_modules = [
   {
+    prefix = "arkui"
+    shard_libs = [
+      {
+        label = "//foundation/arkui/ace_engine/interfaces/napi/kits/drawabledescriptor:drawabledescriptor"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "drawabledescriptor" ]
+      },
+    ]
+  },
+  {
+    prefix = "multimedia"
+    shard_libs = [
+      {
+        label = "//foundation/multimedia/av_session/avpicker:avcastpicker"
+        subsystem_name = "multimedia"
+        part_name = "av_session"
+        lib_names = [ "avcastpicker" ]
+      },
+    ]
+  },
+  {
     prefix = ""
     shard_libs = [
       {
         label = "//base/hiviewdfx/hilog/interfaces/js/kits/napi:libhilognapi"
         subsystem_name = "hiviewdfx"
-        part_name = "hilog_native"
-        lib_names = [ "hilog" ]
+        part_name = "hilog"
+        lib_names = [ "hilog_napi" ]
       },
       {
         label = "//commonlibrary/ets_utils/js_api_module/buffer:buffer_packages"

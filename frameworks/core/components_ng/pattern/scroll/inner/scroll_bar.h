@@ -22,11 +22,16 @@
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "base/utils/utils.h"
+#include "core/animation/friction_motion.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,6 +40,7 @@ constexpr double DEFAULT_TOPANGLE = 60.0;
 constexpr double DEFAULT_BOTTOMANGLE = 120.0;
 constexpr double DEFAULT_MINANGLE = 10.0;
 constexpr double STRAIGHT_ANGLE = 180.0;
+constexpr double BAR_FRICTION = 0.9;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 
 enum class ShapeMode {
@@ -87,12 +93,12 @@ class ScrollBar final : public AceType {
 
 public:
     ScrollBar();
-    explicit ScrollBar(DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT,
+    ScrollBar(DisplayMode displayMode, ShapeMode shapeMode = ShapeMode::RECT,
         PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
     bool InBarTouchRegion(const Point& point) const;
-    bool InBarActiveRegion(const Point& point) const;
+    bool InBarHoverRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(
@@ -195,6 +201,11 @@ public:
         activeWidth_ = activeWidth;
     }
 
+    void SetHoverWidth(const RefPtr<ScrollBarTheme>& theme)
+    {
+        hoverWidth_ = theme->GetActiveWidth() + theme->GetScrollBarMargin() * 2;
+    }
+
     const Dimension& GetActiveWidth() const
     {
         return activeWidth_;
@@ -233,6 +244,7 @@ public:
 
     void SetScrollable(bool isScrollable)
     {
+        CHECK_NULL_VOID_NOLOG(isScrollable_ != isScrollable);
         isScrollable_ = isScrollable;
     }
 
@@ -246,6 +258,12 @@ public:
         if (positionMode_ != positionMode) {
             positionModeUpdate_ = true;
             positionMode_ = positionMode;
+            if (panRecognizer_) {
+                PanDirection panDirection;
+                panDirection.type =
+                    positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
+                panRecognizer_->SetDirection(panDirection);
+            }
         }
     }
 
@@ -256,15 +274,8 @@ public:
 
     void SetDisplayMode(DisplayMode displayMode)
     {
+        CHECK_NULL_VOID_NOLOG(displayMode_ != displayMode);
         displayMode_ = displayMode;
-        if (displayMode_ == DisplayMode::AUTO) {
-            OnScrollEnd();
-        } else if (displayMode_ == DisplayMode::ON) {
-            if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
-                scrollEndAnimator_->Stop();
-            }
-            opacity_ = UINT8_MAX;
-        }
     }
 
     void SetOutBoundary(double outBoundary)
@@ -303,26 +314,64 @@ public:
         return isHover_;
     }
 
-    void SetDriving(bool isDriving)
-    {
-        isDriving_ = isDriving;
-    }
-
-    bool IsDriving() const
-    {
-        return isDriving_;
-    }
-
     uint8_t GetOpacity() const
     {
         return opacity_;
     }
 
-    void OnScrollEnd()
+    void PlayScrollBarEndAnimation()
+    {
+        if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
+            opacityAnimationType_ = OpacityAnimationType::DISAPPEAR;
+            MarkNeedRender();
+        }
+    }
+
+    void PlayScrollBarStartAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
-            PlayBarEndAnimation();
+            disapplearDelayTask_.Cancel();
+            opacityAnimationType_ = OpacityAnimationType::APPEAR;
+            MarkNeedRender();
         }
+    }
+
+    OpacityAnimationType GetOpacityAnimationType() const
+    {
+        return opacityAnimationType_;
+    }
+
+    void SetOpacityAnimationType(OpacityAnimationType opacityAnimationType)
+    {
+        opacityAnimationType_ = opacityAnimationType;
+    }
+
+    HoverAnimationType GetHoverAnimationType() const
+    {
+        return hoverAnimationType_;
+    }
+
+    void SetHoverAnimationType(HoverAnimationType hoverAnimationType)
+    {
+        hoverAnimationType_ = hoverAnimationType;
+    }
+    
+
+    void PlayScrollBarGrowAnimation()
+    {
+        PlayScrollBarStartAnimation();
+        normalWidth_ = activeWidth_;
+        FlushBarWidth();
+        hoverAnimationType_ = HoverAnimationType::GROW;
+        MarkNeedRender();
+    }
+
+    void PlayScrollBarShrinkAnimation()
+    {
+        normalWidth_ = inactiveWidth_;
+        FlushBarWidth();
+        hoverAnimationType_ = HoverAnimationType::SHRINK;
+        MarkNeedRender();
     }
 
     void MarkNeedRender()
@@ -345,6 +394,11 @@ public:
     RefPtr<InputEvent> GetMouseEvent()
     {
         return mouseEvent_;
+    }
+
+    RefPtr<InputEvent> GetHoverEvent() const
+    {
+        return hoverEvent_;
     }
 
     void SetIsUserNormalWidth(bool isUserNormalWidth)
@@ -396,15 +450,36 @@ public:
     {
         return hostBorderRadius_;
     }
+    
+    void SetScrollPositionCallback(ScrollPositionCallback&& callback)
+    {
+        scrollPositionCallback_ = std::move(callback);
+    }
+
+    const ScrollPositionCallback& GetScrollPositionCallback() const
+    {
+        return scrollPositionCallback_;
+    }
+
+    void SetScrollEndCallback(ScrollEndCallback&& scrollEndCallback)
+    {
+        scrollEndCallback_ = std::move(scrollEndCallback);
+    }
+
+    const ScrollEndCallback& GetScrollEndCallback() const
+    {
+        return scrollEndCallback_;
+    }
 
     void SetGestureEvent();
     void SetMouseEvent();
+    void SetHoverEvent();
     void FlushBarWidth();
     void PlayAdaptAnimation(double activeSize, double activeMainOffset, double inactiveSize, double inactiveMainOffset);
-    void PlayGrowAnimation();
-    void PlayShrinkAnimation();
-    void PlayBarEndAnimation();
     void CalcReservedHeight();
+    void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result);
+    void ScheduleDisapplearDelayTask();
 
 protected:
     void InitTheme();
@@ -416,6 +491,12 @@ private:
     void UpdateActiveRectSize(double activeSize);
     void UpdateActiveRectOffset(double activeMainOffset);
     double NormalizeToPx(const Dimension& dimension) const;
+    void InitPanRecognizer();
+    void HandleDragStart(const GestureEvent& info);
+    void HandleDragUpdate(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info);
+    void ProcessFrictionMotion(double value);
+    void ProcessFrictionMotionStop();
 
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
@@ -425,6 +506,7 @@ private:
     Color backgroundColor_;
     Color foregroundColor_;
     Rect touchRegion_;
+    Rect hoverRegion_;
     Rect barRect_;
     Rect activeRect_;
     Dimension minHeight_;           // this is min static height
@@ -435,6 +517,7 @@ private:
     Dimension activeWidth_;
     Dimension normalWidth_;
     Dimension touchWidth_;
+    Dimension hoverWidth_;
 
     Dimension position_;
 
@@ -447,6 +530,8 @@ private:
     double offsetScale_ = 1.0f;
     double scrollableOffset_ = 0.0;
     double barRegionSize_ = 0.0;
+    double friction_ = BAR_FRICTION;
+    double frictionPosition_ = 0.0;
 
     bool isScrollable_ = false;
 
@@ -466,10 +551,17 @@ private:
     uint8_t opacity_ = UINT8_MAX;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
-    RefPtr<Animator> touchAnimator_;
-    RefPtr<Animator> scrollEndAnimator_;
+    RefPtr<InputEvent> hoverEvent_;
+    RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<Animator> adaptAnimator_;
+    RefPtr<Animator> frictionController_;
+    RefPtr<FrictionMotion> frictionMotion_;
     std::function<void()> markNeedRenderFunc_;
+    ScrollPositionCallback scrollPositionCallback_;
+    ScrollEndCallback scrollEndCallback_;
+    OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
+    HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
+    CancelableCallback<void()> disapplearDelayTask_;
 };
 
 } // namespace OHOS::Ace::NG

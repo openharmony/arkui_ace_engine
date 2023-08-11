@@ -58,6 +58,16 @@ void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLa
             labelChanged = true;
         }
     }
+    if (menuProperty->GetFontFamily().has_value()) {
+        if (!itemProperty->GetFontFamily().has_value()) {
+            textLayoutProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
+            contentChanged = true;
+        }
+        if (labelProperty && !itemProperty->GetLabelFontFamily().has_value()) {
+            labelProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
+            labelChanged = true;
+        }
+    }
 }
 
 void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
@@ -164,6 +174,7 @@ void InnerMenuPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    SetMenuAttribute(host);
     UpdateMenuItemChildren(host);
     SetAccessibilityAction();
 }
@@ -202,7 +213,7 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
         if (lastTouchOffset_.has_value() &&
             (touchUpOffset - lastTouchOffset_.value()).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
-            HideMenu();
+            HideMenu(true);
         }
         lastTouchOffset_.reset();
     }
@@ -251,6 +262,31 @@ void MenuPattern::RemoveParentHoverStyle()
     CHECK_NULL_VOID(theme);
     menuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
     menuItemPattern->PlayBgColorAnimation();
+}
+
+void MenuPattern::SetMenuAttribute(RefPtr<FrameNode>& host)
+{
+    auto layoutProperty = host->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!layoutProperty->GetMenuWidth().has_value()) {
+        theme->SetMenuWidth(DEFAULT_MENU_WIDTH);
+    } else {
+        theme->SetMenuWidth(layoutProperty->GetMenuWidth().value());
+    }
+
+    BorderRadiusProperty borderRadius;
+    if (!layoutProperty->GetBorderRadius().has_value()) {
+        auto defaultRadius = theme->GetMenuBorderRadius();
+        borderRadius.SetRadius(defaultRadius);
+        theme->SetChangeBorderRadius(borderRadius);
+    } else {
+        borderRadius = layoutProperty->GetBorderRadius().value();
+        theme->SetChangeBorderRadius(borderRadius);
+    }
 }
 
 void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
@@ -321,7 +357,7 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuPattern::HideMenu() const
+void MenuPattern::HideMenu(bool isMenuOnTouch) const
 {
     if (IsContextMenu()) {
         SubwindowManager::GetInstance()->HideMenuNG(targetId_);
@@ -331,7 +367,7 @@ void MenuPattern::HideMenu() const
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->HideMenu(targetId_);
+    overlayManager->HideMenu(targetId_, isMenuOnTouch);
     LOGI("MenuPattern closing menu %{public}d", targetId_);
 }
 
@@ -482,7 +518,6 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     }
     // to enable inner menu shadow effect for desktopMenu, need to remove clipping from container
     bool clip = !resetForDesktopMenu;
-    renderContext->SetClipToBounds(clip);
     scroll->GetRenderContext()->SetClipToBounds(clip);
 
     // move padding from scroll to inner menu
@@ -502,7 +537,6 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     auto bgColor = theme->GetBackgroundColor();
     renderContext->UpdateBackgroundColor(bgColor);
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
-    renderContext->SetClipToBounds(true);
     // make menu round rect
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(theme->GetMenuBorderRadius());
@@ -563,68 +597,36 @@ void MenuPattern::SetAccessibilityAction()
 
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    UpdateMenuHotArea();
-    UpdateMenuClip(dirty);
-    return false;
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+        return false;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto scroll = FrameNode::GetFrameNode(theme->GetMenuScrollTag(), theme->GetMenuScrollNodeId());
+    CHECK_NULL_RETURN(scroll, false);
+    auto renderScroll = scroll->GetRenderContext();
+    CHECK_NULL_RETURN(renderScroll, false);
+    auto renderContext = dirty->GetHostNode()->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+
+    auto borderRadius = theme->GetChangeBorderRadius();
+    auto TopRadius = borderRadius.radiusTopLeft.value() + borderRadius.radiusTopRight.value();
+    auto bottomRadius = borderRadius.radiusBottomLeft.value() + borderRadius.radiusBottomRight.value();
+    auto menuRadius = std::max(TopRadius.ConvertToVp(), bottomRadius.ConvertToVp());
+    auto idealSize = dirty->GetGeometryNode()->GetMarginFrameSize();
+    if (LessOrEqual(menuRadius, idealSize.Width())) {
+        renderContext->UpdateBorderRadius(borderRadius);
+    } else {
+        auto defaultRadius = theme->GetMenuBorderRadius();
+        borderRadius.SetRadius(defaultRadius);
+        theme->SetChangeBorderRadius(borderRadius);
+    }
+    renderScroll->UpdateBorderRadius(borderRadius);
+    return true;
 }
 
-void MenuPattern::UpdateMenuHotArea()
-{
-    auto rootNode = GetMenuWrapper();
-    CHECK_NULL_VOID(rootNode);
-    if (rootNode->GetChildren().empty()) {
-        return;
-    }
-    auto children = rootNode->GetChildren();
-    auto mainMenuNode = DynamicCast<FrameNode>(children.front());
-    CHECK_NULL_VOID(mainMenuNode);
-    auto mainMenuPattern = mainMenuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(mainMenuPattern);
-    if (!mainMenuPattern->IsContextMenu()) {
-        return;
-    }
-    std::vector<Rect> rects;
-    for (const auto & child : children) {
-        auto menuNode = DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(menuNode);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        if (!menuPattern->IsContextMenu() && !menuPattern->IsSubMenu()) {
-            continue;
-        }
-        auto menuContext = menuNode->GetRenderContext();
-        CHECK_NULL_VOID(menuContext);
-        auto menuHotArea = menuContext->GetPaintRectWithTransform();
-        rects.emplace_back(menuHotArea.GetX(), menuHotArea.GetY(), menuHotArea.Width(), menuHotArea.Height());
-    }
-    SubwindowManager::GetInstance()->SetHotAreas(rects);
-}
-
-void MenuPattern::UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty)
-{
-    // context menu is necessary condition for arrow display
-    // if scroll does not display, do not clip menu and scroll
-    if (IsContextMenu()) {
-        auto scrollParentNode = dirty->GetHostNode();
-        auto scrollNode = DynamicCast<FrameNode>(scrollParentNode->GetFirstChild());
-        CHECK_NULL_VOID(scrollNode);
-        auto scrollContentNode = DynamicCast<FrameNode>(scrollNode->GetFirstChild());
-        CHECK_NULL_VOID(scrollContentNode);
-        auto scrollContentGeometryNode = scrollContentNode->GetGeometryNode();
-        CHECK_NULL_VOID(scrollContentGeometryNode);
-        auto scrollContentSize = scrollContentGeometryNode->GetFrameSize();
-        auto scrollParentGeometryNode = scrollParentNode->GetGeometryNode();
-        auto parentSize = scrollParentGeometryNode->GetFrameSize();
-
-        auto clip = GreatNotEqual(scrollContentSize.Height(), parentSize.Height());
-        auto scrollParentContext = scrollParentNode->GetRenderContext();
-        CHECK_NULL_VOID(scrollParentContext);
-        scrollParentContext->SetClipToBounds(clip);
-        auto scrollContentContext = scrollContentNode->GetRenderContext();
-        CHECK_NULL_VOID(scrollContentContext);
-        scrollContentContext->SetClipToBounds(clip);
-    }
-}
 
 RefPtr<MenuPattern> MenuPattern::GetMainMenuPattern() const
 {
@@ -690,4 +692,29 @@ void InnerMenuPattern::ApplyMultiMenuTheme()
     host->GetRenderContext()->UpdateBackShadow(ShadowConfig::NoneShadow);
 }
 
+void MenuPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+
+    auto menuPattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+
+    auto renderContext = host->GetRenderContext();
+    renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
+
+    auto optionNode = menuPattern->GetOptions();
+    for (const auto& child : optionNode) {
+        auto optionsPattern = child->GetPattern<OptionPattern>();
+        optionsPattern->SetFontColor(menuTheme->GetFontColor());
+
+        child->MarkModifyDone();
+        child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    host->SetNeedCallChildrenUpdate(false);
+}
 } // namespace OHOS::Ace::NG

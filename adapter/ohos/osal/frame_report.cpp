@@ -27,11 +27,11 @@
 namespace OHOS::Ace {
 namespace {
 #ifdef __aarch64__
-    const std::string FRAME_AWARE_SO_PATH = "/system/lib64/libframe_ui_intf.z.so";
+const std::string FRAME_AWARE_SO_PATH = "/system/lib64/libframe_ui_intf.z.so";
 #else
-    const std::string FRAME_AWARE_SO_PATH = "/system/lib/libframe_ui_intf.z.so";
+const std::string FRAME_AWARE_SO_PATH = "/system/lib/libframe_ui_intf.z.so";
 #endif
-}
+} // namespace
 FrameReport& FrameReport::GetInstance()
 {
     static FrameReport instance;
@@ -50,6 +50,40 @@ bool FrameReport::LoadLibrary()
     if (!frameSchedSoLoaded_) {
         frameSchedHandle_ = dlopen(FRAME_AWARE_SO_PATH.c_str(), RTLD_LAZY);
         CHECK_NULL_RETURN(frameSchedHandle_, false);
+        frameInitFunc_ = (FrameInitFunc)LoadSymbol("Init");
+        CHECK_NULL_RETURN(frameInitFunc_, false);
+        frameGetEnableFunc_ = (FrameGetEnableFunc)LoadSymbol("GetSenseSchedEnable");
+        CHECK_NULL_RETURN(frameGetEnableFunc_, false);
+        beginFlushAnimationFunc_ = (BeginFlushAnimationFunc)LoadSymbol("BeginFlushAnimation");
+        CHECK_NULL_RETURN(beginFlushAnimationFunc_, false);
+        endFlushAnimationFunc_ = (EndFlushAnimationFunc)LoadSymbol("EndFlushAnimation");
+        CHECK_NULL_RETURN(endFlushAnimationFunc_, false);
+        beginFlushBuildFunc_ = (BeginFlushBuildFunc)LoadSymbol("BeginFlushBuild");
+        CHECK_NULL_RETURN(beginFlushBuildFunc_, false);
+        endFlushBuildFunc_ = (EndFlushBuildFunc)LoadSymbol("EndFlushBuild");
+        CHECK_NULL_RETURN(endFlushBuildFunc_, false);
+        beginFlushLayoutFunc_ = (BeginFlushLayoutFunc)LoadSymbol("BeginFlushLayout");
+        CHECK_NULL_RETURN(beginFlushLayoutFunc_, false);
+        endFlushLayoutFunc_ = (EndFlushLayoutFunc)LoadSymbol("EndFlushLayout");
+        CHECK_NULL_RETURN(endFlushLayoutFunc_, false);
+        beginFlushRenderFunc_ = (BeginFlushRenderFunc)LoadSymbol("BeginFlushRender");
+        CHECK_NULL_RETURN(beginFlushRenderFunc_, false);
+        endFlushRenderFunc_ = (EndFlushRenderFunc)LoadSymbol("EndFlushRender");
+        CHECK_NULL_RETURN(endFlushRenderFunc_, false);
+        beginFlushRenderFinishFunc_ = (BeginFlushRenderFinishFunc)LoadSymbol("BeginFlushRenderFinish");
+        CHECK_NULL_RETURN(beginFlushRenderFinishFunc_, false);
+        endFlushRenderFinishFunc_ = (EndFlushRenderFinishFunc)LoadSymbol("EndFlushRenderFinish");
+        CHECK_NULL_RETURN(endFlushRenderFinishFunc_, false);
+        beginProcessPostFunc_ = (BeginProcessPostFlushFunc)LoadSymbol("BeginProcessPostFlush");
+        CHECK_NULL_RETURN(beginProcessPostFunc_, false);
+        beginListFlingFunc_ = (BeginListFlingFunc)LoadSymbol("BeginListFling");
+        CHECK_NULL_RETURN(beginListFlingFunc_, false);
+        endListFlingFunc_ = (EndListFlingFunc)LoadSymbol("EndListFling");
+        CHECK_NULL_RETURN(endListFlingFunc_, false);
+        flushBeginFunc_ = (FlushBeginFunc)LoadSymbol("FlushBegin");
+        CHECK_NULL_RETURN(flushBeginFunc_, false);
+        flushEndFunc_ = (FlushEndFunc)LoadSymbol("FlushEnd");
+        CHECK_NULL_RETURN(flushEndFunc_, false);
         frameSchedSoLoaded_ = true;
     }
     LOGD("frame-ace:[LoadLibrary]dlopen libframe_ui_intf.so success");
@@ -67,21 +101,18 @@ void FrameReport::CloseLibrary()
     LOGD("frame-ace:[CloseLibrary]libframe_ui_intf.so close success!\n");
 }
 
-void *FrameReport::LoadSymbol(const char *symName)
+void* FrameReport::LoadSymbol(const char* symName)
 {
-    CHECK_NULL_RETURN(frameSchedSoLoaded_, nullptr);
-
-    void *funcSym = dlsym(frameSchedHandle_, symName);
-    CHECK_NULL_RETURN(funcSym, nullptr);
-    return funcSym;
+    CHECK_NULL_RETURN(frameSchedHandle_, nullptr);
+    return dlsym(frameSchedHandle_, symName);
 }
 
 void FrameReport::Init()
 {
-    LoadLibrary();
-    frameInitFunc_ = (FrameInitFunc)LoadSymbol("Init");
-    CHECK_NULL_VOID(frameInitFunc_);
-    frameInitFunc_();
+    if (LoadLibrary()) {
+        frameInitFunc_();
+        enable_ = frameGetEnableFunc_() != 0;
+    }
 }
 
 int FrameReport::GetEnable()
@@ -94,166 +125,134 @@ int FrameReport::GetFrameReportEnable()
     if (!frameSchedSoLoaded_) {
         return 0;
     }
-    frameGetEnableFunc_ = (FrameGetEnableFunc)LoadSymbol("GetSenseSchedEnable");
-    CHECK_NULL_RETURN(frameGetEnableFunc_, 0);
     return frameGetEnableFunc_();
 }
 
 void FrameReport::BeginFlushAnimation()
 {
     Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::AnimateStart);
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    beginFlushAnimationFunc_ = (BeginFlushAnimationFunc)LoadSymbol("BeginFlushAnimation");
-    CHECK_NULL_VOID(beginFlushAnimationFunc_);
     beginFlushAnimationFunc_();
 }
 
 void FrameReport::EndFlushAnimation()
 {
     Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::AnimateEnd);
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    endFlushAnimationFunc_ = (EndFlushAnimationFunc)LoadSymbol("EndFlushAnimation");
-    CHECK_NULL_VOID(endFlushAnimationFunc_);
     endFlushAnimationFunc_();
 }
 
 void FrameReport::BeginFlushBuild()
 {
     Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::BuildStart);
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    beginFlushBuildFunc_ = (BeginFlushBuildFunc)LoadSymbol("BeginFlushBuild");
-    CHECK_NULL_VOID(beginFlushBuildFunc_);
     beginFlushBuildFunc_();
 }
 
 void FrameReport::EndFlushBuild()
 {
     Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::BuildEnd);
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    endFlushBuildFunc_ = (EndFlushBuildFunc)LoadSymbol("EndFlushBuild");
-    CHECK_NULL_VOID(endFlushBuildFunc_);
     endFlushBuildFunc_();
 }
 
 void FrameReport::BeginFlushLayout()
 {
     Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::LayoutStart);
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    beginFlushLayoutFunc_ = (BeginFlushLayoutFunc)LoadSymbol("BeginFlushLayout");
-    CHECK_NULL_VOID(beginFlushLayoutFunc_);
     beginFlushLayoutFunc_();
 }
 
 void FrameReport::EndFlushLayout()
 {
     Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::LayoutEnd);
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    endFlushLayoutFunc_ = (EndFlushLayoutFunc)LoadSymbol("EndFlushLayout");
-    CHECK_NULL_VOID(endFlushLayoutFunc_);
     endFlushLayoutFunc_();
 }
 
 void FrameReport::BeginFlushRender()
 {
     Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::DrawStart);
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    beginFlushRenderFunc_ = (BeginFlushRenderFunc)LoadSymbol("BeginFlushRender");
-    CHECK_NULL_VOID(beginFlushRenderFunc_);
     beginFlushRenderFunc_();
 }
 
 void FrameReport::EndFlushRender()
 {
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    endFlushRenderFunc_ = (EndFlushRenderFunc)LoadSymbol("EndFlushRender");
-    CHECK_NULL_VOID(endFlushRenderFunc_);
     endFlushRenderFunc_();
 }
 
 void FrameReport::BeginFlushRenderFinish()
 {
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    beginFlushRenderFinishFunc_ = (BeginFlushRenderFinishFunc)LoadSymbol("BeginFlushRenderFinish");
-    CHECK_NULL_VOID(beginFlushRenderFinishFunc_);
     beginFlushRenderFinishFunc_();
 }
 
 void FrameReport::EndFlushRenderFinish()
 {
     Rosen::FrameCollector::GetInstance().MarkFrameEvent(Rosen::FrameEventType::DrawEnd);
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    endFlushRenderFinishFunc_ = (EndFlushRenderFinishFunc)LoadSymbol("EndFlushRenderFinish");
-    CHECK_NULL_VOID(endFlushRenderFinishFunc_);
     endFlushRenderFinishFunc_();
 }
 
 void FrameReport::BeginProcessPostFlush()
 {
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    beginProcessPostFunc_ = (BeginProcessPostFlushFunc)LoadSymbol("BeginProcessPostFlush");
-    CHECK_NULL_VOID(beginProcessPostFunc_);
     beginProcessPostFunc_();
 }
 
 void FrameReport::BeginListFling()
 {
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    beginListFlingFunc_ = (BeginListFlingFunc)LoadSymbol("BeginListFling");
-    CHECK_NULL_VOID(beginListFlingFunc_);
     beginListFlingFunc_();
 }
 
 void FrameReport::EndListFling()
 {
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    endListFlingFunc_ = (EndListFlingFunc)LoadSymbol("EndListFling");
-    CHECK_NULL_VOID(beginListFlingFunc_);
     endListFlingFunc_();
 }
 
 void FrameReport::FlushBegin()
 {
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    flushBeginFunc_ = (FlushBeginFunc)LoadSymbol("FlushBegin");
-    CHECK_NULL_VOID(flushBeginFunc_);
     flushBeginFunc_();
 }
 
 void FrameReport::FlushEnd()
 {
-    if (GetFrameReportEnable() == 0) {
+    if (!enable_) {
         return;
     }
-    flushEndFunc_ = (FlushEndFunc)LoadSymbol("FlushEnd");
-    CHECK_NULL_VOID(flushEndFunc_);
     flushEndFunc_();
 }
 } // namespace OHOS::Ace

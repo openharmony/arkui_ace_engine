@@ -158,7 +158,34 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         labelStyle.heightAdaptivePolicy.value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     label->Put("font", font);
     tabBar->Put("labelStyle", label);
-    
+
+    tabBar->Put("padding", tabContentPattern->GetPadding().ToJsonString().c_str());
+    tabBar->Put(
+        "verticalAlign", ConvertFlexAlignToString(tabContentPattern->GetBottomTabBarStyle().verticalAlign).c_str());
+    tabBar->Put("layoutMode", ConvertLayoutModeToString(tabContentPattern->GetBottomTabBarStyle().layoutMode).c_str());
+    tabBar->Put(
+        "symmetricExtensible", tabContentPattern->GetBottomTabBarStyle().symmetricExtensible ? "true" : "false");
+
     json->Put("tabBar", tabBar);
+}
+
+std::string TabContentNode::ConvertFlexAlignToString(FlexAlign verticalAlign) const
+{
+    if (verticalAlign == FlexAlign::FLEX_START) {
+        return "VerticalAlign.Top";
+    } else if (verticalAlign == FlexAlign::FLEX_END) {
+        return "VerticalAlign.Bottom";
+    }
+    return "VerticalAlign.Center";
+}
+
+std::string TabContentNode::ConvertLayoutModeToString(LayoutMode layoutMode) const
+{
+    if (layoutMode == LayoutMode::VERTICAL) {
+        return "LayoutMode.VERTICAL";
+    } else if (layoutMode == LayoutMode::HORIZONTAL) {
+        return "LayoutMode.HORIZONTAL";
+    }
+    return "LayoutMode.AUTO";
 }
 } // namespace OHOS::Ace::NG

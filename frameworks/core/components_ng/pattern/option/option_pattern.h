@@ -95,7 +95,7 @@ public:
     std::vector<std::string> GetFontFamily();
     Color GetFontColor();
 
-    const std::string& GetText();
+    std::string GetText();
 
     // XTS inspector functions
     std::string InspectorGetFont();

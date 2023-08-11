@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,9 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_METHOD_H
-#include "core/components_ng/render/node_paint_method.h"
 
+#include "core/components_ng/pattern/gauge/gauge_paint_property.h"
+#include "core/components_ng/render/node_paint_method.h"
 namespace OHOS::Ace::NG {
 
 struct RenderRingInfo {
@@ -29,6 +30,7 @@ struct RenderRingInfo {
     int32_t totalScaleNumber = 0;
     Color color;
     Offset center;
+    SizeF contentSize;
 };
 
 class ACE_EXPORT GaugePaintMethod : public NodePaintMethod {
@@ -41,9 +43,17 @@ public:
 
 private:
     void Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    void DrawGauge(RSCanvas& canvas, RenderRingInfo data) const;
-    void DrawIndicator(RSCanvas& canvas, RenderRingInfo data) const;
-    bool ShouldHighLight(float start, float interval, float percent) const;
+    void DrawIndicator(RSCanvas& canvas, const RenderRingInfo& data) const;
+    void PaintMonochromeCircular(
+        RSCanvas& canvas, RenderRingInfo data, const RefPtr<GaugePaintProperty>& paintProperty) const;
+    void PaintSingleSegmentGradientCircular(
+        RSCanvas& canvas, RenderRingInfo data, const RefPtr<GaugePaintProperty>& paintProperty) const;
+    void PaintMultiSegmentGradientCircular(
+        RSCanvas& canvas, RenderRingInfo data, const RefPtr<GaugePaintProperty>& paintProperty) const;
+    void DrawHighLight(RSCanvas& canvas, const RenderRingInfo& data, const float drawStartDegree) const;
+    void CalculateStartAndSweepDegree(const RefPtr<GaugePaintProperty>& paintProperty, RenderRingInfo& data) const;
+    float GetOffsetDegree(const RenderRingInfo& data, const float oppositeSide) const;
+    float GetValueRatio(const RefPtr<GaugePaintProperty>& paintProperty) const;
 };
 
 } // namespace OHOS::Ace::NG

@@ -24,15 +24,21 @@
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ListItemGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ListItemGroupPaintMethod, NodePaintMethod)
 public:
-    ListItemGroupPaintMethod(const V2::ItemDivider& divider, bool vertical, int32_t lanes, float spaceWidth,
+    ListItemGroupPaintMethod(const V2::ItemDivider& divider, ListItemGroupPaintInfo listItemGroupPaintInfo,
         ListItemGroupLayoutAlgorithm::PositionMap& itemPosition)
-        : divider_(divider), vertical_(vertical), lanes_(lanes), spaceWidth_(spaceWidth), itemPosition_(itemPosition)
-    {}
+        : divider_(divider), itemPosition_(itemPosition)
+    {
+        vertical_ = listItemGroupPaintInfo.vertical;
+        lanes_ = listItemGroupPaintInfo.lanes;
+        spaceWidth_ = listItemGroupPaintInfo.spaceWidth;
+        laneGutter_ = listItemGroupPaintInfo.laneGutter;
+    }
     ~ListItemGroupPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
@@ -44,6 +50,7 @@ private:
     bool vertical_ = false;
     int32_t lanes_ = 1;
     float spaceWidth_ = 0.0f;
+    float laneGutter_ = 0.0f;
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
 };
 } // namespace OHOS::Ace::NG

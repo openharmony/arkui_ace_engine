@@ -20,8 +20,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/long_press_event.h"
-#include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/linear_layout/column_model.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/property/accessibility_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -168,5 +173,61 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest003, TestSize.Lev
     props.ResetSupportAction();
     auto actions = props.GetSupportAction();
     EXPECT_EQ(actions.size(), 0);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest004
+ * @tc.desc: Set show value into supportActions_ and get SupportAction length.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. supportActions_ Use default values
+     * @tc.expected: Make the array length returned by the GetSupportAction function 0
+     */
+    auto columnFrameNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, 0, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto columnFrameNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, 1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto buttonNode1 =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 2, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode2 =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 3, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode3 =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 4, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode4 =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 5, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonAccessibilityProperty1 = buttonNode1->GetAccessibilityProperty<AccessibilityProperty>();
+    auto buttonAccessibilityProperty2 = buttonNode2->GetAccessibilityProperty<AccessibilityProperty>();
+    auto buttonAccessibilityProperty3 = buttonNode3->GetAccessibilityProperty<AccessibilityProperty>();
+    auto buttonAccessibilityProperty4 = buttonNode4->GetAccessibilityProperty<AccessibilityProperty>();
+    auto columnAccessibilityProperty2 = columnFrameNode2->GetAccessibilityProperty<AccessibilityProperty>();
+    buttonAccessibilityProperty1->SetText("Button1");
+    buttonAccessibilityProperty2->SetText("Button2");
+    buttonAccessibilityProperty3->SetText("Button3");
+    buttonAccessibilityProperty4->SetText("Button4");
+    columnAccessibilityProperty2->SetAccessibilityText("column2");
+    buttonAccessibilityProperty1->SetAccessibilityDescription("Button1");
+
+    columnFrameNode1->AddChild(buttonNode1);
+    columnFrameNode1->AddChild(buttonNode2);
+    columnFrameNode1->AddChild(columnFrameNode2);
+    columnFrameNode2->AddChild(buttonNode3);
+    columnFrameNode2->AddChild(buttonNode4);
+
+    auto columnAccessibilityProperty1 = columnFrameNode1->GetAccessibilityProperty<AccessibilityProperty>();
+    columnAccessibilityProperty1->SetAccessibilityGroup(true);
+    columnAccessibilityProperty1->SetAccessibilityLevel("yes");
+
+    buttonAccessibilityProperty3->SetAccessibilityText("buttonAccessibilityProperty3");
+    buttonAccessibilityProperty3->SetAccessibilityGroup(true);
+    buttonAccessibilityProperty3->SetAccessibilityLevel("yes");
+    auto columnAccessibilityText1 = columnAccessibilityProperty1->GetAccessibilityText();
+    /**
+     * @tc.expected: step1. expect target text combine
+     */
+    EXPECT_EQ(buttonAccessibilityProperty1->GetAccessibilityDescription(), "Button1");
+    EXPECT_EQ(columnAccessibilityText1, "Button1, Button2, column2");
 }
 } // namespace OHOS::Ace::NG

@@ -92,7 +92,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
 
 void JSCheckboxGroup::Create(const JSCallbackInfo& info)
 {
-    std::optional<std::string> checkboxGroupName;
+    std::optional<std::string> checkboxGroupName = std::make_optional("");
     if ((info.Length() >= 1) && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto groupName = paramObject->GetProperty("group");
@@ -385,9 +385,10 @@ NG::PaddingProperty JSCheckboxGroup::GetNewPadding(const JSCallbackInfo& info)
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
             bottom = bottomDimen;
         }
-
-        padding = GetPadding(top, bottom, left, right);
-        return padding;
+        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
+            padding = GetPadding(top, bottom, left, right);
+            return padding;
+        }
     }
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {

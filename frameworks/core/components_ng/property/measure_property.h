@@ -122,6 +122,16 @@ public:
         return changed;
     }
 
+    bool WidthFixed() const
+    {
+        return width_ && width_->GetDimension().Unit() != DimensionUnit::PERCENT;
+    }
+
+    bool HeightFixed() const
+    {
+        return height_ && height_->GetDimension().Unit() != DimensionUnit::PERCENT;
+    }
+
     std::string ToString() const
     {
         static const int32_t precision = 2;
@@ -307,24 +317,14 @@ struct PaddingPropertyT {
 
     bool UpdateWithCheck(const PaddingPropertyT& value)
     {
-        bool isModified = false;
-        if (value.left.has_value() && (left != value.left)) {
+        if (*this != value) {
             left = value.left;
-            isModified = true;
-        }
-        if (value.right.has_value() && (right != value.right)) {
             right = value.right;
-            isModified = true;
-        }
-        if (value.top.has_value() && (top != value.top)) {
             top = value.top;
-            isModified = true;
-        }
-        if (value.bottom.has_value() && (bottom != value.bottom)) {
             bottom = value.bottom;
-            isModified = true;
+            return true;
         }
-        return isModified;
+        return false;
     }
 
     std::string ToString() const

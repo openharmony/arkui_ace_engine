@@ -52,7 +52,8 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
                        .ConvertToPx();
     float diameter =
         progressTheme ? progressTheme->GetRingDiameter().ConvertToPx() : DEFALT_RING_DIAMETER.ConvertToPx();
-    float width_ = progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.maxSize.Width();
+    float width_ =
+        progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.percentReference.Width();
     if (contentConstraint.selfIdealSize.Width()) {
         width_ = contentConstraint.selfIdealSize.Width().value();
     }
@@ -78,14 +79,14 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     }
     if (type_ == ProgressType::CAPSULE) {
         if (!contentConstraint.selfIdealSize.Width()) {
-            width_ = contentConstraint.parentIdealSize.Width().value_or(DEFALT_CAPSULE_WIDTH.ConvertToPx());
+            width_ = contentConstraint.percentReference.Width();
         }
         if (!contentConstraint.selfIdealSize.Height()) {
             height_ = contentConstraint.parentIdealSize.Height().value_or(GetChildHeight(layoutWrapper, width_));
         }
     }
-    height_ = std::min(height_, static_cast<float>(contentConstraint.maxSize.Height()));
-    width_ = std::min(width_, static_cast<float>(contentConstraint.maxSize.Width()));
+    height_ = std::min(height_, static_cast<float>(contentConstraint.percentReference.Height()));
+    width_ = std::min(width_, static_cast<float>(contentConstraint.percentReference.Width()));
     if (type_ == ProgressType::LINEAR) {
         if (width_ >= height_) {
             height_ = std::min(height_, strokeWidth_);

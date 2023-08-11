@@ -63,6 +63,7 @@ public:
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
     virtual void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) = 0;
+    virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
 

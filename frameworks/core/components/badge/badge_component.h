@@ -38,6 +38,9 @@ public:
     const Dimension& GetBadgeFontSize() const;
     const EventMarker& GetClickEvent() const;
     BadgePosition GetBadgePosition() const;
+    const Dimension& GetBadgePositionX() const;
+    const Dimension& GetBadgePositionY() const;
+    bool IsPositionXy() const;
     const Edge& GetPadding() const;
     const Dimension& GetBadgeCircleSize() const;
     const std::optional<std::string>& GetBadgeLabel() const;
@@ -51,6 +54,9 @@ public:
     void SetShowMessage(bool showMessage);
     void SetMessageCount(int64_t messageCount);
     void SetBadgePosition(BadgePosition badgePostion);
+    void SetBadgePositionX(const Dimension& badgePostionX);
+    void SetBadgePositionY(const Dimension& badgePostionY);
+    void SetIsPositionXy(bool isPositionXy);
     void SetBadgeTextColor(const Color& badgeTextColor);
     void SetBadgeFontSize(const Dimension& badgeFontSize);
     void SetBadgeColor(const Color& color);

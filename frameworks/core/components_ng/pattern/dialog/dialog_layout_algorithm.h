@@ -47,9 +47,10 @@ public:
     }
 
 private:
-    LayoutConstraintF CreateDialogChildConstraint(LayoutWrapper* layoutWrapper, float scrollHeight, float scrollWidth);
+    LayoutConstraintF CreateDialogChildConstraint(LayoutWrapper* layoutWrapper, float height, float width);
     void Distribute(float& scrollHeight, float& listHeight, float restHeight);
     void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
+    void AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll);
 
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
@@ -59,6 +60,8 @@ private:
     bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint) const;
 
     void UpdateTouchRegion();
+
+    double GetPaddingBottom() const;
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;

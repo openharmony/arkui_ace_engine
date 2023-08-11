@@ -22,6 +22,8 @@
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -473,7 +475,7 @@ void PaintProgressFilterMask(RSCanvas* canvas, ArcData arcData)
 #else
     RSPen filterPen;
     filterPen.SetAntiAlias(true);
-    filterPen.SetCapStyle(RSPen::CapStyle::BUTT_CAP);
+    filterPen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
     filterPen.SetWidth(thickness);
 
     RSFilter filter;
@@ -646,7 +648,7 @@ void PaintRainbowFilterMask(
     double maxValue = arcData.maxValue;
     RSPen filterPen;
     filterPen.SetAntiAlias(true);
-    filterPen.SetCapStyle(RSPen::CapStyle::BUTT_CAP);
+    filterPen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
     filterPen.SetWidth(thickness);
 
     RSFilter filter;
@@ -694,7 +696,7 @@ void PaintRainbowFilterMask(
         rainbowFilterPath.AddArc(rect, startAngle, sweepAngle);
         std::vector<RSColorQuad> colors = { segment.GetStartColor().ChangeAlpha(101).GetValue(),
             segment.GetEndColor().ChangeAlpha(101).GetValue() };
-        std::vector<RSscalar> pos = { 0.0, 1.0 };
+        std::vector<RSScalar> pos = { 0.0, 1.0 };
         filterPen.SetShaderEffect(
             RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()),
                 colors, pos, RSTileMode::CLAMP, startAngle, startAngle + sweepAngle));
@@ -860,7 +862,7 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
     botPath.AddArc(rect, 0, sweepDegree_);
 
     std::vector<RSColorQuad> colors = { GetStartColor().GetValue(), GetEndColor().GetValue() };
-    std::vector<RSscalar> pos = { 0.0, 1.0 };
+    std::vector<RSScalar> pos = { 0.0, 1.0 };
     canvas->Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
     botPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     botPen.SetWidth(thickness);
@@ -991,7 +993,7 @@ void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, c
     RSPoint segmentEndPoint(rect.GetRight(), rect.GetBottom());
     RSPoint segmentPoint[2] = { segmentStartPoint, segmentEndPoint };
     std::vector<RSColorQuad> segmentColor = { segmentStartColor.GetValue(), segmentEndColor.GetValue() };
-    std::vector<RSscalar> pos = { 0.0, 1.0 };
+    std::vector<RSScalar> pos = { 0.0, 1.0 };
     segmentBrush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
         segmentPoint[0], segmentPoint[1], segmentColor, pos, RSTileMode::CLAMP));
     segmentBrush.SetAntiAlias(true);

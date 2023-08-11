@@ -71,6 +71,7 @@ public:
         linearSweepEffect_ = paintProperty->GetEnableLinearScanEffect().value_or(false);
         bool paintShadow = paintProperty->GetPaintShadow().value_or(false);
         ProgressStatus progressStatus = paintProperty->GetProgressStatus().value_or(ProgressStatus::PROGRESSING);
+        progressModifier_->SetSmoothEffect(paintProperty->GetEnableSmoothEffect().value_or(true));
         progressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
         progressModifier_->SetContentSize(paintWrapper->GetContentSize());
         CalculateStrokeWidth(paintWrapper->GetContentSize());
@@ -89,8 +90,14 @@ public:
         auto ringProgressColor = GenerateRingProgressColor(paintWrapper);
         progressModifier_->SetRingProgressColor(ringProgressColor);
         progressModifier_->SetPaintShadow(paintShadow);
+        isItalic_ = paintProperty->GetItalicFontStyle() != Ace::FontStyle::NORMAL;
+        progressModifier_->SetIsItalic(isItalic_);
         progressModifier_->SetMaxValue(maxValue_);
         progressModifier_->SetValue(value_);
+        auto strokeRadius = static_cast<float>(
+            paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2.0f, DimensionUnit::VP)).ConvertToPx());
+        strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);
+        progressModifier_->SetStrokeRadius(strokeRadius);
     }
 
     void GetThemeDate();
@@ -116,6 +123,7 @@ private:
     bool sweepEffect_ = false;
     bool ringSweepEffect_ = false;
     bool linearSweepEffect_ = false;
+    bool isItalic_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
 };

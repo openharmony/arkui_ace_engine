@@ -39,12 +39,12 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    static void PaintGradient(
-        RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor, std::vector<bool> gradientRegions);
+    static void PaintGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+        const std::vector<bool>& gradientRegions, const MarginPropertyF& padding);
     static void PaintLeftGradient(RSCanvas& context, const RectF& barRect, const Color& backgroundColor,
-        float shadowMargin, float gradientWidth);
+        float shadowMargin, float gradientWidth, float padding);
     static void PaintRightGradient(RSCanvas& context, const RectF& barRect, const Color& backgroundColor,
-        float shadowMargin, float gradientWidth);
+        float shadowMargin, float gradientWidth, float padding);
     static void PaintTopGradient(RSCanvas& context, const RectF& barRect, const Color& backgroundColor,
         float shadowMargin, float gradientWidth);
     static void PaintBottomGradient(RSCanvas& context, const RectF& barRect, const Color& backgroundColor,

@@ -17,11 +17,12 @@ ace_unittest("scroll_bar_test_ng") {
   ace_animation = true
   flutter_skia = true
   sources = [
+    "$ace_root/frameworks/core/animation/friction_motion.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/effect/scroll_fade_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/effect/scroll_fade_effect.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/effect/scroll_fade_painter.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/scroll/inner/scroll_bar.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/inner/scroll_bar_painter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_layout_algorithm.cpp",
@@ -37,6 +38,7 @@ ace_unittest("scroll_bar_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
     "scroll_bar_accessibility_property_test_ng.cpp",
     "scroll_bar_test_ng.cpp",
   ]

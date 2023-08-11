@@ -18,6 +18,8 @@
 
 #include <optional>
 
+#include "wm/wm_common.h"
+
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +34,12 @@ public:
 
     static RefPtr<WindowNode> GetOrCreateWindowNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType) override;
+    std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType) override;
+
+private:
+    RectF ConvertHotRect(const RectF& rect, int32_t sourceType);
+    std::vector<RectF> ConvertHotRects(const std::vector<Rosen::Rect>& hotAreas);
 };
 } // namespace OHOS::Ace::NG
 

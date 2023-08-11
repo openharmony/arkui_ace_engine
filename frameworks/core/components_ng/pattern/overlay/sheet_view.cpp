@@ -38,13 +38,16 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, RefPtr<FrameNode>
     std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle)
 {
     // create sheet node
-    auto sheetNode = FrameNode::CreateFrameNode("SheetPage", ElementRegister::GetInstance()->MakeUniqueId(),
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(targetId, std::move(callback)));
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
     sheetLayoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     sheetLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    if (sheetStyle.sheetMode.has_value() && sheetStyle.sheetMode == SheetMode::AUTO) {
+        sheetLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+    }
 
     // create drag bar
     bool isShow = sheetStyle.showDragBar.value_or(true);

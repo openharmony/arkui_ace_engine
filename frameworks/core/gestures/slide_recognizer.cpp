@@ -326,7 +326,7 @@ SlideRecognizer::GestureAcceptResult SlideRecognizer::ParseFingersOffset() const
         for (const auto& element : fingersDistance_) {
             Offset offset = element.second;
             double distance = offset.GetDistance();
-            if (fabs(distance) < DEFAULT_SLIDE_DISTANCE) {
+            if (fabs(distance) < DEFAULT_SLIDE_DISTANCE.ConvertToPx()) {
                 return GestureAcceptResult::DETECTING;
             }
         }
@@ -338,7 +338,7 @@ SlideRecognizer::GestureAcceptResult SlideRecognizer::ParseFingersOffset() const
         if (fabs(offset.GetX()) > fabs(offset.GetY())) {
             if ((direction_.type & SwipeDirection::HORIZONTAL) != 0) {
                 double offsetX = offset.GetX();
-                if (fabs(offsetX) < DEFAULT_SLIDE_DISTANCE) {
+                if (fabs(offsetX) < DEFAULT_SLIDE_DISTANCE.ConvertToPx()) {
                     return GestureAcceptResult::DETECTING;
                 }
             } else {
@@ -347,7 +347,7 @@ SlideRecognizer::GestureAcceptResult SlideRecognizer::ParseFingersOffset() const
         } else {
             if ((direction_.type & SwipeDirection::VERTICAL) != 0) {
                 double offsetY = offset.GetY();
-                if (fabs(offsetY) < DEFAULT_SLIDE_DISTANCE) {
+                if (fabs(offsetY) < DEFAULT_SLIDE_DISTANCE.ConvertToPx()) {
                     return GestureAcceptResult::DETECTING;
                 }
             } else {
@@ -363,7 +363,7 @@ SlideRecognizer::GestureAcceptResult SlideRecognizer::ParseAxisOffset() const
 {
     if ((direction_.type & SwipeDirection::ALL) == SwipeDirection::ALL) {
         double distance = Offset(axisHorizontalTotal_, axisVerticalTotal_).GetDistance();
-        if (fabs(distance) < DEFAULT_SLIDE_DISTANCE) {
+        if (fabs(distance) < DEFAULT_SLIDE_DISTANCE.ConvertToPx()) {
             return GestureAcceptResult::DETECTING;
         }
         return GestureAcceptResult::ACCEPT;
@@ -371,7 +371,7 @@ SlideRecognizer::GestureAcceptResult SlideRecognizer::ParseAxisOffset() const
 
     if (axisHorizontalTotal_ > axisVerticalTotal_) {
         if ((direction_.type & SwipeDirection::HORIZONTAL) != 0) {
-            if (axisHorizontalTotal_ < DEFAULT_SLIDE_DISTANCE) {
+            if (axisHorizontalTotal_ < DEFAULT_SLIDE_DISTANCE.ConvertToPx()) {
                 return GestureAcceptResult::DETECTING;
             }
         } else {
@@ -379,7 +379,7 @@ SlideRecognizer::GestureAcceptResult SlideRecognizer::ParseAxisOffset() const
         }
     } else {
         if ((direction_.type & SwipeDirection::VERTICAL) != 0) {
-            if (axisVerticalTotal_ < DEFAULT_SLIDE_DISTANCE) {
+            if (axisVerticalTotal_ < DEFAULT_SLIDE_DISTANCE.ConvertToPx()) {
                 return GestureAcceptResult::DETECTING;
             }
         } else {

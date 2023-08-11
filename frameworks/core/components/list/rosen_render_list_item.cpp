@@ -252,7 +252,7 @@ void RosenRenderListItem::PaintItemDivider(RenderContext& context)
             endPointX + dividerWidth / 2.0, endPointY, paint);
     }
 #else
-    canvas->AttachPen(paint);
+    canvas->AttachPen(pen);
     if (isVertical) {
         canvas->DrawLine(RSPoint(startPointX, startPointY + dividerWidth / 2.0),
             RSPoint(endPointX, endPointY + dividerWidth / 2.0));
