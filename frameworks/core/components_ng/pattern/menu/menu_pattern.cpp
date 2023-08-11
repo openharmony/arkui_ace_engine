@@ -560,6 +560,8 @@ void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     PaddingProperty padding;
     padding.SetEdges(CalcLength(theme->GetOutPadding()));
     host->GetLayoutProperty()->UpdatePadding(padding);
+
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void MenuPattern::SetAccessibilityAction()
