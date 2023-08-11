@@ -294,6 +294,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     titleProp->UpdateContent(titleContent);
     auto titleStyle = dialogTheme_->GetTitleTextStyle();
     titleProp->UpdateFontSize(titleStyle.GetFontSize());
+    titleProp->UpdateFontWeight(titleStyle.GetFontWeight());
     titleProp->UpdateTextColor(titleStyle.GetTextColor());
     PaddingProperty titlePadding;
     auto paddingInTheme = (dialogProperties.content.empty() && dialogProperties.buttons.empty())
