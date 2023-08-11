@@ -85,7 +85,7 @@ HWTEST_F(ParsePathTestNg, ParseTest001, TestSize.Level1)
 {
     auto svgDom = ParsePath(SVG_LABEL1);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size());
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
@@ -100,7 +100,7 @@ HWTEST_F(ParsePathTestNg, ParseTest002, TestSize.Level1)
 {
     auto svgDom = ParsePath(SVG_LABEL2);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
@@ -115,7 +115,7 @@ HWTEST_F(ParsePathTestNg, ParseTest003, TestSize.Level1)
 {
     auto svgDom = ParsePath(SVG_LABEL4);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
 }
@@ -130,7 +130,7 @@ HWTEST_F(ParsePathTestNg, ParseTest004, TestSize.Level1)
 {
     auto svgDom = ParsePath(SVG_LABEL3);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
 }
@@ -145,7 +145,7 @@ HWTEST_F(ParsePathTestNg, ParseTest005, TestSize.Level1)
 {
     auto svgDom = ParsePath(SVG_LABEL3);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size());
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
 }
@@ -160,7 +160,7 @@ HWTEST_F(ParsePathTestNg, ParseTest006, TestSize.Level1)
 {
     auto svgDom = ParsePath(SVG_LABEL5);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size());
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }

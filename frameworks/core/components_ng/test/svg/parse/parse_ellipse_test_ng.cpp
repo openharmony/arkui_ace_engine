@@ -75,7 +75,7 @@ HWTEST_F(ParseEllipseTestNg, ParseTest001, TestSize.Level1)
 {
     auto svgDom = ParseEllipse(SVG_LABEL1);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
@@ -90,7 +90,7 @@ HWTEST_F(ParseEllipseTestNg, ParseTest002, TestSize.Level1)
 {
     auto svgDom = ParseEllipse(SVG_LABEL2);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
@@ -106,7 +106,7 @@ HWTEST_F(ParseEllipseTestNg, ParseTest003, TestSize.Level1)
     auto svgDom = ParseEllipse(SVG_LABEL2);
     RSCanvas rSCanvas;
     svgDom->root_ = nullptr;
-    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }

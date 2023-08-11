@@ -63,7 +63,7 @@ HWTEST_F(ParseCircleTestNg, ParseTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(circleDeclaration->GetCy().ConvertToPx(), Cy);
     EXPECT_FLOAT_EQ(circleDeclaration->GetR().ConvertToPx(), R);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FITWIDTH, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FITWIDTH, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }

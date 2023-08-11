@@ -65,7 +65,7 @@ HWTEST_F(ParseFeColorMatrixTestNg, ParseTest001, TestSize.Level1)
     EXPECT_STREQ(feColorDeclaration->GetType().c_str(), TYPE.c_str());
     EXPECT_STREQ(feColorDeclaration->GetValues().c_str(), VALUE.c_str());
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
