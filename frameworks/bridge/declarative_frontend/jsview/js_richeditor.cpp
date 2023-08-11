@@ -489,17 +489,15 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject)
         style.SetFontSize(size);
     }
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
-    if (!fontStyle->IsNull()) {
+    if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
         updateSpanStyle_.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
         style.SetFontStyle(static_cast<FontStyle>(fontStyle->ToNumber<int32_t>()));
     }
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
-    if (!fontWeight->IsNull()) {
+    if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
-        } else {
-            JSContainerBase::ParseJsString(fontWeight, weight);
         }
         updateSpanStyle_.updateFontWeight = ConvertStrToFontWeight(weight);
         style.SetFontWeight(ConvertStrToFontWeight(weight));
