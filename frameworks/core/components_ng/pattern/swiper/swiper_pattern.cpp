@@ -147,6 +147,7 @@ void SwiperPattern::StopAndResetSpringAnimation()
         springController_->Stop();
         currentDelta_ = 0.0f;
         itemPosition_.clear();
+        isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
     }
 }
@@ -200,6 +201,7 @@ void SwiperPattern::OnModifyDone()
         currentOffset_ = 0.0f;
         mainSizeIsMeasured_ = false;
         itemPosition_.clear();
+        isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
         for (const auto& child : host->GetChildren()) {
             if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
@@ -269,10 +271,12 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             currentIndex_ = userSetCurrentIndex;
         }
     }
-    if (GetLoopIndex(oldIndex_) != GetLoopIndex(currentIndex_)) {
+    if (GetLoopIndex(oldIndex_) != GetLoopIndex(currentIndex_) || (itemPosition_.empty() && !isVoluntarilyClear_)) {
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
+    } else if (isVoluntarilyClear_) {
+        isVoluntarilyClear_ = false;
     }
     if (jumpIndex_) {
         if ((jumpIndex_.value() < 0 || jumpIndex_.value() >= TotalCount()) && !IsLoop()) {
@@ -324,6 +328,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 }
                 swiper->currentOffset_ = 0.0f;
                 swiper->itemPosition_.clear();
+                swiper->isVoluntarilyClear_ = true;
                 swiper->jumpIndex_ = swiper->currentIndex_;
                 auto swiperNode = swiper->GetHost();
                 CHECK_NULL_VOID(swiperNode);
@@ -682,6 +687,7 @@ void SwiperPattern::StopSpringAnimationAndFlushImmediately()
         springController_->Stop();
         currentDelta_ = 0.0f;
         itemPosition_.clear();
+        isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -2617,6 +2623,7 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
         if (isFinishAnimation_) {
             currentDelta_ = 0.0f;
             itemPosition_.clear();
+            isVoluntarilyClear_ = true;
             jumpIndex_ = nextIndex;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             auto pipeline = PipelineContext::GetCurrentContext();

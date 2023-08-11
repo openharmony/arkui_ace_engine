@@ -636,6 +636,7 @@ private:
     bool usePropertyAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
+    bool isVoluntarilyClear_ = false;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
