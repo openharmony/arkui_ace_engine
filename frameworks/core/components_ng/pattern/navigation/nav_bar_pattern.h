@@ -50,11 +50,6 @@ public:
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
 
-    bool GetspringEffect()
-    {
-        return springEffect_;
-    }
-
     void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
     {
         titleBarMenuItems_ = menuItems;
@@ -125,7 +120,6 @@ private:
     void OnCoordScrollEnd();
     RefPtr<FrameNode> FindScrollableChild();
     float offset_ = 0.0f;
-    bool springEffect_ = false;
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
     bool isOritationListenerRegisted_ = false;
