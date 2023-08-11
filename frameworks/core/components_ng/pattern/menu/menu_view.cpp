@@ -120,7 +120,6 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
     props->UpdatePadding(padding);
     node->MountToParent(scroll);
-    theme->SetMenuScrollId(scroll->GetTag(), scroll->GetId());
     return scroll;
 }
 

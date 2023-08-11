@@ -132,7 +132,7 @@ void JSMenu::SetWidth(const JSCallbackInfo& info)
         return;
     }
     CalcDimension width;
-    if (!ParseJsDimensionPx(info[0], width)) {
+    if (!ParseJsDimensionVp(info[0], width)) {
         return;
     }
 
