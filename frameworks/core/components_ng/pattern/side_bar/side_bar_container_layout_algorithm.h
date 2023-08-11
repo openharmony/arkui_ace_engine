@@ -46,6 +46,11 @@ public:
         sideBarStatus_ = sideBarStatus;
     }
 
+    SideBarStatus GetSideBarStatus() const
+    {
+        return sideBarStatus_;
+    }
+
     void SetRealSideBarWidth(float realSideBarWidth)
     {
         realSideBarWidth_ = realSideBarWidth;
