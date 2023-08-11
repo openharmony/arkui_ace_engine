@@ -192,8 +192,8 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     }
     auto children = parentNode->GetChildren();
 
-    for (auto index = static_cast<int>(children.size()) - 1; index >= 0; index--) {
-        auto child = parentNode->GetChildAtIndex(index);
+    for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
+        auto child = *iter;
         if (child == nullptr) {
             LOGW("when findding target in child nodes, find child is nullptr");
             continue;
