@@ -64,7 +64,7 @@ HWTEST_F(ParseFeCompositeTestNg, ParseTest001, TestSize.Level1)
     auto feCompositsDeclaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(svgFeComposite->declaration_);
     EXPECT_NE(feCompositsDeclaration, nullptr);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }

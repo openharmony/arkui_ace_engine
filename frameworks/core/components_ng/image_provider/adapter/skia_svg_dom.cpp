@@ -93,7 +93,7 @@ void SkiaSvgDom::FitViewPort(const Size& layout)
 }
 
 void SkiaSvgDom::DrawImage(
-    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>&)
+    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
     CHECK_NULL_VOID(skiaDom_);
     auto rsCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>();

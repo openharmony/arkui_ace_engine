@@ -49,7 +49,7 @@ public:
     void SetFillColor(const std::optional<Color>& color) override;
 
     void DrawImage(
-        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) override;
+        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) override;
 
     SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override {}

@@ -88,7 +88,7 @@ HWTEST_F(ParseGradientTestNg, ParseLinearGradientTest001, TestSize.Level1)
     EXPECT_EQ(gradient.GetLinearGradient().y2.has_value(), true);
     EXPECT_FLOAT_EQ(gradient.GetLinearGradient().y2->ConvertToPx(), Y2);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
@@ -129,7 +129,7 @@ HWTEST_F(ParseGradientTestNg, ParseRadialGradientTest001, TestSize.Level1)
     EXPECT_EQ(radialGradient.radialShape.has_value(), false);
     EXPECT_EQ(radialGradient.radialSizeType.has_value(), false);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::SCALE_DOWN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
