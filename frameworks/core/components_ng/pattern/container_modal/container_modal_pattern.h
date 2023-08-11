@@ -67,6 +67,8 @@ public:
 
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
 
+    void SetCloseButtonStatus(bool isEnabled);
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& titleNode, int32_t originIndex)
     {

@@ -241,6 +241,13 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     pipeline->RequestFrame();
 }
 
+void OverlayManager::SetContainerButtonEnable(bool isEnabled)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetCloseButtonStatus(isEnabled);
+}
+
 void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow)
 {
     AnimationOption option;
@@ -882,6 +889,9 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     BeforeShowDialog(dialog);
     OpenDialogAnimation(dialog);
+    dialogCount_++;
+    // set close button disable
+    SetContainerButtonEnable(false);
     return dialog;
 }
 
@@ -969,6 +979,11 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     }
     dialogNode->MarkRemoving();
     CloseDialogAnimation(dialogNode);
+    dialogCount_--;
+    // set close button enable
+    if (dialogCount_ == 0) {
+        SetContainerButtonEnable(true);
+    }
     dialogNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     CallOnHideDialogCallback();

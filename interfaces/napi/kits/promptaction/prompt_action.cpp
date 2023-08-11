@@ -27,8 +27,8 @@
 
 namespace OHOS::Ace::Napi {
 namespace {
-const uint32_t SHOW_DIALOG_BUTTON_NUM_MAX = 3;
-const uint32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
+const int32_t SHOW_DIALOG_BUTTON_NUM_MAX = -1;
+const int32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
@@ -238,21 +238,21 @@ void DeleteContextAndThrowError(
     NapiThrow(env, errorMessage, Framework::ERROR_CODE_PARAM_INVALID);
 }
 
-bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, uint32_t maxButtonNum)
+bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, int32_t maxButtonNum)
 {
     uint32_t buttonsLen = 0;
     napi_value buttonArray = nullptr;
     napi_value textNApi = nullptr;
     napi_value colorNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
-    uint32_t index = 0;
+    int32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
-    uint32_t buttonsLenInt = buttonsLen;
+    int32_t buttonsLenInt = buttonsLen;
     if (buttonsLenInt == 0) {
         DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
         return false;
     }
-    if (buttonsLenInt > maxButtonNum) {
+    if (buttonsLenInt > maxButtonNum && maxButtonNum != -1) {
         buttonsLenInt = maxButtonNum;
         LOGW("Supports 1 - %{public}u buttons", maxButtonNum);
     }
