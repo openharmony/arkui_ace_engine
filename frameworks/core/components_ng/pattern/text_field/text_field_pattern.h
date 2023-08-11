@@ -971,6 +971,11 @@ public:
         return inlineState_.frameRect.Width();
     }
 
+    void ResetTouchAtLeftOffsetFlag()
+    {
+        isTouchAtLeftOffset_ = true;
+    }
+
     bool IsNormalInlineState() const;
     void TextIsEmptyRect(RectF &rect);
     void TextAreaInputRectUpdate(RectF &rect);
@@ -1003,7 +1008,7 @@ private:
     std::function<void(Offset)> GetThumbnailCallback();
 #endif
     bool CaretPositionCloseToTouchPosition();
-    void CreateSingleHandle(bool animation = false);
+    void CreateSingleHandle(bool animation = false, bool isMenuShow = true);
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
@@ -1021,8 +1026,8 @@ private:
     // assert handles are inside the contentRect, reset them if not
     void CheckHandles(std::optional<RectF>& firstHandle,
         std::optional<RectF>& secondHandle, float firstHandleSize = 0.0f, float secondHandleSize = 0.0f);
-    void ShowSelectOverlay(
-        const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle, bool animation = false);
+    void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle,
+        bool animation = false, bool isMenuShow = true);
 
     void CursorMoveOnClick(const Offset& offset);
     void UpdateCaretInfoToController() const;
@@ -1108,6 +1113,8 @@ private:
 
     bool ResetObscureTickCountDown();
     bool IsInPasswordMode() const;
+    void GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end);
+    bool IsTouchAtLeftOffset(float currentOffsetX);
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1253,8 +1260,11 @@ private:
     bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
+    bool isFocusedBeforeClick_ = false;
+    bool originalIsMenuShow_ = false;
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
+    bool isTouchAtLeftOffset_ = true;
 };
 } // namespace OHOS::Ace::NG
 
