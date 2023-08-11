@@ -177,6 +177,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
         auto client = textField.Upgrade();
         CHECK_NULL_VOID_NOLOG(client);
         ContainerScope scope(client->GetInstanceId());
+        client->ResetTouchAtLeftOffsetFlag();
         switch (direction) {
             case MiscServices::Direction::UP:
                 client->CursorMoveUp();

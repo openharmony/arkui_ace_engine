@@ -2894,19 +2894,21 @@ HWTEST_F(TextFieldPatternTestNg, SetShowUnderline001, TestSize.Level1)
     TextFieldModelNG textFieldModelInstance;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
 
     /**
      * @tc.steps: step2. call SetShowUnderline function.
      * @tc.expected: The member variable value of textFieldModelInstance is the same as expected.
      */
-    renderContext->UpdateBackgroundColor(Color::BLUE);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
     const bool hideUnderLine = false;
     textFieldModelInstance.SetShowUnderline(hideUnderLine);
-    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLUE);
+    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(true));
     const bool showUnderLine = true;
     textFieldModelInstance.SetShowUnderline(showUnderLine);
-    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
@@ -2923,18 +2925,17 @@ HWTEST_F(TextFieldPatternTestNg, SetShowUnderline002, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(pattern, nullptr);
 
     /**
      * @tc.steps: step2. call SetShowUnderline function.
      * @tc.expected: The member variable value of textFieldModelInstance is the same as expected.
      */
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
-    const bool showUnderLine = true;
-    textFieldModelInstance.SetShowUnderline(showUnderLine);
-    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
+    textFieldModelInstance.SetShowUnderline(true);
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
@@ -4774,7 +4775,7 @@ HWTEST_F(TextFieldPatternTestNg, SetShowError, TestSize.Level2)
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     layoutProperty->UpdateShowUnderline(true);
     pattern->SetShowError();
-    EXPECT_EQ(pattern->GetUnderlineWidth(), 2.0);
+    EXPECT_EQ(pattern->GetUnderlineWidth(), 1.0);
     auto borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
     ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
     EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 1.0);
@@ -4786,7 +4787,7 @@ HWTEST_F(TextFieldPatternTestNg, SetShowError, TestSize.Level2)
     layoutProperty->UpdateShowUnderline(false);
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
     pattern->SetShowError();
-    EXPECT_EQ(pattern->GetUnderlineWidth(), 2.0);
+    EXPECT_EQ(pattern->GetUnderlineWidth(), 1.0);
     borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
     ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
     EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 1.0);
@@ -5393,9 +5394,9 @@ HWTEST_F(TextFieldPatternTestNg, GetInputStyleString, TestSize.Level2)
      * @tc.expected: Check the return value.
      */
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
-    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextInputStyle.INLINE");
+    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextContentStyle.INLINE");
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
-    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextInputStyle.DEFAULT");
+    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextContentStyle.DEFAULT");
 }
 
 /**

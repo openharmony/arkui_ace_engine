@@ -288,6 +288,7 @@ private:
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
+    void SetContainerButtonEnable(bool isEnabled);
 
     void SaveLastModalNode();
     void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
@@ -318,6 +319,7 @@ private:
     WeakPtr<FrameNode> lastModalNode_;
     float sheetHeight_ {0.0};
     WeakPtr<UINode> rootNodeWeak_;
+    int32_t dialogCount_ = 0;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ {false};
     bool hasFilter_ {false};

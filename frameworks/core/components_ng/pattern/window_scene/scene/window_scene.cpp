@@ -48,12 +48,15 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         self->BufferAvailableCallback();
+        Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
     };
 }
 
 WindowScene::~WindowScene()
 {
     CHECK_NULL_VOID_NOLOG(IsMainWindow());
+    CHECK_NULL_VOID_NOLOG(session_);
+    session_->SetShowRecent(false);
     UnregisterLifecycleListener();
 }
 
@@ -64,6 +67,7 @@ void WindowScene::OnAttachToFrameNode()
 
     if (!IsMainWindow()) {
         CHECK_NULL_VOID(session_);
+        session_->SetUINodeId(host->GetAccessibilityId());
         auto surfaceNode = session_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
@@ -73,6 +77,7 @@ void WindowScene::OnAttachToFrameNode()
     }
 
     CHECK_NULL_VOID(session_);
+    session_->SetUINodeId(host->GetAccessibilityId());
     auto sessionInfo = session_->GetSessionInfo();
     auto name = sessionInfo.bundleName_;
     auto pos = name.find_last_of('.');
@@ -229,7 +234,7 @@ void WindowScene::OnBackground()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->CreateSnapshotNode();
+        self->CreateSnapshotNode(true);
         host->RemoveChild(self->contentNode_);
         host->AddChild(self->snapshotNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -249,7 +254,7 @@ void WindowScene::OnDisconnect()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->CreateSnapshotNode();
+        self->CreateSnapshotNode(true);
         host->RemoveChild(self->contentNode_);
         self->contentNode_.Reset();
         host->RemoveChild(self->startingNode_);

@@ -331,7 +331,7 @@ void ProgressModelNG::SetStrokeRadius(const Dimension& value)
 
 void ProgressModelNG::ResetStrokeRadius()
 {
-    ACE_RESET_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, StrokeRadius, PROPERTY_UPDATE_RENDER);
 }
 
 } // namespace OHOS::Ace::NG

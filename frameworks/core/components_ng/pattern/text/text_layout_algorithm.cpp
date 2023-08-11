@@ -61,6 +61,10 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    if (!contentConstraint.maxSize.IsPositive()) {
+        return std::nullopt;
+    }
+
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = frameNode->GetContext();
@@ -70,10 +74,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto contentModifier = pattern->GetContentModifier();
-
-    if (!contentConstraint.maxSize.IsPositive()) {
-        return std::nullopt;
-    }
 
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
@@ -106,7 +106,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     baselineOffset_ = static_cast<float>(baselineOffset);
 
-    float heightFinal = static_cast<float>(height + std::fabs(baselineOffset));
+    auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset));
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         heightFinal = std::min(
             static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.selfIdealSize.Height().value());

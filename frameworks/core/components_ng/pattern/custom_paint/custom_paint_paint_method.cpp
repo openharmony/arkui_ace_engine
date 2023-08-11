@@ -68,6 +68,7 @@ constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
 constexpr double CONIC_END_ANGLE = 359.9;
+constexpr int32_t IMAGE_CACHE_COUNT = 50;
 
 #ifndef USE_ROSEN_DRAWING
 const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] = {
@@ -362,13 +363,56 @@ RSMatrix CustomPaintPaintMethod::GetMatrixFromPattern(const Ace::Pattern& patter
 #endif
 
 #ifndef USE_ROSEN_DRAWING
+sk_sp<SkImage> CustomPaintPaintMethod::GetImage(const std::string& src)
+{
+    if (!imageCache_) {
+        imageCache_ = ImageCache::Create();
+        imageCache_->SetCapacity(IMAGE_CACHE_COUNT);
+    }
+    auto cacheImage = imageCache_->GetCacheImage(src);
+    if (cacheImage && cacheImage->imagePtr) {
+        return cacheImage->imagePtr;
+    }
+
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto image = Ace::ImageProvider::GetSkImage(src, context);
+    CHECK_NULL_RETURN(image, nullptr);
+    auto rasterizedImage = image->makeRasterImage();
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
+    return rasterizedImage;
+}
+#else
+std::shared_ptr<RSImage> CustomPaintPaintMethod::GetImage(const std::string& src)
+{
+    if (!imageCache_) {
+        imageCache_ = ImageCache::Create();
+        imageCache_->SetCapacity(IMAGE_CACHE_COUNT);
+    }
+    auto cacheImage = imageCache_->GetCacheImage(src);
+    if (cacheImage && cacheImage->imagePtr) {
+        return cacheImage->imagePtr;
+    }
+
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto image = Ace::ImageProvider::GetDrawingImage(src, context);
+    CHECK_NULL_RETURN(image, nullptr);
+    RSBitmapFormat rsBitmapFormat { image->GetColorType(), image->GetAlphaType() };
+    RSBitmap rsBitmap;
+    rsBitmap.Build(image->GetWidth(), image->GetHeight(), rsBitmapFormat);
+    CHECK_NULL_RETURN(image->ReadPixels(rsBitmap, 0, 0), nullptr);
+    auto rasterizedImage = std::make_shared<RSImage>();
+    rasterizedImage->BuildFromBitmap(rsBitmap);
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
+    return rasterizedImage;
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint)
 {
-    auto width = pattern.GetImageWidth();
-    auto height = pattern.GetImageHeight();
-    auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                     ? ImageProvider::GetSkImage(pattern.GetImgSrc(), context_, Size(width, height))
-                     : ImageProvider::GetSkImage(pattern.GetImgSrc(), context_);
+    auto image = GetImage(pattern.GetImgSrc());
     CHECK_NULL_VOID(image);
     SkMatrix* matrix = nullptr;
     SkMatrix tempMatrix;
@@ -465,11 +509,7 @@ void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPa
 #else
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush)
 {
-    auto width = pattern.GetImageWidth();
-    auto height = pattern.GetImageHeight();
-    auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                     ? ImageProvider::GetDrawingImage(pattern.GetImgSrc(), context_, Size(width, height))
-                     : ImageProvider::GetDrawingImage(pattern.GetImgSrc(), context_);
+    auto image = GetImage(pattern.GetImgSrc());
     CHECK_NULL_VOID(image);
     RSMatrix matrix;
     if (pattern.IsTransformable()) {

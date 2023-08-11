@@ -104,10 +104,10 @@ void RosenWindow::RequestFrame()
     CHECK_NULL_VOID_NOLOG(!isRequestVsync_);
     LOGD("request next vsync");
     if (rsWindow_) {
+        isRequestVsync_ = true;
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = GetSysTimestamp();
     }
-    isRequestVsync_ = true;
     auto taskExecutor = taskExecutor_.Upgrade();
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(

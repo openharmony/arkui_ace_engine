@@ -518,6 +518,10 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
 
     auto info = KeyEventInfo(keyEvent);
+    if (pipeline &&
+        (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT))) {
+        info.SetMetaKey(1);
+    }
     auto retCallback = false;
     auto onKeyEventCallback = GetOnKeyCallback();
     if (onKeyEventCallback) {

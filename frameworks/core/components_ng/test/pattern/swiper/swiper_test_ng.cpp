@@ -213,6 +213,8 @@ void SwiperTestNg::CommomAttrInfo()
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetThemeManager(themeManager);
     auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    swiperIndicatorTheme->clickArrowBackgroundColor_ = Color::RED;
+    swiperIndicatorTheme->hoverArrowBackgroundColor_ = Color::GREEN;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
 }
 
@@ -821,7 +823,6 @@ HWTEST_F(SwiperTestNg, SwiperEvent002, TestSize.Level1)
     auto pipeline = MockPipelineBase::GetCurrent();
     ASSERT_NE(pipeline, nullptr);
     pipeline->restoreNodeInfo_.emplace(std::make_pair(1, "testFlushUITasks"));
-    EXPECT_CALL(*pipeline, FlushUITasks()).WillRepeatedly(Return());
 
     pattern->InitPanEvent(gestureEventHub);
     EXPECT_EQ(pattern->direction_, Axis::HORIZONTAL);
@@ -5516,30 +5517,30 @@ HWTEST_F(SwiperTestNg, ButtonOnHover001, TestSize.Level1)
     /**
      * @tc.cases: case3.1 isHover is true, RenderContext.BlendBgColor() will be called.
      */
-    EXPECT_CALL(*mockRenderContext, BlendBgColor(_)).Times(1);
     leftArrowPattern->isTouch_ = true;
     leftArrowPattern->ButtonOnHover(buttonNode, true);
+    EXPECT_EQ(mockRenderContext->blendColor_, Color::RED);
 
     /**
      * @tc.cases: case3.2 isHover is true, isTouch is false, RenderContext.BlendBgColor() will be called.
      */
-    EXPECT_CALL(*mockRenderContext, BlendBgColor(_)).Times(1);
     leftArrowPattern->isTouch_ = false;
     leftArrowPattern->ButtonOnHover(buttonNode, true);
+    EXPECT_EQ(mockRenderContext->blendColor_, Color::GREEN);
 
     /**
      * @tc.cases: case3.3 isHover is false, isTouch is true, RenderContext.BlendBgColor() will be called.
      */
-    EXPECT_CALL(*mockRenderContext, BlendBgColor(_)).Times(1);
     leftArrowPattern->isTouch_ = true;
     leftArrowPattern->ButtonOnHover(buttonNode, false);
+    EXPECT_EQ(mockRenderContext->blendColor_, Color::RED);
 
     /**
      * @tc.cases: case3.4 isHover is false, isTouch is false, RenderContext.BlendBgColor() will be called.
      */
-    EXPECT_CALL(*mockRenderContext, BlendBgColor(_)).Times(1);
     leftArrowPattern->isTouch_ = false;
     leftArrowPattern->ButtonOnHover(buttonNode, false);
+    EXPECT_EQ(mockRenderContext->blendColor_, Color::TRANSPARENT);
 }
 
 /**
@@ -5592,30 +5593,30 @@ HWTEST_F(SwiperTestNg, ButtonTouchEvent001, TestSize.Level1)
     /**
      * @tc.cases: case3.1 isHover is true, isTouch is true, RenderContext.BlendBgColor() will be called.
      */
-    EXPECT_CALL(*mockRenderContext, BlendBgColor(_)).Times(1);
     leftArrowPattern->isHover_ = true;
     leftArrowPattern->ButtonTouchEvent(buttonNode, TouchType::DOWN);
+    EXPECT_EQ(mockRenderContext->blendColor_, Color::RED);
 
     /**
      * @tc.cases: case3.2 isHover is true, isTouch is false, RenderContext.BlendBgColor() will be called.
      */
-    EXPECT_CALL(*mockRenderContext, BlendBgColor(_)).Times(1);
     leftArrowPattern->isHover_ = false;
     leftArrowPattern->ButtonTouchEvent(buttonNode, TouchType::DOWN);
+    EXPECT_EQ(mockRenderContext->blendColor_, Color::RED);
 
     /**
      * @tc.cases: case3.3 isHover is false, isTouch is true, RenderContext.BlendBgColor() will be called.
      */
-    EXPECT_CALL(*mockRenderContext, BlendBgColor(_)).Times(1);
     leftArrowPattern->isHover_ = true;
     leftArrowPattern->ButtonTouchEvent(buttonNode, TouchType::UP);
+    EXPECT_EQ(mockRenderContext->blendColor_, Color::GREEN);
 
     /**
      * @tc.cases: case3.4 isHover is false, isTouch is false, RenderContext.BlendBgColor() will be called.
      */
-    EXPECT_CALL(*mockRenderContext, BlendBgColor(_)).Times(1);
     leftArrowPattern->isHover_ = false;
     leftArrowPattern->ButtonTouchEvent(buttonNode, TouchType::CANCEL);
+    EXPECT_EQ(mockRenderContext->blendColor_, Color::TRANSPARENT);
 }
 
 /**

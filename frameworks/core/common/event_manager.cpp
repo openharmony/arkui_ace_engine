@@ -18,6 +18,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
+#include "base/thread/frame_trace_adapter.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
@@ -314,6 +315,10 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
+        FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
+        if (ft != nullptr) {
+            ft->SetFrameTraceLimit();
+        }
         refereeNG_->CleanGestureScope(point.id);
         referee_->CleanGestureScope(point.id);
         touchTestResults_.erase(point.id);

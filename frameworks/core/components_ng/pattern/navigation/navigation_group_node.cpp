@@ -244,6 +244,7 @@ void NavigationGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestinat
         backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
     backButtonNode->MarkModifyDone();
+    navDestination->UpdateTitleFontSize(isVisible);
 }
 
 void NavigationGroupNode::SetBackButtonEvent(
@@ -296,11 +297,7 @@ void NavigationGroupNode::SetBackButtonEvent(
         }; // backButton event
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
-    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(onBackButtonEvent));
-    if (!backButtonEventHub->GetGestureEventHub()) {
-        return;
-    }
-    backButtonEventHub->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent);
+    backButtonEventHub->GetOrCreateGestureEventHub()->SetUserOnClick(onBackButtonEvent);
 }
 
 RefPtr<FrameNode> NavigationGroupNode::GetNavDestinationNodeToHandleBack()

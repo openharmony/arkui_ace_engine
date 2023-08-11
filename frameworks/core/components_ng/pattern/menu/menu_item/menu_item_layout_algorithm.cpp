@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
-
+#include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/pipeline/pipeline_base.h"
@@ -54,23 +54,28 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         rightRowWidth = rightRow->GetGeometryNode()->GetMarginFrameSize().Width();
     }
     // measure left row
-    // left row constraint width = total constraint width - right row width - space
     auto middleSpace = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
     maxRowWidth -= rightRowWidth + middleSpace;
     childConstraint.maxSize.SetWidth(maxRowWidth);
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
     MeasureRow(leftRow, childConstraint);
+    MeasureItem(layoutWrapper);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
-
+    float menuWidth = layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     if (!layoutConstraint->selfIdealSize.Width().has_value()) {
         float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
-        layoutConstraint->selfIdealSize.SetWidth(std::max(minRowWidth, contentWidth));
+        if (leftRowWidth == menuWidth || LessOrEqual(menuWidth, MIN_MENU_WIDTH.ConvertToPx())) {
+            layoutConstraint->selfIdealSize.SetWidth(std::max(minRowWidth, contentWidth));
+        } else {
+            layoutConstraint->selfIdealSize.SetWidth(menuWidth);
+        }
         props->UpdateLayoutConstraint(layoutConstraint.value());
     } else if (layoutConstraint->selfIdealSize.Width().value() >= layoutConstraint->maxSize.Width()) {
         layoutConstraint->selfIdealSize.SetWidth(layoutConstraint->maxSize.Width());
         props->UpdateLayoutConstraint(layoutConstraint.value());
     }
+    
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 }
 
@@ -86,7 +91,7 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(leftRow);
     auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
     float topSpace = (itemHeight - leftRowSize.Height()) / 2.0f;
-    if (padding.top.has_value() && padding.top.value() > topSpace) {
+    if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
         topSpace = padding.top.value();
     }
     leftRow->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
@@ -97,7 +102,7 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(rightRow);
     auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
     topSpace = (itemHeight - rightRowSize.Height()) / 2.0f;
-    if (padding.top.has_value() && padding.top.value() > topSpace) {
+    if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
         topSpace = padding.top.value();
     }
     rightRow->GetGeometryNode()->SetMarginFrameOffset(
@@ -137,5 +142,25 @@ void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const
     }
     rowWidth -= iconContentPadding;
     row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, roWHeight));
+}
+
+void MenuItemLayoutAlgorithm::MeasureItem(LayoutWrapper* layoutWrapper)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
+
+    auto itemProperty = AceType::DynamicCast<MenuItemLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(itemProperty);
+    float menuHeight = 0.0f;
+    if (itemProperty->GetMenuWidth().has_value()) {
+        auto menuWidth = itemProperty->GetMenuWidthValue().ConvertToPx();
+        if (GreatOrEqual(menuWidth, MIN_MENU_WIDTH.ConvertToPx())) {
+            menuWidth -= iconContentPadding;
+            layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(menuWidth, menuHeight));
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

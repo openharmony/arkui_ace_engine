@@ -271,9 +271,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
     LOGD("menu position_ = %{public}s, targetSize = %{public}s", position_.ToString().c_str(),
         targetSize.ToString().c_str());
-
     InitializePadding(layoutWrapper);
-
     auto constraint = props->GetLayoutConstraint();
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, props->GetMeasureType(MeasureType::MATCH_PARENT), true);
@@ -285,10 +283,20 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         bottomSpace_ = constraint->maxSize.Height() - position_.GetY();
         leftSpace_ = Infinity<float>();
     } else {
-        topSpace_ = position_.GetY() - targetSize.Height() - margin_ * 2.0f;
-        bottomSpace_ = wrapperSize_.Height() - position_.GetY() - margin_ * 2.0f;
-        leftSpace_ = position_.GetX();
-        rightSpace_ = wrapperSize_.Width() - leftSpace_;
+        if (props->GetMenuPlacement().has_value()) {
+            auto targetSecurity = static_cast<float>(TARGET_SECURITY.ConvertToPx());
+            topSpace_ = std::max(0.0f, targetOffset_.GetY() - targetSecurity - paddingTop_);
+            bottomSpace_ = std::max(0.0f,
+                wrapperSize_.Height() - targetOffset_.GetY() - targetSize_.Height() - targetSecurity - paddingBottom_);
+            leftSpace_ = std::max(0.0f, targetOffset_.GetX() - paddingStart_ - targetSecurity);
+            rightSpace_ = std::max(
+                0.0f, wrapperSize_.Width() - targetSize_.Width() - targetSecurity - paddingStart_ - paddingEnd_);
+        } else {
+            topSpace_ = position_.GetY() - targetSize.Height() - margin_ * 2.0f;
+            bottomSpace_ = wrapperSize_.Height() - position_.GetY() - margin_ * 2.0f;
+            leftSpace_ = position_.GetX();
+            rightSpace_ = wrapperSize_.Width() - leftSpace_;
+        }
     }
 
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
@@ -355,6 +363,13 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     // initialize screen size and menu position
     CHECK_NULL_VOID(layoutWrapper);
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    if (!targetTag_.empty()) {
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu());
+    }
     Initialize(layoutWrapper);
 
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -400,9 +415,6 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu());
-    }
 
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
         auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -656,9 +668,17 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     } else {
         columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
     }
-    // set max width
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
+    if (menuLayoutProperty->GetMenuWidth().has_value()) {
+        auto menuWidth = menuLayoutProperty->GetMenuWidthValue().ConvertToPxWithSize(wrapperSize_.Width());
+        if (LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth) && LessNotEqual(menuWidth, wrapperSize_.Width())) {
+            constraint.maxSize.SetWidth(menuWidth);
+            constraint.minSize.SetWidth(MIN_MENU_WIDTH.ConvertToPx());
+            return;
+        }
+    }
+    // set max width
     const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
     auto maxHorizontalSpace = std::max(leftSpace_, rightSpace_) - 2.0f * padding.Width();
     auto maxWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
@@ -675,6 +695,7 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     } else {
         minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     }
+
     if (minWidth > constraint.maxSize.Width()) {
         minWidth = constraint.maxSize.Width();
     }

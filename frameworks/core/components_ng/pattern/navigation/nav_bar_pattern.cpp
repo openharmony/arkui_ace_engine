@@ -691,7 +691,6 @@ void NavBarPattern::OnCoordScrollStart()
     auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollablePattern);
     scrollablePattern->SetParentDraggedDown(titlePattern->IsTitleDraggedDown());
-    springEffect_ = scrollablePattern->IsScrollableSpringEffect();
 }
 
 void NavBarPattern::OnCoordScrollUpdate(float offset)

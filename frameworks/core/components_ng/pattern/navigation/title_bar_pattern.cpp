@@ -104,6 +104,9 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
         }
         titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
         titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    } else {
+        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
+        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
     }
 
     if (hostNode->GetSubtitle()) {
@@ -332,7 +335,6 @@ void TitleBarPattern::ProcessTittleDragUpdate(float offset)
     overDragOffset_ = std::clamp(overDragOffset_, 0.0f, static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx()));
     if (Positive(overDragOffset_)) {
         UpdateScaleByDragOverDragOffset(overDragOffset_);
-        return;
     }
 }
 void TitleBarPattern::SetTitleStyleByOffset(float offset)
@@ -460,6 +462,9 @@ void TitleBarPattern::UpdateScaleByDragOverDragOffset(float overDragOffset)
     auto host = GetHost();
     auto navBarNode = AceType::DynamicCast<NavBarNode>(host->GetParent());
     CHECK_NULL_VOID(navBarNode);
+    if (navBarNode->GetPrevTitleIsCustomValue(true)) {
+        return;
+    }
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {

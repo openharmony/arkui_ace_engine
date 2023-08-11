@@ -25,4 +25,8 @@ ace_unittest("remote_window_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/remote_window/remote_window_pattern.cpp",
     "remote_window_test_ng.cpp",
   ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }

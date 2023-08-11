@@ -109,7 +109,8 @@ private:
         OffsetF& bottomPosition, const SizeF& childSize);
     void GetPositionWithPlacement(
         OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
-    OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp);
+    OffsetF GetChildPosition(
+        const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
 

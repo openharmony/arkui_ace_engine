@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,9 @@
 
 #include <mutex>
 
+#include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "frameworks/base/geometry/dimension.h"
 
 namespace OHOS::Ace {
@@ -33,6 +35,8 @@ public:
     virtual void SetStartAngle(float startAngle) = 0;
     virtual void SetEndAngle(float endAngle) = 0;
     virtual void SetColors(const std::vector<Color>& colors, const std::vector<float>& values) = 0;
+    virtual void SetGradientColors(
+        const std::vector<NG::ColorStopArray>& colors, const std::vector<float>& values, const NG::GaugeType& type) = 0;
     virtual void SetStrokeWidth(const Dimension& strokeWidth) = 0;
     virtual void SetLabelMarkedText(std::string labelTextString) = 0;
     virtual void SetMarkedTextColor(const Color color) = 0;

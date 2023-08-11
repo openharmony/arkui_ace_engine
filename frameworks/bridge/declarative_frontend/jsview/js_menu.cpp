@@ -74,6 +74,10 @@ void JSMenu::Font(const JSCallbackInfo& info)
         JSRef<JSVal> size = obj->GetProperty("size");
         if (!size->IsNull()) {
             ParseJsDimensionFp(size, fontSize);
+            if (fontSize.Unit() == DimensionUnit::PERCENT) {
+                // set zero for abnormal value
+                fontSize = CalcDimension();
+            }
         }
 
         auto jsWeight = obj->GetProperty("weight");
@@ -121,6 +125,68 @@ void JSMenu::FontColor(const JSCallbackInfo& info)
     MenuModel::GetInstance()->SetFontColor(color);
 }
 
+void JSMenu::SetWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    CalcDimension width;
+    if (!ParseJsDimensionVp(info[0], width)) {
+        return;
+    }
+
+    MenuModel::GetInstance()->SetWidth(width);
+}
+
+void JSMenu::HandleDifferentRadius(const JSRef<JSVal>& args)
+{
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft;
+        if (ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
+            radiusTopLeft = topLeft;
+        }
+        CalcDimension topRight;
+        if (ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
+            radiusTopRight = topRight;
+        }
+        CalcDimension bottomLeft;
+        if (ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
+            radiusBottomLeft = bottomLeft;
+        }
+        CalcDimension bottomRight;
+        if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
+            radiusBottomRight = bottomRight;
+        }
+        if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
+            !radiusBottomRight.has_value()) {
+            return;
+        }
+        MenuModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+    }
+}
+
+void JSMenu::SetRadius(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    CalcDimension radius;
+    ParseJsDimensionVp(info[0], radius);
+
+    if (LessNotEqual(radius.Value(), 0.0)) {
+        return;
+    }
+    MenuModel::GetInstance()->SetBorderRadius(radius);
+    HandleDifferentRadius(info[0]);
+}
+
 void JSMenu::JSBind(BindingTarget globalObj)
 {
     JSClass<JSMenu>::Declare("Menu");
@@ -129,6 +195,8 @@ void JSMenu::JSBind(BindingTarget globalObj)
     JSClass<JSMenu>::StaticMethod("fontSize", &JSMenu::FontSize, opt);
     JSClass<JSMenu>::StaticMethod("font", &JSMenu::Font, opt);
     JSClass<JSMenu>::StaticMethod("fontColor", &JSMenu::FontColor, opt);
+    JSClass<JSMenu>::StaticMethod("width", &JSMenu::SetWidth, opt);
+    JSClass<JSMenu>::StaticMethod("radius", &JSMenu::SetRadius, opt);
     JSClass<JSMenu>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSMenu>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenu>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);

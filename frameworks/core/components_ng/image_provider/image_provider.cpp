@@ -233,7 +233,7 @@ void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadin
     std::scoped_lock<std::mutex> lock(taskMtx_);
     LOGD("try cancel bgTask %{public}s", key.c_str());
     auto it = tasks_.find(key);
-    CHECK_NULL_VOID(it != tasks_.end());
+    CHECK_NULL_VOID_NOLOG(it != tasks_.end());
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
     // only one LoadingContext waiting for this task, can just cancel
     if (it->second.ctxs_.size() == 1) {
@@ -299,11 +299,9 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     return MakeRefPtr<StaticImageObject>(src, size, data);
 }
 
-void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
+void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
     const SizeF& size, bool forceResize, bool sync)
 {
-    auto obj = objWp.Upgrade();
-    CHECK_NULL_VOID(obj);
     auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
     // check if same task is already executing
     if (!RegisterTask(key, ctxWp)) {
@@ -311,21 +309,21 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const Wea
     }
 
     if (sync) {
-        MakeCanvasImageHelper(objWp, size, key, forceResize, true);
+        MakeCanvasImageHelper(obj, size, key, forceResize, true);
     } else {
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([key, objWp, size, forceResize] { MakeCanvasImageHelper(objWp, size, key, forceResize); });
+        task.Reset([key, obj, size, forceResize] { MakeCanvasImageHelper(obj, size, key, forceResize); });
         tasks_[key].bgTask_ = task;
         ImageUtils::PostToBg(task);
     }
 }
 
 void ImageProvider::MakeCanvasImageHelper(
-    const WeakPtr<ImageObject>& imageObjWp, const SizeF& size, const std::string& key, bool forceResize, bool sync)
+    const RefPtr<ImageObject>& obj, const SizeF& size, const std::string& key, bool forceResize, bool sync)
 {
-    ImageDecoder decoder(imageObjWp.Upgrade(), size, forceResize);
+    ImageDecoder decoder(obj, size, forceResize);
     RefPtr<CanvasImage> image;
     if (SystemProperties::GetImageFrameworkEnabled()) {
         image = decoder.MakePixmapImage();

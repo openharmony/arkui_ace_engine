@@ -52,6 +52,7 @@ public:
     MOCK_METHOD3(GetRectsForRange, void(int32_t start, int32_t end, std::vector<Rect>& selectedRects));
     MOCK_METHOD3(Paint, void(const RSCanvas& canvas, float x, float y));
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
+    MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
 
     static RefPtr<MockParagraph> paragraph_;
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();

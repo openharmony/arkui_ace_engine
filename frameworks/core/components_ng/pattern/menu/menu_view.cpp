@@ -85,6 +85,8 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     textProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
     textProperty->UpdateTextColor(theme->GetMenuTitleFontColor());
     textProperty->UpdateContent(title);
+    textProperty->UpdateMaxLines(1);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
 
     CalcSize idealSize;
     idealSize.SetHeight(CalcLength(theme->GetMenuTitleHeight()));
@@ -118,11 +120,6 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
     props->UpdatePadding(padding);
     node->MountToParent(scroll);
-    auto renderContext = scroll->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetMenuBorderRadius());
-    renderContext->UpdateBorderRadius(borderRadius);
     return scroll;
 }
 

@@ -182,6 +182,7 @@ public:
 #endif
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
@@ -193,6 +194,7 @@ public:
     }
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
+    bool HasFocus() const;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
@@ -227,7 +229,6 @@ private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
-    bool HasFocus() const;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);

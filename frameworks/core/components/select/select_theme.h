@@ -24,6 +24,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
 
@@ -34,6 +35,8 @@ constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
 constexpr Dimension MENU_END_ICON_WIDTH = 12.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
+constexpr Dimension DEFAULT_MENU_WIDTH = 0.0_vp;
+constexpr Dimension MIN_MENU_WIDTH = 64.0_vp;
 
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build

@@ -904,6 +904,8 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     CHECK_NULL_VOID(swiperFrameNode);
     auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+    CHECK_NULL_VOID(swiperController_);
+    swiperController_->FinishAnimation();
     int32_t indicator = swiperPattern->GetCurrentIndex();
     if (indicator == index) {
         return;

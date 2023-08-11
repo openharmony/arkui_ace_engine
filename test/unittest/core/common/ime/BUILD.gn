@@ -26,4 +26,8 @@ ace_unittest("ime_test") {
   ]
 
   external_deps = [ "ability_base:base" ]
+  external_deps += [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }

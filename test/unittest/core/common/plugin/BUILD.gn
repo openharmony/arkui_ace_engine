@@ -30,6 +30,9 @@ ohos_unittest("plugin_manager_test") {
     "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
   ]
-
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

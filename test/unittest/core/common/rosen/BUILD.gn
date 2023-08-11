@@ -35,4 +35,8 @@ ohos_unittest("rosen_test") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "//third_party/googletest:gmock_main",
   ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }

@@ -63,10 +63,9 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info.GetFingerList();
-    uint32_t idx = 0;
     for (const FingerInfo& info : fingerList) {
         JSRef<JSObject> element = CreateFingerInfo(info);
-        fingerArr->SetValueAt(idx++, element);
+        fingerArr->SetValueAt(info.fingerId_, element);
     }
     gestureInfoObj->SetPropertyObject("fingerList", fingerArr);
 

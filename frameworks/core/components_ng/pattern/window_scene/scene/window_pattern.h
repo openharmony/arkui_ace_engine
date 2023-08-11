@@ -51,7 +51,7 @@ protected:
 
     void InitContent();
     void CreateStartingNode();
-    void CreateSnapshotNode();
+    void CreateSnapshotNode(bool usePixelMap = false);
 
     virtual void OnConnect() {}
     virtual void OnForeground() {}
@@ -74,6 +74,7 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     bool IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void SetWindowSceneConsumed(int32_t action);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;

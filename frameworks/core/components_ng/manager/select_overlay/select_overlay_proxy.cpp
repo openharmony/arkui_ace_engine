@@ -118,4 +118,18 @@ void SelectOverlayProxy::DisableMenu(bool isDisabled)
     CHECK_NULL_VOID(pattern);
     pattern->DisableMenu(isDisabled);
 }
+
+bool SelectOverlayProxy::IsMenuShow()
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsMenuShow();
+}
+
+bool SelectOverlayProxy::IsHandleShow()
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsHandleShow();
+}
 } // namespace OHOS::Ace::NG

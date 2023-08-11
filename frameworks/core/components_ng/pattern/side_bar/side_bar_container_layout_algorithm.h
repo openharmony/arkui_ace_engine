@@ -46,14 +46,19 @@ public:
         sideBarStatus_ = sideBarStatus;
     }
 
-    void SetRealSideBarWidth(float realSideBarWidth)
+    SideBarStatus GetSideBarStatus() const
     {
-        realSideBarWidth_ = realSideBarWidth;
+        return sideBarStatus_;
     }
 
-    float GetRealSideBarWidth() const
+    void SetRealSideBarWidth(Dimension realSideBarWidth)
     {
-        return realSideBarWidth_;
+        realSideBarWidthDimension_ = realSideBarWidth;
+    }
+
+    Dimension GetRealSideBarWidth() const
+    {
+        return realSideBarWidthDimension_;
     }
 
     void SetRealDividerWidth(float realDividerWidth)
@@ -192,6 +197,7 @@ private:
     Dimension adjustMinSideBarWidth_;
     Dimension controlImageWidth_;
     Dimension controlImageHeight_;
+    Dimension realSideBarWidthDimension_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerLayoutAlgorithm);
 };
