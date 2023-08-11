@@ -79,11 +79,6 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
     LOGD("pinch recognizer receives axis start event, begin to detect pinch event");
-    if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed()) {
-        LOGD("pinch recognizer exit cause of event's pinchAxisScale is zero and key-ctrl is not being pressed.");
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
@@ -99,6 +94,10 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch up event");
+    if (currentFingers_ < fingers_) {
+        LOGW("PinchGesture current finger number is less than requiried finger number.");
+        return;
+    }
 
     if (isPinchEnd_) {
         return;
@@ -136,8 +135,8 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
-
-    if (isPinchEnd_) {
+    if (currentFingers_ < fingers_) {
+        LOGW("PinchGesture current finger number is less than requiried finger number.");
         return;
     }
 
@@ -146,6 +145,9 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     currentDev_ = ComputeAverageDeviation();
     time_ = event.time;
 
+    if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
+        return;
+    }
     if (refereeState_ == RefereeState::DETECTING) {
         if (GreatOrEqual(fabs(currentDev_ - initialDev_), distance_)) {
             scale_ = currentDev_ / initialDev_;
@@ -298,6 +300,9 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetDeviceId(deviceId_);
         info.SetSourceDevice(deviceType_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
             info.SetTiltX(lastTouchEvent_.tiltX.value());

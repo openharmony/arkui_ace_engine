@@ -49,7 +49,9 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<NavDestinationLayoutAlgorithm>();
+        auto layout = MakeRefPtr<NavDestinationLayoutAlgorithm>();
+        layout->SetIsShown(isOnShow_);
+        return layout;
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -74,6 +76,16 @@ public:
         return name_;
     }
 
+    void SetNavDestinationNode(const RefPtr<UINode>& navDestinationNode)
+    {
+        navDestinationNode_ = navDestinationNode;
+    }
+
+    RefPtr<UINode> GetNavDestinationNode()
+    {
+        return navDestinationNode_.Upgrade();
+    }
+
     void SetRouteInfo(const RefPtr<RouteInfo>& routeInfo)
     {
         routeInfo_ = routeInfo;
@@ -84,10 +96,27 @@ public:
         return routeInfo_;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    void SetIsOnShow(bool isOnShow)
+    {
+        isOnShow_ = isOnShow;
+    }
+
+    bool GetIsOnShow()
+    {
+        return isOnShow_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
     RefPtr<RouteInfo> routeInfo_;
+    WeakPtr<UINode> navDestinationNode_;
+    bool isOnShow_ = false;
 };
 
 } // namespace OHOS::Ace::NG

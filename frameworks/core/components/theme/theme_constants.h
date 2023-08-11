@@ -33,7 +33,7 @@
 #include "core/components/theme/theme_style.h"
 namespace OHOS::Ace {
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW ThemeConstants : public AceType {
+class ACE_FORCE_EXPORT ThemeConstants : public AceType {
     DECLARE_ACE_TYPE(ThemeConstants, AceType);
 
 public:
@@ -275,12 +275,31 @@ public:
         return resAdapter_->GetMediaData(resId, len, dest);
     }
 
+    template<class T>
+    bool GetMediaData(T& resId, size_t& len, std::unique_ptr<uint8_t[]>& dest, const std::string& bundleName,
+        const std::string& moduleName)
+    {
+        if (!resAdapter_) {
+            return false;
+        }
+        return resAdapter_->GetMediaData(resId, len, dest, bundleName, moduleName);
+    }
+
     bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest)
     {
         if (!resAdapter_) {
             return false;
         }
         return resAdapter_->GetRawFileData(rawFile, len, dest);
+    }
+
+    bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+        const std::string& bundleName, const std::string& moduleName)
+    {
+        if (!resAdapter_) {
+            return false;
+        }
+        return resAdapter_->GetRawFileData(rawFile, len, dest, bundleName, moduleName);
     }
 
     bool GetResourceIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const;
@@ -308,13 +327,6 @@ public:
     {
         if (resAdapter_) {
             resAdapter_->UpdateResourceManager(bundleName, moduleName);
-        }
-    }
-
-    void ReloadResource()
-    {
-        if (resAdapter_) {
-            resAdapter_->Reload();
         }
     }
 

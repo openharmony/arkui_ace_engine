@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,12 +27,14 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/span_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #ifndef NG_BUILD
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #endif
+#include "bridge/declarative_frontend/jsview/js_text.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -72,6 +74,13 @@ const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE
 
 } // namespace
 
+void JSSpan::SetFont(const JSCallbackInfo& info)
+{
+    Font font;
+    JSText::GetFontInfo(info, font);
+    SpanModel::GetInstance()->SetFont(font);
+}
+
 void JSSpan::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -99,7 +108,11 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        textColor = theme->GetTextStyle().GetTextColor();
     }
     SpanModel::GetInstance()->SetTextColor(textColor);
 }
@@ -184,6 +197,11 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
 void JSSpan::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+            LOGD("JsOnClick callback is undefined");
+            SpanModel::GetInstance()->ClearOnClick();
+            return;
+        }
         if (!info[0]->IsFunction()) {
             LOGW("the info is not click function");
             return;
@@ -251,6 +269,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::Declare("Span");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSpan>::StaticMethod("create", &JSSpan::Create, opt);
+    JSClass<JSSpan>::StaticMethod("font", &JSSpan::SetFont, opt);
     JSClass<JSSpan>::StaticMethod("fontColor", &JSSpan::SetTextColor, opt);
     JSClass<JSSpan>::StaticMethod("fontSize", &JSSpan::SetFontSize, opt);
     JSClass<JSSpan>::StaticMethod("fontWeight", &JSSpan::SetFontWeight, opt);

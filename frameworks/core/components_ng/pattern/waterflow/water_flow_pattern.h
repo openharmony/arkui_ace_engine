@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
@@ -32,6 +33,7 @@ public:
     bool IsScrollable() const override;
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    OverScrollOffset GetOverScrollOffset(double delta) const override;
     void UpdateScrollBarOffset() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -50,6 +52,8 @@ public:
     {
         return MakeRefPtr<WaterFlowAccessibilityProperty>();
     }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool UpdateStartIndex(int32_t index);
 
@@ -88,6 +92,11 @@ public:
         return layoutInfo_.childrenCount_;
     }
 
+    float GetTotalOffset() const override
+    {
+        return -layoutInfo_.currentOffset_;
+    }
+
     int32_t GetRows() const;
 
     int32_t GetColumns() const;
@@ -96,11 +105,19 @@ public:
 
     void ScrollPage(bool reverse);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void OnAttachToFrameNode() override;
+    void InitScrollableEvent();
+    void CheckScrollable();
+
     WaterFlowLayoutInfo layoutInfo_;
+
+    // clip padding of WaterFlow
+    RefPtr<WaterFlowContentModifier> contentModifier_;
+
     // just for hold WaterFlowPositionController
     RefPtr<WaterFlowPositionController> controller_;
 };

@@ -22,26 +22,53 @@ namespace OHOS::Ace::NG {
 class AnimatableArithmeticProxy : public AnimatableArithmetic<AnimatableArithmeticProxy> {
 public:
     AnimatableArithmeticProxy() = default;
-    explicit AnimatableArithmeticProxy(RefPtr<CustomAnimatableArithmetic> object) : object_(object) {}
+    explicit AnimatableArithmeticProxy(RefPtr<CustomAnimatableArithmetic> object) : object_(object)
+    {
+        if (!object_) {
+            LOGD("object provided is null");
+        }
+    }
     virtual ~AnimatableArithmeticProxy() = default;
 
     AnimatableArithmeticProxy Add(const AnimatableArithmeticProxy& val) const override
     {
+        if (!object_) {
+            return {};
+        }
+        if (!val.object_) {
+            return {};
+        }
+
         return AnimatableArithmeticProxy(object_->Add(val.object_));
     }
 
     AnimatableArithmeticProxy Minus(const AnimatableArithmeticProxy& val) const override
     {
+        if (!object_) {
+            return {};
+        }
+        if (!val.object_) {
+            return {};
+        }
         return AnimatableArithmeticProxy(object_->Minus(val.object_));
     }
 
     AnimatableArithmeticProxy Multiply(const float scale) const override
     {
+        if (!object_) {
+            return {};
+        }
         return AnimatableArithmeticProxy(object_->Multiply(scale));
     }
 
     bool IsEqual(const AnimatableArithmeticProxy& val) const override
     {
+        if (!object_) {
+            return {};
+        }
+        if (!val.object_) {
+            return {};
+        }
         return object_->IsEqual(val.object_);
     }
 

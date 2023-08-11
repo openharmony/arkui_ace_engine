@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,11 +61,19 @@ void RosenRenderTabBarItem::RenderTabBarItemBoundary(RenderContext& context, con
             LOGE("Paint rsNode is null.");
             return;
         }
+#ifndef USE_ROSEN_DRAWING
         rsNode->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE,
             [offset, layoutSize = Size(width, height)](std::shared_ptr<SkCanvas> canvas) {
                 DebugBoundaryPainter::PaintDebugBoundary(canvas.get(), offset, layoutSize);
                 DebugBoundaryPainter::PaintDebugCorner(canvas.get(), offset, layoutSize);
             });
+#else
+        rsNode->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE,
+            [offset, layoutSize = Size(width, height)](std::shared_ptr<RSCanvas> canvas) {
+                DebugBoundaryPainter::PaintDebugBoundary(canvas.get(), offset, layoutSize);
+                DebugBoundaryPainter::PaintDebugCorner(canvas.get(), offset, layoutSize);
+            });
+#endif
     }
 }
 

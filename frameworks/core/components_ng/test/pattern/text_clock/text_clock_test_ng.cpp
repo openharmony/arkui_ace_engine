@@ -16,35 +16,42 @@
 #define private public
 #include <optional>
 #include <string>
+#include <sys/time.h>
 
 #include "gtest/gtest.h"
 
 #include "base/utils/time_util.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#define private public
+#define protected public
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HOURS_WEST = -8;
+constexpr int32_t DATE_INDEX = 0;
 constexpr int32_t HOURS_WEST2 = INT_MAX;
-constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
-inline const std::string CLOCK_FORMAT = "hms";
+constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
+inline const std::string CLOCK_FORMAT = "aa h:m:s";
 inline const std::string UTC_1 = "1000000000000";
 inline const std::string UTC_2 = "2000000000000";
 inline const std::string FORMAT_DATA = "08:00:00";
 inline const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+const std::string EMPTY_TEXT = "";
+const std::string TEXTCLOCK_CONTENT = "08:00:00";
 
 int32_t GetSystemTimeZone()
 {
-    struct timeval currentTime {};
-    struct timezone timeZone {};
-    gettimeofday(&currentTime, &timeZone);
-    int32_t hoursWest = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
+    int32_t hoursWest = timezone / TOTAL_SECONDS_OF_HOUR;
     return hoursWest;
 }
 } // namespace
@@ -132,9 +139,12 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create textclock and get frameNode.
      */
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXTCLOCK_COMPONENT_TAG, 1, []() { return AceType::MakeRefPtr<TextClockPattern>(); });
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(FORMAT_DATA);
+    auto frameNode = CreateTextClockParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
 
     /**
      * @tc.steps: step2. get pattern and create layout property.
@@ -144,6 +154,8 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. call OnModifyDone and UpdateTimeTextCallBack function when default properties.
@@ -152,7 +164,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     pattern->InitTextClockController();
     pattern->OnModifyDone();
     pattern->UpdateTimeTextCallBack();
-    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
 
     /**
      * @tc.steps: step4. get controller and create layout property and event.
@@ -162,7 +174,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     ASSERT_NE(controller, nullptr);
     controller->Start();
     controller->Stop();
-    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
     auto clockLayoutProperty = pattern->CreateLayoutProperty();
     ASSERT_NE(clockLayoutProperty, nullptr);
     auto event = pattern->CreateEventHub();
@@ -180,7 +192,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
     pattern->UpdateTimeTextCallBack();
     EXPECT_EQ(pattern->textClockController_, nullptr);
     EXPECT_EQ(pattern->timeCallback_, nullptr);
-    EXPECT_EQ(layoutProperty->GetContent(), FORMAT_DATA);
+    EXPECT_EQ(textLayoutProperty->GetContent(), FORMAT_DATA);
 }
 
 /**
@@ -232,7 +244,7 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
      * @tc.steps: step2. construct different params.
      */
     auto systemTimeZone = GetSystemTimeZone();
-    std::vector<std::vector<int32_t>> params = {{HOURS_WEST2, systemTimeZone}, {HOURS_WEST, HOURS_WEST}};
+    std::vector<std::vector<int32_t>> params = { { HOURS_WEST2, systemTimeZone }, { HOURS_WEST, HOURS_WEST } };
     for (int turn = 0; turn < params.size(); turn++) {
         testProperty.hoursWest = std::make_optional(params[turn][0]);
         /**
@@ -248,5 +260,140 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
         ASSERT_NE(pattern, nullptr);
         EXPECT_EQ(pattern->GetHoursWest(), params[turn][1]);
     }
+}
+
+/**
+ * @tc.name: TextClockTest005
+ * @tc.desc: Test the fuction of parse format.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of textclock.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional("M月d日yy年 E HH:mm:ss.SSS aa");
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties.
+     * @tc.expected: related function is called.
+     */
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextClockLayoutProperty> textClockLayoutProperty =
+        AceType::DynamicCast<TextClockLayoutProperty>(layoutProperty);
+    ASSERT_NE(textClockLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. get pattern.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. call the format and datetime split, and datetime splice function.
+     * @tc.expected: check whether the value is correct.
+     */
+    int32_t weekType = 0;
+    bool is24H = false;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool isMilliSecond = false;
+    std::vector<std::string> inputFormatSplitter =
+        pattern->ParseInputFormat(is24H, weekType, month, day, isMilliSecond);
+    std::vector<std::string> curDateTime = { "1900", "0", "1", "0", "0", "0", "0", "", "2" };
+    std::string dateTimeValue = "2023/07/08, 下午8:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "7/8/2023, 8:35:07.67 am";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "07/08/2023, 20:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    pattern->SpliceDateTime(curDateTime, inputFormatSplitter);
+    pattern->CheckDateTimeElement(curDateTime, "yy", 'y', (int32_t)DATE_INDEX, true);
+    pattern->CheckDateTimeElement(curDateTime, "MM", 'M', (int32_t)DATE_INDEX, true);
+    pattern->CheckDateTimeElement(curDateTime, "dd", 'd', (int32_t)DATE_INDEX, true);
+    pattern->CheckDateTimeElement(curDateTime, "mm", 'm', (int32_t)DATE_INDEX, true);
+    EXPECT_EQ(is24H, true);
+    EXPECT_EQ(weekType, 2);
+    EXPECT_EQ(month, 1);
+    EXPECT_EQ(day, 1);
+    EXPECT_EQ(isMilliSecond, true);
+}
+
+/**
+ * @tc.name: TextClockTest006
+ * @tc.desc: Test the fuction of parse format.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of textclock.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional("yyyy-MM-dd EEEE hh:mm:ss.SS aa");
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties.
+     * @tc.expected: related function is called.
+     */
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextClockLayoutProperty> textClockLayoutProperty =
+        AceType::DynamicCast<TextClockLayoutProperty>(layoutProperty);
+    ASSERT_NE(textClockLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. get pattern.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. call the format split function.
+     * @tc.expected: check whether the value is correct.
+     */
+    int32_t weekType = 0;
+    bool is24H = false;
+    int32_t month = 0;
+    int32_t day = 0;
+    bool isMilliSecond = false;
+    pattern->GetWeek(true, 3);
+    pattern->GetWeek(false, 5);
+    pattern->GetDigitNumber("12345abcde-=_+");
+    std::vector<std::string> inputFormatSplitter =
+        pattern->ParseInputFormat(is24H, weekType, month, day, isMilliSecond);
+    EXPECT_EQ(is24H, false);
+    EXPECT_EQ(weekType, 1);
+    EXPECT_EQ(month, 2);
+    EXPECT_EQ(day, 2);
+    EXPECT_EQ(isMilliSecond, false);
+}
+
+/**
+ * @tc.name: TextClockAccessibilityPropertyIsScrollable001
+ * @tc.desc: Test IsScrollable of textClockAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockAccessibilityPropertyIsScrollable001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTCLOCK_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextClockPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+    auto textClockAccessibilityProperty = frameNode->GetAccessibilityProperty<TextClockAccessibilityProperty>();
+    ASSERT_NE(textClockAccessibilityProperty, nullptr);
+    textClockAccessibilityProperty->SetHost(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    EXPECT_EQ(textClockAccessibilityProperty->GetText(), EMPTY_TEXT);
+
+    textLayoutProperty->UpdateContent(TEXTCLOCK_CONTENT);
+    EXPECT_EQ(textClockAccessibilityProperty->GetText(), TEXTCLOCK_CONTENT);
 }
 } // namespace OHOS::Ace::NG

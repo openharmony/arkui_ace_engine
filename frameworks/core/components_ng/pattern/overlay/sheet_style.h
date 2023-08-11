@@ -16,7 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_STYLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_STYLE_H
 
+#include <optional>
+
 #include "base/geometry/dimension.h"
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
 const Dimension SHEET_RADIUS = 32.0_vp;
@@ -28,20 +31,21 @@ const double SHEET_VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 enum SheetMode {
     MEDIUM,
     LARGE,
+    AUTO,
 };
 
 struct SheetStyle {
     std::optional<Dimension> height;
     std::optional<SheetMode> sheetMode;
     std::optional<bool> showDragBar;
+    std::optional<Color> backgroundColor;
+    std::optional<Color> maskColor;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
-        if (height != sheetStyle.height || sheetMode != sheetStyle.sheetMode 
-            || showDragBar != sheetStyle.showDragBar) {
-            return false;
-        }
-        return true;
+        return !(height != sheetStyle.height || sheetMode != sheetStyle.sheetMode ||
+                 showDragBar != sheetStyle.showDragBar || backgroundColor != sheetStyle.backgroundColor ||
+                 maskColor != sheetStyle.maskColor);
     }
 };
 } // namespace OHOS::Ace::NG

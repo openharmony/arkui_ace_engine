@@ -61,7 +61,10 @@ class JSViewAbstract {
 public:
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
+    static void GetPerspective(const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, float& perspective);
     static void GetGradientColorStops(Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
+    static void GetFractionStops(
+        std::vector<std::pair<float, float>>& fractionStops, const std::unique_ptr<JsonValue>& array);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
 
     static void JsScale(const JSCallbackInfo& info);
@@ -84,15 +87,20 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
+    static void JsBackgroundEffect(const JSCallbackInfo& info);
     static void JsForegroundBlurStyle(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
     static void JsLightUpEffect(const JSCallbackInfo& info);
+    static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBindContentCover(const JSCallbackInfo& info);
+    static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
     static void ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    static void ParseOverlayCallback(
+        const JSRef<JSObject>& paramObj, std::function<void()>& onAppear, std::function<void()>& onDisappear);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
@@ -113,9 +121,12 @@ public:
     static void ParseBorderImageDimension(
         const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension);
     static void ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset);
+    static void JsUseEffect(const JSCallbackInfo& info);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsColorBlend(const JSCallbackInfo& info);
     static void JsBackdropBlur(const JSCallbackInfo& info);
+    static void JsLinearGradientBlur(const JSCallbackInfo& info);
+    static void JsDynamicLightUp(const JSCallbackInfo& info);
     static void JsWindowBlur(const JSCallbackInfo& info);
     static void JsFlexBasis(const JSCallbackInfo& info);
     static void JsFlexGrow(const JSCallbackInfo& info);
@@ -142,6 +153,9 @@ public:
     static bool ParseJsResponseRegionArray(const JSRef<JSVal>& jsValue, std::vector<DimensionRect>& result);
     static bool ParseJsDimensionRect(const JSRef<JSVal>& jsValue, DimensionRect& result);
 
+    // mouse response response region
+    static void JsMouseResponseRegion(const JSCallbackInfo& info);
+
     // for number and string with no unit, use default dimension unit.
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
@@ -149,13 +163,19 @@ public:
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
+    static bool ParseJsColorFromResource(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
-    static bool ParseJsonDimension(
-        const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, DimensionUnit defaultUnit);
-    static bool ParseJsonDimensionVp(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result);
+    static bool ParseJsDimensionNG(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
+    static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
+
+    static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result,
+        DimensionUnit defaultUnit, bool checkIllegal = false);
+    static bool ParseJsonDimensionVp(
+        const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, bool checkIllegal = false);
     static bool ParseJsonDouble(const std::unique_ptr<JsonValue>& jsonValue, double& result);
     static bool ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue, Color& result);
     static bool ParseJsString(const JSRef<JSVal>& jsValue, std::string& result);
@@ -167,6 +187,7 @@ public:
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
+    static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
 
     static std::pair<CalcDimension, CalcDimension> ParseSize(const JSCallbackInfo& info);
     static void JsUseAlign(const JSCallbackInfo& info);
@@ -239,14 +260,21 @@ public:
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
+    static void JsObscured(const JSCallbackInfo& info);
+
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
+    static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);
 
     static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
+    static void JSRenderGroup(const JSCallbackInfo& info);
+    static void JSRenderFit(const JSCallbackInfo& info);
+
+    static void JsExpandSafeArea(const JSCallbackInfo& info);
 
     static void ParseMenuOptions(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
@@ -296,10 +324,13 @@ public:
     static void SetBlur(float radius);
     static void SetColorBlend(Color color);
     static void SetBackdropBlur(float radius);
+    static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
+    static void SetDynamicLightUp(float rate, float lightUpDegree);
     static void SetWindowBlur(float progress, WindowBlurStyle blurStyle);
     static RefPtr<ThemeConstants> GetThemeConstants(const JSRef<JSObject>& jsObj = JSRef<JSObject>());
     static bool JsWidth(const JSRef<JSVal>& jsValue);
     static bool JsHeight(const JSRef<JSVal>& jsValue);
+    static void GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
 
     template<typename T>
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, T& result)

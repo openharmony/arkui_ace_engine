@@ -39,6 +39,9 @@ public:
     void AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>& customRender) override;
     void SetWidth(Dimension& width) override;
     void SetHeight(Dimension& height) override;
+    void SetShader(const std::string& path) override;
+    void AddShaderImageTexture(const std::string& path) override;
+    void AddShaderInputBuffer(const RefPtr<OHOS::Render3D::ShaderInputBuffer>& buffer) override;
 };
 
 } // namespace OHOS::Ace::Framework

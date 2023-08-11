@@ -26,6 +26,8 @@ public:
     void SetPrevLabel(const std::string& leftLabel) override;
     void SetNextLabel(const std::string& rightLabel) override;
     void SetStatus(const std::string& labelStatus) override;
+    void ResetPrevLabel() override;
+    void ResetNextLabel() override;
 };
 
 } // namespace OHOS::Ace::NG

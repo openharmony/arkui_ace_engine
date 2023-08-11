@@ -56,7 +56,7 @@ ohos_shared_library("ace_ndk") {
   if (target_os == "ohos") {
     sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
     deps += [ ":libace_ndk" ]
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
     version_script =
         get_label_info(":libace_ndk", "target_gen_dir") + "/" +
         get_label_info(":libace_ndk", "name") + version_script_suffix

@@ -20,6 +20,7 @@
 #include "pointer_event.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/vector.h"
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "core/event/axis_event.h"
@@ -69,9 +70,14 @@ void GetEventDevice(int32_t sourceType, E& event)
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const NG::OffsetF& offsetF, const TouchEvent& point);
+void CalculatePointerEvent(
+    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale);
 
-void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events);
+void CalculateWindowCoordinate(
+    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale);
+
+void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MouseEvent& events, bool isScenceBoardWindow);
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event);
 

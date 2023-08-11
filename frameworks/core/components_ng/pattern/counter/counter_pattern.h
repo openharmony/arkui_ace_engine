@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "core/components_ng/pattern/counter/counter_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -64,6 +65,16 @@ public:
             addId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
         return addId_.value();
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<CounterLayoutAlgorithm>();
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
     }
 
 private:

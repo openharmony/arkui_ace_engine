@@ -16,10 +16,15 @@
 #ifndef FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_CLIPBOARD_CLIPBOARD_IMPL_H
 #define FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_CLIPBOARD_CLIPBOARD_IMPL_H
 
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+#include "pasteboard_client.h"
+#endif
+
 #include "core/common/clipboard/clipboard_interface.h"
+#include "core/common/clipboard/paste_data.h"
 
 namespace OHOS::Ace {
-
+class PasteDataImpl;
 class ClipboardImpl : public Clipboard {
 public:
     explicit ClipboardImpl(const RefPtr<TaskExecutor>& taskExecutor) : Clipboard(taskExecutor) {}
@@ -31,6 +36,14 @@ public:
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) override;
     void SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption = CopyOptions::InApp) override;
     void GetPixelMapData(const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) override;
+    void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override;
+    void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) override;
+    void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) override;
+    void SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption) override;
+    void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+        const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+        const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) override;
+    RefPtr<PasteDataMix> CreatePasteDataMix() override;
     void HasData(const std::function<void(bool hasData)>& callback) override;
     void Clear() override;
 
@@ -38,6 +51,12 @@ public:
 private:
     void GetDataSync(const std::function<void(const std::string&)>& callback);
     void GetDataAsync(const std::function<void(const std::string&)>& callback);
+    void GetDataSync(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+        const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+        const std::function<void(const std::string&, bool isLastRecord)>& urlCallback);
+    void GetDataAsync(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+        const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+        const std::function<void(const std::string&, bool isLastRecord)>& urlCallback);
     void GetPixelMapDataSync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetPixelMapDataAsync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
 #endif
@@ -55,6 +74,21 @@ public:
     }
 };
 
+class PasteDataImpl : public PasteDataMix {
+    DECLARE_ACE_TYPE(PasteDataImpl, PasteDataMix);
+
+public:
+    PasteDataImpl() = default;
+    ~PasteDataImpl() = default;
+
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    std::shared_ptr<OHOS::MiscServices::PasteData> GetPasteDataData();
+    void SetUnifiedData(std::shared_ptr<OHOS::MiscServices::PasteData> pasteData);
+
+private:
+    std::shared_ptr<OHOS::MiscServices::PasteData> pasteData_;
+#endif
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_CLIPBOARD_CLIPBOARD_IMPL_H

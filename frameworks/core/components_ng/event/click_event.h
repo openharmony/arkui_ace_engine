@@ -61,10 +61,20 @@ public:
 
     void SetUserCallback(GestureEventFunc&& callback)
     {
+        LOGD("Set usercallback");
         if (userCallback_) {
             userCallback_.Reset();
         }
         userCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
+    }
+
+    void ClearUserCallback()
+    {
+        // When the event param is undefined, it will clear the callback.
+        LOGI("Clear user callback.");
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
     }
 
     void AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -81,6 +91,11 @@ public:
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
     {
         clickEvents_.remove(clickEvent);
+    }
+
+    bool IsClickEventsEmpty() const
+    {
+        return clickEvents_.empty();
     }
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,

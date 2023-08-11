@@ -27,14 +27,14 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_clock/text_clock_accessibility_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
+#include "core/components_ng/pattern/text_clock/text_clock_layout_algorithm.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 using TimeCallback = std::function<void()>;
-
-class TextClockPattern : public TextPattern {
-    DECLARE_ACE_TYPE(TextClockPattern, TextPattern);
+class TextClockPattern : public Pattern {
+    DECLARE_ACE_TYPE(TextClockPattern, Pattern);
 
 public:
     TextClockPattern();
@@ -55,9 +55,22 @@ public:
         return MakeRefPtr<TextClockEventHub>();
     }
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<TextClockLayoutAlgorithm>();
+    }
+
     RefPtr<TextClockController> GetTextClockController() const
     {
         return textClockController_;
+    }
+
+    int32_t GetTextId()
+    {
+        if (!textId_.has_value()) {
+            textId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return textId_.value();
     }
 
 private:
@@ -71,14 +84,29 @@ private:
     void RequestUpdateForNextSecond();
     void FireChangeEvent() const;
     std::string GetCurrentFormatDateTime();
+    static void UpdateTextLayoutProperty(
+        RefPtr<TextClockLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    std::vector<std::string> ParseInputFormat(
+        bool& is24H, int32_t& weekType, int32_t& month, int32_t& day, bool& isMilliSecond);
+    static std::vector<std::string> ParseDateTimeValue(const std::string& strDateTimeValue);
+    static std::string GetAmPm(const std::string& dateTimeValue);
+    static std::string Abstract(const std::string& strSource, const bool& abstractItem);
+    static int32_t GetDigitNumber(const std::string& strSource);
+    static std::string GetWeek(const bool& isShortType, const int32_t& week);
+    static std::string SpliceDateTime(
+        const std::vector<std::string>& curDateTime, const std::vector<std::string>& inputFormatSplitter);
+    static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const std::string& str,
+        const char& element, const int32_t& elementIndex, const bool& oneElement);
 
     std::string GetFormat() const;
     int32_t GetHoursWest() const;
+    RefPtr<FrameNode> GetTextNode();
 
     RefPtr<TextClockController> textClockController_;
     TimeCallback timeCallback_;
     bool isStart_ = true;
     int32_t hourWest_ = 0;
+    std::optional<int32_t> textId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextClockPattern);
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/loading_progress_model_impl.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -47,6 +48,10 @@ LoadingProgressModel* LoadingProgressModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
+} // namespace
+
 void JSLoadingProgress::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLoadingProgress>::Declare("LoadingProgress");
@@ -54,7 +59,12 @@ void JSLoadingProgress::JSBind(BindingTarget globalObj)
 
     JSClass<JSLoadingProgress>::StaticMethod("create", &JSLoadingProgress::Create, opt);
     JSClass<JSLoadingProgress>::StaticMethod("color", &JSLoadingProgress::SetColor, opt);
+    JSClass<JSLoadingProgress>::StaticMethod("enableLoading", &JSLoadingProgress::SetEnableLoading, opt);
     JSClass<JSLoadingProgress>::StaticMethod("foregroundColor", &JSLoadingProgress::SetForegroundColor, opt);
+
+    JSClass<JSLoadingProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSLoadingProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSLoadingProgress>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSLoadingProgress>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -67,7 +77,15 @@ void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
 {
     Color progressColor;
     if (!ParseJsColor(info[0], progressColor)) {
-        return;
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
+            CHECK_NULL_VOID(progressTheme);
+            progressColor = progressTheme->GetLoadingColor();
+        } else {
+            return;
+        }
     }
 
     LoadingProgressModel::GetInstance()->SetColor(progressColor);
@@ -85,5 +103,14 @@ void JSLoadingProgress::SetForegroundColor(const JSCallbackInfo& info)
         return;
     }
     LoadingProgressModel::GetInstance()->SetColor(progressColor);
+}
+
+void JSLoadingProgress::SetEnableLoading(const JSCallbackInfo& info)
+{
+    bool enable = true;
+    if (info[0]->IsBoolean()) {
+        enable = info[0]->ToBoolean();
+    }
+    LoadingProgressModel::GetInstance()->SetEnableLoading(enable);
 }
 }; // namespace OHOS::Ace::Framework

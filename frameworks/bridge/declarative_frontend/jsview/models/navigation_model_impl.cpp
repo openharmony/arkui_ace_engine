@@ -154,6 +154,8 @@ void NavigationModelImpl::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItem
     return;
 }
 
+void NavigationModelImpl::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) {}
+
 void NavigationModelImpl::GetToolBarItems(std::list<RefPtr<AceType>>& items)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -243,6 +245,11 @@ void NavigationModelImpl::SetNavigationStack()
 }
 
 void NavigationModelImpl::SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack)
+{
+    return;
+}
+
+void NavigationModelImpl::SetNavigationStackProvided(bool provided)
 {
     return;
 }

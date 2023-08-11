@@ -155,7 +155,7 @@ void RenderHyperlink::HandleMouseHoverEvent(MouseState mouseState)
     if (!pipeline) {
         return;
     }
-    int32_t windowId = pipeline->GetWindowId();
+    uint32_t windowId = pipeline->GetWindowId();
     MouseFormat handPointStyle = MouseFormat::HAND_POINTING;
     MouseFormat defaultStyle = MouseFormat::DEFAULT;
     if (mouseState == MouseState::HOVER) {

@@ -21,10 +21,10 @@ namespace OHOS::Ace::NG {
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, AceType::MakeRefPtr<ImageModifier>(), false);
+        return MakeRefPtr<ImagePaintMethod>(image_, false);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, AceType::MakeRefPtr<ImageModifier>(), false);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, false);
     }
     return nullptr;
 }
@@ -35,6 +35,10 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         return false;
     }
     return image_;
+}
+bool ImagePattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    return false;
 }
 void ImagePattern::OnModifyDone() {}
 void ImagePattern::OnAttachToFrameNode() {}
@@ -49,4 +53,5 @@ void ImagePattern::OnVisibleChange(bool isVisible) {}
 
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void ImagePattern::DumpInfo() {}
+void ImagePattern::OnLanguageConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG

@@ -39,10 +39,11 @@ class PaBackend : public Backend {
     DECLARE_ACE_TYPE(PaBackend, Backend);
 
 public:
+
     PaBackend() = default;
     ~PaBackend() override;
 
-    bool Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExecutor) override;
+    bool Initialize(BackendType type, SrcLanguage language) override;
 
     void LoadEngine(const char* libName, int32_t instanceId) override;
 
@@ -99,12 +100,11 @@ public:
 private:
     void ParseManifest();
     void LoadPa(const std::string& url, const OHOS::AAFwk::Want& want);
-    SingleTaskExecutor GetAnimationJsTask();
 
     BackendType type_ = BackendType::SERVICE;
+    SrcLanguage language_ = SrcLanguage::ETS;
 
     RefPtr<Framework::ManifestParser> manifestParser_ = nullptr;
-    RefPtr<TaskExecutor> taskExecutor_ = nullptr;
     RefPtr<AssetManager> assetManager_ = nullptr;
     RefPtr<JsBackendAssetManager> jsBackendAssetManager_ = nullptr;
     RefPtr<JsBackendEngine> jsBackendEngine_ = nullptr;
@@ -114,7 +114,6 @@ private:
     std::condition_variable condition_;
     bool isStagingPageExist_ = false;
 };
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_PA_ENGINE_PA_BACKEND_H

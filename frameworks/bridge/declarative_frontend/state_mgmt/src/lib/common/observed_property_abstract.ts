@@ -85,6 +85,8 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
     }
   }
 
+  // Method name is used to check object is of type ObservedPropertyAbstract
+  // Do NOT override in derived classed, use addSubscriber
   public subscribeMe(subscriber: ISinglePropertyChangeSubscriber<T>): void {
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
     this.subscribers_.add(subscriber.id__());
@@ -92,9 +94,30 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
 
   /*
     the inverse function of createOneWaySync or createTwoWaySync
+    Do NOT override in derived classed, use removeSubscriber
   */
   public unlinkSuscriber(subscriberId: number): void {
     this.subscribers_.delete(subscriberId);
+  }
+
+  /*
+    Virtualized version of the subscription mechanism - add subscriber
+  */
+  public addSubscriber(subscriber: ISinglePropertyChangeSubscriber<T>):void {
+    if (subscriber) {
+      this.subscribeMe(subscriber);
+    }
+  }
+
+  /*
+    Virtualized version of the subscription mechanism - remove subscriber
+  */
+  public removeSubscriber(subscriber: IPropertySubscriber, id?: number):void {
+    if (id) {
+      this.unlinkSuscriber(id);
+    } else if (subscriber) {
+      this.unlinkSuscriber(subscriber.id__());
+    }
   }
 
   protected notifyHasChanged(newValue: T) {

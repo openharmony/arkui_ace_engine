@@ -49,7 +49,10 @@ TabsModel* TabsModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-
+constexpr int32_t SM_COLUMN_NUM = 4;
+constexpr int32_t MD_COLUMN_NUM = 8;
+constexpr int32_t LG_COLUMN_NUM = 12;
+const static int32_t PLATFORM_VERSION_TEN = 10;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
 JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
@@ -81,6 +84,28 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
+void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler)](
+                             const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            LOGE("SetTabBarClick tabsInfo is nullptr");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onTabBarClick");
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
+}
+
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
@@ -106,7 +131,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
     BarPosition barPosition = BarPosition::START;
     RefPtr<TabController> tabController;
     RefPtr<SwiperController> swiperController;
-    int32_t index = 0;
+    int32_t index = -1;
     JSRef<JSVal> changeEventVal;
     if (info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -128,6 +153,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
         JSRef<JSVal> indexVal = obj->GetProperty("index");
         if (indexVal->IsNumber()) {
             index = indexVal->ToNumber<int32_t>();
+            index = index < 0 ? 0 : index;
             if (!tabController) {
                 tabController = JSTabsController::CreateController();
             }
@@ -139,6 +165,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
             auto indexValueProperty = indexObj->GetProperty("value");
             if (indexValueProperty->IsNumber()) {
                 index = indexValueProperty->ToNumber<int32_t>();
+                index = index < 0 ? 0 : index;
             }
             changeEventVal = indexObj->GetProperty("changeEvent");
         }
@@ -182,13 +209,25 @@ void JSTabs::SetScrollable(const std::string& value)
     TabsModel::GetInstance()->SetScrollable(StringToBool(value));
 }
 
-void JSTabs::SetBarMode(const std::string& value)
+void JSTabs::SetBarMode(const JSCallbackInfo& info)
 {
-    if (value == "undefined") {
-        TabsModel::GetInstance()->SetTabBarMode(TabBarMode::FIXED);
+    TabBarMode barMode = TabBarMode::FIXED;
+    if (info.Length() < 1) {
+        TabsModel::GetInstance()->SetTabBarMode(barMode);
         return;
     }
-    TabsModel::GetInstance()->SetTabBarMode(ConvertStrToTabBarMode(value));
+    if (info[0]->IsString()) {
+        barMode = ConvertStrToTabBarMode(info[0]->ToString());
+    }
+    if (barMode == TabBarMode::SCROLLABLE) {
+        if (info.Length() > 1 && info[1]->IsObject()) {
+            SetScrollableBarModeOptions(info[1]);
+        } else {
+            ScrollableBarModeOptions option;
+            TabsModel::GetInstance()->SetScrollableBarModeOptions(option);
+        }
+    }
+    TabsModel::GetInstance()->SetTabBarMode(barMode);
 }
 
 void JSTabs::SetBarWidth(const JSCallbackInfo& info)
@@ -199,7 +238,14 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
     }
 
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
-    if (!ParseJsDimensionVp(info[0], width)) {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(info[0], width)) {
+            width = Dimension(-1.0, DimensionUnit::VP);
+            TabsModel::GetInstance()->SetTabBarWidth(width);
+            return;
+        }
+    } else if (!ParseJsDimensionVp(info[0], width)) {
         LOGE("The arg is wrong, fail to parse dimension");
     }
 
@@ -213,10 +259,21 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension height = Dimension(-1.0, DimensionUnit::VP);
-    if (!ParseJsDimensionVp(info[0], height)) {
-        LOGE("The arg is wrong, fail to parse dimension");
+    bool adaptiveHeight = false;
+    if (info[0]->IsString() && info[0]->ToString() == "auto") {
+        adaptiveHeight = true;
+    } else {
+        if (PipelineBase::GetCurrentContext() &&
+            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            if (!ParseJsDimensionVpNG(info[0], height)) {
+                height = Dimension(-1.0, DimensionUnit::VP);
+                LOGD("The arg is wrong, fail to parse dimension");
+            }
+        } else if (!ParseJsDimensionVp(info[0], height)) {
+            LOGD("The arg is wrong, fail to parse dimension");
+        }
     }
-
+    TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
     TabsModel::GetInstance()->SetTabBarHeight(height);
 }
 
@@ -275,6 +332,9 @@ void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
+    CalcDimension dividerStrokeWidth;
+    CalcDimension dividerStartMargin;
+    CalcDimension dividerEndMargin;
     RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
 
@@ -285,21 +345,26 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
         if (info[0]->IsNull()) {
             divider.isNull = true;
         } else {
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
-                divider.strokeWidth.Value() < 0.0f) {
+            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("strokeWidth"), dividerStrokeWidth) ||
+                dividerStrokeWidth.Value() < 0.0f || dividerStrokeWidth.Unit() == DimensionUnit::PERCENT) {
                 divider.strokeWidth.Reset();
+            } else {
+                divider.strokeWidth = dividerStrokeWidth;
             }
             if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
                 divider.color = tabTheme->GetDividerColor();
             }
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
-                divider.startMargin.Value() < 0.0f) {
+            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("startMargin"), dividerStartMargin) ||
+                dividerStartMargin.Value() < 0.0f || dividerStartMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.startMargin.Reset();
+            } else {
+                divider.startMargin = dividerStartMargin;
             }
-
-            if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
-                divider.endMargin.Value() < 0.0f) {
+            if (!info[0]->IsObject() || !ParseJsDimensionVp(obj->GetProperty("endMargin"), dividerEndMargin) ||
+                dividerEndMargin.Value() < 0.0f || dividerEndMargin.Unit() == DimensionUnit::PERCENT) {
                 divider.endMargin.Reset();
+            } else {
+                divider.endMargin = dividerEndMargin;
             }
         }
     }
@@ -317,6 +382,64 @@ void JSTabs::SetClip(const JSCallbackInfo& info)
     }
 }
 
+void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
+{
+    ScrollableBarModeOptions option;
+    auto optionParam = JSRef<JSObject>::Cast(info);
+    CalcDimension margin = Dimension(0.0, DimensionUnit::VP);
+    if (!ParseJsDimensionVp(optionParam->GetProperty("margin"), margin) || Negative(margin.Value()) ||
+        margin.Unit() == DimensionUnit::PERCENT) {
+        option.margin = 0.0_vp;
+    } else {
+        option.margin = margin;
+    }
+
+    auto nonScrollableLayoutStyle = optionParam->GetProperty("nonScrollableLayoutStyle");
+    int32_t layoutStyle;
+    if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle)) {
+        option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+    } else {
+        option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
+    }
+    TabsModel::GetInstance()->SetScrollableBarModeOptions(option);
+}
+
+void JSTabs::SetBarGridAlign(const JSCallbackInfo& info)
+{
+    BarGridColumnOptions columnOption;
+    if (info.Length() < 1) {
+        LOGD("Invalid parameters. Use default parameters instead.");
+    } else if (info[0]->IsObject()) {
+        auto gridParam = JSRef<JSObject>::Cast(info[0]);
+        auto sm = gridParam->GetProperty("sm");
+        if (sm->IsNumber() && sm->ToNumber<int32_t>() >= 0 && sm->ToNumber<int32_t>() <= SM_COLUMN_NUM &&
+            sm->ToNumber<int32_t>() % 2 == 0) {
+            columnOption.sm = sm->ToNumber<int32_t>();
+        }
+        auto md = gridParam->GetProperty("md");
+        if (md->IsNumber() && md->ToNumber<int32_t>() >= 0 && md->ToNumber<int32_t>() <= MD_COLUMN_NUM &&
+            md->ToNumber<int32_t>() % 2 == 0) {
+            columnOption.md = md->ToNumber<int32_t>();
+        }
+        auto lg = gridParam->GetProperty("lg");
+        if (lg->IsNumber() && lg->ToNumber<int32_t>() >= 0 && lg->ToNumber<int32_t>() <= LG_COLUMN_NUM &&
+            lg->ToNumber<int32_t>() % 2 == 0) {
+            columnOption.lg = lg->ToNumber<int32_t>();
+        }
+        CalcDimension columnGutter;
+        if (ParseJsDimensionVp(gridParam->GetProperty("gutter"), columnGutter) && NonNegative(columnGutter.Value()) &&
+            columnGutter.Unit() != DimensionUnit::PERCENT) {
+            columnOption.gutter = columnGutter;
+        }
+        CalcDimension columnMargin;
+        if (ParseJsDimensionVp(gridParam->GetProperty("margin"), columnMargin) && NonNegative(columnMargin.Value()) &&
+            columnMargin.Unit() != DimensionUnit::PERCENT) {
+            columnOption.margin = columnMargin;
+        }
+    }
+    TabsModel::GetInstance()->SetBarGridAlign(columnOption);
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabs>::Declare("Tabs");
@@ -332,6 +455,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
+    JSClass<JSTabs>::StaticMethod("onTabBarClick", &JSTabs::SetOnTabBarClick);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTabs>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -344,6 +468,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barOverlap", &JSTabs::SetBarOverlap);
     JSClass<JSTabs>::StaticMethod("barBackgroundColor", &JSTabs::SetBarBackgroundColor);
     JSClass<JSTabs>::StaticMethod("clip", &JSTabs::SetClip);
+    JSClass<JSTabs>::StaticMethod("barGridAlign", &JSTabs::SetBarGridAlign);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

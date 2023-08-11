@@ -27,7 +27,8 @@ public:
     ListPositionController() = default;
     ~ListPositionController() override = default;
 
-    void JumpTo(int32_t index, int32_t source = 3) override;
+    void JumpTo(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+        int32_t source = 3) override;
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth) override;
     Axis GetScrollDirection() const override;
     Offset GetCurrentOffset() const override;

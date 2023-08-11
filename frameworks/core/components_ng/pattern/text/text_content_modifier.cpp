@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +28,8 @@ constexpr float RACE_TEMPO = 0.2f;
 constexpr uint32_t RACE_DURATION = 2000;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr float ROUND_VALUE = 0.5f;
+constexpr uint32_t POINT_COUNT = 4;
+constexpr float OBSCURED_ALPHA = 0.2f;
 const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W100,
     FontWeight::W200,
@@ -66,6 +69,12 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle> textStyl
 
     racePercentFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
+    clip_ = AceType::MakeRefPtr<PropertyBool>(true);
+    AttachProperty(clip_);
+    fontFamilyString_ = AceType::MakeRefPtr<PropertyString>("");
+    AttachProperty(fontFamilyString_);
+    fontReady_ = AceType::MakeRefPtr<PropertyBool>(false);
+    AttachProperty(fontReady_);
 }
 
 void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle)
@@ -138,34 +147,111 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
     AttachProperty(baselineOffsetFloat_);
 }
 
+void TextContentModifier::SetClip(bool clip)
+{
+    if (clip_) {
+        clip_->Set(clip);
+    }
+}
+
+void TextContentModifier::SetFontReady(bool value)
+{
+    if (fontReady_) {
+        fontReady_->Set(value);
+    }
+}
+
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
-    CHECK_NULL_VOID_NOLOG(paragraph_);
-    auto canvas = drawingContext.canvas;
-    canvas.Save();
-    if (!textRacing_) {
-        auto contentSize = contentSize_->Get();
-        auto contentOffset = contentOffset_->Get();
-        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
-            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
-        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-        paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
-    } else {
-        // Racing
-        float textRacePercent = GetTextRacePercent();
-        canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
+    bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
+        CHECK_NULL_VOID_NOLOG(paragraph_);
+        auto canvas = drawingContext.canvas;
+        canvas.Save();
+        if (!textRacing_) {
+            auto contentSize = contentSize_->Get();
+            auto contentOffset = contentOffset_->Get();
+            if (clip_ && clip_->Get() &&
+                (!fontSize_.has_value() || !fontSizeFloat_ ||
+                    NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
+                RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
+                    contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
+                canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+            }
 
-        float paragraph1Offset =
-            (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
-        if ((paintOffset_.GetX() + paragraph1Offset + paragraph_->GetTextWidth()) > 0) {
-            paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
+            paragraph_->Paint(canvas, paintOffset_.GetX(), paintOffset_.GetY());
+        } else {
+            // Racing
+            float textRacePercent = GetTextRacePercent();
+            if (clip_ && clip_->Get()) {
+                canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::INTERSECT);
+            }
+            float paragraph1Offset =
+                (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
+            if ((paintOffset_.GetX() + paragraph1Offset + paragraph_->GetTextWidth()) > 0) {
+                paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
+            }
+            float paragraph2Offset = paragraph1Offset + paragraph_->GetTextWidth() + textRaceSpaceWidth_;
+            if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
+                paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
+            }
         }
-        float paragraph2Offset = paragraph1Offset + paragraph_->GetTextWidth() + textRaceSpaceWidth_;
-        if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
-            paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
+        canvas.Restore();
+    } else {
+        DrawObscuration(drawingContext);
+    }
+}
+
+void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
+{
+    RSCanvas canvas = drawingContext.canvas;
+    RSBrush brush;
+    std::vector<RSPoint> radiusXY(POINT_COUNT);
+    Dimension borderRadius = Dimension(2.0, DimensionUnit::VP);
+    for (auto& radius : radiusXY) {
+        radius.SetX(static_cast<float>(borderRadius.ConvertToPx()));
+        radius.SetY(static_cast<float>(borderRadius.ConvertToPx()));
+    }
+    CHECK_NULL_VOID(animatableTextColor_);
+    Color fillColor = Color(animatableTextColor_->Get().GetValue());
+    RSColor rrSColor(fillColor.GetRed(), fillColor.GetGreen(), fillColor.GetBlue(),
+        (uint32_t)(fillColor.GetAlpha() * OBSCURED_ALPHA));
+    brush.SetColor(rrSColor);
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+    CHECK_NULL_VOID(fontSizeFloat_);
+    float fontSize = fontSizeFloat_->Get();
+    std::vector<float> textLineWidth;
+    float currentLineWidth = 0.0f;
+    int32_t maxLineCount = 0;
+    CHECK_NULL_VOID(contentSize_);
+    CHECK_NULL_VOID(contentOffset_);
+    for (auto i = 0U; i < drawObscuredRects_.size(); i++) {
+        if (!NearEqual(drawObscuredRects_[i].Width(), 0.0f) && !NearEqual(drawObscuredRects_[i].Height(), 0.0f)) {
+            currentLineWidth += drawObscuredRects_[i].Width();
+            if (i == drawObscuredRects_.size() - 1) {
+                textLineWidth.push_back(currentLineWidth);
+                maxLineCount += LessOrEqual(drawObscuredRects_[i].Bottom(), contentSize_->Get().Height()) ? 1 : 0;
+            } else if (!NearEqual(drawObscuredRects_[i].Bottom(), drawObscuredRects_[i + 1].Bottom())) {
+                textLineWidth.push_back(currentLineWidth);
+                maxLineCount += LessOrEqual(drawObscuredRects_[i].Bottom(), contentSize_->Get().Height()) ? 1 : 0;
+                currentLineWidth = 0;
+            } else {
+                /** nothing to do **/
+            }
         }
     }
-    canvas.Restore();
+    int32_t obscuredLineCount = std::min(maxLineCount, static_cast<int32_t>(textLineWidth.size()));
+    float offsetY = (contentSize_->Get().Height() - (obscuredLineCount * fontSize)) / (obscuredLineCount + 1);
+    for (auto i = 0; i < obscuredLineCount; i++) {
+        RSRoundRect rSRoundRect(RSRect(contentOffset_->Get().GetX(),
+            contentOffset_->Get().GetY() + std::max(offsetY + ((offsetY + fontSize) * i), 0.0f),
+            contentOffset_->Get().GetX() + std::min(textLineWidth[i], contentSize_->Get().Width()),
+            contentOffset_->Get().GetY() +
+                std::min(offsetY + ((offsetY + fontSize) * i) + fontSize, contentSize_->Get().Height())), radiusXY);
+        canvas.DrawRoundRect(rSRoundRect);
+    }
 }
 
 void TextContentModifier::ModifyFontSizeInTextStyle(TextStyle& textStyle)
@@ -308,6 +394,12 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     return flag;
 }
 
+void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
+{
+    CHECK_NULL_VOID(fontFamilyString_);
+    fontFamilyString_->Set(V2::ConvertFontFamily(value));
+}
+
 void TextContentModifier::SetFontSize(const Dimension& value)
 {
     float fontSizeValue;
@@ -351,18 +443,14 @@ void TextContentModifier::SetTextShadow(const Shadow& value)
 
 void TextContentModifier::SetTextDecoration(const TextDecoration& type)
 {
-    if (oldTextDecoration_ == type) {
+    auto oldTextDecoration = textDecoration_.value_or(TextDecoration::NONE);
+    if (oldTextDecoration == type) {
         return;
     }
 
-    if ((oldTextDecoration_ == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
-        (oldTextDecoration_ == TextDecoration::UNDERLINE && type == TextDecoration::NONE)) {
-        textDecorationAnimatable_ = true;
-    } else {
-        textDecorationAnimatable_ = false;
-    }
+    textDecorationAnimatable_ = (oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
+        (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE);
 
-    oldTextDecoration_ = textDecoration_.value_or(TextDecoration::NONE);
     textDecoration_ = type;
     CHECK_NULL_VOID(textDecorationColorAlpha_);
 

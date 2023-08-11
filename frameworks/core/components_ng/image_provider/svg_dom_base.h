@@ -33,19 +33,93 @@ class SvgDomBase : public AceType {
 public:
     virtual SizeF GetContainerSize() const = 0;
     virtual void SetContainerSize(const SizeF& containerSize) = 0;
-    virtual const std::optional<Color>& GetFillColor() = 0;
     virtual void SetFillColor(const std::optional<Color>& color) {}
-    virtual void SetRadius(const BorderRadiusArray& radiusXY) {}
+
+    void SetRadius(const BorderRadiusArray& radiusXY)
+    {
+        if (!radius_) {
+            radius_ = std::make_unique<BorderRadiusArray>(radiusXY);
+        } else {
+            *radius_ = radiusXY;
+        }
+    }
 
     virtual bool IsStatic()
     {
         return true;
     }
+
     virtual void SetAnimationCallback(std::function<void()>&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr) {}
     virtual void ControlAnimation(bool play) {}
 
+    // param [color] deprecated
     virtual void DrawImage(
         RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) = 0;
+
+    void ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
+    {
+        switch (imageFit) {
+            case ImageFit::FILL:
+                ApplyFill(scaleX, scaleY);
+                break;
+            case ImageFit::NONE:
+                break;
+            case ImageFit::COVER:
+                ApplyCover(scaleX, scaleY);
+                break;
+            case ImageFit::CONTAIN:
+                ApplyContain(scaleX, scaleY);
+                break;
+            case ImageFit::SCALE_DOWN:
+                if (svgSize_ > layout_ || svgSize_ == layout_) {
+                    ApplyContain(scaleX, scaleY);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    void ApplyFill(double& scaleX, double& scaleY)
+    {
+        if (!svgSize_.IsValid()) {
+            return;
+        }
+        scaleX = layout_.Width() / svgSize_.Width();
+        scaleY = layout_.Height() / svgSize_.Height();
+    }
+
+    void ApplyContain(double& scaleX, double& scaleY)
+    {
+        if (!svgSize_.IsValid()) {
+            return;
+        }
+        if (Size::CalcRatio(svgSize_) > Size::CalcRatio(layout_)) {
+            scaleX = layout_.Width() / svgSize_.Width();
+            scaleY = scaleX;
+        } else {
+            scaleX = layout_.Height() / svgSize_.Height();
+            scaleY = scaleX;
+        }
+    }
+
+    void ApplyCover(double& scaleX, double& scaleY)
+    {
+        if (!svgSize_.IsValid()) {
+            return;
+        }
+        if (Size::CalcRatio(svgSize_) > Size::CalcRatio(layout_)) {
+            scaleX = layout_.Height() / svgSize_.Height();
+            scaleY = scaleX;
+        } else {
+            scaleX = layout_.Width() / svgSize_.Width();
+            scaleY = scaleX;
+        }
+    }
+
+    Size layout_;  // layout size set by Image Component
+    Size svgSize_; // self size specified in SVG file
+    std::unique_ptr<BorderRadiusArray> radius_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,9 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/painter/rosen_scroll_bar_painter.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace::V2 {
@@ -47,11 +50,18 @@ void RosenRenderListItemGroup::PaintDivider(RenderContext& context)
     const double topOffset = halfSpaceWidth + (strokeWidth / 2.0);
     const double bottomOffset = topOffset - strokeWidth;
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint paint;
     paint.setAntiAlias(true);
     paint.setColor(divider->color.GetValue());
     paint.setStyle(SkPaint::Style::kStroke_Style);
     paint.setStrokeWidth(strokeWidth);
+#else
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(divider->color.GetValue());
+    pen.SetWidth(strokeWidth);
+#endif
     bool isFirstItem = (GetStartIndex() == 0);
     size_t lane = 0;
 
@@ -64,11 +74,21 @@ void RosenRenderListItemGroup::PaintDivider(RenderContext& context)
             double start = GetLanes() > 1 ? crossSize / GetLanes() * lane + startMargin : startMargin;
             double end = GetLanes() > 1 ? crossSize / GetLanes() * (lane + 1) - endMargin : crossSize - endMargin;
             mainAxis -= halfSpaceWidth;
+#ifndef USE_ROSEN_DRAWING
             if (IsVertical()) {
                 canvas->drawLine(start, mainAxis, end, mainAxis, paint);
             } else {
                 canvas->drawLine(mainAxis, start, mainAxis, end, paint);
             }
+#else
+            canvas->AttachPen(pen);
+            if (IsVertical()) {
+                canvas->DrawLine(RSPoint(start, mainAxis), RSPoint(end, mainAxis));
+            } else {
+                canvas->DrawLine(RSPoint(mainAxis, start), RSPoint(mainAxis, end));
+            }
+            canvas->DetachPen();
+#endif
         }
         lane = (GetLanes() <= 1 || (lane + 1) >= GetLanes()) ? 0 : lane + 1;
         isFirstItem = isFirstItem ? lane > 0 : false;

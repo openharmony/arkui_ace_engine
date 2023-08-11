@@ -25,7 +25,6 @@
 #include "core/animation/curves.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -34,10 +33,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -55,20 +52,21 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
 } // namespace
 
-void SelectPattern::OnModifyDone()
+void SelectPattern::OnAttachToFrameNode()
 {
-    Pattern::OnModifyDone();
+    RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnPress();
     RegisterOnHover();
+}
+
+void SelectPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
     CreateSelectedCallback();
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto focusHub = host->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    RegisterOnKeyEvent(focusHub);
-
     auto eventHub = host->GetEventHub<SelectEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (!eventHub->IsEnabled()) {
@@ -92,15 +90,6 @@ void SelectPattern::ShowSelectMenu()
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateTargetSize(selectSize_);
     auto offset = GetHost()->GetPaintRectOffset();
-    auto isContainerModal = context->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
-                            context->GetWindowManager()->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    if (isContainerModal) {
-        auto newOffsetX = offset.GetX() + static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx() * 2) +
-                          static_cast<float>(CONTENT_PADDING.ConvertToPx() * 2);
-        auto newOffsetY = offset.GetY() + static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx());
-        offset.SetX(newOffsetX);
-        offset.SetY(newOffsetY);
-    }
     offset.AddY(selectSize_.Height());
     LOGD("select offset %{public}s size %{public}s", offset.ToString().c_str(), selectSize_.ToString().c_str());
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
@@ -226,7 +215,7 @@ void SelectPattern::CreateSelectedCallback()
         CHECK_NULL_VOID(pattern);
         pattern->SetSelected(index);
         pattern->UpdateText(index);
-
+        pattern->isSelected_ = true;
         auto hub = host->GetEventHub<SelectEventHub>();
         CHECK_NULL_VOID(hub);
         // execute change event callback
@@ -256,8 +245,12 @@ void SelectPattern::CreateSelectedCallback()
     }
 }
 
-void SelectPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+void SelectPattern::RegisterOnKeyEvent()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN_NOLOG(pattern, false);
@@ -320,6 +313,8 @@ void SelectPattern::SetSelected(int32_t index)
     }
     if (index >= options_.size() || index < 0) {
         LOGW("newly selected index invalid");
+        selected_ = -1;
+        ResetOptionProps();
         return;
     }
     UpdateLastSelectedProps(index);
@@ -450,6 +445,7 @@ void SelectPattern::SetFontColor(const Color& color)
 
 void SelectPattern::SetOptionBgColor(const Color& color)
 {
+    optionBgColor_ = color;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedBgColor_.has_value()) {
             continue;
@@ -462,6 +458,7 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 
 void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
+    optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontSize.has_value()) {
             continue;
@@ -474,6 +471,7 @@ void SelectPattern::SetOptionFontSize(const Dimension& value)
 
 void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
+    optionFont_.FontStyle = value;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontStyle.has_value()) {
             continue;
@@ -486,6 +484,7 @@ void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 
 void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 {
+    optionFont_.FontWeight = value;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontWeight.has_value()) {
             continue;
@@ -498,6 +497,7 @@ void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 
 void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 {
+    optionFont_.FontFamily = value;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontFamily.has_value()) {
             continue;
@@ -510,6 +510,7 @@ void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 
 void SelectPattern::SetOptionFontColor(const Color& color)
 {
+    optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontColor.has_value()) {
             continue;
@@ -584,6 +585,26 @@ void SelectPattern::SetSelectedOptionFontColor(const Color& color)
 const std::vector<RefPtr<FrameNode>>& SelectPattern::GetOptions()
 {
     return options_;
+}
+
+void SelectPattern::ResetOptionProps()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(selectTheme && textTheme);
+
+    for (const auto& option : options_) {
+        auto pattern = option->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetBgColor(optionBgColor_.value_or(selectTheme->GetBackgroundColor()));
+        pattern->SetFontSize(optionFont_.FontSize.value_or(selectTheme->GetMenuFontSize()));
+        pattern->SetItalicFontStyle(optionFont_.FontStyle.value_or(textTheme->GetTextStyle().GetFontStyle()));
+        pattern->SetFontWeight(optionFont_.FontWeight.value_or(textTheme->GetTextStyle().GetFontWeight()));
+        pattern->SetFontFamily(optionFont_.FontFamily.value_or(textTheme->GetTextStyle().GetFontFamilies()));
+        pattern->SetFontColor(optionFont_.FontColor.value_or(selectTheme->GetMenuFontColor()));
+    }
 }
 
 void SelectPattern::UpdateLastSelectedProps(int32_t index)
@@ -822,6 +843,12 @@ bool SelectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     SetSelectSize(geometryNode->GetFrameSize());
+    if (isColorConfigurationUpdate_ && GetSelected() >= 0) {
+        auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(props, false);
+        props->UpdateContent(options_[GetSelected()]->GetPattern<OptionPattern>()->GetText());
+        isColorConfigurationUpdate_ = false;
+    }
     return false;
 }
 
@@ -873,5 +900,57 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     CHECK_NULL_VOID(menuLayoutProps);
     menuLayoutProps->UpdateAlignType(menuAlign.alignType);
     menuLayoutProps->UpdateOffset(menuAlign.offset);
+}
+
+std::string SelectPattern::ProvideRestoreInfo()
+{
+    auto jsonObj = JsonUtil::Create(true);
+    jsonObj->Put("selected", selected_);
+    jsonObj->Put("isSelected", isSelected_);
+    return jsonObj->ToString();
+}
+
+void SelectPattern::OnRestoreInfo(const std::string& restoreInfo)
+{
+    auto info = JsonUtil::ParseJsonString(restoreInfo);
+    if (!info->IsValid() || !info->IsObject()) {
+        return;
+    }
+    auto jsonIsOn = info->GetValue("selected");
+    auto jsonIsSelect = info->GetValue("isSelected");
+    if (jsonIsSelect->GetBool()) {
+        SetSelected(jsonIsOn->GetInt());
+        UpdateText(jsonIsOn->GetInt());
+    }
+}
+
+void SelectPattern::OnColorConfigurationUpdate()
+{
+    isColorConfigurationUpdate_ = true;
+    auto host = GetHost();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+
+    auto pattern = host->GetPattern<SelectPattern>();
+    auto menuNode = pattern->GetMenuNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+
+    auto renderContext = menuNode->GetRenderContext();
+    renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
+
+    auto optionNode = menuPattern->GetOptions();
+    for (auto child : optionNode) {
+        auto optionsPattern = child->GetPattern<OptionPattern>();
+        optionsPattern->SetFontColor(selectTheme->GetFontColor());
+
+        child->MarkModifyDone();
+        child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    SetOptionBgColor(selectTheme->GetBackgroundColor());
+    host->SetNeedCallChildrenUpdate(false);
 }
 } // namespace OHOS::Ace::NG

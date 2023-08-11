@@ -50,6 +50,9 @@ template("ace_ohos_standard_source_set") {
 
       # drag window
       "$ace_root/adapter/ohos/entrance/window/drag_window_ohos.cpp",
+
+      # ArkTs Card
+      "$ace_root/adapter/ohos/entrance/form_module_preloader.cpp",
     ]
 
     if (target_cpu == "arm64") {
@@ -80,9 +83,6 @@ template("ace_ohos_standard_source_set") {
       "//third_party/node/src",
     ]
 
-    public_deps =
-        [ "//base/global/resource_management/frameworks/resmgr:global_resmgr" ]
-
     if (ace_use_new_skia) {
       sources += [ "$flutter_root/engine/flutter/shell/common/thread_host.cc" ]
       deps = [
@@ -101,11 +101,8 @@ template("ace_ohos_standard_source_set") {
     }
 
     deps += [
-      "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
-      "$ability_runtime_path/frameworks/native/ability/native:data_ability_helper",
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
-      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
-      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+      "$ace_root/interfaces/inner_api/ace:ace_uicontent",
       "//third_party/zlib:shared_libz",
     ]
 
@@ -116,21 +113,28 @@ template("ace_ohos_standard_source_set") {
       "ability_base:want",
       "ability_runtime:ability_context_native",
       "ability_runtime:ability_manager",
-      "ace_engine:ace_uicontent",
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:data_ability_helper",
       "common_event_service:cesfwk_innerkits",
       "data_share:datashare_consumer",
+      "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "graphic_2d:2d_graphics",
+      "graphic_2d:librender_service_client",
       "i18n:intl_util",
       "input:libmmi-client",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
+      "napi:ace_napi",
       "preferences:native_preferences",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
+      "resource_management:global_resmgr",
       "window_manager:libdm",
       "window_manager:libwm",
+      "window_manager:libwsutils",
     ]
   }
 }

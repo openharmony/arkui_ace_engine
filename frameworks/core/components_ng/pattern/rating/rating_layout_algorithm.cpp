@@ -28,19 +28,28 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
     }
-
-    // case 2: Using the theme's height and width by default if rating component is not set size.
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
-
-    SizeF componentSize;
     auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    // case 2.1: Rating use the mini size specified in the theme, when it is used as indicator.
-    bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
     auto stars =
         ratingLayoutProperty->GetStarsValue(RatingPattern::GetStarNumFromTheme().value_or(DEFAULT_RATING_STAR_NUM));
+    // case 2: rating component is only set with valid width or height
+    // return height = width / stars, or width = height * stars.
+    if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
+        auto width = contentConstraint.selfIdealSize.Width().value();
+        return SizeF(width, width / static_cast<float>(stars));
+    }
+    if (!contentConstraint.selfIdealSize.Width() && contentConstraint.selfIdealSize.Height()) {
+        auto height = contentConstraint.selfIdealSize.Height().value();
+        return SizeF(height * static_cast<float>(stars), height);
+    }
+
+    // case 3: Using the theme's height and width by default if rating component is not set size.
+    SizeF componentSize;
+    bool indicator = ratingLayoutProperty->GetIndicator().value_or(false);
+    // Rating use the mini size specified in the theme, when it is used as indicator.
     auto height =
         indicator ? ratingTheme->GetRatingMiniHeight().ConvertToPx() : ratingTheme->GetRatingHeight().ConvertToPx();
     componentSize.SetHeight(static_cast<float>(height));

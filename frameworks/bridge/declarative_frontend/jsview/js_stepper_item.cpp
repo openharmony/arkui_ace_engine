@@ -31,7 +31,7 @@ StepperItemModel* StepperItemModel::GetInstance()
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ImageModelNG());
+            instance_.reset(new NG::StepperItemModelNG());
 #else
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::StepperItemModelNG());
@@ -47,6 +47,10 @@ StepperItemModel* StepperItemModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
+} // namespace
 
 void JSStepperItem::Create(const JSCallbackInfo& info)
 {
@@ -77,6 +81,14 @@ void JSStepperItem::SetPrevLabel(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsUndefined() || info[0]->IsNull())) {
+        StepperItemModel::GetInstance()->ResetPrevLabel();
+        return;
+    }
+
     if (!info[0]->IsString()) {
         LOGE("Arg is not String.");
     }
@@ -90,6 +102,14 @@ void JSStepperItem::SetNextLabel(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsUndefined() || info[0]->IsNull())) {
+        StepperItemModel::GetInstance()->ResetNextLabel();
+        return;
+    }
+
     if (!info[0]->IsString()) {
         LOGE("Arg is not String.");
     }

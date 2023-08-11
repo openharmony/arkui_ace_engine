@@ -30,12 +30,13 @@ bool FrameReport::LoadLibrary()
 {
     frameSchedHandle_ = nullptr;
     frameSchedSoLoaded_ = false;
+    enable_ = false;
     return false;
 }
 
 void FrameReport::CloseLibrary() {}
 
-void *FrameReport::LoadSymbol(const char *symName)
+void* FrameReport::LoadSymbol(const char* symName)
 {
     return nullptr;
 }
@@ -120,4 +121,14 @@ void FrameReport::EndListFling()
 {
     endListFlingFunc_ = nullptr;
 }
-}  // namespace ACE
+
+void FrameReport::FlushBegin()
+{
+    flushBeginFunc_ = nullptr;
+}
+
+void FrameReport::FlushEnd()
+{
+    flushEndFunc_ = nullptr;
+}
+} // namespace OHOS::Ace

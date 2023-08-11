@@ -52,10 +52,6 @@ build_component("web") {
   if (is_ohos_standard_system) {
     configs = [ ":ohos_web_config" ]
     deps = [
-      "$ability_runtime_path/frameworks/native/appkit:appkit_native",
-      "//foundation/graphic/graphic_2d:libsurface",
-      "//foundation/window/window_manager/utils:libwmutil",
-      "//foundation/window/window_manager/wm:libwm",
       "//third_party/EGL:libEGL",
       "//third_party/openGLES:libGLES",
     ]
@@ -63,10 +59,13 @@ build_component("web") {
       "ability_base:base",
       "ability_base:configuration",
       "ability_runtime:app_manager",
+      "ability_runtime:appkit_native",
       "c_utils:utils",
+      "graphic_2d:surface",
       "init:libbegetutil",
       "ipc:ipc_core",
       "webview:libnweb",
+      "window_manager:libwm",
     ]
   }
 }

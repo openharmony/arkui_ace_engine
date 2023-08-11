@@ -15,8 +15,10 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_ellipse.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPath.h"
 #include "include/core/SkPicture.h"
+#endif
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -41,10 +43,17 @@ void RosenRenderSvgEllipse::Paint(RenderContext& context, const Offset& offset)
         RosenRenderTransform::SyncTransformToRsNode(rsNode, transform);
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkAutoCanvasRestore save(canvas, false);
     PaintMaskLayer(context, offset, offset);
 
     SkPath path;
+#else
+    RSAutoCanvasRestore save(*canvas, false);
+    PaintMaskLayer(context, offset, offset);
+
+    RSPath path;
+#endif
     GetPath(path);
     UpdateGradient(fillState_);
 
@@ -61,6 +70,7 @@ void RosenRenderSvgEllipse::PaintDirectly(RenderContext& context, const Offset& 
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkAutoCanvasRestore save(canvas, true);
     if (NeedTransform()) {
         canvas->concat(RosenSvgPainter::ToSkMatrix(GetTransformMatrix4Raw()));
@@ -68,6 +78,15 @@ void RosenRenderSvgEllipse::PaintDirectly(RenderContext& context, const Offset& 
     PaintMaskLayer(context, offset, offset);
 
     SkPath path;
+#else
+    RSAutoCanvasRestore save(*canvas, true);
+    if (NeedTransform()) {
+        canvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(GetTransformMatrix4Raw()));
+    }
+    PaintMaskLayer(context, offset, offset);
+
+    RSPath path;
+#endif
     GetPath(path);
     UpdateGradient(fillState_);
     RosenSvgPainter::SetFillStyle(canvas, path, fillState_, opacity_);
@@ -86,13 +105,24 @@ void RosenRenderSvgEllipse::UpdateMotion(const std::string& path, const std::str
 
 Rect RosenRenderSvgEllipse::GetPaintBounds(const Offset& offset)
 {
+#ifndef USE_ROSEN_DRAWING
     SkPath path;
     GetPath(path);
     auto& bounds = path.getBounds();
     return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
+#else
+    RSPath path;
+    GetPath(path);
+    auto bounds = path.GetBounds();
+    return Rect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
+#endif
 }
 
+#ifndef USE_ROSEN_DRAWING
 void RosenRenderSvgEllipse::GetPath(SkPath& path)
+#else
+void RosenRenderSvgEllipse::GetPath(RSPath& path)
+#endif
 {
     double rx = 0.0;
     if (GreatOrEqual(rx_.Value(), 0.0)) {
@@ -110,9 +140,17 @@ void RosenRenderSvgEllipse::GetPath(SkPath& path)
             ry = ConvertDimensionToPx(rx_, LengthType::HORIZONTAL);
         }
     }
+#ifndef USE_ROSEN_DRAWING
     SkRect rect = SkRect::MakeXYWH(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL) - rx,
         ConvertDimensionToPx(cy_, LengthType::VERTICAL) - ry, rx + rx, ry + ry);
     path.addOval(rect);
+#else
+    auto rect = RSRect(ConvertDimensionToPx(cx_, LengthType::HORIZONTAL) - rx,
+        ConvertDimensionToPx(cy_, LengthType::VERTICAL) - ry,
+        rx + ConvertDimensionToPx(cx_, LengthType::HORIZONTAL),
+        ry + ConvertDimensionToPx(cy_, LengthType::VERTICAL));
+    path.AddOval(rect);
+#endif
 }
 
 } // namespace OHOS::Ace

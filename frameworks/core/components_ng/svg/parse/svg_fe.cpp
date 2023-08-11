@@ -43,7 +43,11 @@ SvgFe::SvgFe() : SvgNode()
     InitNoneFlag();
 }
 
+#ifndef USE_ROSEN_DRAWING
 void SvgFe::GetImageFilter(sk_sp<SkImageFilter>& imageFilter, ColorInterpolationType& currentColor)
+#else
+void SvgFe::GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, ColorInterpolationType& currentColor)
+#endif
 {
     ColorInterpolationType srcColor = currentColor;
     InitFilterColor(AceType::DynamicCast<SvgFeDeclaration>(declaration_), currentColor);
@@ -51,6 +55,7 @@ void SvgFe::GetImageFilter(sk_sp<SkImageFilter>& imageFilter, ColorInterpolation
     currentColor = srcColor;
 }
 
+#ifndef USE_ROSEN_DRAWING
 void SvgFe::ConverImageFilterColor(
     sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor, const ColorInterpolationType& dst)
 {
@@ -76,13 +81,33 @@ void SvgFe::ConverImageFilterColor(
 #endif
     }
 }
+#else
+void SvgFe::ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter,
+    const ColorInterpolationType& srcColor, const ColorInterpolationType& dst)
+{
+    if (dst == ColorInterpolationType::LINEAR_RGB && srcColor == ColorInterpolationType::SRGB) {
+        auto colorFilter = RSRecordingColorFilter::CreateSrgbGammaToLinear();
+        CHECK_NULL_VOID(colorFilter);
+        imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
+    } else if (dst == ColorInterpolationType::SRGB && srcColor == ColorInterpolationType::LINEAR_RGB) {
+        auto colorFilter = RSRecordingColorFilter::CreateLinearToSrgbGamma();
+        CHECK_NULL_VOID(colorFilter);
+        imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
+    }
+}
+#endif
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkImageFilter> SvgFe::MakeImageFilter(const FeInType& in, sk_sp<SkImageFilter>& imageFilter)
+#else
+std::shared_ptr<RSImageFilter> SvgFe::MakeImageFilter(const FeInType& in, std::shared_ptr<RSImageFilter>& imageFilter)
+#endif
 {
     switch (in) {
         case FeInType::SOURCE_GRAPHIC:
             return nullptr;
         case FeInType::SOURCE_ALPHA: {
+#ifndef USE_ROSEN_DRAWING
             SkColorMatrix m;
             m.setScale(0, 0, 0, 1.0f);
 #ifdef USE_SYSTEM_SKIA
@@ -93,6 +118,13 @@ sk_sp<SkImageFilter> SvgFe::MakeImageFilter(const FeInType& in, sk_sp<SkImageFil
 #else
             return SkImageFilters::ColorFilter(SkColorFilters::Matrix(m), nullptr);
 #endif
+#endif
+#else
+            RSColorMatrix m;
+            m.SetScale(0, 0, 0, 1.0f);
+            auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(m);
+            CHECK_NULL_RETURN(colorFilter, nullptr);
+            return RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, nullptr);
 #endif
         }
         case FeInType::BACKGROUND_IMAGE:

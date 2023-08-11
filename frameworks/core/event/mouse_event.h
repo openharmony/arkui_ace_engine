@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,14 +22,16 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+namespace OHOS::MMI {
+class PointerEvent;
+} // namespace OHOS::MMI
+
 namespace OHOS::Ace {
 
 class MouseInfo;
-
 constexpr int32_t MOUSE_PRESS_LEFT = 1;
 static const int32_t MOUSE_BASE_ID = 1000;
 
-using OnHoverEventFunc = std::function<void(bool)>;
 using OnMouseEventFunc = std::function<void(MouseInfo& info)>;
 
 enum class MouseAction : int32_t {
@@ -43,6 +45,9 @@ enum class MouseAction : int32_t {
     HOVER_ENTER,
     HOVER_MOVE,
     HOVER_EXIT,
+    PULL_DOWN,
+    PULL_MOVE,
+    PULL_UP
 };
 
 enum class MouseState : int32_t {
@@ -72,6 +77,7 @@ enum class HoverEffectType : int32_t {
 };
 
 struct MouseEvent final {
+    int32_t id = 0;
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
@@ -84,11 +90,15 @@ struct MouseEvent final {
     float screenX = 0.0f;
     float screenY = 0.0f;
     MouseAction action = MouseAction::NONE;
+    MouseAction pullAction = MouseAction::NONE;
     MouseButton button = MouseButton::NONE_BUTTON;
     int32_t pressedButtons = 0; // combined by MouseButtons
     TimeStamp time;
     int64_t deviceId = 0;
+    int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::vector<uint8_t> enhanceData;
 
     Offset GetOffset() const
     {
@@ -124,11 +134,15 @@ struct MouseEvent final {
                 .screenX = screenX,
                 .screenY = screenY,
                 .action = action,
+                .pullAction = pullAction,
                 .button = button,
                 .pressedButtons = pressedButtons,
                 .time = time,
                 .deviceId = deviceId,
-                .sourceType = sourceType };
+                .targetDisplayId = targetDisplayId,
+                .sourceType = sourceType,
+                .pointerEvent = pointerEvent,
+                .enhanceData = enhanceData };
         }
 
         return { .x = x / scale,
@@ -143,11 +157,15 @@ struct MouseEvent final {
             .screenX = screenX / scale,
             .screenY = screenY / scale,
             .action = action,
+            .pullAction = pullAction,
             .button = button,
             .pressedButtons = pressedButtons,
             .time = time,
             .deviceId = deviceId,
-            .sourceType = sourceType };
+            .targetDisplayId = targetDisplayId,
+            .sourceType = sourceType,
+            .pointerEvent = pointerEvent,
+            .enhanceData = enhanceData };
     }
 
     TouchEvent CreateTouchPoint() const
@@ -162,8 +180,11 @@ struct MouseEvent final {
         } else {
             type = TouchType::UNKNOWN;
         }
-        int32_t id = GetId();
-        TouchPoint point { .id = id,
+        int32_t pointId = id;
+        if (sourceType == SourceType::MOUSE) {
+            pointId = GetId();
+        }
+        TouchPoint point { .id = pointId,
             .x = x,
             .y = y,
             .screenX = screenX,
@@ -171,7 +192,7 @@ struct MouseEvent final {
             .downTime = time,
             .size = 0.0,
             .isPressed = (type == TouchType::DOWN) };
-        TouchEvent event { .id = id,
+        TouchEvent event { .id = pointId,
             .x = x,
             .y = y,
             .screenX = screenX,
@@ -180,7 +201,10 @@ struct MouseEvent final {
             .time = time,
             .size = 0.0,
             .deviceId = deviceId,
-            .sourceType = sourceType };
+            .targetDisplayId = targetDisplayId,
+            .sourceType = sourceType,
+            .pointerEvent = pointerEvent,
+            .enhanceData = enhanceData };
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -203,7 +227,10 @@ struct MouseEvent final {
             .pressedButtons = pressedButtons,
             .time = time,
             .deviceId = deviceId,
-            .sourceType = sourceType };
+            .targetDisplayId = targetDisplayId,
+            .sourceType = sourceType,
+            .pointerEvent = pointerEvent,
+            .enhanceData = enhanceData };
     }
 };
 
@@ -265,7 +292,17 @@ public:
         return globalLocation_;
     }
 
+    void SetPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    {
+        pointerEvent_ = pointerEvent;
+    }
+    const std::shared_ptr<MMI::PointerEvent> GetPointerEvent() const
+    {
+        return pointerEvent_;
+    }
+
 private:
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
     MouseAction action_ = MouseAction::NONE;
     // global position at which the touch point contacts the screen.
@@ -277,6 +314,18 @@ private:
 };
 
 using HoverEffectFunc = std::function<void(bool)>;
+
+class HoverInfo;
+class HoverInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(HoverInfo, BaseEventInfo);
+
+public:
+    HoverInfo() : BaseEventInfo("onHover") {}
+    ~HoverInfo() override = default;
+};
+
+using OnHoverFunc = std::function<void(bool, HoverInfo& info)>;
+using OnHoverEventFunc = std::function<void(bool)>;
 
 class MouseEventTarget : public virtual TouchEventTarget {
     DECLARE_ACE_TYPE(MouseEventTarget, TouchEventTarget);
@@ -296,6 +345,7 @@ public:
             return false;
         }
         MouseInfo info;
+        info.SetPointerEvent(event.pointerEvent);
         info.SetButton(event.button);
         info.SetAction(event.action);
         info.SetGlobalLocation(event.GetOffset());
@@ -305,6 +355,7 @@ public:
         info.SetScreenLocation(event.GetScreenOffset());
         info.SetTimeStamp(event.time);
         info.SetDeviceId(event.deviceId);
+        info.SetTargetDisplayId(event.targetDisplayId);
         info.SetSourceDevice(event.sourceType);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         onMouseCallback_(info);
@@ -336,6 +387,26 @@ public:
     {
         onHoverCallback_ = onHoverCallback;
     }
+    void SetCallback(const OnHoverFunc& onHoverEventCallback)
+    {
+        onHoverEventCallback_ = onHoverEventCallback;
+    }
+
+    bool HandleHoverEvent(bool isHovered, const MouseEvent& event)
+    {
+        if (!onHoverEventCallback_) {
+            return false;
+        }
+        HoverInfo hoverInfo;
+        hoverInfo.SetTimeStamp(event.time);
+        hoverInfo.SetDeviceId(event.deviceId);
+        hoverInfo.SetSourceDevice(event.sourceType);
+        onHoverEventCallback_(isHovered, hoverInfo);
+        if (hoverInfo.IsStopPropagation()) {
+            return false;
+        }
+        return true;
+    }
 
     bool HandleHoverEvent(bool isHovered)
     {
@@ -357,6 +428,7 @@ public:
 
 private:
     OnHoverEventFunc onHoverCallback_;
+    OnHoverFunc onHoverEventCallback_;
 };
 
 class HoverEffectTarget : public virtual TouchEventTarget {
@@ -393,5 +465,4 @@ using MouseTestResult = std::list<RefPtr<MouseEventTarget>>;
 using HoverTestResult = std::list<RefPtr<HoverEventTarget>>;
 
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_MOUSE_EVENT_H

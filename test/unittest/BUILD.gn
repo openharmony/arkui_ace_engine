@@ -83,7 +83,7 @@ ohos_source_set("ace_unittest_log") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ "hilog:libhilog" ]
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -97,7 +97,7 @@ ohos_source_set("ace_unittest_trace") {
     "$ace_root/frameworks/base/log/ace_trace.cpp",
   ]
   deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
-  external_deps = [ "hitrace_native:hitrace_meter" ]
+  external_deps = [ "hitrace:hitrace_meter" ]
   configs = [ ":ace_unittest_config" ]
 }
 
@@ -110,14 +110,17 @@ ohos_source_set("ace_components_base") {
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/inspector.cpp",
+    "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scroll/inner/scroll_bar.cpp",
   ]
   configs = [ ":ace_unittest_config" ]
 }
 
-# ace components evnet
+# ace components event
 ohos_source_set("ace_components_event") {
   testonly = true
   subsystem_name = ace_engine_subsystem
@@ -179,6 +182,8 @@ ohos_source_set("ace_components_layout") {
     "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
   ]
   configs = [ ":ace_unittest_config" ]
 }
@@ -196,6 +201,7 @@ ohos_source_set("ace_components_property") {
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
   ]
   configs = [ ":ace_unittest_config" ]
 }
@@ -316,6 +322,7 @@ ohos_source_set("ace_core_animation") {
 }
 
 ohos_source_set("ace_engine_unittest_flutter_deps") {
+  testonly = true
   sources = []
   public_configs = []
   public_deps = []
@@ -334,4 +341,35 @@ ohos_source_set("ace_engine_unittest_flutter_deps") {
       "$ace_flutter_engine_root/skia:ace_skia_ohos",
     ]
   }
+}
+
+source_set("ace_components_mock") {
+  testonly = true
+  sources = [
+    "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_pixel_map.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/scrollable_event/mock_scrollable.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_surface_creator.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_layout_adapter.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/render/mock_font_collection.cpp",
+    "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+  ]
+  deps = [ "//third_party/googletest:gmock_main" ]
+  configs += [ ":ace_unittest_config" ]
 }

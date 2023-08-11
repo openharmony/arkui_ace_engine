@@ -35,8 +35,8 @@ using LoadFailNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 struct LoadNotifier {
     LoadNotifier(DataReadyNotifyTask&& dataReadyNotifyTask, LoadSuccessNotifyTask&& loadSuccessNotifyTask,
         LoadFailNotifyTask&& loadFailNotifyTask)
-        : onDataReady_(std::move(dataReadyNotifyTask)),
-          onLoadSuccess_(std::move(loadSuccessNotifyTask)), onLoadFail_(std::move(loadFailNotifyTask))
+        : onDataReady_(std::move(dataReadyNotifyTask)), onLoadSuccess_(std::move(loadSuccessNotifyTask)),
+          onLoadFail_(std::move(loadFailNotifyTask))
     {}
 
     DataReadyNotifyTask onDataReady_;
@@ -61,22 +61,24 @@ public:
 
     /** Decode image data and make CanvasImage from ImageObject.
      *
-     *    @param imageObjWp           weakPtr of imageObj, contains image data
+     *    @param obj                  imageObject, contains image data
      *    @param targetSize           target size of canvasImage
      *    @param forceResize          force resize image to target size
      *    @param sync                 if true, run task synchronously
      *    @return                     true if MakeCanvasImage was successful
      */
-    static void MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
+    static void MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
         const SizeF& targetSize, bool forceResize = false, bool sync = false);
 
-    // Query [CanvasImage] from cache, if hit, notify load success immediately and returns true
-    static RefPtr<CanvasImage> QueryCanvasImageFromCache(const ImageSourceInfo& src, const SizeF& targetSize);
+    /** Check if data is present in imageObj, if not, reload image data.
+     *
+     *    @param imageObj         contains image source and image data
+     *    @return                 true if image data is prepared
+     */
+    static bool PrepareImageData(const RefPtr<ImageObject>& imageObj);
 
     // Query imageObj from cache, if hit, notify dataReady and returns true
     static RefPtr<ImageObject> QueryImageObjectFromCache(const ImageSourceInfo& src);
-    // generate cache key for canvasImage, combining src and image size
-    static std::string GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize);
 
     // cancel a scheduled background task
     static void CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
@@ -95,24 +97,15 @@ private:
     // mark a task as finished, erase from map and retrieve corresponding ctxs
     static std::set<WeakPtr<ImageLoadingContext>> EndTask(const std::string& key);
 
-    /** Check if data is present in imageObj, if not, reload image data.
-     *
-     *    @param imageObj         contains image source and image data
-     *    @return                 true if image data is prepared
-     */
-    static bool PrepareImageData(const RefPtr<ImageObject>& imageObj);
-
     static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 
     static RefPtr<ImageObject> QueryThumbnailCache(const ImageSourceInfo& src);
-    static void CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, const std::string& key);
 
     // helper function to create image object from ImageSourceInfo
     static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false);
 
-    // return true if MakeCanvasImage was successful.
-    static bool MakeCanvasImageHelper(
-        const WeakPtr<ImageObject>& imageObjWp, const SizeF& targetSize, bool forceResize, bool sync = false);
+    static void MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& targetSize, const std::string& key,
+        bool forceResize, bool sync = false);
 
     // helper functions to end task and callback to LoadingContexts
     static void SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false);

@@ -35,7 +35,6 @@ struct CachedImage;
 class ImageObject;
 
 namespace NG {
-struct CachedImage;
 class ImageObject;
 } // namespace NG
 
@@ -87,9 +86,7 @@ public:
     ~ImageCache() override = default;
 
     void CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image);
-    void CacheImageNG(const std::string& key, const std::shared_ptr<NG::CachedImage>& image);
     std::shared_ptr<CachedImage> GetCacheImage(const std::string& key);
-    std::shared_ptr<NG::CachedImage> GetCacheImageNG(const std::string& key);
 
     void CacheImageData(const std::string& key, const RefPtr<CachedImageData>& imageData);
     RefPtr<CachedImageData> GetCacheImageData(const std::string& key);
@@ -204,10 +201,8 @@ protected:
 
     mutable std::mutex imageCacheMutex_;
     std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
-    std::list<CacheNode<std::shared_ptr<NG::CachedImage>>> cacheListNG_;
 
     std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<CachedImage>>>::iterator> imageCache_;
-    std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<NG::CachedImage>>>::iterator> imageCacheNG_;
 
     std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
 
@@ -237,7 +232,7 @@ protected:
     static std::atomic<float> clearCacheFileRatio_;
 
     static std::mutex cacheFileSizeMutex_;
-    static int32_t cacheFileSize_;
+    static int64_t cacheFileSize_;
 
     static std::mutex cacheFileInfoMutex_;
     static std::list<FileInfo> cacheFileInfo_;

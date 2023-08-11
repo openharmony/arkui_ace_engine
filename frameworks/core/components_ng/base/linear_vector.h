@@ -32,20 +32,22 @@ public:
 
     LinearVector operator+(const LinearVector& linearVector) const
     {
-        LinearVector tempLinearVector = *this;
-        for (size_t i = 0; i < tempLinearVector.size() && i < linearVector.size(); ++i) {
-            tempLinearVector[i] += linearVector[i];
+        LinearVector longLinearVector = linearVector.size() > this->size() ? linearVector : *this;
+        const LinearVector* shortLinearVector = linearVector.size() <= this->size() ? &linearVector : this;
+        for (size_t i = 0; i < shortLinearVector->size(); ++i) {
+            longLinearVector[i] += shortLinearVector->at(i);
         }
-        return tempLinearVector;
+        return longLinearVector;
     }
 
     LinearVector operator-(const LinearVector& linearVector) const
     {
-        LinearVector tempLinearVector = *this;
-        for (size_t i = 0; i < tempLinearVector.size() && i < linearVector.size(); ++i) {
-            tempLinearVector[i] -= linearVector[i];
+        LinearVector longLinearVector = linearVector.size() > this->size() ? linearVector : *this;
+        const LinearVector* shortLinearVector = linearVector.size() <= this->size() ? &linearVector : this;
+        for (size_t i = 0; i < shortLinearVector->size(); ++i) {
+            longLinearVector[i] -= shortLinearVector->at(i);
         }
-        return tempLinearVector;
+        return longLinearVector;
     }
 
     LinearVector operator*(const float scale) const
@@ -63,7 +65,7 @@ public:
             return false;
         }
         for (size_t i = 0; i < linearVector.size(); ++i) {
-            if (this->at(i) != linearVector[i]) {
+            if (!NearEqual(this->at(i), linearVector[i])) {
                 return false;
             }
         }

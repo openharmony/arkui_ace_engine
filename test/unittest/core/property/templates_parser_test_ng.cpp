@@ -163,13 +163,27 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg001, TestSize.Level1)
             childrenCount = 5;
             return "2px 2px repeat(auto-fill, 2px 2% 2 ) 2px";
         },
-            size, gap, childrenCount, { 2, 2, 2, 0, 2, 2 } }
+            size, gap, childrenCount, { 2, 2, 2, 0, 2, 2 } },
+        { [&]() {
+            size = 200;
+            gap = 10;
+            childrenCount = 5;
+            return "(auto-fit, 2px 2)";
+        },
+            size, gap, childrenCount, {} },
+        { [&]() {
+            size = 200;
+            gap = 10;
+            childrenCount = 5;
+            return "repeat(auto-fit, ) 2px";
+        },
+            size, gap, childrenCount, { 0 } }
     };
     for (auto [args, size, gap, childrenCount, rt] : parms) {
         auto result = ParseTemplateArgs(args(), size, gap, childrenCount);
-        EXPECT_EQ(result.size(), rt.size());
-        for (int i = 0; i < rt.size() && i < result.size(); i++) {
-            EXPECT_EQ(rt[i], result[i]);
+        EXPECT_EQ(result.first.size(), rt.size());
+        for (int i = 0; i < rt.size() && i < result.first.size(); i++) {
+            EXPECT_EQ(rt[i], result.first[i]);
         }
     }
 }

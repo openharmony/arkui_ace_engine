@@ -68,7 +68,6 @@ WebModel* WebModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-JSwebEventCallback JSWeb::OnControllerAttachedCallback_ = nullptr;
 bool JSWeb::webDebuggingAccess_ = false;
 class JSWebDialog : public Referenced {
 public:
@@ -567,6 +566,81 @@ private:
     }
 
     RefPtr<WebPermissionRequest> webPermissionRequest_;
+};
+
+class JSScreenCaptureRequest : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSScreenCaptureRequest>::Declare("ScreenCaptureRequest");
+        JSClass<JSScreenCaptureRequest>::CustomMethod("deny", &JSScreenCaptureRequest::Deny);
+        JSClass<JSScreenCaptureRequest>::CustomMethod("getOrigin", &JSScreenCaptureRequest::GetOrigin);
+        JSClass<JSScreenCaptureRequest>::CustomMethod("grant", &JSScreenCaptureRequest::Grant);
+        JSClass<JSScreenCaptureRequest>::Bind(
+            globalObj, &JSScreenCaptureRequest::Constructor, &JSScreenCaptureRequest::Destructor);
+    }
+
+    void SetEvent(const WebScreenCaptureRequestEvent& eventInfo)
+    {
+        request_ = eventInfo.GetWebScreenCaptureRequest();
+    }
+
+    void Deny(const JSCallbackInfo& args)
+    {
+        if (request_) {
+            request_->Deny();
+        }
+    }
+
+    void GetOrigin(const JSCallbackInfo& args)
+    {
+        std::string origin;
+        if (request_) {
+            origin = request_->GetOrigin();
+        }
+        auto originJs = JSVal(ToJSValue(origin));
+        auto originJsRef = JSRef<JSVal>::Make(originJs);
+        args.SetReturnValue(originJsRef);
+    }
+
+    void Grant(const JSCallbackInfo& args)
+    {
+        if (!request_) {
+            return;
+        }
+        if (args.Length() < 1 || !args[0]->IsObject()) {
+            LOGE("JSScreenCaptureRequest parame error");
+            request_->Deny();
+            return;
+        }
+        JSRef<JSObject> paramObject = JSRef<JSObject>::Cast(args[0]);
+        auto captureModeObj = paramObject->GetProperty("captureMode");
+        if (!captureModeObj->IsNumber()) {
+            request_->Deny();
+            return;
+        }
+        int32_t captureMode = captureModeObj->ToNumber<int32_t>();
+        request_->SetCaptureMode(captureMode);
+        request_->SetSourceId(-1);
+        request_->Grant();
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jsScreenCaptureRequest = Referenced::MakeRefPtr<JSScreenCaptureRequest>();
+        jsScreenCaptureRequest->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jsScreenCaptureRequest));
+    }
+
+    static void Destructor(JSScreenCaptureRequest* jsScreenCaptureRequest)
+    {
+        if (jsScreenCaptureRequest != nullptr) {
+            jsScreenCaptureRequest->DecRefCount();
+        }
+    }
+
+    RefPtr<WebScreenCaptureRequest> request_;
 };
 
 class JSWebWindowNewHandler : public Referenced {
@@ -1544,6 +1618,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onClientAuthenticationRequest", &JSWeb::OnSslSelectCertRequest);
     JSClass<JSWeb>::StaticMethod("onPermissionRequest", &JSWeb::OnPermissionRequest);
     JSClass<JSWeb>::StaticMethod("onContextMenuShow", &JSWeb::OnContextMenuShow);
+    JSClass<JSWeb>::StaticMethod("onContextMenuHide", &JSWeb::OnContextMenuHide);
     JSClass<JSWeb>::StaticMethod("onSearchResultReceive", &JSWeb::OnSearchResultReceive);
     JSClass<JSWeb>::StaticMethod("mediaPlayGestureAccess", &JSWeb::MediaPlayGestureAccess);
     JSClass<JSWeb>::StaticMethod("onDragStart", &JSWeb::JsOnDragStart);
@@ -1583,6 +1658,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
+    JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
+    JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -1601,6 +1678,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSContextMenuResult::JSBind(globalObj);
     JSWebWindowNewHandler::JSBind(globalObj);
     JSDataResubmitted::JSBind(globalObj);
+    JSScreenCaptureRequest::JSBind(globalObj);
 }
 
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
@@ -1638,6 +1716,13 @@ JSRef<JSVal> LoadWebPageFinishEventToJSValue(const LoadWebPageFinishEvent& event
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("url", eventInfo.GetLoadedUrl());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> ContextMenuHideEventToJSValue(const ContextMenuHideEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("info", eventInfo.GetInfo());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -1839,9 +1924,6 @@ void JSWeb::Create(const JSCallbackInfo& info)
                                  int32_t webId) {
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
-            if (JSWeb::OnControllerAttachedCallback_) {
-                JSWeb::OnControllerAttachedCallback_();
-            }
         };
 
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
@@ -2174,11 +2256,8 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info);
-        JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
-        if (message->IsBoolean()) {
-            return message->ToBoolean();
-        }
-        return false;
+        func->Execute(*eventInfo);
+        return true;
     };
     WebModel::GetInstance()->SetOnSslErrorRequest(jsCallback);
 }
@@ -2472,6 +2551,26 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
         return false;
     };
     WebModel::GetInstance()->SetOnContextMenuShow(jsCallback);
+}
+
+void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb: OnContextMenuHide");
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<ContextMenuHideEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ContextMenuHideEventToJSValue);
+
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<ContextMenuHideEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOnContextMenuHide(jsCallback);
 }
 
 void JSWeb::JsEnabled(bool isJsEnabled)
@@ -2803,6 +2902,35 @@ void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetPermissionRequestEventId(jsCallback);
+}
+
+JSRef<JSVal> ScreenCaptureRequestEventToJSValue(const WebScreenCaptureRequestEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> requestObj = JSClass<JSScreenCaptureRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSScreenCaptureRequest>());
+    requestEvent->SetEvent(eventInfo);
+    obj->SetPropertyObject("handler", requestObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnScreenCaptureRequest(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebScreenCaptureRequestEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ScreenCaptureRequestEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebScreenCaptureRequestEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetScreenCaptureRequestEventId(jsCallback);
 }
 
 void JSWeb::BackgroundColor(const JSCallbackInfo& info)
@@ -3158,10 +3286,10 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func, info]() {
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetPageVisibleId(std::move(uiCallback));
@@ -3219,10 +3347,10 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostSyncEvent([execCtx, func = func, info]() {
+        context->PostSyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<DataResubmittedEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetOnDataResubmitted(uiCallback);
@@ -3324,10 +3452,10 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func, info]() {
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetFaviconReceivedId(uiCallback);
@@ -3356,10 +3484,10 @@ void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func, info]() {
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<TouchIconUrlEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetTouchIconUrlId(uiCallback);
@@ -3453,8 +3581,8 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
 JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
-    obj->SetProperty("navigationStartTick", eventInfo.GetNavigationStartTick());
-    obj->SetProperty("firstContentfulPaintMs", eventInfo.GetFirstContentfulPaintMs());
+    obj->SetProperty<int64_t>("navigationStartTick", eventInfo.GetNavigationStartTick());
+    obj->SetProperty<int64_t>("firstContentfulPaintMs", eventInfo.GetFirstContentfulPaintMs());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -3473,14 +3601,15 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func, info]() {
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
-            func->Execute(*eventInfo);
+            postFunc->Execute(*eventInfo);
         });
     };
     WebModel::GetInstance()->SetFirstContentfulPaintId(std::move(uiCallback));
 }
+
 void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
 {
     LOGI("JSWeb OnControllerAttached");
@@ -3495,11 +3624,38 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        context->PostAsyncEvent([execCtx, func = func]() {
+        context->PostAsyncEvent([execCtx, postFunc = func]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            func->Execute();
+            postFunc->Execute();
         });
     };
-    WebModel::GetInstance()->SetOnControllerAttached(std::move(JSWeb::OnControllerAttachedCallback_), uiCallback);
+    WebModel::GetInstance()->SetOnControllerAttached(std::move(uiCallback));
+}
+
+JSRef<JSVal> OverScrollEventToJSValue(const WebOnOverScrollEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("xOffset", eventInfo.GetX());
+    obj->SetProperty("yOffset", eventInfo.GetY());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnOverScroll(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebOnOverScrollEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), OverScrollEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                          const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnOverScrollEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetOverScrollId(jsCallback);
 }
 } // namespace OHOS::Ace::Framework

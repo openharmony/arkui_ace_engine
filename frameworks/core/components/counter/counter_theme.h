@@ -108,6 +108,11 @@ public:
         return borderWidth_;
     }
 
+    const NG::BorderWidthProperty& GetContentBorderWidth() const
+    {
+        return contentBorderWidth_;
+    }
+
     const NG::BorderColorProperty& GetBorderColor() const
     {
         return borderColor_;
@@ -128,6 +133,7 @@ private:
     double alphaDisabled_ = 0.4;
     NG::BorderRadiusProperty borderRadius_ = { 4.0_vp, 4.0_vp, 4.0_vp, 4.0_vp };
     NG::BorderWidthProperty borderWidth_ = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
+    NG::BorderWidthProperty contentBorderWidth_ = { 0.0_vp, 1.0_vp, 0.0_vp, 1.0_vp };
     NG::BorderColorProperty borderColor_ = { Color::GRAY, Color::GRAY, Color::GRAY, Color::GRAY };
     NG::BorderStyleProperty borderStyle_ = { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID,
         BorderStyle::SOLID };

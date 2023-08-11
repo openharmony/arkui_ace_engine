@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,12 @@ const char ROOT_ETS_TAG[] = "root";
 const char STAGE_ETS_TAG[] = "stage";
 // page view
 const char PAGE_ETS_TAG[] = "page";
+// container modal view (title bar)
+const char CONTAINER_MODAL_ETS_TAG[] = "ContainerModal";
+
+const char ATOMIC_SERVICE_ETS_TAG[] = "AtomicService";
+const char APP_BAR_ETS_TAG[] = "AppBar";
+
 // js custom view
 const char JS_VIEW_ETS_TAG[] = "JsView";
 const char JS_VIEW_COMPONENT_TAG[] = "ProxyComponent";
@@ -81,6 +87,9 @@ const char TEXT_COMPONENT_TAG[] = "TextComponentV2";
 const char TEXT_ETS_TAG[] = "Text";
 const char TEXT_ATTRS_OVER_FLOW[] = "textOverflow";
 const char TEXT_ATTRS_MAX_LINES[] = "maxLines";
+
+// rich editor
+const char RICH_EDITOR_ETS_TAG[] = "RichEditor";
 
 // stack
 const char STACK_COMPONENT_TAG[] = "StackComponent";
@@ -119,10 +128,10 @@ const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
 const char NAVBAR_ETS_TAG[] = "NavBar";
 
 // navRouter view
-const char NAVROUTER_VIEW_ETS_TAG[] = "NavRouterView";
+const char NAVROUTER_VIEW_ETS_TAG[] = "NavRouter";
 
 // navDestination view
-const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestinationView";
+const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 const char NAVDESTINATION_TITLE_BAR_ETS_TAG[] = "NavDestinationTitleBar";
 const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 
@@ -185,6 +194,7 @@ const char NAVIGATOR_ETS_TAG[] = "Navigator";
 // panel
 const char PANEL_COMPONENT_TAG[] = "SlidingPanelComponentV2";
 const char PANEL_ETS_TAG[] = "Panel";
+const char PANEL_CLOSE_ICON_ETS_TAG[] = "CloseIcon";
 
 // pattern-lock
 const char PATTERN_LOCK_COMPONENT_TAG[] = "PatternLockComponent";
@@ -282,6 +292,10 @@ const char SCROLL_ETS_TAG[] = "Scroll";
 const char CALENDAR_COMPONENT_TAG[] = "calendar";
 const char CALENDAR_ETS_TAG[] = "Calendar";
 
+// calendarPicker
+const char CALENDAR_PICKER_COMPONENT_TAG[] = "CalendarPickerComponent";
+const char CALENDAR_PICKER_ETS_TAG[] = "CalendarPicker";
+
 // badge
 const char BADGE_COMPONENT_TAG[] = "BadgeComponent";
 const char BADGE_ETS_TAG[] = "Badge";
@@ -293,6 +307,10 @@ const char SEARCH_ETS_TAG[] = "Search";
 // formComponent
 const char FORM_COMPONENT_TAG[] = "FormComponent";
 const char FORM_ETS_TAG[] = "FormComponent";
+
+// formLink
+const char FORM_LINK_TAG[] = "FormLink";
+const char FORM_LINK_ETS_TAG[] = "FormLink";
 
 // PluginComponent
 const char PLUGIN_COMPONENT_TAG[] = "PluginComponent";
@@ -325,6 +343,11 @@ const char DATA_PANEL_ETS_TAG[] = "DataPanel";
 // sheet
 const char SHEET_COMPONENT_TAG[] = "SheetComponent";
 const char SHEET_ETS_TAG[] = "Sheet";
+const char SHEET_MASK_TAG[] = "SheetMask";
+const char SHEET_PAGE_TAG[] = "SheetPage";
+
+// full screen modal
+const char MODAL_PAGE_TAG[] = "ModalPage";
 
 // hyperlink
 const char HYPERLINK_COMPONENT_TAG[] = "HyperlinkComponent";
@@ -483,6 +506,9 @@ const char POPUP_ETS_TAG[] = "Popup";
 // remote window
 const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 
+// effect view
+const char EFFECT_COMPONENT_ETS_TAG[] = "EffectComponent";
+
 // Model
 const char MODEL_COMPONENT_TAG[] = "ModelComponent";
 const char MODEL_ETS_TAG[] = "Model";
@@ -496,8 +522,18 @@ ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
 const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
 const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 
-// SecLocationButton
-const char SEC_LOCATION_BUTTON_COMPONENT_TAG[] = "SecLocationButtonComponent";
-const char SEC_LOCATION_BUTTON_ETS_TAG[] = "SecLocationButton";
+// LocationButton
+const char LOCATION_BUTTON_COMPONENT_TAG[] = "LocationButtonComponent";
+const char LOCATION_BUTTON_ETS_TAG[] = "LocationButton";
 
+// PasteButton
+const char PASTE_BUTTON_COMPONENT_TAG[] = "PasteButtonComponent";
+const char PASTE_BUTTON_ETS_TAG[] = "PasteButton";
+
+// SaveButton
+const char SAVE_BUTTON_COMPONENT_TAG[] = "SaveButtonComponent";
+const char SAVE_BUTTON_ETS_TAG[] = "SaveButton";
+
+// Keyboard
+const char KEYBOARD_ETS_TAG[] = "Keyboard";
 } // namespace OHOS::Ace::V2

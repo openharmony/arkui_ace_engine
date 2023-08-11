@@ -69,6 +69,16 @@ public:
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
     virtual void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) = 0;
 
+    virtual void ResetBlockBorderColor() = 0;
+    virtual void ResetBlockBorderWidth() = 0;
+    virtual void ResetStepColor() = 0;
+    virtual void ResetTrackBorderRadius() = 0;
+    virtual void ResetBlockSize() = 0;
+    virtual void ResetBlockType() = 0;
+    virtual void ResetBlockImage() = 0;
+    virtual void ResetBlockShape() = 0;
+    virtual void ResetStepSize() = 0;
+
 private:
     static std::unique_ptr<SliderModel> instance_;
     static std::mutex mutex_;

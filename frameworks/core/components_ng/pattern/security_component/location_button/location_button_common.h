@@ -39,7 +39,8 @@ enum class LocationButtonLocationDescription : int32_t {
     SEND_CURRENT_LOCATION,
     RELOCATION,
     PUNCHIN,
-    CURRENT_POSITION
+    CURRENT_POSITION,
+    MAX_LABEL_TYPE
 };
 } // namespace OHOS::Ace
 

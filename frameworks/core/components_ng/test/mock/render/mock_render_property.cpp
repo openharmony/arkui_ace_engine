@@ -16,6 +16,7 @@
 #include "core/components_ng/render/render_property.h"
 
 namespace OHOS::Ace::NG {
+void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}

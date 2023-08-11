@@ -31,8 +31,8 @@ PanEventActuator::PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventH
         fingers_ = DEFAULT_PAN_FINGER;
     }
 
-    if (LessOrEqual(distance_, DEFAULT_PAN_DISTANCE)) {
-        distance_ = DEFAULT_PAN_DISTANCE;
+    if (LessOrEqual(distance_, DEFAULT_PAN_DISTANCE.ConvertToPx())) {
+        distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();
     }
 
     auto gestureHub = gestureEventHub_.Upgrade();
@@ -61,7 +61,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
 
         // Trigger pan start event setted by user.
         auto userCallback = actuator->userCallback_;
-        CHECK_NULL_VOID(userCallback);
+        CHECK_NULL_VOID_NOLOG(userCallback);
         auto userActionStart = userCallback->GetActionStartEventFunc();
         if (userActionStart) {
             userActionStart(info);
@@ -81,7 +81,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
 
         // Trigger pan update event  setted by user.
         auto userCallback = actuator->userCallback_;
-        CHECK_NULL_VOID(userCallback);
+        CHECK_NULL_VOID_NOLOG(userCallback);
         auto userActionUpdate = userCallback->GetActionUpdateEventFunc();
         if (userActionUpdate) {
             userActionUpdate(info);
@@ -101,7 +101,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
 
         // Trigger pan end event  setted by user.
         auto userCallback = actuator->userCallback_;
-        CHECK_NULL_VOID(userCallback);
+        CHECK_NULL_VOID_NOLOG(userCallback);
         auto userActionEnd = userCallback->GetActionEndEventFunc();
         if (userActionEnd) {
             userActionEnd(info);
@@ -121,7 +121,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
 
         // Trigger pan end event  setted by user.
         auto userCallback = actuator->userCallback_;
-        CHECK_NULL_VOID(userCallback);
+        CHECK_NULL_VOID_NOLOG(userCallback);
         auto userActionCancel = userCallback->GetActionCancelEventFunc();
         if (userActionCancel) {
             userActionCancel();

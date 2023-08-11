@@ -37,14 +37,14 @@ public:
         RefPtr<OHOS::Ace::CustomPaintComponent> mockComponent = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
         auto jsContext = Referenced::MakeRefPtr<JSRenderingContext>();
         jsContext->SetAnti(true);
-        jsContext->SetComponent(mockComponent->GetTaskPool());
+        jsContext->SetCanvasPattern(mockComponent->GetTaskPool());
         jsContext->SetAntiAlias();
         mockComponent->GetTaskPool()->UpdateFontSize(DEFAULT_FONT_SIZE);
         mockComponent->GetTaskPool()->FillText(
             "This component is not supported on PC preview.", Offset(0, DEFAULT_OFFSET));
         if (content == "Video") {
             mockComponent->SetInspectorTag(content + "ComponentV2");
-        } else if (content == "PluginComponent") {
+        } else if (content == "PluginComponent" || content == "UIExtensionComponent") {
             mockComponent->SetInspectorTag(content);
         } else {
             mockComponent->SetInspectorTag(content + "Component");

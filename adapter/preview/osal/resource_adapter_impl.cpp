@@ -255,7 +255,8 @@ void RawThemeStyle::ParseContent()
 RefPtr<ResourceAdapter> ResourceAdapter::Create()
 {
     auto deviceType = SystemProperties::GetDeviceType();
-    if (deviceType == DeviceType::PHONE || deviceType == DeviceType::CAR || deviceType == DeviceType::TABLET) {
+    if (deviceType == DeviceType::PHONE || deviceType == DeviceType::CAR || deviceType == DeviceType::TABLET ||
+        deviceType == DeviceType::TWO_IN_ONE) {
         return AceType::MakeRefPtr<ResourceAdapterImpl>();
     }
     return RefPtr<ResourceAdapter>();

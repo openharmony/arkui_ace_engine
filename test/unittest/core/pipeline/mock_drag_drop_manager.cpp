@@ -47,7 +47,8 @@ RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& cust
 
 void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY) {}
 
-RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType)
+RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
+    float globalX, float globalY, DragType dragType, bool findDrop)
 {
     return nullptr;
 }
@@ -57,14 +58,14 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
     return false;
 }
 
-void DragDropManager::OnDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode) {}
+void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode) {}
 
-void DragDropManager::OnDragMove(float globalX, float globalY, const std::string& extraInfo)
+void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
 {
-    currentId_ = static_cast<int32_t>(globalX);
+    currentId_ = static_cast<int32_t>(point.GetX());
 }
 
-void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string& extraInfo) {}
+void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo) {}
 
 void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo) {}
 

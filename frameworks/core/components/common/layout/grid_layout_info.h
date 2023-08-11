@@ -38,9 +38,11 @@ enum class GridColumnType {
     TOAST,
     PANEL,
     TOOL_BAR,
+    TAB_BAR,
     DIALOG,
     CAR_DIALOG,
     LIST_CARD,
+    NAVIGATION_TOOLBAR,
 };
 
 class GridLayoutInfo : public virtual AceType {

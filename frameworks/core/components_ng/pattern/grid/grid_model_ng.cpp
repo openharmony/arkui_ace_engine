@@ -120,7 +120,10 @@ void GridModelNG::SetEditable(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, value);
 }
 
-void GridModelNG::SetIsRTL(bool rightToLeft) {}
+void GridModelNG::SetIsRTL(TextDirection direction)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutDirection, direction);
+}
 
 void GridModelNG::SetLayoutDirection(FlexDirection value)
 {
@@ -167,6 +170,29 @@ void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, EdgeEffect, edgeEffect);
 }
 
+void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
+void GridModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
+void GridModelNG::SetFriction(double friction)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFriction(friction);
+}
+
 void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -174,6 +200,15 @@ void GridModelNG::SetOnScrollToIndex(ScrollToIndexFunc&& value)
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollToIndex(std::move(value));
+}
+
+void GridModelNG::SetOnScrollBarUpdate(ScrollBarUpdateFunc&& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollBarUpdate(std::move(value));
 }
 
 void GridModelNG::SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value)
@@ -251,7 +286,70 @@ void GridModelNG::AddDragFrameNodeToManager() const
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddGridDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+}
+
+void GridModelNG::SetOnScroll(OnScrollEvent&& onScroll)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScroll(std::move(onScroll));
+}
+
+void GridModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
+}
+
+void GridModelNG::SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStart(std::move(onScrollStart));
+}
+
+void GridModelNG::SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(onScrollStop));
+}
+
+void GridModelNG::SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollIndex(std::move(onScrollIndex));
+}
+
+void GridModelNG::SetOnReachStart(OnReachEvent&& onReachStart)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachStart(std::move(onReachStart));
+}
+
+void GridModelNG::SetOnReachEnd(OnReachEvent&& onReachEnd)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachEnd(std::move(onReachEnd));
 }
 
 RefPtr<ScrollControllerBase> GridModelNG::CreatePositionController()

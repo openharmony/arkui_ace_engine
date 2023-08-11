@@ -73,4 +73,6 @@ void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackIn
 {
 }
 
+void RosenRenderSurface::ConsumeBuffer() {}
+
 } // namespace OHOS::Ace::NG

@@ -242,16 +242,14 @@ void DialogContainer::Destroy()
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
-        RefPtr<PipelineBase> context;
-        context.Swap(pipelineContext_);
+        RefPtr<PipelineBase>& context = pipelineContext_;
         if (GetSettings().usePlatformAsUIThread) {
             context->Destroy();
         } else {
             taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
         }
         // 2. Destroy Frontend on JS thread.
-        RefPtr<Frontend> frontend;
-        frontend_.Swap(frontend);
+        RefPtr<Frontend>& frontend = frontend_;
         if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
             frontend->UpdateState(Frontend::State::ON_DESTROY);
             frontend->Destroy();
@@ -329,11 +327,7 @@ void DialogContainer::AttachView(
     // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
     flutterTaskExecutor->InitJsThread(false);
     InitializeFrontend();
-
-    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
-    if (parentContainerId == -1) {
-        SetUseNewPipeline();
-    }
+    SetUseNewPipeline();
 
     InitPipelineContext(std::move(window), instanceId, density, width, height, windowId);
     InitializeCallback();
@@ -475,6 +469,27 @@ void DialogContainer::ShowDialog(int32_t instanceId, const std::string& title, c
     LOGI("DialogContainer::ShowDialog end");
 }
 
+void DialogContainer::ShowDialog(int32_t instanceId, const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    LOGI("DialogContainer::ShowDialog begin");
+    auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_VOID(container);
+    auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
+    CHECK_NULL_VOID(frontend);
+    auto delegate = frontend->GetDelegate();
+    CHECK_NULL_VOID(delegate);
+    delegate->ShowDialog(
+        dialogAttr, buttons, std::move(callback), callbacks, [instanceId = instanceId](bool isShow) {
+            LOGI("DialogContainer::ShowDialog HideWindow instanceId = %{public}d", instanceId);
+            if (!isShow) {
+                DialogContainer::HideWindow(instanceId);
+            }
+        });
+    LOGI("DialogContainer::ShowDialog end");
+}
+
 void DialogContainer::ShowActionMenu(int32_t instanceId, const std::string& title,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
@@ -506,6 +521,7 @@ bool DialogContainer::ShowToastDialogWindow(
     if (isToast) {
         window->SetTouchable(false);
     }
+    window->SetNeedDefaultAnimation(false);
     OHOS::Rosen::WMError ret = window->Show();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         LOGE("DialogContainer::ShowToastDialogWindow Show window failed code: %{public}d", static_cast<int32_t>(ret));

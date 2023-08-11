@@ -47,13 +47,13 @@ ohos_shared_library("ace_form_render") {
 
   configs = [
     "$ace_root:ace_config",
-    "$ace_root/test/unittest:ace_coverage_config",
+    "$ace_root:ace_coverage_config",
     "//commonlibrary/c_utils/base:utils_config",
   ]
 
   public_configs = [ ":form_render_config" ]
 
-  deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+  deps = [ "$ace_root/interfaces/inner_api/ace:ace_uicontent" ]
 
   external_deps = [
     "ability_base:configuration",
@@ -61,11 +61,11 @@ ohos_shared_library("ace_form_render") {
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
-    "ace_engine:ace_uicontent",
     "c_utils:utils",
     "form_fwk:form_manager",
-    "graphic_standard:surface",
-    "hiviewdfx_hilog_native:libhilog",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:surface",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",

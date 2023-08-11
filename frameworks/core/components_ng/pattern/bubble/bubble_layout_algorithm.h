@@ -15,6 +15,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H
 
+#include <optional>
 #include <string>
 
 #include "base/geometry/ng/offset_t.h"
@@ -32,7 +33,17 @@ class ACE_EXPORT BubbleLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     BubbleLayoutAlgorithm() = default;
-    BubbleLayoutAlgorithm(int32_t id, const std::string& tag) : targetNodeId_(id), targetTag_(tag) {}
+    BubbleLayoutAlgorithm(int32_t id, const std::string& tag, const std::optional<OffsetF>& targetOffset = std::nullopt,
+        const std::optional<SizeF>& targetSize = std::nullopt)
+        : targetNodeId_(id), targetTag_(tag)
+    {
+        if (targetOffset.has_value()) {
+            targetOffset_ = targetOffset.value();
+        }
+        if (targetSize.has_value()) {
+            targetSize_ = targetSize.value();
+        }
+    }
     ~BubbleLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -79,6 +90,11 @@ public:
         return arrowPlacement_;
     }
 
+    OffsetT<Dimension> GetChildOffsetAfterLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
+
+protected:
+    OffsetF positionOffset_;
+
 private:
     enum class ErrorPositionType {
         NORMAL = 0,
@@ -86,15 +102,15 @@ private:
         BOTTOM_RIGHT_ERROR,
     };
 
-    void InitTargetSizeAndPosition(const RefPtr<BubbleLayoutProperty>& layoutProp);
+    void InitTargetSizeAndPosition(bool showInSubWindow);
     void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
     void InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition, OffsetF& topPosition,
         OffsetF& bottomPosition, const SizeF& childSize);
-
-    OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp);
-    OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition,
-        const OffsetF& topArrowPosition, const OffsetF& bottomArrowPosition);
+    void GetPositionWithPlacement(
+        OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
+    OffsetF GetChildPosition(
+        const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
 

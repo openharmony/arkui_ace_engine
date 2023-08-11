@@ -42,14 +42,16 @@ public:
     static void JsBorderColor(const JSCallbackInfo& info);
 
 private:
-    static bool ConvertGradientColor(const JsiRef<JsiValue>& param, OHOS::Ace::NG::Gradient& gradient);
+    static bool ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient);
     static NG::ProgressStatus ConvertStrToProgressStatus(const std::string& value);
     static void JsSetProgressStyleOptions(const JSCallbackInfo& info);
+    static void JsSetLinearStyleOptions(const JSCallbackInfo& info);
     static void JsSetRingStyleOptions(const JSCallbackInfo& info);
     static void JsSetCapsuleStyle(const JSCallbackInfo& info);
     static void JsSetFontStyle(const JSCallbackInfo& info);
     static void JsSetFontDefault();
     static void JsSetFont(const JSRef<JSObject>& info);
+    static void JsSetCommonOptions(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

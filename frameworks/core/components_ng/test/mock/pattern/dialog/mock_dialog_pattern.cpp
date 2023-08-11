@@ -33,7 +33,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 }
 
 // set render context properties of content frame
-void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode)
+void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props)
 {
 }
 
@@ -56,7 +56,8 @@ void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_
 {
 }
 
-RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t index, bool isCancel)
+RefPtr<FrameNode> DialogPattern::CreateButton(
+    const ButtonInfo& params, int32_t index, bool isCancel, bool useRelativeLayout)
 {
     return nullptr;
 }
@@ -91,4 +92,6 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
 void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
 }
+
+void DialogPattern::OnColorConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG

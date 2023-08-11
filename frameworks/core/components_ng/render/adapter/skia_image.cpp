@@ -18,10 +18,10 @@
 #include <utility>
 
 #include "image_painter_utils.h"
-#include "include/core/SkColorFilter.h"
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/render/drawing.h"
+#include "frameworks/core/image/flutter_image_cache.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
 #endif
@@ -57,12 +57,15 @@ RefPtr<CanvasImage> CanvasImage::Create()
     return AceType::MakeRefPtr<SkiaImage>();
 }
 
-SkImageInfo SkiaImage::MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap)
+sk_sp<SkImage> SkiaImage::MakeSkImageFromPixmap(const RefPtr<PixelMap>& pixmap)
 {
     SkColorType colorType = PixelFormatToSkColorType(pixmap);
     SkAlphaType alphaType = AlphaTypeToSkAlphaType(pixmap);
     sk_sp<SkColorSpace> colorSpace = ColorSpaceToSkColorSpace(pixmap);
-    return SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
+    auto info = SkImageInfo::Make(pixmap->GetWidth(), pixmap->GetHeight(), colorType, alphaType, colorSpace);
+
+    SkPixmap skPixmap(info, pixmap->GetPixels(), pixmap->GetRowBytes());
+    return SkImage::MakeFromRaster(skPixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
 }
 
 sk_sp<SkColorSpace> SkiaImage::ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
@@ -129,10 +132,41 @@ RefPtr<CanvasImage> SkiaImage::Clone()
 {
     auto clone = MakeRefPtr<SkiaImage>(image_);
     clone->uniqueId_ = uniqueId_;
+    clone->compressData_ = std::move(compressData_);
+    clone->compressWidth_ = compressWidth_;
+    clone->compressHeight_ = compressHeight_;
     return clone;
 }
 
-RefPtr<PixelMap> SkiaImage::GetPixelMap()
+void SkiaImage::Cache(const std::string& key)
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineCtx);
+    auto cache = pipelineCtx->GetImageCache();
+    CHECK_NULL_VOID(cache);
+
+    auto cached = std::make_shared<CachedImage>(GetImage());
+    cached->uniqueId = GetUniqueID();
+    pipelineCtx->GetImageCache()->CacheImage(key, cached);
+}
+
+RefPtr<CanvasImage> SkiaImage::QueryFromCache(const std::string& key)
+{
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineCtx, nullptr);
+    auto cache = pipelineCtx->GetImageCache();
+    CHECK_NULL_RETURN(cache, nullptr);
+    auto cacheImage = cache->GetCacheImage(key);
+    CHECK_NULL_RETURN_NOLOG(cacheImage, nullptr);
+    LOGD("skImage found in cache: %{public}s", key.c_str());
+
+    auto skiaImage = MakeRefPtr<SkiaImage>(cacheImage->imagePtr);
+    skiaImage->SetUniqueID(cacheImage->uniqueId);
+
+    return skiaImage;
+}
+
+RefPtr<PixelMap> SkiaImage::GetPixelMap() const
 {
     CHECK_NULL_RETURN(GetImage(), nullptr);
     auto rasterImage = GetImage()->makeRasterImage();
@@ -160,12 +194,11 @@ void SkiaImage::DrawToRSCanvas(
         ImagePainterUtils::ClipRRect(canvas, dstRect, radiusXY);
         canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
     } else {
-        DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY);
+        DrawWithRecordingCanvas(canvas, radiusXY);
     }
 }
 
-bool SkiaImage::DrawWithRecordingCanvas(
-    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
+bool SkiaImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArray& radiusXY)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();

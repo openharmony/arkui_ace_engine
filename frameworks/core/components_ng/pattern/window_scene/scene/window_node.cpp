@@ -15,84 +15,14 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "pointer_event.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::unordered_map<SourceType, int32_t> SOURCE_TYPE_MAP = {
-    { SourceType::TOUCH, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN },
-    { SourceType::TOUCH_PAD, MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD },
-    { SourceType::MOUSE, MMI::PointerEvent::SOURCE_TYPE_MOUSE },
-};
-
-const std::unordered_map<TouchType, int32_t> TOUCH_TYPE_MAP = {
-    { TouchType::CANCEL, MMI::PointerEvent::POINTER_ACTION_CANCEL },
-    { TouchType::DOWN, MMI::PointerEvent::POINTER_ACTION_DOWN },
-    { TouchType::MOVE, MMI::PointerEvent::POINTER_ACTION_MOVE },
-    { TouchType::UP, MMI::PointerEvent::POINTER_ACTION_UP },
-};
-
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const TouchEvent& point)
-{
-    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
-
-    OHOS::MMI::PointerEvent::PointerItem item;
-    item.SetWindowX(static_cast<int32_t>(point.x - offsetF.GetX()));
-    item.SetWindowY(static_cast<int32_t>(point.y - offsetF.GetY()));
-    item.SetDisplayX(static_cast<int32_t>(point.screenX));
-    item.SetDisplayY(static_cast<int32_t>(point.screenY));
-    item.SetPointerId(point.id);
-    pointerEvent->AddPointerItem(item);
-
-    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
-    auto sourceTypeIter = SOURCE_TYPE_MAP.find(point.sourceType);
-    if (sourceTypeIter != SOURCE_TYPE_MAP.end()) {
-        sourceType = sourceTypeIter->second;
-    }
-    pointerEvent->SetSourceType(sourceType);
-
-    int32_t pointerAction = OHOS::MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
-    auto pointerActionIter = TOUCH_TYPE_MAP.find(point.type);
-    if (pointerActionIter != TOUCH_TYPE_MAP.end()) {
-        pointerAction = pointerActionIter->second;
-    }
-    pointerEvent->SetPointerAction(pointerAction);
-    pointerEvent->SetPointerId(point.id);
-    return pointerEvent;
-}
-}
-
-HitTestResult WindowNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
-{
-    const auto& rect = GetGeometryNode()->GetFrameRect();
-    if (!rect.IsInRegion(parentLocalPoint)) {
-        return HitTestResult::OUT_OF_REGION;
-    }
-
-    auto context = GetContext();
-    CHECK_NULL_RETURN(context, HitTestResult::BUBBLING);
-
-    DispatchPointerEvent(touchRestrict.touchEvent);
-    auto callback = [weak = WeakClaim(this)] (const TouchEvent& point) {
-        auto windowNode = weak.Upgrade();
-        CHECK_NULL_VOID(windowNode);
-        windowNode->DispatchPointerEvent(point);
-    };
-    context->AddUIExtensionCallback(callback);
-    return HitTestResult::BUBBLING;
-}
-
-void WindowNode::DispatchPointerEvent(const TouchEvent& point) const
-{
-    auto pattern = GetPattern<WindowPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto selfGlobalOffset = GetTransformRelativeOffset();
-    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, point);
-    pattern->DispatchPointerEvent(pointerEvent);
+constexpr float MOUSE_RECT_HOT_VP = 4.0f;
+constexpr float TOUCH_RECT_HOT_VP = 20.0f;
+constexpr double DEFAULT_HOT_DENSITY = 1.5f;
 }
 
 RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(
@@ -115,5 +45,73 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(
     windowNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(windowNode);
     return windowNode;
+}
+
+bool WindowNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType)
+{
+    auto pattern = GetPattern<WindowPattern>();
+    if (pattern != nullptr) {
+        auto hotAreas = pattern->GetHotAreas();
+        if (!hotAreas.empty()) {
+            auto hotRects = ConvertHotRects(hotAreas);
+            for (auto& hotRect : hotRects) {
+                if (hotRect.IsInRegion(parentLocalPoint)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    const auto& rect = GetPaintRectWithTransform();
+    const auto& hotRect = ConvertHotRect(rect, sourceType);
+    if (!hotRect.IsInRegion(parentLocalPoint)) {
+        LOGD("Point %{public}s is out of region in %{public}s",
+            parentLocalPoint.ToString().c_str(), GetTag().c_str());
+        return true;
+    }
+    return false;
+}
+
+std::vector<RectF> WindowNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
+{
+    auto pattern = GetPattern<WindowPattern>();
+    if (pattern != nullptr) {
+        auto hotAreas = pattern->GetHotAreas();
+        if (!hotAreas.empty()) {
+            return ConvertHotRects(hotAreas);
+        }
+    }
+    std::vector<RectF> responseRegionList;
+    responseRegionList.emplace_back(ConvertHotRect(rect, sourceType));
+    return responseRegionList;
+}
+
+std::vector<RectF> WindowNode::ConvertHotRects(const std::vector<Rosen::Rect>& hotAreas)
+{
+    std::vector<RectF> responseRegionList;
+    for (size_t i = 0; i < hotAreas.size(); i++) {
+        float hotX = static_cast<float>(hotAreas[i].posX_);
+        float hotY = static_cast<float>(hotAreas[i].posY_);
+        float hotWidth = static_cast<float>(hotAreas[i].width_);
+        float hotHeight = static_cast<float>(hotAreas[i].height_);
+        RectF rectHot(hotX, hotY, hotWidth, hotHeight);
+        responseRegionList.emplace_back(rectHot);
+    }
+    return responseRegionList;
+}
+
+RectF WindowNode::ConvertHotRect(const RectF& rect, int32_t sourceType)
+{
+    float hotOffsetVp = (sourceType == static_cast<int32_t>(Ace::SourceType::MOUSE)) ?
+        MOUSE_RECT_HOT_VP : TOUCH_RECT_HOT_VP;
+    auto context = PipelineContext::GetCurrentContext();
+    double density = (context != nullptr) ? context->GetDensity() : DEFAULT_HOT_DENSITY;
+    float hotOffset = static_cast<float>(hotOffsetVp * density);
+    float hotX = rect.GetX() - hotOffset;
+    float hotY = rect.GetY() - hotOffset;
+    float hotWidth = rect.Width() + hotOffset * 2;
+    float hotHeight = rect.Height() + hotOffset * 2;
+    RectF rectHot(hotX, hotY, hotWidth, hotHeight);
+    return rectHot;
 }
 } // namespace OHOS::Ace::NG

@@ -29,8 +29,8 @@
 
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
+#include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -49,8 +49,8 @@ std::unique_ptr<JsonValue> AcePerformanceCheck::performanceInfo_ = nullptr;
 
 void AcePerformanceCheck::Start()
 {
-    if (SystemProperties::IsPerformanceCheckEnabled()) {
-        LOGD("AcePerformanceCheck::Start()");
+    if (AceChecker::IsPerformanceCheckEnabled()) {
+        LOGI("performance check start");
         performanceInfo_ = JsonUtil::Create(true);
     }
 }
@@ -58,7 +58,7 @@ void AcePerformanceCheck::Start()
 void AcePerformanceCheck::Stop()
 {
     if (performanceInfo_) {
-        LOGD("AcePerformanceCheck::Stop()");
+        LOGI("performance check stop");
         auto info = performanceInfo_->ToString();
         // output info to json file
         auto filePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui_bestpractice.json";
@@ -67,6 +67,7 @@ void AcePerformanceCheck::Stop()
         DumpLog::GetInstance().SetDumpFile(std::move(ss));
         DumpLog::GetInstance().Print(info);
         DumpLog::GetInstance().Reset();
+        AceChecker::NotifyCaution("AcePerformanceCheck::Stop, json data generated, store in " + filePath);
         performanceInfo_.reset(nullptr);
     }
 }
@@ -94,6 +95,7 @@ AceScopedPerformanceCheck::~AceScopedPerformanceCheck()
 bool AceScopedPerformanceCheck::CheckIsRuleContainsPage(const std::string& ruleType, const std::string& pagePath)
 {
     // check for the presence of rule json
+    CHECK_NULL_RETURN(AcePerformanceCheck::performanceInfo_, false);
     if (!AcePerformanceCheck::performanceInfo_->Contains(ruleType)) {
         AcePerformanceCheck::performanceInfo_->Put(ruleType.c_str(), JsonUtil::CreateArray(false));
         return false;
@@ -140,29 +142,35 @@ CodeInfo AceScopedPerformanceCheck::GetCodeInfo(int32_t row, int32_t col)
     CHECK_NULL_RETURN(frontend, {});
     auto sourceMap = frontend->GetCurrentPageSourceMap();
     CHECK_NULL_RETURN(sourceMap, {});
-    auto codeInfo = sourceMap->Find(row, col);
-    LOGD("codeInfo=%{public}d, %{public}d, %{public}s", codeInfo.row, codeInfo.col, codeInfo.sources.c_str());
+    // There is no same row and column info of viewPU in sourcemap, but the row info is correct.
+    auto codeInfo = sourceMap->Find(row, col, false);
     return { codeInfo.row, codeInfo.col, codeInfo.sources };
+}
+
+bool AceScopedPerformanceCheck::CheckPage(const CodeInfo& codeInfo, const std::string& rule)
+{
+    if (!codeInfo.sources.empty() && CheckIsRuleContainsPage(rule, codeInfo.sources)) {
+        return true;
+    }
+    return false;
 }
 
 void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout)
 {
-    LOGD("AcePerformanceCheck::RecoredPerformanceCheckData()");
+    auto codeInfo = GetCodeInfo(1, 1);
     std::vector<PerformanceCheckNode> pageNodeList;
     std::vector<PerformanceCheckNode> flexNodeList;
     std::unordered_map<int32_t, PerformanceCheckNode> foreachNodeMap;
     int32_t itemCount = 0;
     int32_t maxDepth = 0;
     for (const auto& node : nodeMap) {
-        if (node.second.childrenSize >=
-            SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::NODE_CHILDREN)) {
+        if (node.second.childrenSize >= AceChecker::GetNodeChildren()) {
             pageNodeList.emplace_back(node.second);
         }
         if (node.second.pageDepth > maxDepth) {
             maxDepth = node.second.pageDepth;
         }
-        if (node.second.flexLayouts >=
-            SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::FLEX_LAYOUTS)) {
+        if (node.second.flexLayouts != 0 && node.second.flexLayouts >= AceChecker::GetFlexLayouts()) {
             flexNodeList.emplace_back(node.second);
         }
         if (node.second.isForEachItem) {
@@ -175,25 +183,21 @@ void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceChec
             }
         }
     }
-    RecordPageNodeCountAndDepth(nodeMap.size(), maxDepth, pageNodeList);
-    RecordForEachItemsCount(itemCount, foreachNodeMap);
-    RecordFlexLayoutsCount(flexNodeList);
-    RecordVsyncTimeout(nodeMap, vsyncTimeout / CONVERT_NANOSECONDS);
+    RecordPageNodeCountAndDepth(nodeMap.size(), maxDepth, pageNodeList, codeInfo);
+    RecordForEachItemsCount(itemCount, foreachNodeMap, codeInfo);
+    RecordFlexLayoutsCount(flexNodeList, codeInfo);
+    RecordVsyncTimeout(nodeMap, vsyncTimeout / CONVERT_NANOSECONDS, codeInfo);
 }
 
 void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
-    int32_t pageNodeCount, int32_t pageDepth, std::vector<PerformanceCheckNode>& pageNodeList)
+    int32_t pageNodeCount, int32_t pageDepth, std::vector<PerformanceCheckNode>& pageNodeList, const CodeInfo& codeInfo)
 {
-    if (pageNodeCount < SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::PAGE_NODES) &&
-        pageDepth < SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::PAGE_DEPTH)) {
+    if ((pageNodeCount < AceChecker::GetPageNodes() && pageDepth < AceChecker::GetPageDepth()) ||
+        CheckPage(codeInfo, "9901")) {
         return;
     }
-    auto codeInfo = GetCodeInfo(1, 1);
-    if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9901", codeInfo.sources)) {
-        return;
-    }
-    LOGD("AcePerformanceCheck::RecordPageNodeCountAndDepth()");
     auto eventTime = GetCurrentTime();
+    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9901");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());
@@ -221,15 +225,15 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
 
 void AceScopedPerformanceCheck::RecordFunctionTimeout(int64_t time, const std::string& functionName)
 {
-    if (time < SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::FUNCTION_TIMEOUT)) {
+    if (time < AceChecker::GetFunctionTimeout()) {
         return;
     }
     auto codeInfo = GetCodeInfo(1, 1);
     if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9902", codeInfo.sources)) {
         return;
     }
-    LOGD("AcePerformanceCheck::RecordFunctionTimeout()");
     auto eventTime = GetCurrentTime();
+    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());
@@ -239,17 +243,14 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout(int64_t time, const std::s
     ruleJson->Put(pageJson);
 }
 
-void AceScopedPerformanceCheck::RecordVsyncTimeout(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout)
+void AceScopedPerformanceCheck::RecordVsyncTimeout(
+    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& codeInfo)
 {
-    if (vsyncTimeout < SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::VSYNC_TIMEOUT)) {
+    if (vsyncTimeout < AceChecker::GetVsyncTimeout() || CheckPage(codeInfo, "9903")) {
         return;
     }
-    auto codeInfo = GetCodeInfo(1, 1);
-    if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9903", codeInfo.sources)) {
-        return;
-    }
-    LOGD("AcePerformanceCheck::RecordVsyncTimeout()");
     auto eventTime = GetCurrentTime();
+    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9903");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());
@@ -257,8 +258,8 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(const PerformanceCheckNodeMap
     pageJson->Put("costTime", vsyncTimeout);
     for (const auto& node : nodeMap) {
         int64_t layoutTime = node.second.layoutTime / CONVERT_NANOSECONDS;
-        if (layoutTime >= SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::NODE_TIMEOUT) &&
-            node.second.nodeTag != "page" && node.second.nodeTag != "ContainerModal") {
+        if (layoutTime != 0 && layoutTime >= AceChecker::GetNodeTimeout() && node.second.nodeTag != "page" &&
+            node.second.nodeTag != "ContainerModal" && node.second.nodeTag != "JsView") {
             auto componentJson = JsonUtil::Create(false);
             componentJson->Put("name", node.second.nodeTag.c_str());
             componentJson->Put("costTime", layoutTime);
@@ -278,17 +279,13 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(const PerformanceCheckNodeMap
 }
 
 void AceScopedPerformanceCheck::RecordForEachItemsCount(
-    int32_t count, std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap)
+    int32_t count, std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, const CodeInfo& codeInfo)
 {
-    if (count < SystemProperties::GetPerformanceParameterWithType(PerformanceParameterType::FOREACH_ITEMS)) {
+    if (count == 0 || count < AceChecker::GetForeachItems() || CheckPage(codeInfo, "9904")) {
         return;
     }
-    auto codeInfo = GetCodeInfo(1, 1);
-    if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9904", codeInfo.sources)) {
-        return;
-    }
-    LOGD("AcePerformanceCheck::RecordForEachItemsCount()");
     auto eventTime = GetCurrentTime();
+    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9904");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());
@@ -311,22 +308,19 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(
     ruleJson->Put(pageJson);
 }
 
-void AceScopedPerformanceCheck::RecordFlexLayoutsCount(const std::vector<PerformanceCheckNode>& nodeList)
+void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
+    const std::vector<PerformanceCheckNode>& flexNodeList, const CodeInfo& codeInfo)
 {
-    if (nodeList.empty()) {
+    if (flexNodeList.empty() || CheckPage(codeInfo, "9905")) {
         return;
     }
-    auto codeInfo = GetCodeInfo(1, 1);
-    if (!codeInfo.sources.empty() && CheckIsRuleContainsPage("9905", codeInfo.sources)) {
-        return;
-    }
-    LOGD("AcePerformanceCheck::RecordFlexLayoutsCount()");
     auto eventTime = GetCurrentTime();
+    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9905");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());
     pageJson->Put("pagePath", codeInfo.sources.c_str());
-    for (auto& node : nodeList) {
+    for (auto& node : flexNodeList) {
         auto componentJson = JsonUtil::Create(false);
         componentJson->Put("name", node.nodeTag.c_str());
         componentJson->Put("flexTime", node.flexLayouts);

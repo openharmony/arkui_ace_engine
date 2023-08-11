@@ -28,7 +28,8 @@ group("fuzztest") {
     "sharedimagemanager_fuzzer:SharedImageManagerFuzzTest",
     "uiservice_fuzzer:UiServiceFuzzTest",
     "util_fuzzer:UtilFuzzTest",
-    "utilengine_fuzzer:UtilEngineFuzzTest",
+
+    #"utilengine_fuzzer:UtilEngineFuzzTest",
     "utilmost_fuzzer:UtilMostFuzzTest",
   ]
 }

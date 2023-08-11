@@ -19,8 +19,10 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
 
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
@@ -56,6 +58,11 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
 TextStyle CreateTextStyleUsingThemeWithText(const RefPtr<FrameNode> frameNode,
     const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
     const RefPtr<TextTheme>& textTheme);
+
+std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
+std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);
+std::string GetFontWeightInJson(const std::optional<FontWeight>& value);
+std::string GetFontSizeInJson(const std::optional<Dimension>& value);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H

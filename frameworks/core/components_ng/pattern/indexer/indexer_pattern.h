@@ -85,6 +85,9 @@ public:
         return selected_;
     }
 
+    bool IsMeasureBoundary() const override;
+    void UpdateChildBoundary(RefPtr<FrameNode>& frameNode);
+ 
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -95,7 +98,8 @@ private:
     bool MoveIndexByStep(int32_t step);
     bool KeyIndexByStep(int32_t step);
     bool MoveIndexBySearch(const std::string& searchStr);
-    void ApplyIndexChanged(bool refreshBubble = true, bool fromTouchUp = false);
+    void ApplyIndexChanged(
+        bool isTextNodeInTree, bool refreshBubble = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
     void OnSelect(bool changed = false);
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
@@ -117,6 +121,7 @@ private:
     void OnPopupTouchDown(const TouchEventInfo& info);
     void AddListItemClickListener(RefPtr<FrameNode>& listItemNode, int32_t index);
     void OnListItemClick(int32_t index);
+    void ClearClickStatus();
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
     RefPtr<FrameNode> CreatePopupNode();
     void UpdateBubbleView();
@@ -141,6 +146,7 @@ private:
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
     void FireOnSelect(int32_t selectIndex, bool fromPress);
     void SetAccessibilityAction();
+    void RemoveBubble();
     
     RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -150,6 +156,7 @@ private:
     bool isKeyEventRegisted_ = false;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isPopup_ = false;
 
     std::vector<std::string> arrayValue_;
     int32_t itemCount_ = 0;
@@ -165,9 +172,11 @@ private:
     int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
     int32_t lastSelectProp_ = -1;
-    int32_t popupClickedIndex_ = -1;
+    uint32_t popupClickedIndex_ = -1;
     int32_t lastFireSelectIndex_ = -1;
+    float lastItemSize_ = -1.0f;
     bool lastIndexFromPress_ = false;
+    bool selectChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

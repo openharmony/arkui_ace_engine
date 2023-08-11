@@ -405,4 +405,44 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest009, TestSize.Level1)
     buttonPattern->AnimateTouchAndHover(context, HOVER_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
     EXPECT_EQ(buttonPattern->isOn_, false);
 }
+
+/**
+ * @tc.name: ToggleButtonPatternTest010
+ * @tc.desc: Test the Distributed capability of ToggleButton.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.isOn = std::make_optional(IS_ON);
+    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and update frameNode.
+     * @tc.expected: function ProvideRestoreInfo is called.
+     */
+    auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->isOn_ = false;
+    auto ret = buttonPattern->ProvideRestoreInfo();
+    EXPECT_TRUE(ret == R"({"IsOn":false})");
+
+    /**
+     * @tc.steps: step3. function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    std::string restoreInfo_ = "invalid_json_string";
+    buttonPattern->OnRestoreInfo(restoreInfo_);
+    auto toggleButtonPaintProperty = buttonPattern->GetPaintProperty<ToggleButtonPaintProperty>();
+    ASSERT_NE(toggleButtonPaintProperty, nullptr);
+    EXPECT_TRUE(toggleButtonPaintProperty->GetIsOnValue(false));
+    restoreInfo_ = R"({"IsOn":true})";
+    buttonPattern->OnRestoreInfo(restoreInfo_);
+    ASSERT_NE(toggleButtonPaintProperty, nullptr);
+    EXPECT_TRUE(toggleButtonPaintProperty->GetIsOnValue(false));
+}
 } // namespace OHOS::Ace::NG

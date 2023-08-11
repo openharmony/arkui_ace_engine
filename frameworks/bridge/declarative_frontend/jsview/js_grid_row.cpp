@@ -308,6 +308,8 @@ void JSGridRow::ParseAlignItems(int32_t alignItem)
         alignItem == static_cast<int32_t>(FlexAlign::FLEX_END) ||
         alignItem == static_cast<int32_t>(FlexAlign::CENTER) || alignItem == static_cast<int32_t>(FlexAlign::STRETCH)) {
         GridRowModel::GetInstance()->SetAlignItems(static_cast<FlexAlign>(alignItem));
+    } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        GridRowModel::GetInstance()->SetAlignItems(FlexAlign::FLEX_START);
     }
 }
 
@@ -318,6 +320,9 @@ void JSGridRow::JSBind(BindingTarget globalObj)
     JSClass<JSGridRow>::StaticMethod("onBreakpointChange", &JSGridRow::JsBreakpointEvent);
     JSClass<JSGridRow>::StaticMethod("height", &JSGridRow::Height);
     JSClass<JSGridRow>::StaticMethod("alignItems", &JSGridRow::AlignItems);
+    JSClass<JSGridRow>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSGridRow>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSGridRow>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGridRow>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

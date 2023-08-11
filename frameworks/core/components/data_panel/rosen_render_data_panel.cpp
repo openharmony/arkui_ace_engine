@@ -22,6 +22,8 @@
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -473,7 +475,7 @@ void PaintProgressFilterMask(RSCanvas* canvas, ArcData arcData)
 #else
     RSPen filterPen;
     filterPen.SetAntiAlias(true);
-    filterPen.SetCapStyle(RSPen::CapStyle::BUTT_CAP);
+    filterPen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
     filterPen.SetWidth(thickness);
 
     RSFilter filter;
@@ -562,6 +564,7 @@ void PaintFilterMask(RSCanvas* canvas, ArcData arcData)
     PaintProgressFilterMask(canvas, arcData);
 }
 
+#ifndef USE_ROSEN_DRAWING
 void PaintRainbowFilterMask(SkCanvas* canvas, double factor, const std::vector<Segment>& segments, ArcData arcData)
 {
     if (segments.empty()) {
@@ -632,6 +635,101 @@ void PaintRainbowFilterMask(SkCanvas* canvas, double factor, const std::vector<S
     canvas->restore();
 }
 } // namespace
+#else
+void PaintRainbowFilterMask(
+    RSCanvas* canvas, double factor, const std::vector<Segment>& segments, ArcData arcData)
+{
+    if (segments.empty()) {
+        return;
+    }
+    double thickness = arcData.thickness;
+    double radius = arcData.radius - SHADOW_BLUR_RADIUS;
+    Offset center = arcData.center;
+    double maxValue = arcData.maxValue;
+    RSPen filterPen;
+    filterPen.SetAntiAlias(true);
+    filterPen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
+    filterPen.SetWidth(thickness);
+
+    RSFilter filter;
+    filter.SetMaskFilter(
+        RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, SHADOW_BLUR_RADIUS));
+    filterPen.SetFilter(filter);
+    RSRect rect = RSRect(
+        center.GetX() - radius + thickness / 2, center.GetY() - radius + thickness / 2,
+        radius * 2 - thickness + center.GetX() - radius + thickness / 2,
+        radius * 2 - thickness + center.GetY() - radius + thickness / 2);
+    double startAngle = arcData.startAngle;
+
+    canvas->Save();
+    canvas->Rotate(startAngle, center.GetX(), center.GetY());
+    RSPen startCirclePen;
+    RSBrush startCircleBrush;
+
+    startCirclePen.SetAntiAlias(true);
+    startCirclePen.SetColor(segments[0].GetStartColor().ChangeAlpha(101).GetValue());
+    startCirclePen.SetFilter(filter);
+
+    startCircleBrush.SetAntiAlias(true);
+    startCircleBrush.SetColor(segments[0].GetStartColor().ChangeAlpha(101).GetValue());
+    startCircleBrush.SetFilter(filter);
+    RSRecordingPath startCircleArch;
+    RSRect startCircleArchRect =
+        RSRect(center.GetX() - thickness / 2, center.GetY() - radius,
+            thickness + center.GetX() - thickness / 2, thickness + center.GetY() - radius);
+    startCircleArch.AddArc(startCircleArchRect, 90.0, 180.0);
+    canvas->AttachPen(startCirclePen);
+    canvas->AttachBrush(startCircleBrush);
+    canvas->DrawPath(startCircleArch);
+    canvas->DetachPen();
+    canvas->DetachBrush();
+    canvas->Restore();
+
+    canvas->Save();
+    canvas->Rotate(-QUARTER_CIRCLE + 1, center.GetX(), center.GetY());
+    for (const auto& segment : segments) {
+        double sweepAngle = segment.GetValue() / maxValue * arcData.wholeAngle * factor;
+        if (GreatNotEqual(sweepAngle, arcData.wholeAngle)) {
+            sweepAngle = arcData.wholeAngle;
+        }
+        RSRecordingPath rainbowFilterPath;
+        rainbowFilterPath.AddArc(rect, startAngle, sweepAngle);
+        std::vector<RSColorQuad> colors = { segment.GetStartColor().ChangeAlpha(101).GetValue(),
+            segment.GetEndColor().ChangeAlpha(101).GetValue() };
+        std::vector<RSScalar> pos = { 0.0, 1.0 };
+        filterPen.SetShaderEffect(
+            RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()),
+                colors, pos, RSTileMode::CLAMP, startAngle, startAngle + sweepAngle));
+        canvas->AttachPen(filterPen);
+        canvas->DrawPath(rainbowFilterPath);
+        canvas->DetachPen();
+        startAngle += sweepAngle;
+    }
+    canvas->Save();
+    RSPen endCirclePen;
+    RSBrush endCircleBrush;
+
+    endCirclePen.SetAntiAlias(true);
+    endCirclePen.SetColor(segments[segments.size() - 1].GetEndColor().ChangeAlpha(101).GetValue());
+    endCirclePen.SetFilter(filter);
+
+    endCircleBrush.SetAntiAlias(true);
+    endCircleBrush.SetColor(segments[segments.size() - 1].GetEndColor().ChangeAlpha(101).GetValue());
+    endCircleBrush.SetFilter(filter);
+    RSRecordingPath endCircleArch;
+    endCircleArch.AddArc(startCircleArchRect, 90.0, -180.0);
+    canvas->Rotate(startAngle + QUARTER_CIRCLE, center.GetX(), center.GetY());
+    canvas->AttachPen(endCirclePen);
+    canvas->AttachBrush(endCircleBrush);
+    canvas->DrawPath(endCircleArch);
+    canvas->DetachPen();
+    canvas->DetachBrush();
+    canvas->Restore();
+
+    canvas->Restore();
+}
+} // namespace
+#endif
 
 void RosenRenderProgressDataPanel::Paint(RenderContext& context, const Offset& offset)
 {
@@ -661,9 +759,14 @@ void RosenRenderProgressDataPanel::PaintEffectedLoadingProgress(RenderContext& c
     }
     PaintTrackBackground(canvas, center, thickness, backgroundTrack_, diameter);
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint circlePaint;
     circlePaint.setStyle(SkPaint::kFill_Style);
     circlePaint.setAntiAlias(true);
+#else
+    RSBrush circleBrush;
+    circleBrush.SetAntiAlias(true);
+#endif
     double angle = sweepDegree_;
     double dx = 0.0;
     double dy = 0.0;
@@ -672,6 +775,7 @@ void RosenRenderProgressDataPanel::PaintEffectedLoadingProgress(RenderContext& c
     if (animateAngle - angle < 0.0) {
         angle = animateAngle;
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->save();
     canvas->rotate(animateAngle, center.GetX(), center.GetY()); // animate
     for (int i = 0; i < CIRCLE_NUMBER; i++) {
@@ -683,6 +787,21 @@ void RosenRenderProgressDataPanel::PaintEffectedLoadingProgress(RenderContext& c
         canvas->drawCircle(center.GetX() - dx, center.GetY() - dy, thickness / 2, circlePaint);
     }
     canvas->restore();
+#else
+    canvas->Save();
+    canvas->Rotate(animateAngle, center.GetX(), center.GetY()); // animate
+    for (int i = 0; i < CIRCLE_NUMBER; i++) {
+        dx = radius * std::sin((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * M_PI / 180.0);
+        dy = radius * std::cos((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * M_PI / 180.0);
+        circleBrush.SetColor(
+            Color::LineColorTransition(GetStartColor(), GetEndColor(), static_cast<double>(i) / CIRCLE_NUMBER)
+                .GetValue());
+        canvas->AttachBrush(circleBrush);
+        canvas->DrawCircle(RSPoint(center.GetX() - dx, center.GetY() - dy), thickness / 2);
+        canvas->DetachBrush();
+    }
+    canvas->Restore();
+#endif
 }
 
 void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, const Offset& offset)
@@ -704,6 +823,7 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
     }
     double animateAngle = rotateAngle_ - sweepDegree_;
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint botPaint;
     SkPath botPath;
     SkRect rect = SkRect::MakeXYWH(center.GetX() - diameter / 2 + thickness / 2,
@@ -732,6 +852,33 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
     canvas->rotate(animateAngle, center.GetX(), center.GetY()); // animate
     canvas->drawPath(botPath, botPaint);
     canvas->restore();
+#else
+    RSPen botPen;
+    RSRecordingPath botPath;
+    RSRect rect = RSRect(
+        center.GetX() - diameter / 2 + thickness / 2, center.GetY() - diameter / 2 + thickness / 2,
+        (center.GetX() - diameter / 2 + thickness / 2) + diameter - thickness,
+        (center.GetY() - diameter / 2 + thickness / 2) + diameter - thickness);
+    botPath.AddArc(rect, 0, sweepDegree_);
+
+    std::vector<RSColorQuad> colors = { GetStartColor().GetValue(), GetEndColor().GetValue() };
+    std::vector<RSScalar> pos = { 0.0, 1.0 };
+    canvas->Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
+    botPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    botPen.SetWidth(thickness);
+    botPen.SetAntiAlias(true);
+
+    botPen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+        RSPoint(center.GetX(), center.GetY()), colors, pos, RSTileMode::DECAL, 0.0,
+        sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2))));
+    canvas->Save();
+    PaintTrackBackground(canvas, center, thickness, backgroundTrack_, diameter);
+    canvas->Rotate(animateAngle, center.GetX(), center.GetY()); // animate
+    canvas->AttachPen(botPen);
+    canvas->DrawPath(botPath);
+    canvas->DetachPen();
+    canvas->Restore();
+#endif
 }
 
 void RosenRenderProgressDataPanel::PaintRingProgress(RenderContext& context, const Offset& offset)
@@ -765,6 +912,7 @@ void RosenRenderPercentageDataPanel::PaintBackground(
     if (!canvas) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint backgroundPaint;
     SkRRect rRect;
     rRect.setRectXY(SkRect::MakeWH(totalWidth, height), height, height);
@@ -775,6 +923,18 @@ void RosenRenderPercentageDataPanel::PaintBackground(
     canvas->clipRRect(rRect, true);
     canvas->drawRect(
         { leftTop.GetX(), leftTop.GetY(), totalWidth + leftTop.GetX(), height + leftTop.GetY() }, backgroundPaint);
+#else
+    RSBrush backgroundBrush;
+    RSRoundRect rRect(RSRect(0, 0, totalWidth, height), height, height);
+    rRect.Offset(leftTop.GetX(), leftTop.GetY());
+    backgroundBrush.SetColor(backgroundTrack_.GetValue());
+    backgroundBrush.SetAntiAlias(true);
+    canvas->ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
+    canvas->AttachBrush(backgroundBrush);
+    canvas->DrawRect(
+        RSRect(leftTop.GetX(), leftTop.GetY(), totalWidth + leftTop.GetX(), height + leftTop.GetY()));
+    canvas->DetachBrush();
+#endif
 }
 
 void RosenRenderPercentageDataPanel::PaintSpace(
@@ -784,12 +944,23 @@ void RosenRenderPercentageDataPanel::PaintSpace(
     if (!canvas) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint segmentPaint;
     SkRect rect = SkRect::MakeXYWH(xSpace, leftTop.GetY(), spaceWidth, height);
     segmentPaint.setColor(Color::WHITE.GetValue());
     segmentPaint.setStyle(SkPaint::kFill_Style);
     segmentPaint.setAntiAlias(true);
     canvas->drawRect(rect, segmentPaint);
+#else
+    RSBrush segmentBrush;
+    RSRect rect = RSRect(xSpace, leftTop.GetY(),
+        spaceWidth + xSpace, height + leftTop.GetY());
+    segmentBrush.SetColor(Color::WHITE.GetValue());
+    segmentBrush.SetAntiAlias(true);
+    canvas->AttachBrush(segmentBrush);
+    canvas->DrawRect(rect);
+    canvas->DetachBrush();
+#endif
 }
 
 void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, const Offset& leftTop,
@@ -799,6 +970,7 @@ void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, c
     if (!canvas) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint segmentPaint;
     SkRect rect;
     rect = SkRect::MakeXYWH(xSegment, leftTop.GetY(), segmentValue, height);
@@ -813,6 +985,22 @@ void RosenRenderPercentageDataPanel::PaintColorSegment(RenderContext& context, c
     segmentPaint.setStyle(SkPaint::kFill_Style);
     segmentPaint.setAntiAlias(true);
     canvas->drawRect(rect, segmentPaint);
+#else
+    RSBrush segmentBrush;
+    RSRect rect;
+    rect = RSRect(xSegment, leftTop.GetY(), segmentValue + xSegment, height + leftTop.GetY());
+    RSPoint segmentStartPoint(rect.GetLeft(), rect.GetTop());
+    RSPoint segmentEndPoint(rect.GetRight(), rect.GetBottom());
+    RSPoint segmentPoint[2] = { segmentStartPoint, segmentEndPoint };
+    std::vector<RSColorQuad> segmentColor = { segmentStartColor.GetValue(), segmentEndColor.GetValue() };
+    std::vector<RSScalar> pos = { 0.0, 1.0 };
+    segmentBrush.SetShaderEffect(RSShaderEffect::CreateLinearGradient(
+        segmentPoint[0], segmentPoint[1], segmentColor, pos, RSTileMode::CLAMP));
+    segmentBrush.SetAntiAlias(true);
+    canvas->AttachBrush(segmentBrush);
+    canvas->DrawRect(rect);
+    canvas->DetachBrush();
+#endif
 }
 
 void RosenRenderPercentageDataPanel::PaintLinearProgress(RenderContext& context, const Offset& offset)

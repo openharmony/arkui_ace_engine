@@ -92,7 +92,7 @@ void JSCheckboxGroup::JSBind(BindingTarget globalObj)
 
 void JSCheckboxGroup::Create(const JSCallbackInfo& info)
 {
-    std::optional<std::string> checkboxGroupName;
+    std::optional<std::string> checkboxGroupName = std::make_optional("");
     if ((info.Length() >= 1) && info[0]->IsObject()) {
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto groupName = paramObject->GetProperty("group");
@@ -169,11 +169,18 @@ void JSCheckboxGroup::JsWidth(const JSCallbackInfo& info)
 
 void JSCheckboxGroup::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto defaultWidth = checkBoxTheme->GetDefaultWidth();
+    auto horizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
+    auto width = defaultWidth - horizontalPadding * 2;
+    CalcDimension value(width);
+    ParseJsDimensionVp(jsValue, value);
+    if (value.IsNegative()) {
+        value = width;
     }
-
     CheckBoxGroupModel::GetInstance()->SetWidth(value);
 }
 
@@ -189,11 +196,18 @@ void JSCheckboxGroup::JsHeight(const JSCallbackInfo& info)
 
 void JSCheckboxGroup::JsHeight(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension value;
-    if (!ParseJsDimensionVp(jsValue, value)) {
-        return;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    auto defaultHeight = checkBoxTheme->GetDefaultHeight();
+    auto verticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
+    auto height = defaultHeight - verticalPadding * 2;
+    CalcDimension value(height);
+    ParseJsDimensionVp(jsValue, value);
+    if (value.IsNegative()) {
+        value = height;
     }
-
     CheckBoxGroupModel::GetInstance()->SetHeight(value);
 }
 
@@ -371,9 +385,10 @@ NG::PaddingProperty JSCheckboxGroup::GetNewPadding(const JSCallbackInfo& info)
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
             bottom = bottomDimen;
         }
-
-        padding = GetPadding(top, bottom, left, right);
-        return padding;
+        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
+            padding = GetPadding(top, bottom, left, right);
+            return padding;
+        }
     }
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {

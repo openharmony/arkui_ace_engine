@@ -16,12 +16,17 @@
 #include "core/components_ng/render/image_painter.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
+
+constexpr Color COLOR_PRIVATE_MODE = Color(0x66d7d7d7);
+constexpr Dimension RECT_BORDER_RADIUS = 2.0_vp;
+constexpr uint32_t RADIUS_POINT_COUNT = 4;
 
 void ApplyContain(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect)
 {
@@ -74,35 +79,47 @@ void ApplyNone(const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, Re
     dstRect.SetRect(Alignment::GetAlignPosition(dstSize, srcSize, Alignment::CENTER), srcSize);
     srcRect.SetRect(Alignment::GetAlignPosition(rawPicSize, srcSize, Alignment::CENTER), srcSize);
 }
-
-// The [GRAY_COLOR_MATRIX] is of dimension [4 x 5], which transforms a RGB source color (R, G, B, A) to the
-// destination color (R', G', B', A').
-//
-// A classic color image to grayscale conversion formula is [Gray = R * 0.3 + G * 0.59 + B * 0.11].
-// Hence we get the following conversion:
-//
-// | M11 M12 M13 M14 M15 |   | R |   | R' |
-// | M21 M22 M23 M24 M25 |   | G |   | G' |
-// | M31 M32 M33 M34 M35 | x | B | = | B' |
-// | M41 M42 M43 M44 M45 |   | A |   | A' |
-//                           | 1 |
-const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
-    0.30f, 0.59f, 0.11f, 0, 0,                                   // green
-    0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
-    0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 } // namespace
+
+void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
+{
+    CHECK_NULL_VOID(canvasImage_);
+    const auto config = canvasImage_->GetPaintConfig();
+    RSBrush brush;
+    Color fillColor = COLOR_PRIVATE_MODE;
+    RSColor rSColor(fillColor.GetRed(), fillColor.GetGreen(), fillColor.GetBlue(), fillColor.GetAlpha());
+    brush.SetColor(rSColor);
+    std::vector<RSPoint> radiusXY(RADIUS_POINT_COUNT);
+    if (config.borderRadiusXY_) {
+        for (auto index = 0U; index < radiusXY.size(); index++) {
+            radiusXY[index].SetX(static_cast<float>((*config.borderRadiusXY_)[index].GetX()));
+            radiusXY[index].SetY(static_cast<float>((*config.borderRadiusXY_)[index].GetY()));
+        }
+    } else if (config.isSvg_) {
+        // obscured SVGs need a default corner radius
+        for (auto& radius : radiusXY) {
+            radius.SetX(static_cast<float>(RECT_BORDER_RADIUS.ConvertToPx()));
+            radius.SetY(static_cast<float>(RECT_BORDER_RADIUS.ConvertToPx()));
+        }
+    }
+    canvas.AttachBrush(brush);
+    RSRoundRect rSRoundRect(RSRect(offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(),
+                            contentSize.Height() + offset.GetY()), radiusXY);
+    canvas.DrawRoundRect(rSRoundRect);
+}
 
 void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
     CHECK_NULL_VOID(canvasImage_);
     const auto config = canvasImage_->GetPaintConfig();
-    if (config.isSvg_) {
+    bool drawObscuration = std::any_of(config.obscuredReasons_.begin(), config.obscuredReasons_.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    if (drawObscuration) {
+        DrawObscuration(canvas, offset, contentSize);
+    } else if (config.isSvg_) {
         DrawSVGImage(canvas, offset, contentSize);
-    } else if (config.imageRepeat_ == ImageRepeat::NO_REPEAT) {
-        DrawStaticImage(canvas, offset, contentSize);
     } else {
-        RectF rect(offset.GetX(), offset.GetY(), contentSize.Width(), contentSize.Height());
-        DrawImageWithRepeat(canvas, rect);
+        DrawStaticImage(canvas, offset, contentSize);
     }
 }
 
@@ -126,21 +143,7 @@ void ImagePainter::DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const S
 void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const
 {
     CHECK_NULL_VOID(canvasImage_);
-    RSBrush brush;
-    RSFilter filter;
     const auto config = canvasImage_->GetPaintConfig();
-    filter.SetFilterQuality(RSFilter::FilterQuality(config.imageInterpolation_));
-    // note that [colorFilter] has higher priority to [renderMode], because the [ImageRenderMode::TEMPLATE] is actually
-    // a special value of colorFilter
-    if (ImageRenderMode::TEMPLATE == config.renderMode_ || config.colorFilter_) {
-        RSColorMatrix colorFilterMatrix;
-        if (config.colorFilter_) {
-            colorFilterMatrix.SetArray(config.colorFilter_->data());
-        } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
-            colorFilterMatrix.SetArray(GRAY_COLOR_MATRIX);
-        }
-        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorFilterMatrix));
-    }
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 
@@ -148,9 +151,6 @@ void ImagePainter::DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, cons
         ImagePainter::FlipHorizontal(canvas, contentSize);
     }
 
-    brush.SetFilter(filter);
-    canvas.AttachBrush(brush);
-    // include recordingCanvas's ClipAdaptiveRRect operation.
     canvasImage_->DrawToRSCanvas(canvas, ToRSRect(config.srcRect_), ToRSRect(config.dstRect_),
         config.borderRadiusXY_ ? *config.borderRadiusXY_ : BorderRadiusArray());
     canvas.Restore();

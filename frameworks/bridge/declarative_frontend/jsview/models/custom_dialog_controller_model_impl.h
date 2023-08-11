@@ -29,6 +29,7 @@ public:
         bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
         RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation) override;
 
+private:
     void ShowDialog(DialogProperties& dialogProperties, bool& pending, bool& isShown,
         std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent, RefPtr<AceType>& customDialog,
         std::list<DialogOperation>& dialogOperation);

@@ -138,9 +138,12 @@ private:
     TabBarMode GetTabBarMode() const;
     Dimension GetBarWidth() const;
     Dimension GetBarHeight() const;
+    bool GetBarAdaptiveHeight() const;
     Color GetBarBackgroundColor() const;
     int32_t GetIndex() const;
     bool GetFadingEdge() const;
+    BarGridColumnOptions GetBarGridAlign() const;
+    ScrollableBarModeOptions GetScrollableBarModeOptions() const;
 
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;

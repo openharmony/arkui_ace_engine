@@ -29,20 +29,20 @@ namespace {
 SizeF GetMaxSize(const SizeF& maxSize, float aspectRatio)
 {
     if (NearZero(aspectRatio)) {
-        return SizeF(0.0, 0.0);
+        return { 0.0, 0.0 };
     }
     // infinite size not allowed
     bool infWidth = GreaterOrEqualToInfinity(maxSize.Width());
     bool infHeight = GreaterOrEqualToInfinity(maxSize.Height());
     if (infWidth && infHeight) {
         auto width = PipelineContext::GetCurrentRootWidth();
-        return SizeF(width, width / aspectRatio);
+        return { width, width / aspectRatio };
     }
     if (infWidth) {
-        return SizeF(maxSize.Height() * aspectRatio, maxSize.Height());
+        return { maxSize.Height() * aspectRatio, maxSize.Height() };
     }
     if (infHeight) {
-        return SizeF(maxSize.Width(), maxSize.Width() / aspectRatio);
+        return { maxSize.Width(), maxSize.Width() / aspectRatio };
     }
     return maxSize;
 }
@@ -58,13 +58,14 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
     // case 2: image component is not set with size, use image source size to determine component size
     // if image data and altImage are both not ready, can not decide content size,
     // return std::nullopt and wait for next layout task triggered by [OnImageDataReady]
-    if ((!loadingCtx_ || !loadingCtx_->GetImageSize().IsPositive()) &&
-        (!altLoadingCtx_ || !altLoadingCtx_->GetImageSize().IsPositive())) {
+    auto loadingCtx = loadingCtx_.Upgrade();
+    auto altLoadingCtx = altLoadingCtx_.Upgrade();
+    if ((!loadingCtx || !loadingCtx->GetImageSize().IsPositive()) &&
+        (!altLoadingCtx || !altLoadingCtx->GetImageSize().IsPositive())) {
         return std::nullopt;
     }
     // if image data is valid, use image source, or use altImage data
-    auto imageLoadingContext = loadingCtx_ ? loadingCtx_ : altLoadingCtx_;
-    auto rawImageSize = imageLoadingContext->GetImageSize();
+    auto rawImageSize = loadingCtx ? loadingCtx->GetImageSize() : altLoadingCtx->GetImageSize();
     SizeF size(rawImageSize);
     do {
         auto aspectRatio = static_cast<float>(Size::CalcRatio(rawImageSize));
@@ -112,17 +113,19 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!layoutWrapper->GetGeometryNode()->GetContent()) {
         return;
     }
-    const auto& imageLayoutProperty = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(imageLayoutProperty);
+    const auto& props = DynamicCast<ImageLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
-    bool autoResize = imageLayoutProperty->GetAutoResize().value_or(true);
-    ImageFit imageFit = imageLayoutProperty->GetImageFit().value_or(ImageFit::COVER);
-    const std::optional<SizeF>& sourceSize = imageLayoutProperty->GetSourceSize();
-    if (loadingCtx_) {
-        loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize);
+    bool autoResize = props->GetAutoResize().value_or(true);
+    ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
+    const std::optional<SizeF>& sourceSize = props->GetSourceSize();
+    auto loadingCtx = loadingCtx_.Upgrade();
+    if (loadingCtx) {
+        loadingCtx->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize);
     }
-    if (altLoadingCtx_) {
-        altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize);
+    auto altLoadingCtx = altLoadingCtx_.Upgrade();
+    if (altLoadingCtx) {
+        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize);
     }
 }
 

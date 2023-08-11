@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,15 @@
 
 #include "image_object.h"
 
+#ifdef USE_ROSEN_DRAWING
+#include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#endif
+
 namespace OHOS::Ace {
 class AnimatedImageObject : public ImageObject {
     DECLARE_ACE_TYPE(AnimatedImageObject, ImageObject);
 public:
+#ifndef USE_ROSEN_DRAWING
     AnimatedImageObject(
         ImageSourceInfo source,
         const Size& imageSize,
@@ -26,6 +31,15 @@ public:
         const sk_sp<SkData>& data)
         : ImageObject(source, imageSize, frameCount), skData_(data)
     {}
+#else
+    AnimatedImageObject(
+        ImageSourceInfo source,
+        const Size& imageSize,
+        int32_t frameCount,
+        const std::shared_ptr<RSData>& data)
+        : ImageObject(source, imageSize, frameCount), drawingData_(data)
+    {}
+#endif
 
     ~AnimatedImageObject() override = default;
 
@@ -55,16 +69,28 @@ public:
 
     void ClearData() override
     {
+#ifndef USE_ROSEN_DRAWING
         skData_ = nullptr;
+#else
+        drawingData_ = nullptr;
+#endif
     }
 
     RefPtr<ImageObject> Clone() override
     {
+#ifndef USE_ROSEN_DRAWING
         return MakeRefPtr<AnimatedImageObject>(imageSource_, imageSize_, frameCount_, skData_);
+#else
+        return MakeRefPtr<AnimatedImageObject>(imageSource_, imageSize_, frameCount_, drawingData_);
+#endif
     }
 
 private:
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkData> skData_;
+#else
+    std::shared_ptr<RSData> drawingData_;
+#endif
     RefPtr<AnimatedImagePlayer> animatedPlayer_;
 };
 
@@ -77,8 +103,14 @@ void AnimatedImageObject::UploadToGpuForRender(
     bool syncMode)
 {
     constexpr float SizeOffset = 0.5f;
+#ifndef USE_ROSEN_DRAWING
     if (!animatedPlayer_ && skData_) {
         auto codec = SkCodec::MakeFromData(skData_);
+#else
+    if (!animatedPlayer_ && drawingData_) {
+        auto skData = drawingData_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+        auto codec = SkCodec::MakeFromData(skData);
+#endif
         int32_t dstWidth = -1;
         int32_t dstHeight = -1;
         if (forceResize) {
@@ -98,15 +130,24 @@ void AnimatedImageObject::UploadToGpuForRender(
         int32_t dstWidth = static_cast<int32_t>(imageSize.Width() + SizeOffset);
         int32_t dstHeight = static_cast<int32_t>(imageSize.Height() + SizeOffset);
         animatedPlayer_->SetTargetSize(dstWidth, dstHeight);
+#ifndef USE_ROSEN_DRAWING
     } else if (!animatedPlayer_ && !skData_) {
+#else
+    } else if (!animatedPlayer_ && !drawingData_) {
+#endif
         LOGE("animated player is not constructed and image data is null, can not construct animated player!");
     } else if (animatedPlayer_ && !forceResize) {
         LOGI("animated player has been constructed, do nothing!");
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 RefPtr<ImageObject> CreateAnimatedImageObject(ImageSourceInfo source, const Size& imageSize, int32_t frameCount,
     const sk_sp<SkData>& data)
+#else
+RefPtr<ImageObject> CreateAnimatedImageObject(ImageSourceInfo source, const Size& imageSize, int32_t frameCount,
+    const std::shared_ptr<RSData>& data)
+#endif
 {
     return Referenced::MakeRefPtr<AnimatedImageObject>(source, imageSize, frameCount, data);
 }

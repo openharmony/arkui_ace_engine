@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_BUTTON_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_BUTTON_MODEL_IMPL_H
 
+#include "core/components/button/button_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components_ng/pattern/button/button_model.h"
 
@@ -40,14 +41,17 @@ public:
     void SetAspectRatio(const double& ratio) override;
     void SetSize(const std::optional<Dimension>& width, const std::optional<Dimension>& height) override;
     void SetBorderRadius(const Dimension& radius) override;
+    void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
+        const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) override {};
     void SetHoverEffect(const int32_t& hoverEffectNum) override;
-    void SetRemoteMessage(RemoteCallback remoteCallback) override;
+    void SetRemoteMessage(RemoteCallback&& remoteCallback) override;
 
 private:
     static RefPtr<TextComponent> GetTextComponent();
     static void ResetButtonHeight();
-    static void SetTypeAndStateEffect(const std::optional<ButtonType>& type,
-        const std::optional<bool>& stateEffect, const RefPtr<ButtonComponent>& buttonComponent);
+    static void SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect,
+        const RefPtr<ButtonComponent>& buttonComponent);
     static void SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonComponent);
 };
 } // namespace OHOS::Ace::Framework

@@ -21,6 +21,7 @@
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/event/ace_event_handler.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/component.h"
@@ -33,6 +34,11 @@ enum class DialogType {
     ACTION_SHEET,
     CHECKBOX_DIALOG,
     PROGRESS_DIALOG,
+};
+
+enum class DialogButtonStyle {
+    DEFAULT = 0,
+    HIGHTLIGHT,
 };
 
 // Alignment of dialog in vertical.
@@ -105,11 +111,14 @@ struct ActionSheetInfo {
 
 // Information of Button.
 struct ButtonInfo {
-    std::string text;      // text of button.
-    std::string textColor; // style of text in button.
+    std::string text;              // text of button.
+    std::string textColor;         // style of text in button.
     bool isBgColorSetted = false;
     Color bgColor;                 // background color of button.
     RefPtr<NG::ClickEvent> action; // NG button click action
+    bool enabled = true;                             // status of enabled in button.
+    bool defaultFocus = false;                       // status of defaultFocus in button.
+    std::optional<DialogButtonStyle> dlgButtonStyle; // DialogButtonStyle of dialog.
 
     // Whether button info is valid, valid if text is not empty.
     bool IsValid() const
@@ -121,6 +130,7 @@ struct ButtonInfo {
 struct DialogProperties {
     DialogType type = DialogType::COMMON; // type of dialog, current support common dialog and alert dialog.
     std::string title;                    // title of dialog.
+    std::string subtitle;                 // subtitle of dialog.
     std::string content;                  // message of dialog.
     std::string checkboxContent;          // message of checkbox.
     bool autoCancel = true;               // pop dialog when click mask if autoCancel is true.
@@ -128,17 +138,19 @@ struct DialogProperties {
     bool isMenu = false;
     bool isSelect = false;                // init checkbox state
     std::vector<ButtonInfo> buttons;
-    std::function<void()> onCancel;                         // NG cancel callback
-    std::function<void(int32_t, int32_t)> onSuccess;        // NG prompt success callback
-    std::function<void(const bool)> onChange;               // onChange success callback
-    DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
-    DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
+    std::function<void()> onCancel;       // NG cancel callback
+    std::function<void(int32_t, int32_t)> onSuccess;      // NG prompt success callback
+    std::function<void(const bool)> onChange;             // onChange success callback
+    DialogAlignment alignment = DialogAlignment::DEFAULT; // Alignment of dialog.
+    DimensionOffset offset;                               // Offset which base on alignment of Dialog.
     int32_t gridCount = -1;
     std::optional<Color> maskColor;
+    std::optional<Color> backgroundColor;
+    std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<AnimationOption> openAnimation;
     std::optional<AnimationOption> closeAnimation;
     bool isShowInSubWindow = false;
-    
+
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
     // These ids is used for AlertDialog of declarative.
@@ -152,6 +164,19 @@ struct DialogProperties {
 
     // These attributes is used for ActionSheet.
     std::vector<ActionSheetInfo> sheetsInfo;
+
+    WeakPtr<NG::UINode> windowScene;
+    std::optional<DimensionRect> maskRect;
+};
+
+struct PromptDialogAttr {
+    std::string title;
+    std::string message;
+    bool autoCancel = true;
+
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
+    std::optional<DimensionRect> maskRect;
 };
 
 } // namespace OHOS::Ace

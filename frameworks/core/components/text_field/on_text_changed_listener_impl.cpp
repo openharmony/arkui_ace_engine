@@ -86,6 +86,48 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
     PostTaskToUI(task);
 }
 
+std::u16string OnTextChangedListenerImpl::GetLeftTextOfCursor(int32_t number)
+{
+    LOGI("[OnTextChangedListenerImpl] GetLeftTextOfCursor status: %{public}d", number);
+    std::u16string leftResult;
+    auto task = [textField = field_, &leftResult, number] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->instanceId_);
+        leftResult = client->GetLeftTextOfCursor(number);
+    };
+    PostSyncTaskToUI(task);
+    return leftResult;
+}
+
+std::u16string OnTextChangedListenerImpl::GetRightTextOfCursor(int32_t number)
+{
+    LOGI("[OnTextChangedListenerImpl] GetRightTextOfCursor status: %{public}d", number);
+    std::u16string rightResult;
+    auto task = [textField = field_, &rightResult, number] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->instanceId_);
+        rightResult = client->GetRightTextOfCursor(number);
+    };
+    PostSyncTaskToUI(task);
+    return rightResult;
+}
+
+int32_t OnTextChangedListenerImpl::GetTextIndexAtCursor()
+{
+    LOGI("[OnTextChangedListenerImpl] GetTextIndexAtCursor");
+    int32_t index = 0;
+    auto task = [textField = field_, &index] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->instanceId_);
+        index = client->GetTextIndexAtCursor();
+    };
+    PostSyncTaskToUI(task);
+    return index;
+}
+
 void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
 {
     LOGI("[OnTextChangedListenerImpl] DeleteBackward length: %{public}d", length);
@@ -265,5 +307,27 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
     }
 
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
+void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task)
+{
+    if (!task) {
+        LOGE("task is empty");
+        return;
+    }
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("context is null");
+        return;
+    }
+
+    auto taskExecutor = context->GetTaskExecutor();
+    if (!taskExecutor) {
+        LOGE("task executor is null");
+        return;
+    }
+
+    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace

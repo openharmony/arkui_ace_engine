@@ -33,23 +33,55 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
+namespace {
+const DimensionOffset TEXT_PICKER_OFFSET_DEFAULT_TOP = DimensionOffset(0.0_vp, 40.0_vp);
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
+    DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
+    DialogAlignment::BOTTOM_END };
+}
 
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
+std::unique_ptr<TextPickerDialogModel> TextPickerDialogModel::textPickerDialogInstance_ = nullptr;
+std::mutex TextPickerModel::mutex_;
+std::mutex TextPickerDialogModel::mutex_;
 
 TextPickerModel* TextPickerModel::GetInstance()
 {
     if (!textPickerInstance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!textPickerInstance_) {
 #ifdef NG_BUILD
-        textPickerInstance_.reset(new NG::TextPickerModelNG());
-#else
-        if (Container::IsCurrentUseNewPipeline()) {
             textPickerInstance_.reset(new NG::TextPickerModelNG());
-        } else {
-            textPickerInstance_.reset(new Framework::TextPickerModelImpl());
-        }
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                textPickerInstance_.reset(new NG::TextPickerModelNG());
+            } else {
+                textPickerInstance_.reset(new Framework::TextPickerModelImpl());
+            }
 #endif
+        }
     }
     return textPickerInstance_.get();
+}
+
+TextPickerDialogModel* TextPickerDialogModel::GetInstance()
+{
+    if (!textPickerDialogInstance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!textPickerDialogInstance_) {
+#ifdef NG_BUILD
+            textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
+            } else {
+                textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
+            }
+#endif
+        }
+    }
+    return textPickerDialogInstance_.get();
 }
 } // namespace OHOS::Ace
 
@@ -82,26 +114,16 @@ void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBackgroundColor(info);
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (info.Length() < 1) {
-            LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
-            return;
-        }
-        Color backgroundColor;
-        if (!ParseJsColor(info[0], backgroundColor)) {
-            LOGI("the info[0] is null");
-            return;
-        }
-        TextPickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
-    }
-
-    auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    if (!pickerBase) {
-        LOGE("PickerBaseComponent is null");
+    if (info.Length() < 1) {
+        LOGI("The arg(PickerBackgroundColor) is wrong, it is supposed to have at least 1 argument");
         return;
     }
-
-    pickerBase->SetHasBackgroundColor(true);
+    Color backgroundColor;
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        LOGI("the info[0] is null");
+        return;
+    }
+    TextPickerModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 size_t JSTextPicker::ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option)
@@ -237,7 +259,7 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, Pa
     bool ret = true;
     auto getRange = paramObjec->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
-        return false;
+        return ret;
     }
     if (!JSTextPickerParser::ParseTextArray(paramObjec, param)) {
         if (!JSTextPickerParser::ParseIconTextArray(paramObjec, param.result, param.kind, param.selected)) {
@@ -250,9 +272,8 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, Pa
 }
 
 bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
-    std::vector<NG::TextCascadePickerOptions>& options,
-    std::vector<uint32_t>& selectedValues, std::vector<std::string>& values,
-    NG::TextCascadePickerOptionsAttr& attr)
+    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues,
+    std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr)
 {
     auto getRange = paramObject->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
@@ -266,9 +287,9 @@ bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
         return false;
     } else {
         JSTextPickerParser::GenerateCascadeOptions(getRange, options);
-        uint32_t maxCount = options.empty()? 0 : 1;
+        uint32_t maxCount = options.empty() ? 0 : 1;
         for (size_t i = 0; i < options.size(); i++) {
-            size_t tmp  = ProcessCascadeOptionDepth(options[i]);
+            size_t tmp = ProcessCascadeOptionDepth(options[i]);
             if (tmp > maxCount) {
                 maxCount = tmp;
             }
@@ -291,12 +312,18 @@ bool JSTextPicker::ProcessCascadeOptions(const JSRef<JSObject>& paramObject,
     return true;
 }
 
-bool JSTextPickerParser::GenerateCascadeOptionsInternal(const JSRef<JSObject>& jsObj,
-    std::vector<NG::TextCascadePickerOptions>& options)
+bool JSTextPickerParser::GenerateCascadeOptionsInternal(
+    const JSRef<JSObject>& jsObj, std::vector<NG::TextCascadePickerOptions>& options)
 {
     NG::TextCascadePickerOptions option;
     auto text = jsObj->GetProperty("text");
-    option.rangeResult.emplace_back(text->ToString());
+    std::string textStr = "";
+    if (ParseJsString(text, textStr)) {
+        option.rangeResult.emplace_back(textStr);
+    } else {
+        return false;
+    }
+
     auto children = jsObj->GetProperty("children");
     if (children->IsArray()) {
         JSRef<JSArray> arrayChildren = JSRef<JSArray>::Cast(children);
@@ -310,8 +337,8 @@ bool JSTextPickerParser::GenerateCascadeOptionsInternal(const JSRef<JSObject>& j
     return true;
 }
 
-bool JSTextPickerParser::GenerateCascadeOptions(const JSRef<JSArray>& array,
-    std::vector<NG::TextCascadePickerOptions>& options)
+bool JSTextPickerParser::GenerateCascadeOptions(
+    const JSRef<JSArray>& array, std::vector<NG::TextCascadePickerOptions>& options)
 {
     for (size_t i = 0; i < array->Length(); i++) {
         if (array->GetValueAt(i)->IsObject()) {
@@ -327,8 +354,8 @@ bool JSTextPickerParser::GenerateCascadeOptions(const JSRef<JSArray>& array,
     return true;
 }
 
-bool JSTextPickerParser::ParseMultiTextArrayRangeInternal(const JSRef<JSVal>& value,
-    std::vector<NG::TextCascadePickerOptions>& options)
+bool JSTextPickerParser::ParseMultiTextArrayRangeInternal(
+    const JSRef<JSVal>& value, std::vector<NG::TextCascadePickerOptions>& options)
 {
     if (value->IsArray()) {
         NG::TextCascadePickerOptions option;
@@ -344,8 +371,8 @@ bool JSTextPickerParser::ParseMultiTextArrayRangeInternal(const JSRef<JSVal>& va
     return true;
 }
 
-bool JSTextPickerParser::ParseMultiTextArrayRange(const JSRef<JSArray>& jsRangeValue,
-    std::vector<NG::TextCascadePickerOptions>& options)
+bool JSTextPickerParser::ParseMultiTextArrayRange(
+    const JSRef<JSArray>& jsRangeValue, std::vector<NG::TextCascadePickerOptions>& options)
 {
     options.clear();
     if (jsRangeValue->Length() > 0) {
@@ -371,8 +398,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
             continue;
         }
 
-        auto valueIterator = std::find(options[i].rangeResult.begin(),
-            options[i].rangeResult.end(), values[i]);
+        auto valueIterator = std::find(options[i].rangeResult.begin(), options[i].rangeResult.end(), values[i]);
         if (valueIterator != options[i].rangeResult.end()) {
             selectedValue = std::distance(options[i].rangeResult.begin(), valueIterator);
             selectedValues.emplace_back(selectedValue);
@@ -383,8 +409,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
 }
 
 void JSTextPickerParser::ParseMultiTextArraySelectArrayInternal(
-    const std::vector<NG::TextCascadePickerOptions>& options,
-    std::vector<uint32_t>& selectedValues)
+    const std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < options.size(); i++) {
         if (i > selectedValues.size() - 1) {
@@ -424,8 +449,8 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
     return true;
 }
 
-void JSTextPickerParser::ParseMultiTextArrayValueInternal(const std::vector<NG::TextCascadePickerOptions>& options,
-    std::vector<std::string>& values)
+void JSTextPickerParser::ParseMultiTextArrayValueInternal(
+    const std::vector<NG::TextCascadePickerOptions>& options, std::vector<std::string>& values)
 {
     for (uint32_t i = 0; i < options.size(); i++) {
         if (i > values.size() - 1) {
@@ -435,8 +460,7 @@ void JSTextPickerParser::ParseMultiTextArrayValueInternal(const std::vector<NG::
                 values.emplace_back("");
             }
         } else {
-            auto valueIterator = std::find(options[i].rangeResult.begin(),
-                options[i].rangeResult.end(), values[i]);
+            auto valueIterator = std::find(options[i].rangeResult.begin(), options[i].rangeResult.end(), values[i]);
             if (valueIterator == options[i].rangeResult.end()) {
                 values[i] = options[i].rangeResult.front();
             }
@@ -479,7 +503,9 @@ bool JSTextPickerParser::ParseMultiTextArrayValue(const JsiRef<JsiValue>& jsValu
             ParseMultiTextArrayValueSingleInternal(param.options, value, param.values);
         } else {
             for (uint32_t i = 0; i < param.options.size(); i++) {
-                param.values.emplace_back(param.options[i].rangeResult.front());
+                if (param.options[i].rangeResult.size() > 0) {
+                    param.values.emplace_back(param.options[i].rangeResult.front());
+                }
             }
         }
     }
@@ -501,7 +527,9 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
     if (getValue->IsObject()) {
         JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
         param.valueChangeEventVal = valueObj->GetProperty("changeEvent");
-        getValue = valueObj->GetProperty("value");
+        if (param.valueChangeEventVal->IsFunction()) {
+            getValue = valueObj->GetProperty("value");
+        }
     }
     if (!ParseMultiTextArrayValue(getValue, param)) {
         return false;
@@ -509,7 +537,9 @@ bool JSTextPickerParser::ParseMultiTextArray(const JSRef<JSObject>& paramObject,
     if (getSelected->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(getSelected);
         param.selectedChangeEventVal = selectedObj->GetProperty("changeEvent");
-        getSelected = selectedObj->GetProperty("value");
+        if (param.selectedChangeEventVal->IsFunction()) {
+            getSelected = selectedObj->GetProperty("value");
+        }
     }
     if (!ParseMultiTextArraySelect(getSelected, param)) {
         return false;
@@ -664,8 +694,8 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
     return true;
 }
 
-bool JSTextPickerParser::ParseIconTextArray(const JSRef<JSObject>& paramObject,
-    std::vector<NG::RangeContent>& result, uint32_t& kind, uint32_t& selectedValue)
+bool JSTextPickerParser::ParseIconTextArray(
+    const JSRef<JSObject>& paramObject, std::vector<NG::RangeContent>& result, uint32_t& kind, uint32_t& selectedValue)
 {
     auto getSelected = paramObject->GetProperty("selected");
     auto getRange = paramObject->GetProperty("range");
@@ -712,20 +742,22 @@ bool JSTextPickerParser::ParseIconTextArray(const JSRef<JSObject>& paramObject,
 void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
 {
     auto fontColor = paramObj->GetProperty("color");
-    auto fontStyle = paramObj->GetProperty("font");
+    auto fontOptions = paramObj->GetProperty("font");
 
     Color textColor;
     if (ParseJsColor(fontColor, textColor)) {
         textStyle.textColor = textColor;
     }
 
-    if (!fontStyle->IsObject()) {
+    if (!fontOptions->IsObject()) {
         LOGE("fontStyle is not obj.");
         return;
     }
-    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontStyle);
+    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontOptions);
     auto fontSize = fontObj->GetProperty("size");
     auto fontWeight = fontObj->GetProperty("weight");
+    auto fontFamily = fontObj->GetProperty("family");
+    auto fontStyle = fontObj->GetProperty("style");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         textStyle.fontSize = Dimension(-1);
     } else {
@@ -746,6 +778,22 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
             ParseJsString(fontWeight, weight);
         }
         textStyle.fontWeight = ConvertStrToFontWeight(weight);
+    }
+
+    if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
+        std::vector<std::string> families;
+        if (ParseJsFontFamilies(fontFamily, families)) {
+            textStyle.fontFamily = families;
+        }
+    }
+
+    if (fontStyle->IsNumber()) {
+        auto style = fontStyle->ToNumber<int32_t>();
+        if (style < 0 || style > 1) {
+            LOGE("Text fontStyle(%d) is invalid value", style);
+            return;
+        }
+        textStyle.fontStyle = static_cast<FontStyle>(style);
     }
 }
 
@@ -823,8 +871,8 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
-void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePickerOptions>& options,
-    uint32_t index, std::vector<uint32_t>& selectedValues)
+void JSTextPicker::ProcessCascadeSelected(
+    const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index, std::vector<uint32_t>& selectedValues)
 {
     std::vector<std::string> rangeResultValue;
     for (size_t i = 0; i < options.size(); i++) {
@@ -843,8 +891,8 @@ void JSTextPicker::ProcessCascadeSelected(const std::vector<NG::TextCascadePicke
     }
 }
 
-void JSTextPicker::SetSelectedInternal(uint32_t count,
-    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
+void JSTextPicker::SetSelectedInternal(
+    uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     for (uint32_t i = 0; i < count; i++) {
         if (i > selectedValues.size() - 1) {
@@ -858,8 +906,8 @@ void JSTextPicker::SetSelectedInternal(uint32_t count,
     }
 }
 
-void JSTextPicker::SetSelectedIndexMultiInternal(uint32_t count,
-    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
+void JSTextPicker::SetSelectedIndexMultiInternal(
+    uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues)
 {
     if (!TextPickerModel::GetInstance()->IsCascade()) {
         SetSelectedInternal(count, options, selectedValues);
@@ -900,8 +948,8 @@ void JSTextPicker::SetSelectedIndexMulti(const JsiRef<JsiValue>& jsSelectedValue
     std::vector<uint32_t> selectedValues;
     std::vector<NG::TextCascadePickerOptions> options;
     TextPickerModel::GetInstance()->GetMultiOptions(options);
-    auto count = TextPickerModel::GetInstance()->IsCascade() ?
-        TextPickerModel::GetInstance()->GetMaxCount() : options.size();
+    auto count =
+        TextPickerModel::GetInstance()->IsCascade() ? TextPickerModel::GetInstance()->GetMaxCount() : options.size();
     if (jsSelectedValue->IsArray()) {
         if (!ParseJsIntegerArray(jsSelectedValue, selectedValues)) {
             LOGE("parse selectedValues array error.");
@@ -986,52 +1034,36 @@ void JSTextPicker::OnCancel(const JSCallbackInfo& info) {}
 
 void JSTextPicker::OnChange(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        if (!info[0]->IsFunction()) {
-            return;
-        }
-        auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                            const std::vector<std::string>& value, const std::vector<double>& index) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("TextPicker.onChange");
-            if (value.size() == 1 && index.size() == 1) {
-                auto params = ConvertToJSValues(value[0], index[0]);
-                func->Call(JSRef<JSObject>(), static_cast<int>(params.size()), params.data());
-            } else {
-                std::vector<JSRef<JSVal>> result;
-                JSRef<JSArray> valueArray = JSRef<JSArray>::New();
-                for (uint32_t i = 0; i < value.size(); i++) {
-                    valueArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(value[i])));
-                }
-                JSRef<JSVal> valueJs = JSRef<JSVal>::Cast(valueArray);
-                result.emplace_back(valueJs);
-                JSRef<JSArray> selectedArray = JSRef<JSArray>::New();
-                for (uint32_t i = 0; i < index.size(); i++) {
-                    selectedArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(index[i])));
-                }
-                JSRef<JSVal> selectedJs = JSRef<JSVal>::Cast(selectedArray);
-                result.emplace_back(selectedJs);
-                func->Call(JSRef<JSObject>(), static_cast<int>(result.size()), result.data());
-            }
-        };
-        TextPickerModel::GetInstance()->SetOnCascadeChange(std::move(onChange));
-        info.ReturnSelf();
-    } else {
-        if (!info[0]->IsFunction()) {
-            return;
-        }
-        auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
-        auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                            const std::string& value, double index) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("TextPicker.onChange");
-            auto params = ConvertToJSValues(value, index);
-            func->Call(JSRef<JSObject>(), static_cast<int>(params.size()), params.data());
-        };
-        TextPickerModel::GetInstance()->SetOnChange(std::move(onChange));
-        info.ReturnSelf();
+    if (!info[0]->IsFunction()) {
+        return;
     }
+    auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                        const std::vector<std::string>& value, const std::vector<double>& index) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("TextPicker.onChange");
+        if (value.size() == 1 && index.size() == 1) {
+            auto params = ConvertToJSValues(value[0], index[0]);
+            func->Call(JSRef<JSObject>(), static_cast<int>(params.size()), params.data());
+        } else {
+            std::vector<JSRef<JSVal>> result;
+            JSRef<JSArray> valueArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < value.size(); i++) {
+                valueArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(value[i])));
+            }
+            JSRef<JSVal> valueJs = JSRef<JSVal>::Cast(valueArray);
+            result.emplace_back(valueJs);
+            JSRef<JSArray> selectedArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < index.size(); i++) {
+                selectedArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(index[i])));
+            }
+            JSRef<JSVal> selectedJs = JSRef<JSVal>::Cast(selectedArray);
+            result.emplace_back(selectedJs);
+            func->Call(JSRef<JSObject>(), static_cast<int>(result.size()), result.data());
+        }
+    };
+    TextPickerModel::GetInstance()->SetOnCascadeChange(std::move(onChange));
+    info.ReturnSelf();
 }
 
 void JSTextPickerDialog::JSBind(BindingTarget globalObj)
@@ -1056,27 +1088,121 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    std::function<void()> cancelEvent;
+    std::function<void(const std::string&)> acceptEvent;
+    std::function<void(const std::string&)> changeEvent;
+    auto onCancel = paramObject->GetProperty("onCancel");
+    if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
+        cancelEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("TextPickerDialog.onCancel");
+            func->Execute();
+        };
+    }
+    auto onAccept = paramObject->GetProperty("onAccept");
+    if (!onAccept->IsUndefined() && onAccept->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
+        acceptEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onAccept");
+            func->Execute(keys, info);
+        };
+    }
+    auto onChange = paramObject->GetProperty("onChange");
+    if (!onChange->IsUndefined() && onChange->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
+        changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onChange");
+            func->Execute(keys, info);
+        };
+    }
+    NG::TextPickerSettingData settingData;
+    TextPickerDialog textPickerDialog;
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto dialogEvent = DialogEvent(info);
-        auto dialogCancelEvent = DialogCancelEvent(info);
-        TextPickerDialogShow(paramObject, dialogEvent, dialogCancelEvent);
-        return;
+    auto pickerText = TextPickerDialogModel::GetInstance()->CreateObject();
+    if (pickerText == nullptr) {
+        // parse Multi column text
+        if (!ParseShowData(paramObject, settingData)) {
+            return;
+        }
+    } else {
+        auto getSelected = paramObject->GetProperty("selected");
+        auto defaultHeight = paramObject->GetProperty("defaultPickerItemHeight");
+        auto canLoop = paramObject->GetProperty("canLoop");
+        JSRef<JSArray> getRange = paramObject->GetProperty("range");
+        std::vector<std::string> getRangeVector;
+        if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
+            LOGE("parse range failed");
+            return;
+        }
+        std::string value = "";
+        uint32_t selectedValue = 0;
+        auto getValue = paramObject->GetProperty("value");
+        if (!JSViewAbstract::ParseJsInteger(getSelected, selectedValue) &&
+            JSViewAbstract::ParseJsString(getValue, value)) {
+            auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
+            if (valueIterator != getRangeVector.end()) {
+                selectedValue = std::distance(getRangeVector.begin(), valueIterator);
+            }
+        }
+        if (selectedValue >= getRangeVector.size()) {
+            LOGW("selectedValue is out of range");
+            selectedValue = 0;
+        }
+        CalcDimension height;
+        if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
+            if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
+                return;
+            }
+        }
+        if (!defaultHeight->IsEmpty()) {
+            textPickerDialog.isDefaultHeight = true;
+        }
+        textPickerDialog.height = height;
+        textPickerDialog.selectedValue = selectedValue;
+        textPickerDialog.getRangeVector = getRangeVector;
     }
 
-    auto PickerText = AceType::MakeRefPtr<PickerTextComponent>();
-    if (!PickerText) {
-        LOGE("PickerText Component is null");
-        return;
+    // Parse alignment
+    auto alignmentValue = paramObject->GetProperty("alignment");
+    if (alignmentValue->IsNumber()) {
+        auto alignment = alignmentValue->ToNumber<int32_t>();
+        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            textPickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
+        }
+        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+            textPickerDialog.offset = TEXT_PICKER_OFFSET_DEFAULT_TOP;
+        }
     }
-    ParseText(PickerText, paramObject);
-    DialogProperties properties {};
-    properties.alignment = DialogAlignment::CENTER;
-    properties.customComponent = PickerText;
-    properties.customStyle = true;
-    AddEvent(PickerText, info);
-    PickerText->SetDialogName("pickerTextDialog");
-    PickerText->OpenDialog(properties);
+
+    // Parse offset
+    auto offsetValue = paramObject->GetProperty("offset");
+    if (offsetValue->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+        CalcDimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        JSAlertDialog::ParseJsDimensionVp(dxValue, dx);
+        CalcDimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        JSAlertDialog::ParseJsDimensionVp(dyValue, dy);
+        textPickerDialog.offset = DimensionOffset(dx, dy);
+    }
+
+    // Parse maskRect.
+    auto maskRectValue = paramObject->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        textPickerDialog.maskRect = maskRect;
+    }
+
+    TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData, std::move(cancelEvent),
+        std::move(acceptEvent), std::move(changeEvent), textPickerDialog);
 }
 
 void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
@@ -1121,8 +1247,7 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, settingData, dialogEvent, dialogCancelEvent,
-            weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
+        [properties, settingData, dialogEvent, dialogCancelEvent, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
@@ -1160,11 +1285,10 @@ bool JSTextPickerDialog::ParseShowDataOptions(
     return true;
 }
 
-bool JSTextPickerDialog::ParseShowDataAttribute(const JSRef<JSObject>& paramObject,
-    NG::TextPickerSettingData& settingData)
+bool JSTextPickerDialog::ParseShowDataAttribute(
+    const JSRef<JSObject>& paramObject, NG::TextPickerSettingData& settingData)
 {
     CalcDimension height;
-    NG::PickerTextProperties textProperties;
     auto defaultHeight = paramObject->GetProperty("defaultPickerItemHeight");
     if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
         if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
@@ -1172,16 +1296,10 @@ bool JSTextPickerDialog::ParseShowDataAttribute(const JSRef<JSObject>& paramObje
         }
     }
     settingData.height = height;
-    ParseTextProperties(paramObject, textProperties);
-    if (memcpy_s(&settingData.properties, sizeof(NG::PickerTextProperties),
-        &textProperties, sizeof(NG::PickerTextProperties)) != EOK) {
-        LOGE("memcpy properties error.");
-        return false;
-    }
+    ParseTextProperties(paramObject, settingData.properties);
     return true;
 }
-bool JSTextPickerDialog::ParseCanLoop(const JSRef<JSObject>& paramObject,
-    bool& canLoop)
+bool JSTextPickerDialog::ParseCanLoop(const JSRef<JSObject>& paramObject, bool& canLoop)
 {
     bool result = false;
     auto prop = paramObject->GetProperty("canLoop");
@@ -1214,8 +1332,7 @@ void JSTextPickerDialog::ParseShowDataMultiContent(const std::vector<NG::TextCas
     settingData.attr.isHasSelectAttr = attr.isHasSelectAttr;
 }
 
-bool JSTextPickerDialog::ParseShowData(
-    const JSRef<JSObject>& paramObject, NG::TextPickerSettingData& settingData)
+bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::TextPickerSettingData& settingData)
 {
     ParseTextArrayParam param;
     bool rangeContentCheckErr = false;
@@ -1327,7 +1444,8 @@ std::map<std::string, NG::DialogGestureEvent> JSTextPickerDialog::DialogCancelEv
     auto onCancel = paramObject->GetProperty("onCancel");
     if (!onCancel->IsUndefined() && onCancel->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCancel));
-        auto cancelId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const GestureEvent& /*info*/) {
+        auto cancelId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                            const GestureEvent& /* info */) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("TextPickerDialog.onCancel");
             func->Execute();

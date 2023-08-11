@@ -57,8 +57,8 @@ public:
     }
 
 protected:
-    // std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateStack(const Alignment alignment);
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateSmallChild(
+    // std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateStack(const Alignment alignment);
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateSmallChild(
         const LayoutConstraintF& childLayoutConstraint);
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
 };
@@ -74,15 +74,15 @@ PaddingProperty StackTestNg::CreatePadding(float left, float top, float right, f
 }
 
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> StackTestNg::CreateSmallChild(
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> StackTestNg::CreateSmallChild(
     const LayoutConstraintF& childLayoutConstraint)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     firstGeometryNode->Reset();
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
@@ -115,7 +115,8 @@ HWTEST_F(StackTestNg, StackTestNgTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<StackLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto alignment = layoutProperty->GetAlignment();
+    ASSERT_NE(layoutProperty->GetPositionProperty(), nullptr);
+    auto alignment = layoutProperty->GetPositionProperty()->GetAlignment();
     ASSERT_EQ(alignment, Alignment::TOP_LEFT);
 
     /**
@@ -124,8 +125,8 @@ HWTEST_F(StackTestNg, StackTestNgTest001, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto stackPattern = frameNode->GetPattern<StackPattern>();
     ASSERT_NE(stackPattern, nullptr);
     auto layoutAlgorithm = AceType::DynamicCast<StackLayoutAlgorithm>(stackPattern->CreateLayoutAlgorithm());
@@ -179,12 +180,13 @@ HWTEST_F(StackTestNg, StackTestNgTest002, TestSize.Level1)
     */
     StackModelNG stackModelNG;
     stackModelNG.Create();
-    stackModelNG.SetAlignmentContent(Alignment::TOP_LEFT);
+    stackModelNG.SetAlignment(Alignment::TOP_LEFT);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<StackLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto alignmentContent = layoutProperty->GetAlignmentContent();
+    ASSERT_NE(layoutProperty->GetPositionProperty(), nullptr);
+    auto alignmentContent = layoutProperty->GetPositionProperty()->GetAlignment();
     ASSERT_EQ(alignmentContent, Alignment::TOP_LEFT);
     layoutProperty->UpdateLayoutDirection(TextDirection::LTR);
 
@@ -195,8 +197,8 @@ HWTEST_F(StackTestNg, StackTestNgTest002, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto stackPattern = frameNode->GetPattern<StackPattern>();
     ASSERT_NE(stackPattern, nullptr);
     auto layoutAlgorithm = stackPattern->CreateLayoutAlgorithm();

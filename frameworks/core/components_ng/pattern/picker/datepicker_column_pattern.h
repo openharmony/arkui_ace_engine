@@ -28,8 +28,8 @@
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_paint_method.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +47,34 @@ struct DateTextProperties {
     Color downColor;
 };
 
+struct DatePickerOptionProperty {
+    float height = 0.0f;
+    float fontheight = 0.0f;
+    float prevDistance = 0.0f; // between the prev item and itself when scroll up
+    float nextDistance = 0.0f; // between the next item and itself when scroll down
+};
+
+class DatePickerEventParam : public virtual AceType {
+    DECLARE_ACE_TYPE(DatePickerEventParam, AceType)
+
+public:
+    RefPtr<FrameNode> instance_;
+    int32_t itemIndex_ = 0;
+    int32_t itemTotalCounts_ = 0;
+};
+
+enum class DatePickerScrollDirection {
+    UP = 0,
+    DOWN,
+};
+enum class DatePickerOptionIndex {
+    COLUMN_INDEX_0 = 0,
+    COLUMN_INDEX_1,
+    COLUMN_INDEX_2,
+    COLUMN_INDEX_3,
+    COLUMN_INDEX_4,
+};
+
 class DatePickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(DatePickerColumnPattern, LinearLayoutPattern);
 
@@ -58,7 +86,10 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<DatePickerColumnLayoutAlgorithm>();
-        layoutAlgorithm->SetCurrentOffset(GetCurrentOffset());
+        if (algorithmOffset_.size() == 0) {
+            ResetAlgorithmOffset();
+        }
+        layoutAlgorithm->SetCurrentOffset(algorithmOffset_);
         return layoutAlgorithm;
     }
 
@@ -72,8 +103,8 @@ public:
         return MakeRefPtr<DatePickerColumnAccessibilityProperty>();
     }
 
-    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false,
-        bool isUpdateAnimationProperties = false);
+    void FlushCurrentOptions(
+        bool isDown = false, bool isUpateTextContentOnly = false, bool isUpdateAnimationProperties = false);
 
     bool NotLoopOptions() const;
 
@@ -181,8 +212,6 @@ public:
 
     void TossStoped();
 
-    void UpdateScrollDelta(double delta);
-
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -195,6 +224,18 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
     void PlayHoverAnimation(const Color& color);
+
+    std::vector<DatePickerOptionProperty> optionProperties_;
+    RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<DatePickerEventParam> param);
+    void OnAroundButtonClick(RefPtr<DatePickerEventParam> param);
+    std::vector<int32_t> algorithmOffset_;
+    void ResetAlgorithmOffset();
+    void CalcAlgorithmOffset(DatePickerScrollDirection dir, double distancePercent);
+    void SetOptionShiftDistance();
+    float GetShiftDistanceForLandscape(uint32_t index, DatePickerScrollDirection dir);
+    float GetShiftDistance(uint32_t index, DatePickerScrollDirection dir);
+    int32_t CalcScrollIndex(int32_t totalOptionCount, int32_t currentIndex, bool canLoop, int32_t step);
+    void ShiftOptionProp(RefPtr<FrameNode> curNode, RefPtr<FrameNode> shiftNode);
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
@@ -218,8 +259,8 @@ private:
         const RefPtr<DataPickerRowLayoutProperty>& timePickerLayoutProperty);
     void AddAnimationTextProperties(uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty);
     void UpdateTextPropertiesLinear(bool isDown, double scale);
-    void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        uint32_t index, uint32_t showCount, bool isDown, double scale);
+    void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index,
+        uint32_t showCount, bool isDown, double scale);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void SetAccessibilityAction();
@@ -238,6 +279,10 @@ private:
     float gradientHeight_;
     float dividerHeight_;
     float dividerSpacingWidth_;
+
+    float dividerSpacing_ = 0.0f;
+    FontWeight SelectedWeight_;
+    FontWeight CandidateWeight_;
     Color pressColor_;
     Color hoverColor_;
 
@@ -253,7 +298,6 @@ private:
     RefPtr<CurveAnimation<double>> fromTopCurve_;
     RefPtr<TossAnimationController> tossAnimationController_ = AceType::MakeRefPtr<TossAnimationController>();
     std::vector<DateTextProperties> animationProperties_;
-    bool isJump_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
 };

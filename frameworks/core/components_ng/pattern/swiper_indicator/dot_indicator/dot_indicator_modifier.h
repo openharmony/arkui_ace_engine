@@ -124,7 +124,7 @@ public:
 
     // Touch bottom animation
     void UpdateTouchBottomAnimation(TouchBottomType touchBottomType, const LinearVector<float>& vectorBlackPointCenterX,
-        const std::pair<float, float>& longPointCenterX);
+        const std::pair<float, float>& longPointCenterX, float touchBottomRate);
 
     void SetAxis(Axis axis)
     {

@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
-constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
+constexpr Dimension INDICATOR_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr int32_t POINT_HOVER_ANIMATION_DURATION = 100;
@@ -46,13 +46,16 @@ constexpr float TOUCH_BOTTOM_CURVE_VELOCITY = 0.1f;
 constexpr float TOUCH_BOTTOM_CURVE_MASS = 0.2f;
 constexpr float TOUCH_BOTTOM_CURVE_STIFFNESS = 0.48f;
 constexpr float TOUCH_BOTTOM_CURVE_DAMPING = 1.0f;
+constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
+constexpr float TOUCH_BOTTOM_BACKGROUND_HEIGHT_MULTIPLE = 0.8f;
+constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
-    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
+    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->GetStagingValue();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
     contentProperty.normalToHoverPointDilateRatio = normalToHoverPointDilateRatio_->Get();
@@ -60,11 +63,8 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.longPointDilateRatio = longPointDilateRatio_->Get();
     contentProperty.indicatorPadding = indicatorPadding_->Get();
     contentProperty.indicatorMargin = indicatorMargin_->Get();
-    contentProperty.itemHalfSizes = itemHalfSizes_->Get();
+    contentProperty.itemHalfSizes = itemHalfSizes_->GetStagingValue();
     PaintBackground(context, contentProperty);
-    if (indicatorMask_) {
-        PaintMask(context);
-    }
     PaintContent(context, contentProperty);
 }
 
@@ -92,7 +92,9 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
 
     auto widthChangeValue = (backgroundWidthDilateRatio_->Get() - 1.0f) * rectWidth;
     auto heightChangeValue = (1.0f - backgroundHeightDilateRatio_->Get()) * rectHeight;
-
+    if (axis_ == Axis::VERTICAL) {
+        std::swap(widthChangeValue, heightChangeValue);
+    }
     // Property to get the rectangle offset
     float rectLeft =
         axis_ == Axis::HORIZONTAL ? contentProperty.indicatorMargin.GetX() : contentProperty.indicatorMargin.GetY();
@@ -101,22 +103,36 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     // Adapter circle and rect
     float rectRight = rectLeft + (axis_ == Axis::HORIZONTAL ? rectWidth : rectHeight);
     float rectBottom = rectTop + (axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth);
-    if (touchBottomType_ == TouchBottomType::START) {
-        rectLeft -= widthChangeValue;
+
+    if (axis_ == Axis::HORIZONTAL) {
+        if (touchBottomType_ == TouchBottomType::START) {
+            rectLeft -= widthChangeValue;
+        }
+        if (touchBottomType_ == TouchBottomType::END) {
+            rectRight += widthChangeValue;
+        }
+        rectTop = rectTop + heightChangeValue * 0.5f;
+        rectBottom = rectBottom - heightChangeValue * 0.5f;
+        rectHeight -= heightChangeValue;
+    } else {
+        if (touchBottomType_ == TouchBottomType::START) {
+            rectTop -= heightChangeValue;
+        }
+        if (touchBottomType_ == TouchBottomType::END) {
+            rectBottom += heightChangeValue;
+        }
+        rectLeft = rectLeft + widthChangeValue * 0.5f;
+        rectRight = rectRight - widthChangeValue * 0.5f;
+        rectWidth -= widthChangeValue;
     }
-    if (touchBottomType_ == TouchBottomType::END) {
-        rectRight += widthChangeValue;
-    }
-    rectTop = rectTop + heightChangeValue * 0.5f;
-    rectBottom = rectBottom - heightChangeValue * 0.5f;
-    rectHeight -= heightChangeValue;
     // Paint background
     RSCanvas canvas = context.canvas;
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(contentProperty.backgroundColor));
     canvas.AttachBrush(brush);
-    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, rectHeight * 0.5, rectHeight * 0.5 });
+    auto radius = axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth;
+    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
 }
 
 void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty& contentProperty)
@@ -168,12 +184,6 @@ void DotIndicatorModifier::PaintUnselectedIndicator(
         if (currentIndexFlag) {
             rectItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
             rectItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
-            if (itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] > itemHalfSizes[ITEM_HALF_WIDTH]) {
-                rectItemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
-            }
-            if (itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] > itemHalfSizes[ITEM_HALF_HEIGHT]) {
-                rectItemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
-            }
         }
         float rectLeft = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) - rectItemWidth * 0.5;
         float rectTop = (axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX()) - rectItemHeight * 0.5;
@@ -291,7 +301,9 @@ void DotIndicatorModifier::UpdateNormalPaintProperty(
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
-    auto backgroundColor = swiperTheme->GetHoverColor().ChangeOpacity(0);
+    auto backgroundColor = indicatorMask_ ?
+        swiperTheme->GetPressedColor() :
+        swiperTheme->GetHoverColor().ChangeOpacity(0);
     UpdateShrinkPaintProperty(margin, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     UpdateBackgroundColor(backgroundColor);
 }
@@ -448,7 +460,8 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
 }
 
 void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
-    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX,
+    float touchBottomRate)
 {
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
@@ -459,8 +472,11 @@ void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBotto
     auto backgroundHeightDilateRatio = 1.0f;
 
     if (touchBottomType != TouchBottomType::NONE) {
-        backgroundWidthDilateRatio = 1.225f - 0.0125f * vectorBlackPointCenterX_->Get().size();
-        backgroundHeightDilateRatio = 0.8f;
+        backgroundWidthDilateRatio = TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE -
+                                     TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE * vectorBlackPointCenterX_->Get().size();
+        backgroundHeightDilateRatio = TOUCH_BOTTOM_BACKGROUND_HEIGHT_MULTIPLE;
+        backgroundWidthDilateRatio = (backgroundWidthDilateRatio - 1.0f) * touchBottomRate + 1.0f;
+        backgroundHeightDilateRatio = (backgroundHeightDilateRatio - 1.0f) * touchBottomRate + 1.0f;
     }
     touchBottomType_ = touchBottomType;
     AnimationUtils::Animate(option, [weak = WeakClaim(this), backgroundWidthDilateRatio, backgroundHeightDilateRatio,

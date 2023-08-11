@@ -97,7 +97,7 @@ public:
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
-    void SetEventColumn();
+    void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0);
     void HideEventColumn();
@@ -107,6 +107,8 @@ public:
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
+    void GetTextPixelMap(bool startDrag);
+    OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode);
 #endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const
     {
@@ -114,15 +116,40 @@ public:
     }
 
     void StartDragTaskForWeb(const GestureEvent& info);
+    void StartLongPressActionForWeb();
+    void CancelDragForWeb();
+    void ResetDragActionForWeb() {
+        if (isReceivedLongPress_) {
+            isReceivedLongPress_ = false;
+        }
+    }
+
+    void SetIsNotInPreviewState(bool isNotInPreviewState)
+    {
+        isNotInPreviewState_ = isNotInPreviewState;
+    }
+
+    bool GetIsNotInPreviewState() const
+    {
+        return isNotInPreviewState_;
+    }
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
     RefPtr<DragEvent> customCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
-    WeakPtr<FrameNode> columnNodeWeak_;
     std::function<void(GestureEvent&)> actionStart_;
+
+    std::function<void(GestureEvent&)> longPressUpdate_;
+    std::function<void()> actionCancel_;
+    std::function<void(Offset)> textDragCallback_;
+    GestureEvent longPressInfo_;
+    bool isReceivedLongPress_ = false;
+    bool isNotInPreviewState_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

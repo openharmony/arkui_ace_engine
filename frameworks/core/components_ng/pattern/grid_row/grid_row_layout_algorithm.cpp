@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid_row/grid_row_layout_property.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -91,7 +92,10 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
 
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     idealSize.SetHeight(childHeight + padding.Height());
-    idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+        idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 }
 
@@ -237,12 +241,16 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     CreateChildrenConstraint(maxSize, layoutProperty->CreatePaddingAndBorder());
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto mode = windowManager->GetWindowMode();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
-        hostLayoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
+        layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()), mode);
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
         layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);
-        layoutProperty->UpdateSizeType(sizeType);
+        hostLayoutProperty->UpdateSizeType(sizeType);
     }
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue());
     gutterInDouble_ =

@@ -22,6 +22,8 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -44,10 +46,84 @@ public:
         navigationMode_ = navigationMode;
     }
 
+    void SetRealNavBarWidth(float realNavBarWidth)
+    {
+        realNavBarWidth_ = realNavBarWidth;
+    }
+
+    float GetRealNavBarWidth()
+    {
+        return realNavBarWidth_;
+    }
+
+    void SetIfNeedInit(bool ifNeedInit)
+    {
+        ifNeedInit_ = ifNeedInit;
+    }
+
+    float GetRealNavBarHeight() const
+    {
+        return realNavBarHeight_;
+    }
+
+    float GetRealDividerWidth() const
+    {
+        return realDividerWidth_;
+    }
+
+    OffsetF GetNavBarOffset() const
+    {
+        return navBarOffset_;
+    }
+
+    static bool IsAutoHeight(const RefPtr<LayoutProperty>& layoutProperty);
+
 private:
-    NavigationMode usrNavigationMode_ = NavigationMode::AUTO;
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
+    void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize);
+
+    void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& contentSize_);
+
+    void RangeCalculation(
+        const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
+
+    void GetRange(const RefPtr<NavigationGroupNode>& hostNode);
+
+    void UpdateNavigationMode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+
+    void SizeCalculation(LayoutWrapper* layoutWrapper,
+        const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+
+    void SizeCalculationSplit(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+
+    void SizeCalculationStack(const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+
+    void SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size);
+
+    bool ifNeedInit_ = true;
+    OffsetF navBarOffset_;
+
+    bool userSetNavBarRangeFlag_ = false;
+    bool userSetMinContentFlag_ = false;
+    Dimension minNavBarWidthValue_ = 0.0_vp;
+    Dimension maxNavBarWidthValue_ = 0.0_vp;
+    Dimension minContentWidthValue_ = 0.0_vp;
+
+    float realNavBarWidth_ = 0.0f;
+    float realDividerWidth_ = 0.0f;
+    float realNavBarHeight_ = 0.0f;
+    float realContentWidth_ = 0.0f;
+    float realContentHeight_ = 0.0f;
+
+    SizeF navBarSize_ = SizeF(0.0f, 0.0f);
+    SizeF contentSize_ = SizeF(0.0f, 0.0f);
+    SizeF dividerSize_ = SizeF(0.0f, 0.0f);
 };
 
 } // namespace OHOS::Ace::NG

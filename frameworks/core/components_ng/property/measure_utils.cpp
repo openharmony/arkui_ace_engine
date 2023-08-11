@@ -23,8 +23,13 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const static int32_t PLATFORM_VERSION_TEN = 10;
+}
+
 SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference)
 {
     auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width());
@@ -186,9 +191,9 @@ void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
     size.AddPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size, Axis reserveAxis)
+void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
 {
-    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom, reserveAxis);
+    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
 void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
@@ -196,9 +201,9 @@ void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
     size.AddPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size, Axis reserveAxis)
+void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
 {
-    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom, reserveAxis);
+    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
 float GetMainAxisOffset(const OffsetF& offset, Axis axis)
@@ -253,20 +258,66 @@ void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size)
     size.SetWidth(value);
 }
 
-SizeF CreateIdealSize(
-    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingPercentRef)
+SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingMaxSize)
 {
     auto optional = CreateIdealSize(layoutConstraint, axis, measureType);
-    if (usingPercentRef) {
-        optional.UpdateIllegalSizeWithCheck(layoutConstraint.percentReference);
+    if (usingMaxSize) {
+        optional.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
     } else {
         optional.UpdateIllegalSizeWithCheck(layoutConstraint.minSize);
     }
-    optional.Constrain(layoutConstraint.minSize, layoutConstraint.maxSize);
     return optional.ConvertToSizeT();
 }
 
 OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType)
+{
+    OptionalSizeF idealSize;
+    do {
+        // Use idea size first if it is valid.
+        idealSize.UpdateSizeWithCheck(layoutConstraint.selfIdealSize);
+        if (idealSize.IsValid()) {
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT) {
+            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.parentIdealSize);
+            idealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT_CROSS_AXIS) {
+            auto selfSize = GetCrossAxisSize(idealSize, axis);
+            if (!selfSize) {
+                auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
+                if (parentCrossSize) {
+                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+                } else {
+                    parentCrossSize = GetCrossAxisSize(layoutConstraint.maxSize, axis);
+                    SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+                }
+            }
+            break;
+        }
+
+        if (measureType == MeasureType::MATCH_PARENT_MAIN_AXIS) {
+            auto selfSize = GetMainAxisSize(idealSize, axis);
+            auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
+            if (!selfSize) {
+                if (parentMainSize) {
+                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+                } else {
+                    parentMainSize = GetMainAxisSize(layoutConstraint.maxSize, axis);
+                    SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+                }
+            }
+            break;
+        }
+    } while (false);
+    return idealSize;
+}
+
+OptionalSizeF CreateIdealSizeByPercentRef(
+    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain)
 {
     OptionalSizeF idealSize;
     do {
@@ -310,7 +361,11 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
             break;
         }
     } while (false);
-    idealSize.Constrain(layoutConstraint.minSize, layoutConstraint.maxSize);
+    if (needToConstrain) {
+        idealSize.Constrain(layoutConstraint.minSize, layoutConstraint.maxSize,
+            PipelineBase::GetCurrentContext() &&
+                PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN);
+    }
     return idealSize;
 }
 

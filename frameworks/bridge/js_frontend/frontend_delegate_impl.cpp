@@ -1268,7 +1268,11 @@ void FrontendDelegateImpl::OnSurfaceChanged()
     OnMediaQueryUpdate();
 }
 
-void FrontendDelegateImpl::OnMediaQueryUpdate()
+void FrontendDelegateImpl::OnLayoutCompleted(const std::string& componentId) {}
+
+void FrontendDelegateImpl::OnDrawCompleted(const std::string& componentId) {}
+
+void FrontendDelegateImpl::OnMediaQueryUpdate(bool isSynchronous)
 {
     if (mediaQueryInfo_->GetIsInit()) {
         return;
@@ -1833,6 +1837,16 @@ RefPtr<JsAcePage> FrontendDelegateImpl::GetPage(int32_t pageId) const
 void FrontendDelegateImpl::RegisterFont(const std::string& familyName, const std::string& familySrc)
 {
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+}
+
+void FrontendDelegateImpl::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+bool FrontendDelegateImpl::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
 }
 
 void FrontendDelegateImpl::HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)

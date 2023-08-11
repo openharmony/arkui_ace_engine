@@ -33,6 +33,7 @@ struct MenuItemFontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
 };
 
@@ -60,6 +61,8 @@ public:
         value->propTitle_ = CloneTitle();
         value->propMenuPlacement_ = CloneMenuPlacement();
         value->propSelectMenuAlignOption_ = CloneSelectMenuAlignOption();
+        value->propBorderRadius_ = CloneBorderRadius();
+        value->propMenuWidth_ = CloneMenuWidth();
         return value;
     }
 
@@ -73,12 +76,16 @@ public:
         ResetTitle();
         ResetMenuPlacement();
         ResetSelectMenuAlignOption();
+        ResetBorderRadius();
+        ResetMenuWidth();
     }
 
     // target frameNode that this menu belongs to
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuOffset, NG::OffsetF, PROPERTY_UPDATE_MEASURE);
     // target frameNode size, null for click show menu
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetSize, NG::SizeF, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, NG::BorderRadiusProperty, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
     // offset to cursor
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PositionOffset, NG::OffsetF, PROPERTY_UPDATE_LAYOUT);
@@ -92,6 +99,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontFamily,
+        std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(SelectMenuAlignOption, SelectMenuAlignOption);

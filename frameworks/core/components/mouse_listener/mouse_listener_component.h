@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-using OnHoverCallback = std::function<void(bool)>;
+using OnHoverCallback = std::function<void(bool, HoverInfo& info)>;
 
 class ACE_EXPORT MouseListenerComponent final : public SoleChildComponent {
     DECLARE_ACE_TYPE(MouseListenerComponent, SoleChildComponent);

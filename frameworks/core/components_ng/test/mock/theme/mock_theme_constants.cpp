@@ -190,4 +190,9 @@ void ThemeConstants::LoadFile(const RefPtr<Asset>& asset)
 void ThemeConstants::SetColorScheme(ColorScheme colorScheme)
 {
 }
+
+std::shared_ptr<Media::PixelMap> ThemeConstants::GetPixelMap(uint32_t key) const
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

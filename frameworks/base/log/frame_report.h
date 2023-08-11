@@ -24,19 +24,21 @@
 namespace OHOS::Ace {
 using FrameInitFunc = void (*)();
 using FrameGetEnableFunc = int (*)();
-using BeginFlushAnimationFunc = void(*)();
-using EndFlushAnimationFunc = void(*)();
-using BeginFlushBuildFunc = void(*)();
-using EndFlushBuildFunc = void(*)();
-using BeginFlushLayoutFunc = void(*)();
-using EndFlushLayoutFunc = void(*)();
-using BeginFlushRenderFunc = void(*)();
-using EndFlushRenderFunc = void(*)();
-using BeginFlushRenderFinishFunc = void(*)();
-using EndFlushRenderFinishFunc = void(*)();
-using BeginProcessPostFlushFunc = void(*)();
-using BeginListFlingFunc = void(*)();
-using EndListFlingFunc = void(*)();
+using BeginFlushAnimationFunc = void (*)();
+using EndFlushAnimationFunc = void (*)();
+using BeginFlushBuildFunc = void (*)();
+using EndFlushBuildFunc = void (*)();
+using BeginFlushLayoutFunc = void (*)();
+using EndFlushLayoutFunc = void (*)();
+using BeginFlushRenderFunc = void (*)();
+using EndFlushRenderFunc = void (*)();
+using BeginFlushRenderFinishFunc = void (*)();
+using EndFlushRenderFinishFunc = void (*)();
+using BeginProcessPostFlushFunc = void (*)();
+using BeginListFlingFunc = void (*)();
+using EndListFlingFunc = void (*)();
+using FlushBeginFunc = void (*)();
+using FlushEndFunc = void (*)();
 
 class ACE_EXPORT FrameReport final {
 public:
@@ -57,16 +59,19 @@ public:
     void BeginProcessPostFlush();
     void BeginListFling();
     void EndListFling();
+    void FlushBegin();
+    void FlushEnd();
 
 private:
     FrameReport();
     ~FrameReport();
     bool LoadLibrary();
     void CloseLibrary();
-    void *LoadSymbol(const char *symName);
+    void* LoadSymbol(const char* symName);
     int GetFrameReportEnable();
-    void *frameSchedHandle_ = nullptr;
+    void* frameSchedHandle_ = nullptr;
     bool frameSchedSoLoaded_ = false;
+    bool enable_ = false;
 
     ACE_EXPORT FrameInitFunc frameInitFunc_ = nullptr;
     ACE_EXPORT FrameGetEnableFunc frameGetEnableFunc_ = nullptr;
@@ -83,6 +88,8 @@ private:
     ACE_EXPORT BeginProcessPostFlushFunc beginProcessPostFunc_ = nullptr;
     ACE_EXPORT BeginListFlingFunc beginListFlingFunc_ = nullptr;
     ACE_EXPORT EndListFlingFunc endListFlingFunc_ = nullptr;
+    ACE_EXPORT FlushBeginFunc flushBeginFunc_ = nullptr;
+    ACE_EXPORT FlushEndFunc flushEndFunc_ = nullptr;
 };
-}
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_FRAME_REPORT_H

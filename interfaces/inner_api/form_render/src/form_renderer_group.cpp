@@ -23,6 +23,7 @@ namespace OHOS {
 namespace Ace {
 namespace {
 constexpr char FORM_RENDERER_COMP_ID[] = "ohos.extra.param.key.form_comp_id";
+constexpr char FORM_RENDER_STATE[] = "ohos.extra.param.key.form_render_state";
 }
 std::shared_ptr<FormRendererGroup> FormRendererGroup::Create(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
@@ -49,14 +50,49 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
     formRequest.compId = compId;
     formRequest.want = want;
     formRequest.formJsInfo = formJsInfo;
-    formRequests_.push_back(formRequest);
+    auto info = std::find_if(
+        formRequests_.begin(), formRequests_.end(), formRequest);
+    if (info != formRequests_.end()) {
+        *info = formRequest;
+    } else {
+        formRequests_.emplace_back(formRequest);
+    }
+    bool isVerified = want.GetBoolParam(FORM_RENDER_STATE, false);
+    if (isVerified) {
+        HILOG_DEBUG("The user is verified, start rendering form.");
+        InnerAddForm(formRequest);
+        return;
+    }
+    HILOG_INFO("The user is not verified at this time, can not render the form now.");
+}
+
+void FormRendererGroup::OnUnlock()
+{
+    HILOG_INFO("The user is verified, OnUnlock called.");
+    FormRequest currentFormRequest;
+    for (auto& formRequest : formRequests_) {
+        if (currentCompId_ == formRequest.compId) {
+            currentFormRequest = formRequest;
+            formRequest.want.SetParam(FORM_RENDER_STATE, true);
+        }
+    }
+    HILOG_DEBUG("start rendering form.");
+    InnerAddForm(currentFormRequest);
+}
+
+void FormRendererGroup::InnerAddForm(const FormRequest& formRequest)
+{
+    HILOG_DEBUG("InnerAddForm called");
+    auto compId = formRequest.compId;
+    OHOS::AAFwk::Want want = formRequest.want;
+    AppExecFwk::FormJsInfo formJsInfo = formRequest.formJsInfo;
     if (formRenderer_ == nullptr) {
         formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_);
         if (!formRenderer_) {
-            HILOG_ERROR("AddForm create form render failed");
+            HILOG_ERROR("InnerAddForm create form render failed");
             return;
         }
-        HILOG_INFO("AddForm compId is %{public}s. formId is %{public}s", compId.c_str(),
+        HILOG_INFO("InnerAddForm compId is %{public}s. formId is %{public}s", compId.c_str(),
             std::to_string(formJsInfo.formId).c_str());
         formRenderer_->AddForm(want, formJsInfo);
     } else {
@@ -66,13 +102,24 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
     }
 }
 
-void FormRendererGroup::ReloadForm()
+void FormRendererGroup::ReloadForm(const AppExecFwk::FormJsInfo& formJsInfo)
 {
     if (formRenderer_ == nullptr) {
         HILOG_ERROR("ReloadForm failed, formRenderer is null");
         return;
     }
-    formRenderer_->ReloadForm();
+
+    formRenderer_->ReloadForm(formJsInfo.formSrc);
+    for (auto &formRequest : formRequests_) {
+        bool allDynamic = formJsInfo.isDynamic && formRequest.isDynamic;
+        if (!allDynamic && currentCompId_ == formRequest.compId) {
+            HILOG_INFO("SurfaceReuse due to change to static card when curCompId is %{public}s.",
+                formRequest.compId.c_str());
+            formRenderer_->OnSurfaceReuse(formJsInfo);
+        }
+        formRequest.formJsInfo = formJsInfo;
+        formRequest.isDynamic = formJsInfo.isDynamic;
+    }
 }
 
 void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -97,7 +144,13 @@ void FormRendererGroup::DeleteForm(const std::string& compId)
         }
     }
 
-    if (formRequests_.empty() || compId != currentCompId_) {
+    if (compId != currentCompId_) {
+        return;
+    }
+
+    if (formRequests_.empty()) {
+        HILOG_INFO("Release renderer obj due to formRequests is empty.");
+        DeleteForm();
         return;
     }
 
@@ -107,10 +160,20 @@ void FormRendererGroup::DeleteForm(const std::string& compId)
     formRenderer_->AttachForm(request.want, request.formJsInfo);
 }
 
+bool FormRendererGroup::IsFormRequestsEmpty()
+{
+    return formRequests_.empty();
+}
+
+const std::vector<FormRequest>& FormRendererGroup::GetAllRendererFormRequests() const
+{
+    return formRequests_;
+}
+
 void FormRendererGroup::DeleteForm()
 {
     if (formRenderer_ == nullptr) {
-        HILOG_ERROR("DeleteForm failed, formRenderer is null");
+        HILOG_INFO("FormRenderer has destory");
         return;
     }
     formRenderer_->Destroy();

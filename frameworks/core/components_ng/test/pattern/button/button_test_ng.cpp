@@ -33,8 +33,8 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -372,7 +372,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest002, TestSize.Level1)
     ButtonModelNG buttonModelNG;
     std::list<RefPtr<Component>> buttonChildren;
     createWithPara.parseSuccess = false;
-    buttonModelNG.Create(createWithPara, buttonChildren);
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
     buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -462,7 +462,6 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest005, TestSize.Level1)
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
 
-    EXPECT_EQ(layoutProperty->GetBorderRadius(), BORDER_RADIUS);
     EXPECT_EQ(buttonEventHub->GetStateEffect(), STATE_EFFECT);
 }
 
@@ -614,7 +613,7 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest008, TestSize.Level1)
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
     auto layoutProperty = AccessibilityManager::DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    layoutProperty->UpdateBorderRadius(BORDER_RADIUS);
+    layoutProperty->UpdateBorderRadius({ BORDER_RADIUS, BORDER_RADIUS, BORDER_RADIUS, BORDER_RADIUS });
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(),
         SizeF(BORDER_RADIUS.ConvertToPx() * 2, BORDER_RADIUS.ConvertToPx() * 2));
@@ -729,18 +728,18 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest0010, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), BUTTON_WIDTH);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
 
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    auto childWrapper = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper->GetOrCreateChildByIndex(0));
     ASSERT_NE(childWrapper, nullptr);
     auto iter = layoutWrapper->childrenMap_.find(0);
     if (iter == layoutWrapper->childrenMap_.end()) {
         layoutWrapper->AppendChild(childWrapper);
     }
-    auto childButtonLayoutProperty = AccessibilityManager::DynamicCast<LayoutProperty>(
-        childWrapper->GetLayoutProperty());
+    auto childButtonLayoutProperty =
+        AccessibilityManager::DynamicCast<LayoutProperty>(childWrapper->GetLayoutProperty());
     ASSERT_NE(childButtonLayoutProperty, nullptr);
-    CalcSize calcSize {CalcLength(Dimension(300.0)), CalcLength(Dimension(300.0))};
+    CalcSize calcSize { CalcLength(Dimension(300.0)), CalcLength(Dimension(300.0)) };
     childButtonLayoutProperty->UpdateUserDefinedIdealSize(calcSize);
-    
+
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     buttonLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(childWrapper->GetGeometryNode()->GetContentSize().Width(), 1.0);
@@ -748,8 +747,8 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest0010, TestSize.Level1)
      * @tc.steps: step4. use layoutAlgorithm to measure and layout.
      * @tc.expected: check whether the value of geometry's contentSize's height is 1.
      */
-    auto buttonLayoutProperty = AccessibilityManager::DynamicCast<ButtonLayoutProperty>(
-        layoutWrapper->GetLayoutProperty());
+    auto buttonLayoutProperty =
+        AccessibilityManager::DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(buttonLayoutProperty, nullptr);
     buttonLayoutProperty->UpdateFontSize(Dimension(24.0));
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
@@ -810,8 +809,8 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest011, TestSize.Level1)
 
     EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::CLIP);
     EXPECT_EQ(textLayoutProp->GetMaxLines(), 10);
-    EXPECT_EQ(textLayoutProp->GetAdaptMinFontSize()->ConvertToPx(), 15);
-    EXPECT_EQ(textLayoutProp->GetAdaptMaxFontSize()->ConvertToPx(), 50);
+    EXPECT_EQ(buttonLayoutProperty->GetMinFontSize()->ConvertToPx(), 15);
+    EXPECT_EQ(buttonLayoutProperty->GetMaxFontSize()->ConvertToPx(), 50);
     EXPECT_EQ(textLayoutProp->GetFontSize()->ConvertToPx(), 20);
     EXPECT_EQ(textLayoutProp->GetFontWeight(), Ace::FontWeight::W100);
     EXPECT_EQ(textLayoutProp->GetFontFamily(), fontFamily);
@@ -1031,7 +1030,8 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest015, TestSize.Level1)
     EXPECT_EQ(frameSize, SizeF(DEFAULT_HEIGTH.ConvertToPx(), DEFAULT_HEIGTH.ConvertToPx()));
     auto buttonLayoutProperty =
         AccessibilityManager::DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    buttonLayoutProperty->UpdateBorderRadius(BORDER_RADIUS);
+    AccessibilityManager::DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty())
+        ->UpdateBorderRadius({ BORDER_RADIUS, BORDER_RADIUS, BORDER_RADIUS, BORDER_RADIUS });
     constraintSize =
         buttonLayoutAlgorithm->HandleLabelCircleButtonConstraint(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(constraintSize, SizeF(BORDER_RADIUS.ConvertToPx() * 2, BORDER_RADIUS.ConvertToPx() * 2));
@@ -1191,6 +1191,64 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest019, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     buttonPattern->AnimateTouchAndHover(context, START_OPACITY, END_OPACITY, DURATION, Curves::FRICTION);
     buttonPattern->AnimateTouchAndHover(context, END_OPACITY, START_OPACITY, DURATION, Curves::FRICTION);
+    EXPECT_EQ(buttonPattern->isHover_, false);
+}
+
+/**
+ * @tc.name: ButtonPatternTest020
+ * @tc.desc: Test GetFirstValidRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest020, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutAlgorithm = AceType::DynamicCast<ButtonLayoutAlgorithm>(buttonPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(buttonLayoutAlgorithm, nullptr);
+    BorderRadiusProperty radius;
+    auto firstValidRadius = buttonLayoutAlgorithm->GetFirstValidRadius(radius);
+    EXPECT_EQ(firstValidRadius, 0.0_vp);
+    radius.radiusTopLeft = BORDER_RADIUS;
+    firstValidRadius = buttonLayoutAlgorithm->GetFirstValidRadius(radius);
+    EXPECT_EQ(firstValidRadius, BORDER_RADIUS);
+
+    radius.radiusTopLeft.reset();
+    radius.radiusTopRight = BORDER_RADIUS;
+    firstValidRadius = buttonLayoutAlgorithm->GetFirstValidRadius(radius);
+    EXPECT_EQ(firstValidRadius, BORDER_RADIUS);
+
+    radius.radiusTopRight.reset();
+    radius.radiusBottomLeft = BORDER_RADIUS;
+    firstValidRadius = buttonLayoutAlgorithm->GetFirstValidRadius(radius);
+    EXPECT_EQ(firstValidRadius, BORDER_RADIUS);
+
+    radius.radiusBottomLeft.reset();
+    radius.radiusBottomRight = BORDER_RADIUS;
+    firstValidRadius = buttonLayoutAlgorithm->GetFirstValidRadius(radius);
+    EXPECT_EQ(firstValidRadius, BORDER_RADIUS);
+}
+
+/**
+ * @tc.name: ButtonPatternTest021
+ * @tc.desc: Test HandleHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonTestNg, ButtonPatternTest021, TestSize.Level1)
+{
+    TestProperty testProperty;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->SetEnabled(false);
+    buttonPattern->HandleHoverEvent(true);
+    EXPECT_EQ(buttonPattern->isHover_, true);
+    eventHub->SetEnabled(true);
+    buttonPattern->HandleHoverEvent(false);
     EXPECT_EQ(buttonPattern->isHover_, false);
 }
 

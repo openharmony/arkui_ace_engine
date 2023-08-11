@@ -23,7 +23,7 @@
 #include "macros.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT_WITH_PREVIEW SerializeableObject {
+class ACE_FORCE_EXPORT SerializeableObject {
 public:
     SerializeableObject() = default;
     virtual ~SerializeableObject() = default;

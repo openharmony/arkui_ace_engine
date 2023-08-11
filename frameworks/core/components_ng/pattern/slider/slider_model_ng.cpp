@@ -185,4 +185,49 @@ void SliderModelNG::SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
+
+void SliderModelNG::ResetBlockBorderColor()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockBorderColor);
+}
+
+void SliderModelNG::ResetBlockBorderWidth()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockBorderWidth);
+}
+
+void SliderModelNG::ResetStepColor()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, StepColor);
+}
+
+void SliderModelNG::ResetTrackBorderRadius()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius);
+}
+
+void SliderModelNG::ResetBlockSize()
+{
+    ACE_RESET_LAYOUT_PROPERTY(SliderLayoutProperty, BlockSize);
+}
+
+void SliderModelNG::ResetBlockType()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockType);
+}
+
+void SliderModelNG::ResetBlockImage()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockImage);
+}
+
+void SliderModelNG::ResetBlockShape()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, BlockShape);
+}
+
+void SliderModelNG::ResetStepSize()
+{
+    ACE_RESET_PAINT_PROPERTY(SliderPaintProperty, StepSize);
+}
 } // namespace OHOS::Ace::NG

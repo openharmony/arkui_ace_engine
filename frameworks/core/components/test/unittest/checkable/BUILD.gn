@@ -48,6 +48,7 @@ ohos_unittest("CheckableComponentTest") {
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/components/declaration/common/declaration_constants.cpp",
     "$ace_root/frameworks/core/components/declaration/common/declaration_creator_manager.cpp",
@@ -69,6 +70,7 @@ ohos_unittest("CheckableComponentTest") {
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/property_animation.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     #base
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
@@ -259,7 +261,7 @@ ohos_unittest("CheckableComponentTest") {
       "resmgr:resourcemanager",
     ]
   } else {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   }
   external_deps += [ "c_utils:utils" ]
   part_name = ace_engine_part

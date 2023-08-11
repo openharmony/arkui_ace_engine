@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
+#include <memory>
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -30,7 +32,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -82,7 +83,21 @@ void UpdateFontColor(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayout
     }
 }
 
-void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& size, const Color& color)
+void UpdateFontFamily(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+    const std::optional<std::vector<std::string>>& fontFamilies)
+{
+    std::vector<std::string> emptyFontfamily;
+    if (fontFamilies.has_value()) {
+        textProperty->UpdateFontFamily(fontFamilies.value());
+    } else if (menuProperty && menuProperty->GetFontFamily().has_value()) {
+        textProperty->UpdateFontFamily(menuProperty->GetFontFamily().value());
+    } else {
+        textProperty->UpdateFontFamily(emptyFontfamily);
+    }
+}
+
+void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& horizontalSize,
+    const Dimension& verticalSize, const Color& color)
 {
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetSrc(src);
@@ -92,7 +107,7 @@ void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimens
     CHECK_NULL_VOID(props);
     props->UpdateImageSourceInfo(imageSourceInfo);
     props->UpdateAlignment(Alignment::CENTER);
-    CalcSize idealSize = { CalcLength(size), CalcLength(size) };
+    CalcSize idealSize = { CalcLength(horizontalSize), CalcLength(verticalSize) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     props->UpdateCalcLayoutProperty(layoutConstraint);
@@ -108,23 +123,22 @@ void MenuItemPattern::OnMountToParentDone()
     UpdateTextNodes();
 }
 
-void MenuItemPattern::OnModifyDone()
+void MenuItemPattern::OnAttachToFrameNode()
 {
-    Pattern::OnModifyDone();
+    RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
-    RegisterOnKeyEvent();
-    /*
-     * The structure of menu item is designed as follows :
-     * |--menu_item
-     *   |--left_row
-     *     |--icon
-     *     |--content
-     *   |--right_row
-     *     |--label
-     *     |--end_icon
-     */
+}
+
+void CustomMenuItemPattern::OnAttachToFrameNode()
+{
+    RegisterOnTouch();
+}
+
+void MenuItemPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RefPtr<FrameNode> leftRow =
@@ -230,7 +244,7 @@ void MenuItemPattern::ShowSubMenu()
 
     auto focusHub = subMenu->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocus();
+    focusHub->RequestFocusWithDefaultFocusFirstly();
     parentMenuPattern->SetShowedSubMenu(subMenu);
 }
 
@@ -292,7 +306,7 @@ void MenuItemPattern::RegisterOnTouch()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnPress(info);
+        pattern->OnTouch(info);
     };
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gestureHub->AddTouchEvent(touchEvent);
@@ -311,7 +325,6 @@ void MenuItemPattern::RegisterOnHover()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent);
-    inputHub->SetHoverEffect(HoverEffectType::BOARD);
 }
 
 void MenuItemPattern::RegisterOnKeyEvent()
@@ -328,8 +341,9 @@ void MenuItemPattern::RegisterOnKeyEvent()
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
-void MenuItemPattern::OnPress(const TouchEventInfo& info)
+void MenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
+    // change menu item paint props on press
     auto touchType = info.GetTouches().front().GetTouchType();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -348,6 +362,24 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
+{
+    auto touchType = info.GetTouches().front().GetTouchType();
+
+    // close menu when touch up
+    // can't use onClick because that conflicts with interactions developers might set to the customNode
+    // recognize gesture as click if touch up position is close to last touch down position
+    if (touchType == TouchType::DOWN) {
+        lastTouchOffset_ = std::make_unique<Offset>(info.GetTouches().front().GetLocalLocation());
+    } else if (touchType == TouchType::UP) {
+        auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
+        if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
+            CloseMenu();
+        }
+        lastTouchOffset_.reset();
+    }
 }
 
 void MenuItemPattern::OnHover(bool isHover)
@@ -385,6 +417,13 @@ bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT && GetSubBuilder() && !isSubMenuShowed_) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(theme, false);
+        SetBgBlendColor(theme->GetHoverColor());
+        PlayBgColorAnimation();
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         ShowSubMenu();
         return true;
     }
@@ -502,7 +541,8 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), Color::BLACK);
+    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), selectTheme->GetIconSideLength(),
+        selectTheme->GetMenuIconColor());
 
     auto renderContext = selectIcon_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -536,7 +576,9 @@ void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
     CHECK_NULL_VOID(pipeline);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    UpdateIconSrc(iconNode, iconSrc, selectTheme->GetIconSideLength(), selectTheme->GetMenuIconColor());
+    auto iconWidth = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconWidth();
+    auto iconHeight = isStart ? selectTheme->GetIconSideLength() : selectTheme->GetEndIconHeight();
+    UpdateIconSrc(iconNode, iconSrc, iconWidth, iconHeight, selectTheme->GetMenuIconColor());
 
     iconNode->MountToParent(row, ((isStart && selectIcon_) || (!isStart && label_)) ? 1 : 0);
     iconNode->MarkModifyDone();
@@ -563,6 +605,9 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     }
     auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
     CHECK_NULL_VOID(textProperty);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateClipEdge(false);
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
@@ -575,6 +620,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
     UpdateFontColor(
         textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+    auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
+    UpdateFontFamily(textProperty, menuProperty, fontFamily);
     textProperty->UpdateContent(content);
     textProperty->UpdateMaxLines(1);
     textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);

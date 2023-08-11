@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 
+#include <queue>
+
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -99,8 +102,14 @@ RefPtr<FrameNode> MenuItemGroupPattern::GetMenu()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto menu = AceType::DynamicCast<FrameNode>(host->GetParent());
-    return menu ? menu : nullptr;
+    auto parent = host->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::MENU_ETS_TAG) {
+            return DynamicCast<FrameNode>(parent);
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
 }
 
 std::string MenuItemGroupPattern::GetHeaderContent()
@@ -109,5 +118,25 @@ std::string MenuItemGroupPattern::GetHeaderContent()
     auto content = headerContent_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(content, "");
     return content->GetContentValue("");
+}
+
+void MenuItemGroupPattern::UpdateMenuItemIconInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::queue<RefPtr<UINode>> nodes;
+    nodes.emplace(host);
+    while (!nodes.empty()) {
+        auto currentNode = nodes.front();
+        nodes.pop();
+        if (DynamicCast<FrameNode>(currentNode) && DynamicCast<FrameNode>(currentNode)->GetPattern<MenuItemPattern>()) {
+            auto itemPattern = DynamicCast<FrameNode>(currentNode)->GetPattern<MenuItemPattern>();
+            hasSelectIcon_ |= itemPattern->HasSelectIcon();
+            hasStartIcon_ |= itemPattern->HasStartIcon();
+        }
+        for (const auto& child : currentNode->GetChildren()) {
+            nodes.emplace(child);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

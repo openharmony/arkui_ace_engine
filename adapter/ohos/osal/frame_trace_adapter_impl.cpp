@@ -16,16 +16,18 @@
 #include "frame_trace_adapter_impl.h"
 #include <unistd.h>
 #include "frame_trace.h"
+#include "parameters.h"
 
 namespace OHOS::Ace {
 #ifdef __aarch64__
-const char* FRAME_TRACE_SO_PATH = "/system/lib64/libframe_trace_intf.z.so";
+const char* FRAME_TRACE_SO_PATH = "/system/lib64/platformsdk/libframe_trace_intf.z.so";
 #else
-const char* FRAME_TRACE_SO_PATH = "/system/lib/libframe_trace_intf.z.so";
+const char* FRAME_TRACE_SO_PATH = "/system/lib/platformsdk/libframe_trace_intf.z.so";
 #endif
 
 static bool g_judgeFrameTrace = false;
 static bool g_accessFrameTrace = false;
+constexpr char INTERVAL_LIMIT[] = "ffrt.interval.limit";
 
 bool FrameTraceAdapterImpl::AccessFrameTrace()
 {
@@ -70,5 +72,10 @@ bool FrameTraceAdapterImpl::IsEnabled()
         return FRAME_TRACE::IsEnabled();
     }
     return false;
+}
+
+void FrameTraceAdapterImpl::SetFrameTraceLimit()
+{
+    OHOS::system::SetParameter(INTERVAL_LIMIT, "true");
 }
 }

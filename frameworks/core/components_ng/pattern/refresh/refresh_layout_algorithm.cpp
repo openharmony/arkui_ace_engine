@@ -24,6 +24,9 @@
 #include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
+} // namespace
 
 RefreshLayoutAlgorithm::RefreshLayoutAlgorithm() = default;
 
@@ -62,7 +65,9 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<RefreshPattern>();
     CHECK_NULL_VOID(pattern);
     // Update child position.
+    // if customBuilder exist, customBuilder is first child
     int32_t index = 0;
+    float customBuilderHeight = 0.0f;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (!child) {
             index++;
@@ -81,8 +86,20 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
             if (index == layoutProperty->GetCustomBuilderIndexValue(-1)) {
                 alignChild = Alignment::TOP_CENTER;
                 paddingOffsetChild += layoutProperty->GetCustomBuilderOffsetValue();
+                auto geometryNode = child->GetGeometryNode();
+                CHECK_NULL_VOID(geometryNode);
+                customBuilderHeight = geometryNode->GetMarginFrameSize().Height();
             } else {
-                paddingOffsetChild += pattern->GetScrollOffsetValue();
+                auto paintProperty = pattern->GetPaintProperty<RefreshRenderProperty>();
+                CHECK_NULL_VOID(paintProperty);
+                auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
+                if (refreshingProp) {
+                    auto distance = static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx());
+                    auto refreshingPosition = Positive(customBuilderHeight) ? distance + customBuilderHeight : 0.0f;
+                    paddingOffsetChild += OffsetF(0.0f, refreshingPosition);
+                } else {
+                    paddingOffsetChild += pattern->GetScrollOffsetValue();
+                }
             }
         }
         auto translate = Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), alignChild) +
@@ -93,3 +110,4 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 }
 
 } // namespace OHOS::Ace::NG
+

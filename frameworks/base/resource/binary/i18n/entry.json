@@ -27,6 +27,17 @@
             "skip":"跳过",
             "back":"返回",
             "next":"下一步"
+        },
+        "window":{
+            "maximize":"最大化显示",
+            "exitMaximize":"退出最大化显示",
+            "fullScreen":"全屏显示",
+            "exitFullScreen":"退出全屏显示",
+            "leftSide":"窗口显示在屏幕左侧",
+            "rightSide":"窗口显示在屏幕右侧"
+        },
+        "datepicker":{
+            "lunarSwitch":"显示农历"
         }
     },
     "en-US":{
@@ -57,6 +68,17 @@
             "skip":"SKIP",
             "back":"BACK",
             "next":"NEXT"
+        },
+        "window":{
+            "maximize":"Maximize",
+            "exitMaximize":"Exit Maximize",
+            "fullScreen":"Full Screen",
+            "exitFullScreen":"Exit Full Screen",
+            "leftSide":"Show On Left",
+            "rightSide":"Show On Right"
+        },
+        "datepicker":{
+            "lunarSwitch":"Display Lunar"
         }
     },
     "ml":{

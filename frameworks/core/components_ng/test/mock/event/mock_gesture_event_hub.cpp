@@ -19,7 +19,7 @@ namespace OHOS::Ace::NG {
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
 
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId)
+    TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint)
 {
     return false;
 }

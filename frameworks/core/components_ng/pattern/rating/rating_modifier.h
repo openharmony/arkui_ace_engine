@@ -115,6 +115,13 @@ public:
         }
     }
 
+    void SetContentSize(SizeF contentSize)
+    {
+        if (contentSize_) {
+            contentSize_->Set(contentSize);
+        }
+    }
+
     void SetDrawScore(double drawScore)
     {
         if (drawScore_) {
@@ -195,6 +202,7 @@ private:
     RefPtr<PropertyFloat> drawScore_;
     RefPtr<PropertyFloat> stepSize_; 
     RefPtr<PropertyOffsetF> contentOffset_;
+    RefPtr<PropertySizeF> contentSize_;
     // animatable property
     RefPtr<AnimatablePropertyColor> boardColor_;
     ACE_DISALLOW_COPY_AND_MOVE(RatingModifier);

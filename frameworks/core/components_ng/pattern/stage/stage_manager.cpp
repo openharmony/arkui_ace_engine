@@ -18,9 +18,11 @@
 #include <unordered_map>
 
 #include "base/geometry/ng/size_t.h"
+#include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
@@ -52,32 +54,43 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             transitionType, [weak = WeakPtr<FrameNode>(page), transitionType, instanceId = Container::CurrentId()]() {
                 ContainerScope scope(instanceId);
                 LOGI("pageTransition exit finish");
-                auto page = weak.Upgrade();
-                CHECK_NULL_VOID(page);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
-                auto pageFocusHub = page->GetFocusHub();
-                CHECK_NULL_VOID(pageFocusHub);
-                pageFocusHub->SetParentFocusable(false);
-                pageFocusHub->LostFocus();
-                if (transitionType == PageTransitionType::EXIT_POP && page->GetParent()) {
-                    auto stageNode = page->GetParent();
-                    stageNode->RemoveChild(page);
-                    stageNode->RebuildRenderContextTree();
-                    context->RequestFrame();
-                    return;
-                }
-                page->GetEventHub<EventHub>()->SetEnabled(true);
-                auto pattern = page->GetPattern<PagePattern>();
-                CHECK_NULL_VOID(pattern);
-                pattern->SetPageInTransition(false);
-                pattern->ProcessHideState();
+                auto taskExecutor = context->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                taskExecutor->PostSyncTask(
+                    [weak, weakContext = WeakPtr<PipelineContext>(context), transitionType]() {
+                        auto page = weak.Upgrade();
+                        CHECK_NULL_VOID(page);
+                        auto context = weakContext.Upgrade();
+                        CHECK_NULL_VOID(context);
+                        auto pageFocusHub = page->GetFocusHub();
+                        CHECK_NULL_VOID(pageFocusHub);
+                        pageFocusHub->SetParentFocusable(false);
+                        pageFocusHub->LostFocus();
+                        if (transitionType == PageTransitionType::EXIT_POP && page->GetParent()) {
+                            auto stageNode = page->GetParent();
+                            stageNode->RemoveChild(page);
+                            stageNode->RebuildRenderContextTree();
+                            context->RequestFrame();
+                            return;
+                        }
+                        page->GetEventHub<EventHub>()->SetEnabled(true);
+                        auto pattern = page->GetPattern<PagePattern>();
+                        CHECK_NULL_VOID(pattern);
+                        pattern->SetPageInTransition(false);
+                        pattern->ProcessHideState();
+                        context->MarkNeedFlushMouseEvent();
+                    },
+                    TaskExecutor::TaskType::UI);
             });
         return;
     }
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "NA");
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
             ContainerScope scope(instanceId);
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
             LOGI("pageTransition in finish");
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
@@ -89,9 +102,10 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             auto pageFocusHub = page->GetFocusHub();
             CHECK_NULL_VOID(pageFocusHub);
             pageFocusHub->SetParentFocusable(true);
-            pageFocusHub->RequestFocus();
+            pageFocusHub->RequestFocusWithDefaultFocusFirstly();
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
+            context->MarkNeedFlushMouseEvent();
         });
 }
 } // namespace
@@ -168,7 +182,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
-    if (SystemProperties::IsPerformanceCheckEnabled()) {
+    if (AceChecker::IsPerformanceCheckEnabled()) {
         // After completing layout tasks at all nodes on the page, perform performance testing and management
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakNode = WeakPtr<FrameNode>(node), startTime]() {
             auto stage = weakStage.Upgrade();
@@ -201,6 +215,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
 void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout)
 {
+    CHECK_NULL_VOID_NOLOG(pageNode);
     PerformanceCheckNodeMap nodeMap;
     pageNode->GetPerformanceCheckData(nodeMap);
     AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout);
@@ -323,6 +338,8 @@ bool StageManager::CleanPageStack()
     auto popSize = static_cast<int32_t>(children.size() - 1);
     for (int32_t count = 1; count <= popSize; ++count) {
         auto pageNode = children.front();
+        // mark pageNode child as destroying
+        pageNode->SetChildrenInDestroying();
         stageNode_->RemoveChild(pageNode);
     }
     stageNode_->RebuildRenderContextTree();
@@ -385,6 +402,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
+    context->MarkNeedFlushMouseEvent();
 }
 
 void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType)
@@ -392,20 +410,10 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     auto pageNode = DynamicCast<FrameNode>(node);
     CHECK_NULL_VOID(pageNode);
     auto layoutProperty = pageNode->GetLayoutProperty();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (pipeline) {
-        LOGI("FirePageShow MinPlatformVersion:%{public}d, IgnoreViewSafeArea:%{public}u",
-            pipeline->GetMinPlatformVersion(), pipeline->GetIgnoreViewSafeArea());
-        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && !pipeline->GetIgnoreViewSafeArea() &&
-            layoutProperty) {
-            layoutProperty->SetSafeArea(pipeline->GetCurrentViewSafeArea());
-        }
-    }
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
     pageFocusHub->SetParentFocusable(true);
-    pageFocusHub->RequestFocus();
+    pageFocusHub->RequestFocusWithDefaultFocusFirstly();
 
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
@@ -415,6 +423,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(context);
+    context->MarkNeedFlushMouseEvent();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();

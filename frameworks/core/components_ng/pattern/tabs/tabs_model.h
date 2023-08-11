@@ -31,6 +31,11 @@
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
+enum class LayoutStyle {
+    ALWAYS_CENTER,
+    ALWAYS_AVERAGE_SPLIT,
+    SPACE_BETWEEN_OR_CENTER,
+};
 
 struct TabsItemDivider final {
     Dimension strokeWidth = 0.0_vp;
@@ -57,6 +62,44 @@ struct TabsItemDivider final {
     }
 };
 
+struct BarGridColumnOptions final {
+    int32_t sm = -1;
+    int32_t md = -1;
+    int32_t lg = -1;
+    Dimension gutter = 0.0_vp;
+    Dimension margin = 0.0_vp;
+
+    BarGridColumnOptions()
+    {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (!pipelineContext) {
+            return;
+        }
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        if (!tabTheme) {
+            return;
+        }
+        gutter = tabTheme->GetTabBarColumnGutter();
+        margin = tabTheme->GetTabBarColumnMargin();
+    }
+
+    bool operator==(const BarGridColumnOptions& option) const
+    {
+        return (sm == option.sm) && (md == option.md) && (lg == option.lg) && (margin == option.margin) &&
+               (gutter == option.gutter);
+    }
+};
+
+struct ScrollableBarModeOptions final {
+    Dimension margin = 0.0_vp;
+    LayoutStyle nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+
+    bool operator==(const ScrollableBarModeOptions& option) const
+    {
+        return (margin == option.margin) && (nonScrollableLayoutStyle == option.nonScrollableLayoutStyle);
+    }
+};
+
 class TabsModel {
 public:
     static TabsModel* GetInstance();
@@ -70,16 +113,20 @@ public:
     virtual void SetTabBarMode(TabBarMode tabBarMode) = 0;
     virtual void SetTabBarWidth(const Dimension& tabBarWidth) = 0;
     virtual void SetTabBarHeight(const Dimension& tabBarHeight) = 0;
+    virtual void SetBarAdaptiveHeight(bool barAdaptiveHeight) = 0;
     virtual void SetIsVertical(bool isVertical) = 0;
     virtual void SetScrollable(bool scrollable) = 0;
     virtual void SetAnimationDuration(float duration) = 0;
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
+    virtual void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) = 0;
     virtual void SetDivider(const TabsItemDivider& divider) = 0;
     virtual void SetFadingEdge(bool fadingEdge) = 0;
     virtual void SetBarOverlap(bool barOverlap) = 0;
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) = 0;
     virtual void SetBarBackgroundColor(const Color& backgroundColor) = 0;
     virtual void SetClipEdge(bool clipEdge) = 0;
+    virtual void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) = 0;
+    virtual void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) = 0;
 
 private:
     static std::unique_ptr<TabsModel> instance_;

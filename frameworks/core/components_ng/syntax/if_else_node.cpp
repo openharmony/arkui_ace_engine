@@ -20,6 +20,7 @@
 
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -97,6 +98,18 @@ void IfElseNode::FlushUpdateAndMarkDirty()
         MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
     branchIdChanged_ = false;
+}
+
+bool IfElseNode::TryRetake(const std::string& id)
+{
+    auto node = GetDisappearingChildById(id);
+    if (node) {
+        AddChild(node);
+        // for geometryTransition, let all reused children call UpdateGeometryTransition.
+        LayoutProperty::UpdateAllGeometryTransition(node);
+        return true;
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

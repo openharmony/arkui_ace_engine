@@ -45,6 +45,7 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/core/animation/spring_animation.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
+    "$ace_root/test/mock/frameworks/base/log/mock_jank_frame_report.cpp",
 
     # common
     "$ace_root/frameworks/core/common/ace_application_info.cpp",
@@ -55,6 +56,7 @@ ohos_unittest("SpringChainTest") {
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
     "$ace_root/frameworks/core/common/font_loader.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
@@ -227,7 +229,7 @@ ohos_unittest("SpringChainTest") {
   } else {
     configs += [ "//third_party/curl:curl_config" ]
     deps += [ "//third_party/curl:curl" ]
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   }
 
   external_deps += [ "c_utils:utils" ]

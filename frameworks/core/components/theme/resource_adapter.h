@@ -41,8 +41,6 @@ public:
 
     virtual void Init(const ResourceInfo& resourceInfo) {}
 
-    virtual void Reload() {}
-
     virtual void UpdateConfig(const ResourceConfiguration& config) {}
 
     virtual RefPtr<ThemeStyle> GetTheme(int32_t themeId)
@@ -127,12 +125,30 @@ public:
         return false;
     }
 
+    virtual bool GetRawFileData(const std::string& rawFile, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+        const std::string& bundleName, const std::string& moduleName)
+    {
+        return false;
+    }
+
     virtual bool GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest)
     {
         return false;
     }
 
+    virtual bool GetMediaData(uint32_t resId, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+        const std::string& bundleName, const std::string& moduleName)
+    {
+        return false;
+    }
+
     virtual bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest)
+    {
+        return false;
+    }
+
+    virtual bool GetMediaData(const std::string& resName, size_t& len, std::unique_ptr<uint8_t[]>& dest,
+        const std::string& bundleName, const std::string& moduleName)
     {
         return false;
     }

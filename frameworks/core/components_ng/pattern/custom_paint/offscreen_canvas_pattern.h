@@ -94,7 +94,7 @@ public:
     int32_t GetWidth();
     int32_t GetHeight();
 
-    const LineDashParam& GetLineDash() const;
+    LineDashParam GetLineDash() const;
     void SetLineDash(const std::vector<double>& segments);
 
     void SetTextDirection(TextDirection direction);
@@ -110,6 +110,8 @@ public:
     void Translate(double x, double y);
     TransformParam GetTransform() const;
     std::string ToDataURL(const std::string& type, const double quality);
+
+    bool IsSucceed();
 
 private:
     RefPtr<OffscreenCanvasPaintMethod> offscreenPaintMethod_;

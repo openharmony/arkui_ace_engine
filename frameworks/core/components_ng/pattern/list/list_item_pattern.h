@@ -40,6 +40,7 @@ class ACE_EXPORT ListItemPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemPattern, Pattern);
 
 public:
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
     explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
         : shallowBuilder_(shallowBuilder), listItemStyle_(listItemStyle)
     {}
@@ -134,6 +135,11 @@ public:
         return isSelected_;
     }
 
+    void SetSelected(bool selected)
+    {
+        isSelected_ = selected;
+    }
+
     bool Selectable() const
     {
         return selectable_;
@@ -199,13 +205,14 @@ private:
     void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
     void InitListItemCardStyleForList();
     void UpdateListItemAlignToCenter();
+    Color GetBlendGgColor();
     void InitHoverEvent();
     void HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode);
     void InitPressEvent();
-    void HandlePressEvent(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& itemNode);
+    void HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode);
     void InitDisableEvent();
     void SetAccessibilityAction();
-    void DoDeleteAnimation(const OnDeleteEvent& onDelete, bool isRightDelete);
+    void DoDeleteAnimation(bool isRightDelete);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;
@@ -243,7 +250,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchListener_;
     bool isHover_ = false;
-    Color currentBackgroundColor_;
+    bool isPressed_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };

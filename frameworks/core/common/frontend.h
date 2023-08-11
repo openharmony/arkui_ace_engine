@@ -31,6 +31,8 @@
 
 using FrontendDialogCallback = std::function<void(const std::string& event, const std::string& param)>;
 
+class NativeValue;
+
 namespace OHOS::Ace {
 
 #ifndef WEARABLE_PRODUCT
@@ -108,7 +110,7 @@ public:
 
     // Get the stage mode sourceMap.
     virtual void GetStageSourceMap(
-        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {};
+        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {}
 
     virtual void RunPage(int32_t pageId, const std::string& content, const std::string& params) = 0;
 
@@ -122,7 +124,15 @@ public:
     // Get window config of front end, which is used to calculate the pixel ratio of the real device.
     virtual WindowConfig& GetWindowConfig() = 0;
 
-    virtual FrontendType GetType() = 0;
+    FrontendType GetType() const
+    {
+        return type_;
+    }
+
+    RefPtr<TaskExecutor> GetTaskExecutor() const
+    {
+        return taskExecutor_;
+    }
 
     // inform the frontend that onCreate or onDestroy
     virtual void UpdateState(State) = 0;
@@ -212,6 +222,9 @@ public:
 
     virtual void OnSurfaceChanged(int32_t width, int32_t height) = 0;
 
+    virtual void OnLayoutCompleted(const std::string& componentId) = 0;
+    virtual void OnDrawCompleted(const std::string& componentId) = 0;
+
     virtual void TriggerGarbageCollection() {}
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
@@ -241,6 +254,11 @@ public:
     }
 
     virtual void NotifyAppStorage(const std::string& key, const std::string& value) {}
+    
+    virtual NativeValue* GetContextValue()
+    {
+        return nullptr;
+    }
 #ifdef PREVIEW
     virtual void RunNativeEngineLoop() {}
 #endif
@@ -258,7 +276,7 @@ public:
 
     virtual void FlushReload() {}
     // flush frontend for HotReload feature in NG
-    virtual void HotReload() {};
+    virtual void HotReload() {}
 
     State GetState() const
     {
@@ -268,6 +286,9 @@ public:
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 
 protected:
+    virtual bool MaybeRelease() override;
+    FrontendType type_ = FrontendType::JS;
+    RefPtr<TaskExecutor> taskExecutor_;
     bool disallowPopLastPage_ = false;
     FrontendDialogCallback dialogCallback_ = nullptr;
     State state_ = State::UNDEFINE;

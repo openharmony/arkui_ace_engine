@@ -30,7 +30,7 @@ inline constexpr UIState UI_STATE_PRESSED = 1;
 inline constexpr UIState UI_STATE_FOCUSED = 1 << 1;
 inline constexpr UIState UI_STATE_DISABLED = 1 << 2;
 // used for radio, checkbox, switch.
-inline constexpr UIState UI_STATE_CHECKED = 1 << 3;
+inline constexpr UIState UI_STATE_SELECTED = 1 << 3;
 
 // StateStyleManager is mainly used to manage the setting and refresh of state styles.
 class StateStyleManager : public virtual AceType {
@@ -66,6 +66,15 @@ public:
             return currentState_ == state;
         }
         return (currentState_ & state) == state;
+    }
+
+    void SetCurrentUIState(UIState state, bool flag)
+    {
+        if (flag) {
+            currentState_ |= state;
+        } else {
+            currentState_ &= ~state;
+        }
     }
 
     void UpdateCurrentUIState(UIState state)

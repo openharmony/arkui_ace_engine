@@ -21,16 +21,15 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr uint32_t MIN_GRID_COUNTS = 2;
-} // namespace
-
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
     auto childConstraint = layoutProperty->CreateChildConstraint();
+    childConstraint.maxSize.SetWidth(layoutConstraint->maxSize.Width());
     // constraint max size minus padding
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, childConstraint.maxSize);
@@ -39,8 +38,11 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(columnInfo);
     CHECK_NULL_VOID(columnInfo->GetParent());
     columnInfo->GetParent()->BuildColumnWidth();
-    auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    auto minWidth = static_cast<float>(columnInfo->GetWidth());
     childConstraint.minSize.SetWidth(minWidth);
+    if (layoutConstraint->minSize.Width() < minWidth) {
+        layoutConstraint->minSize.SetWidth(minWidth);
+    }
     // Calculate max width of menu items
     UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
 
@@ -55,6 +57,15 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
 
+    if (layoutConstraint->selfIdealSize.Width().has_value() &&
+        layoutConstraint->selfIdealSize.Width().value() >= layoutConstraint->maxSize.Width()) {
+        layoutConstraint->selfIdealSize.SetWidth(layoutConstraint->maxSize.Width());
+        layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
+    } else if (layoutConstraint->selfIdealSize.Width().has_value() &&
+               layoutConstraint->selfIdealSize.Width().value() < layoutConstraint->minSize.Width()) {
+        layoutConstraint->selfIdealSize.SetWidth(layoutConstraint->minSize.Width());
+        layoutProperty->UpdateLayoutConstraint(layoutConstraint.value());
+    }
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 }
 
@@ -76,7 +87,7 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
-        translate.AddY(child->GetGeometryNode()->GetFrameSize().Height());
+        translate.AddY(child->GetGeometryNode()->GetMarginFrameSize().Height());
     }
 }
 

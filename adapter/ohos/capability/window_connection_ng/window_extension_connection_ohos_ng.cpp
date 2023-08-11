@@ -45,19 +45,21 @@ public:
     ~NGConnectionCallback() override = default;
     void OnWindowReady(const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode) override
     {
-        CHECK_NULL_VOID(rsSurfaceNode);
-        auto nodeStrong = originNode_.Upgrade();
-        CHECK_NULL_VOID(nodeStrong);
-        auto context = nodeStrong->GetRenderContext();
-        CHECK_NULL_VOID(rsSurfaceNode);
-        rsOriginNode_ = std::static_pointer_cast<Rosen::RSSurfaceNode>(
-            AceType::DynamicCast<NG::RosenRenderContext>(context)->GetRSNode());
-        auto task = [weak = originNode_, rsNode = rsSurfaceNode, instanceId = instanceId_]() {
+        LOGI("OnWindowReady called");
+        auto task = [weak = wptr<NGConnectionCallback>(this), weakOriginNode = originNode_, rsNode = rsSurfaceNode,
+                        instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
-            auto node = weak.Upgrade();
-            CHECK_NULL_VOID(node);
-            UpdateFrameNodeTree(node, rsNode);
-            auto pattern = AceType::DynamicCast<NG::AbilityComponentPattern>(node->GetPattern());
+            CHECK_NULL_VOID(rsNode);
+            auto nodeStrong = weakOriginNode.Upgrade();
+            CHECK_NULL_VOID(nodeStrong);
+            auto context = nodeStrong->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            auto extensionCallback = weak.promote();
+            CHECK_NULL_VOID(extensionCallback);
+            extensionCallback->rsOriginNode_ = std::static_pointer_cast<Rosen::RSSurfaceNode>(
+                AceType::DynamicCast<NG::RosenRenderContext>(context)->GetRSNode());
+            UpdateFrameNodeTree(nodeStrong, rsNode);
+            auto pattern = AceType::DynamicCast<NG::AbilityComponentPattern>(nodeStrong->GetPattern());
             if (pattern) {
                 pattern->FireConnect();
             }
@@ -122,7 +124,6 @@ private:
     }
 
     WeakPtr<NG::FrameNode> originNode_;
-    WeakPtr<RenderNode> node_;
     std::shared_ptr<Rosen::RSSurfaceNode> rsOriginNode_;
     int32_t instanceId_ = -1;
 };
@@ -175,7 +176,11 @@ void WindowExtensionConnectionAdapterOhosNG::ConnectExtension(const RefPtr<NG::F
         instanceId = container->GetInstanceId();
     }
     sptr<Rosen::IWindowExtensionCallback> callback = new NGConnectionCallback(node, instanceId);
-    windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback);
+    if (extensionSession_ != nullptr) {
+        windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback, extensionSession_);
+    } else {
+        windowExtension_->ConnectExtension(element, rosenRect, userIds.front(), windowId, callback);
+    }
 #else
     LOGI("unrosen engine doesn't support ability component");
 #endif

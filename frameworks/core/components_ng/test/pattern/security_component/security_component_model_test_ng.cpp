@@ -35,6 +35,11 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_common.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
+#include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/security_component_handler.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -58,12 +63,19 @@ namespace {
     constexpr float DEFAULT_BORDER_WIDTH = 1.0f;
     constexpr float DEFAULT_PADDING_WITHOUT_BG = 4.0f;
     constexpr float DEFAULT_BUTTON_SIZE = 20.0f;
-    const std::string DEFAULT_TEXT = "Add Location";
+    const std::string DEFAULT_TEXT = "Add Security Component Buttom";
     constexpr int INDEX_ZERO = 0;
     constexpr int INDEX_ONE = 1;
     constexpr int INDEX_TWO = 2;
     constexpr int INDEX_SIZE = 3;
+    constexpr int ICON_RESOURCE_TABLE = 2;
 }
+
+#ifdef SECURITY_COMPONENT_ENABLE
+namespace {
+    constexpr float MAX_ROTATE = 360.0f;
+}
+#endif
 
 class SecurityComponentModelTestNg : public testing::Test {
 public:
@@ -71,36 +83,16 @@ public:
     static void TearDownTestCase();
 protected:
     static RefPtr<FrameNode> CreateSecurityComponent(int32_t text, int32_t icon,
-        SecurityComponentBackgroundType backgroundType);
+        int32_t backgroundType, std::string type);
     static void CreateSecurityComponentNotFinish(int32_t text, int32_t icon,
-        SecurityComponentBackgroundType backgroundType);
-    static RefPtr<LayoutWrapper> CreateLayoutWrapper(RefPtr<FrameNode>& node);
-    static RefPtr<LayoutWrapper> CreateSecurityComponentLayoutWrapper(RefPtr<FrameNode>& node);
+        int32_t backgroundType, std::string type);
+    static RefPtr<LayoutWrapperNode> CreateLayoutWrapper(RefPtr<FrameNode>& node);
+    static RefPtr<LayoutWrapperNode> CreateSecurityComponentLayoutWrapper(RefPtr<FrameNode>& node);
     static void CheckSecurityComponentDefaultProp(RefPtr<FrameNode>& node);
     static void InitDefaultTheme(RefPtr<SecurityComponentTheme>& theme);
-    static void SetUserDefinedPropty();
-};
-
-class MockSecurityModelNG : public SecurityComponentModelNG {
-public:
-    void Create(int32_t text, int32_t icon,
-        SecurityComponentBackgroundType backgroundType) override
-    {
-        CreateCommon(V2::SEC_LOCATION_BUTTON_ETS_TAG,
-            text, icon, backgroundType, []() { return AceType::MakeRefPtr<SecurityComponentPattern>();});
-    }
-
-    bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id) override
-    {
-        id = InternalResource::ResourceId::LOCATION_BUTTON_FILLED_SVG;
-        return true;
-    }
-
-    bool GetTextResource(int32_t textStyle, std::string& text) override
-    {
-        text = DEFAULT_TEXT;
-        return true;
-    }
+    static void SetLocationUserDefinedPropty();
+    static void SetPasteUserDefinedPropty();
+    static void SetSaveUserDefinedPropty();
 };
 
 class MockSecurityComponentButtonLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -126,7 +118,7 @@ void SecurityComponentModelTestNg::InitDefaultTheme(RefPtr<SecurityComponentThem
     theme->backgroundRightPadding_ = Dimension(DEFAULT_PADDING);
     theme->backgroundBottomPadding_ = Dimension(DEFAULT_PADDING);
     theme->backgroundLeftPadding_ = Dimension(DEFAULT_PADDING);
-    theme->textIconPadding_ = Dimension(DEFAULT_PADDING);
+    theme->textIconSpace_ = Dimension(DEFAULT_PADDING);
     theme->borderRadius_ = Dimension(DEFAULT_BORDER_RADIUS);
     theme->borderWidth_ = Dimension(DEFAULT_BORDER_WIDTH);
     theme->paddingWithoutBg_ = Dimension(DEFAULT_PADDING_WITHOUT_BG);
@@ -154,24 +146,40 @@ void SecurityComponentModelTestNg::TearDownTestCase()
 }
 
 RefPtr<FrameNode> SecurityComponentModelTestNg::CreateSecurityComponent(int32_t text, int32_t icon,
-    SecurityComponentBackgroundType backgroundType)
+    int32_t backgroundType, std::string type)
 {
-    MockSecurityModelNG sc;
-    sc.Create(text, icon, backgroundType);
+    if (type == V2::LOCATION_BUTTON_ETS_TAG) {
+        LocationButtonModelNG locationSc;
+        locationSc.Create(text, icon, backgroundType);
+    } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
+        PasteButtonModelNG pasteSc;
+        pasteSc.Create(text, icon, backgroundType);
+    } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
+        SaveButtonModelNG saveSc;
+        saveSc.Create(text, icon, backgroundType);
+    }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
 }
 
 void SecurityComponentModelTestNg::CreateSecurityComponentNotFinish(int32_t text, int32_t icon,
-    SecurityComponentBackgroundType backgroundType)
+    int32_t backgroundType, std::string type)
 {
-    MockSecurityModelNG sc;
-    sc.Create(text, icon, backgroundType);
+    if (type == V2::LOCATION_BUTTON_ETS_TAG) {
+        LocationButtonModelNG locationSc;
+        locationSc.Create(text, icon, backgroundType);
+    } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
+        PasteButtonModelNG pasteSc;
+        pasteSc.Create(text, icon, backgroundType);
+    } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
+        SaveButtonModelNG saveSc;
+        saveSc.Create(text, icon, backgroundType);
+    }
 }
 
-void SecurityComponentModelTestNg::SetUserDefinedPropty()
+void SecurityComponentModelTestNg::SetLocationUserDefinedPropty()
 {
-    MockSecurityModelNG sc;
+    LocationButtonModelNG sc;
     sc.SetFontSize(Dimension(15.0)); // 15.0 vp
     sc.SetIconSize(Dimension(15.0)); // 15.0 vp
     sc.SetIconColor(Color::RED);
@@ -186,21 +194,62 @@ void SecurityComponentModelTestNg::SetUserDefinedPropty()
     sc.SetBackgroundBorderStyle(BorderStyle::DOTTED);
     sc.SetBackgroundBorderRadius(Dimension(15.0)); // 15.0 vp
     sc.SetBackgroundPadding(Dimension(25.0)); // 25.0 vp
-    sc.SetTextIconPadding(Dimension(25.0)); // 25.0 vp
+    sc.SetTextIconSpace(Dimension(25.0)); // 25.0 vp
     sc.SetTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
-    sc.SetlayoutOrder(SecSecurityComponentLayoutOrder::TEXT_FIRST);
 }
 
-RefPtr<LayoutWrapper> SecurityComponentModelTestNg::CreateLayoutWrapper(RefPtr<FrameNode>& node)
+void SecurityComponentModelTestNg::SetPasteUserDefinedPropty()
+{
+    PasteButtonModelNG sc;
+    sc.SetFontSize(Dimension(15.0)); // 15.0 vp
+    sc.SetIconSize(Dimension(15.0)); // 15.0 vp
+    sc.SetIconColor(Color::RED);
+    sc.SetFontStyle(Ace::FontStyle::ITALIC);
+    sc.SetFontWeight(FontWeight::BOLDER);
+    std::vector<std::string> fontFamilies = { "testFont" };
+    sc.SetFontFamily(fontFamilies);
+    sc.SetFontColor(Color::GREEN);
+    sc.SetBackgroundColor(Color::GRAY);
+    sc.SetBackgroundBorderWidth(Dimension(15.0)); // 15.0 vp
+    sc.SetBackgroundBorderColor(Color::GREEN);
+    sc.SetBackgroundBorderStyle(BorderStyle::DOTTED);
+    sc.SetBackgroundBorderRadius(Dimension(15.0)); // 15.0 vp
+    sc.SetBackgroundPadding(Dimension(25.0)); // 25.0 vp
+    sc.SetTextIconSpace(Dimension(25.0)); // 25.0 vp
+    sc.SetTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+}
+
+void SecurityComponentModelTestNg::SetSaveUserDefinedPropty()
+{
+    SaveButtonModelNG sc;
+    sc.SetFontSize(Dimension(15.0)); // 15.0 vp
+    sc.SetIconSize(Dimension(15.0)); // 15.0 vp
+    sc.SetIconColor(Color::RED);
+    sc.SetFontStyle(Ace::FontStyle::ITALIC);
+    sc.SetFontWeight(FontWeight::BOLDER);
+    std::vector<std::string> fontFamilies = { "testFont" };
+    sc.SetFontFamily(fontFamilies);
+    sc.SetFontColor(Color::GREEN);
+    sc.SetBackgroundColor(Color::GRAY);
+    sc.SetBackgroundBorderWidth(Dimension(15.0)); // 15.0 vp
+    sc.SetBackgroundBorderColor(Color::GREEN);
+    sc.SetBackgroundBorderStyle(BorderStyle::DOTTED);
+    sc.SetBackgroundBorderRadius(Dimension(15.0)); // 15.0 vp
+    sc.SetBackgroundPadding(Dimension(25.0)); // 25.0 vp
+    sc.SetTextIconSpace(Dimension(25.0)); // 25.0 vp
+    sc.SetTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+}
+
+RefPtr<LayoutWrapperNode> SecurityComponentModelTestNg::CreateLayoutWrapper(RefPtr<FrameNode>& node)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     if (geometryNode == nullptr) {
         return nullptr;
     }
-    return AceType::MakeRefPtr<LayoutWrapper>(node, geometryNode, node->GetLayoutProperty());
+    return AceType::MakeRefPtr<LayoutWrapperNode>(node, geometryNode, node->GetLayoutProperty());
 }
 
-RefPtr<LayoutWrapper> SecurityComponentModelTestNg::CreateSecurityComponentLayoutWrapper(RefPtr<FrameNode>& node)
+RefPtr<LayoutWrapperNode> SecurityComponentModelTestNg::CreateSecurityComponentLayoutWrapper(RefPtr<FrameNode>& node)
 {
     auto layoutWrapper = CreateLayoutWrapper(node);
     auto buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
@@ -239,29 +288,28 @@ void SecurityComponentModelTestNg::CheckSecurityComponentDefaultProp(RefPtr<Fram
 {
     auto property = node->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
-    EXPECT_EQ(property->GetSecurityComponentDescription().value_or(0), 1);
-    EXPECT_EQ(property->GetIconStyle().value_or(1), 1);
-    EXPECT_EQ(property->GetBackgroundType().value_or(SecurityComponentBackgroundType::NORMAL),
-        SecurityComponentBackgroundType::CAPSULE);
-    EXPECT_EQ(property->GetTextIconPadding().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING);
+    EXPECT_EQ(property->GetSecurityComponentDescription().value_or(1), 0);
+    EXPECT_EQ(property->GetIconStyle().value_or(1), 0);
+    EXPECT_EQ(property->GetBackgroundType().value_or(static_cast<int32_t>(ButtonType::NORMAL)),
+        static_cast<int32_t>(ButtonType::CAPSULE));
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING);
     EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING);
     EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::VERTICAL),
         SecurityComponentLayoutDirection::HORIZONTAL);
-    EXPECT_EQ(property->GetLayoutOrder().value_or(SecSecurityComponentLayoutOrder::TEXT_FIRST),
-        SecSecurityComponentLayoutOrder::ICON_FIRST);
 }
 
 /**
- * @tc.name: SecurityComponentPropertyTest001
+ * @tc.name: SecurityComponentLocationPropertyTest001
  * @tc.desc: Test default properties of security component.
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest001, TestSize.Level1)
 {
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, 1, SecurityComponentBackgroundType::CAPSULE);
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
+        V2::LOCATION_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
-    ASSERT_EQ(frameNode->GetTag(), V2::SEC_LOCATION_BUTTON_ETS_TAG);
+    ASSERT_EQ(frameNode->GetTag(), V2::LOCATION_BUTTON_ETS_TAG);
 
     CheckSecurityComponentDefaultProp(frameNode);
 
@@ -270,11 +318,10 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest001, TestSiz
     ASSERT_NE(textNode, nullptr);
     auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textProp, nullptr);
-    EXPECT_EQ(textProp->GetContent().value_or(""), DEFAULT_TEXT);
     EXPECT_EQ(textProp->GetMaxLines().value_or(0), 1);
     EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_FONT_SIZE);
     EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::ITALIC), Ace::FontStyle::NORMAL);
-    EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::MEDIUM), FontWeight::NORMAL);
+    EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
     std::vector<std::string> emptyVec;
     auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
     EXPECT_FALSE(fontFamily.empty());
@@ -303,28 +350,27 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest001, TestSiz
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::NONE);
 
-    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_BORDER_RADIUS);
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::BLUE);
     EXPECT_EQ(buttonProp->GetType().value_or(ButtonType::NORMAL), ButtonType::CAPSULE);
 }
 
 /**
- * @tc.name: SecurityComponentPropertyTest002
+ * @tc.name: SecurityComponentLocationPropertyTest002
  * @tc.desc: Test default properties of security component without background
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest002, TestSize.Level1)
 {
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, 1,
-        SecurityComponentBackgroundType::BACKGROUND_NULL);
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
-    ASSERT_EQ(frameNode->GetTag(), V2::SEC_LOCATION_BUTTON_ETS_TAG);
+    ASSERT_EQ(frameNode->GetTag(), V2::LOCATION_BUTTON_ETS_TAG);
 
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
-    EXPECT_EQ(property->GetBackgroundType().value_or(SecurityComponentBackgroundType::NORMAL),
-        SecurityComponentBackgroundType::BACKGROUND_NULL);
+    EXPECT_EQ(property->GetBackgroundType().value_or(static_cast<int32_t>(ButtonType::NORMAL)),
+        BUTTON_TYPE_NULL);
     EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING_WITHOUT_BG);
     EXPECT_EQ(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(),
         DEFAULT_PADDING_WITHOUT_BG);
@@ -356,51 +402,48 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest002, TestSiz
 }
 
 /**
- * @tc.name: SecurityComponentPropertyTest003
+ * @tc.name: SecurityComponentLocationPropertyTest003
  * @tc.desc: Test default properties of security component without icon
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest003, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest003, TestSize.Level1)
 {
     RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, -1,
-        SecurityComponentBackgroundType::BACKGROUND_NULL);
+        BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
-    ASSERT_EQ(frameNode->GetTag(), V2::SEC_LOCATION_BUTTON_ETS_TAG);
+    ASSERT_EQ(frameNode->GetTag(), V2::LOCATION_BUTTON_ETS_TAG);
 
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
     EXPECT_EQ(property->GetIconStyle().value_or(1), -1);
-    EXPECT_EQ(property->GetTextIconPadding().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
 
     auto iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
     ASSERT_EQ(iconNode, nullptr);
 }
 
 /**
- * @tc.name: SecurityComponentPropertyTest004
+ * @tc.name: SecurityComponentLocationPropertyTest004
  * @tc.desc: Test set security component property
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest004, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest004, TestSize.Level1)
 {
-    CreateSecurityComponentNotFinish(1, 1, SecurityComponentBackgroundType::CAPSULE);
-    SetUserDefinedPropty();
-
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
+    SetLocationUserDefinedPropty();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
-    EXPECT_EQ(property->GetTextIconPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::HORIZONTAL),
         SecurityComponentLayoutDirection::VERTICAL);
-    EXPECT_EQ(property->GetLayoutOrder().value_or(SecSecurityComponentLayoutOrder::ICON_FIRST),
-        SecSecurityComponentLayoutOrder::TEXT_FIRST);
 
     auto iconNode = GetCurSecCompChildNode(V2::IMAGE_ETS_TAG);
     ASSERT_NE(iconNode, nullptr);
@@ -408,7 +451,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest004, TestSiz
     ASSERT_NE(iconProp, nullptr);
     ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
     EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::RED);
-
     auto textNode = GetCurSecCompChildNode(V2::TEXT_ETS_TAG);
     ASSERT_NE(textNode, nullptr);
     auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -435,34 +477,30 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest004, TestSiz
     EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
-    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
 }
 
 /**
- * @tc.name: SecurityComponentPropertyTest005
+ * @tc.name: SecurityComponentLocationPropertyTest005
  * @tc.desc: Test set security component property
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest005, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest005, TestSize.Level1)
 {
-    CreateSecurityComponentNotFinish(1, 1, SecurityComponentBackgroundType::CAPSULE);
-    SetUserDefinedPropty();
-
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
+    SetLocationUserDefinedPropty();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
-    EXPECT_EQ(property->GetTextIconPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
     EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::HORIZONTAL),
         SecurityComponentLayoutDirection::VERTICAL);
-    EXPECT_EQ(property->GetLayoutOrder().value_or(SecSecurityComponentLayoutOrder::ICON_FIRST),
-        SecSecurityComponentLayoutOrder::TEXT_FIRST);
 
     auto iconNode = GetCurSecCompChildNode(V2::IMAGE_ETS_TAG);
     ASSERT_NE(iconNode, nullptr);
@@ -470,7 +508,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest005, TestSiz
     ASSERT_NE(iconProp, nullptr);
     ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
     EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::RED);
-
     auto textNode = GetCurSecCompChildNode(V2::TEXT_ETS_TAG);
     ASSERT_NE(textNode, nullptr);
     auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -497,27 +534,451 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest005, TestSiz
     EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
     EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
-
-    EXPECT_EQ(buttonProp->GetBorderRadius().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
     EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
 }
 
 /**
- * @tc.name: SecurityComponentPropertyTest006
+ * @tc.name: SecurityComponentLocationPropertyTest006
  * @tc.desc: Test set security component property without background
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest006, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest006, TestSize.Level1)
 {
-    CreateSecurityComponentNotFinish(1, 1, SecurityComponentBackgroundType::BACKGROUND_NULL);
-    MockSecurityModelNG sc;
-    sc.SetBackgroundColor(Color::GRAY);
-    sc.SetBackgroundBorderWidth(Dimension(15.0)); // 15.0 vp
-    sc.SetBackgroundBorderColor(Color::GREEN);
-    sc.SetBackgroundBorderStyle(BorderStyle::DOTTED);
-    sc.SetBackgroundBorderRadius(Dimension(15.0)); // 15.0 vp
-    sc.SetBackgroundPadding(Dimension(25.0)); // 25.0 vp
+    CreateSecurityComponentNotFinish(0, 0, BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
+    LocationButtonModelNG locationSc;
+    locationSc.SetBackgroundColor(Color::GRAY);
+    locationSc.SetBackgroundBorderWidth(Dimension(15.0)); // 15.0 vp
+    locationSc.SetBackgroundBorderColor(Color::GREEN);
+    locationSc.SetBackgroundBorderStyle(BorderStyle::DOTTED);
+    locationSc.SetBackgroundBorderRadius(Dimension(15.0)); // 15.0 vp
+    locationSc.SetBackgroundPadding(Dimension(25.0)); // 25.0 vp
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_NE(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_NE(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_NE(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_NE(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+
+    auto buttonNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    auto borderColor = buttonRender->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_NE(borderColor.leftColor.value_or(Color()), Color::GREEN);
+    auto& widthProp = buttonProp->GetBorderWidthProperty();
+    ASSERT_EQ(widthProp, nullptr);
+    auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
+    EXPECT_NE(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+}
+
+/**
+ * @tc.name: SecurityComponentLocationPropertyTest007
+ * @tc.desc: Test set security component property without icon
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPropertyTest007, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(1, -1, static_cast<int32_t>(ButtonType::CAPSULE),
+        V2::LOCATION_BUTTON_ETS_TAG);
+    LocationButtonModelNG locationSc;
+    locationSc.SetTextIconSpace(Dimension(15.0)); // 15.0vp
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
+}
+
+/**
+ * @tc.name: SecurityComponentLocationPatternTest001
+ * @tc.desc: Test default security component modifyDone
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::LOCATION_BUTTON_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_TRUE(pattern->isAppearCallback_);
+    EXPECT_NE(pattern->clickListener_, nullptr);
+
+    auto secCompGesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(secCompGesture, nullptr);
+    EXPECT_EQ(secCompGesture->GetHitTestMode(), HitTestMode::HTMDEFAULT);
+
+    // modifydone again
+    pattern->OnModifyDone();
+    EXPECT_TRUE(pattern->isAppearCallback_);
+    EXPECT_NE(pattern->clickListener_, nullptr);
+}
+
+/**
+ * @tc.name: SecurityComponentLocationPatternTest002
+ * @tc.desc: Test event callback
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationPatternTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::LOCATION_BUTTON_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto secCompGesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(secCompGesture, nullptr);
+    auto clickListener = secCompGesture->clickEventActuator_->clickEvents_.back();
+    ASSERT_NE(clickListener, nullptr);
+    ASSERT_NE(clickListener->callback_, nullptr);
+    GestureEvent info;
+    clickListener->callback_(info);
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_NE(eventHub->onAppear_, nullptr);
+    ASSERT_NE(eventHub->onDisappear_, nullptr);
+    eventHub->onAppear_();
+    eventHub->onDisappear_();
+    ASSERT_EQ(pattern->scId_, -1);
+}
+
+/**
+ * @tc.name: SecurityComponentLocationLayoutAlgoTest001
+ * @tc.desc: Test default layout algo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationLayoutAlgoTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::LOCATION_BUTTON_ETS_TAG);
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto layoutAlgo = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgo, nullptr);
+
+    auto layoutWrapper = CreateSecurityComponentLayoutWrapper(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutAlgo->Measure(layoutWrapper.rawPtr_);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
+    property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+    pattern->OnModifyDone();
+
+    layoutAlgo->Measure(layoutWrapper.rawPtr_);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+
+    property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CIRCLE));
+    property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+    pattern->OnModifyDone();
+
+    layoutAlgo->Measure(layoutWrapper.rawPtr_);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+}
+
+/**
+ * @tc.name: SecurityComponentLocationAccessibilityPropertyTest001
+ * @tc.desc: Test security component accessibility property
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationAccessibilityPropertyTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::LOCATION_BUTTON_ETS_TAG);
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto accessibility = pattern->CreateAccessibilityProperty();
+    ASSERT_NE(accessibility, nullptr);
+    accessibility->SetHost(frameNode);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePropertyTest001
+ * @tc.desc: Test default properties of security component.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
+        V2::SAVE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
+
+    CheckSecurityComponentDefaultProp(frameNode);
+
+    // text node property
+    auto textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
+    ASSERT_NE(textNode, nullptr);
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProp, nullptr);
+    EXPECT_EQ(textProp->GetMaxLines().value_or(0), 1);
+    EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_FONT_SIZE);
+    EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::ITALIC), Ace::FontStyle::NORMAL);
+    EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
+    std::vector<std::string> emptyVec;
+    auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
+    EXPECT_FALSE(fontFamily.empty());
+    EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::WHITE);
+
+    // icon node property
+    auto iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(iconProp, nullptr);
+    ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
+    EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::WHITE);
+
+    // button node property
+    auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    auto borderColor = buttonRender->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_EQ(borderColor.leftColor.value_or(Color()), Color::RED);
+    auto& widthProp = buttonProp->GetBorderWidthProperty();
+    ASSERT_NE(widthProp, nullptr);
+    EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_BORDER_WIDTH);
+    auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
+    EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::NONE);
+
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::BLUE);
+    EXPECT_EQ(buttonProp->GetType().value_or(ButtonType::NORMAL), ButtonType::CAPSULE);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePropertyTest002
+ * @tc.desc: Test default properties of security component without background
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        BUTTON_TYPE_NULL, V2::SAVE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
+
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetBackgroundType().value_or(static_cast<int32_t>(ButtonType::NORMAL)),
+        BUTTON_TYPE_NULL);
+    EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING_WITHOUT_BG);
+    EXPECT_EQ(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(),
+        DEFAULT_PADDING_WITHOUT_BG);
+    EXPECT_EQ(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING_WITHOUT_BG);
+    EXPECT_EQ(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(),
+        DEFAULT_PADDING_WITHOUT_BG);
+
+    auto textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
+    ASSERT_NE(textNode, nullptr);
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProp, nullptr);
+    EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::BLACK);
+
+    auto iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(iconProp, nullptr);
+    ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
+    EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::BLUE);
+
+    auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+    EXPECT_EQ(buttonProp->GetType().value_or(ButtonType::CAPSULE), ButtonType::NORMAL);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePropertyTest003
+ * @tc.desc: Test default properties of security component without icon
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest003, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, -1,
+        BUTTON_TYPE_NULL, V2::SAVE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
+
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetIconStyle().value_or(1), -1);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
+
+    auto iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    ASSERT_EQ(iconNode, nullptr);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePropertyTest004
+ * @tc.desc: Test set security component property
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest004, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    SetSaveUserDefinedPropty();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::HORIZONTAL),
+        SecurityComponentLayoutDirection::VERTICAL);
+
+    auto iconNode = GetCurSecCompChildNode(V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(iconProp, nullptr);
+    ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
+    EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::RED);
+    auto textNode = GetCurSecCompChildNode(V2::TEXT_ETS_TAG);
+    ASSERT_NE(textNode, nullptr);
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProp, nullptr);
+    EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
+    EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL), Ace::FontStyle::ITALIC);
+    EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::MEDIUM), FontWeight::BOLDER);
+    std::vector<std::string> emptyVec;
+    auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
+    ASSERT_FALSE(fontFamily.empty());
+    EXPECT_EQ(fontFamily[0], "testFont");
+    EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::GREEN);
+
+    auto buttonNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    auto borderColor = buttonRender->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_EQ(borderColor.leftColor.value_or(Color()), Color::GREEN);
+    auto& widthProp = buttonProp->GetBorderWidthProperty();
+    ASSERT_NE(widthProp, nullptr);
+    EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
+    auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
+    EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePropertyTest005
+ * @tc.desc: Test set security component property
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest005, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    SetSaveUserDefinedPropty();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::HORIZONTAL),
+        SecurityComponentLayoutDirection::VERTICAL);
+
+    auto iconNode = GetCurSecCompChildNode(V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(iconProp, nullptr);
+    ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
+    EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::RED);
+    auto textNode = GetCurSecCompChildNode(V2::TEXT_ETS_TAG);
+    ASSERT_NE(textNode, nullptr);
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProp, nullptr);
+    EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
+    EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL), Ace::FontStyle::ITALIC);
+    EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::MEDIUM), FontWeight::BOLDER);
+    std::vector<std::string> emptyVec;
+    auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
+    ASSERT_FALSE(fontFamily.empty());
+    EXPECT_EQ(fontFamily[0], "testFont");
+    EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::GREEN);
+
+    auto buttonNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    auto borderColor = buttonRender->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_EQ(borderColor.leftColor.value_or(Color()), Color::GREEN);
+    auto& widthProp = buttonProp->GetBorderWidthProperty();
+    ASSERT_NE(widthProp, nullptr);
+    EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
+    auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
+    EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
+}
+
+/**
+ * @tc.name: SecurityComponentSavePropertyTest006
+ * @tc.desc: Test set security component property without background
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest006, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(0, 0, BUTTON_TYPE_NULL, V2::SAVE_BUTTON_ETS_TAG);
+    SaveButtonModelNG saveSc;
+    saveSc.SetBackgroundColor(Color::GRAY);
+    saveSc.SetBackgroundBorderWidth(Dimension(15.0)); // 15.0 vp
+    saveSc.SetBackgroundBorderColor(Color::GREEN);
+    saveSc.SetBackgroundBorderStyle(BorderStyle::DOTTED);
+    saveSc.SetBackgroundBorderRadius(Dimension(15.0)); // 15.0 vp
+    saveSc.SetBackgroundPadding(Dimension(25.0)); // 25.0 vp
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
@@ -543,36 +1004,37 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest006, TestSiz
 }
 
 /**
- * @tc.name: SecurityComponentPropertyTest007
+ * @tc.name: SecurityComponentSavePropertyTest007
  * @tc.desc: Test set security component property without icon
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPropertyTest007, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePropertyTest007, TestSize.Level1)
 {
-    CreateSecurityComponentNotFinish(1, -1, SecurityComponentBackgroundType::CAPSULE);
-    MockSecurityModelNG sc;
-    sc.SetTextIconPadding(Dimension(15.0)); // 15.0vp
+    CreateSecurityComponentNotFinish(1, -1, static_cast<int32_t>(ButtonType::CAPSULE),
+        V2::SAVE_BUTTON_ETS_TAG);
+    SaveButtonModelNG saveSc;
+    saveSc.SetTextIconSpace(Dimension(15.0)); // 15.0vp
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
-    EXPECT_EQ(property->GetTextIconPadding().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
 }
 
 /**
- * @tc.name: SecurityComponentPatternTest001
+ * @tc.name: SecurityComponentSavePatternTest001
  * @tc.desc: Test default security component modifyDone
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest001, TestSize.Level1)
 {
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, 1,
-        SecurityComponentBackgroundType::CAPSULE);
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
-    ASSERT_EQ(frameNode->GetTag(), V2::SEC_LOCATION_BUTTON_ETS_TAG);
+    ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
 
     auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -591,17 +1053,17 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternTest001, TestSize
 }
 
 /**
- * @tc.name: SecurityComponentPatternTest002
+ * @tc.name: SecurityComponentSavePatternTest002
  * @tc.desc: Test event callback
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternTest002, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSavePatternTest002, TestSize.Level1)
 {
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, 1,
-        SecurityComponentBackgroundType::CAPSULE);
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
-    ASSERT_EQ(frameNode->GetTag(), V2::SEC_LOCATION_BUTTON_ETS_TAG);
+    ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
 
     auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -625,17 +1087,17 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPatternTest002, TestSize
 }
 
 /**
- * @tc.name: SecurityComponentLayoutAlgoTest001
+ * @tc.name: SecurityComponentSaveLayoutAlgoTest001
  * @tc.desc: Test default layout algo
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgoTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveLayoutAlgoTest001, TestSize.Level1)
 {
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, 1,
-        SecurityComponentBackgroundType::CAPSULE);
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
-    ASSERT_EQ(frameNode->GetTag(), V2::SEC_LOCATION_BUTTON_ETS_TAG);
+    ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
     auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
@@ -651,9 +1113,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgoTest001, TestS
 
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     ASSERT_NE(property, nullptr);
-    property->UpdateBackgroundType(SecurityComponentBackgroundType::CIRCLE);
+    property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
-    property->UpdateLayoutOrder(SecSecurityComponentLayoutOrder::ICON_FIRST);
     pattern->OnModifyDone();
 
     layoutAlgo->Measure(layoutWrapper.rawPtr_);
@@ -662,17 +1123,17 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgoTest001, TestS
 }
 
 /**
- * @tc.name: SecurityComponentLayoutAlgoTest001
+ * @tc.name: SecurityComponentSaveAccessibilityPropertyTest001
  * @tc.desc: Test security component accessibility property
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentAccessibilityPropertyTest001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentSaveAccessibilityPropertyTest001, TestSize.Level1)
 {
-    RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, 1,
-        SecurityComponentBackgroundType::CAPSULE);
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
     ASSERT_NE(frameNode, nullptr);
-    ASSERT_EQ(frameNode->GetTag(), V2::SEC_LOCATION_BUTTON_ETS_TAG);
+    ASSERT_EQ(frameNode->GetTag(), V2::SAVE_BUTTON_ETS_TAG);
     auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
@@ -680,6 +1141,949 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentAccessibilityPropertyTes
     auto accessibility = pattern->CreateAccessibilityProperty();
     ASSERT_NE(accessibility, nullptr);
     accessibility->SetHost(frameNode);
-    ASSERT_EQ(accessibility->GetText(), DEFAULT_TEXT);
 }
+
+/**
+ * @tc.name: SecurityComponentPastePropertyTest001
+ * @tc.desc: Test default properties of security component.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0, static_cast<int32_t>(ButtonType::CAPSULE),
+        V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::PASTE_BUTTON_ETS_TAG);
+
+    CheckSecurityComponentDefaultProp(frameNode);
+
+    // text node property
+    auto textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
+    ASSERT_NE(textNode, nullptr);
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProp, nullptr);
+    EXPECT_EQ(textProp->GetMaxLines().value_or(0), 1);
+    EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_FONT_SIZE);
+    EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::ITALIC), Ace::FontStyle::NORMAL);
+    EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::NORMAL), FontWeight::MEDIUM);
+    std::vector<std::string> emptyVec;
+    auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
+    EXPECT_FALSE(fontFamily.empty());
+    EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::WHITE);
+
+    // icon node property
+    auto iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(iconProp, nullptr);
+    ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
+    EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::WHITE);
+
+    // button node property
+    auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    auto borderColor = buttonRender->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_EQ(borderColor.leftColor.value_or(Color()), Color::RED);
+    auto& widthProp = buttonProp->GetBorderWidthProperty();
+    ASSERT_NE(widthProp, nullptr);
+    EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_BORDER_WIDTH);
+    auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
+    EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::NONE);
+
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::BLUE);
+    EXPECT_EQ(buttonProp->GetType().value_or(ButtonType::NORMAL), ButtonType::CAPSULE);
+}
+
+/**
+ * @tc.name: SecurityComponentPastePropertyTest002
+ * @tc.desc: Test default properties of security component without background
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        BUTTON_TYPE_NULL, V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::PASTE_BUTTON_ETS_TAG);
+
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetBackgroundType().value_or(static_cast<int32_t>(ButtonType::NORMAL)),
+        BUTTON_TYPE_NULL);
+    EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING_WITHOUT_BG);
+    EXPECT_EQ(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(),
+        DEFAULT_PADDING_WITHOUT_BG);
+    EXPECT_EQ(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), DEFAULT_PADDING_WITHOUT_BG);
+    EXPECT_EQ(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(),
+        DEFAULT_PADDING_WITHOUT_BG);
+
+    auto textNode = GetSecCompChildNode(frameNode, V2::TEXT_ETS_TAG);
+    ASSERT_NE(textNode, nullptr);
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProp, nullptr);
+    EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::BLACK);
+
+    auto iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(iconProp, nullptr);
+    ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
+    EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::BLUE);
+
+    auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::TRANSPARENT);
+    EXPECT_EQ(buttonProp->GetType().value_or(ButtonType::CAPSULE), ButtonType::NORMAL);
+}
+
+/**
+ * @tc.name: SecurityComponentPastePropertyTest003
+ * @tc.desc: Test default properties of security component without icon
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest003, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(1, -1,
+        BUTTON_TYPE_NULL, V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::PASTE_BUTTON_ETS_TAG);
+
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetIconStyle().value_or(1), -1);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
+
+    auto iconNode = GetSecCompChildNode(frameNode, V2::IMAGE_ETS_TAG);
+    ASSERT_EQ(iconNode, nullptr);
+}
+
+/**
+ * @tc.name: SecurityComponentPastePropertyTest004
+ * @tc.desc: Test set security component property
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest004, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    SetPasteUserDefinedPropty();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::HORIZONTAL),
+        SecurityComponentLayoutDirection::VERTICAL);
+
+    auto iconNode = GetCurSecCompChildNode(V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(iconProp, nullptr);
+    ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
+    EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::RED);
+    auto textNode = GetCurSecCompChildNode(V2::TEXT_ETS_TAG);
+    ASSERT_NE(textNode, nullptr);
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProp, nullptr);
+    EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
+    EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL), Ace::FontStyle::ITALIC);
+    EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::MEDIUM), FontWeight::BOLDER);
+    std::vector<std::string> emptyVec;
+    auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
+    ASSERT_FALSE(fontFamily.empty());
+    EXPECT_EQ(fontFamily[0], "testFont");
+    EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::GREEN);
+
+    auto buttonNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    auto borderColor = buttonRender->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_EQ(borderColor.leftColor.value_or(Color()), Color::GREEN);
+    auto& widthProp = buttonProp->GetBorderWidthProperty();
+    ASSERT_NE(widthProp, nullptr);
+    EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
+    auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
+    EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
+}
+
+/**
+ * @tc.name: SecurityComponentPastePropertyTest005
+ * @tc.desc: Test set security component property
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest005, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(0, 0, static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    SetPasteUserDefinedPropty();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_EQ(property->GetTextIconLayoutDirection().value_or(SecurityComponentLayoutDirection::HORIZONTAL),
+        SecurityComponentLayoutDirection::VERTICAL);
+
+    auto iconNode = GetCurSecCompChildNode(V2::IMAGE_ETS_TAG);
+    ASSERT_NE(iconNode, nullptr);
+    auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(iconProp, nullptr);
+    ImageSourceInfo iconSrc = iconProp->GetImageSourceInfo().value_or(ImageSourceInfo());
+    EXPECT_EQ(iconSrc.GetFillColor().value_or(Color()), Color::RED);
+    auto textNode = GetCurSecCompChildNode(V2::TEXT_ETS_TAG);
+    ASSERT_NE(textNode, nullptr);
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProp, nullptr);
+    EXPECT_EQ(textProp->GetFontSize().value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
+    EXPECT_EQ(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL), Ace::FontStyle::ITALIC);
+    EXPECT_EQ(textProp->GetFontWeight().value_or(FontWeight::MEDIUM), FontWeight::BOLDER);
+    std::vector<std::string> emptyVec;
+    auto fontFamily = textProp->GetFontFamily().value_or(emptyVec);
+    ASSERT_FALSE(fontFamily.empty());
+    EXPECT_EQ(fontFamily[0], "testFont");
+    EXPECT_EQ(textProp->GetTextColor().value_or(Color()), Color::GREEN);
+
+    auto buttonNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    auto borderColor = buttonRender->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_EQ(borderColor.leftColor.value_or(Color()), Color::GREEN);
+    auto& widthProp = buttonProp->GetBorderWidthProperty();
+    ASSERT_NE(widthProp, nullptr);
+    EXPECT_EQ(widthProp->leftDimen.value_or(Dimension(0.0)).ConvertToVp(), 15.0); // 15.0 vp
+    auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
+    EXPECT_EQ(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+    EXPECT_EQ(buttonRender->GetBackgroundColor().value_or(Color()), Color::GRAY);
+}
+
+/**
+ * @tc.name: SecurityComponentPastePropertyTest006
+ * @tc.desc: Test set security component property without background
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest006, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(0, 0, BUTTON_TYPE_NULL, V2::PASTE_BUTTON_ETS_TAG);
+    PasteButtonModelNG pasteSc;
+    pasteSc.SetBackgroundColor(Color::GRAY);
+    pasteSc.SetBackgroundBorderWidth(Dimension(15.0)); // 15.0 vp
+    pasteSc.SetBackgroundBorderColor(Color::GREEN);
+    pasteSc.SetBackgroundBorderStyle(BorderStyle::DOTTED);
+    pasteSc.SetBackgroundBorderRadius(Dimension(15.0)); // 15.0 vp
+    pasteSc.SetBackgroundPadding(Dimension(25.0)); // 25.0 vp
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_NE(property->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_NE(property->GetBackgroundRightPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_NE(property->GetBackgroundTopPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+    EXPECT_NE(property->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ConvertToVp(), 25.0); // 25.0 vp
+
+    auto buttonNode = GetCurSecCompChildNode(V2::BUTTON_ETS_TAG);
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonProp, nullptr);
+    auto buttonRender = buttonNode->GetRenderContext();
+    ASSERT_NE(buttonRender, nullptr);
+    auto borderColor = buttonRender->GetBorderColor().value_or(BorderColorProperty());
+    EXPECT_NE(borderColor.leftColor.value_or(Color()), Color::GREEN);
+    auto& widthProp = buttonProp->GetBorderWidthProperty();
+    ASSERT_EQ(widthProp, nullptr);
+    auto borderStyle = buttonRender->GetBorderStyle().value_or(BorderStyleProperty());
+    EXPECT_NE(borderStyle.styleLeft.value_or(BorderStyle::SOLID), BorderStyle::DOTTED);
+}
+
+/**
+ * @tc.name: SecurityComponentPastePropertyTest007
+ * @tc.desc: Test set security component property without icon
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePropertyTest007, TestSize.Level1)
+{
+    CreateSecurityComponentNotFinish(1, -1, static_cast<int32_t>(ButtonType::CAPSULE),
+        V2::PASTE_BUTTON_ETS_TAG);
+    PasteButtonModelNG pasteSc;
+    pasteSc.SetTextIconSpace(Dimension(15.0)); // 15.0vp
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetTextIconSpace().value_or(Dimension(0.0)).ConvertToVp(), 0.0);
+}
+
+/**
+ * @tc.name: SecurityComponentPastePatternTest001
+ * @tc.desc: Test default security component modifyDone
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::PASTE_BUTTON_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_TRUE(pattern->isAppearCallback_);
+    EXPECT_NE(pattern->clickListener_, nullptr);
+
+    auto secCompGesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(secCompGesture, nullptr);
+    EXPECT_EQ(secCompGesture->GetHitTestMode(), HitTestMode::HTMDEFAULT);
+
+    // modifydone again
+    pattern->OnModifyDone();
+    EXPECT_TRUE(pattern->isAppearCallback_);
+    EXPECT_NE(pattern->clickListener_, nullptr);
+}
+
+/**
+ * @tc.name: SecurityComponentPastePatternTest002
+ * @tc.desc: Test event callback
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPastePatternTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::PASTE_BUTTON_ETS_TAG);
+
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto secCompGesture = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(secCompGesture, nullptr);
+    auto clickListener = secCompGesture->clickEventActuator_->clickEvents_.back();
+    ASSERT_NE(clickListener, nullptr);
+    ASSERT_NE(clickListener->callback_, nullptr);
+    GestureEvent info;
+    clickListener->callback_(info);
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_NE(eventHub->onAppear_, nullptr);
+    ASSERT_NE(eventHub->onDisappear_, nullptr);
+    eventHub->onAppear_();
+    eventHub->onDisappear_();
+    ASSERT_EQ(pattern->scId_, -1);
+}
+
+/**
+ * @tc.name: SecurityComponentPasteLayoutAlgoTest001
+ * @tc.desc: Test default layout algo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteLayoutAlgoTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::PASTE_BUTTON_ETS_TAG);
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto layoutAlgo = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgo, nullptr);
+
+    auto layoutWrapper = CreateSecurityComponentLayoutWrapper(frameNode);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutAlgo->Measure(layoutWrapper.rawPtr_);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
+    property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+    pattern->OnModifyDone();
+
+    layoutAlgo->Measure(layoutWrapper.rawPtr_);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Height(), DEFAULT_BUTTON_SIZE);
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize().Width(), DEFAULT_BUTTON_SIZE);
+}
+
+/**
+ * @tc.name: SecurityComponentPasteAccessibilityPropertyTest001
+ * @tc.desc: Test security component accessibility property
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteAccessibilityPropertyTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_EQ(frameNode->GetTag(), V2::PASTE_BUTTON_ETS_TAG);
+    auto pattern = frameNode->GetPattern<SecurityComponentPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    auto accessibility = pattern->CreateAccessibilityProperty();
+    ASSERT_NE(accessibility, nullptr);
+    accessibility->SetHost(frameNode);
+}
+
+/**
+ * @tc.name: SecurityComponentGetIconResourceTest001
+ * @tc.desc: Test set security component property with invalid icon
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentGetIconResourceTest001, TestSize.Level1)
+{
+    InternalResource::ResourceId id;
+    EXPECT_FALSE(LocationButtonModelNG::GetInstance()->GetIconResource(-1, id));
+    EXPECT_FALSE(LocationButtonModelNG::GetInstance()->GetIconResource(ICON_RESOURCE_TABLE + 1, id));
+    EXPECT_FALSE(PasteButtonModelNG::GetInstance()->GetIconResource(-1, id));
+    EXPECT_FALSE(PasteButtonModelNG::GetInstance()->GetIconResource(ICON_RESOURCE_TABLE + 1, id));
+    EXPECT_FALSE(SaveButtonModelNG::GetInstance()->GetIconResource(-1, id));
+    EXPECT_FALSE(SaveButtonModelNG::GetInstance()->GetIconResource(ICON_RESOURCE_TABLE + 1, id));
+}
+
+#ifdef SECURITY_COMPONENT_ENABLE
+/**
+ * @tc.name: SecurityComponentHandlerTest001
+ * @tc.desc: Test security component handler
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    RefPtr<FrameNode> invalidFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), "test");
+    int32_t scId;
+    GestureEvent info;
+
+    ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(invalidFrameNode, scId), -1);
+    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(invalidFrameNode, 0), -1);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(-1), -1);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(-1, frameNode, info), -1);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, invalidFrameNode, info), -1);
+}
+
+/**
+ * @tc.name: SecurityComponentHandlerTest002
+ * @tc.desc: Test security component handler
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    int32_t scId;
+    GestureEvent info;
+
+    ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
+    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, 0), -1);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0),
+        OHOS::Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_COMPONENT_NOT_EXIST);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, frameNode, info), -1);
+}
+
+/**
+ * @tc.name: SecurityComponentHandlerTest003
+ * @tc.desc: Test security component handler
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest003, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::LOCATION_BUTTON_ETS_TAG);
+    int32_t scId;
+    GestureEvent info;
+
+    ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
+    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, 0), -1);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0),
+        OHOS::Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_COMPONENT_NOT_EXIST);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, frameNode, info), -1);
+}
+
+/**
+ * @tc.name: SecurityComponentHandlerTest004
+ * @tc.desc: Test security component handler
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    int32_t scId;
+    GestureEvent info;
+
+    ASSERT_EQ(SecurityComponentHandler::RegisterSecurityComponent(frameNode, scId), -1);
+    ASSERT_EQ(SecurityComponentHandler::UpdateSecurityComponent(frameNode, 0), -1);
+    ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(0),
+        OHOS::Security::SecurityComponent::SCErrCode::SC_SERVICE_ERROR_COMPONENT_NOT_EXIST);
+    ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(0, frameNode, info), -1);
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest001
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    // security component is not completely displayed
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    RefPtr<RenderContext> parentRenderContext = parentFrameNode->GetRenderContext();
+    auto parentFrameRect = parentRenderContext->GetPaintRectWithTransform();
+    RefPtr<RenderContext> childRenderContext = childFrameNode->GetRenderContext();
+    auto childFrameRect = childRenderContext->GetPaintRectWithTransform();
+    ASSERT_EQ(parentFrameRect.Width(), childFrameRect.Width());
+    ASSERT_EQ(parentFrameRect.Height(), childFrameRect.Height());
+
+    PixStretchEffectOption pixelStretchEffectOption;
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdatePixelStretchEffect(pixelStretchEffectOption);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest002
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateLightUpEffect(1);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest003
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest003, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateSphericalEffect(0);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetSphericalEffect().value(), 0.0f);
+    renderContext->UpdateSphericalEffect(1);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest004
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest004, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateForegroundColor(Color::TRANSPARENT);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetForegroundColor().value(), Color::TRANSPARENT);
+    renderContext->UpdateForegroundColor(Color::GRAY);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest005
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest005, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    RefPtr<BasicShape> basicShape;
+    renderContext->UpdateClipMask(basicShape);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest006
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest006, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateClipEdge(true);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest007
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest007, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontColorBlend(Color::TRANSPARENT);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetFrontColorBlend().value(), Color::TRANSPARENT);
+    renderContext->UpdateFrontColorBlend(Color::GRAY);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest008
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest008, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontHueRotate(0);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetFrontHueRotate().value(), 0.0f);
+    renderContext->UpdateFrontHueRotate(MAX_ROTATE);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetFrontHueRotate().value(), MAX_ROTATE);
+    renderContext->UpdateFrontHueRotate(1);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest009
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest009, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontSepia(0.0_vp);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetFrontSepia().value().ConvertToVp(), 0.0f);
+    renderContext->UpdateFrontSepia(1.0_vp);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest010
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest010, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontInvert(0.0_vp);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetFrontInvert().value().ConvertToVp(), 0.0f);
+    renderContext->UpdateFrontInvert(1.0_vp);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest011
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest011, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontContrast(1.0_vp);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetFrontContrast().value().ConvertToVp(), 1.0f);
+    renderContext->UpdateFrontContrast(2.0_vp);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest012
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest012, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontSaturate(1.0_vp);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetFrontSaturate().value().ConvertToVp(), 1.0f);
+    renderContext->UpdateFrontSaturate(2.0_vp);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest013
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest013, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontGrayScale(0.0_vp);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f);
+    renderContext->UpdateFrontGrayScale(1.0_vp);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest014
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest014, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontBlurRadius(0.0_px);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest015
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest015, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto property = parentFrameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateVisibility(VisibleType::VISIBLE);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(property->GetVisibility().value(), VisibleType::VISIBLE);
+    property->UpdateVisibility(VisibleType::INVISIBLE);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest016
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest016, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateFrontBrightness(1.0_vp);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetFrontBrightness().value().ConvertToVp(), 1.0f);
+    renderContext->UpdateFrontBrightness(2.0_vp);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest017
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest017, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    auto renderContext = parentFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateOpacity(1);
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_EQ(renderContext->GetOpacity().value(), 1.0f);
+    renderContext->UpdateOpacity(2);
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+}
+#endif
 } // namespace OHOS::Ace::NG

@@ -15,18 +15,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MASK_PROGRESS_MOON_PROGRESS_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MASK_PROGRESS_MOON_PROGRESS_MODIFIER_H
 
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace::NG {
-class MoonProgressModifier : public Rosen::RSOverlayStyleModifier {
+class MoonProgressModifier : public OverlayModifier {
 public:
-    MoonProgressModifier() = default;
+    MoonProgressModifier();
     ~MoonProgressModifier() override = default;
     
-    void Draw(RSDrawingContext& context) const override;
+    void onDraw(DrawingContext& context) override;
 
     void SetMaskColor(LinearColor color);
     void SetValue(float value);
@@ -34,16 +32,20 @@ public:
     float GetMaxValue();
     void InitRatio();
     void SetMoonAnimate(float value) const;
+    void SetBigRadius(const SizeF& frameSize);
 
 private:
     void PaintSquareMoon(RSCanvas& canvas, const SizeF& frameSize) const;
 
     // Animatable
-    std::shared_ptr<Rosen::RSAnimatableProperty<LinearColor>> maskColor_;
-    std::shared_ptr<Rosen::RSAnimatableProperty<float>> ratio_;
+    RefPtr<AnimatablePropertyColor> maskColor_;
+    RefPtr<AnimatablePropertyFloat> ratio_;
+    RefPtr<AnimatablePropertyFloat> value_;
     // No animatable
-    std::shared_ptr<Rosen::RSProperty<float>> value_;
-    std::shared_ptr<Rosen::RSProperty<float>> maxValue_;
+    RefPtr<PropertyFloat> maxValue_;
+    // Others
+    float bigRadius_ = .0f;
+    float smallRadius_ = .0f;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MASK_PROGRESS_MOON_PROGRESS_MODIFIER_H

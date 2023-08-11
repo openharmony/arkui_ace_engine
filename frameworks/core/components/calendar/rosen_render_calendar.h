@@ -23,6 +23,9 @@
 #include "third_party/txt/src/txt/text_style.h"
 
 #include "core/components/calendar/render_calendar.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Rosen {
     class DrawCmdList;
@@ -161,7 +164,11 @@ private:
     FontWeight dayFontWeight_ = FontWeight::W500;
     FontWeight lunarDayFontWeight_ = FontWeight::W500;
     FontWeight workStateFontWeight_ = FontWeight::W400;
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<Rosen::DrawCmdList> drawCmdList_;
+#else
+    std::shared_ptr<RSDrawCmdList> drawCmdList_;
+#endif
 };
 
 } // namespace OHOS::Ace

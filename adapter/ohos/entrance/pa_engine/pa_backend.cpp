@@ -36,31 +36,17 @@ RefPtr<Backend> Backend::Create()
 
 PaBackend::~PaBackend() noexcept
 {
-    // To guarantee the jsBackendEngine_ released in js thread
-    auto jsTaskExecutor = GetAnimationJsTask();
-    RefPtr<JsBackendEngine> jsBackendEngine;
-    jsBackendEngine.Swap(jsBackendEngine_);
-    jsTaskExecutor.PostTask([jsBackendEngine] {});
+    LOGI("PaBackend destructor.");
 }
 
-SingleTaskExecutor PaBackend::GetAnimationJsTask()
-{
-    return SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
-}
-
-bool PaBackend::Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExecutor)
+bool PaBackend::Initialize(BackendType type, SrcLanguage language)
 {
     LOGI("PaBackend initialize begin.");
-    CHECK_NULL_RETURN(taskExecutor, false);
     type_ = type;
-    taskExecutor_ = taskExecutor;
+    language_ = language;
 
-    taskExecutor->PostTask(
-        [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), taskExecutor = taskExecutor_, type = type_] {
-            auto jsBackendEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsBackendEngine);
-            jsBackendEngine->Initialize(taskExecutor, type);
-        }, TaskExecutor::TaskType::JS);
+    CHECK_NULL_RETURN_NOLOG(jsBackendEngine_, false);
+    jsBackendEngine_->Initialize(type, language);
 
     LOGI("PaBackend initialize end.");
     return true;
@@ -79,13 +65,13 @@ void PaBackend::UpdateState(Backend::State state)
         case Backend::State::ON_CREATE:
             break;
         case Backend::State::ON_DESTROY:
-            if (taskExecutor_) {
-                taskExecutor_->PostSyncTask(
+            if (jsBackendEngine_) {
+                jsBackendEngine_->PostSyncTask(
                     [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)] {
                         auto jsBackendEngine = weakEngine.Upgrade();
                         CHECK_NULL_VOID_NOLOG(jsBackendEngine);
                         jsBackendEngine->DestroyApplication("pa");
-                    }, TaskExecutor::TaskType::JS);
+                    });
             }
             break;
         default:
@@ -95,13 +81,13 @@ void PaBackend::UpdateState(Backend::State state)
 
 void PaBackend::OnCommand(const OHOS::AAFwk::Want& want, int startId)
 {
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostTask(
+    CHECK_NULL_VOID(jsBackendEngine_);
+    jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), want, startId] {
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID_NOLOG(jsBackendEngine);
             jsBackendEngine->OnCommand(want, startId);
-        }, TaskExecutor::TaskType::JS);
+        });
 }
 
 void PaBackend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
@@ -117,14 +103,14 @@ int32_t PaBackend::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& v
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, value, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Insert(uri, value, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -135,14 +121,14 @@ std::shared_ptr<AppExecFwk::PacMap> PaBackend::Call(
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, method, arg, pacMap, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Call(method, arg, pacMap, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -153,14 +139,14 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> PaBackend::Query(
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, columns, predicates, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Query(uri, columns, predicates, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -171,14 +157,14 @@ int32_t PaBackend::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& v
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, value, predicates, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Update(uri, value, predicates, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -188,14 +174,14 @@ int32_t PaBackend::Delete(const Uri& uri, const OHOS::NativeRdb::DataAbilityPred
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, predicates, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->Delete(uri, predicates, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -205,14 +191,14 @@ int32_t PaBackend::BatchInsert(const Uri& uri, const std::vector<OHOS::NativeRdb
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, values, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->BatchInsert(uri, values, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -222,14 +208,14 @@ std::string PaBackend::GetType(const Uri& uri)
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->GetType(uri, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -239,14 +225,14 @@ std::vector<std::string> PaBackend::GetFileTypes(const Uri& uri, const std::stri
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, mimeTypeFilter, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->GetFileTypes(uri, mimeTypeFilter, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -256,14 +242,14 @@ int32_t PaBackend::OpenFile(const Uri& uri, const std::string& mode)
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, mode, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->OpenFile(uri, mode, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -273,14 +259,14 @@ int32_t PaBackend::OpenRawFile(const Uri& uri, const std::string& mode)
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, mode, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->OpenRawFile(uri, mode, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -290,14 +276,14 @@ Uri PaBackend::NormalizeUri(const Uri& uri)
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->NormalizeUri(uri, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -307,14 +293,14 @@ Uri PaBackend::DenormalizeUri(const Uri& uri)
     CallingInfo callingInfo;
     NAPI_RemoteObject_getCallingInfo(callingInfo);
     LOGD("Calling token id is %{public}u.", callingInfo.callingTokenId);
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, uri, callingInfo] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->DenormalizeUri(uri, callingInfo);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
@@ -337,7 +323,7 @@ void PaBackend::ParseManifest()
 void PaBackend::LoadPa(const std::string& url, const OHOS::AAFwk::Want& want)
 {
     LOGD("LoadPa: %{private}s.", url.c_str());
-    CHECK_NULL_VOID(taskExecutor_);
+    CHECK_NULL_VOID(jsBackendEngine_);
 
     std::unique_lock<std::mutex> lock(LoadPaMutex_);
     if (isStagingPageExist_) {
@@ -350,19 +336,19 @@ void PaBackend::LoadPa(const std::string& url, const OHOS::AAFwk::Want& want)
     isStagingPageExist_ = true;
 
     if (type_ == BackendType::FORM) {
-        taskExecutor_->PostSyncTask(
+        jsBackendEngine_->PostSyncTask(
             [weak = WeakPtr<JsBackendEngine>(jsBackendEngine_), url, want] {
                 auto jsBackendEngine = weak.Upgrade();
                 CHECK_NULL_VOID_NOLOG(jsBackendEngine);
                 jsBackendEngine->LoadJs(url, want);
-            }, TaskExecutor::TaskType::JS);
+            });
     } else {
-        taskExecutor_->PostTask(
+        jsBackendEngine_->PostTask(
             [weak = WeakPtr<JsBackendEngine>(jsBackendEngine_), url, want] {
                 auto jsBackendEngine = weak.Upgrade();
                 CHECK_NULL_VOID_NOLOG(jsBackendEngine);
                 jsBackendEngine->LoadJs(url, want);
-            }, TaskExecutor::TaskType::JS);
+            });
     }
 }
 
@@ -377,120 +363,120 @@ void PaBackend::RunPa(const std::string& url, const OHOS::AAFwk::Want& want)
 
 void PaBackend::OnCreate(const OHOS::AAFwk::Want& want)
 {
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_VOID(jsBackendEngine_);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), want] {
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID_NOLOG(jsBackendEngine);
             jsBackendEngine->OnCreate(want);
-        }, TaskExecutor::TaskType::JS);
+        });
 }
 
 void PaBackend::OnDelete(const int64_t formId)
 {
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostTask(
+    CHECK_NULL_VOID(jsBackendEngine_);
+    jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formId] {
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID_NOLOG(jsBackendEngine);
             jsBackendEngine->OnDelete(formId);
-        }, TaskExecutor::TaskType::JS);
+        });
 }
 
 void PaBackend::OnTriggerEvent(const int64_t formId, const std::string& message)
 {
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostTask(
+    CHECK_NULL_VOID(jsBackendEngine_);
+    jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formId, message] {
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID_NOLOG(jsBackendEngine);
             jsBackendEngine->OnTriggerEvent(formId, message);
-        }, TaskExecutor::TaskType::JS);
+        });
 }
 
 void PaBackend::OnUpdate(const int64_t formId)
 {
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostTask(
+    CHECK_NULL_VOID(jsBackendEngine_);
+    jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formId] {
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID_NOLOG(jsBackendEngine);
             jsBackendEngine->OnUpdate(formId);
-        }, TaskExecutor::TaskType::JS);
+        });
 }
 
 void PaBackend::OnCastTemptoNormal(const int64_t formId)
 {
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostTask(
+    CHECK_NULL_VOID(jsBackendEngine_);
+    jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formId] {
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID_NOLOG(jsBackendEngine);
             jsBackendEngine->OnCastTemptoNormal(formId);
-        }, TaskExecutor::TaskType::JS);
+        });
 }
 
 void PaBackend::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
 {
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostTask(
+    CHECK_NULL_VOID(jsBackendEngine_);
+    jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formEventsMap] {
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID_NOLOG(jsBackendEngine);
             jsBackendEngine->OnVisibilityChanged(formEventsMap);
-        }, TaskExecutor::TaskType::JS);
+        });
 }
 
 int32_t PaBackend::OnAcquireFormState(const OHOS::AAFwk::Want& want)
 {
     auto ret = (int32_t)AppExecFwk::FormState::UNKNOWN;
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, want] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->OnAcquireFormState(want);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
 sptr<IRemoteObject> PaBackend::OnConnect(const OHOS::AAFwk::Want& want)
 {
     sptr<IRemoteObject> ret = nullptr;
-    CHECK_NULL_RETURN(taskExecutor_, ret);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, ret);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &ret, want] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 ret = jsBackendEngine->OnConnectService(want);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return ret;
 }
 
 void PaBackend::OnDisConnect(const OHOS::AAFwk::Want& want)
 {
-    CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostTask(
+    CHECK_NULL_VOID(jsBackendEngine_);
+    jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), want] {
             auto jsBackendEngine = weakEngine.Upgrade();
             CHECK_NULL_VOID_NOLOG(jsBackendEngine);
             jsBackendEngine->OnDisconnectService(want);
-        }, TaskExecutor::TaskType::JS);
+        });
 }
 
 bool PaBackend::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 {
     bool result = false;
-    CHECK_NULL_RETURN(taskExecutor_, result);
-    taskExecutor_->PostSyncTask(
+    CHECK_NULL_RETURN(jsBackendEngine_, result);
+    jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), &result, formId, &wantParams] {
             auto jsBackendEngine = weakEngine.Upgrade();
             if (jsBackendEngine != nullptr) {
                 result = jsBackendEngine->OnShare(formId, wantParams);
             }
-        }, TaskExecutor::TaskType::JS);
+        });
     return result;
 }
 } // namespace OHOS::Ace

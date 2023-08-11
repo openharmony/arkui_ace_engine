@@ -64,13 +64,13 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
 void UpdatePaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty, const SizeF& selfSize,
     PaddingPropertyF& paddingValue);
 
-void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
+ACE_FORCE_EXPORT void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size, Axis reserveAxis = Axis::NONE);
+ACE_FORCE_EXPORT void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size);
 
 void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size, Axis reserveAxis = Axis::NONE);
+void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
 float GetCrossAxisSize(const SizeF& size, Axis axis);
 
@@ -97,7 +97,8 @@ void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
  * @param usingMaxSize When the component cannot confirm the size, it decides whether to use the max or min value.
  * @return SizeF the node size info.
  */
-SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingMaxSize);
+ACE_FORCE_EXPORT SizeF CreateIdealSize(
+    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool usingMaxSize);
 
 /**
  * @brief Create node IdealSize.
@@ -107,7 +108,20 @@ SizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, Meas
  * @param measureType the measure info.
  * @return SizeF the node size info.
  */
-OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType);
+ACE_FORCE_EXPORT OptionalSizeF CreateIdealSize(
+    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType);
+
+/**
+ * @brief Create node IdealSize by percent reference.
+ *
+ * @param layoutConstraint the constraint of current node.
+ * @param axis the axis of this node.
+ * @param measureType the measure info.
+ * @param needToConstrain constraint the result idealSize or not by min and max size in layoutConstraint.
+ * @return SizeF the node size info.
+ */
+OptionalSizeF CreateIdealSizeByPercentRef(
+    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain = false);
 
 /**
  * @brief Create max size for children which is parent's max size minus margin and padding.

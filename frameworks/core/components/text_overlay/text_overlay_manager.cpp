@@ -22,7 +22,11 @@
 #include "core/components/stack/stack_element.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "txt/paragraph_txt.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -358,7 +362,11 @@ void TextOverlayBase::InitAnimation(const WeakPtr<PipelineContext>& pipelineCont
     animator_->Play();
 }
 
+#ifndef USE_ROSEN_DRAWING
 void TextOverlayBase::PaintSelection(SkCanvas* canvas, const Offset& globalOffset)
+#else
+void TextOverlayBase::PaintSelection(RSCanvas* canvas, const Offset& globalOffset)
+#endif
 {
     selectedRect_.clear();
     if (!IsSelectiveDevice()) {
@@ -378,6 +386,7 @@ void TextOverlayBase::PaintSelection(SkCanvas* canvas, const Offset& globalOffse
     if (boxes.empty()) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->save();
     SkPaint paint;
     paint.setColor(selectedColor_.GetValue());
@@ -396,6 +405,26 @@ void TextOverlayBase::PaintSelection(SkCanvas* canvas, const Offset& globalOffse
         }
     }
     canvas->restore();
+#else
+    canvas->Save();
+    RSPen pen;
+    pen.SetColor(selectedColor_.GetValue());
+    Offset effectiveOffset = textOffsetForShowCaret_;
+    canvas->AttachPen(pen);
+    for (const auto& box : boxes) {
+        auto selectionRect = ConvertSkRect(box.rect) + effectiveOffset;
+        selectedRect_.emplace_back(selectionRect + globalOffset);
+        if (box.direction == txt::TextDirection::ltr) {
+            canvas->DrawRect(RSRect(
+                selectionRect.Left(), selectionRect.Top(), selectionRect.Right(), selectionRect.Bottom()));
+        } else {
+            canvas->DrawRect(RSRect(
+                selectionRect.Right(), selectionRect.Top(), selectionRect.Left(), selectionRect.Bottom()));
+        }
+    }
+    canvas->DetachPen();
+    canvas->Restore();
+#endif
 }
 
 void TextOverlayBase::InitSelection(const Offset& pos, const Offset& globalOffset)

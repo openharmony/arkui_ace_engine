@@ -21,21 +21,24 @@
 
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
+class RosenRenderContext;
 using TaskFunc = std::function<void(CanvasPaintMethod&, PaintWrapper*)>;
 class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    explicit CanvasPaintMethod(const WeakPtr<PipelineBase> context)
+    explicit CanvasPaintMethod(const WeakPtr<PipelineBase> context, RefPtr<RenderingContext2DModifier> contentModifier)
     {
+        matrix_.reset();
         context_ = context;
         imageShadow_ = std::make_unique<Shadow>();
+        contentModifier_ = contentModifier;
         InitImageCallbacks();
     }
 
     ~CanvasPaintMethod() override = default;
 
-    CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
     void PushTask(const TaskFunc& task)
     {
@@ -60,9 +63,13 @@ public:
     void CloseImageBitmap(const std::string& src);
     void DrawImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage);
-    std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
+    std::unique_ptr<Ace::ImageData> GetImageData(RefPtr<RosenRenderContext> renderContext,
+        double left, double top, double width, double height);
     void TransferFromImageBitmap(PaintWrapper* paintWrapper, const RefPtr<OffscreenCanvasPattern>& offscreenCanvas);
-    std::string ToDataURL(const std::string& args);
+    std::string ToDataURL(RefPtr<RosenRenderContext> renderContext, const std::string& args);
+#ifndef USE_ROSEN_DRAWING
+    bool DrawBitmap(RefPtr<RosenRenderContext> renderContext, SkBitmap& currentBitmap);
+#endif
     std::string GetJsonData(const std::string& path);
 
     void FillText(
@@ -75,31 +82,43 @@ public:
     void SetTransform(const TransformParam& param) override;
 
 private:
-    void PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper);
-    void CreateBitmap(SizeF contentSize);
-
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImage> GetImage(const std::string& src) override;
+#else
+    std::shared_ptr<RSImage> GetImage(const std::string& src) override;
+#endif
 
     void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
         bool isStroke, bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = false);
     void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
-    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
+#ifndef USE_ROSEN_DRAWING
+    void PaintShadow(
+        const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint = nullptr) override;
+#else
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas) override;
+#endif
     OffsetF GetContentOffset(PaintWrapper* paintWrapper) const override
     {
-        return paintWrapper ? paintWrapper->GetContentOffset() : OffsetF(0.0f, 0.0f);
+        return OffsetF(0.0f, 0.0f);
     }
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
+#ifndef USE_ROSEN_DRAWING
     SkCanvas* GetRawPtrOfSkCanvas() override
     {
         return skCanvas_.get();
     }
+#else
+    RSCanvas* GetRawPtrOfRSCanvas() override
+    {
+        return rsCanvas_.get();
+    }
+#endif
 
     std::list<TaskFunc> tasks_;
-    SizeF lastLayoutSize_;
 
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
     RefPtr<ImageCache> imageCache_;

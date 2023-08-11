@@ -51,15 +51,19 @@ public:
     virtual void SetControlButtonHeight(const Dimension& height);
     virtual void SetControlButtonLeft(const Dimension& left);
     virtual void SetControlButtonTop(const Dimension& top);
-    virtual void SetControlButtonShowIconStr(const std::string& showIconStr);
-    virtual void SetControlButtonHiddenIconStr(const std::string& hiddenIconStr);
-    virtual void SetControlButtonSwitchingIconStr(const std::string& switchingIconStr);
+    virtual void SetControlButtonShowIconInfo(
+        const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    virtual void SetControlButtonHiddenIconInfo(
+        const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
+    virtual void SetControlButtonSwitchingIconInfo(
+        const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
     virtual void SetOnChange(std::function<void(const bool)>&& onChange);
     virtual void SetDividerStrokeWidth(const Dimension& strokeWidth);
     virtual void SetDividerColor(const Color& color);
     virtual void SetDividerStartMargin(const Dimension& startMargin);
     virtual void SetDividerEndMargin(const Dimension& endMargin);
     virtual void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent);
+    virtual void SetMinContentWidth(const Dimension& minContentWidth);
 
 private:
     static std::unique_ptr<SideBarContainerModel> instance_;
@@ -67,8 +71,6 @@ private:
 
     virtual void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode);
     virtual void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode);
-    virtual void InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
-        const RefPtr<NG::FrameNode>& sideBarContentFrameNode);
     virtual void MarkNeedInitRealSideBarWidth();
 };
 } // namespace OHOS::Ace::NG

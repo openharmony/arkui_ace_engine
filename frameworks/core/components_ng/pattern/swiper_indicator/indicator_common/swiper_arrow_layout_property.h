@@ -39,10 +39,10 @@ public:
         value->propEnabled_ = CloneEnabled();
         value->propDisplayArrow_ = CloneDisplayArrow();
         value->propHoverShow_ = CloneHoverShow();
-        value->propIsShowBoard_ = CloneIsShowBoard();
-        value->propIsSiderMiddle_ = CloneIsSiderMiddle();
-        value->propBoardSize_ = CloneBoardSize();
-        value->propBoardColor_ = CloneBoardColor();
+        value->propIsShowBackground_ = CloneIsShowBackground();
+        value->propIsSidebarMiddle_ = CloneIsSidebarMiddle();
+        value->propBackgroundSize_ = CloneBackgroundSize();
+        value->propBackgroundColor_ = CloneBackgroundColor();
         value->propArrowSize_ = CloneArrowSize();
         value->propArrowColor_ = CloneArrowColor();
         return value;
@@ -57,10 +57,10 @@ public:
         ResetEnabled();
         ResetDisplayArrow();
         ResetHoverShow();
-        ResetIsShowBoard();
-        ResetIsSiderMiddle();
-        ResetBoardSize();
-        ResetBoardColor();
+        ResetIsShowBackground();
+        ResetIsSidebarMiddle();
+        ResetBackgroundSize();
+        ResetBackgroundColor();
         ResetArrowSize();
         ResetArrowColor();
     }
@@ -71,10 +71,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Enabled, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayArrow, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverShow, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBoard, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSiderMiddle, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BoardSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BoardColor, Color, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowBackground, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSidebarMiddle, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowColor, Color, PROPERTY_UPDATE_NORMAL);
 };

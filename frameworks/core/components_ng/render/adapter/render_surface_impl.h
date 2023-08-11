@@ -64,6 +64,8 @@ public:
 
     void SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback) override;
 
+    void SetIsFullScreen(bool isFullScreen) override;
+
 private:
     WeakPtr<NG::RenderContext> renderContext_;
     RefPtr<ExtSurface> extSurface_;

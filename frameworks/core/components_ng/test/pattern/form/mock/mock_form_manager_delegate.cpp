@@ -57,9 +57,9 @@ void FormManagerDelegate::AddRenderDelegate() {}
 
 void FormManagerDelegate::RegisterRenderDelegateEvent() {}
 
-void FormManagerDelegate::AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback &callback) {}
+void FormManagerDelegate::AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback) {}
 
-void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle &callback) {}
+void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback) {}
 
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate) {}
 
@@ -67,5 +67,17 @@ void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::Pointe
 
 void FormManagerDelegate::NotifySurfaceChange(float width, float height) {}
 
-void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback &&callback) {}
+void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback) {}
+
+void FormManagerDelegate::AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback) {}
+
+void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback) {}
+
+void FormManagerDelegate::ResetForm() {}
+
+void FormManagerDelegate::ReleaseForm() {}
+
+void FormManagerDelegate::ReleaseRenderer() {}
+
+void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) {}
 } // namespace OHOS::Ace

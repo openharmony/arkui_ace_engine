@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_DRAG_TEXT_DRAG_BASE_H
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -27,8 +28,8 @@ using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>
 
 // inherited by TextPattern and TextFieldPattern
 // Text Drag polymorphism
-class TextDragBase : public virtual AceType {
-    DECLARE_ACE_TYPE(TextDragBase, AceType);
+class TextDragBase : public virtual SelectionHost {
+    DECLARE_ACE_TYPE(TextDragBase, SelectionHost);
 
 public:
     TextDragBase() = default;
@@ -42,16 +43,22 @@ public:
 
     virtual std::vector<RSTypographyProperties::TextBox> GetTextBoxes() = 0;
     virtual OffsetF GetParentGlobalOffset() const = 0;
-    virtual bool BetweenSelectedPosition(const Offset& globalOffset) = 0;
 
-    virtual void SetDragNode(const RefPtr<FrameNode>& dragNode) = 0;
-    virtual const RefPtr<FrameNode>& GetDragNode() const = 0;
+    virtual RefPtr<FrameNode> MoveDragNode() = 0;
 
     virtual ParagraphT GetDragParagraph() const = 0;
 
     virtual void CloseSelectOverlay() = 0;
     virtual void CreateHandles() = 0;
     virtual bool CloseKeyboard(bool forceClose) = 0;
+
+    virtual void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+        const std::vector<Rect>& rectsForPlaceholders, OffsetF contentOffset) {}
+    
+    virtual OffsetF GetContentOffset()
+    {
+        return OffsetF(0, 0);
+    }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragBase);
 };

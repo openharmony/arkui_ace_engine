@@ -114,7 +114,11 @@ private:
     Border border_;
     Edge padding_;
 
+#ifndef USE_ROSEN_DRAWING
     RSPath path_;
+#else
+    RSRecordingPath path_;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(BubblePaintMethod);
 };

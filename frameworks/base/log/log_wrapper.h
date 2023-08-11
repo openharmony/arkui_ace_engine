@@ -40,7 +40,11 @@
         }                                                                                                       \
     } while (0)
 
+#ifdef ACE_DEBUG_LOG
 #define LOGD(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
+#else
+#define LOGD(fmt, ...) ((void)0)
+#endif
 #define LOGI(fmt, ...) PRINT_LOG(INFO, fmt, ##__VA_ARGS__)
 #define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
 #define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
@@ -73,7 +77,7 @@ enum class LogLevel : uint32_t {
     FATAL,
 };
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW LogWrapper final {
+class ACE_FORCE_EXPORT LogWrapper final {
 public:
     static bool JudgeLevel(LogLevel level)
     {

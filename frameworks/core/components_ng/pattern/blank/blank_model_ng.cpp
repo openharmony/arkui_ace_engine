@@ -33,10 +33,12 @@ void BlankModelNG::Create()
     auto blankNode = FrameNode::GetOrCreateFrameNode(
         V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
     stack->Push(blankNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexGrow, 1.0f);
-    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexShrink, 1.0f);
-    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, AlignSelf, FlexAlign::STRETCH);
-    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, Height, Dimension(0.0, DimensionUnit::VP));
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexGrow, 1.0f);
+        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexShrink, 0.0f);
+        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, AlignSelf, FlexAlign::STRETCH);
+        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, Height, Dimension(0.0, DimensionUnit::VP));
+    }
 }
 
 void BlankModelNG::SetBlankMin(const Dimension& blankMin)
@@ -45,12 +47,14 @@ void BlankModelNG::SetBlankMin(const Dimension& blankMin)
     CHECK_NULL_VOID(blankNode);
     auto layoutProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto result = blankMin;
     if (blankMin.IsNegative()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension());
-        return;
+        result = Dimension();
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, blankMin);
-    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, blankMin);
+    ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result);
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+        ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexBasis, result);
+    }
 }
 
 void BlankModelNG::SetHeight(const Dimension& height)

@@ -45,7 +45,7 @@ ImageLoadingContext::~ImageLoadingContext()
             ImageProvider::CancelTask(src_.GetKey(), WeakClaim(this));
         } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE) {
             // cancel MakeCanvasImage task
-            if (DynamicCast<StaticImageObject>(imageObj_)) {
+            if (InstanceOf<StaticImageObject>(imageObj_)) {
                 ImageProvider::CancelTask(canvasKey_, WeakClaim(this));
             }
         }
@@ -54,20 +54,18 @@ ImageLoadingContext::~ImageLoadingContext()
 
 SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF& dstSize, const SizeF& rawImageSize)
 {
+    if (!srcSize.IsPositive()) {
+        return rawImageSize;
+    }
+
     SizeF targetSize = rawImageSize;
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, rawImageSize);
-    auto viewScale = context->GetViewScale();
-    do {
-        if (!srcSize.IsPositive()) {
-            break;
-        }
-        double widthScale = dstSize.Width() / srcSize.Width() * viewScale;
-        double heightScale = dstSize.Height() / srcSize.Height() * viewScale;
-        if (widthScale < 1.0 && heightScale < 1.0) {
-            targetSize = SizeF(targetSize.Width() * widthScale, targetSize.Height() * heightScale);
-        }
-    } while (false);
+    auto viewScale = context ? context->GetViewScale() : 1.0;
+    double widthScale = dstSize.Width() / srcSize.Width() * viewScale;
+    double heightScale = dstSize.Height() / srcSize.Height() * viewScale;
+    if (widthScale < 1.0 && heightScale < 1.0) {
+        targetSize = SizeF(targetSize.Width() * widthScale, targetSize.Height() * heightScale);
+    }
     return targetSize;
 }
 
@@ -123,35 +121,34 @@ void ImageLoadingContext::OnMakeCanvasImage()
         updateParamsCallback_();
         updateParamsCallback_ = nullptr;
     }
+    auto userDefinedSize = GetSourceSize();
+    SizeF targetSize;
+    if (userDefinedSize) {
+        ImagePainter::ApplyImageFit(imageFit_, *userDefinedSize, dstSize_, srcRect_, dstRect_);
+        targetSize = *userDefinedSize;
+    } else {
+        auto imageSize = GetImageSize();
+        // calculate the srcRect based on original image size
+        ImagePainter::ApplyImageFit(imageFit_, imageSize, dstSize_, srcRect_, dstRect_);
 
-    // step1: do first [ApplyImageFit] to calculate the srcRect based on original image size
-    ImagePainter::ApplyImageFit(imageFit_, GetImageSize(), dstSize_, srcRect_, dstRect_);
+        bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == GetSourceInfo().GetSrcType());
+        if (autoResize_ && !isPixelMapResource) {
+            targetSize = CalculateTargetSize(srcRect_.GetSize(), dstRect_.GetSize(), imageSize);
+            // calculate real srcRect used for paint based on resized image size
+            ImagePainter::ApplyImageFit(imageFit_, targetSize, dstSize_, srcRect_, dstRect_);
+        }
 
-    // step2: calculate resize target
-    auto targetSize = GetImageSize();
-    bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == GetSourceInfo().GetSrcType());
-    if (autoResize_ && !isPixelMapResource) {
-        targetSize =
-            CalculateTargetSize(srcRect_.GetSize(), dstRect_.GetSize(), GetSourceSize().value_or(GetImageSize()));
+        // upscale targetSize if size level is mapped
+        if (targetSize.IsPositive() && sizeLevel_ > targetSize.Width()) {
+            targetSize.ApplyScale(sizeLevel_ / targetSize.Width());
+        }
     }
 
-    // step3: do second [ApplyImageFit] to calculate real srcRect used for paint based on resized image size
-    ImagePainter::ApplyImageFit(imageFit_, targetSize, dstSize_, srcRect_, dstRect_);
-
-    // upscale targetSize if size level is mapped
-    bool forceResize = GetSourceSize().has_value();
-    if (!forceResize && sizeLevel_ > 0) {
-        targetSize.ApplyScale(sizeLevel_ / targetSize.Width());
-    }
-
-    if (auto image = ImageProvider::QueryCanvasImageFromCache(src_, targetSize); image) {
-        SuccessCallback(image);
-        return;
-    }
-    LOGD("start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
-    // step4: [MakeCanvasImage] according to [resizeTarget]
+    LOGD("start MakeCanvasImage: %{public}s, size = %{public}s", imageObj_->GetSourceInfo().ToString().c_str(),
+        targetSize.ToString().c_str());
+    // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
-    imageObj_->MakeCanvasImage(Claim(this), targetSize, forceResize, syncLoad_);
+    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
 }
 
 void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
@@ -163,13 +160,13 @@ void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 
 void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage)
 {
-    canvasImage_ = canvasImage->Clone();
+    canvasImage_ = canvasImage;
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE_SUCCESS);
 }
 
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
-    LOGD("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
+    LOGW("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }
 
@@ -289,25 +286,18 @@ void ImageLoadingContext::SetSourceSize(const std::optional<SizeF>& sourceSize)
 
 std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 {
-    if (sourceSizePtr_ == nullptr) {
-        return std::nullopt;
-    }
+    CHECK_NULL_RETURN_NOLOG(sourceSizePtr_, std::nullopt);
     if (sourceSizePtr_->Width() <= 0.0 || sourceSizePtr_->Height() <= 0.0) {
         LOGW("Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
         return std::nullopt;
     }
-    return std::optional<SizeF>(*sourceSizePtr_);
+    return { *sourceSizePtr_ };
 }
 
 bool ImageLoadingContext::NeedAlt() const
 {
     auto state = stateManager_->GetCurrentState();
     return state != ImageLoadingState::LOAD_SUCCESS;
-}
-
-const std::optional<Color>& ImageLoadingContext::GetSvgFillColor() const
-{
-    return src_.GetFillColor();
 }
 
 void ImageLoadingContext::ResetLoading()

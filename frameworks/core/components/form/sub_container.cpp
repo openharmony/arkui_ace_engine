@@ -497,6 +497,13 @@ void SubContainer::UpdateCard(
     }
 }
 
+void SubContainer::UpdateConfiguration()
+{
+    if (frontend_) {
+        frontend_->OnMediaFeatureUpdate();
+    }
+}
+
 bool SubContainer::Dump(const std::vector<std::string>& params)
 {
     if (pipelineContext_) {

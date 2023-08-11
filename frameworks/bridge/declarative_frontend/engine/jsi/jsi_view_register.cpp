@@ -37,7 +37,6 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
-#include "uicast_interface/uicast_jsi_impl.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -231,9 +230,42 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
 #endif
     UpdateRootComponent(obj);
 
-    {
-        UICastJsiImpl::UpdateRootView();
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    LOGD("Register NamedRoute start");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    // will need three arguments
+    if (argc != 3) {
+        LOGE("The arg is wrong, must have three arguments");
+        return panda::JSValueRef::Undefined(vm);
     }
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsFunction()) {
+        LOGE("The arg is wrong, value must be function");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!secondArg->IsString()) {
+        LOGE("The arg is wrong, value must be string");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
+    if (!thirdArg->IsObject()) {
+        LOGE("The arg is wrong, value must be object");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto engine = EngineHelper::GetEngine(Container::CurrentId());
+    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
+    auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
+    CHECK_NULL_RETURN(jsiEngine, panda::JSValueRef::Undefined(vm));
+
+    jsiEngine->AddToNamedRouterMap(panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)),
+        secondArg->ToString(vm)->ToString(), thirdArg->ToObject(vm));
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -438,7 +470,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
             auto arrayVal = panda::Local<panda::ArrayRef>(secondArg);
             auto len = arrayVal->Length(vm);
             std::vector<std::string> arrayResult;
-            for (int32_t i = 0; i < len; i++) {
+            for (auto i = 0U; i < len; i++) {
                 auto subItemVal = panda::ArrayRef::GetValueAt(vm, arrayVal, i);
                 if (!subItemVal->IsString()) {
                     arrayResult.emplace_back(std::string());
@@ -1028,11 +1060,15 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
 }
 
 #ifdef FORM_SUPPORTED
-void JsRegisterFormViews(BindingTarget globalObj)
+void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
         LOGE("JsRegisterViews can't find runtime");
+        return;
+    }
+    if (isReload) {
+        JsBindFormViews(globalObj, formModuleList, isReload);
         return;
     }
     auto vm = runtime->GetEcmaVm();
@@ -1087,7 +1123,7 @@ void JsRegisterFormViews(BindingTarget globalObj)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
 
-    JsBindFormViews(globalObj);
+    JsBindFormViews(globalObj, formModuleList);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);
@@ -1266,6 +1302,8 @@ void JsRegisterViews(BindingTarget globalObj)
     focusControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "requestFocus"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RequestFocus));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "focusControl"), focusControlObj);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerNamedRoute"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsRegisterNamedRoute));
 
     JsBindViews(globalObj);
 

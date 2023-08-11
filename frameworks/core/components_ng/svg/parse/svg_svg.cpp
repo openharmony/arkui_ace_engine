@@ -34,6 +34,7 @@ RefPtr<SvgNode> SvgSvg::Create()
     return AceType::MakeRefPtr<SvgSvg>();
 }
 
+#ifndef USE_ROSEN_DRAWING
 SkPath SvgSvg::AsPath(const Size& viewPort) const
 {
     SkPath path;
@@ -43,6 +44,17 @@ SkPath SvgSvg::AsPath(const Size& viewPort) const
     }
     return path;
 }
+#else
+RSRecordingPath SvgSvg::AsPath(const Size& viewPort) const
+{
+    RSRecordingPath path;
+    for (const auto& child : children_) {
+        RSRecordingPath childPath = child->AsPath(viewPort);
+        path.Op(path, childPath, RSPathOp::UNION);
+    }
+    return path;
+}
+#endif
 
 Size SvgSvg::GetSize() const
 {
@@ -52,7 +64,7 @@ Size SvgSvg::GetSize() const
     return Size(declaration->GetWidth().Value(), declaration->GetHeight().Value());
 }
 
-const Rect& SvgSvg::GetViewBox() const
+Rect SvgSvg::GetViewBox() const
 {
     auto declaration = AceType::DynamicCast<SvgDeclaration>(declaration_);
     CHECK_NULL_RETURN_NOLOG(declaration, Rect());

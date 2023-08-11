@@ -46,12 +46,13 @@ using AxisEventCallback = std::function<void(const AxisEvent&, const std::functi
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
 using DragEventCallBack = std::function<void(int32_t x, int32_t y, const DragEventAction& action)>;
+using StopDragCallback = std::function<void()>;
 
 constexpr int32_t INSTANCE_ID_UNDEFINED = -1;
 constexpr int32_t INSTANCE_ID_PLATFORM = -2;
 constexpr int32_t MIN_PLUGIN_SUBCONTAINER_ID = 2000000;
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW Container : public virtual AceType {
+class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
 
 public:
@@ -299,13 +300,7 @@ public:
         return false;
     }
 
-    static bool IsForeground()
-    {
-        auto container = Current();
-        return container ? container->state_ == Frontend::State::ON_SHOW : false;
-    }
-
-    virtual void NotifyConfigurationChange(bool) {}
+    virtual void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange = {false, false}) {}
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)
@@ -326,6 +321,27 @@ public:
     std::shared_ptr<NG::DistributedUI>& GetDistributedUI()
     {
         return distributedUI_;
+    }
+
+    virtual bool IsLauncherContainer()
+    {
+        return false;
+    }
+
+    virtual bool IsScenceBoardWindow()
+    {
+        return false;
+    }
+
+    virtual bool IsSceneBoardEnabled()
+    {
+        return false;
+    }
+
+    virtual bool GetCurPointerEventInfo(
+        int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
+    {
+        return false;
     }
 
 protected:

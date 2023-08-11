@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 
 template<typename T>
-class ACE_EXPORT_WITH_PREVIEW Animation : public Interpolator, public ValueListenable<T> {
+class ACE_FORCE_EXPORT Animation : public Interpolator, public ValueListenable<T> {
     DECLARE_ACE_TYPE(Animation, Interpolator);
 
 public:

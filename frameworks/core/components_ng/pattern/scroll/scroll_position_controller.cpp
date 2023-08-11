@@ -24,31 +24,13 @@
 
 namespace OHOS::Ace::NG {
 
-void ScrollPositionController::JumpTo(int32_t index, int32_t source)
+void ScrollPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID_NOLOG(pattern);
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
     CHECK_NULL_VOID_NOLOG(scrollPattern);
     LOGW("jumpTo is not supported now");
-}
-
-bool ScrollPositionController::AnimateTo(
-    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth)
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    if (scrollPattern && scrollPattern->GetAxis() != Axis::NONE) {
-        // TODO: percent support
-        if (position.Unit() == DimensionUnit::PERCENT) {
-            LOGW("not support percent dimension now");
-            return false;
-        }
-        scrollPattern->AnimateTo(-position.ConvertToPx(), duration, curve, false, nullptr);
-        return true;
-    }
-    return false;
 }
 
 void ScrollPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
@@ -67,15 +49,6 @@ double ScrollPositionController::GetCurrentPosition() const
     auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
     CHECK_NULL_RETURN_NOLOG(scrollPattern, 0.0);
     return scrollPattern->GetCurrentPosition();
-}
-
-Axis ScrollPositionController::GetScrollDirection() const
-{
-    auto pattern = scroll_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(pattern, Axis::NONE);
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_RETURN_NOLOG(scrollPattern, Axis::NONE);
-    return scrollPattern->GetAxis();
 }
 
 void ScrollPositionController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
@@ -98,19 +71,10 @@ void ScrollPositionController::ScrollPage(bool reverse, bool smooth)
     }
 }
 
-Offset ScrollPositionController::GetCurrentOffset() const
+bool ScrollPositionController::IsAtEnd() const
 {
-    auto pattern = scroll_.Upgrade();
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(pattern);
-    CHECK_NULL_RETURN_NOLOG(scrollPattern, Offset::Zero());
-    auto pxOffset = scrollPattern->GetCurrentOffset();
-    // need to reverse the coordinate
-    auto x = Dimension(-pxOffset.GetX(), DimensionUnit::PX);
-    auto y = Dimension(-pxOffset.GetY(), DimensionUnit::PX);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, Offset::Zero());
-    Offset offset(pipeline->ConvertPxToVp(x), pipeline->ConvertPxToVp(y));
-    return offset;
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scroll_.Upgrade());
+    CHECK_NULL_RETURN_NOLOG(scrollPattern, false);
+    return scrollPattern->IsAtBottom();
 }
-
 } // namespace OHOS::Ace::NG

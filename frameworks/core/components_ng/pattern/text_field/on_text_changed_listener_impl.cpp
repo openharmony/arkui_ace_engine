@@ -30,7 +30,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         ContainerScope scope(client->GetInstanceId());
         client->InsertValue(StringUtils::Str16ToStr8(text));
     };
-    PostTaskToUI(task);
+    PostSyncTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
@@ -47,7 +47,7 @@ void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
         ContainerScope scope(client->GetInstanceId());
         client->DeleteBackward(length);
     };
-    PostTaskToUI(task);
+    PostSyncTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::DeleteForward(int32_t length)
@@ -64,7 +64,7 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
         ContainerScope scope(client->GetInstanceId());
         client->DeleteForward(length);
     };
-    PostTaskToUI(task);
+    PostSyncTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
@@ -77,6 +77,48 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
         client->SetInputMethodStatus(status);
     };
     PostTaskToUI(task);
+}
+
+std::u16string OnTextChangedListenerImpl::GetLeftTextOfCursor(int32_t number)
+{
+    LOGI("[OnTextChangedListenerImpl] GetLeftTextOfCursor status: %{public}d", number);
+    std::u16string leftResult;
+    auto task = [textField = pattern_, &leftResult, number] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID_NOLOG(client);
+        ContainerScope scope(client->GetInstanceId());
+        leftResult = client->GetLeftTextOfCursor(number);
+    };
+    PostSyncTaskToUI(task);
+    return leftResult;
+}
+
+std::u16string OnTextChangedListenerImpl::GetRightTextOfCursor(int32_t number)
+{
+    LOGI("[OnTextChangedListenerImpl] GetRightTextOfCursor status: %{public}d", number);
+    std::u16string rightResult;
+    auto task = [textField = pattern_, &rightResult, number] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID_NOLOG(client);
+        ContainerScope scope(client->GetInstanceId());
+        rightResult = client->GetRightTextOfCursor(number);
+    };
+    PostSyncTaskToUI(task);
+    return rightResult;
+}
+
+int32_t OnTextChangedListenerImpl::GetTextIndexAtCursor()
+{
+    LOGI("[OnTextChangedListenerImpl] GetTextIndexAtCursor");
+    int32_t index = 0;
+    auto task = [textField = pattern_, &index] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID_NOLOG(client);
+        ContainerScope scope(client->GetInstanceId());
+        index = client->GetTextIndexAtCursor();
+    };
+    PostSyncTaskToUI(task);
+    return index;
 }
 
 void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) {}
@@ -135,6 +177,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
         auto client = textField.Upgrade();
         CHECK_NULL_VOID_NOLOG(client);
         ContainerScope scope(client->GetInstanceId());
+        client->ResetTouchAtLeftOffsetFlag();
         switch (direction) {
             case MiscServices::Direction::UP:
                 client->CursorMoveUp();
@@ -153,7 +196,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
                 break;
         }
     };
-    PostTaskToUI(task);
+    PostSyncTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
@@ -168,7 +211,7 @@ void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
         ContainerScope scope(client->GetInstanceId());
         client->HandleSetSelection(start, end);
     };
-    PostTaskToUI(task);
+    PostSyncTaskToUI(task);
 }
 
 void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
@@ -200,6 +243,24 @@ void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMove
         client->HandleSelect(keyCode, cursorMoveSkip);
     };
     PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task)
+{
+    CHECK_NULL_VOID(task);
+    auto textFieldPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto instanceId = textFieldPattern->GetInstanceId();
+    ContainerScope scope(instanceId);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
 }
 
 void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)

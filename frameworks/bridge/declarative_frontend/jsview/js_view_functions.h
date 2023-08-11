@@ -64,11 +64,8 @@ public:
     void ExecuteInitiallyProvidedValue(const std::string& jsonData);
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
     void ExecuteRecycle(const std::string& viewName);
-#ifdef UICAST_COMPONENT_SUPPORTED
-    void ExecuteCreateChildView(const std::string& jsonData);
-    void ExecuteRouterHandle(const std::string& jsonData);
-    void ExecuteReplayOnEvent(const std::string& jsonData);
-#endif
+    void ExecuteAboutToRecycle();
+    void ExecuteSetActive(bool active);
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
@@ -110,11 +107,8 @@ private:
     JSWeak<JSFunc> jsUpdateWithValueParamsFunc_;
     JSWeak<JSFunc> jsSetInitiallyProvidedValueFunc_;
     JSWeak<JSFunc> jsRecycleFunc_;
-#ifdef UICAST_COMPONENT_SUPPORTED
-    JSWeak<JSFunc> jsCreateChildViewFunc_;
-    JSWeak<JSFunc> jsRouterHandleFunc_;
-    JSWeak<JSFunc> jsReplayOnEventFunc_;
-#endif
+    JSWeak<JSFunc> jsAboutToRecycleFunc_;
+    JSWeak<JSFunc> jsSetActive_;
 
     JSExecutionContext context_;
 };

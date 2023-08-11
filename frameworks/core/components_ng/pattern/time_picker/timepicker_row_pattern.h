@@ -63,6 +63,18 @@ public:
         return MakeRefPtr<LinearLayoutAlgorithm>();
     }
 
+    void SetConfirmNode(WeakPtr<FrameNode> buttonConfirmNode)
+    {
+        weakButtonConfirm_ = buttonConfirmNode;
+    }
+
+    void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
+    {
+        weakButtonCancel_ = buttonCancelNode;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TimePickerLayoutProperty>();
@@ -75,11 +87,18 @@ public:
 
     void OnColumnsBuilding();
 
-    std::unordered_map<std::string, RefPtr<FrameNode>> GetAllChildNode();
+    const std::unordered_map<std::string, RefPtr<FrameNode>>& GetAllChildNode()
+    {
+        return allChildNode_;
+    }
+
+    void UpdateAllChildNode();
 
     void HandleHourColumnBuilding();
 
     void FlushColumn();
+
+    void FlushAmPmFormatString();
 
     void OnDataLinking(
         const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
@@ -123,9 +142,9 @@ public:
         showCount_ = showCount;
     }
 
-    uint32_t GetOptionCount(const RefPtr<FrameNode>& frmeNode)
+    uint32_t GetOptionCount(const RefPtr<FrameNode>& frameNode)
     {
-        return options_[frmeNode].size();
+        return optionsTotalCount_[frameNode];
     }
 
     std::string GetOptionValue(const RefPtr<FrameNode>& frmeNode, uint32_t index)
@@ -150,14 +169,11 @@ public:
         return DividerId_.value();
     }
 
-    const std::vector<std::string>& GetAllOptions(const RefPtr<FrameNode>& frmeNode)
-    {
-        return options_[frmeNode];
-    }
+    const std::string& GetOptionsValue(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex);
 
-    const std::map<RefPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
+    const std::map<RefPtr<FrameNode>, uint32_t>& GetOptionsCount() const
     {
-        return options_;
+        return optionsTotalCount_;
     }
 
     void SetHour24(bool value)
@@ -167,7 +183,19 @@ public:
 
     bool GetHour24() const
     {
-        return hour24_;
+        auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
+        CHECK_NULL_RETURN(timePickerLayoutProperty, hour24_);
+        return timePickerLayoutProperty->GetIsUseMilitaryTimeValue(hour24_);
+    }
+
+    void ClearOptionsHour()
+    {
+        // when switch IsUseMilitaryTime state, should clear options_[hourColumn]
+        // Hour24 : Index = [0, 23] -> hour = [0, 23]
+        // Hour12 : Index = [0, 11] -> hour = [1, 12]
+        auto hourColumn = allChildNode_["hour"];
+        CHECK_NULL_VOID(hourColumn);
+        options_[hourColumn].clear();
     }
 
     void SetSelectedTime(const PickerTime& value)
@@ -285,11 +313,29 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         json->Put("selected", selectedTime_.ToString(false, false).c_str());
-        json->Put("useMilitaryTime", V2::ConvertBoolToString(hour24_).c_str());
     }
 
     void CreateAmPmNode();
+    void OnColorConfigurationUpdate() override;
+	
+    void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
+    {
+        contentRowNode_ = contentRowNode;
+    }
 
+    void SetbuttonTitleNode(RefPtr<FrameNode>& buttonTitleNode)
+    {
+        buttonTitleNode_ = buttonTitleNode;
+    }
+
+    void SetPickerTag(bool isPicker)
+    {
+        isPicker_ = isPicker;
+    }
+
+    void SetFocusDisable();
+    void SetFocusEnable();
+    
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -307,7 +353,9 @@ private:
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
-    std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
+    std::unordered_map<std::string, RefPtr<FrameNode>> allChildNode_;
+    std::map<RefPtr<FrameNode>, std::unordered_map<uint32_t, std::string>> options_;
+    std::map<RefPtr<FrameNode>, uint32_t> optionsTotalCount_;
     uint32_t showCount_ = 0;
     Color backgroundColor_ = Color::WHITE;
     // true, use 24 hours style; false, use 12 hours style.
@@ -320,12 +368,18 @@ private:
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;
     std::optional<int32_t> DividerId_;
+    WeakPtr<FrameNode> weakButtonConfirm_;
+    WeakPtr<FrameNode> weakButtonCancel_;
 
     bool hasSecond_ = false;
     std::vector<RefPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
+
+    RefPtr<FrameNode> buttonTitleNode_;
+    RefPtr<FrameNode> contentRowNode_;
+    bool isPicker_ = false;
 };
 } // namespace OHOS::Ace::NG
 

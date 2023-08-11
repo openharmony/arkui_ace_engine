@@ -18,13 +18,9 @@
 
 #include <algorithm>
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 
 namespace OHOS::Ace::NG {
 

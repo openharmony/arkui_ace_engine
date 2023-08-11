@@ -26,8 +26,10 @@ public:
     explicit SvgCanvasImage(const RefPtr<SvgDomBase>& svgDom) : svgDom_(svgDom) {}
     ~SvgCanvasImage() override = default;
 
-    void SetFillColor(const std::optional<Color>& color) {}
-    std::optional<Color> GetFillColor();
+    void SetFillColor(const std::optional<Color>& color)
+    {
+        svgDom_->SetFillColor(color);
+    }
 
     const RefPtr<SvgDomBase>& GetSVGDom() const;
 
@@ -41,8 +43,8 @@ public:
         return svgDom_->GetContainerSize().Height();
     }
 
-    void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
-        const BorderRadiusArray& radiusXY) override;
+    void DrawToRSCanvas(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
 
     bool IsStatic() override;
     void SetRedrawCallback(std::function<void()>&& callback) override;

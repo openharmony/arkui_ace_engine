@@ -33,6 +33,7 @@ const char PLAYER_PARAM_ISMUTE[] = "mute";
 const char PLAYER_PARAM_TEXTURE[] = "texture";
 const char PLAYER_PARAM_NEEDFRESHFORCE[] = "needRefreshForce";
 const char PLAYER_PARAM_LOOP[] = "loop";
+const char PLAYER_PARAM_SEEKMODE[] = "seekMode";
 
 const char PLAYER_METHOD_INIT[] = "init";
 const char PLAYER_METHOD_GETPOSITION[] = "getposition";
@@ -47,6 +48,7 @@ const char PLAYER_METHOD_SETSPEED[] = "setspeed";
 const char PLAYER_METHOD_SETDIRECTION[] = "setdirection";
 const char PLAYER_METHOD_SETLANDSCAPE[] = "setlandscape";
 const char PLAYER_METHOD_SETSURFACE[] = "setsurface";
+const char PLAYER_METHOD_UPDATERESOURCE[] = "updateresource";
 
 const char PLAYER_EVENT_PREPARED[] = "prepared";
 const char PLAYER_EVENT_COMPLETION[] = "completion";
@@ -162,6 +164,27 @@ void Player::InitPlay()
             }
         }
     });
+
+    isInit_ = true;
+}
+
+void Player::SetSource(const std::string& src)
+{
+    src_ = src;
+    if (isInit_) {
+        std::stringstream paramStream;
+        paramStream << PLAYER_PARAM_SRC << PARAM_EQUALS << src_;
+        std::string param = paramStream.str();
+        CallResRegisterMethod(MakeMethodHash(PLAYER_METHOD_UPDATERESOURCE), param,
+            [weak = WeakClaim(this)](std::string& result) {
+                auto player = weak.Upgrade();
+                if (player) {
+                    if (!player->IsResultSuccess(result)) {
+                        player->OnError(PLAYER_ERROR_CODE_FILEINVALID, PLAYER_ERROR_MSG_FILEINVALID);
+                    }
+                }
+            });
+    }
 }
 
 void Player::SetSurfaceId(int64_t id)
@@ -230,6 +253,7 @@ void Player::OnSeekComplete(const std::string& param)
 void Player::OnPlayStatus(const std::string& param)
 {
     isPlaying_ = GetIntParam(param, PLAYER_PARAM_ISPLAYING) == 1;
+    SetTickActive(isPlaying_);
     for (const auto& listener : onPlayStatusListener_) {
         listener(isPlaying_);
     }
@@ -324,27 +348,27 @@ void Player::OnPaused()
 
 void Player::Stop()
 {
-    // The destructor will be executed at platform thread, so destroy scheduler at here.
     if (scheduler_) {
         scheduler_->Stop();
-        scheduler_.Reset();
     }
 
-    auto context = context_.Upgrade();
-    if (!context) {
-        LOGE("fail to get context");
-        return;
-    }
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
-    if (platformTaskExecutor.IsRunOnCurrentThread()) {
-        UnregisterEvent();
-    } else {
-        platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto player = weak.Upgrade();
-            if (player) {
-                player->UnregisterEvent();
-            }
-        });
+    CallResRegisterMethod(stopMethod_, PARAM_NONE, [weak = WeakClaim(this)](std::string& result) {
+        LOGI("callback play OnStop.");
+        auto player = weak.Upgrade();
+        if (player) {
+            player->OnStop();
+        }
+    });
+}
+
+void Player::OnStop()
+{
+    isPlaying_ = false;
+    currentPos_ = 0;
+    SetTickActive(isPlaying_);
+
+    for (const auto& listener : onPlayStatusListener_) {
+        listener(isPlaying_);
     }
 }
 
@@ -374,6 +398,16 @@ void Player::SeekTo(uint32_t pos)
 {
     std::stringstream paramStream;
     paramStream << PARAM_VALUE << PARAM_EQUALS << pos;
+
+    std::string param = paramStream.str();
+    CallResRegisterMethod(seekMethod_, param);
+}
+
+void Player::SeekTo(uint32_t pos, uint32_t mode)
+{
+    std::stringstream paramStream;
+    paramStream << PARAM_VALUE << PARAM_EQUALS << pos << PARAM_AND <<
+        PLAYER_PARAM_SEEKMODE << PARAM_EQUALS << mode;
 
     std::string param = paramStream.str();
     CallResRegisterMethod(seekMethod_, param);
@@ -545,4 +579,41 @@ void Player::OnPopListener()
     }
 }
 
+void Player::SetFullScreenChange(bool isFullScreen)
+{
+    std::stringstream paramStream;
+    paramStream << PARAM_VALUE << PARAM_EQUALS << (isFullScreen ? "1" : "0");
+
+    std::string param = paramStream.str();
+    CallResRegisterMethod(fullscreenMethod_, param);
+}
+
+void Player::Release(const std::function<void(bool)>& onRelease)
+{
+    // The destructor will be executed at platform thread, so destroy scheduler at here.
+    if (scheduler_) {
+        scheduler_.Reset();
+    }
+
+    auto context = context_.Upgrade();
+    if (!context) {
+        LOGE("fail to get context");
+        return;
+    }
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
+    if (platformTaskExecutor.IsRunOnCurrentThread()) {
+        UnregisterEvent();
+    } else {
+        platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
+            auto player = weak.Upgrade();
+            if (player) {
+                player->UnregisterEvent();
+            }
+        });
+    }
+
+    Resource::Release(onRelease);
+
+    isInit_ = false;
+}
 } // namespace OHOS::Ace

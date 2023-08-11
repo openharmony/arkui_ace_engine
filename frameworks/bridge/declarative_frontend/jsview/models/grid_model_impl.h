@@ -35,7 +35,7 @@ public:
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetCachedCount(int32_t value) override;
-    void SetIsRTL(bool rightToLeft) override;
+    void SetIsRTL(TextDirection direction) override;
     void SetLayoutDirection(FlexDirection value) override;
     void SetMaxCount(int32_t value) override;
     void SetMinCount(int32_t value) override;
@@ -45,12 +45,27 @@ public:
     void SetSupportAnimation(bool value) override;
     void SetSupportDragAnimation(bool value) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
+    void SetScrollEnabled(bool scrollEnabled) override {};
+    void SetFriction(double friction) override {};
     void SetOnScrollToIndex(std::function<void(const BaseEventInfo*)>&& value) override;
+    void SetOnScrollBarUpdate(
+        std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>&& value) override;
     void SetOnItemDragStart(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;
     void SetOnItemDragEnter(std::function<void(const ItemDragInfo&)>&& value) override;
     void SetOnItemDragMove(std::function<void(const ItemDragInfo&, int32_t, int32_t)>&& value) override;
     void SetOnItemDragLeave(std::function<void(const ItemDragInfo&, int32_t)>&& value) override;
     void SetOnItemDrop(std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>&& value) override;
+
+    void SetOnScroll(std::function<void(Dimension, ScrollState)>&& onScroll) override {};
+    void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) override {};
+    void SetOnScrollFrameBegin(
+        std::function<ScrollFrameResult(Dimension, ScrollState)>&& onScrollFrameBegin) override {};
+    void SetOnScrollStart(std::function<void()>&& onScrollStart) override {};
+    void SetOnScrollStop(std::function<void()>&& onScrollStop) override {};
+    void SetOnReachStart(std::function<void()>&& onReachStart) override {};
+    void SetOnReachEnd(std::function<void()>&& onReachEnd) override {};
+
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
 };

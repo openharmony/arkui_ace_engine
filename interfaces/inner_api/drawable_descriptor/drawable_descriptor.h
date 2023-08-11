@@ -64,13 +64,14 @@ private:
 class ACE_EXPORT LayeredDrawableDescriptor : public DrawableDescriptor {
 public:
     LayeredDrawableDescriptor(
-        std::unique_ptr<uint8_t[]> jsonBuf, size_t len, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
+        std::unique_ptr<uint8_t[]> jsonBuf, size_t len, std::shared_ptr<Global::Resource::ResourceManager> resourceMgr)
         : jsonBuf_(std::move(jsonBuf)), len_(len), resourceMgr_(std::move(resourceMgr)) {};
     ~LayeredDrawableDescriptor() override = default;
     std::unique_ptr<DrawableDescriptor> GetForeground();
     std::unique_ptr<DrawableDescriptor> GetBackground();
     std::unique_ptr<DrawableDescriptor> GetMask();
     std::shared_ptr<Media::PixelMap> GetPixelMap() override;
+    static std::string GetStaticMaskClipPath();
 
 private:
     friend class ImageConverter;
@@ -84,7 +85,7 @@ private:
 
     std::unique_ptr<uint8_t[]> jsonBuf_;
     size_t len_ = 0;
-    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr_;
+    const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr_;
     OptionalPixelMap foreground_;
     OptionalPixelMap background_;
     OptionalPixelMap mask_;
@@ -93,9 +94,11 @@ private:
 
 class DrawableDescriptorFactory {
 public:
-    static std::unique_ptr<DrawableDescriptor> Create(int32_t id,
-        std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, Global::Resource::RState& state,
-        DrawableDescriptor::DrawableType& drawableType, uint32_t density)
+    using DrawableType = DrawableDescriptor::DrawableType;
+    using ResourceManager = Global::Resource::ResourceManager;
+    using RState = Global::Resource::RState;
+    static std::unique_ptr<DrawableDescriptor> Create(int32_t id, const std::shared_ptr<ResourceManager>& resourceMgr,
+        RState& state, DrawableType& drawableType, uint32_t density)
     {
         std::string type;
         size_t len;
@@ -123,8 +126,8 @@ public:
     }
 
     static std::unique_ptr<DrawableDescriptor> Create(const char* name,
-        std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, Global::Resource::RState& state,
-        DrawableDescriptor::DrawableType& drawableType, uint32_t density)
+        const std::shared_ptr<ResourceManager>& resourceMgr, RState& state, DrawableType& drawableType,
+        uint32_t density)
     {
         std::string type;
         size_t len;

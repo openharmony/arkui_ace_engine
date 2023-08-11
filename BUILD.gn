@@ -46,6 +46,7 @@ config("ace_config") {
     "-ffunction-sections",
     "-Wno-non-c-typedef-for-linkage",
     "-Os",
+    "-Werror=return-stack-address",
   ]
 
   cflags_cc = [
@@ -78,6 +79,7 @@ config("ace_test_config") {
     "//foundation/arkui/ace_engine/frameworks/bridge/test/unittest/*",
     "//foundation/arkui/ace_engine/frameworks/core/*",
     "//foundation/arkui/ace_engine/test/fuzztest/*",
+    "//foundation/arkui/ace_engine/test/unittest/*",
     "//foundation/graphic/graphic_2d/rosen/test/render_service/*",
   ]
   include_dirs = [
@@ -121,6 +123,15 @@ config("ace_test_config") {
   cflags_cc += [ "-fvisibility-inlines-hidden" ]
   ldflags = [ "-Wl,-gc-sections" ]
 
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
+}
+
+config("ace_coverage_config") {
+  cflags = []
+  ldflags = []
   if (ace_engine_feature_enable_coverage) {
     cflags += [ "--coverage" ]
     ldflags += [ "--coverage" ]

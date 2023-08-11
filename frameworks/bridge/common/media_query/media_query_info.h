@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class ACE_FORCE_EXPORT_WITH_PREVIEW MediaQueryInfo : public AceType {
+class ACE_FORCE_EXPORT MediaQueryInfo : public AceType {
     DECLARE_ACE_TYPE(MediaQueryInfo, AceType);
 
 public:

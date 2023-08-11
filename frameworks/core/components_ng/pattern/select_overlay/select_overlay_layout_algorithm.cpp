@@ -26,21 +26,25 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
+}
 void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(info_)) {
-        LayoutWrapper::RemoveChildInRenderTree(menu);
+    if (!CheckInShowArea(*info_) || (!info_->firstHandle.isShow && !info_->secondHandle.isShow)) {
+        menu->SetActive(false);
         return;
+    } else {
+        menu->SetActive(true);
     }
     auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
     menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
     menu->Layout();
 
-    auto exetensionMenu = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_VOID(exetensionMenu);
+    auto button = layoutWrapper->GetOrCreateChildByIndex(1);
+    CHECK_NULL_VOID(button);
     auto menuNode = menu->GetHostNode();
     CHECK_NULL_VOID(menuNode);
     auto menuContext = menuNode->GetRenderContext();
@@ -51,40 +55,30 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             OffsetF(menuContext->GetOffset()->GetX().ConvertToPx(), menuContext->GetOffset()->GetY().ConvertToPx());
     }
     if (!info_->menuInfo.menuIsShow) {
-        hasExtensitonMenu_ = false;
+        hasExtensionMenu_ = false;
         return;
     }
-    hasExtensitonMenu_ = true;
-    // Adjust the constraint of extensionMenu
-    RemeasureExtensionMenu(layoutWrapper, offset);
+    hasExtensionMenu_ = true;
+    button->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
+    button->Layout();
     auto extensionMenuOffset = ComputeExtensionMenuPosition(layoutWrapper, offset);
-    exetensionMenu->GetGeometryNode()->SetMarginFrameOffset(extensionMenuOffset);
-    exetensionMenu->Layout();
+
+    auto extensionMenu = layoutWrapper->GetOrCreateChildByIndex(2);
+    CHECK_NULL_VOID(extensionMenu);
+    extensionMenu->GetGeometryNode()->SetMarginFrameOffset(extensionMenuOffset);
+    extensionMenu->Layout();
 }
 
-void SelectOverlayLayoutAlgorithm::RemeasureExtensionMenu(LayoutWrapper* layoutWrapper, const OffsetF& offset)
+bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const SelectOverlayInfo& info)
 {
-    auto extensionItem = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_VOID(extensionItem);
-
-    auto layoutConstraint = extensionItem->GetLayoutProperty()->GetLayoutConstraint();
-    auto layoutConstraintMaxSize = layoutConstraint->maxSize;
-
-    layoutConstraint->maxSize =
-        SizeF(defaultMenuEndOffset_.GetX(), layoutConstraintMaxSize.Height() - defaultMenuEndOffset_.GetY());
-    extensionItem->Measure(layoutConstraint);
-}
-
-bool SelectOverlayLayoutAlgorithm::CheckInShowArea(const std::shared_ptr<SelectOverlayInfo>& info)
-{
-    if (info->useFullScreen) {
+    if (info.useFullScreen) {
         return true;
     }
-    if (info->isSingleHandle) {
-        return info->firstHandle.paintRect.IsWrappedBy(info->showArea);
+    if (info.isSingleHandle) {
+        return info.firstHandle.paintRect.IsWrappedBy(info.showArea);
     }
-    return info->firstHandle.paintRect.IsWrappedBy(info->showArea) &&
-           info->secondHandle.paintRect.IsWrappedBy(info->showArea);
+    return info.firstHandle.paintRect.IsWrappedBy(info.showArea) &&
+           info.secondHandle.paintRect.IsWrappedBy(info.showArea);
 }
 
 OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper)
@@ -112,8 +106,11 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         return defaultMenuEndOffset_ - OffsetF(menuWidth, 0.0f);
     }
 
-    const auto& firstHandleRect = info_->firstHandle.paintRect;
-    const auto& secondHandleRect = info_->secondHandle.paintRect;
+    // paint rect is in global position, need to convert to local position
+    auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
+    const auto firstHandleRect = info_->firstHandle.paintRect - offset;
+    const auto secondHandleRect = info_->secondHandle.paintRect - offset;
+
     auto singleHandle = firstHandleRect;
     if (!info_->firstHandle.isShow) {
         singleHandle = secondHandleRect;
@@ -134,11 +131,20 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    RectF viewPort = layoutWrapper->GetGeometryNode()->GetFrameRect() - offset;
+    auto frameNode = info_->callerFrameNode.Upgrade();
+    if (frameNode) {
+        auto viewPortOption = frameNode->GetViewPort();
+        if (viewPortOption.has_value()) {
+            viewPort = viewPortOption.value();
+        }
+    }
+    LOGD("select_overlay viewPort Rect: %{public}s", viewPort.ToString().c_str());
 
     // Adjust position of overlay.
-    if (LessOrEqual(menuPosition.GetX(), 0.0)) {
+    if (LessOrEqual(menuPosition.GetX(), viewPort.GetX())) {
         menuPosition.SetX(theme->GetDefaultMenuPositionX());
-    } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, overlayWidth)) {
+    } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, viewPort.GetX() + viewPort.Width())) {
         menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
     }
     if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
@@ -149,25 +155,40 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
                 static_cast<float>(singleHandle.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
         }
     }
+    if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - menuSpacingBetweenText - menuHeight) ||
+        LessNotEqual(menuPosition.GetY(), menuSpacingBetweenText)) {
+        auto menuOffsetY = viewPort.GetY() - menuSpacingBetweenText - menuHeight;
+        if (menuOffsetY > menuSpacingBetweenText) {
+            menuPosition.SetY(menuOffsetY);
+        } else {
+            menuPosition.SetY(menuSpacingBetweenText);
+        }
+    } else if (GreatOrEqual(menuPosition.GetY(), viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText)) {
+        menuPosition.SetY(viewPort.GetY() + viewPort.Height() + menuSpacingBetweenText);
+    }
+    LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
     return menuPosition;
 }
 
 OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset)
 {
-    auto extensionItem = layoutWrapper->GetOrCreateChildByIndex(1);
+    auto extensionItem = layoutWrapper->GetOrCreateChildByIndex(2);
     CHECK_NULL_RETURN(extensionItem, OffsetF());
-    auto menu = extensionItem->GetHostNode();
-    CHECK_NULL_RETURN(menu, OffsetF());
-    auto menuPattern = menu->GetPattern<LinearLayoutPattern>();
-    CHECK_NULL_RETURN(menuPattern, OffsetF());
-    auto property = menuPattern->GetLayoutProperty<LinearLayoutProperty>();
-    auto visibility = property->GetVisibilityValue();
-    if (visibility != VisibleType::VISIBLE) {
-        return OffsetF();
-    }
+    auto extensionLayoutConstraint = extensionItem->GetLayoutProperty()->GetLayoutConstraint();
+    auto extensionLayoutConstraintMaxSize = extensionLayoutConstraint->maxSize;
     auto extensionWidth = extensionItem->GetGeometryNode()->GetMarginFrameSize().Width();
-    return (defaultMenuEndOffset_ - OffsetF(extensionWidth, 0.0f));
+    auto extensionHeight = extensionItem->GetGeometryNode()->GetMarginFrameSize().Height();
+    auto menuItem = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(menuItem, OffsetF());
+    auto menuHeight = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
+    auto extensionOffset =
+        defaultMenuEndOffset_ - OffsetF(extensionWidth, -menuHeight - MORE_MENU_INTERVAL.ConvertToPx());
+    if (extensionOffset.GetY() + extensionHeight > extensionLayoutConstraintMaxSize.Height()) {
+        extensionOffset =
+            defaultMenuEndOffset_ - OffsetF(extensionWidth, extensionHeight + MORE_MENU_INTERVAL.ConvertToPx());
+    }
+    return extensionOffset;
 }
 
 bool SelectOverlayLayoutAlgorithm::IsTextAreaSelectAll()

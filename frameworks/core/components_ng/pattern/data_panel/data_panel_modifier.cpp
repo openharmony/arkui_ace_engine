@@ -39,6 +39,9 @@ constexpr float WHOLE_CIRCLE = 360.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
 constexpr float PERCENT_HALF = 0.5f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12f;
+constexpr float FIXED_ANGLE = 2.0f;
+constexpr float FIXED_DRAW_ANGLE = 4.0f;
+constexpr uint32_t SHADOW_ALPHA = 0.4 * 255;
 } // namespace
 
 DataPanelModifier::DataPanelModifier()
@@ -153,10 +156,11 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
             pos.emplace_back(itemPos);
         }
     }
-    pos.at(pos.size() - 1) = 1.0f;
+
     RSPen gradientPaint;
     gradientPaint.SetWidth(thickness);
     gradientPaint.SetAntiAlias(true);
+    gradientPaint.SetAlpha(SHADOW_ALPHA);
     RSFilter filter;
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowRadiusFloat_->Get()));
     gradientPaint.SetFilter(filter);
@@ -168,11 +172,13 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
     RSBrush startCirclePaint;
     startCirclePaint.SetAntiAlias(true);
     startCirclePaint.SetColor(arcData.shadowColor.GetColors().begin()->GetLinearColor().GetValue());
+    startCirclePaint.SetAlpha(SHADOW_ALPHA);
     startCirclePaint.SetFilter(filter);
 
     RSBrush endCirclePaint;
     endCirclePaint.SetAntiAlias(true);
     endCirclePaint.SetColor(arcData.shadowColor.GetColors().rbegin()->GetLinearColor().GetValue());
+    endCirclePaint.SetAlpha(SHADOW_ALPHA);
     endCirclePaint.SetFilter(filter);
 
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
@@ -230,8 +236,13 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
     }
     double totalValue = 0.0;
     float factor = 1.0;
+    size_t tempSize = valuesLastLength_;
     for (size_t i = 0; i < valuesLastLength_; i++) {
         totalValue += values_[i]->Get();
+        if (totalValue >= maxValue) {
+            tempSize = i + 1;
+            break;
+        }
     }
     if (GreatNotEqual(totalValue, maxValue)) {
         factor = maxValue / totalValue;
@@ -240,8 +251,24 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
         proportions = maxValue == 0 ? 1.0 : DEFAULT_MAX_VALUE / maxValue;
     }
     totalValue = totalValue * proportions;
-    for (int32_t i = static_cast<int32_t>(valuesLastLength_) - 1; i >= 0; i--) {
-        arcData.progressColors = valueColors_[i]->Get().GetGradient();
+    double shadowValue = totalValue;
+    for (int32_t i = static_cast<int32_t>(tempSize) - 1; i >= 0; i--) {
+        float totalValuePre = shadowValue * 1.0f;
+        if (isEffect_->Get() && GreatNotEqual(totalValue, 0.0)) {
+            arcData.progress = shadowValue * date;
+        } else {
+            arcData.progress = shadowValue;
+        }
+        shadowValue -= values_[i]->Get() * proportions;
+        arcData.gradientPointBase = (shadowValue * 1.0f) / totalValuePre;
+        if ((isShadowVisible_ && (isHasShadowValue_ || isEffect_->Get())) && (i < shadowColorsLastLength_)) {
+            arcData.shadowColor = SortGradientColorsOffset(shadowColors_[i]->Get().GetGradient());
+            PaintRainbowFilterMask(canvas, factor * date, arcData);
+        }
+    }
+
+    for (int32_t i = static_cast<int32_t>(tempSize) - 1; i >= 0; i--) {
+        arcData.progressColors = SortGradientColorsOffset(valueColors_[i]->Get().GetGradient());
         float totalValuePre = totalValue * 1.0f;
         if (isEffect_->Get() && GreatNotEqual(totalValue, 0.0)) {
             arcData.progress = totalValue * date;
@@ -250,13 +277,8 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
         }
         totalValue -= values_[i]->Get() * proportions;
         arcData.gradientPointBase = (totalValue * 1.0f) / totalValuePre;
-        if ((isShadowVisible_ && (isHasShadowValue_ || isEffect_->Get())) && (i < shadowColorsLastLength_)) {
-            arcData.shadowColor = shadowColors_[i]->Get().GetGradient();
-            PaintRainbowFilterMask(canvas, factor * date, arcData);
-        }
         PaintProgress(canvas, arcData, isEffect_->Get(), false, 0.0);
     }
-
     canvas.Restore();
 }
 
@@ -285,7 +307,8 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
     }
 
     auto widthSegment = offset.GetX();
-    PaintBackground(canvas, offset, totalWidth, context.height);
+    auto firstSegmentWidth = values_[0]->Get() * scaleMaxValue;
+    PaintBackground(canvas, offset, totalWidth, context.height, firstSegmentWidth);
     bool isStopPaint = false;
     float totalPaintWidth = 0.0f;
     float preWidthSegment = 0.0f;
@@ -306,7 +329,7 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
             segmentLinearData.isEndData = true;
             isStopPaint = true;
         }
-        segmentLinearData.segmentColor = valueColors_[i]->Get().GetGradient();
+        segmentLinearData.segmentColor = SortGradientColorsOffset(valueColors_[i]->Get().GetGradient());
         segmentLinearData.segmentWidth = segmentWidth * scaleMaxValue;
         segmentLinearData.xSegment = widthSegment;
         preWidthSegment = widthSegment;
@@ -314,7 +337,7 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
             segmentLinearData.segmentWidth = totalWidth - preWidthSegment;
         }
         if ((isShadowVisible_ && (isHasShadowValue_ || isEffect_->Get())) && (i < shadowColorsLastLength_)) {
-            segmentLinearData.segmentShadowColor = shadowColors_[i]->Get().GetGradient();
+            segmentLinearData.segmentShadowColor = SortGradientColorsOffset(shadowColors_[i]->Get().GetGradient());
             PaintColorSegmentFilterMask(canvas, segmentLinearData);
         }
         PaintColorSegment(canvas, segmentLinearData);
@@ -329,15 +352,20 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
     }
 }
 
-void DataPanelModifier::PaintBackground(RSCanvas& canvas, OffsetF offset, float totalWidth, float height) const
+void DataPanelModifier::PaintBackground(
+    RSCanvas& canvas, OffsetF offset, float totalWidth, float height, float segmentWidth) const
 {
     RSBrush brush;
     brush.SetColor(ToRSColor(trackBackgroundColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
-    RSRect rRect(offset.GetX() - (height * PERCENT_HALF), offset.GetY(),
-        totalWidth + offset.GetX() + (height * PERCENT_HALF), height + offset.GetY());
-    RSRoundRect rrRect(rRect, height, height);
+    RSRect rRect(offset.GetX(), offset.GetY(), totalWidth + offset.GetX(), height + offset.GetY());
+    RSRoundRect rrRect;
+    if (height <= segmentWidth) {
+        rrRect = RSRoundRect(rRect, height, height);
+    } else {
+        rrRect = RSRoundRect(rRect, segmentWidth, segmentWidth);
+    }
     canvas.DrawRoundRect(rrRect);
     canvas.DetachBrush();
 }
@@ -348,14 +376,7 @@ void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, const LinearData& se
     auto xSegment = segmentLinearData.xSegment;
     auto segmentWidth = segmentLinearData.segmentWidth;
     auto height = segmentLinearData.height;
-    RSBrush brush;
-    RSRect rect(xSegment, offset.GetY(), xSegment + segmentWidth, offset.GetY() + height);
-    RSPoint segmentStartPoint;
-    segmentStartPoint.SetX(rect.GetLeft());
-    segmentStartPoint.SetY(rect.GetTop());
-    RSPoint segmentEndPoint;
-    segmentEndPoint.SetX(rect.GetRight());
-    segmentEndPoint.SetY(rect.GetBottom());
+
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     size_t length = segmentLinearData.segmentColor.GetColors().size();
@@ -364,40 +385,33 @@ void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, const LinearData& se
         pos.emplace_back(segmentLinearData.segmentColor.GetColors().at(i).GetDimension().Value());
     }
 
+    RSRect rect(xSegment, offset.GetY(), xSegment + segmentWidth, offset.GetY() + height);
+    RSRoundRect paintRect = RSRoundRect(rect, 0, 0);
+
     if (segmentLinearData.isFirstData) {
-        RSBrush startCirclePaint;
-        startCirclePaint.SetAntiAlias(true);
-        startCirclePaint.SetColor(segmentLinearData.segmentColor.GetColors().begin()->GetLinearColor().GetValue());
-        canvas.Save();
-        canvas.AttachBrush(startCirclePaint);
-        RSRect edgeRect(xSegment - (height * PERCENT_HALF), offset.GetY(),
-            xSegment + height * PERCENT_HALF, offset.GetY() + height);
-        canvas.DrawArc(edgeRect, QUARTER_CIRCLE, HALF_CIRCLE);
-        canvas.DetachBrush();
-        canvas.Restore();
+        paintRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, height, height);
+        paintRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, height, height);
     }
 
+    if (segmentLinearData.isEndData) {
+        paintRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, height, height);
+        paintRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, height, height);
+    }
+
+    RSPoint segmentStartPoint;
+    segmentStartPoint.SetX(rect.GetLeft());
+    segmentStartPoint.SetY(rect.GetTop());
+    RSPoint segmentEndPoint;
+    segmentEndPoint.SetX(rect.GetRight());
+    segmentEndPoint.SetY(rect.GetBottom());
     canvas.Save();
+    RSBrush brush;
     brush.SetShaderEffect(
         RSShaderEffect::CreateLinearGradient(segmentStartPoint, segmentEndPoint, colors, pos, RSTileMode::CLAMP));
     canvas.AttachBrush(brush);
-    canvas.DrawRect(rect);
+    canvas.DrawRoundRect(paintRect);
     canvas.DetachBrush();
     canvas.Restore();
-
-    if (segmentLinearData.isEndData) {
-        RSBrush endCirclePaint;
-        endCirclePaint.SetAntiAlias(true);
-        endCirclePaint.SetColor(segmentLinearData.segmentColor.GetColors().rbegin()->GetLinearColor().GetValue());
-
-        canvas.Save();
-        canvas.AttachBrush(endCirclePaint);
-        RSRect edgeRectEnd(xSegment + segmentWidth - (height * PERCENT_HALF), offset.GetY(),
-            xSegment + segmentWidth + height * PERCENT_HALF, offset.GetY() + height);
-        canvas.DrawArc(edgeRectEnd, -QUARTER_CIRCLE, HALF_CIRCLE);
-        canvas.DetachBrush();
-        canvas.Restore();
-    }
 }
 
 void DataPanelModifier::PaintColorSegmentFilterMask(RSCanvas& canvas, const LinearData& segmentLinearData) const
@@ -406,19 +420,6 @@ void DataPanelModifier::PaintColorSegmentFilterMask(RSCanvas& canvas, const Line
     auto xSegment = segmentLinearData.xSegment;
     auto segmentWidth = segmentLinearData.segmentWidth;
     auto height = segmentLinearData.height;
-    RSBrush brush;
-    RSFilter filter;
-    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowRadiusFloat_->Get()));
-    brush.SetFilter(filter);
-
-    RSRect rect(xSegment + shadowOffsetXFloat_->Get(), offset.GetY() + shadowOffsetYFloat_->Get(),
-        xSegment + segmentWidth + shadowOffsetXFloat_->Get(), offset.GetY() + height + shadowOffsetYFloat_->Get());
-    RSPoint segmentStartPoint;
-    segmentStartPoint.SetX(rect.GetLeft());
-    segmentStartPoint.SetY(rect.GetTop());
-    RSPoint segmentEndPoint;
-    segmentEndPoint.SetX(rect.GetRight());
-    segmentEndPoint.SetY(rect.GetBottom());
 
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
@@ -428,46 +429,37 @@ void DataPanelModifier::PaintColorSegmentFilterMask(RSCanvas& canvas, const Line
         pos.emplace_back(segmentLinearData.segmentShadowColor.GetColors().at(i).GetDimension().Value());
     }
 
+    RSRect rect(xSegment + shadowOffsetXFloat_->Get(), offset.GetY() + shadowOffsetYFloat_->Get(),
+        xSegment + segmentWidth + shadowOffsetXFloat_->Get(), offset.GetY() + height + shadowOffsetYFloat_->Get());
+    RSRoundRect paintRect = RSRoundRect(rect, 0, 0);
     if (segmentLinearData.isFirstData) {
-        RSBrush startCirclePaint;
-        startCirclePaint.SetAntiAlias(true);
-        startCirclePaint.SetColor(
-            segmentLinearData.segmentShadowColor.GetColors().begin()->GetLinearColor().GetValue());
-        startCirclePaint.SetFilter(filter);
-        canvas.Save();
-        canvas.AttachBrush(startCirclePaint);
-        RSRect edgeRect(xSegment + shadowOffsetXFloat_->Get() - (height * PERCENT_HALF) + 1,
-            offset.GetY() + shadowOffsetYFloat_->Get(),
-            xSegment + shadowOffsetXFloat_->Get() + height * PERCENT_HALF + 1,
-            offset.GetY() + shadowOffsetYFloat_->Get() + height);
-        canvas.DrawArc(edgeRect, QUARTER_CIRCLE, HALF_CIRCLE);
-        canvas.DetachBrush();
-        canvas.Restore();
+        paintRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, height, height);
+        paintRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, height, height);
     }
 
+    if (segmentLinearData.isEndData) {
+        paintRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, height, height);
+        paintRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, height, height);
+    }
+
+    RSPoint segmentStartPoint;
+    segmentStartPoint.SetX(rect.GetLeft());
+    segmentStartPoint.SetY(rect.GetTop());
+    RSPoint segmentEndPoint;
+    segmentEndPoint.SetX(rect.GetRight());
+    segmentEndPoint.SetY(rect.GetBottom());
     canvas.Save();
+    RSBrush brush;
+    RSFilter filter;
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowRadiusFloat_->Get()));
+    brush.SetFilter(filter);
+    brush.SetAlpha(SHADOW_ALPHA);
     brush.SetShaderEffect(
         RSShaderEffect::CreateLinearGradient(segmentStartPoint, segmentEndPoint, colors, pos, RSTileMode::CLAMP));
     canvas.AttachBrush(brush);
-    canvas.DrawRect(rect);
+    canvas.DrawRoundRect(paintRect);
     canvas.DetachBrush();
     canvas.Restore();
-
-    if (segmentLinearData.isEndData) {
-        RSBrush endCirclePaint;
-        endCirclePaint.SetAntiAlias(true);
-        endCirclePaint.SetColor(segmentLinearData.segmentShadowColor.GetColors().rbegin()->GetLinearColor().GetValue());
-        endCirclePaint.SetFilter(filter);
-        canvas.Save();
-        canvas.AttachBrush(endCirclePaint);
-        RSRect edgeRectEnd(xSegment + shadowOffsetXFloat_->Get() + segmentWidth - (height * PERCENT_HALF),
-            offset.GetY() + shadowOffsetYFloat_->Get(),
-            xSegment + shadowOffsetXFloat_->Get() + segmentWidth + height * PERCENT_HALF,
-            offset.GetY() + shadowOffsetYFloat_->Get() + height);
-        canvas.DrawArc(edgeRectEnd, -QUARTER_CIRCLE, HALF_CIRCLE);
-        canvas.DetachBrush();
-        canvas.Restore();
-    }
 }
 
 void DataPanelModifier::PaintSpace(RSCanvas& canvas, OffsetF offset, float spaceWidth, float xSpace, float height) const
@@ -538,7 +530,6 @@ void DataPanelModifier::PaintProgress(
             pos.emplace_back(itemPos);
         }
     }
-    pos.at(pos.size() - 1) = 1.0f;
 
     RSPen gradientPaint;
     gradientPaint.SetWidth(thickness);
@@ -563,7 +554,14 @@ void DataPanelModifier::PaintProgress(
     canvas.AttachBrush(startCirclePaint);
     RSRect edgeRect(center.GetX() - thickness * PERCENT_HALF, center.GetY() - radius,
         center.GetX() + thickness * PERCENT_HALF, center.GetY() - radius + thickness);
-    canvas.DrawArc(edgeRect, QUARTER_CIRCLE, HALF_CIRCLE);
+    canvas.DrawArc(edgeRect, QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
+    canvas.DetachBrush();
+    canvas.Restore();
+
+    canvas.Save();
+    canvas.Rotate(drawAngle, center.GetX(), center.GetY());
+    canvas.AttachBrush(endCirclePaint);
+    canvas.DrawArc(edgeRect, -QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
     canvas.DetachBrush();
     canvas.Restore();
 
@@ -575,12 +573,21 @@ void DataPanelModifier::PaintProgress(
     canvas.DrawPath(path);
     canvas.DetachPen();
     canvas.Restore();
+}
 
-    canvas.Save();
-    canvas.Rotate(drawAngle, center.GetX(), center.GetY());
-    canvas.AttachBrush(endCirclePaint);
-    canvas.DrawArc(edgeRect, -QUARTER_CIRCLE, HALF_CIRCLE);
-    canvas.DetachBrush();
-    canvas.Restore();
+Gradient DataPanelModifier::SortGradientColorsOffset(const Gradient& srcGradient) const
+{
+    auto srcGradientColors = srcGradient.GetColors();
+    std::sort(
+        srcGradientColors.begin(), srcGradientColors.end(), [](const GradientColor& left, const GradientColor& right) {
+            return left.GetDimension().Value() < right.GetDimension().Value();
+        });
+
+    Gradient gradient;
+    for (const auto& item : srcGradientColors) {
+        gradient.AddColor(item);
+    }
+
+    return gradient;
 }
 } // namespace OHOS::Ace::NG

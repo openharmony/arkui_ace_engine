@@ -26,6 +26,12 @@ public:
     void SetFontWeight(FontWeight weight) override;
     void SetFontStyle(Ace::FontStyle style) override;
     void SetFontColor(const std::optional<Color>& color) override;
+    void SetWidth(const Dimension& width) override;
+    void SetBorderRadius(const Dimension& radius) override;
+    void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
+        const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) override;
+    void SetFontFamily(const std::vector<std::string> &families) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_MENU_MODEL_IMPL_H

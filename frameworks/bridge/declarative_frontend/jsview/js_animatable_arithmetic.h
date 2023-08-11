@@ -32,11 +32,11 @@ public:
     explicit JSAnimatableArithmetic(const JSRef<JSObject>& jsObject, JSExecutionContext ctx)
         : jsObject_(jsObject), ctx_(ctx)
     {
-        auto addVal = jsObject_->GetProperty("add");
+        auto addVal = jsObject_->GetProperty("plus");
         if (addVal->IsFunction()) {
             addFunc_ = JSRef<JSFunc>::Cast(addVal);
         } else {
-            LOGD("'add' function does not exist on AnimatableArithmetic object");
+            LOGD("'plus' function does not exist on AnimatableArithmetic object");
         }
         auto minusVal = jsObject_->GetProperty("subtract");
         if (minusVal->IsFunction()) {
@@ -66,7 +66,7 @@ public:
         }
         JAVASCRIPT_EXECUTION_SCOPE(ctx_);
         JSRef<JSVal> argv[1] = { rhs->jsObject_ };
-        auto retVal = addFunc_.Lock()->Call(jsObject_, 1, argv);
+        auto retVal = addFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsObject()) {
             LOGE("add: result is not an object!");
             return {};
@@ -83,7 +83,7 @@ public:
         }
         JAVASCRIPT_EXECUTION_SCOPE(ctx_);
         JSRef<JSVal> argv[1] = { rhs->jsObject_ };
-        auto retVal = minusFunc_.Lock()->Call(jsObject_, 1, argv);
+        auto retVal = minusFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsObject()) {
             LOGE("minus: result is not an object!");
             return {};
@@ -96,7 +96,7 @@ public:
     {
         JAVASCRIPT_EXECUTION_SCOPE(ctx_);
         JSRef<JSVal> argv[1] = { JSRef<JSVal>::Make(ToJSValue(scale)) };
-        auto retVal = multiplyFunc_.Lock()->Call(jsObject_, 1, argv);
+        auto retVal = multiplyFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsObject()) {
             LOGE("multiply: result is not an object!");
             return {};
@@ -114,7 +114,7 @@ public:
 
         JAVASCRIPT_EXECUTION_SCOPE(ctx_);
         JSRef<JSVal> argv[1] = { rhs->jsObject_ };
-        auto retVal = equalsFunc_.Lock()->Call(jsObject_, 1, argv);
+        auto retVal = equalsFunc_->Call(jsObject_, 1, argv);
         if (!retVal->IsBoolean()) {
             LOGE("equals: result is not an boolean!");
             return false;
@@ -131,10 +131,10 @@ public:
 private:
     JSRef<JSObject> jsObject_;
     JSExecutionContext ctx_;
-    JSWeak<JSFunc> addFunc_;
-    JSWeak<JSFunc> minusFunc_;
-    JSWeak<JSFunc> multiplyFunc_;
-    JSWeak<JSFunc> equalsFunc_;
+    JSRef<JSFunc> addFunc_;
+    JSRef<JSFunc> minusFunc_;
+    JSRef<JSFunc> multiplyFunc_;
+    JSRef<JSFunc> equalsFunc_;
 };
 } // namespace OHOS::Ace::Framework
 

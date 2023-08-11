@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::V2 {
 
-void ListPositionController::JumpTo(int32_t index, int32_t source)
+void ListPositionController::JumpTo(int32_t index, bool /* smooth */, ScrollAlign /* align */, int32_t source)
 {
     auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
     if (!list) {

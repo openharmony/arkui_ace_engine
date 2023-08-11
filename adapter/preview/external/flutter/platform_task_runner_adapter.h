@@ -19,8 +19,6 @@
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/message_loop_task_queues.h"
 
-#include "adapter/preview/external/flutter/main_event_loop.h"
-
 namespace flutter {
 
 class PlatformTaskRunnerAdapter : public fml::TaskRunner {

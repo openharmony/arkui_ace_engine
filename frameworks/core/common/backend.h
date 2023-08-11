@@ -18,12 +18,13 @@
 
 #include "base/memory/ace_type.h"
 #include "base/resource/asset_manager.h"
-#include "base/thread/task_executor.h"
 #include "core/common/js_message_dispatcher.h"
 
 namespace OHOS::Ace {
 
 enum class BackendType { SERVICE, DATA, FORM };
+
+enum class SrcLanguage { ETS, JS };
 
 class ACE_EXPORT Backend : public AceType {
     DECLARE_ACE_TYPE(Backend, AceType);
@@ -36,7 +37,7 @@ public:
 
     static RefPtr<Backend> Create();
 
-    virtual bool Initialize(BackendType type, const RefPtr<TaskExecutor>& taskExecutor) = 0;
+    virtual bool Initialize(BackendType type, SrcLanguage language) = 0;
 
     virtual void LoadEngine(const char* libName, int32_t instanceId) = 0;
 

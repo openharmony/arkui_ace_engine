@@ -41,19 +41,17 @@ build_component_ng("web_pattern_ng") {
   if (is_ohos_standard_system) {
     configs = [ ":ohos_web_config" ]
     configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
-    deps = [
-      "$ability_runtime_path/frameworks/native/appkit:appkit_native",
-      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-      "//foundation/window/window_manager/utils:libwmutil",
-      "//foundation/window/window_manager/wm:libwm",
-    ]
     external_deps = [
       "ability_base:base",
       "ability_base:configuration",
       "ability_runtime:app_manager",
+      "ability_runtime:appkit_native",
       "c_utils:utils",
+      "graphic_2d:librender_service_client",
+      "init:libbegetutil",
       "ipc:ipc_core",
       "webview:libnweb",
+      "window_manager:libwm",
     ]
   }
 }

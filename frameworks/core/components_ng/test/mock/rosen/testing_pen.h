@@ -53,7 +53,7 @@ public:
     virtual void SetJoinStyle(JoinStyle js) {}
     virtual void SetMiterLimit(float limit) {}
     virtual void SetAlpha(uint32_t alpha) {}
-
+    virtual void SetAlphaF(float alpha) {}
     virtual std::shared_ptr<TestingShaderEffect> GetShaderEffect()
     {
         return std::make_shared<TestingShaderEffect>();

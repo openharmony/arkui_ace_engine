@@ -53,6 +53,9 @@ public:
     static void SetBlockStyle(const JSCallbackInfo& info);
     static void SetStepSize(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
+
+private:
+    static void ResetBlockStyle();
 };
 
 } // namespace OHOS::Ace::Framework

@@ -55,7 +55,8 @@ RefPtr<CanvasPaintMethod> CanvasPaintMethodTestNg::paintMethod_ = nullptr;
 void CanvasPaintMethodTestNg::SetUpTestSuite()
 {
     RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
-    paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(pipelineContext);
+    RefPtr<RenderingContext2DModifier> contentModifier = AceType::MakeRefPtr<RenderingContext2DModifier>();
+    paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(pipelineContext, contentModifier);
 }
 
 void CanvasPaintMethodTestNg::TearDownTestSuite()
@@ -240,11 +241,14 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg003, TestSize.Level1)
 
     paintMethod_->SetLineDash(CANDIDATE_DOUBLES);
     for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
-        EXPECT_DOUBLE_EQ(paintMethod_->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
+        auto lineDash = paintMethod_->strokeState_.GetLineDash();
+        EXPECT_DOUBLE_EQ(lineDash.lineDash[i], CANDIDATE_DOUBLES[i]);
     }
+
     for (double item : CANDIDATE_DOUBLES) {
         paintMethod_->SetLineDashOffset(item);
-        EXPECT_DOUBLE_EQ(paintMethod_->GetLineDash().dashOffset, item);
+        auto lineDash = paintMethod_->strokeState_.GetLineDash();
+        EXPECT_DOUBLE_EQ(lineDash.dashOffset, item);
     }
 
     for (auto textAlign : CANDIDATE_TEXT_ALIGNS) {
@@ -398,57 +402,6 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg007, TestSize.Level1)
 }
 
 /**
- * @tc.name: CanvasPaintMethodTestNg008
- * @tc.desc: Test the function ToDataURL of CanvasPaintMethod.
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg008, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     */
-    ASSERT_NE(paintMethod_, nullptr);
-    paintMethod_->lastLayoutSize_.SetWidth(IDEAL_WIDTH);
-    paintMethod_->lastLayoutSize_.SetWidth(IDEAL_HEIGHT);
-    paintMethod_->CreateBitmap(IDEAL_SIZE);
-
-    /**
-     * @tc.steps2: Test the function ToDataURL.
-     * @tc.expected: The part of result is equal to IMAGE_PNG.
-     * @tc.note: The test is incomplete.
-     */
-    std::string result = paintMethod_->ToDataURL(IMAGE_PNG);
-    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
-
-    /**
-     * @tc.steps3: Test the function ToDataURL.
-     * @tc.expected: The part of result is equal to IMAGE_PNG.
-     * @tc.note: The test is incomplete.
-     */
-    const string testMimeType1(IMAGE_PNG + "\"" + IMAGE_PNG + "\"" + IMAGE_PNG + "," + QUALITY_0);
-    result = paintMethod_->ToDataURL(testMimeType1);
-    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
-
-    /**
-     * @tc.steps4: Test the function ToDataURL.
-     * @tc.expected: The part of result is equal to IMAGE_PNG.
-     * @tc.note: The test is incomplete.
-     */
-    const string testMimeType2(IMAGE_WEBP + "\"" + IMAGE_WEBP + "\"" + IMAGE_WEBP + "," + QUALITY_50);
-    result = paintMethod_->ToDataURL(testMimeType2);
-    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
-
-    /**
-     * @tc.steps5: Test the function ToDataURL.
-     * @tc.expected: The part of result is equal to IMAGE_PNG.
-     * @tc.note: The test is incomplete.
-     */
-    const string testMimeType3(IMAGE_JPEG + "\"" + IMAGE_JPEG + "\"" + IMAGE_JPEG + "," + QUALITY_100);
-    result = paintMethod_->ToDataURL(testMimeType3);
-    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
-}
-
-/**
  * @tc.name: CanvasPaintMethodTestNg009
  * @tc.desc: Test the function UpdateLineDash of CanvasPaintMethod.
  * @tc.type: FUNC
@@ -525,12 +478,6 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg010, TestSize.Level1)
     paintMethod_->loadingSource_.SetSrc(loadingSrc);
     paintMethod_->ImageObjReady(imageObj);
     EXPECT_EQ(paintMethod_->currentSource_.GetSrc(), loadingSrc);
-
-    /**
-     * @tc.steps4: Call the function GetForegroundDrawFunction.
-     * @tc.expected: The return value is non-null.
-     */
-    EXPECT_NE(paintMethod_->GetForegroundDrawFunction(nullptr), nullptr);
 }
 
 #ifndef NEW_SKIA

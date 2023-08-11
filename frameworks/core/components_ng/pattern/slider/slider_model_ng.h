@@ -46,6 +46,17 @@ public:
     void SetStepSize(const Dimension& value) override;
     void SetOnChange(SliderOnChangeEvent&& eventOnChange) override;
     void SetOnChangeEvent(SliderOnValueChangeEvent&& onChangeEvent) override;
+
+    void ResetBlockBorderColor() override;
+    void ResetBlockBorderWidth() override;
+    void ResetStepColor() override;
+    void ResetTrackBorderRadius() override;
+    void ResetBlockSize() override;
+    void ResetBlockType() override;
+    void ResetBlockImage() override;
+    void ResetBlockShape() override;
+    void ResetStepSize() override;
+
 private:
     void SetSliderValue(float value);
 };

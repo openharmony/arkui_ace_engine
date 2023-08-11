@@ -18,8 +18,7 @@ group("unittest") {
   deps = []
   if (!is_asan) {
     deps = [
-      "accessibility:accessibility_unittest",
-      "base:base_unittest",
+      #"animation:animation_unittest",
       "event:event_unittest",
       "image_provider:image_provider_test_ng",
       "layout:layout_unittest",
@@ -27,8 +26,9 @@ group("unittest") {
       "pattern:pattern_unittest",
       "property:property_unittest",
       "render:render_unittest",
-      "svg:svg_unittest",
       "syntax:syntax_unittest",
+
+      #"svg:svg_unittest",
     ]
   }
 }

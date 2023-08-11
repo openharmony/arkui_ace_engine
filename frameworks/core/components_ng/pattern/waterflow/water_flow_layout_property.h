@@ -37,6 +37,7 @@ public:
         ResetColumnsGap();
         ResetRowsGap();
         ResetWaterflowDirection();
+        ResetScrollEnabled();
         itemLayoutConstraint_.reset();
     }
 
@@ -68,7 +69,12 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ColumnsGap, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowsGap, Dimension, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RowsGap, Dimension);
+    void OnRowsGapUpdate(Dimension /* rowsGap */) const
+    {
+        ResetWaterflowLayoutInfoAndMeasure();
+    }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CachedCount, int32_t);
     void OnCachedCountUpdate(int32_t /* cachedCount */) const
@@ -122,6 +128,8 @@ public:
     {
         return itemLayoutConstraint_ != nullptr;
     }
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutProperty);

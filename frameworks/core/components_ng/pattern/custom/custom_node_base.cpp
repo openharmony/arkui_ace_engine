@@ -31,10 +31,10 @@ CustomNodeBase::~CustomNodeBase()
 
 void CustomNodeBase::Update()
 {
+    needRebuild_ = false;
     if (updateFunc_) {
         updateFunc_();
     }
-    needRebuild_ = false;
 }
 
 void CustomNodeBase::MarkNeedUpdate()
@@ -49,5 +49,30 @@ void CustomNodeBase::MarkNeedUpdate()
     }
     needRebuild_ = true;
     context->AddDirtyCustomNode(AceType::DynamicCast<UINode>(Claim(this)));
+}
+
+void CustomNodeBase::FireRecycleSelf()
+{
+    std::queue<RefPtr<UINode>> q;
+    q.push(AceType::DynamicCast<UINode>(Claim(this)));
+    while (!q.empty()) {
+        auto node = q.front();
+        q.pop();
+        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        if (frameNode) {
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            if (layoutProperty && layoutProperty->GetGeometryTransition()) {
+                layoutProperty->UpdateGeometryTransition("");
+            }
+        }
+        const auto& children = node->GetChildren();
+        for (const auto& child : children) {
+            q.push(child);
+        }
+    }
+
+    if (recycleCustomNodeFunc_) {
+        recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));
+    }
 }
 } // namespace OHOS::Ace::NG

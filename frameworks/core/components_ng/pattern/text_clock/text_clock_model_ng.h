@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_CLOCK_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_CLOCK_MODEL_NG_H
 
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +26,11 @@ public:
     void SetFormat(const std::string& format) override;
     void SetHoursWest(const int32_t& hoursWest) override;
     void SetOnDateChange(std::function<void(const std::string)>&& onChange) override;
+    void SetFontSize(const Dimension& value) override;
+    void SetTextColor(const Color& value) override;
+    void SetItalicFontStyle(Ace::FontStyle value) override;
+    void SetFontWeight(FontWeight value) override;
+    void SetFontFamily(const std::vector<std::string>& value) override;
 };
 } // namespace OHOS::Ace::NG
 

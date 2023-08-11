@@ -82,5 +82,17 @@ public:
     static void Mock(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 };
+
+class JSUIExtension : public JSViewAbstract, public JSInteractableView {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Create(const JSCallbackInfo& info);
+    static void onRemoteReady(const JSCallbackInfo& info);
+    static void onReceive(const JSCallbackInfo& info);
+    static void onResult(const JSCallbackInfo& info);
+    static void onRelease(const JSCallbackInfo& info);
+    static void onError(const JSCallbackInfo& info);
+    static void Mock(const JSCallbackInfo& info);
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PREVIEWER_MOCK_H

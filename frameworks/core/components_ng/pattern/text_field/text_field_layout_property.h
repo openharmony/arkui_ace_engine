@@ -61,6 +61,12 @@ public:
         ResetShowErrorText();
         ResetShowCounter();
         ResetShowUnderline();
+        ResetShowPasswordSourceInfo();
+        ResetHidePasswordSourceInfo();
+        ResetTextAlignChanged();
+        ResetDisplayMode();
+        ResetMaxViewLines();
+        ResetSelectionMenuHidden();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -121,9 +127,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordIcon, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCounter, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowUnderline, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxViewLines, uint32_t, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TypeChanged, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextAlignChanged, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOptions, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredNewLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredTextLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
@@ -134,6 +143,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretPosition, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectionMenuHidden, bool, PROPERTY_UPDATE_MEASURE);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -157,6 +167,12 @@ protected:
         value->propShowErrorText_ = CloneShowErrorText();
         value->propShowCounter_ = CloneShowCounter();
         value->propShowUnderline_ = CloneShowUnderline();
+        value->propShowPasswordSourceInfo_ = CloneShowPasswordSourceInfo();
+        value->propHidePasswordSourceInfo_ = CloneHidePasswordSourceInfo();
+        value->propTextAlignChanged_ = CloneTextAlignChanged();
+        value->propDisplayMode_ = CloneDisplayMode();
+        value->propMaxViewLines_ = CloneMaxViewLines();
+        value->propSelectionMenuHidden_ = CloneSelectionMenuHidden();
     }
 
 private:

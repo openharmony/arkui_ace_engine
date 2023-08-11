@@ -94,6 +94,9 @@ public:
 
     void OnSurfaceChanged(int32_t width, int32_t height) override {}
 
+    void OnLayoutCompleted(const std::string& componentId) override {}
+    void OnDrawCompleted(const std::string& componentId) override {}
+
     void ReplacePage(const std::string& url, const std::string& params) override {}
 
     void DumpFrontend() const override
@@ -115,11 +118,6 @@ public:
     WindowConfig& GetWindowConfig() override
     {
         return windowConfig_;
-    }
-
-    FrontendType GetType() override
-    {
-        return type_;
     }
 
     void SendCallbackMessage(const std::string& callbackId, const std::string& data) const override
@@ -169,7 +167,6 @@ public:
     }
 
 private:
-    FrontendType type_ { FrontendType::JSON };
     static constexpr int32_t JSON_DESIGN_WIDTH = 1080;
     std::unordered_map<int, RefPtr<AcePage>> pageMap_;
     RefPtr<PipelineBase> pipelineContext_;

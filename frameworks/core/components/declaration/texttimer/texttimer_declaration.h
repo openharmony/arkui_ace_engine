@@ -23,11 +23,11 @@
 
 namespace OHOS::Ace {
 
-inline constexpr double DEFAULT_COUNT = 60000.0;
+inline constexpr double TIME_DEFAULT_COUNT = 60000.0;
 inline const char DEFAULT_FORMAT[] = "HH:mm:ss.S";
 
 struct TextTimerAttribute : Attribute {
-    double inputCount = DEFAULT_COUNT;
+    double inputCount = TIME_DEFAULT_COUNT;
     bool isCountDown_ = false;
     std::string format_ = DEFAULT_FORMAT;
 };

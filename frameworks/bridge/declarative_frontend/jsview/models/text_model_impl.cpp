@@ -46,6 +46,8 @@ void TextModelImpl::Create(const std::string& content)
     textComponent->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetFont(const Font& value) {}
+
 void TextModelImpl::SetFontSize(const Dimension& value)
 {
     auto component = GetComponent();

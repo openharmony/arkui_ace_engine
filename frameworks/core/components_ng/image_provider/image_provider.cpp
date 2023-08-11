@@ -20,9 +20,12 @@
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
+#include "core/components_ng/image_provider/adapter/image_decoder.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -30,7 +33,12 @@
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
-#include "core/components_ng/render/adapter/svg_canvas_image.h"
+#ifndef USE_ROSEN_DRAWING
+#include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
+#include "core/image/flutter_image_cache.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -127,7 +135,7 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
 
 void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync)
 {
-    CacheCanvasImage(canvasImage, key);
+    canvasImage->Cache(key);
     auto ctxs = EndTask(key);
     // when upload success, pass back canvasImage to LoadingContext
     auto notifyLoadSuccess = [ctxs, canvasImage] {
@@ -136,7 +144,7 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
             if (!ctx) {
                 continue;
             }
-            ctx->SuccessCallback(canvasImage);
+            ctx->SuccessCallback(canvasImage->Clone());
         }
     };
     if (sync) {
@@ -225,7 +233,7 @@ void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadin
     std::scoped_lock<std::mutex> lock(taskMtx_);
     LOGD("try cancel bgTask %{public}s", key.c_str());
     auto it = tasks_.find(key);
-    CHECK_NULL_VOID(it != tasks_.end());
+    CHECK_NULL_VOID_NOLOG(it != tasks_.end());
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());
     // only one LoadingContext waiting for this task, can just cancel
     if (it->second.ctxs_.size() == 1) {
@@ -272,15 +280,65 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
         return PixelMapImageObject::Create(src, data);
     }
 
+#ifndef USE_ROSEN_DRAWING
     // standard skia image object
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
     auto [size, frameCount] = skiaImageData->Parse();
-    CHECK_NULL_RETURN(size.IsPositive() && frameCount >= 0, nullptr);
+#else
+    // standard drawing image object
+    auto rosenImageData = DynamicCast<DrawingImageData>(data);
+    CHECK_NULL_RETURN(rosenImageData, nullptr);
+    auto [size, frameCount] = rosenImageData->Parse();
+#endif
+    CHECK_NULL_RETURN(size.IsPositive(), nullptr);
 
     if (frameCount > 1) {
         return MakeRefPtr<AnimatedImageObject>(src, size, data);
     }
     return MakeRefPtr<StaticImageObject>(src, size, data);
+}
+
+void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
+    const SizeF& size, bool forceResize, bool sync)
+{
+    auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
+    // check if same task is already executing
+    if (!RegisterTask(key, ctxWp)) {
+        return;
+    }
+
+    if (sync) {
+        MakeCanvasImageHelper(obj, size, key, forceResize, true);
+    } else {
+        std::scoped_lock<std::mutex> lock(taskMtx_);
+        // wrap with [CancelableCallback] and record in [tasks_] map
+        CancelableCallback<void()> task;
+        task.Reset([key, obj, size, forceResize] { MakeCanvasImageHelper(obj, size, key, forceResize); });
+        tasks_[key].bgTask_ = task;
+        ImageUtils::PostToBg(task);
+    }
+}
+
+void ImageProvider::MakeCanvasImageHelper(
+    const RefPtr<ImageObject>& obj, const SizeF& size, const std::string& key, bool forceResize, bool sync)
+{
+    ImageDecoder decoder(obj, size, forceResize);
+    RefPtr<CanvasImage> image;
+    if (SystemProperties::GetImageFrameworkEnabled()) {
+        image = decoder.MakePixmapImage();
+    } else {
+#ifndef USE_ROSEN_DRAWING
+        image = decoder.MakeSkiaImage();
+#else
+        image = decoder.MakeDrawingImage();
+#endif
+    }
+
+    if (image) {
+        SuccessCallback(image, key, sync);
+    } else {
+        FailCallback(key, "Make CanvasImage failed.");
+    }
 }
 } // namespace OHOS::Ace::NG

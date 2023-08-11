@@ -59,7 +59,7 @@ ohos_shared_library("ace_uicontent") {
   configs = [
     ":uicontent_config",
     "$ace_root:ace_config",
-    "$ace_root/test/unittest:ace_coverage_config",
+    "$ace_root:ace_coverage_config",
   ]
 
   sources = [
@@ -76,7 +76,7 @@ ohos_shared_library("ace_uicontent") {
     external_deps = [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
-      "hilog_native:libhilog",
+      "hilog:libhilog",
     ]
   }
 

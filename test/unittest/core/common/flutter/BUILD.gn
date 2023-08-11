@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("flutter_test") {
@@ -21,10 +20,11 @@ ohos_unittest("flutter_test") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_asset_manager.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_task_executor.cpp",
+    "$ace_root/frameworks/core/common/flutter/flutter_thread_model.cpp",
     "$ace_root/frameworks/core/common/flutter/flutter_window.cpp",
     "$ace_root/frameworks/core/components/plugin/file_asset_provider.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
-    "flutter_test.cpp",
+    "$ace_root/test/unittest/core/common/flutter/flutter_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -35,9 +35,13 @@ ohos_unittest("flutter_test") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "//third_party/googletest:gmock_main",
   ]
-
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
   if (ace_use_new_skia) {
     sources += [
+      "$flutter_root/engine/flutter/shell/common/thread_host.cc",
       "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
       "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
     ]

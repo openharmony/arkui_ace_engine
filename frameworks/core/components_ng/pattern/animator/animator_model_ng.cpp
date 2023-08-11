@@ -22,7 +22,7 @@ void AnimatorModelNG::AddEventListener(
     auto animatorInfo = GetAnimatorInfo(animatorId);
     CHECK_NULL_VOID(animatorInfo);
     auto animator = animatorInfo->GetAnimator();
-    CHECK_NULL_VOID(animatorInfo);
+    CHECK_NULL_VOID(animator);
     switch (operation) {
         case EventOperation::START:
             animator->ClearStartListeners();

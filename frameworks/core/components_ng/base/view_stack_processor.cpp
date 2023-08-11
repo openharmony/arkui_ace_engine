@@ -90,7 +90,10 @@ void ViewStackProcessor::FlushRerenderTask()
 {
     auto node = Finish();
     CHECK_NULL_VOID_NOLOG(node);
-    if (predict_) {
+    if (predictNode_) {
+        predictNode_->AddAttachToMainTreeTask([node]() {
+            node->FlushUpdateAndMarkDirty();
+        });
         return;
     }
     node->FlushUpdateAndMarkDirty();
@@ -103,6 +106,7 @@ void ViewStackProcessor::Pop()
     }
 
     auto currentNode = Finish();
+    currentNode->SetBuildByJs(true);
     auto parent = GetMainElementNode();
     if (AceType::InstanceOf<GroupNode>(parent)) {
         auto groupNode = AceType::DynamicCast<GroupNode>(parent);
@@ -172,6 +176,9 @@ void ViewStackProcessor::SetVisualState(VisualState state)
             break;
         case VisualState::PRESSED:
             visualState_ = UI_STATE_PRESSED;
+            break;
+        case VisualState::SELECTED:
+            visualState_ = UI_STATE_SELECTED;
             break;
         case VisualState::NORMAL:
         default:

@@ -1148,7 +1148,7 @@ void PluginFrontendDelegate::OnSurfaceChanged()
     OnMediaQueryUpdate();
 }
 
-void PluginFrontendDelegate::OnMediaQueryUpdate()
+void PluginFrontendDelegate::OnMediaQueryUpdate(bool isSynchronous)
 {
     if (mediaQueryInfo_->GetIsInit()) {
         return;
@@ -1628,6 +1628,16 @@ RefPtr<JsAcePage> PluginFrontendDelegate::GetPage(int32_t pageId) const
 void PluginFrontendDelegate::RegisterFont(const std::string& familyName, const std::string& familySrc)
 {
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+}
+
+void PluginFrontendDelegate::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+bool PluginFrontendDelegate::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
 }
 
 void PluginFrontendDelegate::HandleImage(

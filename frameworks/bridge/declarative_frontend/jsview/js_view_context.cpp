@@ -61,7 +61,7 @@ namespace {
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 
 void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
-    const JSCallbackInfo& info, std::function<void()>& onFinishEvent)
+    JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent)
 {
     auto triggerId = Container::CurrentId();
     AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
@@ -91,8 +91,7 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     pipelineContext->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
-    JSRef<JSFunc> jsAnimateToFunc = JSRef<JSFunc>::Cast(info[1]);
-    jsAnimateToFunc->Call(info[1]);
+    jsAnimateToFunc->Call(jsAnimateToFunc);
     AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
         if (!context) {
@@ -136,7 +135,8 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
 
 } // namespace
 
-const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs, bool isForm)
+const AnimationOption JSViewContext::CreateAnimation(
+    const std::unique_ptr<JsonValue>& animationArgs, const std::function<float(float)>& jsFunc, bool isForm)
 {
     AnimationOption option = AnimationOption();
     if (!animationArgs) {
@@ -157,14 +157,21 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
     RefPtr<Curve> curve;
     auto curveArgs = animationArgs->GetValue("curve");
     if (curveArgs->IsString()) {
-        curve = CreateCurve(animationArgs->GetString("curve", "linear"));
+        curve = CreateCurve(animationArgs->GetString("curve", DOM_ANIMATION_TIMING_FUNCTION_EASE_IN_OUT));
     } else if (curveArgs->IsObject()) {
         auto curveString = curveArgs->GetValue("__curveString");
         if (!curveString) {
             // Default AnimationOption which is invalid.
             return option;
         }
-        curve = CreateCurve(curveString->GetString());
+        auto aniTimFunc = curveString->GetString();
+
+        std::string customFuncName(DOM_ANIMATION_TIMING_FUNCTION_CUSTOM);
+        if (aniTimFunc == customFuncName) {
+            curve = CreateCurve(jsFunc);
+        } else {
+            curve = CreateCurve(aniTimFunc);
+        }
     } else {
         curve = Curves::EASE_IN_OUT;
     }
@@ -198,9 +205,35 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
     return option;
 }
 
+std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& obj)
+{
+    std::function<float(float)> customCallBack = nullptr;
+    JSRef<JSVal> curveVal = obj->GetProperty("curve");
+    if (curveVal->IsObject()) {
+        JSRef<JSObject> curveobj = JSRef<JSObject>::Cast(curveVal);
+        JSRef<JSVal> onCallBack = curveobj->GetProperty("__curveCustomFunc");
+        if (onCallBack->IsFunction()) {
+            RefPtr<JsFunction> jsFuncCallBack =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
+            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+                ContainerScope scope(id);
+                JSRef<JSVal> params[1];
+                params[0] = JSRef<JSVal>::Make(ToJSValue(time));
+                auto result = func->ExecuteJS(1, params);
+                auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
+                if (resultValue < 0 || resultValue > 1) {
+                    LOGI("The interpolate return  value error = %{public}f ", resultValue);
+                }
+                return resultValue;
+            };
+        }
+    }
+    return customCallBack;
+}
+
 void JSViewContext::JSAnimation(const JSCallbackInfo& info)
 {
-    LOGD("JSAnimation");
+    ACE_FUNCTION_TRACE();
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -242,7 +275,8 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         ViewContextModel::GetInstance()->closeAnimation(option, false);
         return;
     }
-    option = CreateAnimation(animationArgs, pipelineContextBase->IsFormRender());
+
+    option = CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContextBase->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
@@ -301,12 +335,29 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
         return;
     }
 
-    AnimationOption option = CreateAnimation(animationArgs, pipelineContext->IsFormRender());
+    AnimationOption option =
+        CreateAnimation(animationArgs, ParseCallBackFunction(obj), pipelineContext->IsFormRender());
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
         LOGD("RSAnimationInfo: Begin JSAnimateTo, usingSharedRuntime: %{public}d", usingSharedRuntime);
         if (usingSharedRuntime) {
-            AnimateToForStageMode(pipelineContext, option, info, onFinishEvent);
+            if (pipelineContext->IsLayouting()) {
+                LOGW("pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
+                    option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
+                pipelineContext->GetTaskExecutor()->PostTask(
+                    [id = Container::CurrentId(), option, func = JSRef<JSFunc>::Cast(info[1]),
+                        onFinishEvent]() mutable {
+                        ContainerScope scope(id);
+                        auto container = Container::Current();
+                        CHECK_NULL_VOID(container);
+                        auto pipelineContext = container->GetPipelineContext();
+                        CHECK_NULL_VOID(pipelineContext);
+                        AnimateToForStageMode(pipelineContext, option, func, onFinishEvent);
+                    },
+                    TaskExecutor::TaskType::UI);
+                return;
+            }
+            AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent);
         } else {
             AnimateToForFaMode(pipelineContext, option, info, onFinishEvent);
         }

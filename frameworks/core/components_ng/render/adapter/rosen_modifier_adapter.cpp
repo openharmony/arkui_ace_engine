@@ -61,31 +61,40 @@ void ModifierAdapter::RemoveModifier(int32_t modifierId)
 void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 {
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
+#else
+    CHECK_NULL_VOID_NOLOG(context.canvas);
+#endif
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID_NOLOG(modifier);
+#ifndef USE_ROSEN_DRAWING
     DrawingContext context_ = { canvas, context.width, context.height };
+#else
+    DrawingContext context_ = { *context.canvas, context.width, context.height };
+#endif
     modifier->onDraw(context_);
 }
 
-#define CONVERT_PROP(prop, srcType, propType)                                                 \
-    if (AceType::InstanceOf<srcType>(prop)) {                                                 \
-        auto castProp = AceType::DynamicCast<srcType>(prop);                                  \
-        auto rsProp = std::make_shared<RSProperty<propType>>(castProp->Get());                \
-        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },            \
-            [rsProp](const propType& value) { rsProp->Set(value); });                         \
-        return rsProp;                                                                        \
+#define CONVERT_PROP(prop, srcType, propType)                                      \
+    if (AceType::InstanceOf<srcType>(prop)) {                                      \
+        auto castProp = AceType::DynamicCast<srcType>(prop);                       \
+        auto rsProp = std::make_shared<RSProperty<propType>>(castProp->Get());     \
+        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); }, \
+            [rsProp](const propType& value) { rsProp->Set(value); });              \
+        return rsProp;                                                             \
     }
 
-#define CONVERT_ANIMATABLE_PROP(prop, srcType, propType)                                      \
-    if (AceType::InstanceOf<srcType>(prop)) {                                                 \
-        auto castProp = AceType::DynamicCast<srcType>(prop);                                  \
-        auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get());      \
-        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },            \
-            [rsProp](const propType& value) { rsProp->Set(value); });                         \
-        rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                             \
-        return rsProp;                                                                        \
+#define CONVERT_ANIMATABLE_PROP(prop, srcType, propType)                                 \
+    if (AceType::InstanceOf<srcType>(prop)) {                                            \
+        auto castProp = AceType::DynamicCast<srcType>(prop);                             \
+        auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get()); \
+        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },       \
+            [rsProp](const propType& value) { rsProp->Set(value); },                     \
+            [rsProp]() -> propType { return rsProp->GetStagingValue(); });               \
+        rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                        \
+        return rsProp;                                                                   \
     }
 
 inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<PropertyBase>& property)
@@ -98,7 +107,9 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_PROP(property, PropertyFloat, float);
     CONVERT_PROP(property, PropertyString, std::string);
     CONVERT_PROP(property, PropertyColor, Color);
+    CONVERT_PROP(property, PropertyRectF, RectF);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyOffsetF, OffsetF);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyUint8, uint8_t);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyFloat, float);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyColor, LinearColor);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorColor, GradientArithmetic);
@@ -107,18 +118,19 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
 
     if (AceType::InstanceOf<AnimatableArithmeticProperty>(property)) {
         auto castProp = AceType::DynamicCast<AnimatableArithmeticProperty>(property);
+        if (!castProp && !castProp->Get()) {
+            LOGE("ConvertToRSProperty: Failed converting to RSProperty - AnimatableArithmeticProperty is null");
+            return nullptr;
+        }
         AnimatableArithmeticProxy proxy(castProp->Get());
         auto rsProp = std::make_shared<RSAnimatableProperty<AnimatableArithmeticProxy>>(proxy);
-        auto getter = [rsProp]() -> RefPtr<CustomAnimatableArithmetic> {
-            return rsProp->Get().GetObject();
-        };
+        auto getter = [rsProp]() -> RefPtr<CustomAnimatableArithmetic> { return rsProp->Get().GetObject(); };
         auto setter = [rsProp](const RefPtr<CustomAnimatableArithmetic>& value) {
             rsProp->Set(AnimatableArithmeticProxy(value));
         };
         castProp->SetUpCallbacks(getter, setter);
-        rsProp->SetUpdateCallback([cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) {
-            cb(value.GetObject());
-        });
+        rsProp->SetUpdateCallback(
+            [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) { cb(value.GetObject()); });
         return rsProp;
     }
 
@@ -141,11 +153,19 @@ void ContentModifierAdapter::AttachProperties()
 void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
 {
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
+#else
+    CHECK_NULL_VOID_NOLOG(context.canvas);
+#endif
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID_NOLOG(modifier);
+#ifndef USE_ROSEN_DRAWING
     DrawingContext context_ = { canvas, context.width, context.height };
+#else
+    DrawingContext context_ = { *context.canvas, context.width, context.height };
+#endif
     modifier->onDraw(context_);
 }
 

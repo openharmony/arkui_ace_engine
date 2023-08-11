@@ -15,12 +15,18 @@
 
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 
+#include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double DEFAULT_OPACITY = 1.0f;
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
+} // namespace
+
 void QRCodeModelNG::Create(const std::string& value)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -28,10 +34,23 @@ void QRCodeModelNG::Create(const std::string& value)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::QRCODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<QRCodePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    CHECK_NULL_VOID(qrCodeTheme);
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
-    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, Color::BLACK);
-    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, Color::WHITE);
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::WHITE);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, qrCodeTheme->GetQrcodeColor());
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, qrCodeTheme->GetBackgroundColor());
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrCodeTheme->GetBackgroundColor());
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, DEFAULT_OPACITY);
+    } else {
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, Color::BLACK);
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, Color::WHITE);
+        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::WHITE);
+        ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, DEFAULT_OPACITY);
+    }
 }
 
 void QRCodeModelNG::SetQRCodeColor(Color color)
@@ -45,6 +64,10 @@ void QRCodeModelNG::SetQRCodeColor(Color color)
 void QRCodeModelNG::SetQRBackgroundColor(Color color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color);
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
+}
+
+void QRCodeModelNG::SetContentOpacity(double opacity)
+{
+    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Opacity, opacity);
 }
 } // namespace OHOS::Ace::NG

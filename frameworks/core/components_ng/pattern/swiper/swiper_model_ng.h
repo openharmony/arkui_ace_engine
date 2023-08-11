@@ -43,14 +43,17 @@ public:
     void SetEdgeEffect(EdgeEffect EdgeEffect) override;
     void SetDisplayMode(SwiperDisplayMode displayMode) override;
     void SetDisplayCount(int32_t displayCount) override;
+    void ResetDisplayCount() override;
+    void SetMinSize(const Dimension& minSize) override;
     void SetShowIndicator(bool showIndicator) override;
     void SetIndicatorType(SwiperIndicatorType indicatorType) override;
     void SetIsIndicatorCustomSize(bool isCustomSize) override;
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
-    void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart) override;
-    void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd) override;
+    void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
+    void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
+    void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) override;
 
     void SetRemoteMessageEventId(RemoteCallback&& remoteCallback) override;
     void SetOnClick(

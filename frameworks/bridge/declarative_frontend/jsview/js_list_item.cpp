@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <functional>
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -143,9 +144,34 @@ void JSListItem::SetSelectable(bool selectable)
     ListItemModel::GetInstance()->SetSelectable(selectable);
 }
 
+void JSListItem::SetSelected(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+    bool select = false;
+    if (info[0]->IsBoolean()) {
+        select = info[0]->ToBoolean();
+    }
+    ListItemModel::GetInstance()->SetSelected(select);
+
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("ListItem.ChangeEvent");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        ListItemModel::GetInstance()->SetSelectChangeEvent(std::move(changeEvent));
+    }
+}
+
 void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, bool isStartArea)
 {
     auto deleteAreaObj = JSRef<JSObject>::Cast(jsValue);
+    auto listItemTheme = GetTheme<ListItemTheme>();
 
     std::function<void()> builderAction;
     auto builderObject = deleteAreaObj->GetProperty("builder");
@@ -158,38 +184,52 @@ void JSListItem::JsParseDeleteArea(const JSCallbackInfo& args, const JSRef<JSVal
     if (defaultDeleteAnimation->IsBoolean()) {
         useDefaultDeleteAnimation = defaultDeleteAnimation->ToBoolean();
     }
-    auto onDelete = deleteAreaObj->GetProperty("onDelete");
-    std::function<void()> onDeleteCallback;
-    if (onDelete->IsFunction()) {
-        onDeleteCallback = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onDelete)]() {
+    auto onAction = deleteAreaObj->GetProperty("onAction");
+    if (!onAction->IsFunction()) {
+        onAction = deleteAreaObj->GetProperty("onDelete");
+    }
+    std::function<void()> onActionCallback;
+    if (onAction->IsFunction()) {
+        onActionCallback = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onAction)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
     }
-    auto onEnterDeleteArea = deleteAreaObj->GetProperty("onEnterDeleteArea");
-    std::function<void()> onEnterDeleteAreaCallback;
-    if (onEnterDeleteArea->IsFunction()) {
-        onEnterDeleteAreaCallback = [execCtx = args.GetExecutionContext(),
-                                        func = JSRef<JSFunc>::Cast(onEnterDeleteArea)]() {
+    auto onEnterActionArea = deleteAreaObj->GetProperty("onEnterActionArea");
+    if (!onEnterActionArea->IsFunction()) {
+        onEnterActionArea = deleteAreaObj->GetProperty("onEnterDeleteArea");
+    }
+    std::function<void()> onEnterActionAreaCallback;
+    if (onEnterActionArea->IsFunction()) {
+        onEnterActionAreaCallback = [execCtx = args.GetExecutionContext(),
+                                        func = JSRef<JSFunc>::Cast(onEnterActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
     }
-    auto onExitDeleteArea = deleteAreaObj->GetProperty("onExitDeleteArea");
-    std::function<void()> onExitDeleteAreaCallback;
-    if (onExitDeleteArea->IsFunction()) {
-        onExitDeleteAreaCallback = [execCtx = args.GetExecutionContext(),
-                                       func = JSRef<JSFunc>::Cast(onExitDeleteArea)]() {
+    auto onExitActionArea = deleteAreaObj->GetProperty("onExitActionArea");
+    if (!onExitActionArea->IsFunction()) {
+        onExitActionArea = deleteAreaObj->GetProperty("onExitDeleteArea");
+    }
+    std::function<void()> onExitActionAreaCallback;
+    if (onExitActionArea->IsFunction()) {
+        onExitActionAreaCallback = [execCtx = args.GetExecutionContext(),
+                                       func = JSRef<JSFunc>::Cast(onExitActionArea)]() {
             func->Call(JSRef<JSObject>());
             return;
         };
     }
-    auto deleteAreaDistance = deleteAreaObj->GetProperty("deleteAreaDistance");
+    auto actionAreaDistance = deleteAreaObj->GetProperty("actionAreaDistance");
     CalcDimension length;
-    ParseJsDimensionVp(deleteAreaDistance, length);
+    if (!ParseJsDimensionVp(actionAreaDistance, length)) {
+        actionAreaDistance = deleteAreaObj->GetProperty("deleteAreaDistance");
+        if (!ParseJsDimensionVp(actionAreaDistance, length)) {
+            length = listItemTheme->GetDeleteDistance();
+        }
+    }
 
     ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), useDefaultDeleteAnimation,
-        std::move(onDeleteCallback), std::move(onEnterDeleteAreaCallback), std::move(onExitDeleteAreaCallback), length,
+        std::move(onActionCallback), std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback), length,
         isStartArea);
 }
 
@@ -304,6 +344,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("onSelect", &JSListItem::SelectCallback);
     JSClass<JSListItem>::StaticMethod("borderRadius", &JSListItem::JsBorderRadius);
     JSClass<JSListItem>::StaticMethod("swipeAction", &JSListItem::SetSwiperAction);
+    JSClass<JSListItem>::StaticMethod("selected", &JSListItem::SetSelected);
 
     JSClass<JSListItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSListItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

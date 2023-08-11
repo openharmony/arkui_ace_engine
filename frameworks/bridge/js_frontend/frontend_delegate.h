@@ -26,6 +26,7 @@
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
+#include "frameworks/bridge/common/utils/componentInfo.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 
@@ -61,10 +62,16 @@ public:
     virtual void PushWithCallback(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
     {}
+    virtual void PushNamedRoute(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
+    {}
     // Jump to the specified page, but current page will be removed from the stack.
     virtual void Replace(const std::string& uri, const std::string& params) = 0;
     virtual void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) {}
     virtual void ReplaceWithCallback(const std::string& uri, const std::string& params,
+        const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
+    {}
+    virtual void ReplaceNamedRoute(const std::string& uri, const std::string& params,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0)
     {}
     // Back to specified page or the previous page if url not set.
@@ -86,6 +93,7 @@ public:
     {
         return "";
     }
+    virtual void GetRectangleById(const std::string& key, NG::Rectangle& rectangle);
 
     // distribute
     virtual std::string RestoreRouterStack(const std::string& contentInfo)
@@ -126,9 +134,14 @@ public:
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) = 0;
+    virtual void ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks) {};
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged) {};
+    virtual void ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks,
+        std::function<void(bool)>&& onStatusChanged) {};
 
     virtual void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) = 0;
     virtual void DisableAlertBeforeBackPage() = 0;
@@ -190,9 +203,13 @@ public:
 
     virtual const RefPtr<MediaQueryInfo>& GetMediaQueryInfoInstance() = 0;
 
-    virtual void OnMediaQueryUpdate() = 0;
+    virtual void OnMediaQueryUpdate(bool isSynchronous = false) = 0;
 
     virtual void RegisterFont(const std::string& familyName, const std::string& familySrc) = 0;
+
+    virtual void GetSystemFontList(std::vector<std::string>& fontList) = 0;
+
+    virtual bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) = 0;
 
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;
 

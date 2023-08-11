@@ -55,13 +55,11 @@ void ModelPaintMethod::PerformPaint(RSCanvas& canvas, PaintWrapper* paintWrapper
     CHECK_NULL_VOID(paintProperty);
     auto offset = paintWrapper->GetContentOffset();
     adapter->OnPaint(paintProperty);
-    auto drawable = adapter->GetDrawable(offset);
-    CHECK_NULL_VOID(drawable);
     std::shared_ptr<Rosen::Drawing::CoreCanvasImpl> coreCanvas = canvas.GetCanvasData();
     const Rosen::Drawing::SkiaCanvas* skiaCanvas = static_cast<const Rosen::Drawing::SkiaCanvas*>(coreCanvas.get());
     CHECK_NULL_VOID(skiaCanvas);
     SkCanvas* skCanvas = skiaCanvas->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
-    skCanvas->drawDrawable(drawable);
+    adapter->GetTextureLayer(offset)->OnDraw(skCanvas);
 }
 } // namespace OHOS::Ace::NG

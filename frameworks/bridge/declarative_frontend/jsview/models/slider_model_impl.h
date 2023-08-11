@@ -45,6 +45,16 @@ public:
     void SetStepSize(const Dimension& value) override;
     void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) override;
     void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) override {};
+
+    void ResetBlockBorderColor() override {};
+    void ResetBlockBorderWidth() override {};
+    void ResetStepColor() override {};
+    void ResetTrackBorderRadius() override {};
+    void ResetBlockSize() override {};
+    void ResetBlockType() override {};
+    void ResetBlockImage() override {};
+    void ResetBlockShape() override {};
+    void ResetStepSize() override {};
 };
 
 } // namespace OHOS::Ace::Framework

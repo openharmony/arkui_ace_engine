@@ -37,26 +37,18 @@ void ScrollBarPainter::PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& s
         RSBrush brush;
         brush.SetBlendMode(RSBlendMode::SRC_OVER);
         brush.SetAntiAlias(true);
-        RSPen pen;
-        pen.SetBlendMode(RSBlendMode::SRC_OVER);
-        pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
 
         RSRect bgRect(barRect.Left(), barRect.Top(), barRect.Right(), barRect.Bottom());
         RSColor bgColor = ToRSColor(scrollBar->GetBackgroundColor());
         brush.SetColor(bgColor);
-        pen.SetColor(bgColor);
         double filletRadius = bgRect.GetWidth() * HALF;
-        canvas.AttachPen(pen);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect({ bgRect, filletRadius, filletRadius });
-        canvas.DetachPen();
         canvas.DetachBrush();
 
         RSRect fgRect(activeRect.Left(), activeRect.Top(), activeRect.Right(), activeRect.Bottom());
         RSColor fgColor = ToRSColor(scrollBar->GetForegroundColor().BlendOpacity(opacity / FULL_ALPHA));
         brush.SetColor(fgColor);
-        pen.SetColor(fgColor);
-        canvas.AttachPen(pen);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect({ fgRect, filletRadius, filletRadius });
     }

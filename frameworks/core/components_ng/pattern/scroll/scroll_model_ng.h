@@ -29,13 +29,13 @@ public:
     RefPtr<ScrollControllerBase> GetOrCreateController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void SetAxis(Axis axis) override;
-    void SetOnScrollBegin(NG::ScrollBeginEvent&& event) override;
-    void SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event) override;
-    void SetOnScroll(NG::OnScrollEvent&& event) override;
+    void SetOnScrollBegin(OnScrollBeginEvent&& event) override;
+    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event) override;
+    void SetOnScroll(NG::ScrollEvent&& event) override;
     void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) override;
     void SetOnScrollEnd(NG::ScrollEndEvent&& event) override;
-    void SetOnScrollStart(NG::ScrollStartEvent&& event) override;
-    void SetOnScrollStop(NG::ScrollStopEvent&& event) override;
+    void SetOnScrollStart(OnScrollStartEvent&& event) override;
+    void SetOnScrollStop(OnScrollStopEvent&& event) override;
     void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy) override;
     void InitScrollBar(const RefPtr<ScrollBarTheme>& theme, const std::pair<bool, Color>& color,
         const std::pair<bool, Dimension>& width, EdgeEffect effect) override;
@@ -45,6 +45,11 @@ public:
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
+    void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetScrollEnabled(bool scrollEnabled) override;
+    void SetFriction(double friction) override;
+    void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override;
 };
 
 } // namespace OHOS::Ace::NG

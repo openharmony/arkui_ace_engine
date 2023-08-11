@@ -351,6 +351,7 @@ public:
             theme->hoverToTouchDuration_ = switchPattern->GetAttr<double>("hover_to_press_animation_duration", 0.0);
             theme->touchDuration_ = switchPattern->GetAttr<double>("touch_animation_duration", 0.0);
             theme->colorAnimationDuration_ = switchPattern->GetAttr<double>("color_animation_duration", 0.0);
+            theme->pointAnimationDuration_ = switchPattern->GetAttr<double>("point_animation_duration", 0.0);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
@@ -373,8 +374,14 @@ public:
         return colorAnimationDuration_;
     }
 
+    double GetPointAnimationDuration() const
+    {
+        return pointAnimationDuration_;
+    }
+
 private:
     double colorAnimationDuration_ = 0.0;
+    double pointAnimationDuration_ = 0.0;
 };
 
 class RadioTheme : public CheckableTheme {

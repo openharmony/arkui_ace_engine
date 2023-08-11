@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,11 +36,13 @@ namespace {
 constexpr double GESTURE_EVENT_PROPERTY_VALUE = 10.0;
 constexpr int32_t CLICK_TEST_RESULT_SIZE = 1;
 constexpr int32_t CLICK_TEST_RESULT_SIZE_2 = 2;
+constexpr int32_t CLICK_TEST_RESULT_SIZE_0 = 0;
 constexpr uint32_t CLICK_EVENTS_SIZE = 1;
 constexpr uint32_t CLICK_EVENTS_SIZE_2 = 2;
 const TouchRestrict CLICK_TOUCH_RESTRICT = { TouchRestrict::CLICK };
 constexpr float WIDTH = 400.0f;
 constexpr float HEIGHT = 400.0f;
+const std::string RESULT_SUCCESS = "success";
 const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
 } // namespace
 
@@ -209,5 +211,100 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest003, TestSize.Level1)
      * onAccessibilityEventFunc_ are not nullptr.
      */
     (*clickEventActuator.clickRecognizer_->onAction_)(info);
+}
+
+/**
+ * @tc.name: ClickEventActuatorTest004
+ * @tc.desc: test clear user callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+
+    /**
+     * @tc.steps: step2. Invoke OnCollectTouchTarget when clickEvents_ is empty and userCallback_ is not nullptr.
+     * @tc.expected: OnCollectTouchTarget will return directly and finalResult is 1.
+     */
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    EXPECT_NE(getEventTargetImpl, nullptr);
+
+    TouchTestResult finalResult;
+    std::string result;
+    GestureEventFunc callback = [&result](GestureEvent& info) { result = RESULT_SUCCESS; };
+
+    clickEventActuator.SetUserCallback(std::move(callback));
+    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    EXPECT_NE(clickEventActuator.userCallback_->callback_, nullptr);
+
+    GestureEvent info = GestureEvent();
+    clickEventActuator.userCallback_->callback_(info);
+    EXPECT_EQ(result, RESULT_SUCCESS);
+    EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE);
+
+    clickEventActuator.ClearUserCallback();
+    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    EXPECT_EQ(clickEventActuator.userCallback_, nullptr);
+    EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE);
+}
+
+/**
+ * @tc.name: ClickEventActuatorTest005
+ * @tc.desc: test user callback and clickevent are different.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventActuatorTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+
+    /**
+     * @tc.steps: step2. test clear callback and add event.
+     * @tc.expected: Add clickRecognizer_ to finalResult, and it's size is equal 1.
+     */
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    EXPECT_NE(getEventTargetImpl, nullptr);
+    clickEventActuator.ClearUserCallback();
+
+    GestureEventFunc callback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    clickEventActuator.AddClickEvent(clickEvent);
+
+    TouchTestResult finalResult;
+    clickEventActuator.OnCollectTouchTarget(COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResult);
+    EXPECT_EQ(finalResult.size(), CLICK_TEST_RESULT_SIZE);
+
+    /**
+     * @tc.steps: step3. test clear callback again.
+     * @tc.expected: Add clickRecognizer_ to finalResult, and it's size is equal 1.
+     */
+    TouchTestResult finalResultAfterClear;
+    clickEventActuator.ClearUserCallback();
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResultAfterClear);
+    EXPECT_EQ(finalResultAfterClear.size(), CLICK_TEST_RESULT_SIZE);
+
+    /**
+     * @tc.steps: step4. test clear event again.
+     * @tc.expected: callback and event are null, and it's size is equal 0.
+     */
+    clickEventActuator.RemoveClickEvent(clickEvent);
+    TouchTestResult finalResultAfterClearEvent;
+    clickEventActuator.OnCollectTouchTarget(
+        COORDINATE_OFFSET, CLICK_TOUCH_RESTRICT, getEventTargetImpl, finalResultAfterClearEvent);
+    EXPECT_EQ(finalResultAfterClearEvent.size(), CLICK_TEST_RESULT_SIZE_0);
 }
 } // namespace OHOS::Ace::NG

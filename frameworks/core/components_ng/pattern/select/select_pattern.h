@@ -147,6 +147,9 @@ public:
 
     void UpdateLastSelectedProps(int32_t index);
 
+    // reset options props when selected index is -1
+    void ResetOptionProps();
+
     void SetBgBlendColor(const Color& color)
     {
         bgBlendColor_ = color;
@@ -173,8 +176,12 @@ public:
     void SetMenuAlign(const MenuAlign& menuAlign);
 
     std::string GetValue();
+    std::string ProvideRestoreInfo() override;
+    void OnRestoreInfo(const std::string& restoreInfo) override;
+    void OnColorConfigurationUpdate() override;
 
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -224,7 +231,7 @@ private:
     // add click event to show menu
     void RegisterOnClick();
 
-    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void RegisterOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
 
     // callback when an option is selected
@@ -250,7 +257,7 @@ private:
     // index of selected option
     int32_t selected_ = -1;
     // props when selected
-    struct SelectedFont {
+    struct OptionFont {
         // text style when selected
         std::optional<Dimension> FontSize;
         std::optional<Ace::FontStyle> FontStyle;
@@ -258,8 +265,10 @@ private:
         std::optional<std::vector<std::string>> FontFamily;
         std::optional<Color> FontColor;
     };
-    SelectedFont selectedFont_;
+    OptionFont selectedFont_;
     std::optional<Color> selectedBgColor_;
+    OptionFont optionFont_;
+    std::optional<Color> optionBgColor_;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json) const;
@@ -273,9 +282,10 @@ private:
 
     Color bgBlendColor_ = Color::TRANSPARENT;
     bool isHover_ = false;
-
+    bool isSelected_ = false;
     MenuAlign menuAlign_;
-
+    std::string selectValue_;
+    bool isColorConfigurationUpdate_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
 

@@ -45,7 +45,7 @@ enum class TestingPathOp {
 class TestingPath {
 public:
     TestingPath() = default;
-    ~TestingPath() = default;
+    virtual ~TestingPath() = default;
 
     virtual void AddArc(TestingRect oval, float startAngle, float sweepAngle) {}
     virtual void AddRect(const TestingRect& rect, TestingPathDirection dir = TestingPathDirection::CW_DIRECTION) {}

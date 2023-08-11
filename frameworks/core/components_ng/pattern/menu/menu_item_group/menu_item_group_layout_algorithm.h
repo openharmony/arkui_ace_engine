@@ -19,8 +19,8 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuItemGroupLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -49,6 +49,11 @@ private:
 
     float GetChildrenMaxWidth(
         const std::list<RefPtr<LayoutWrapper>>& children, const LayoutConstraintF& layoutConstraint);
+    std::list<WeakPtr<UINode>> GetItemsAndGroups(const RefPtr<FrameNode>& host) const;
+    RefPtr<FrameNode> GetBrotherNode(const RefPtr<FrameNode>& host);
+    bool IsLastNode(const RefPtr<FrameNode>& host) const;
+
+    void UpdateHeaderAndFooterMargin(LayoutWrapper* layoutWrapper) const;
 
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;

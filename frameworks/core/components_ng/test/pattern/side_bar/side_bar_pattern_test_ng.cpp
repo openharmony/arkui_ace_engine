@@ -23,14 +23,18 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/extensions/extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,6 +46,7 @@ constexpr bool SHOW_CONTROL_BUTTON = true;
 constexpr Dimension SIDE_BAR_WIDTH = 50.0_vp;
 constexpr Dimension MIN_SIDE_BAR_WIDTH = 50.0_vp;
 constexpr Dimension MAX_SIDE_BAR_WIDTH = 50.0_vp;
+constexpr Dimension MIN_CONTENT_WIDTH = 50.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr bool AUTO_HIDE = true;
@@ -57,6 +62,15 @@ constexpr float FLOAT_240 = 240.0f;
 const std::string SHOW_ICON_STR = "123";
 const std::string HIDDEN_ICON_STR = "123";
 const std::string SWITCHING_ICON_STR = "123";
+constexpr Dimension IMAGE_WIDTH = 10.0_vp;
+constexpr Dimension IMAGE_HEIGHT = 10.0_vp;
+constexpr Dimension DEFAULT_IMAGE_WIDTH_V10 = 24.0_vp;
+constexpr Dimension DEFAULT_IMAGE_HEIGHT_V10 = 24.0_vp;
+constexpr int32_t PLATFORM_VERSION_9 = 9;
+constexpr int32_t PLATFORM_VERSION_10 = 10;
+constexpr static int32_t TEST_VALUE = 12;
+constexpr float MAX_SIDE_BAR = 20.0f;
+constexpr float MIN_SIDE_BAR = -10.0f;
 } // namespace
 
 class SideBarPatternTestNg : public testing::Test {
@@ -109,15 +123,16 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg002, TestSize.Level1)
     SideBarContainerModelInstance.SetSideBarWidth(SIDE_BAR_WIDTH);
     SideBarContainerModelInstance.SetMinSideBarWidth(MIN_SIDE_BAR_WIDTH);
     SideBarContainerModelInstance.SetMaxSideBarWidth(MAX_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMinContentWidth(MIN_CONTENT_WIDTH);
     SideBarContainerModelInstance.SetAutoHide(AUTO_HIDE);
     SideBarContainerModelInstance.SetSideBarPosition(SIDE_BAR_POSITION);
     SideBarContainerModelInstance.SetControlButtonWidth(WIDTH);
     SideBarContainerModelInstance.SetControlButtonHeight(HEIGHT);
     SideBarContainerModelInstance.SetControlButtonLeft(LEFT);
     SideBarContainerModelInstance.SetControlButtonTop(TOP);
-    SideBarContainerModelInstance.SetControlButtonShowIconStr(SHOW_ICON_STR);
-    SideBarContainerModelInstance.SetControlButtonHiddenIconStr(HIDDEN_ICON_STR);
-    SideBarContainerModelInstance.SetControlButtonSwitchingIconStr(SWITCHING_ICON_STR);
+    SideBarContainerModelInstance.SetControlButtonShowIconInfo(SHOW_ICON_STR, false, nullptr);
+    SideBarContainerModelInstance.SetControlButtonHiddenIconInfo(HIDDEN_ICON_STR, false, nullptr);
+    SideBarContainerModelInstance.SetControlButtonSwitchingIconInfo(SWITCHING_ICON_STR, false, nullptr);
     ChangeEvent eventOnChange = [](const bool) {};
     SideBarContainerModelInstance.SetOnChange(std::move(eventOnChange));
     SideBarContainerModelInstance.MarkNeedInitRealSideBarWidth();
@@ -136,15 +151,16 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg002, TestSize.Level1)
     EXPECT_EQ(sideBarLayoutProperty->GetSideBarWidth(), SIDE_BAR_WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetMinSideBarWidth(), MIN_SIDE_BAR_WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetMaxSideBarWidth(), MAX_SIDE_BAR_WIDTH);
+    EXPECT_EQ(sideBarLayoutProperty->GetMinContentWidth(), MIN_CONTENT_WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetAutoHide(), AUTO_HIDE);
     EXPECT_EQ(sideBarLayoutProperty->GetSideBarPosition(), SIDE_BAR_POSITION);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonWidth(), WIDTH);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHeight(), HEIGHT);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonLeft(), LEFT);
     EXPECT_EQ(sideBarLayoutProperty->GetControlButtonTop(), TOP);
-    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonShowIconStr(), SHOW_ICON_STR);
-    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHiddenIconStr(), HIDDEN_ICON_STR);
-    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonSwitchingIconStr(), SWITCHING_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonShowIconInfo()->GetSrc(), SHOW_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonHiddenIconInfo()->GetSrc(), HIDDEN_ICON_STR);
+    EXPECT_EQ(sideBarLayoutProperty->GetControlButtonSwitchingIconInfo()->GetSrc(), SWITCHING_ICON_STR);
 }
 
 /**
@@ -324,17 +340,60 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg010, TestSize.Level1)
  */
 HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg011, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create sideBarContainer,controlButton node,then mount controlButton node to its parent
+     * frameNode.
+     * @tc.expected: check whether the sideBarContainer node's children is not empty.
+     */
     SideBarContainerModelNG SideBarContainerModelInstance;
     auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
-    EXPECT_FALSE(pattern == nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+
     SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+
+    /**
+     * @tc.steps: step2. get the default color of controlButton from sidebar theme, then execute UpdateControlButtonIcon
+     * method.
+     * @tc.expected: check whether the controlButton's fillColor is same as the default color.
+     */
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    Color controlButtonColor = sideBarTheme->GetControlImageColor();
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonChildren = buttonFrameNode->GetChildren();
+    ASSERT_FALSE(buttonChildren.empty());
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(buttonChildren.front());
+    ASSERT_NE(imgFrameNode, nullptr);
+    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
     pattern->UpdateControlButtonIcon();
-    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+    auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
+
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->UpdateControlButtonIcon();
+    imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
+
+    pattern->sideBarStatus_ = SideBarStatus::CHANGING;
+    pattern->UpdateControlButtonIcon();
+    imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
 }
 
 /**
@@ -605,7 +664,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg022, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(hostNode, geometryNode, layoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(
         AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>());
@@ -868,5 +927,380 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg030, TestSize.Level1)
     pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
     pattern->DoSideBarAnimation();
     EXPECT_EQ(pattern->showSideBar_, true);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg031
+ * @tc.desc: Test SideBar CreateAndMountControlButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBarContainer node, and set the state of ShowSideBar to false.
+     * Then execute CreateAndMountControlButton method.
+     * @tc.expected: check whether the controlButton's fillColor is same as the default color.
+     */
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+
+    SideBarContainerModelInstance.SetShowSideBar(false);
+    SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    Color controlButtonColor = sideBarTheme->GetControlImageColor();
+
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonChildren = buttonFrameNode->GetChildren();
+    ASSERT_FALSE(buttonChildren.empty());
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(buttonChildren.front());
+    ASSERT_NE(imgFrameNode, nullptr);
+    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg032
+ * @tc.desc: Test SideBar OnUpdateShowControlButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create control button.
+     */
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    pattern->AttachToFrameNode(frameNode);
+
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+    SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+
+    /**
+     * @tc.steps: step2. Set showControlButton's value to false, then execute OnUpdateShowControlButton.
+     * @tc.expected: button is not visible.
+     */
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateShowControlButton(false);
+    pattern->OnUpdateShowControlButton(layoutProperty, frameNode);
+
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto visibility = buttonLayoutProperty->GetVisibility();
+    EXPECT_EQ(visibility, VisibleType::GONE);
+
+    /**
+     * @tc.steps: step3. Set showControlButton's value to true, then execute OnUpdateShowControlButton.
+     * @tc.expected: button is visible.
+     */
+    layoutProperty->UpdateShowControlButton(true);
+    pattern->OnUpdateShowControlButton(layoutProperty, frameNode);
+    buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    visibility = buttonLayoutProperty->GetVisibility();
+    EXPECT_EQ(visibility, VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg033
+ * @tc.desc: Test SideBar GetControlImageSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sidebarContainer frame node.
+     */
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    pattern->AttachToFrameNode(frameNode);
+
+    /**
+     * @tc.steps: step2. Set platform version to 10, then execute GetControlImageSize.
+     * @tc.expected: image's width is 24vp, and height is 24vp.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    Dimension width;
+    Dimension height;
+    pattern->GetControlImageSize(width, height);
+    EXPECT_EQ(width, DEFAULT_IMAGE_WIDTH_V10);
+    EXPECT_EQ(height, DEFAULT_IMAGE_HEIGHT_V10);
+
+    /**
+     * @tc.steps: step3. Set image's width and height to 10vp, then execute GetControlImageSize.
+     * @tc.expected: image's width is 10vp, and height is 10vp.
+     */
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_9);
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateControlButtonWidth(IMAGE_WIDTH);
+    layoutProperty->UpdateControlButtonHeight(IMAGE_HEIGHT);
+    pattern->GetControlImageSize(width, height);
+    EXPECT_EQ(width, IMAGE_WIDTH);
+    EXPECT_EQ(height, IMAGE_HEIGHT);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg034
+ * @tc.desc: Test SideBar AttachToFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg034, TestSize.Level1)
+{
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->minPlatformVersion_ = 12;
+    pattern->AttachToFrameNode(frameNode);
+    pattern->OnModifyDone();
+    SideBarContainerModelInstance.SetShowSideBar(true);
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+    EXPECT_NE(pattern->dragEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg035
+ * @tc.desc: Test SideBar OnUpdateSideBarAndContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg035, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton1 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton3 = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    frameNode->children_.push_back(backButton);
+    pattern->GetContentNode(host);
+    frameNode->children_.push_back(backButton1);
+    frameNode->children_.push_back(backButton2);
+    frameNode->children_.push_back(backButton3);
+    auto sideBarNode = pattern->GetSideBarNode(host);
+    ASSERT_NE(sideBarNode, nullptr);
+    auto sideBarContext = sideBarNode->GetRenderContext();
+    ASSERT_NE(sideBarContext, nullptr);
+    auto contentNode = pattern->GetContentNode(host);
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    auto contentContext = contentNode->GetRenderContext();
+    ASSERT_NE(contentContext, nullptr);
+    pattern->OnUpdateSideBarAndContent(host);
+    EXPECT_NE(sideBarNode->renderContext_, nullptr);
+    sideBarContext->UpdateClipEdge(true);
+    contentContext->UpdateClipEdge(true);
+    pattern->OnUpdateSideBarAndContent(host);
+    EXPECT_NE(sideBarNode->renderContext_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg036
+ * @tc.desc: Test SideBar DoAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg036, TestSize.Level1)
+{
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    stack->Push(frameNode);
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    SideBarContainerModelInstance.SetSideBarPosition(SideBarPosition::START);
+    pattern->UpdateAnimDir();
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    pattern->GetSideBarPositionWithRtl(layoutProperty);
+    pattern->DoAnimation();
+    EXPECT_EQ(pattern->animDir_, SideBarAnimationDirection::LTR);
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::CHANGING);
+    pattern->animDir_ = SideBarAnimationDirection::RTL;
+    EXPECT_EQ(pattern->currentOffset_, 0.0f);
+    pattern->DoAnimation();
+    EXPECT_EQ(pattern->animDir_, SideBarAnimationDirection::RTL);
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::CHANGING);
+    pattern->animDir_ = SideBarAnimationDirection::RTL;
+    EXPECT_EQ(pattern->currentOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg037
+ * @tc.desc: Test SideBar InitDividerMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar and controlbutton node,then register inputEvent to InitDividerMouseEvent.
+     * @tc.expected: check whether the controlButtonHoverEvent_ is nullptr.
+     */
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imgNode = FrameNode::GetOrCreateFrameNode(
+        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imgNode, nullptr);
+    auto imgHub = imgNode->GetEventHub<EventHub>();
+    ASSERT_NE(imgHub, nullptr);
+    auto gestureHub = imgHub->GetOrCreateInputEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    pattern->SetHasControlButton(true);
+    EXPECT_EQ(pattern->controlButtonHoverEvent_, nullptr);
+    pattern->InitDividerMouseEvent(gestureHub);
+    EXPECT_EQ(pattern->controlButtonClickEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg038
+ * @tc.desc: Test SideBar OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern, frameNode, sideBarLayoutProperty
+        layoutWrapper .
+     * @tc.expected: check whether the pattern->needInitRealSideBarWidth_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+
+    WeakPtr<FrameNode> hostNode = frameNode;
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    auto algorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(algorithmWrapper, nullptr);
+    auto algorithm = AceType::DynamicCast<SideBarContainerLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(algorithm, nullptr);
+
+    DirtySwapConfig config;
+    pattern->needInitRealSideBarWidth_ = false;
+    pattern->isControlButtonClick_ = true;
+    EXPECT_FALSE(pattern->needInitRealSideBarWidth_);
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->needInitRealSideBarWidth_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg039
+ * @tc.desc: Test SideBar UpdateSideBarPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg039, TestSize.Level1)
+{
+    float value = UPDATE_SIDE_BAR_POSITION_VALUE;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    EXPECT_FALSE(pattern == nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->sideBarStatus_ = SideBarStatus::CHANGING;
+    pattern->realSideBarWidth_ = REAL_SIDE_BAR_WIDTH_VALUE;
+    pattern->UpdateSideBarPosition(value);
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::CHANGING);
+    EXPECT_EQ(pattern->currentOffset_, CURRENT_OFFSET_VALUE);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg040
+ * @tc.desc: Test SideBar HandleDragUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern and frameNode.
+     * @tc.expected: check whether the pattern->sideBarStatus_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+    pattern->maxSideBarWidth_ = MAX_SIDE_BAR;
+    pattern->minSideBarWidth_ = MIN_SIDE_BAR;
+    pipeline->minPlatformVersion_ = TEST_VALUE;
+    pattern->HandleDragUpdate(CURRENT_OFFSET_VALUE);
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
 }
 } // namespace OHOS::Ace::NG

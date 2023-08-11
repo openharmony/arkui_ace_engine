@@ -122,6 +122,11 @@ void JSEnvironment::GetLayoutDirection(const JSCallbackInfo& args)
 void JSEnvironment::GetLanguageCode(const JSCallbackInfo& args)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(args.GetExecutionContext());
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("Initialize is not complete, cannot get the language");
+        return;
+    }
     auto location = Localization::GetInstance();
     auto language = location->GetLanguage();
     auto returnValue = JSVal(ToJSValue(language));

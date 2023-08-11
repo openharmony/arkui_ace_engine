@@ -24,6 +24,7 @@ public:
     void Create(const std::string& value) override;
     void SetQRCodeColor(Color color) override;
     void SetQRBackgroundColor(Color color) override;
+    void SetContentOpacity(double opacity) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H

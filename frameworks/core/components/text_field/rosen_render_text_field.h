@@ -20,8 +20,12 @@
 #include <string>
 
 #include "txt/paragraph_txt.h"
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "core/components/common/properties/decoration.h"
 #include "core/components/text_field/render_text_field.h"
@@ -54,7 +58,11 @@ public:
         return startCaretRect_;
     }
 
+#ifndef USE_ROSEN_DRAWING
     const SkBitmap& GetBitmap() const
+#else
+    const RSBitmap& GetBitmap() const
+#endif
     {
         return canvasCache_;
     }
@@ -96,7 +104,11 @@ private:
     Offset ComputeVerticalOffsetForCenter(double outerHeight, double innerHeight) const;
     void SetShaderIfNeeded(std::unique_ptr<txt::ParagraphStyle> paragraphStyle,
         std::unique_ptr<txt::TextStyle> txtStyle, double textAreaWidth);
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkShader> MakeGradientShader(double shadeWidth) const;
+#else
+    std::shared_ptr<RSShaderEffect> MakeGradientShader(double shadeWidth) const;
+#endif
     std::shared_ptr<txt::FontCollection> GetFontCollection();
     void ResetParagraphIfNeeded();
     void ComputeExtendHeight(double decorationHeight);
@@ -108,6 +120,7 @@ private:
     bool NeedAdjustPosition(const std::wstring& textBeforeCursor);
 
     // Paint cursor at the extent position. When [affinity] supported, extends this function.
+#ifndef USE_ROSEN_DRAWING
     void PaintCaret(SkCanvas& canvas, const Rect& caretRect);
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, const Size& size, RenderContext& context);
     void PaintSelectCaret(SkCanvas* canvas);
@@ -119,6 +132,19 @@ private:
     void PaintOverlayForHoverAndPress(const Offset& offset, SkCanvas* canvas) const;
     void PaintTextField(const Offset& offset, RenderContext& context, SkCanvas* canvas, bool isMagnifier = false);
     SkVector GetSkRadii(const Radius& radius) const;
+#else
+    void PaintCaret(RSCanvas& canvas, const Rect& caretRect);
+    void PaintDecoration(const Offset& offset, RSCanvas* canvas, const Size& size, RenderContext& context);
+    void PaintSelectCaret(RSCanvas* canvas);
+    void PaintIcon(const Offset& offset, RenderContext& context);
+    void PaintSelection(RSCanvas* canvas) const;
+    void PaintTextAndPlaceholder(RSCanvas* canvas) const;
+    void PaintErrorText(RSCanvas* canvas) const;
+    void PaintCountText(RSCanvas* canvas) const;
+    void PaintOverlayForHoverAndPress(const Offset& offset, RSCanvas* canvas) const;
+    void PaintTextField(const Offset& offset, RenderContext& context, RSCanvas* canvas, bool isMagnifier = false);
+    RSPoint GetRSRadii(const Radius& radius) const;
+#endif
     void PaintFocus(const Offset& offset, const Size& widthHeight, RenderContext& context);
     void PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas);
 
@@ -133,8 +159,14 @@ private:
     Size lastLayoutSize_;
     double originInnerWidth_ = 0.0;
     double realTextWidth_ = 0.0;
+
+#ifndef USE_ROSEN_DRAWING
     SkBitmap canvasCache_ {};
     std::unique_ptr<SkCanvas> magnifierCanvas_;
+#else
+    RSBitmap canvasCache_ {};
+    std::unique_ptr<RSCanvas> magnifierCanvas_;
+#endif
 };
 
 } // namespace OHOS::Ace

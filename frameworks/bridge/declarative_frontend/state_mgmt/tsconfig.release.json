@@ -15,6 +15,7 @@
     "src/lib/common/i_storage.ts",
 
     // sdk
+    "src/lib/sdk/i_animatable_arithmetic.ts",
     "src/lib/sdk/i_data_source.d.ts",
     "src/lib/sdk/i_property_subscriber.ts",
     "src/lib/sdk/local_storage.ts",
@@ -27,7 +28,6 @@
 
     // common
     "src/lib/common/state_mgmt_console_trace.ts",
-    "src/lib/common/distributed_storage.ts",
     "src/lib/common/observed_object.ts",
     "src/lib/common/observed_property_abstract.ts",
 
@@ -49,19 +49,14 @@
     "src/lib/partial_update/pu_foreach.d.ts",
     "src/lib/partial_update/pu_view_native.d.ts",
     "src/lib/partial_update/pu_observed_property_abstract.ts",
-    "src/lib/partial_update/pu_observed_property_object_abstract.ts",
-    "src/lib/partial_update/pu_observed_property_simple_abstract.ts",
-    "src/lib/partial_update/pu_observed_property_object.ts",
-    "src/lib/partial_update/pu_observed_property_simple.ts",
-    "src/lib/partial_update/pu_synced_property_object_one_way.ts",
-    "src/lib/partial_update/pu_synced_property_object_two_way.ts",
-    "src/lib/partial_update/pu_synced_property_simple_one_way.ts",
-    "src/lib/partial_update/pu_synced_property_simple_two_way.ts",
+    "src/lib/partial_update/pu_observed_property.ts",
+    "src/lib/partial_update/pu_synced_property_one_way.ts",
+    "src/lib/partial_update/pu_synced_property_two_way.ts",
     "src/lib/partial_update/pu_synced_property_object_nested.ts",
     "src/lib/partial_update/pu_view.ts",
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
-  
+
     // init
     "src/index.ts",
   ],

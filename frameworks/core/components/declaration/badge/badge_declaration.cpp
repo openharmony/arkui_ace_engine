@@ -40,6 +40,8 @@ void BadgeDeclaration::InitializeStyle()
     SetBadgeColor(badgeTheme->GetBadgeColor());
     SetMessageCount(badgeTheme->GetMessageCount());
     SetBadgePosition(badgeTheme->GetBadgePosition());
+    SetBadgePositionX(badgeTheme->GetBadgePositionX());
+    SetBadgePositionY(badgeTheme->GetBadgePositionY());
     SetShowMessage(badgeTheme->GetShowMessage());
     SetBadgeTextColor(badgeTheme->GetBadgeTextColor());
     SetBadgeFontSize(badgeTheme->GetBadgeFontSize());

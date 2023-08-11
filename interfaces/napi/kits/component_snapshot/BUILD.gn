@@ -33,6 +33,7 @@ template("napi_componentsnapshot_static") {
     sources = [ "js_component_snapshot.cpp" ]
 
     deps = [ "../utils:napi_utils_static_${platform}" ]
+    external_deps = []
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
     }
@@ -40,7 +41,7 @@ template("napi_componentsnapshot_static") {
     if (platform != "" && is_cross_platform_build) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]
     } else {
-      deps += [ "//foundation/arkui/napi/:ace_napi" ]
+      external_deps += [ "napi:ace_napi" ]
     }
 
     if (is_cross_platform_build) {
@@ -48,11 +49,10 @@ template("napi_componentsnapshot_static") {
         configs = [ "//foundation/multimedia/image_framework/interfaces/innerkits:image_external_config" ]
       }
     } else {
-      external_deps = []
       if (defined(config.pixel_map_support)) {
         external_deps += [
-          "multimedia_image_framework:image",
-          "multimedia_image_framework:image_native",
+          "image_framework:image",
+          "image_framework:image_native",
         ]
       }
     }

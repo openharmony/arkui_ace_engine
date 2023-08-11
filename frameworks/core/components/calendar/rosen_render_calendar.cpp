@@ -82,8 +82,7 @@ void DrawCalendarText(RSCanvas* canvas,
 #ifndef USE_ROSEN_DRAWING
     paragraph->Paint(canvas, offset.GetX() + textPaintOffsetX, offset.GetY() + textPaintOffsetY);
 #else
-    paragraph->Paint(
-        canvas->GetCanvasData()->ExportSkCanvas(), offset.GetX() + textPaintOffsetX, offset.GetY() + textPaintOffsetY);
+    LOGE("Drawing is not supported");
 #endif
     textRect.SetRect(offset.GetX() + textPaintOffsetX, offset.GetY() + textPaintOffsetY, textWidth, textHeight);
 }
@@ -132,7 +131,11 @@ void RosenRenderCalendar::Paint(RenderContext& context, const Offset& offset)
     if (isV2Component_) {
 #ifdef OHOS_PLATFORM
         const Size& layout = GetLayoutSize();
+#ifndef USE_ROSEN_DRAWING
         OHOS::Rosen::RSRecordingCanvas canvas(layout.Width(), layout.Height());
+#else
+        RSRecordingCanvas canvas(layout.Width(), layout.Height());
+#endif
         DrawWeekAndDates(&canvas, offset);
         drawCmdList_ = canvas.GetDrawCmdList();
         isNeedRepaint_ = false;
@@ -455,14 +458,16 @@ void RosenRenderCalendar::PaintDay(
 #else
                 if (day.dayMark == "work") {
                     workStateStyle.font_size = workDayMarkSize_;
-                    workStateStyle.color =
-                        isV2Component_ ? RSColor::ColorQuadSetA(workDayMarkColor_, WEEKEND_TRANSPARENT)
-                                       : nonCurrentMonthWorkDayMarkColor_;
+                    workStateStyle.color = isV2Component_ ?
+                        RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(workDayMarkColor_),
+                        RSColor::ColorQuadGetG(workDayMarkColor_), RSColor::ColorQuadGetB(workDayMarkColor_),
+                        WEEKEND_TRANSPARENT) : nonCurrentMonthWorkDayMarkColor_;
                 } else if (day.dayMark == "off") {
                     workStateStyle.font_size = offDayMarkSize_;
-                    workStateStyle.color =
-                        isV2Component_ ? RSColor::ColorQuadSetA(offDayMarkColor_, WEEKEND_TRANSPARENT)
-                                       : nonCurrentMonthOffDayMarkColor_;
+                    workStateStyle.color = isV2Component_ ?
+                        RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(offDayMarkColor_),
+                        RSColor::ColorQuadGetG(offDayMarkColor_), RSColor::ColorQuadGetB(offDayMarkColor_),
+                        WEEKEND_TRANSPARENT) : nonCurrentMonthOffDayMarkColor_;
                 }
 #endif
             }
@@ -507,8 +512,9 @@ void RosenRenderCalendar::SetNonFocusStyle(
     RSColorQuad lunarTextColor;
     if (day.month.month != currentMonth_.month) {
         dateTextColor = nonCurrentMonthDayColor_;
-        lunarTextColor = day.markLunarDay ? RSColor::ColorQuadSetA(markLunarColor_, WEEKEND_TRANSPARENT)
-                                          : nonCurrentMonthLunarColor_;
+        lunarTextColor = day.markLunarDay ? RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(markLunarColor_),
+            RSColor::ColorQuadGetG(markLunarColor_), RSColor::ColorQuadGetB(markLunarColor_), WEEKEND_TRANSPARENT) :
+            nonCurrentMonthLunarColor_;
 #endif
     } else if (IsToday(day)) {
         dateTextColor = todayDayColor_;
@@ -744,15 +750,22 @@ void RosenRenderCalendar::PaintUnderscore(RSCanvas* canvas, const Offset& offset
     RSPen pen;
     RSColorQuad color;
     if (day.month.month != currentMonth_.month) {
-        color = RSColor::ColorQuadSetA(focusedAreaBackgroundColor_, NON_CURRENT_MONTH_TRANSPARENT);
+        color = RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(focusedAreaBackgroundColor_),
+            RSColor::ColorQuadGetG(focusedAreaBackgroundColor_), RSColor::ColorQuadGetB(focusedAreaBackgroundColor_),
+            NON_CURRENT_MONTH_TRANSPARENT);
     } else if (IsToday(day)) {
         color = isV2Component_ && !day.touched
-            ? RSColor::ColorQuadSetA(focusedAreaBackgroundColor_, CURRENT_MONTH_TRANSPARENT)
-            : focusedDayColor_;
+            ? RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(focusedAreaBackgroundColor_),
+            RSColor::ColorQuadGetG(focusedAreaBackgroundColor_), RSColor::ColorQuadGetB(focusedAreaBackgroundColor_),
+            CURRENT_MONTH_TRANSPARENT) : focusedDayColor_;
     } else if (day.weekend) {
-        color = RSColor::ColorQuadSetA(focusedAreaBackgroundColor_, WEEKEND_TRANSPARENT);
+        color = RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(focusedAreaBackgroundColor_),
+            RSColor::ColorQuadGetG(focusedAreaBackgroundColor_), RSColor::ColorQuadGetB(focusedAreaBackgroundColor_),
+            WEEKEND_TRANSPARENT);
     } else {
-        color = RSColor::ColorQuadSetA(focusedAreaBackgroundColor_, CURRENT_MONTH_TRANSPARENT);
+        color = RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(focusedAreaBackgroundColor_),
+            RSColor::ColorQuadGetG(focusedAreaBackgroundColor_), RSColor::ColorQuadGetB(focusedAreaBackgroundColor_),
+            CURRENT_MONTH_TRANSPARENT);
     }
     pen.SetAntiAlias(true);
     pen.SetColor(color);
@@ -790,13 +803,18 @@ void RosenRenderCalendar::PaintScheduleMarker(RSCanvas* canvas, const Offset& of
     RSBrush brush;
     RSColorQuad color;
     if (day.month.month != currentMonth_.month) {
-        color = RSColor::ColorQuadSetA(focusedAreaBackgroundColor_, NON_CURRENT_MONTH_TRANSPARENT);
+        color = RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(focusedAreaBackgroundColor_),
+            RSColor::ColorQuadGetG(focusedAreaBackgroundColor_), RSColor::ColorQuadGetB(focusedAreaBackgroundColor_),
+            NON_CURRENT_MONTH_TRANSPARENT);
     } else if (IsToday(day)) {
         color = isV2Component_ && !day.touched
-            ? RSColor::ColorQuadSetA(focusedAreaBackgroundColor_, SCHEDULE_MARKER_TRANSPARENT)
-            : focusedDayColor_;
+            ? RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(focusedAreaBackgroundColor_),
+            RSColor::ColorQuadGetG(focusedAreaBackgroundColor_), RSColor::ColorQuadGetB(focusedAreaBackgroundColor_),
+            SCHEDULE_MARKER_TRANSPARENT) : focusedDayColor_;
     } else {
-        color = RSColor::ColorQuadSetA(focusedAreaBackgroundColor_, SCHEDULE_MARKER_TRANSPARENT);
+        color = RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(focusedAreaBackgroundColor_),
+            RSColor::ColorQuadGetG(focusedAreaBackgroundColor_), RSColor::ColorQuadGetB(focusedAreaBackgroundColor_),
+            SCHEDULE_MARKER_TRANSPARENT);
     }
     brush.SetAntiAlias(true);
     brush.SetColor(color);
@@ -833,8 +851,12 @@ void RosenRenderCalendar::InitWorkStateStyle(
         auto offColor = SkColorSetA(markLunarColor_, WEEKEND_TRANSPARENT);
         auto workColor = SkColorSetA(workDayMarkColor_, WEEKEND_TRANSPARENT);
 #else
-        auto offColor = RSColor::ColorQuadSetA(markLunarColor_, WEEKEND_TRANSPARENT);
-        auto workColor = RSColor::ColorQuadSetA(workDayMarkColor_, WEEKEND_TRANSPARENT);
+        auto offColor = RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(markLunarColor_),
+            RSColor::ColorQuadGetG(markLunarColor_), RSColor::ColorQuadGetB(markLunarColor_),
+            WEEKEND_TRANSPARENT);
+        auto workColor = RSColor::ColorQuadSetARGB(RSColor::ColorQuadGetR(workDayMarkColor_),
+            RSColor::ColorQuadGetG(workDayMarkColor_), RSColor::ColorQuadGetB(workDayMarkColor_),
+            WEEKEND_TRANSPARENT);
 #endif
         SetWorkStateStyle(day, workColor, offColor, workStateStyle);
     } else if (IsToday(day)) {

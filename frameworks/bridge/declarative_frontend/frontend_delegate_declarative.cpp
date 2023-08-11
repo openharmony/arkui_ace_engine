@@ -19,8 +19,6 @@
 #include <regex>
 #include <string>
 
-#include "uicast_interface/uicast_context_impl.h"
-
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -116,7 +114,8 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const UpdatePageCallback& updatePageCallback, const ResetStagingPageCallback& resetLoadingPageCallback,
     const DestroyPageCallback& destroyPageCallback, const DestroyApplicationCallback& destroyApplicationCallback,
     const UpdateApplicationStateCallback& updateApplicationStateCallback, const TimerCallback& timerCallback,
-    const MediaQueryCallback& mediaQueryCallback, const RequestAnimationCallback& requestAnimationCallback,
+    const MediaQueryCallback& mediaQueryCallback, const LayoutInspectorCallback& layoutInpsectorCallback,
+    const DrawInspectorCallback& drawInpsectorCallback, const RequestAnimationCallback& requestAnimationCallback,
     const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
     const OnSaveAbilityStateCallBack& onSaveAbilityStateCallBack,
@@ -129,9 +128,9 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       asyncEvent_(asyncEventCallback), syncEvent_(syncEventCallback), updatePage_(updatePageCallback),
       resetStagingPage_(resetLoadingPageCallback), destroyPage_(destroyPageCallback),
       destroyApplication_(destroyApplicationCallback), updateApplicationState_(updateApplicationStateCallback),
-      timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback),
-      requestAnimationCallback_(requestAnimationCallback), jsCallback_(jsCallback),
-      onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
+      timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback), layoutInspectorCallback_(layoutInpsectorCallback),
+      drawInspectorCallback_(drawInpsectorCallback), requestAnimationCallback_(requestAnimationCallback),
+      jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
       onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveAbilityState_(onSaveAbilityStateCallBack),
       onRestoreAbilityState_(onRestoreAbilityStateCallBack), onNewWant_(onNewWantCallBack),
       onMemoryLevel_(onMemoryLevelCallBack), onStartContinuationCallBack_(onStartContinuationCallBack),
@@ -619,7 +618,13 @@ void FrontendDelegateDeclarative::CallPopPage()
 
 void FrontendDelegateDeclarative::ResetStagingPage()
 {
-    taskExecutor_->PostTask([resetStagingPage = resetStagingPage_] { resetStagingPage(); }, TaskExecutor::TaskType::JS);
+    if (resetStagingPage_) {
+        taskExecutor_->PostTask(
+            [resetStagingPage = resetStagingPage_] { resetStagingPage(); },
+            TaskExecutor::TaskType::JS);
+    } else {
+        LOGE("resetStagingPage_ is null");
+    }
 }
 
 void FrontendDelegateDeclarative::OnApplicationDestroy(const std::string& packageName)
@@ -787,10 +792,12 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
     }
 }
 
-void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback)
+void FrontendDelegateDeclarative::InitializeRouterManager(
+    NG::LoadPageCallback&& loadPageCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
 }
 
 // Start FrontendDelegate overrides.
@@ -830,6 +837,15 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
     Push(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
 }
 
+void FrontendDelegateDeclarative::PushNamedRoute(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->PushNamedRoute(
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    OnMediaQueryUpdate();
+}
+
 void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::string& params)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -864,6 +880,15 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
         return;
     }
     Replace(PageTarget(uri, static_cast<RouterMode>(routerMode)), params, errorCallback);
+}
+
+void FrontendDelegateDeclarative::ReplaceNamedRoute(const std::string& uri, const std::string& params,
+    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->ReplaceNamedRoute(
+        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarative::Back(const std::string& uri, const std::string& params)
@@ -1039,9 +1064,6 @@ void FrontendDelegateDeclarative::StartPush(const PageTarget& target, const std:
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadPage(GenerateNextPageId(), PageTarget(target, pagePath), false, params);
-        {
-            UICastContextImpl::HandleRouterPageCall("UICast::Page::push", target.url);
-        }
         if (errorCallback != nullptr) {
             errorCallback("", ERROR_CODE_NO_ERROR);
         }
@@ -1085,9 +1107,6 @@ void FrontendDelegateDeclarative::StartReplace(const PageTarget& target, const s
     LOGD("router.Replace pagePath = %{private}s", pagePath.c_str());
     if (!pagePath.empty()) {
         LoadReplacePage(GenerateNextPageId(), PageTarget(target, pagePath), params);
-        {
-            UICastContextImpl::HandleRouterPageCall("UICast::Page::replace", target.url);
-        }
         if (errorCallback != nullptr) {
             errorCallback("", ERROR_CODE_NO_ERROR);
         }
@@ -1176,9 +1195,6 @@ void FrontendDelegateDeclarative::BackWithTarget(const PageTarget& target, const
 
 void FrontendDelegateDeclarative::StartBack(const PageTarget& target, const std::string& params)
 {
-    {
-        UICastContextImpl::HandleRouterPageCall("UICast::Page::back", target.url);
-    }
     if (target.url.empty()) {
         std::string pagePath;
         {
@@ -1341,9 +1357,6 @@ Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
 void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");
-    {
-        UICastContextImpl::ShowToast(message, duration, bottom);
-    }
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
@@ -1436,9 +1449,6 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .buttons = buttons,
     };
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std::string& message,
@@ -1453,9 +1463,47 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
         .onStatusChanged = std::move(onStatusChanged),
     };
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
+}
+
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .content = dialogAttr.message,
+        .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
+        .maskRect = dialogAttr.maskRect,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
     }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .content = dialogAttr.message,
+        .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
+        .onStatusChanged = std::move(onStatusChanged),
+        .maskRect = dialogAttr.maskRect,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
@@ -1523,9 +1571,6 @@ void FrontendDelegateDeclarative::ShowActionMenu(
         .buttons = button,
     };
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
@@ -1539,9 +1584,6 @@ void FrontendDelegateDeclarative::ShowActionMenu(const std::string& title, const
         .onStatusChanged = std::move(onStatusChanged),
     };
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
-    {
-        UICastContextImpl::ShowDialog(dialogProperties);
-    }
 }
 
 void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
@@ -1792,10 +1834,10 @@ void FrontendDelegateDeclarative::OnSurfaceChanged()
         mediaQueryInfo_->SetIsInit(false);
     }
     mediaQueryInfo_->EnsureListenerIdValid();
-    OnMediaQueryUpdate();
+    OnMediaQueryUpdate(true);
 }
 
-void FrontendDelegateDeclarative::OnMediaQueryUpdate()
+void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
 {
     auto containerId = Container::CurrentId();
     if (containerId < 0) {
@@ -1812,22 +1854,52 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
         return;
     }
 
+    auto callback = [weak = AceType::WeakClaim(this)] {
+        auto delegate = weak.Upgrade();
+        if (!delegate) {
+            return;
+        }
+        const auto& info = delegate->mediaQueryInfo_->GetMediaQueryInfo();
+        // request css mediaquery
+        std::string param("\"viewsizechanged\",");
+        param.append(info);
+        delegate->asyncEvent_("_root", param);
+
+        // request js media query
+        const auto& listenerId = delegate->mediaQueryInfo_->GetListenerId();
+        delegate->mediaQueryCallback_(listenerId, info);
+        delegate->mediaQueryInfo_->ResetListenerId();
+    };
+    auto container = Container::Current();
+    if (container && container->IsUseStageModel() && isSynchronous) {
+        callback();
+        return;
+    }
+    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS);
+}
+
+void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
+{
     taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
+        [weak = AceType::WeakClaim(this), componentId] {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
-            const auto& info = delegate->mediaQueryInfo_->GetMediaQueryInfo();
-            // request css mediaquery
-            std::string param("\"viewsizechanged\",");
-            param.append(info);
-            delegate->asyncEvent_("_root", param);
+            delegate->layoutInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS);
+}
 
-            // request js media query
-            const auto& listenerId = delegate->mediaQueryInfo_->GetListenerId();
-            delegate->mediaQueryCallback_(listenerId, info);
-            delegate->mediaQueryInfo_->ResetListenerId();
+void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
+{
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawInspectorCallback_(componentId);
         },
         TaskExecutor::TaskType::JS);
 }
@@ -2577,6 +2649,16 @@ RefPtr<JsAcePage> FrontendDelegateDeclarative::GetPage(int32_t pageId) const
 void FrontendDelegateDeclarative::RegisterFont(const std::string& familyName, const std::string& familySrc)
 {
     pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+}
+
+void FrontendDelegateDeclarative::GetSystemFontList(std::vector<std::string>& fontList)
+{
+    pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+bool FrontendDelegateDeclarative::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
 }
 
 void FrontendDelegateDeclarative::HandleImage(

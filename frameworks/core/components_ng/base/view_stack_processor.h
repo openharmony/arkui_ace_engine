@@ -114,7 +114,7 @@ class ACE_EXPORT ViewStackProcessor final {
 public:
     friend class ScopedViewStackProcessor;
 
-    static ViewStackProcessor* GetInstance();
+    ACE_FORCE_EXPORT static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
 
     template<typename Pattern>
@@ -173,14 +173,14 @@ public:
         return frameNode->GetFocusHub();
     }
 
-    RefPtr<FrameNode> GetMainFrameNode() const;
+    ACE_FORCE_EXPORT RefPtr<FrameNode> GetMainFrameNode() const;
 
     // Get main component include composed component created by js view.
     RefPtr<UINode> GetMainElementNode() const;
 
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
-    void Push(const RefPtr<UINode>& element, bool isCustomView = false);
+    ACE_FORCE_EXPORT void Push(const RefPtr<UINode>& element, bool isCustomView = false);
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.
@@ -205,10 +205,14 @@ public:
     void PopKey();
 
     // Prevent predict mark dirty when creating predict node
-    void SetPredict(bool predict)
+    void SetPredict(RefPtr<UINode> predictNode)
     {
-        predict_ = predict;
-    };
+        predictNode_ = predictNode;
+    }
+
+    void ResetPredict() {
+        predictNode_.Reset();
+    }
 
     // Check whether the current node is in the corresponding polymorphic style state.
     // When the polymorphic style is not set on the front end, it returns true regardless of the current node state;
@@ -325,6 +329,13 @@ public:
 
     RefPtr<UINode> GetNewUINode();
 
+    void GetAndPushFrameNode(const std::string& tag, int32_t elmtId)
+    {
+        LOGD("NG ViewStackProcessor GetAndPushFrameNode() tag: %s, elmtId: %d", tag.c_str(), elmtId);
+        auto frameNode = FrameNode::GetFrameNode(tag, elmtId);
+        Push(frameNode);
+    }
+
 private:
     ViewStackProcessor();
 
@@ -343,7 +354,7 @@ private:
     std::string viewKey_;
     std::stack<size_t> keyStack_;
 
-    bool predict_ = false;
+    RefPtr<UINode> predictNode_;
 
     std::stack<int32_t> parentIdStack_;
 

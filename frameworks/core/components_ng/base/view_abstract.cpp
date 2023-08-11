@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
@@ -33,6 +34,7 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -149,6 +151,19 @@ void ViewAbstract::SetMinHeight(const CalcLength& height)
     layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::ResetMinSize(bool resetWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMinSize(resetWidth);
+}
+
 void ViewAbstract::SetMaxWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -175,6 +190,19 @@ void ViewAbstract::SetMaxHeight(const CalcLength& height)
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::ResetMaxSize(bool resetWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMaxSize(resetWidth);
+}
+
 void ViewAbstract::SetAspectRatio(float ratio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -182,6 +210,15 @@ void ViewAbstract::SetAspectRatio(float ratio)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio);
+}
+
+void ViewAbstract::SetBackgroundAlign(const Alignment& align)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundAlign, align);
 }
 
 void ViewAbstract::SetBackgroundColor(const Color& color)
@@ -193,14 +230,13 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
-void ViewAbstract::SetBackgroundImage(const std::string& src)
+void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
         return;
     }
-    ImageSourceInfo imageSourceInfo(src);
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, imageSourceInfo);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
 void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
@@ -240,10 +276,33 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
         target->UpdateBackBlurStyle(bgBlurStyle);
         if (target->GetBackBlurRadius().has_value()) {
             target->UpdateBackBlurRadius(Dimension());
         }
+    }
+}
+
+void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateBackgroundEffect(effectOption);
     }
 }
 
@@ -424,6 +483,7 @@ void ViewAbstract::SetBorderRadius(const Dimension& value)
     }
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(value);
+    borderRadius.multiValued = false;
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, borderRadius);
 }
 
@@ -503,6 +563,88 @@ void ViewAbstract::SetBorderStyle(const BorderStyleProperty& value)
     ACE_UPDATE_RENDER_CONTEXT(BorderStyle, value);
 }
 
+void ViewAbstract::DisableOnClick()
+{
+    LOGD("Disable OnClick event");
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnClick();
+}
+
+void ViewAbstract::DisableOnTouch()
+{
+    LOGD("Disable OnTouch event");
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->ClearUserOnTouch();
+}
+
+void ViewAbstract::DisableOnKeyEvent()
+{
+    LOGD("Disable OnKey event");
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnKey();
+}
+
+void ViewAbstract::DisableOnHover()
+{
+    LOGD("Disable OnHover event");
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnHover();
+}
+
+void ViewAbstract::DisableOnMouse()
+{
+    LOGD("Disable OnMouse event");
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnMouse();
+}
+
+void ViewAbstract::DisableOnAppear()
+{
+    LOGD("Disable OnAppear event");
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAppear();
+}
+
+void ViewAbstract::DisableOnDisAppear()
+{
+    LOGD("Disable OnDisAppear event");
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnDisAppear();
+}
+
+void ViewAbstract::DisableOnAreaChange()
+{
+    LOGD("Disable OnAreaChange event");
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->ClearUserOnAreaChange();
+}
+
+void ViewAbstract::DisableOnFocus()
+{
+    LOGD("Disable OnFocus event");
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnFocus();
+}
+
+void ViewAbstract::DisableOnBlur()
+{
+    LOGD("Disable OnBlur event");
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearUserOnBlur();
+}
+
 void ViewAbstract::SetOnClick(GestureEventFunc&& clickEventFunc)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -524,7 +666,7 @@ void ViewAbstract::SetOnMouse(OnMouseEventFunc&& onMouseEventFunc)
     eventHub->SetMouseEvent(std::move(onMouseEventFunc));
 }
 
-void ViewAbstract::SetOnHover(OnHoverEventFunc&& onHoverEventFunc)
+void ViewAbstract::SetOnHover(OnHoverFunc&& onHoverEventFunc)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
@@ -662,6 +804,14 @@ void ViewAbstract::SetResponseRegion(const std::vector<DimensionRect>& responseR
     gestureHub->SetResponseRegion(responseRegion);
 }
 
+void ViewAbstract::SetMouseResponseRegion(const std::vector<DimensionRect>& mouseRegion)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->MarkResponseRegion(true);
+    gestureHub->SetMouseResponseRegion(mouseRegion);
+}
+
 void ViewAbstract::SetTouchable(bool touchable)
 {
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
@@ -685,7 +835,7 @@ void ViewAbstract::AddDragFrameNodeToManager()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 void ViewAbstract::SetDraggable(bool draggable)
@@ -792,9 +942,14 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
 }
 
-void ViewAbstract::SetGeometryTransition(const std::string& id)
+void ViewAbstract::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, GeometryTransition, id);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+    }
 }
 
 void ViewAbstract::SetOpacity(double opacity)
@@ -875,7 +1030,7 @@ void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformTranslate, value);
 }
 
-void ViewAbstract::SetRotate(const NG::Vector4F& value)
+void ViewAbstract::SetRotate(const NG::Vector5F& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
@@ -986,6 +1141,7 @@ void ViewAbstract::BindPopup(
             LOGI("Popup now show in subwindow.");
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
             if (popupPattern) {
+                popupPattern->SetContainerId(Container::CurrentId());
                 popupPattern->StartEnteringAnimation(nullptr);
             }
         } else {
@@ -1054,7 +1210,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
-        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
     BindMenu(menuNode, targetNode->GetId(), offset);
@@ -1089,11 +1245,33 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
         target->UpdateBackBlurRadius(radius);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
     }
+}
+
+void ViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(LinearGradientBlur, blurPara);
+}
+
+void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpRate, rate);
+    ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius)
@@ -1410,6 +1588,15 @@ void ViewAbstract::SetSharedTransition(
     }
 }
 
+void ViewAbstract::SetUseEffect(bool useEffect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(UseEffect, useEffect);
+}
+
 void ViewAbstract::SetForegroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1491,5 +1678,44 @@ void ViewAbstract::UpdateAnimatableArithmeticProperty(const std::string& propert
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     frameNode->UpdateAnimatableArithmeticProperty(propertyName, value);
+}
+
+void ViewAbstract::SetObscured(const std::vector<ObscuredReasons>& reasons)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(Obscured, reasons);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ViewAbstract::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaExpandOpts, opts);
+}
+
+void ViewAbstract::SetRenderGroup(bool isRenderGroup)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(RenderGroup, isRenderGroup);
+}
+
+void ViewAbstract::SetRenderFit(RenderFit renderFit)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
 }
 } // namespace OHOS::Ace::NG

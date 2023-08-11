@@ -110,22 +110,15 @@ public:
     }
 
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
-        const std::optional<T>& bottom, Axis reserveAxis = Axis::NONE)
+        const std::optional<T>& bottom)
     {
-        T zero = 0;
-        switch (reserveAxis) {
-            case Axis::NONE:
-                width_ = std::max(width_ - left.value_or(0) - right.value_or(0), zero);
-                height_ = std::max(height_ - top.value_or(0) - bottom.value_or(0), zero);
-                break;
-            case Axis::HORIZONTAL:
-                width_ = std::max(width_ - left.value_or(0) - right.value_or(0), zero);
-                break;
-            case Axis::VERTICAL:
-                height_ = std::max(height_ - top.value_or(0) - bottom.value_or(0), zero);
-                break;
-            default:
-                break;
+        T tempWidth = width_ - left.value_or(0) - right.value_or(0);
+        if (NonNegative(tempWidth)) {
+            width_ = tempWidth;
+        }
+        T tempHeight = height_ - top.value_or(0) - bottom.value_or(0);
+        if (NonNegative(tempHeight)) {
+            height_ = tempHeight;
         }
     }
 
@@ -221,7 +214,7 @@ public:
         return isModified;
     }
 
-    void Constrain(const SizeT& minSize, const SizeT& maxSize)
+    void UpdateMin(const SizeT& minSize)
     {
         if (NonNegative(minSize.width_)) {
             width_ = width_ > minSize.Width() ? width_ : minSize.Width();
@@ -229,12 +222,27 @@ public:
         if (NonNegative(minSize.height_)) {
             height_ = height_ > minSize.Height() ? height_ : minSize.Height();
         }
+    }
+
+    void UpdateMax(const SizeT& maxSize)
+    {
         if (NonNegative(maxSize.width_)) {
             width_ = width_ < maxSize.Width() ? width_ : maxSize.Width();
         }
         if (NonNegative(maxSize.height_)) {
             height_ = height_ < maxSize.Height() ? height_ : maxSize.Height();
         }
+    }
+
+    void Constrain(const SizeT& minSize, const SizeT& maxSize, bool version10OrLarger = false)
+    {
+        if (version10OrLarger) {
+            UpdateMax(maxSize);
+            UpdateMin(minSize);
+            return;
+        }
+        UpdateMin(minSize);
+        UpdateMax(maxSize);
     }
 
     SizeT operator*(double value) const
@@ -442,33 +450,15 @@ public:
     }
 
     void MinusPadding(const std::optional<T>& left, const std::optional<T>& right, const std::optional<T>& top,
-        const std::optional<T>& bottom, Axis reserveAxis = Axis::NONE)
+        const std::optional<T>& bottom)
     {
-        switch (reserveAxis) {
-            case Axis::NONE:
-                if (width_) {
-                    T tempWidth = width_.value() - left.value_or(0) - right.value_or(0);
-                    width_ = NonNegative(tempWidth) ? tempWidth : 0;
-                }
-                if (height_) {
-                    T tempHeight = height_.value() - top.value_or(0) - bottom.value_or(0);
-                    height_ = NonNegative(tempHeight) ? tempHeight : 0;
-                }
-                break;
-            case Axis::HORIZONTAL:
-                if (height_) {
-                    T tempHeight = height_.value() - top.value_or(0) - bottom.value_or(0);
-                    height_ = NonNegative(tempHeight) ? tempHeight : 0;
-                }
-                break;
-            case Axis::VERTICAL:
-                if (width_) {
-                    T tempWidth = width_.value() - left.value_or(0) - right.value_or(0);
-                    width_ = NonNegative(tempWidth) ? tempWidth : 0;
-                }
-                break;
-            default:
-                break;
+        if (width_) {
+            T tempWidth = width_.value() - left.value_or(0) - right.value_or(0);
+            width_ = NonNegative(tempWidth) ? tempWidth : 0;
+        }
+        if (height_) {
+            T tempHeight = height_.value() - top.value_or(0) - bottom.value_or(0);
+            height_ = NonNegative(tempHeight) ? tempHeight : 0;
         }
     }
 
@@ -615,7 +605,7 @@ public:
         return isModified;
     }
 
-    void Constrain(const SizeT<T>& minSize, const SizeT<T>& maxSize)
+    void UpdateMin(const SizeT<T>& minSize)
     {
         if (NonNegative(minSize.Width()) && width_) {
             width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
@@ -623,6 +613,10 @@ public:
         if (NonNegative(minSize.Height()) && height_) {
             height_ = height_.value_or(0) > minSize.Height() ? height_ : minSize.Height();
         }
+    }
+
+    void UpdateMax(const SizeT<T>& maxSize)
+    {
         if (NonNegative(maxSize.Width()) && width_) {
             width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
         }
@@ -631,15 +625,44 @@ public:
         }
     }
 
-    void ConstrainFloat(const SizeT<T>& minSize, const SizeT<T>& maxSize, bool isWidth)
+    void Constrain(const SizeT<T>& minSize, const SizeT<T>& maxSize, bool version10OrLarger = false)
+    {
+        if (version10OrLarger) {
+            UpdateMax(maxSize);
+            UpdateMin(minSize);
+            return;
+        }
+        UpdateMin(minSize);
+        UpdateMax(maxSize);
+    }
+
+    void ConstrainFloat(const SizeT<T>& minSize, const SizeT<T>& maxSize, bool isWidth, bool version10OrLarger = false)
     {
         if (isWidth) {
+            if (version10OrLarger) {
+                if (NonNegative(maxSize.Width()) && width_) {
+                    width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
+                }
+                if (NonNegative(minSize.Width()) && width_) {
+                    width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
+                }
+                return;
+            }
             if (NonNegative(minSize.Width()) && width_) {
                 width_ = width_.value_or(0) > minSize.Width() ? width_ : minSize.Width();
             }
 
             if (NonNegative(maxSize.Width()) && width_) {
                 width_ = width_.value_or(0) < maxSize.Width() ? width_ : maxSize.Width();
+            }
+            return;
+        }
+        if (version10OrLarger) {
+            if (NonNegative(maxSize.Height()) && height_) {
+                height_ = height_.value_or(0) < maxSize.Height() ? Height() : maxSize.Height();
+            }
+            if (NonNegative(minSize.Height()) && height_) {
+                height_ = height_.value_or(0) > minSize.Height() ? height_ : minSize.Height();
             }
             return;
         }

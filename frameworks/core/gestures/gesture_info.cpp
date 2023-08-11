@@ -14,26 +14,25 @@
 */
 
 #include "gesture_info.h"
-#include "unified_data.h"
-#include "unified_types.h"
 
 namespace OHOS::Ace {
-void DragEvent::SetData(std::shared_ptr<UDMF::UnifiedData>& unifiedData)
+#ifdef ENABLE_DRAG_FRAMEWORK
+void DragEvent::SetData(const RefPtr<UnifiedData>& unifiedData)
 {
     unifiedData_ = unifiedData;
 }
 
-std::shared_ptr<UDMF::UnifiedData>& DragEvent::GetData()
+RefPtr<UnifiedData>& DragEvent::GetData()
 {
     return unifiedData_;
 }
 
-void DragEvent::SetSummary(std::shared_ptr<UDMF::Summary>& summary)
+void DragEvent::SetSummary(std::map<std::string, int64_t>& summary)
 {
     summary_ = summary;
 }
 
-std::shared_ptr<UDMF::Summary>& DragEvent::GetSummary()
+std::map<std::string, int64_t>& DragEvent::GetSummary()
 {
     return summary_;
 }
@@ -68,12 +67,12 @@ bool DragEvent::IsUseCustomAnimation()
     return useCustomAnimation_;
 }
 
-void DragEvent::SetDragInfo(std::shared_ptr<UDMF::UnifiedData>& dragInfo)
+void DragEvent::SetDragInfo(const RefPtr<UnifiedData>& dragInfo)
 {
     dragInfo_ = dragInfo;
 }
 
-std::shared_ptr<UDMF::UnifiedData>& DragEvent::GetDragInfo()
+RefPtr<UnifiedData>& DragEvent::GetDragInfo()
 {
     return dragInfo_;
 }
@@ -87,4 +86,25 @@ bool DragEvent::IsCopy()
 {
     return copy_;
 }
+
+void DragEvent::SetUdKey(const std::string udKey)
+{
+    udKey_ = udKey;
+}
+
+std::string DragEvent::GetUdKey()
+{
+    return udKey_;
+}
+
+void DragEvent::SetIsGetDataSuccess(bool isGetDataSuccess)
+{
+    isGetDataSuccess_ = isGetDataSuccess;
+}
+
+bool DragEvent::IsGetDataSuccess()
+{
+    return isGetDataSuccess_;
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace

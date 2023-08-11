@@ -156,14 +156,14 @@ void UObject::Serialize(char* buffer, int32_t bufferLen)
     }
 }
 
-void UObject::Deserialize(char* buffer, int32_t bufferLen)
+void UObject::Deserialize(const char* buffer, int32_t bufferLen)
 {
     if (!buffer) {
         LOGE("|ERROR| buffer is null");
         return;
     }
 
-    buffer_ = buffer;
+    constBuffer_ = buffer;
     offset_ = 0;
 
     while (offset_ < bufferLen) {
@@ -279,6 +279,9 @@ void UObject::WriteDouble(double value)
 
 void UObject::WriteString(const std::string& value)
 {
+    if (value.empty()) {
+        return;
+    }
     if (memcpy_s(buffer_, bufferLen_ - offset_, value.c_str(), value.length()) != 0) {
         LOGE("memcpy overflow.");
         return;
@@ -350,74 +353,74 @@ void UObject::WriteObj(const std::string& key, const std::shared_ptr<UObject>& o
 
 char UObject::ReadChar()
 {
-    char result = buffer_[0];
+    char result = constBuffer_[0];
     offset_++;
-    buffer_++;
+    constBuffer_++;
     return result;
 }
 
 int32_t UObject::ReadInt32()
 {
     int32_t result;
-    if (memcpy_s(&result, sizeof(int32_t), buffer_, sizeof(int32_t)) != 0) {
+    if (memcpy_s(&result, sizeof(int32_t), constBuffer_, sizeof(int32_t)) != 0) {
         LOGE("memcpy overflow.");
         return 0;
     }
     offset_ += sizeof(int32_t);
-    buffer_ += sizeof(int32_t);
+    constBuffer_ += sizeof(int32_t);
     return result;
 }
 
 int64_t UObject::ReadInt64()
 {
     int64_t result;
-    if (memcpy_s(&result, sizeof(int64_t), buffer_, sizeof(int64_t)) != 0) {
+    if (memcpy_s(&result, sizeof(int64_t), constBuffer_, sizeof(int64_t)) != 0) {
         LOGE("memcpy overflow.");
         return 0;
     }
     offset_ += sizeof(int64_t);
-    buffer_ += sizeof(int64_t);
+    constBuffer_ += sizeof(int64_t);
     return result;
 }
 
 size_t UObject::ReadSizeT()
 {
     size_t result;
-    if (memcpy_s(&result, sizeof(size_t), buffer_, sizeof(size_t)) != 0) {
+    if (memcpy_s(&result, sizeof(size_t), constBuffer_, sizeof(size_t)) != 0) {
         LOGE("memcpy overflow.");
         return 0;
     }
     offset_ += sizeof(size_t);
-    buffer_ += sizeof(size_t);
+    constBuffer_ += sizeof(size_t);
     return result;
 }
 
 double UObject::ReadDouble()
 {
     double result;
-    if (memcpy_s(&result, sizeof(double), buffer_, sizeof(double)) != 0) {
+    if (memcpy_s(&result, sizeof(double), constBuffer_, sizeof(double)) != 0) {
         LOGE("memcpy overflow.");
         return 0;
     }
     offset_ += sizeof(double);
-    buffer_ += sizeof(double);
+    constBuffer_ += sizeof(double);
     return result;
 }
 
 std::string UObject::ReadString(int32_t len)
 {
-    std::string result(buffer_, len);
+    std::string result(constBuffer_, len);
     offset_ += len;
-    buffer_ += len;
+    constBuffer_ += len;
     return result;
 }
 
 std::shared_ptr<UObject> UObject::ReadObj(int32_t len)
 {
     std::shared_ptr<UObject> obj = std::make_shared<UObject>();
-    obj->Deserialize(buffer_, len);
+    obj->Deserialize(constBuffer_, len);
     offset_ += len;
-    buffer_ += len;
+    constBuffer_ += len;
     return obj;
 }
 

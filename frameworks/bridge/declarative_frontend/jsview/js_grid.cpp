@@ -166,24 +166,39 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetGridHeight(value);
 }
 
-void JSGrid::JsOnScrollIndex(const JSCallbackInfo& info)
+void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
-        LOGE("param not valid, need function");
         return;
     }
 
-    auto onScrollIndex = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](
-                             const BaseEventInfo* event) {
-        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::GridEventInfo>(event);
-        if (!eventInfo) {
-            return;
+    auto onScrollBarUpdate = [execCtx = info.GetExecutionContext(),
+                                 func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+                                     JSRef<JSFunc>::Cast(info[0]))](int32_t index, const Dimension& offset) {
+        JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+        JSRef<JSVal> itemOffset = ConvertToJSValue(offset);
+        JSRef<JSVal> params[2] = { itemIndex, itemOffset };
+        auto result = func->ExecuteJS(2, params);
+        if (result->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
+
+            Dimension totalOffset_;
+            Dimension totalLength_;
+            if (!ConvertFromJSValue(obj->GetProperty("totalOffset"), totalOffset_) ||
+                !ConvertFromJSValue(obj->GetProperty("totalLength"), totalLength_)) {
+                return std::pair<float, float>(0, 0);
+            } else {
+                return std::pair<float, float>(totalOffset_.ConvertToPx(), totalLength_.ConvertToPx());
+            }
         }
-        auto params = ConvertToJSValues(eventInfo->GetScrollIndex());
-        func->Call(JSRef<JSObject>(), static_cast<int>(params.size()), params.data());
+        return std::pair<float, float>(0, 0);
     };
-    GridModel::GetInstance()->SetOnScrollToIndex(std::move(onScrollIndex));
+    GridModel::GetInstance()->SetOnScrollBarUpdate(std::move(onScrollBarUpdate));
+}
+
+void JSGrid::SetScrollEnabled(const JSCallbackInfo& args)
+{
+    GridModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
 }
 
 void JSGrid::JSBind(BindingTarget globalObj)
@@ -209,7 +224,8 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("scrollBar", &JSGrid::SetScrollBar, opt);
     JSClass<JSGrid>::StaticMethod("scrollBarWidth", &JSGrid::SetScrollBarWidth, opt);
     JSClass<JSGrid>::StaticMethod("scrollBarColor", &JSGrid::SetScrollBarColor, opt);
-    JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
+
+    JSClass<JSGrid>::StaticMethod("onScrollBarUpdate", &JSGrid::JsOnScrollBarUpdate);
     JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
     JSClass<JSGrid>::StaticMethod("editMode", &JSGrid::SetEditMode, opt);
     JSClass<JSGrid>::StaticMethod("multiSelectable", &JSGrid::SetMultiSelectable, opt);
@@ -228,21 +244,46 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("height", &JSGrid::JsGridHeight);
     JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
+    JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
+    JSClass<JSGrid>::StaticMethod("friction", &JSGrid::SetFriction);
+
+    JSClass<JSGrid>::StaticMethod("onScroll", &JSGrid::JsOnScroll);
+    JSClass<JSGrid>::StaticMethod("onReachStart", &JSGrid::JsOnReachStart);
+    JSClass<JSGrid>::StaticMethod("onReachEnd", &JSGrid::JsOnReachEnd);
+    JSClass<JSGrid>::StaticMethod("onScrollStart", &JSGrid::JsOnScrollStart);
+    JSClass<JSGrid>::StaticMethod("onScrollStop", &JSGrid::JsOnScrollStop);
+    JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
+    JSClass<JSGrid>::StaticMethod("onScrollFrameBegin", &JSGrid::JsOnScrollFrameBegin);
+
     JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
-void JSGrid::SetScrollBar(int32_t displayMode)
+void JSGrid::SetScrollBar(const JSCallbackInfo& info)
 {
-    if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
-        LOGE("Param is not valid");
-        return;
+    int32_t displayMode = 1;
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        ParseJsInt32(info[0], displayMode);
+        if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
+            LOGE("Param is not valid");
+            return;
+        }
     }
     GridModel::GetInstance()->SetScrollBarMode(displayMode);
 }
 
 void JSGrid::SetScrollBarColor(const std::string& color)
 {
-    GridModel::GetInstance()->SetScrollBarColor(color);
+    if (!color.empty() && color != "undefined") {
+        GridModel::GetInstance()->SetScrollBarColor(color);
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    Color defaultColor(theme->GetForegroundColor());
+    GridModel::GetInstance()->SetScrollBarColor(defaultColor.ColorToString());
 }
 
 void JSGrid::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
@@ -289,14 +330,28 @@ void JSGrid::SetEditMode(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetEditable(editMode);
 }
 
-void JSGrid::SetMaxCount(double maxCount)
+void JSGrid::SetMaxCount(const JSCallbackInfo& info)
 {
-    GridModel::GetInstance()->SetMaxCount(static_cast<int32_t>(maxCount));
+    int32_t maxCount = Infinity<int32_t>();
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        ParseJsInt32(info[0], maxCount);
+        if (maxCount < 1) {
+            maxCount = Infinity<int32_t>();
+        }
+    }
+    GridModel::GetInstance()->SetMaxCount(maxCount);
 }
 
-void JSGrid::SetMinCount(double minCount)
+void JSGrid::SetMinCount(const JSCallbackInfo& info)
 {
-    GridModel::GetInstance()->SetMinCount(static_cast<int32_t>(minCount));
+    int32_t minCount = 1;
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        ParseJsInt32(info[0], minCount);
+        if (minCount < 1) {
+            minCount = 1;
+        }
+    }
+    GridModel::GetInstance()->SetMinCount(minCount);
 }
 
 void JSGrid::CellLength(int32_t cellLength)
@@ -314,12 +369,18 @@ void JSGrid::SetDragAnimation(bool value)
     GridModel::GetInstance()->SetSupportDragAnimation(value);
 }
 
-void JSGrid::SetEdgeEffect(int32_t value)
+void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 {
-    if (value < 0 || value >= static_cast<int32_t>(EDGE_EFFECT.size())) {
+    if (info.Length() < 1) {
+        LOGE("args is invalid");
         return;
     }
-    GridModel::GetInstance()->SetEdgeEffect(EDGE_EFFECT[value]);
+    int32_t edgeEffect;
+    if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsInt32(info[0], edgeEffect) ||
+        edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
+        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
+    }
+    GridModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
 }
 
 void JSGrid::SetLayoutDirection(int32_t value)
@@ -333,15 +394,15 @@ void JSGrid::SetLayoutDirection(int32_t value)
 
 void JSGrid::SetDirection(const std::string& dir)
 {
-    bool rightToLeft = false;
+    TextDirection direction;
     if (dir == "Ltr") {
-        rightToLeft = false;
+        direction = TextDirection::LTR;
     } else if (dir == "Rtl") {
-        rightToLeft = true;
+        direction = TextDirection::RTL;
     } else {
-        rightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        direction = TextDirection::AUTO;
     }
-    GridModel::GetInstance()->SetIsRTL(rightToLeft);
+    GridModel::GetInstance()->SetIsRTL(direction);
 }
 
 void JSGrid::JsOnGridDragEnter(const JSCallbackInfo& info)
@@ -446,6 +507,155 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
 void JSGrid::SetMultiSelectable(bool multiSelectable)
 {
     GridModel::GetInstance()->SetMultiSelectable(multiSelectable);
+}
+
+void JSGrid::SetNestedScroll(const JSCallbackInfo& args)
+{
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        GridModel::GetInstance()->SetNestedScroll(nestedOpt);
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+    int32_t froward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
+    if (froward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        froward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        froward = 0;
+    }
+    int32_t backward = 0;
+    JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
+    if (backward < static_cast<int32_t>(NestedScrollMode::SELF_ONLY) ||
+        backward > static_cast<int32_t>(NestedScrollMode::PARALLEL)) {
+        LOGW("ScrollFroward params invalid");
+        backward = 0;
+    }
+    nestedOpt.forward = static_cast<NestedScrollMode>(froward);
+    nestedOpt.backward = static_cast<NestedScrollMode>(backward);
+    GridModel::GetInstance()->SetNestedScroll(nestedOpt);
+    args.ReturnSelf();
+}
+
+void JSGrid::SetFriction(const JSCallbackInfo& info)
+{
+    double friction = -1.0;
+    if (!JSViewAbstract::ParseJsDouble(info[0], friction)) {
+        LOGW("Friction params invalid,can not convert to double");
+        friction = -1.0;
+    }
+    GridModel::GetInstance()->SetFriction(friction);
+}
+
+void JSGrid::JsOnScroll(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                            const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+            auto params = ConvertToJSValues(scrollOffset, scrollState);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+        GridModel::GetInstance()->SetOnScroll(std::move(onScroll));
+    }
+    args.ReturnSelf();
+}
+
+void JSGrid::JsOnScrollStart(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        GridModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSGrid::JsOnScrollStop(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        GridModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+    }
+    args.ReturnSelf();
+}
+
+void JSGrid::JsOnScrollIndex(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const int32_t first, const int32_t last) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(first, last);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+        GridModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
+    }
+    args.ReturnSelf();
+}
+
+void JSGrid::JsOnScrollFrameBegin(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
+            ScrollFrameResult scrollRes { .offset = offset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(offset, state);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                LOGE("Error calling onScrollFrameBegin, result is empty.");
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                LOGE("Error calling onScrollFrameBegin, result is not object.");
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
+        };
+        GridModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
+    }
+}
+
+void JSGrid::JsOnReachStart(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        GridModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSGrid::JsOnReachEnd(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        GridModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+    }
+    args.ReturnSelf();
 }
 
 } // namespace OHOS::Ace::Framework

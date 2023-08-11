@@ -37,13 +37,14 @@ struct DividerInfo {
     int32_t lanes;
     int32_t totalItemCount;
     Color color;
+    float laneGutter = 0.0f;
 };
 
 class ListContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ListContentModifier, ContentModifier);
 public:
     using PositionMap = ListLayoutAlgorithm::PositionMap;
-    ListContentModifier();
+    ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize);
     ~ListContentModifier() override = default;
     void onDraw(DrawingContext& context) override;
 
@@ -100,4 +101,4 @@ private:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIVIDER_DIVIDER_MODIFIER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_CONTENT_MODIFIER_H

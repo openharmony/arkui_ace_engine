@@ -18,8 +18,9 @@
 #include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
-TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
-    WeakPtr<ScrollBar>&& scrollBar, WeakPtr<ScrollEdgeEffect>&& edgeEffect) {}
+TextFieldOverlayModifier::TextFieldOverlayModifier(
+    const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
+{}
 
 void TextFieldOverlayModifier::onDraw(DrawingContext& context) {}
 } // namespace OHOS::Ace::NG

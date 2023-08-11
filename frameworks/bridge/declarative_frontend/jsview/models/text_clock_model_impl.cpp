@@ -48,6 +48,56 @@ void TextClockModelImpl::SetOnDateChange(std::function<void(const std::string)>&
     component->SetOnDateChange(std::move(onChange));
 }
 
+void TextClockModelImpl::SetFontSize(const Dimension& value)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetFontSize(value);
+    component->SetTextStyle(textStyle);
+}
+
+void TextClockModelImpl::SetTextColor(const Color& value)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetTextColor(value);
+    component->SetTextStyle(textStyle);
+}
+
+void TextClockModelImpl::SetItalicFontStyle(Ace::FontStyle value)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetFontStyle(value);
+    component->SetTextStyle(textStyle);
+}
+
+void TextClockModelImpl::SetFontWeight(FontWeight value)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetFontWeight(value);
+    component->SetTextStyle(textStyle);
+}
+
+void TextClockModelImpl::SetFontFamily(const std::vector<std::string>& value)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetFontFamilies(value);
+    component->SetTextStyle(textStyle);
+}
+
 RefPtr<TextClockComponent> TextClockModelImpl::GetComponent()
 {
     auto* stack = ViewStackProcessor::GetInstance();

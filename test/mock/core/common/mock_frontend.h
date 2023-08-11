@@ -40,7 +40,6 @@ public:
     MOCK_METHOD(void, UpdateState, (Frontend::State state), (override));
     MOCK_METHOD(RefPtr<AccessibilityManager>, GetAccessibilityManager, (), (const override));
     MOCK_METHOD(bool, IsForeground, (), (override));
-    MOCK_METHOD(FrontendType, GetType, (), (override));
     MOCK_METHOD(RefPtr<AceEventHandler>, GetEventHandler, (), (override));
     MOCK_METHOD(void, RebuildAllPages, (), (override));
     MOCK_METHOD(void, SetColorMode, (ColorMode colorMode), (override));
@@ -83,6 +82,15 @@ public:
         height_ = height;
     }
 
+    void OnLayoutCompleted(const std::string& componentId) override
+    {
+        componentId_ = componentId;
+    }
+    void OnDrawCompleted(const std::string& componentId) override
+    {
+        componentId_ = componentId;
+    }
+
     int32_t GetWidth() const
     {
         return width_;
@@ -93,14 +101,20 @@ public:
         return height_;
     }
 
+    const std::string& GetComponentId() const
+    {
+        return componentId_;
+    }
+
     WindowConfig& GetWindowConfig() override
     {
         return windowConfig_;
     }
-    
+
 private:
     int32_t width_ = 0;
     int32_t height_ = 0;
+    std::string componentId_ = "init_id";
     WindowConfig windowConfig_;
 };
 } // namespace OHOS::Ace

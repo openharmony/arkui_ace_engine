@@ -42,9 +42,6 @@ void NavDestinationModelNG::Create()
     int32_t nodeId = stack->ClaimNodeId();
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    CHECK_NULL_VOID(navDestinationPattern);
-    navDestinationPattern->SetName(std::to_string(nodeId));
 
     // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {
@@ -85,9 +82,6 @@ void NavDestinationModelNG::Create()
     }
 
     stack->Push(navDestinationNode);
-    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-    navDestinationLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 }
 void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
 {
@@ -112,11 +106,6 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
         });
-    auto context = AceType::DynamicCast<FrameNode>(navDestinationNode)->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    if (!(context->GetBackgroundColor().has_value())) {
-        context->UpdateBackgroundColor(Color::WHITE);
-    }
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
     // titleBar node
@@ -153,9 +142,6 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         navDestinationNode->SetContentNode(contentNode);
     }
     stack->Push(navDestinationNode);
-    auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-    navDestinationLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
 }
 
 void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar)
@@ -213,9 +199,9 @@ void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+    textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
-    textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     if (!hasSubTitle) {
         textLayoutProperty->UpdateMaxLines(2); // 2:title's maxLine.
     } else {
@@ -326,5 +312,14 @@ void NavDestinationModelNG::SetOnBackPressed(std::function<bool()>&& onBackPress
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnBackPressed(onBackPressed);
+}
+
+RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
+{
+    ScopedViewStackProcessor processor;
+    Create();
+    auto uiNode = ViewStackProcessor::GetInstance()->Finish();
+    uiNode->SetRemoveSilently(true);
+    return uiNode;
 }
 } // namespace OHOS::Ace::NG

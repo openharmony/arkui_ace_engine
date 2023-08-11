@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <securec.h>
 
+#include "base/i18n/localization.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
@@ -37,6 +38,10 @@ namespace {
 // TODO datepicker style modification
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
+constexpr uint32_t RATE = 2;
+constexpr uint32_t HALF = 2;
+constexpr uint32_t FOUCS_WIDTH = 2;
+constexpr uint32_t MARGIN_SIZE = 12;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -44,6 +49,7 @@ void TextPickerPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
 }
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -52,6 +58,21 @@ bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
     return true;
+}
+
+void TextPickerPattern::OnLanguageConfigurationUpdate()
+{
+    auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
+    CHECK_NULL_VOID(buttonConfirmNode);
+    auto confirmNode = buttonConfirmNode->GetFirstChild();
+    auto confirmNodeLayout = AceType::DynamicCast<FrameNode>(confirmNode)->GetLayoutProperty<TextLayoutProperty>();
+    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+
+    auto buttonCancelNode = weakButtonCancel_.Upgrade();
+    CHECK_NULL_VOID(buttonCancelNode);
+    auto cancelNode = buttonCancelNode->GetFirstChild();
+    auto cancelNodeLayout = AceType::DynamicCast<FrameNode>(cancelNode)->GetLayoutProperty<TextLayoutProperty>();
+    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
 }
 
 void TextPickerPattern::SetButtonIdeaSize()
@@ -63,20 +84,20 @@ void TextPickerPattern::SetButtonIdeaSize()
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto children = host->GetChildren();
-    auto height = pickerTheme->GetDividerSpacing();
     auto width = host->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
-    auto defaultWidth = height.ConvertToPx() * 2;
-    if (width > defaultWidth) {
-        width = static_cast<float>(defaultWidth);
-    }
     for (const auto& child : children) {
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonLayoutProperty->UpdateBorderRadius(PRESS_RADIUS);
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()),
-            CalcLength(CalculateHeight() - PRESS_INTERVAL.ConvertToPx())));
+        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+        auto buttonHeight = CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * RATE;
+        if (resizeFlag_) {
+            buttonHeight = resizePickerItemHeight_ - PRESS_INTERVAL.ConvertToPx() * RATE;
+        }
+        buttonLayoutProperty->
+            UpdateUserDefinedIdealSize(CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx() * RATE),
+                CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
@@ -380,18 +401,29 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
+    auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    CHECK_NULL_VOID(stackChild);
+    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+    CHECK_NULL_VOID(pickerChild);
+    auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
     auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
-    auto pickerThemeWidth = dividerSpacing * 2;
+    auto pickerThemeWidth = dividerSpacing * RATE;
 
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
+    auto centerX = (frameWidth / childSize - pickerThemeWidth) / RATE +
                    columnNode->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
-                   PRESS_INTERVAL.ConvertToPx() * 2;
+                   PRESS_INTERVAL.ConvertToPx() * RATE;
     auto centerY =
-        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
-
-    paintRect.SetRect(RectF(centerX, centerY, (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2,
-        dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2));
+        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
+    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
+    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
+    if (piantRectWidth > columnWidth) {
+        piantRectWidth = columnWidth - FOUCS_WIDTH;
+        centerX = focusKeyID_ * piantRectWidth + FOUCS_WIDTH / HALF;
+    } else {
+        centerX = centerX - MARGIN_SIZE / HALF;
+    }
+    paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
@@ -408,13 +440,17 @@ bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
 
-    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ESCAPE) {
-        operationOn_ = event.code == KeyCode::KEY_SPACE;
+    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER) {
+        if (!operationOn_ && event.code == KeyCode::KEY_ENTER) {
+            HandleDirectionKey(event.code);
+        }
+        operationOn_ = (event.code == KeyCode::KEY_SPACE) || (event.code == KeyCode::KEY_ENTER);
         return true;
     }
 
     if (event.code == KeyCode::KEY_TAB) {
-        return operationOn_;
+        operationOn_ = false;
+        return false;
     }
 
     if (event.code == KeyCode::KEY_DPAD_UP || event.code == KeyCode::KEY_DPAD_DOWN ||
@@ -611,6 +647,11 @@ bool TextPickerPattern::HandleDirectionKey(KeyCode code)
             textPickerColumnPattern->InnerHandleScroll(1, false);
             break;
 
+        case KeyCode::KEY_ENTER:
+            focusKeyID_ = 0;
+            PaintFocusState();
+            break;
+
         case KeyCode::KEY_DPAD_LEFT:
             focusKeyID_ -= 1;
             if (focusKeyID_ < 0) {
@@ -788,5 +829,37 @@ std::string TextPickerPattern::GetOptionsMultiStr() const
         result = GetOptionsMultiStrInternal();
     }
     return result;
+}
+
+void TextPickerPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetNeedCallChildrenUpdate(false);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateColor(normalStyle.GetTextColor());
+    pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
+    if (isPicker_) {
+        return;
+    }
+    SetBackgroundColor(dialogTheme->GetBackgroundColor());
+    if (contentRowNode_) {
+        auto layoutRenderContext = contentRowNode_->GetRenderContext();
+        CHECK_NULL_VOID(layoutRenderContext);
+        layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    }
+    auto frameNode = DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(frameNode);
+    FrameNode::ProcessOffscreenNode(frameNode);
+    host->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

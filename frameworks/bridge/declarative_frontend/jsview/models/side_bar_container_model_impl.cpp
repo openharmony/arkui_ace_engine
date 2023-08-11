@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/side_bar_container_model_impl.h"
 
+#include "base/image/pixel_map.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -141,7 +142,8 @@ void SideBarContainerModelImpl::SetControlButtonTop(const Dimension& top)
     component->SetButtonTop(buttonTop);
 }
 
-void SideBarContainerModelImpl::SetControlButtonShowIconStr(const std::string& showIconStr)
+void SideBarContainerModelImpl::SetControlButtonShowIconInfo(
+    const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
@@ -149,7 +151,8 @@ void SideBarContainerModelImpl::SetControlButtonShowIconStr(const std::string& s
     component->SetShowIcon(showIconStr);
 }
 
-void SideBarContainerModelImpl::SetControlButtonHiddenIconStr(const std::string& hiddenIconStr)
+void SideBarContainerModelImpl::SetControlButtonHiddenIconInfo(
+    const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
@@ -157,7 +160,8 @@ void SideBarContainerModelImpl::SetControlButtonHiddenIconStr(const std::string&
     component->SetHiddenIcon(hiddenIconStr);
 }
 
-void SideBarContainerModelImpl::SetControlButtonSwitchingIconStr(const std::string& switchingIconStr)
+void SideBarContainerModelImpl::SetControlButtonSwitchingIconInfo(
+    const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::SideBarContainerComponent>(stack->GetMainComponent());
@@ -178,12 +182,11 @@ void SideBarContainerModelImpl::SetDividerStartMargin(const Dimension& startMarg
 
 void SideBarContainerModelImpl::SetDividerEndMargin(const Dimension& endMargin) {}
 
+void SideBarContainerModelImpl::SetMinContentWidth(const Dimension& minContentWidth) {};
+
 void SideBarContainerModelImpl::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode) {}
 
 void SideBarContainerModelImpl::CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode) {}
-
-void SideBarContainerModelImpl::InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
-    const RefPtr<NG::FrameNode>& sideBarContentFrameNode) {}
 
 void SideBarContainerModelImpl::MarkNeedInitRealSideBarWidth() {}
 } // namespace OHOS::Ace::Framework

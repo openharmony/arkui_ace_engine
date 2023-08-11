@@ -51,15 +51,18 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         }
     }
 
+    DataPanelShadow shadowOption;
     bool isHasShadowValue = false;
     if (paintProperty->HasShadowOption()) {
         isHasShadowValue = true;
+        shadowOption = paintProperty->GetShadowOptionValue();
     }
 
-    DataPanelShadow shadowDefault;
-    DataPanelShadow shadowOption = paintProperty->GetShadowOption().value_or(shadowDefault);
+    size_t shadowColorsLastLength = MAX_COUNT;
     if (shadowOption.colors.size() == 0) {
         shadowOption.colors = valuesColor;
+    } else {
+        shadowColorsLastLength = shadowOption.colors.size();
     }
 
     dataPanelModifier_->UpdateDate();
@@ -77,7 +80,7 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     dataPanelModifier_->SetShadowRadius(shadowOption.radius);
     dataPanelModifier_->SetShadowOffsetX(shadowOption.offsetX);
     dataPanelModifier_->SetShadowOffsetY(shadowOption.offsetY);
-    dataPanelModifier_->SetShadowColors(shadowOption.colors);
+    dataPanelModifier_->SetShadowColors(shadowOption.colors, shadowColorsLastLength);
 }
 
 void DataPanelPaintMethod::CreateGradient(const std::pair<Color, Color>& itemParam, Gradient& gradient) const

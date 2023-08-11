@@ -82,6 +82,8 @@ public:
             theme->textStyle_.SetFontSize(toastPattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp));
             theme->textStyle_.SetTextColor(toastPattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
             theme->backgroundColor_ = toastPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
+            theme->radius_ = Radius(toastPattern->GetAttr<Dimension>("toast_border_radius", 24.0_vp),
+                toastPattern->GetAttr<Dimension>("toast_border_radius", 24.0_vp));
         }
     };
 

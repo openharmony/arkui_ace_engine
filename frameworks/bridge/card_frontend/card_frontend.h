@@ -111,6 +111,8 @@ public:
     void OnNewWant(const std::string& data) override {}
     void CallRouterBack() override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override;
+    void OnLayoutCompleted(const std::string& componentId) override {}
+    void OnDrawCompleted(const std::string& componentId) override {}
     void DumpFrontend() const override {}
     std::string GetPagePath() const override
     {
@@ -123,11 +125,6 @@ public:
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return eventHandler_;
-    }
-
-    FrontendType GetType() override
-    {
-        return type_;
     }
 
     // judge frontend is foreground frontend.
@@ -203,7 +200,6 @@ protected:
     void ParseManifest() const;
 
     ColorMode colorMode_ = ColorMode::LIGHT;
-    FrontendType type_ = FrontendType::JS_CARD;
     bool foregroundFrontend_ = false;
     bool pageLoaded_ = false;
     double density_ = 1.0;
@@ -215,7 +211,6 @@ protected:
     OnFormVisibleCallback onFormVisibleCallback_;
 
     mutable std::once_flag onceFlag_;
-    RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AceEventHandler> eventHandler_;
     Framework::PageIdPool pageIdPool_;
     std::string formSrc_;

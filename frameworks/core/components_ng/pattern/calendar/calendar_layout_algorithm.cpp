@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,21 +21,28 @@
 #include "base/geometry/ng/size_t.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
-
 constexpr int32_t CALENDAR_MIN_WIDTH = 350;
 constexpr int32_t CALENDAR_MIN_HEIGHT = 230;
-
 } // namespace
 
 std::optional<SizeF> CalendarLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto calendarMonthPattern = host->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_RETURN(calendarMonthPattern, std::nullopt);
+    if (calendarMonthPattern->IsCalendarDialog()) {
+        return contentConstraint.maxSize;
+    }
+
     SizeF calendarMinSize(CALENDAR_MIN_WIDTH, CALENDAR_MIN_HEIGHT);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
@@ -63,5 +70,4 @@ std::optional<SizeF> CalendarLayoutAlgorithm::MeasureContent(
     maxHeight_ = constrainSize.Height();
     return maxSize;
 }
-
 } // namespace OHOS::Ace::NG

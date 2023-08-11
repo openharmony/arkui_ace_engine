@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
 #include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
@@ -93,15 +94,17 @@ const uint32_t DEFAULT_MONTH = 2;
 const uint32_t DEFAULT_DAY = 5;
 constexpr uint32_t AM_PM_HOUR_12 = 12;
 constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
-constexpr int32_t CHILD_WITHOUT_AMPM_SIZE = 2;
 const double YOFFSET_START1 = 0.0;
 const double YOFFSET_END1 = 1000.0;
 const double TIME_PLUS = 1 * 100.0;
+const SizeF TEST_FRAME_SIZE { 20, 50 };
 } // namespace
 class TimePickerPatternTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
 };
 
 class TestNode : public UINode {
@@ -126,13 +129,22 @@ public:
 void TimePickerPatternTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
-    auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void TimePickerPatternTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void TimePickerPatternTestNg::SetUp()
+{
+    auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+}
+
+void TimePickerPatternTestNg::TearDown()
+{
+    MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
 }
 
 /**
@@ -471,6 +483,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern005, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -589,15 +602,13 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg001, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumnNode = allChildNode["minute"];
     ASSERT_NE(minuteColumnNode, nullptr);
     auto minuteColumnPattern = minuteColumnNode->GetPattern<TimePickerColumnPattern>();
     auto options = minuteColumnPattern->GetOptions();
-    options[minuteColumnNode].clear();
-    for (auto& Value : DEFAULT_VALUE) {
-        options[minuteColumnNode].emplace_back(std::to_string(Value));
-    }
+    options[minuteColumnNode] = DEFAULT_VALUE.size();
     minuteColumnPattern->SetOptions(options);
     auto accessibilityProperty = minuteColumnNode->GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
@@ -622,6 +633,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg002, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -632,7 +644,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg002, Test
 
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     auto options = minuteColumnPattern->GetOptions();
-    options[minuteColumn].clear();
+    options[minuteColumn] = 0;
     minuteColumnPattern->SetOptions(options);
     EXPECT_FALSE(accessibilityProperty->IsScrollable());
 }
@@ -651,6 +663,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg003, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -674,7 +687,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg003, Test
     EXPECT_EQ(accessibilityProperty->GetEndIndex(), itemCount - 1);
 
     auto options = minuteColumnPattern->GetOptions();
-    options[minuteColumn].clear();
+    options[minuteColumn] = 0;
     minuteColumnPattern->SetOptions(options);
 
     EXPECT_EQ(accessibilityProperty->GetBeginIndex(), DEFAULT_INDEX);
@@ -695,6 +708,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumnNode = allChildNode["minute"];
     ASSERT_NE(minuteColumnNode, nullptr);
@@ -702,17 +716,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg004, Test
     minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
 
     auto options = minuteColumnPattern->GetOptions();
-    options[minuteColumnNode].clear();
+    options[minuteColumnNode] = 0;
     minuteColumnPattern->SetOptions(options);
     auto accessibilityProperty = minuteColumnNode->GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
     EXPECT_EQ(accessibilityProperty->GetText(), "");
 
-    for (auto& Value : DEFAULT_VALUE) {
-        options[minuteColumnNode].emplace_back(std::to_string(Value));
-    }
+    options[minuteColumnNode] = DEFAULT_VALUE.size();
     minuteColumnPattern->SetOptions(options);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(DEFAULT_VALUE.at(CURRENT_VALUE1)));
+    EXPECT_EQ(accessibilityProperty->GetText(), "08:00:00");
 
     options.erase(minuteColumnNode);
     minuteColumnPattern->SetOptions(options);
@@ -733,6 +745,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg005, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumnNode = allChildNode["minute"];
     ASSERT_NE(minuteColumnNode, nullptr);
@@ -740,17 +753,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg005, Test
     minuteColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
 
     auto options = minuteColumnPattern->GetOptions();
-    options[minuteColumnNode].clear();
-    for (auto& Value : DEFAULT_VALUE) {
-        options[minuteColumnNode].emplace_back(std::to_string(Value));
-    }
+    options[minuteColumnNode] = DEFAULT_VALUE.size();
     minuteColumnPattern->SetOptions(options);
     auto accessibilityProperty = minuteColumnNode->GetAccessibilityProperty<TimePickerColumnAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
 
     accessibilityProperty->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = accessibilityProperty->GetSupportAction();
-    uint64_t actions = 0, exptectActions = 0;
+    uint64_t actions = 0;
+    uint64_t exptectActions = 0;
     exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
     for (auto action : supportAceActions) {
@@ -773,6 +784,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg006, Test
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -811,6 +823,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetHour24(false);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
@@ -821,6 +834,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAccessibilityPropertyTestNg007, Test
     auto hourColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
     hourColumnPattern->SetCurrentIndex(CURRENT_VALUE1);
     auto amPmColumn = allChildNode["amPm"];
+    ASSERT_NE(amPmColumn, nullptr);
     auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
 
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<TimePickerRowAccessibilityProperty>();
@@ -858,6 +872,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern006, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -939,6 +954,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern007, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -949,7 +965,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern007, TestSize.Level1)
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto weakNode = AceType::WeakClaim(AceType::RawPtr(buttonNode));
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         weakNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     DirtySwapConfig dirtySwapConfig;
     EXPECT_FALSE(minuteColumnPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
@@ -973,6 +989,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern008, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1001,6 +1018,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern009, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1026,6 +1044,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1049,9 +1068,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
 
     // action update
     auto options = minuteColumnPattern->GetOptions();
-    auto totalOptionCount = options[minuteColumn].size();
+    auto totalOptionCount = options[minuteColumn];
 
     gestureEvent.SetInputEventType(InputEventType::AXIS);
+    gestureEvent.SetSourceTool(SourceTool::MOUSE);
     Offset deltaOffset(0.0, -1.0);
     gestureEvent.SetDelta(deltaOffset);
     auto preIndex = minuteColumnPattern->GetCurrentIndex();
@@ -1135,6 +1155,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern011, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1142,7 +1163,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern011, TestSize.Level1)
     ASSERT_TRUE(minuteColumnPattern);
 
     auto options = minuteColumnPattern->GetOptions();
-    auto totalOptionCount = options[minuteColumn].size();
+    auto totalOptionCount = options[minuteColumn];
 
     minuteColumnPattern->CreateAnimation();
     EXPECT_EQ(minuteColumnPattern->toController_->stopCallbacks_.size(), 1);
@@ -1176,6 +1197,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern012, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1220,6 +1242,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1241,7 +1264,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
     EXPECT_EQ(minuteColumnPattern->gradientHeight_, gradientHeight - TEXT_HOUR24_HEIGHT_NUMBER);
 
     minuteColumnPattern->SetDividerHeight(OPTION_COUNT_PHONE_LANDSCAPE);
-    EXPECT_EQ(minuteColumnPattern->gradientHeight_, gradientHeight);
+    EXPECT_EQ(minuteColumnPattern->gradientHeight_, gradientHeight - TEXT_HOUR24_HEIGHT_NUMBER);
 }
 
 /**
@@ -1258,6 +1281,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1266,7 +1290,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
 
     minuteColumnPattern->yOffset_ = OFFSET_Y;
     auto options = minuteColumnPattern->GetOptions();
-    int totalOptionCount = static_cast<int>(options[minuteColumn].size());
+    int totalOptionCount = static_cast<int>(options[minuteColumn]);
     minuteColumnPattern->SetCurrentIndex(totalOptionCount);
     minuteColumnPattern->SetShowCount(totalOptionCount * 2);
     minuteColumnPattern->UpdateColumnChildPosition(OFFSET_X);
@@ -1291,6 +1315,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_TRUE(timePickerRowPattern);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_TRUE(minuteColumn);
@@ -1300,16 +1325,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern015, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     minuteColumnPattern->InitOnKeyEvent(focusHub);
-    auto onKeyEvent = focusHub->onKeyEventInternal_;
 
     KeyEvent keyEvent(KeyCode::KEY_DPAD_UP, KeyAction::UP);
-    EXPECT_FALSE(onKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.action = KeyAction::DOWN;
-    EXPECT_TRUE(onKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
-    EXPECT_TRUE(onKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     keyEvent.code = KeyCode::KEY_DPAD_CENTER;
-    EXPECT_FALSE(onKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 }
 
 /**
@@ -1328,7 +1352,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
     ASSERT_NE(timePickerRowPattern, nullptr);
 
     frameNode->GetGeometryNode()->frame_.rect_.SetWidth(EXTRA_WIDTH);
-    auto dirty = AceType::MakeRefPtr<LayoutWrapper>(
+    auto dirty = AceType::MakeRefPtr<LayoutWrapperNode>(
         frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
     DirtySwapConfig config;
     config.frameSizeChange = true;
@@ -1345,7 +1369,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         EXPECT_EQ(buttonLayoutProperty->GetMeasureType(), MeasureType::MATCH_PARENT_MAIN_AXIS);
         EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), ButtonType::NORMAL);
-        EXPECT_EQ(buttonLayoutProperty->GetBorderRadiusValue(), PRESS_RADIUS);
         auto calcSize = buttonLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value();
         EXPECT_EQ(calcSize.Width().value(), CalcLength(defaultWidth - PRESS_INTERVAL.ConvertToPx()));
         EXPECT_EQ(calcSize.Height().value(), CalcLength(height - PRESS_INTERVAL));
@@ -1428,6 +1451,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern004, TestSize.Level1)
     ASSERT_NE(timePickerRowPattern, nullptr);
 
     timePickerRowPattern->SetHour24(false);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto amPmColumn = allChildNode["amPm"];
     ASSERT_NE(amPmColumn, nullptr);
@@ -1473,6 +1497,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern005, TestSize.Level1)
     ASSERT_NE(timePickerRowPattern, nullptr);
 
     timePickerRowPattern->SetHour24(false);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto amPmColumn = allChildNode["amPm"];
     ASSERT_NE(amPmColumn, nullptr);
@@ -1528,8 +1553,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern007, TestSize.Level1)
     timePickerRowPattern->SetHour24(true);
     EXPECT_EQ(frameNode->GetChildren().size(), CHILD_WITH_AMPM_SIZE);
     timePickerRowPattern->GetAllChildNode();
-    EXPECT_EQ(frameNode->children_.size(), CHILD_WITHOUT_AMPM_SIZE);
-    EXPECT_FALSE(timePickerRowPattern->amPmId_.has_value());
+    EXPECT_EQ(frameNode->children_.size(), CHILD_WITH_AMPM_SIZE);
+    EXPECT_TRUE(timePickerRowPattern->amPmId_.has_value());
 }
 
 /**
@@ -1634,13 +1659,12 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto focusHub = eventHub->GetOrCreateFocusHub();
     timePickerRowPattern->InitOnKeyEvent(focusHub);
-    auto onKeyEventInternal = focusHub->onKeyEventInternal_;
     auto getInnerFocusRectFunc = focusHub->getInnerFocusRectFunc_;
 
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::UNKNOWN;
     keyEvent.code = KeyCode::KEY_DPAD_UP;
-    EXPECT_FALSE(onKeyEventInternal(keyEvent));
+    EXPECT_FALSE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 
     keyEvent.action = KeyAction::DOWN;
     auto stackChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(timePickerRowPattern->focusKeyID_));
@@ -1650,49 +1674,60 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto pattern = pickerChild->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(pattern, nullptr);
     timePickerRowPattern->options_[pickerChild].clear();
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
 
-    timePickerRowPattern->options_[pickerChild].emplace_back("AM");
-    timePickerRowPattern->options_[pickerChild].emplace_back("PM");
+    timePickerRowPattern->options_[pickerChild][0] = "AM";
+    timePickerRowPattern->options_[pickerChild][1] = "PM";
     auto currentIndex = pattern->GetCurrentIndex();
     auto totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex - 1) % totalOptionCount);
 
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
     currentIndex = pattern->GetCurrentIndex();
     totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex + 1) % totalOptionCount);
 
-    keyEvent.code = KeyCode::KEY_DPAD_LEFT;
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
-    EXPECT_EQ(timePickerRowPattern->focusKeyID_, 0);
+    keyEvent.code = KeyCode::KEY_MOVE_HOME;
+    currentIndex = pattern->GetCurrentIndex();
+    totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+    EXPECT_EQ(pattern->GetCurrentIndex(), 0);
+
+    keyEvent.code = KeyCode::KEY_MOVE_END;
+    currentIndex = pattern->GetCurrentIndex();
+    totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+    EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount - 1));
 
     keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
-    EXPECT_TRUE(onKeyEventInternal(keyEvent));
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
     EXPECT_EQ(timePickerRowPattern->focusKeyID_, 1);
+
+    keyEvent.code = KeyCode::KEY_DPAD_LEFT;
+    EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
+    EXPECT_EQ(timePickerRowPattern->focusKeyID_, 0);
 
     auto frameWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
     auto childSize = frameNode->GetChildren().size();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
-    auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
+    pickerTheme->dividerSpacing_ = Dimension(OFFSET_X);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(pickerTheme));
+    auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
     auto pickerThemeWidth = dividerSpacing * 2;
-    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
-                   pickerChild->GetGeometryNode()->GetFrameRect().Width() * timePickerRowPattern->focusKeyID_ +
-                   PRESS_INTERVAL.ConvertToPx() * 2;
     auto centerY =
         (frameNode->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
-
+    // default focusWidth < columnWidth, focusWidth = columnWidth
     RoundRect paintRect;
     getInnerFocusRectFunc(paintRect);
     auto rect = paintRect.GetRect();
-    EXPECT_EQ(rect.GetX(), centerX);
+    EXPECT_EQ(rect.GetX(), 0);
     EXPECT_EQ(rect.GetY(), centerY);
-    EXPECT_EQ(rect.Width(), (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2);
+    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width());
     EXPECT_EQ(rect.Height(), dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2);
 
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
@@ -1711,6 +1746,16 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y,
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+    // default focusWidth < columnWidth
+    pickerChild->GetGeometryNode()->frame_.rect_.SetWidth(EXTRA_WIDTH);
+    RoundRect paintRect2;
+    timePickerRowPattern->GetInnerFocusPaintRect(paintRect2);
+    auto rect2 = paintRect2.GetRect();
+    auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
+                   pickerChild->GetGeometryNode()->GetFrameRect().Width() * timePickerRowPattern->focusKeyID_ +
+                   PRESS_INTERVAL.ConvertToPx() * 2;
+    EXPECT_EQ(rect2.GetX(), centerX);
+    EXPECT_EQ(rect2.Width(), (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2);
 }
 
 /**
@@ -1734,6 +1779,30 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern012, TestSize.Level1)
     keyEvent.code = KeyCode::KEY_DPAD_CENTER;
     EXPECT_FALSE(timePickerRowPattern->OnKeyEvent(keyEvent));
     EXPECT_FALSE(timePickerRowPattern->HandleDirectionKey(KeyCode::KEY_DPAD_CENTER));
+}
+
+/**
+ * @tc.name: TimePickerRowPattern013
+ * @tc.desc: Test TimePickerRowPattern SetFocusDisable and SetFocusEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern013, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    TimePickerModelNG::GetInstance()->SetHour24(false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+
+    auto host = timePickerRowPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto focusHub = host->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    timePickerRowPattern->SetFocusDisable();
+    timePickerRowPattern->SetFocusEnable();
 }
 
 /**
@@ -1779,13 +1848,14 @@ HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)
      */
     auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto minuteColumn = allChildNode["minute"];
     ASSERT_NE(minuteColumn, nullptr);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     ASSERT_NE(minuteColumnPattern, nullptr);
     auto options = minuteColumnPattern->GetOptions();
-    options[minuteColumn].clear();
+    options[minuteColumn] = 0;
     minuteColumnPattern->SetOptions(options);
     minuteColumnPattern->SetAccessibilityAction();
 
@@ -1810,13 +1880,49 @@ HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: Related function is called.
      */
     options = minuteColumnPattern->GetOptions();
-    options[minuteColumn].clear();
-    for (int i = 0; i < INDEX; i++) {
-        options[minuteColumn].emplace_back(std::to_string(i));
-    }
+    options[minuteColumn] = INDEX;
     minuteColumnPattern->SetOptions(options);
     minuteColumnPattern->SetCurrentIndex(1);
     EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
     EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: TimePickerAlgorithmTest001
+ * @tc.desc: Test Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(frameNode);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    auto layoutConstraint = LayoutConstraintF();
+    layoutConstraint.selfIdealSize.SetWidth(20);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_TRUE(timePickerRowPattern);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"];
+    ASSERT_TRUE(minuteColumn);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_TRUE(minuteColumnPattern);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(minuteColumn, minuteColumn->GetGeometryNode(), pickerProperty);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    /**
+     * @tc.step: step2. initialize TimePickerColumnLayoutAlgorithm and call Measure
+     *                  and Layout function.
+     */
+    TimePickerColumnLayoutAlgorithm timePickerColumnLayoutAlgorithm;
+    timePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
+    timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+    auto frameSize = layoutWrapper.geometryNode_->GetFrameSize();
+    EXPECT_EQ(frameSize, TEST_FRAME_SIZE);
 }
 } // namespace OHOS::Ace::NG

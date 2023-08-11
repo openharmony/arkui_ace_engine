@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_ROSEN_RENDER_TEXT_OVERLAY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_OVERLAY_ROSEN_RENDER_TEXT_OVERLAY_H
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
+#endif
 
 #include "core/components/text_overlay/render_text_overlay.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -34,9 +36,17 @@ public:
 
 private:
     void PaintHandles(RenderContext& context) const;
+#ifndef USE_ROSEN_DRAWING
     void PaintHandle(SkCanvas* skCanvas, Offset centerOffset, bool isLeftHandle = false) const;
+#else
+    void PaintHandle(RSCanvas* canvas, Offset centerOffset, bool isLeftHandle = false) const;
+#endif
     void PaintMagnifier(RenderContext& context);
+#ifndef USE_ROSEN_DRAWING
     void PaintClipLine(SkCanvas* skCanvas, SkPaint paint);
+#else
+    void PaintClipLine(RSCanvas* canvas, RSPen pen);
+#endif
     void PaintMore(RenderContext& context);
     void InitMoreButtonPaintColor();
     Offset CalculateMoreButtonCenter();

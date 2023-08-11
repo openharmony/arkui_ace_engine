@@ -14,23 +14,44 @@
  */
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
-#include <optional>
 #include <string>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void ProcessMaskRect(const DialogProperties& param, const RefPtr<FrameNode>& dialog)
+{
+    auto dialogContext = dialog->GetRenderContext();
+    auto hub = dialog->GetEventHub<DialogEventHub>();
+    if (param.maskRect.has_value()) {
+        auto width = param.maskRect->GetWidth();
+        auto height = param.maskRect->GetHeight();
+        auto offset = param.maskRect->GetOffset();
+        auto rootWidth = PipelineContext::GetCurrentRootWidth();
+        auto rootHeight = PipelineContext::GetCurrentRootHeight();
+
+        RectF rect = RectF(offset.GetX().ConvertToPxWithSize(rootWidth),
+                           offset.GetY().ConvertToPxWithSize(rootHeight),
+                           width.ConvertToPxWithSize(rootWidth),
+                           height.ConvertToPxWithSize(rootHeight));
+        dialogContext->ClipWithRect(rect);
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        std::vector<DimensionRect> mouseResponseRegion;
+        mouseResponseRegion.push_back(param.maskRect.value());
+        gestureHub->SetMouseResponseRegion(mouseResponseRegion);
+        gestureHub->SetResponseRegion(mouseResponseRegion);
+    }
+}
+}
 
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
@@ -77,6 +98,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     hub->SetOnCancel(param.onCancel);
     hub->SetOnSuccess(param.onSuccess);
 
+    ProcessMaskRect(param, dialog);
+
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     pattern->BuildChild(param);
@@ -84,6 +107,8 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     // set open and close animation
     pattern->SetOpenAnimation(param.openAnimation);
     pattern->SetCloseAnimation(param.closeAnimation);
+
+    pattern->SetDialogProperties(param);
 
     dialog->MarkModifyDone();
     return dialog;

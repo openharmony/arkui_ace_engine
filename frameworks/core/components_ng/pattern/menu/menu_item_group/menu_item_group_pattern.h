@@ -76,6 +76,19 @@ public:
 
     std::string GetHeaderContent();
 
+    bool HasSelectIcon() const
+    {
+        return hasSelectIcon_;
+    }
+
+    bool HasStartIcon() const
+    {
+        return hasStartIcon_;
+    }
+
+    // Travel children to update items icon info
+    void UpdateMenuItemIconInfo();
+
 protected:
     void OnMountToParentDone() override;
 
@@ -85,6 +98,13 @@ private:
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
     int32_t itemStartIndex_ = 0;
+
+    // True: one of menu items in group has select icon;
+    // False: none of menu items in group has select icon.
+    bool hasSelectIcon_ = false;
+    // True: one of menu items in group has start icon;
+    // False: none of menu items in group has start icon.
+    bool hasStartIcon_ = false;
 
     RefPtr<FrameNode> headerContent_;
     RefPtr<FrameNode> footerContent_;

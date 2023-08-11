@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 #include "core/components/text/text_theme.h"
-#include "core/components_ng/pattern/image/image_modifier.h"
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -31,13 +31,14 @@ namespace OHOS::Ace::NG {
 namespace {
 void NormalizeRadius(BorderRadiusArray& radius, const SizeF& size)
 {
+    auto maxRadius = std::min(size.Width(), size.Height()) / 2;
     // radius shouldn't be larger than half of image size
     for (auto&& corner : radius) {
-        if (corner.GetX() > size.Width() / 2) {
-            corner.SetX(size.Width() / 2);
+        if (corner.GetX() > maxRadius) {
+            corner.SetX(maxRadius);
         }
-        if (corner.GetY() > size.Height() / 2) {
-            corner.SetY(size.Height() / 2);
+        if (corner.GetY() > maxRadius) {
+            corner.SetY(maxRadius);
         }
     }
 }
@@ -86,24 +87,6 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
     config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(radiusXY);
 }
 
-RefPtr<Modifier> ImagePaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
-{
-    return imageModifier_;
-}
-
-void ImagePaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
-{
-    auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(props);
-    UpdatePaintConfig(props, paintWrapper);
-    auto contentSize = paintWrapper->GetContentSize();
-    auto offset = paintWrapper->GetContentOffset();
-    auto canvasImage = WeakClaim(RawPtr(canvasImage_));
-    imageModifier_->UpdateImageData(canvasImage, offset, contentSize);
-    imageModifier_->SetImageFit(props->GetImageFit().value_or(ImageFit::COVER));
-    imageModifier_->Modify();
-}
-
 void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper)
 {
     auto&& config = canvasImage_->GetPaintConfig();
@@ -117,15 +100,29 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     if (colorFilterMatrix.has_value()) {
         config.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
     }
-    // scale for recordingCanvas: take padding into account
-    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto contentSize = paintWrapper->GetContentSize();
-    config.scaleX_ = contentSize.Width() / frameSize.Width();
-    config.scaleY_ = contentSize.Height() / frameSize.Height();
+    auto renderCtx = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderCtx);
+    config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper);
     }
+}
+
+CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_RETURN(canvasImage_, nullptr);
+    auto contentSize = paintWrapper->GetContentSize();
+
+    // update render props to ImagePaintConfig
+    auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_RETURN(props, nullptr);
+    UpdatePaintConfig(props, paintWrapper);
+    if (InstanceOf<SvgCanvasImage>(canvasImage_)) {
+        DynamicCast<SvgCanvasImage>(canvasImage_)->SetFillColor(props->GetSvgFillColor());
+    }
+    ImagePainter imagePainter(canvasImage_);
+    return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };
 }
 
 CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)

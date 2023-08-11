@@ -114,7 +114,7 @@ void JSPluginCallback::SendRequestEventResult(napi_value jsObject)
         std::string strExtraData;
     };
 
-    MyData* data = new MyData;
+    std::shared_ptr<MyData> data = std::make_shared<MyData>();
     data->want = want_;
 
     if (jsTemplate != nullptr) {
@@ -129,24 +129,23 @@ void JSPluginCallback::SendRequestEventResult(napi_value jsObject)
         AceKVObjectToString(cbInfo_.env, jsExtraData, data->strExtraData);
     }
 
-    uv_loop_s* loop = nullptr;
-    napi_get_uv_event_loop(cbInfo_.env, &loop);
-    uv_work_t* work = new uv_work_t;
-    work->data = (void*)data;
-    int rev = uv_queue_work(
-        loop, work, [](uv_work_t* work) {
-            MyData* data = (MyData*)work->data;
+    auto container = AceEngine::Get().GetContainer(cbInfo_.containerId);
+    if (!container) {
+        HILOG_INFO("%{public}s called, container is null. %{public}d", __func__, cbInfo_.containerId);
+        return;
+    }
+
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        HILOG_INFO("%{public}s called, taskExecutor is null.", __func__);
+        return;
+    }
+    taskExecutor->PostTask(
+        [data]() {
             PluginComponentManager::GetInstance()->ReturnRequest(
                 data->want, data->strTemplate, data->strDate, data->strExtraData);
         },
-        [](uv_work_t* work, int status) {
-            delete (MyData*)work->data;
-            delete work;
-        });
-    if (rev != 0) {
-        delete work;
-        delete data;
-    }
+        TaskExecutor::TaskType::BACKGROUND);
 }
 
 napi_value JSPluginCallback::MakeCallbackParamForRequest(
@@ -316,29 +315,25 @@ void JSPluginCallback::OnRequestEvent(const AAFwk::Want& want, const std::string
     uvWorkData_.data = data;
     uvWorkData_.name = name;
 
-    uv_loop_s* loop = nullptr;
-    napi_get_uv_event_loop(cbInfo_.env, &loop);
-    uv_work_t* work = new uv_work_t;
-    work->data = (void*)this;
-    int rev = uv_queue_work(
-        loop, work, [](uv_work_t* work) {},
-        [](uv_work_t* work, int status) {
-            if (work == nullptr) {
-                return;
-            }
-            JSPluginCallback* context = (JSPluginCallback*)work->data;
+    auto container = AceEngine::Get().GetContainer(cbInfo_.containerId);
+    if (!container) {
+        HILOG_INFO("%{public}s called, container is null. %{public}d", __func__, cbInfo_.containerId);
+        return;
+    }
+
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        HILOG_INFO("%{public}s called, taskExecutor is null.", __func__);
+        return;
+    }
+    taskExecutor->PostTask(
+        [uvWorkData = &uvWorkData_]() {
+            JSPluginCallback* context = (JSPluginCallback*)uvWorkData->that;
             if (context) {
                 context->OnRequestEventInner(&context->uvWorkData_);
             }
-            delete work;
-            work = nullptr;
-        });
-    if (rev != 0) {
-        if (work != nullptr) {
-            delete work;
-            work = nullptr;
-        }
-    }
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void JSPluginCallback::OnRequestCallBackInner(const OnPluginUvWorkData* workData)
@@ -397,38 +392,35 @@ void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTe
                 std::condition_variable cv;
             };
 
-            ResultData* resultData = new ResultData;
+            std::shared_ptr<ResultData> resultData = std::make_shared<ResultData>();
             resultData->context = this;
 
-            uv_work_t* work = new uv_work_t;
-            work->data = (void*)resultData;
-            int rev = uv_queue_work(
-                loop, work, [](uv_work_t* work) {},
-                [](uv_work_t* work, int status) {
-                    if (work == nullptr) {
-                        return;
-                    }
-                    ResultData* data = (ResultData*)work->data;
-                    if (data->context) {
-                        data->context->OnRequestCallBackInner(&data->context->uvWorkData_);
-                    }
+            auto container = AceEngine::Get().GetContainer(cbInfo_.containerId);
+            if (!container) {
+                HILOG_INFO("%{public}s called, container is null. %{public}d", __func__, cbInfo_.containerId);
+                return;
+            }
+
+            auto taskExecutor = container->GetTaskExecutor();
+            if (!taskExecutor) {
+                HILOG_INFO("%{public}s called, taskExecutor is null.", __func__);
+                return;
+            }
+            taskExecutor->PostTask(
+                [resultData]() {
+                    resultData->context->OnRequestCallBackInner(&resultData->context->uvWorkData_);
 
                     {
-                        std::unique_lock<std::mutex> lock(data->mtx);
-                        data->ready=true;
-                        data->cv.notify_all();
+                        std::unique_lock<std::mutex> lock(resultData->mtx);
+                        resultData->ready = true;
+                        resultData->cv.notify_all();
                     }
-                    delete work;
-                });
-            if (rev != 0) {
-                delete resultData;
-                delete work;
-            } else {
-                {
-                    std::unique_lock<std::mutex> lock(resultData->mtx);
-                    resultData->cv.wait(lock, [&] { return resultData->ready; });
-                }
-                delete resultData;
+                },
+                TaskExecutor::TaskType::JS);
+
+            {
+                std::unique_lock<std::mutex> lock(resultData->mtx);
+                resultData->cv.wait(lock, [&] { return resultData->ready; });
             }
         } else {
             OnRequestCallBackInner(&uvWorkData_);

@@ -93,15 +93,10 @@ public:
         return JsiRef<T>::Make(T::Cast(that.Get()));
     }
 
-    static JsiRef<T> New()
+    template<class... Args>
+    static JsiRef<T> New(Args&&... args)
     {
-        return JsiRef<T>::Make(T::New());
-    }
-
-    template<typename S>
-    static JsiRef<T> New(S param)
-    {
-        return JsiRef<T>::Make(T::New(param));
+        return JsiRef<T>::Make(T::New(std::forward<Args>(args)...));
     }
 
     JsiRef(const JsiRef<T>& rhs) : value_(rhs.value_) {}
@@ -169,32 +164,32 @@ public:
 
     JsiWeak(const JsiWeak<T>& rhs) : value_(rhs.value_)
     {
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
     }
 
     JsiWeak(JsiWeak<T>&& rhs) : value_(std::move(rhs.value_))
     {
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
         rhs.value_.Reset();
     }
 
     explicit JsiWeak(const JsiRef<T>& rhs) : value_(rhs.Get())
     {
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
     }
 
     JsiWeak<T>& operator=(const JsiWeak<T>& rhs)
     {
         value_.Reset();
         value_ = rhs.value_;
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
         return *this;
     }
 
     JsiWeak<T>& operator=(const JsiRef<T>& rhs)
     {
         value_ = rhs.Get();
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
         return *this;
     }
 
@@ -202,7 +197,7 @@ public:
     {
         value_.Reset();
         value_ = std::move(rhs.value_);
-        value_.SetWeak();
+        value_.SetWeakCallback(this, Reset);
 
         rhs.value_.Reset();
         return *this;
@@ -220,7 +215,16 @@ public:
 
     JsiRef<T> Lock() const
     {
+        if (IsEmpty()) {
+            LOGD("trying to acquire a strong reference to an empty handle!");
+        }
         return JsiRef<T>(value_);
+    }
+
+    static void Reset(void *ref)
+    {
+        auto that = reinterpret_cast<JsiWeak<T>*>(ref);
+        that->Reset();
     }
 
 private:

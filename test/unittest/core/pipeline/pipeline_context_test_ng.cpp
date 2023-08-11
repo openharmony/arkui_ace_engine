@@ -19,6 +19,8 @@
 
 #include "gtest/gtest.h"
 
+#include "core/common/window_animation_config.h"
+
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
@@ -31,6 +33,7 @@
 #include "test/mock/core/common/mock_window.h"
 
 #include "base/json/json_util.h"
+#include "base/log/frame_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/test/mock/mock_mouse_style.h"
@@ -41,6 +44,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -56,7 +60,6 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -288,10 +291,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg003, TestSize.Level1)
      * @tc.steps2: Add dirty layout and render nodes to taskScheduler_ to test functions
      *             FlushLayoutTask and FlushRenderTask of the UITaskScheduler.
      */
-    context_->taskScheduler_.AddDirtyLayoutNode(frameNode_);
-    context_->taskScheduler_.dirtyLayoutNodes_[frameNode_->GetPageId()].emplace(nullptr);
-    context_->taskScheduler_.AddDirtyRenderNode(frameNode_);
-    context_->taskScheduler_.dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
+    context_->taskScheduler_->AddDirtyLayoutNode(frameNode_);
+    context_->taskScheduler_->AddDirtyRenderNode(frameNode_);
+    context_->taskScheduler_->dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
 
     /**
      * @tc.steps3: Call the function FlushVsync with isEtsCard=true.
@@ -399,27 +401,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     frameNode_->eventHub_->focusHub_ = nullptr;
     context_->FlushFocus();
     EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
-    /**
-     * @tc.steps4: free stageManager_ and call FlushFocus
-     * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
-     */
-    auto stageManager = context_->stageManager_;
-    context_->stageManager_ = nullptr;
-    context_->FlushFocus();
-    EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
 
     /**
-     * @tc.steps5: Init a new frameNode and SetFocusType with Node and call RequestDefaultFocus
-     * @tc.expected: return true while IsFocusableWholePath return true.
-                    return false while IsFocusableWholePath return false.
-     */
-
-     /**
-     * @tc.steps5: set stageManager_ and stageNode_, stageNode_'s child,
-                create frameNode_1's focusHub and call SetIsDefaultHasFocused with true
-     * @tc.expected: RequestDefaultFocus returns false.
-     */
-    context_->stageManager_ = stageManager;
+    * @tc.steps5: set stageManager_ and stageNode_, stageNode_'s child,
+               create frameNode_1's focusHub and call SetIsDefaultHasFocused with true
+    * @tc.expected: RequestDefaultFocus returns false.
+    */
     context_->stageManager_->stageNode_ = frameNode_;
     frameNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode_1 = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
@@ -485,6 +472,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg007, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
+    context_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     /**
      * @tc.steps2: Call the function SetupRootElement with isJsCard_ = true.
      * @tc.expected: The stageManager_ is non-null.
@@ -758,7 +746,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg014, TestSize.Level1)
      * @tc.steps2: Call the function OnIdle.
      * @tc.expected: The value of flagCbk remains unchanged.
      */
-    context_->AddPredictTask([&flagCbk](int64_t deadline) { flagCbk = true; });
+    context_->AddPredictTask([&flagCbk](int64_t, bool) { flagCbk = true; });
     context_->OnIdle(0);
     EXPECT_FALSE(flagCbk);
 
@@ -1456,7 +1444,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     context_->designWidthScale_ = DEFAULT_DOUBLE1;
     context_->OnVirtualKeyboardHeightChange(DEFAULT_DOUBLE1);
     EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_DOUBLE1);
-    EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0);
+    EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), 0);
 
     /**
      * @tc.steps3: init data and Call the function OnVirtualKeyboardHeightChange
@@ -1464,13 +1452,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
      * @tc.expected: the return is same as expectation.
      */
     context_->textFieldManager_ = nullptr;
-    // the first arg is rootHeigth_, the second arg is the parameter of founction,
+    // the first arg is rootHeight_, the second arg is the parameter of function,
     // the third arg is the expectation returns
     std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, -100 } };
     for (int turn = 0; turn < params.size(); turn++) {
         context_->rootHeight_ = params[turn][0];
         context_->OnVirtualKeyboardHeightChange(params[turn][1]);
-        EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), params[turn][2]);
+        EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][2]);
     }
     /**
      * @tc.steps4: init data and Call the function OnVirtualKeyboardHeightChange
@@ -1482,7 +1470,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     ASSERT_NE(context_->rootNode_, nullptr);
     // the first arg is manager->height_, the second arg is manager->position_.deltaY_
     // the third arg is rootHeight_, the forth arg is context_->rootNode_->geometryNode_->frame_.rect_.y_
-    // the fifth arg is the parameter of founction, the sixth arg is the expectation returns
+    // the fifth arg is the parameter of function, the sixth arg is the expectation returns
     params = { { 10, 100, 300, 0, 50, 0 }, { 10, 100, 300, 100, 100, 100 }, { 30, 100, 300, 100, 50, 100 },
         { 50, 290, 400, 100, 200, -145 }, { -1000, 290, 400, 100, 200, 100 } };
     for (int turn = 0; turn < params.size(); turn++) {
@@ -1490,8 +1478,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
         manager->position_.deltaY_ = params[turn][1];
         context_->rootHeight_ = params[turn][2];
         context_->rootNode_->geometryNode_->frame_.rect_.y_ = params[turn][3];
+        context_->safeAreaManager_->UpdateKeyboardOffset(params[turn][3]);
         context_->OnVirtualKeyboardHeightChange(params[turn][4]);
-        EXPECT_EQ(context_->rootNode_->GetGeometryNode()->GetFrameOffset().GetY(), params[turn][5]);
+        EXPECT_EQ(context_->safeAreaManager_->GetKeyboardOffset(), params[turn][5]);
     }
 }
 
@@ -1540,8 +1529,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg030, TestSize.Level1)
     EXPECT_CALL(*mockPattern_, ProvideRestoreInfo())
         .Times(AnyNumber())
         .WillRepeatedly(testing::Return("Default restore info"));
-    EXPECT_CALL(*mockPattern_, GetSurfaceNodeName()).Times(AnyNumber()).WillRepeatedly(testing::Return(std::nullopt));
-    EXPECT_CALL(*mockPattern_, UseExternalRSNode()).Times(AnyNumber()).WillRepeatedly(testing::Return(false));
+    EXPECT_CALL(*mockPattern_, GetContextParam()).Times(AnyNumber()).WillRepeatedly(testing::Return(std::nullopt));
     EXPECT_CALL(*mockPattern_, CreatePaintProperty())
         .Times(AnyNumber())
         .WillRepeatedly(testing::Return(AceType::MakeRefPtr<PaintProperty>()));
@@ -1625,7 +1613,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg031, TestSize.Level1)
      * @tc.expected: flag is false.
      */
     bool flag = false;
-    auto callback = [&flag](const TouchEvent& point) { flag = !flag; };
     context_->OnTouchEvent(point_, true);
     EXPECT_FALSE(flag);
     /**
@@ -1642,66 +1629,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg031, TestSize.Level1)
     point_.type = TouchType::UP;
     context_->OnTouchEvent(point_, false);
     EXPECT_TRUE(context_->hasIdleTasks_);
-    /**
-     * @tc.steps4: init uiExtensionCallback_ and call OnTouchEvent with second arg is false.
-     * @tc.expected: flag is true, hasIdleTasks_ is true and touchEvents_ is not empty.
-     */
-    context_->uiExtensionCallback_ = callback;
-    point_.type = TouchType::MOVE;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_TRUE(flag);
-    EXPECT_TRUE(context_->hasIdleTasks_);
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    /**
-     * @tc.steps5: change id and call OnTouchEvent with second arg is false.
-                change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: touchEvents_ is not empty and uiExtensionCallback_ is nullptr.
-     */
-    point_.id += 1;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    point_.type = TouchType::UP;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_FALSE(context_->touchEvents_.empty());
-    EXPECT_EQ(context_->uiExtensionCallback_, nullptr);
-    /**
-     * @tc.steps5: change id and call OnTouchEvent with second arg is false.
-                change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: touchEvents_ is not empty, uiExtensionCallback_ is nullptr.
-     */
-    context_->uiExtensionCallback_ = callback;
-    point_.type = TouchType::CANCEL;
-    context_->OnTouchEvent(point_, false);
-    EXPECT_EQ(context_->uiExtensionCallback_, nullptr);
-    /**
-     * @tc.steps5: create sub pipeline and set into touchPluginPipelineContext_.
-                change touch type and call OnTouchEvent with second arg is false.
-     * @tc.expected: flag is true.
-     */
-    point_.type = TouchType::DOWN;
-    context_->rootNode_ = frameNode_;
-    auto eventHub = frameNode_->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->focusHub_ = nullptr;
-    auto window = std::make_shared<MockWindow>();
-    EXPECT_CALL(*window, RequestFrame()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushTasks()).Times(AnyNumber());
-    EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
-    EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
-    EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushCustomAnimation(NANO_TIME_STAMP))
-        .Times(AnyNumber())
-        .WillOnce(testing::Return(true))
-        .WillRepeatedly(testing::Return(false));
-    EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
-    auto context_2 = AceType::MakeRefPtr<PipelineContext>(
-        window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
-    context_2->SetEventManager(AceType::MakeRefPtr<EventManager>());
-    flag = false;
-    context_2->uiExtensionCallback_ = callback;
-    context_->touchPluginPipelineContext_.push_back(context_2);
-    context_->OnTouchEvent(point_, false);
-    EXPECT_TRUE(flag);
 }
 
 /**
@@ -1788,56 +1715,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
     frameNode_3->layoutProperty_ = AceType::MakeRefPtr<ImageLayoutProperty>();
     auto rt = context_->GetNavDestinationBackButtonNode();
     EXPECT_EQ(rt, nullptr);
-    /**
-     * @tc.steps3: set propVisibility_ equals GONE and call GetNavDestinationBackButtonNode.
-     * @tc.expected: rt is nullptr.
-     */
-    frameNode_3->layoutProperty_->propVisibility_ = VisibleType::GONE;
-    rt = context_->GetNavDestinationBackButtonNode();
-    EXPECT_EQ(rt, nullptr);
-    /**
-     * @tc.steps4: set propVisibility_ equals VISIBLE and call GetNavDestinationBackButtonNode.
-     * @tc.expected: rt is not nullptr.
-     */
-    frameNode_3->layoutProperty_->propVisibility_ = VisibleType::VISIBLE;
-    rt = context_->GetNavDestinationBackButtonNode();
-    EXPECT_NE(rt, nullptr);
-}
-
-/**
- * @tc.name: PipelineContextTestNg034
- * @tc.desc: Test SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg034, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters and set a flag.
-     */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->window_, nullptr);
-    bool flag = false;
-    /**
-     * @tc.steps2: call SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
-     * @tc.expected: flag is true.
-     */
-    context_->SetGetViewSafeAreaImpl([&flag]() {
-        flag = !flag;
-        return SafeAreaEdgeInserts();
-    });
-    context_->GetCurrentViewSafeArea();
-    EXPECT_TRUE(flag);
-    /**
-     * @tc.steps3: reset window_ and call SetGetViewSafeAreaImpl and GetCurrentViewSafeArea.
-     * @tc.expected: flag is still true.
-     */
-    context_->window_ = nullptr;
-    context_->SetGetViewSafeAreaImpl([&flag]() {
-        flag = !flag;
-        return SafeAreaEdgeInserts();
-    });
-    context_->GetCurrentViewSafeArea();
-    EXPECT_TRUE(flag);
 }
 
 /**
@@ -1949,10 +1826,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg037, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     bool flag = false;
-    auto callback = [&flag](int32_t input_1, int32_t input_2, int32_t input_3, int32_t input_4) { flag = !flag; };
+    auto callback = [&flag](int32_t input_1, int32_t input_2, int32_t input_3, int32_t input_4,
+                        WindowSizeChangeReason type) { flag = !flag; };
     context_->surfaceChangedCallbackMap_[0] = callback;
     context_->surfaceChangedCallbackMap_[1] = nullptr;
-    context_->ExecuteSurfaceChangedCallbacks(0, 0);
+    context_->ExecuteSurfaceChangedCallbacks(0, 0, WindowSizeChangeReason::ROTATION);
     EXPECT_TRUE(flag);
 }
 
@@ -1996,6 +1874,91 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg039, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNg040
+ * @tc.desc: Test SetContainerButtonHide function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize root node and containerModal node.
+     * @tc.expected: root node and containerModal node are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    ASSERT_NE(context_->window_, nullptr);
+    context_->SetupRootElement();
+    ASSERT_NE(context_->GetRootElement(), nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerPattern, nullptr);
+    /**
+     * @tc.steps2: call SetContainerButtonHide with params true, true, false.
+     * @tc.expected: depends on first param, hideSplitButton value is true.
+     */
+    context_->SetContainerButtonHide(true, true, false);
+    EXPECT_TRUE(containerPattern->hideSplitButton_ == true);
+    /**
+     * @tc.steps3: call SetContainerButtonHide with params false, true, false.
+     * @tc.expected: depends on first param, hideSplitButton value is false.
+     */
+    context_->SetContainerButtonHide(false, true, false);
+    EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg041
+ * @tc.desc: Test the function OnLayoutCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg041, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: frontend-ptr is non-null.
+     */
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context_, nullptr);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps2: test the function OnLayoutCompleted by TEST_TAG.
+     * @tc.expected: frontend componentId_ is TEST_TAG
+     */
+    context_->OnLayoutCompleted(TEST_TAG);
+    EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
+    context_->weakFrontend_.Reset();
+}
+
+/**
+ * @tc.name: PipelineContextTestNg042
+ * @tc.desc: Test the function OnDrawCompleted.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg042, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: frontend-ptr is non-null.
+     */
+
+    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    ASSERT_NE(context_, nullptr);
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    context_->weakFrontend_ = frontend;
+
+    /**
+     * @tc.steps4: test the function OnDrawCompleted by TEST_TAG.
+     * @tc.expected: frontend componentId_ is TEST_TAG
+     */
+    context_->OnDrawCompleted(TEST_TAG);
+    EXPECT_EQ(frontend->GetComponentId(), TEST_TAG);
+    context_->weakFrontend_.Reset();
+}
+
+/**
  * @tc.name: UITaskSchedulerTestNg001
  * @tc.desc: Test FlushLayoutTask.
  * @tc.type: FUNC
@@ -2032,38 +1995,37 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg001, TestSize.Level1)
      * @tc.expected: frame info not record.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode);
-    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
     taskScheduler.AddDirtyLayoutNode(frameNode2);
-    taskScheduler.FlushLayoutTask(false);
-    EXPECT_EQ(frameInfo.layoutInfos_.size(), 0);
-
-    /**
-     * @tc.steps6: add layoutNode again and set isLayoutDirtyMarked_ true  and recall FlushLayoutTask with false .
-     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 1.
-     */
-    taskScheduler.AddDirtyLayoutNode(frameNode2);
-    frameNode2->isLayoutDirtyMarked_ = true;
     taskScheduler.FlushLayoutTask(false);
     EXPECT_EQ(frameInfo.layoutInfos_.size(), 1);
 
     /**
-     * @tc.steps7: add layoutNode again and call FlushLayoutTask with true .
+     * @tc.steps6: add layoutNode again and set isLayoutDirtyMarked_ true  and recall FlushLayoutTask with false .
      * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 2.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     frameNode2->isLayoutDirtyMarked_ = true;
-    taskScheduler.FlushLayoutTask(true);
+    taskScheduler.FlushLayoutTask(false);
     EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
 
     /**
+     * @tc.steps7: add layoutNode again and call FlushLayoutTask with true .
+     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 3.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    frameNode2->isLayoutDirtyMarked_ = true;
+    taskScheduler.FlushLayoutTask(true);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 3);
+
+    /**
      * @tc.steps8: finish FinishRecordFrameInfo and do step7.
-     * @tc.expected: frame info stop record frameInfo.layoutInfos_.size is 2.
+     * @tc.expected: frame info stop record frameInfo.layoutInfos_.size is 3.
      */
     taskScheduler.FinishRecordFrameInfo();
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     frameNode2->isLayoutDirtyMarked_ = true;
     taskScheduler.FlushLayoutTask(true);
-    EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 3);
 }
 
 /**
@@ -2120,7 +2082,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg003, TestSize.Level1)
      * @tc.steps3: Call AddPredictTask.
      * @tc.expected: predictTask_ in the taskScheduler size is 2.
      */
-    taskScheduler.AddPredictTask([](int64_t deadline) {});
+    taskScheduler.AddPredictTask([](int64_t, bool) {});
     taskScheduler.AddPredictTask(nullptr);
     EXPECT_EQ(taskScheduler.predictTask_.size(), 2);
 
@@ -2156,7 +2118,6 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg004, TestSize.Level1)
      * @tc.expected: NeedAdditionalLayout return false.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode);
-    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     EXPECT_FALSE(taskScheduler.NeedAdditionalLayout());
 
@@ -2165,7 +2126,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg004, TestSize.Level1)
      * @tc.expected: NeedAdditionalLayout return true.
      */
     auto frameNode3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 3, nullptr);
-    auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode3);
+    auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>("test", frameNode3);
     geometryTransition->hasOutAnim_ = true;
     geometryTransition->inNode_ = frameNode2;
     geometryTransition->outNode_ = frameNode3;

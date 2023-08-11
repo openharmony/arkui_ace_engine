@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_IMAGE_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_IMAGE_PAINT_H
 
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -28,6 +26,7 @@ public:
     explicit ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;
 
+    void DrawObscuration(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void DrawStaticImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void DrawSVGImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& svgContainerSize) const;

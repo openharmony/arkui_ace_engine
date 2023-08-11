@@ -33,7 +33,8 @@ class ACE_EXPORT NavDestinationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavDestinationGroupNode, GroupNode)
 public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-        : GroupNode(tag, nodeId, pattern) {}
+        : GroupNode(tag, nodeId, pattern)
+    {}
     ~NavDestinationGroupNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
@@ -102,12 +103,30 @@ public:
 
     void OnAttachToMainTree(bool recursive) override;
 
+    void OnOffscreenProcess(bool recursive) override;
+
+    void ProcessShallowBuilder();
+
+    void UpdateTitleFontSize(bool showBackButton);
+
+    void SetTransitionType(PageTransitionType type)
+    {
+        transitionType_ = type;
+    }
+
+    PageTransitionType GetTransitionType() const
+    {
+        return transitionType_;
+    }
+
 private:
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
     NavDestinationBackButtonEvent backButtonEvent_;
+
+    PageTransitionType transitionType_ = PageTransitionType::NONE;
 };
 
 } // namespace OHOS::Ace::NG

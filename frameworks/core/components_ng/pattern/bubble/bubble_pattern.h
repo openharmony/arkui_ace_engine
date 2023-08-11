@@ -29,11 +29,18 @@
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_paint_method.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-class BubblePattern : public Pattern {
-    DECLARE_ACE_TYPE(BubblePattern, Pattern);
+
+enum class TransitionStatus {
+    INVISIABLE,
+    ENTERING,
+    NORMAL,
+    EXITING,
+};
+class BubblePattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern);
 
 public:
     BubblePattern() = default;
@@ -64,7 +71,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<BubbleLayoutAlgorithm>(targetNodeId_, targetTag_);
+        return MakeRefPtr<BubbleLayoutAlgorithm>(targetNodeId_, targetTag_, targetOffset_, targetSize_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -87,9 +94,41 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    void OnWindowHide() override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void StartEnteringAnimation(std::function<void()> finish);
     void StartExitingAnimation(std::function<void()> finish);
     bool IsOnShow();
+    bool IsExiting();
+    void OnColorConfigurationUpdate() override;
+
+    void SetMessageNode(RefPtr<FrameNode> messageNode)
+    {
+        messageNode_ = messageNode;
+    }
+
+    void SetCustomPopupTag(bool isCustomPopup)
+    {
+        isCustomPopup_ = isCustomPopup;
+    }
+
+    void SetTransitionStatus(TransitionStatus transitionStatus)
+    {
+        transitionStatus_ = transitionStatus;
+    }
+
+    void SetSkipHotArea(bool skip)
+    {
+        skipHotArea_ = skip;
+    }
+
+    bool IsSkipHotArea() const
+    {
+        return skipHotArea_;
+    }
+
+protected:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
 private:
     void OnModifyDone() override;
@@ -106,8 +145,8 @@ private:
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
     void PopBubble();
-    void Animation(RefPtr<RenderContext>& renderContext, const Color& endColor,
-        int32_t duration, const RefPtr<Curve>& curve);
+    void Animation(
+        RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
 
     OffsetT<Dimension> GetInvisibleOffset();
     RefPtr<RenderContext> GetRenderContext();
@@ -134,17 +173,16 @@ private:
 
     bool showArrow_ = false;
 
-    enum class TransitionStatus {
-        INVISIABLE,
-        ENTERING,
-        NORMAL,
-        EXITING,
-    };
-
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 
     bool delayShow_ = false;
+    bool skipHotArea_ = false;
 
+    std::optional<OffsetF> targetOffset_;
+    std::optional<SizeF> targetSize_;
+
+    bool isCustomPopup_ = false;
+    RefPtr<FrameNode> messageNode_;
     ACE_DISALLOW_COPY_AND_MOVE(BubblePattern);
 };
 } // namespace OHOS::Ace::NG

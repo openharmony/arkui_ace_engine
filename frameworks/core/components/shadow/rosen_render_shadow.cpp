@@ -20,6 +20,8 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/core/SkRRect.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -52,12 +54,12 @@ void RosenRenderShadow::Paint(RenderContext& context, const Offset& offset)
                              clipRect_.Height() + NormalizeToPx(SHADOW_OFFSET)),
             true);
 #else
-        canvas->ClipRect(
-            RSRect(clipRect_.GetOffset().GetX() - NormalizeToPx(SHADOW_OFFSET) / 2,
-                clipRect_.GetOffset().GetY(),
-                clipRect_.Width() - NormalizeToPx(SHADOW_OFFSET) / 2 + clipRect_.GetOffset().GetX(),
-                clipRect_.Height() + NormalizeToPx(SHADOW_OFFSET) + clipRect_.GetOffset().GetY(),),
-            true);
+        canvas->ClipRect(RSRect(
+            clipRect_.GetOffset().GetX() - NormalizeToPx(SHADOW_OFFSET) / 2,
+            clipRect_.GetOffset().GetY(),
+            clipRect_.Width() + NormalizeToPx(SHADOW_OFFSET) / 2 + clipRect_.GetOffset().GetX(),
+            clipRect_.Height() + NormalizeToPx(SHADOW_OFFSET) + clipRect_.GetOffset().GetY()),
+            RSClipOp::INTERSECT, true);
 #endif
     }
 

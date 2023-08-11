@@ -17,12 +17,14 @@
 
 #include <map>
 
+#include "adapter/preview/entrance/ace_container.h"
+#include "adapter/preview/entrance/ace_view_preview.h"
+#include "adapter/preview/entrance/editing/text_input_client_mgr.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "core/common/container_scope.h"
-#include "adapter/preview/entrance/ace_container.h"
-#include "adapter/preview/entrance/editing/text_input_client_mgr.h"
-#include "adapter/preview/entrance/ace_view_preview.h"
+#include "core/event/key_event.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -31,46 +33,98 @@ const wchar_t UPPER_CASE_A = L'A';
 const wchar_t LOWER_CASE_A = L'a';
 const wchar_t CASE_0 = L'0';
 const std::wstring NUM_SYMBOLS = L")!@#$%^&*(";
-const std::map<KeyCode, wchar_t> PRINTABEL_SYMBOLS = {
-    {KeyCode::KEY_GRAVE, L'`'},
-    {KeyCode::KEY_MINUS, L'-'},
-    {KeyCode::KEY_EQUALS, L'='},
-    {KeyCode::KEY_LEFT_BRACKET, L'['},
-    {KeyCode::KEY_RIGHT_BRACKET, L']'},
-    {KeyCode::KEY_BACKSLASH, L'\\'},
-    {KeyCode::KEY_SEMICOLON, L';'},
-    {KeyCode::KEY_APOSTROPHE, L'\''},
-    {KeyCode::KEY_COMMA, L','},
-    {KeyCode::KEY_PERIOD, L'.'},
-    {KeyCode::KEY_SLASH, L'/'},
-    {KeyCode::KEY_SPACE, L' '},
-    {KeyCode::KEY_NUMPAD_DIVIDE, L'/'},
-    {KeyCode::KEY_NUMPAD_MULTIPLY, L'*'},
-    {KeyCode::KEY_NUMPAD_SUBTRACT, L'-'},
-    {KeyCode::KEY_NUMPAD_ADD, L'+'},
-    {KeyCode::KEY_NUMPAD_DOT, L'.'},
-    {KeyCode::KEY_NUMPAD_COMMA, L','},
-    {KeyCode::KEY_NUMPAD_EQUALS, L'='},
+const std::map<MMI::KeyCode, wchar_t> PRINTABEL_SYMBOLS = {
+    { MMI::KeyCode::KEY_GRAVE, L'`' },
+    { MMI::KeyCode::KEY_MINUS, L'-' },
+    { MMI::KeyCode::KEY_EQUALS, L'=' },
+    { MMI::KeyCode::KEY_LEFT_BRACKET, L'[' },
+    { MMI::KeyCode::KEY_RIGHT_BRACKET, L']' },
+    { MMI::KeyCode::KEY_BACKSLASH, L'\\' },
+    { MMI::KeyCode::KEY_SEMICOLON, L';' },
+    { MMI::KeyCode::KEY_APOSTROPHE, L'\'' },
+    { MMI::KeyCode::KEY_COMMA, L',' },
+    { MMI::KeyCode::KEY_PERIOD, L'.' },
+    { MMI::KeyCode::KEY_SLASH, L'/' },
+    { MMI::KeyCode::KEY_SPACE, L' ' },
+    { MMI::KeyCode::KEY_NUMPAD_DIVIDE, L'/' },
+    { MMI::KeyCode::KEY_NUMPAD_MULTIPLY, L'*' },
+    { MMI::KeyCode::KEY_NUMPAD_SUBTRACT, L'-' },
+    { MMI::KeyCode::KEY_NUMPAD_ADD, L'+' },
+    { MMI::KeyCode::KEY_NUMPAD_DOT, L'.' },
+    { MMI::KeyCode::KEY_NUMPAD_COMMA, L',' },
+    { MMI::KeyCode::KEY_NUMPAD_EQUALS, L'=' },
 };
 
-const std::map<KeyCode, wchar_t> SHIFT_PRINTABEL_SYMBOLS = {
-    {KeyCode::KEY_GRAVE, L'~'},
-    {KeyCode::KEY_MINUS, L'_'},
-    {KeyCode::KEY_EQUALS, L'+'},
-    {KeyCode::KEY_LEFT_BRACKET, L'{'},
-    {KeyCode::KEY_RIGHT_BRACKET, L'}'},
-    {KeyCode::KEY_BACKSLASH, L'|'},
-    {KeyCode::KEY_SEMICOLON, L':'},
-    {KeyCode::KEY_APOSTROPHE, L'\"'},
-    {KeyCode::KEY_COMMA, L'<'},
-    {KeyCode::KEY_PERIOD, L'>'},
-    {KeyCode::KEY_SLASH, L'?'},
+const std::map<MMI::KeyCode, wchar_t> SHIFT_PRINTABEL_SYMBOLS = {
+    { MMI::KeyCode::KEY_GRAVE, L'~' },
+    { MMI::KeyCode::KEY_MINUS, L'_' },
+    { MMI::KeyCode::KEY_EQUALS, L'+' },
+    { MMI::KeyCode::KEY_LEFT_BRACKET, L'{' },
+    { MMI::KeyCode::KEY_RIGHT_BRACKET, L'}' },
+    { MMI::KeyCode::KEY_BACKSLASH, L'|' },
+    { MMI::KeyCode::KEY_SEMICOLON, L':' },
+    { MMI::KeyCode::KEY_APOSTROPHE, L'\"' },
+    { MMI::KeyCode::KEY_COMMA, L'<' },
+    { MMI::KeyCode::KEY_PERIOD, L'>' },
+    { MMI::KeyCode::KEY_SLASH, L'?' },
 };
 
+void ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& event)
+{
+    event.id = pointerEvent->id;
+    event.x = pointerEvent->x;
+    event.y = pointerEvent->y;
+    event.screenX = pointerEvent->screenX;
+    event.screenY = pointerEvent->screenY;
+    event.type = static_cast<TouchType>(static_cast<size_t>(pointerEvent->type));
+    event.pullType = static_cast<TouchType>(static_cast<size_t>(pointerEvent->pullType));
+    event.time = pointerEvent->time;
+    event.size = pointerEvent->size;
+    event.force = pointerEvent->force;
+    event.tiltX = pointerEvent->tiltX;
+    event.tiltY = pointerEvent->tiltY;
+    event.deviceId = pointerEvent->deviceId;
+    event.sourceType = static_cast<SourceType>(static_cast<int32_t>(pointerEvent->sourceType));
+    event.sourceTool = static_cast<SourceTool>(static_cast<int32_t>(pointerEvent->sourceTool));
+    event.pointerEvent = pointerEvent;
+    for (auto& item : pointerEvent->pointers) {
+        TouchPoint pointer;
+        pointer.id = item.id;
+        pointer.x = item.x;
+        pointer.y = item.y;
+        pointer.screenX = item.screenX;
+        pointer.screenY = item.screenY;
+        pointer.downTime = item.downTime;
+        pointer.size = item.size;
+        pointer.force = item.force;
+        pointer.tiltX = item.tiltX;
+        pointer.tiltY = item.tiltY;
+        pointer.sourceTool = static_cast<SourceTool>(static_cast<int32_t>(item.sourceTool));
+        pointer.isPressed = item.isPressed;
+        event.pointers.emplace_back(pointer);
+    }
 }
 
-EventDispatcher::EventDispatcher()
-{}
+void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
+{
+    event.code = static_cast<KeyCode>(static_cast<int32_t>(keyEvent->code));
+    event.key = keyEvent->key;
+    event.action = static_cast<KeyAction>(static_cast<int32_t>(keyEvent->action));
+    for (auto& item : keyEvent->pressedCodes) {
+        event.pressedCodes.push_back(static_cast<KeyCode>(static_cast<int32_t>(item)));
+    }
+    event.repeatTime = keyEvent->repeatTime;
+    event.timeStamp = keyEvent->timeStamp;
+    event.metaKey = keyEvent->metaKey;
+    event.deviceId = keyEvent->deviceId;
+    event.sourceType = static_cast<SourceType>(static_cast<int32_t>(keyEvent->sourceType));
+    event.rawKeyEvent = keyEvent;
+    event.enableCapsLock = keyEvent->enableCapsLock_;
+}
+
+} // namespace
+
+EventDispatcher::EventDispatcher() {}
 
 EventDispatcher::~EventDispatcher() = default;
 
@@ -81,7 +135,7 @@ void EventDispatcher::Initialize()
     TextInputClientMgr::GetInstance().InitTextInputProxy();
     // Register the idle event callback function.
 #ifndef ENABLE_ROSEN_BACKEND
-    IdleCallback idleNoticeCallback = [] (int64_t deadline) {
+    IdleCallback idleNoticeCallback = [](int64_t deadline) {
         EventDispatcher::GetInstance().DispatchIdleEvent(deadline);
     };
     FlutterDesktopSetIdleCallback(controller_, idleNoticeCallback);
@@ -108,23 +162,186 @@ void EventDispatcher::DispatchIdleEvent(int64_t deadline)
     aceView->ProcessIdleEvent(deadline);
 }
 
-bool EventDispatcher::DispatchTouchEvent(const TouchEvent& event)
+static void GetMouseEventAction(int32_t action, OHOS::Ace::MouseEvent& mouseEvent)
+{
+    switch (action) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN:
+            mouseEvent.action = MouseAction::PRESS;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_BUTTON_UP:
+            mouseEvent.action = MouseAction::RELEASE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW:
+            mouseEvent.action = MouseAction::WINDOW_ENTER;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW:
+            mouseEvent.action = MouseAction::WINDOW_LEAVE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
+            mouseEvent.action = MouseAction::MOVE;
+            break;
+#ifdef ENABLE_DRAG_FRAMEWORK
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
+            events.action = MouseAction::PRESS;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
+            events.action = MouseAction::MOVE;
+            break;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
+            events.action = MouseAction::RELEASE;
+            break;
+#endif // ENABLE_DRAG_FRAMEWORK
+        default:
+            mouseEvent.action = MouseAction::NONE;
+            break;
+    }
+}
+
+static void GetMouseEventButton(int32_t button, Ace::MouseEvent& mouseEvent)
+{
+    switch (button) {
+        case MMI::PointerEvent::MOUSE_BUTTON_LEFT:
+            mouseEvent.button = MouseButton::LEFT_BUTTON;
+            break;
+        case MMI::PointerEvent::MOUSE_BUTTON_RIGHT:
+            mouseEvent.button = MouseButton::RIGHT_BUTTON;
+            break;
+        case MMI::PointerEvent::MOUSE_BUTTON_MIDDLE:
+            mouseEvent.button = MouseButton::MIDDLE_BUTTON;
+            break;
+        case MMI::PointerEvent::MOUSE_BUTTON_SIDE:
+            mouseEvent.button = MouseButton::BACK_BUTTON;
+            break;
+        case MMI::PointerEvent::MOUSE_BUTTON_EXTRA:
+            mouseEvent.button = MouseButton::SIDE_BUTTON;
+            break;
+        case MMI::PointerEvent::MOUSE_BUTTON_FORWARD:
+            mouseEvent.button = MouseButton::FORWARD_BUTTON;
+            break;
+        case MMI::PointerEvent::MOUSE_BUTTON_BACK:
+            mouseEvent.button = MouseButton::BACK_BUTTON;
+            break;
+        case MMI::PointerEvent::MOUSE_BUTTON_TASK:
+            mouseEvent.button = MouseButton::TASK_BUTTON;
+            break;
+        default:
+            mouseEvent.button = MouseButton::NONE_BUTTON;
+            break;
+    }
+}
+
+static void ConvertMouseEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ace::MouseEvent& mouseEvent)
+{
+    mouseEvent.id = pointerEvent->id;
+    mouseEvent.x = pointerEvent->x;
+    mouseEvent.y = pointerEvent->y;
+    mouseEvent.screenX = pointerEvent->screenX;
+    mouseEvent.screenY = pointerEvent->screenY;
+    GetMouseEventAction(pointerEvent->pointerAction_, mouseEvent);
+    GetMouseEventButton(pointerEvent->buttonId_, mouseEvent);
+    mouseEvent.sourceType = SourceType::MOUSE;
+    mouseEvent.targetDisplayId = pointerEvent->targetDisplayId_;
+    mouseEvent.deviceId = pointerEvent->deviceId;
+    std::set<int32_t> buttonSet = pointerEvent->pressedButtons_;
+    if (pointerEvent->pressedButtons_.empty()) {
+        pointerEvent->pressedButtons_.insert(pointerEvent->buttonId_);
+    }
+    uint32_t buttons = 0;
+    if (buttonSet.end() != buttonSet.find(MMI::PointerEvent::MOUSE_BUTTON_LEFT)) {
+        buttons &= static_cast<uint32_t>(MouseButton::LEFT_BUTTON);
+    }
+    if (buttonSet.end() != buttonSet.find(MMI::PointerEvent::MOUSE_BUTTON_RIGHT)) {
+        buttons &= static_cast<uint32_t>(MouseButton::RIGHT_BUTTON);
+    }
+    if (buttonSet.end() != buttonSet.find(MMI::PointerEvent::MOUSE_BUTTON_MIDDLE)) {
+        buttons &= static_cast<uint32_t>(MouseButton::MIDDLE_BUTTON);
+    }
+    if (buttonSet.end() != buttonSet.find(MMI::PointerEvent::MOUSE_BUTTON_SIDE)) {
+        buttons &= static_cast<uint32_t>(MouseButton::SIDE_BUTTON);
+    }
+    if (buttonSet.end() != buttonSet.find(MMI::PointerEvent::MOUSE_BUTTON_EXTRA)) {
+        buttons &= static_cast<uint32_t>(MouseButton::EXTRA_BUTTON);
+    }
+    if (buttonSet.end() != buttonSet.find(MMI::PointerEvent::MOUSE_BUTTON_FORWARD)) {
+        buttons &= static_cast<uint32_t>(MouseButton::FORWARD_BUTTON);
+    }
+    if (buttonSet.end() != buttonSet.find(MMI::PointerEvent::MOUSE_BUTTON_BACK)) {
+        buttons &= static_cast<uint32_t>(MouseButton::BACK_BUTTON);
+    }
+    if (buttonSet.end() != buttonSet.find(MMI::PointerEvent::MOUSE_BUTTON_TASK)) {
+        buttons &= static_cast<uint32_t>(MouseButton::TASK_BUTTON);
+    }
+    mouseEvent.pressedButtons = static_cast<int32_t>(buttons);
+}
+
+static void GetAxisEventAction(int32_t action, Ace::AxisEvent& event)
+{
+    switch (action) {
+        case MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
+            event.action = Ace::AxisAction::BEGIN;
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE:
+            event.action = Ace::AxisAction::UPDATE;
+            break;
+        case MMI::PointerEvent::POINTER_ACTION_AXIS_END:
+            event.action = Ace::AxisAction::END;
+            break;
+        default:
+            event.action = Ace::AxisAction::NONE;
+            break;
+    }
+}
+
+static double GetAxisValue(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MMI::PointerEvent::AxisType axis)
+{
+    double axisValue {};
+    if ((axis >= MMI::PointerEvent::AXIS_TYPE_UNKNOWN) && (axis < MMI::PointerEvent::AXIS_TYPE_MAX)) {
+        axisValue = pointerEvent->axisValues_[axis];
+    }
+    return axisValue;
+}
+
+static void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ace::AxisEvent& event)
+{
+    event.id = pointerEvent->id;
+    event.x = pointerEvent->x;
+    event.y = pointerEvent->y;
+    event.screenX = pointerEvent->screenX;
+    event.screenY = pointerEvent->screenY;
+    event.horizontalAxis = GetAxisValue(pointerEvent, MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
+    event.verticalAxis = GetAxisValue(pointerEvent, MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
+    event.pinchAxisScale = GetAxisValue(pointerEvent, MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
+    GetAxisEventAction(pointerEvent->pointerAction_, event);
+    event.sourceType = SourceType::MOUSE;
+    event.sourceTool = SourceTool::MOUSE;
+    event.pointerEvent = pointerEvent;
+}
+
+bool EventDispatcher::DispatchTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     ACE_SCOPED_TRACE("DispatchTouchEvent");
     LOGI("Dispatch touch event");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null");
-        return false;
-    }
-
+    CHECK_NULL_RETURN(container, false);
     auto aceView = container->GetAceView();
-    if (!aceView) {
-        LOGE("aceView is null");
-        return false;
+    CHECK_NULL_RETURN(aceView, false);
+    if (pointerEvent->sourceType == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        if (pointerEvent->pointerAction_ >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+            pointerEvent->pointerAction_ <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+            OHOS::Ace::AxisEvent axisEvent;
+            ConvertAxisEvent(pointerEvent, axisEvent);
+            return aceView->HandleAxisEvent(axisEvent);
+        } else {
+            OHOS::Ace::MouseEvent mouseEvent;
+            ConvertMouseEvent(pointerEvent, mouseEvent);
+            return aceView->HandleMouseEvent(mouseEvent);
+        }
     }
 
-    return aceView->HandleTouchEvent(event);
+    TouchEvent touchEvent;
+    ConvertTouchEvent(pointerEvent, touchEvent);
+    return aceView->HandleTouchEvent(touchEvent);
 }
 
 bool EventDispatcher::DispatchBackPressedEvent()
@@ -132,14 +349,9 @@ bool EventDispatcher::DispatchBackPressedEvent()
     ACE_SCOPED_TRACE("DispatchBackPressedEvent");
     LOGI("Dispatch back pressed event");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        return false;
-    }
-
+    CHECK_NULL_RETURN(container, false);
     auto context = container->GetPipelineContext();
-    if (!context) {
-        return false;
-    }
+    CHECK_NULL_RETURN(context, false);
 
     std::promise<bool> backPromise;
     std::future<bool> backFuture = backPromise.get_future();
@@ -163,109 +375,77 @@ bool EventDispatcher::DispatchBackPressedEvent()
     return backFuture.get();
 }
 
-bool EventDispatcher::DispatchInputMethodEvent(unsigned int code_point)
+bool EventDispatcher::DispatchInputMethodEvent(unsigned int codePoint)
 {
     ACE_SCOPED_TRACE("DispatchInputMethodEvent");
     LOGI("Dispatch input method event");
-    return TextInputClientMgr::GetInstance().AddCharacter(static_cast<wchar_t>(code_point));
+    return TextInputClientMgr::GetInstance().AddCharacter(static_cast<wchar_t>(codePoint));
 }
 
-bool EventDispatcher::DispatchKeyEvent(const KeyEvent& event)
+bool EventDispatcher::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     ACE_SCOPED_TRACE("DispatchKeyEvent");
     LOGI("Dispatch key event");
-    if (HandleTextKeyEvent(event)) {
+    if (HandleTextKeyEvent(keyEvent)) {
         LOGI("The event is related to the input component and has been handled successfully.");
         return true;
     }
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null");
-        return false;
-    }
-
+    CHECK_NULL_RETURN(container, false);
     auto aceView = container->GetAceView();
-    if (!aceView) {
-        LOGE("aceView is null");
-        return false;
-    }
-#ifdef USE_GLFW_WINDOW
-    container->GetTaskExecutor()->PostTask(
-        [aceView, event]() {
-            aceView->HandleKeyEvent(event);
-        },
-        TaskExecutor::TaskType::UI);
-    return true;
-#else
+    CHECK_NULL_RETURN(aceView, false);
+
+    KeyEvent event;
+    ConvertKeyEvent(keyEvent, event);
     return aceView->HandleKeyEvent(event);
-#endif
 }
 
-void EventDispatcher::RegisterCallbackGetCapsLockStatus(CallbackGetKeyboardStatus callback)
-{
-    if (callback) {
-        callbackGetCapsLockStatus_ = callback;
-    }
-}
-
-void EventDispatcher::RegisterCallbackGetNumLockStatus(CallbackGetKeyboardStatus callback)
-{
-    if (callback) {
-        callbackGetNumLockStatus_ = callback;
-    }
-}
-
-bool EventDispatcher::HandleTextKeyEvent(const KeyEvent& event)
+bool EventDispatcher::HandleTextKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     // Only the keys involved in the input component are processed here, and the other keys will be forwarded.
     if (!TextInputClientMgr::GetInstance().IsValidClientId()) {
         return false;
     }
 
-    bool enableCapsLock = callbackGetCapsLockStatus_ && callbackGetCapsLockStatus_();
-    bool enableNumLock = callbackGetNumLockStatus_ && callbackGetNumLockStatus_();
     const static size_t maxKeySizes = 2;
     wchar_t keyChar;
-    if (event.pressedCodes.size() == 1) {
-        auto iterCode = PRINTABEL_SYMBOLS.find(event.code);
+    if (keyEvent->pressedCodes.size() == 1) {
+        auto iterCode = PRINTABEL_SYMBOLS.find(keyEvent->code);
         if (iterCode != PRINTABEL_SYMBOLS.end()) {
             keyChar = iterCode->second;
-        } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
-            keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_0) + CASE_0;
-        } else if (KeyCode::KEY_NUMPAD_0 <= event.code && event.code <= KeyCode::KEY_NUMPAD_9) {
-            if (!enableNumLock) {
+        } else if (MMI::KeyCode::KEY_0 <= keyEvent->code && keyEvent->code <= MMI::KeyCode::KEY_9) {
+            keyChar = static_cast<wchar_t>(keyEvent->code) - static_cast<wchar_t>(MMI::KeyCode::KEY_0) + CASE_0;
+        } else if (MMI::KeyCode::KEY_NUMPAD_0 <= keyEvent->code && keyEvent->code <= MMI::KeyCode::KEY_NUMPAD_9) {
+            if (!keyEvent->enableNumLock_) {
                 return true;
             }
-            keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_NUMPAD_0) + CASE_0;
-        } else if (KeyCode::KEY_A <= event.code && event.code <= KeyCode::KEY_Z) {
-            keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_A);
-            keyChar += (enableCapsLock ? UPPER_CASE_A : LOWER_CASE_A);
+            keyChar = static_cast<wchar_t>(keyEvent->code) - static_cast<wchar_t>(MMI::KeyCode::KEY_NUMPAD_0) + CASE_0;
+        } else if (MMI::KeyCode::KEY_A <= keyEvent->code && keyEvent->code <= MMI::KeyCode::KEY_Z) {
+            keyChar = static_cast<wchar_t>(keyEvent->code) - static_cast<wchar_t>(MMI::KeyCode::KEY_A);
+            keyChar += (keyEvent->enableCapsLock_ ? UPPER_CASE_A : LOWER_CASE_A);
         } else {
             return false;
         }
-    } else if (event.pressedCodes.size() == maxKeySizes && event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT) {
-        auto iterCode = SHIFT_PRINTABEL_SYMBOLS.find(event.code);
+    } else if (keyEvent->pressedCodes.size() == maxKeySizes &&
+               keyEvent->pressedCodes[0] == MMI::KeyCode::KEY_SHIFT_LEFT) {
+        auto iterCode = SHIFT_PRINTABEL_SYMBOLS.find(keyEvent->code);
         if (iterCode != SHIFT_PRINTABEL_SYMBOLS.end()) {
             keyChar = iterCode->second;
-        } else if (KeyCode::KEY_A <= event.code && event.code <= KeyCode::KEY_Z) {
-            keyChar = static_cast<wchar_t>(event.code) - static_cast<wchar_t>(KeyCode::KEY_A);
-            keyChar += (enableCapsLock ? LOWER_CASE_A : UPPER_CASE_A);
-        } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
-            keyChar = NUM_SYMBOLS[static_cast<int32_t>(event.code) - static_cast<int32_t>(KeyCode::KEY_0)];
+        } else if (MMI::KeyCode::KEY_A <= keyEvent->code && keyEvent->code <= MMI::KeyCode::KEY_Z) {
+            keyChar = static_cast<wchar_t>(keyEvent->code) - static_cast<wchar_t>(MMI::KeyCode::KEY_A);
+            keyChar += (keyEvent->enableCapsLock_ ? LOWER_CASE_A : UPPER_CASE_A);
+        } else if (MMI::KeyCode::KEY_0 <= keyEvent->code && keyEvent->code <= MMI::KeyCode::KEY_9) {
+            keyChar = NUM_SYMBOLS[static_cast<int32_t>(keyEvent->code) - static_cast<int32_t>(MMI::KeyCode::KEY_0)];
         } else {
             return false;
         }
     } else {
         return false;
     }
-#ifdef USE_GLFW_WINDOW
-    return true;
-#else
-    if (event.action != KeyAction::DOWN) {
+    if (keyEvent->action != MMI::KeyAction::DOWN) {
         return true;
     }
     return TextInputClientMgr::GetInstance().AddCharacter(keyChar);
-#endif
 }
 
 } // namespace OHOS::Ace::Platform

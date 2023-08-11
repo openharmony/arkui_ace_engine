@@ -37,32 +37,43 @@ public:
     void ModifyTextStyle(TextStyle& textStyle);
     void SetDefaultAnimatablePropertyValue();
 
+    void SetFontFamilies(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
+    void SetFontStyle(const OHOS::Ace::FontStyle& value);
     void SetContentOffset(OffsetF& value);
+    float GetContentOffsetY();
     void SetContentSize(SizeF& value);
     void SetTextValue(std::string& value);
     void SetErrorTextValue(const std::string& value);
     void SetPlaceholderValue(std::string&& value);
     void SetTextRectY(const float value);
+    float GetTextRectX();
     void SetTextObscured(bool value);
     void ChangeDragStatus();
     void SetTextRectX(const float value);
+    float GetTextRectY();
     void SetTextAlign(const TextAlign value);
     void SetShowCounter(bool value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
     void SetShowErrorState(bool value);
     void SetShowUnderlineState(bool value);
+    void SetShowPasswordIcon(const std::string& value);
+    void SetHidePasswordIcon(const std::string& value);
+    void SetFontReady(bool value);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
+    void SetDefaultFontStyle(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
     void UpdatePaintConfig(RefPtr<CanvasImage>& passwordIconCanvasImage, DrawingContext context, RectF iconRect) const;
 
     WeakPtr<Pattern> pattern_;
+    RefPtr<PropertyString> fontFamilyString_;
+
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
 
@@ -85,6 +96,10 @@ private:
     RefPtr<PropertyBool> showCounter_;
     RefPtr<PropertyBool> showErrorState_;
     RefPtr<PropertyBool> showUnderline_;
+    RefPtr<PropertyString> showPasswordIconSrc_;
+    RefPtr<PropertyString> hidePasswordIconSrc_;
+    RefPtr<PropertyInt> fontStyle_;
+    RefPtr<PropertyBool> fontReady_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

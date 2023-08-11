@@ -29,27 +29,30 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+ImageSourceInfo CreateSourceInfo(
+    const std::string& src, RefPtr<PixelMap>& pixmap, const std::string& bundleName, const std::string& moduleName)
+{
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (pixmap) {
+        return ImageSourceInfo(pixmap);
+    }
+#endif
+    return { src, bundleName, moduleName };
+}
+} // namespace
 
-void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
-    const std::string& bundleName, const std::string& moduleName)
+void ImageModelNG::Create(
+    const std::string& src, RefPtr<PixelMap>& pixMap, const std::string& bundleName, const std::string& moduleName)
 {
     LOGD("creating new image %{public}s", src.c_str());
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto createSourceInfoFunc = [&src, noPixMap, &pixMap, &bundleName, &moduleName]() -> ImageSourceInfo {
-#if defined(PIXEL_MAP_SUPPORTED)
-        if (noPixMap) {
-            return ImageSourceInfo(src, bundleName, moduleName);
-        }
-        return ImageSourceInfo(pixMap);
-#else
-        return ImageSourceInfo(src, bundleName, moduleName);
-#endif
-    };
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     stack->Push(frameNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, createSourceInfoFunc());
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        ImageLayoutProperty, ImageSourceInfo, CreateSourceInfo(src, pixMap, bundleName, moduleName));
 }
 
 void ImageModelNG::SetAlt(const std::string& src)
@@ -111,14 +114,6 @@ void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& siz
 
 void ImageModelNG::SetImageFill(const Color& color)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-    if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(color);
-        ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
-    }
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
 }
