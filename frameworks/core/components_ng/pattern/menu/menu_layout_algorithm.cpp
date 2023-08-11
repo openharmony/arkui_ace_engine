@@ -285,10 +285,20 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         bottomSpace_ = constraint->maxSize.Height() - position_.GetY();
         leftSpace_ = Infinity<float>();
     } else {
-        topSpace_ = position_.GetY() - targetSize.Height() - margin_ * 2.0f;
-        bottomSpace_ = wrapperSize_.Height() - position_.GetY() - margin_ * 2.0f;
-        leftSpace_ = position_.GetX();
-        rightSpace_ = wrapperSize_.Width() - leftSpace_;
+        if (props->GetMenuPlacement().has_value()) {
+            auto targetSecurity = static_cast<float>(TARGET_SECURITY.ConvertToPx());
+            topSpace_ = std::max(0.0f, targetOffset_.GetY() - targetSecurity - paddingTop_);
+            bottomSpace_ = std::max(0.0f,
+                wrapperSize_.Height() - targetOffset_.GetY() - targetSize_.Height() - targetSecurity - paddingBottom_);
+            leftSpace_ = std::max(0.0f, targetOffset_.GetX() - paddingStart_ - targetSecurity);
+            rightSpace_ = std::max(
+                0.0f, wrapperSize_.Width() - targetSize_.Width() - targetSecurity - paddingStart_ - paddingEnd_);
+        } else {
+            topSpace_ = position_.GetY() - targetSize.Height() - margin_ * 2.0f;
+            bottomSpace_ = wrapperSize_.Height() - position_.GetY() - margin_ * 2.0f;
+            leftSpace_ = position_.GetX();
+            rightSpace_ = wrapperSize_.Width() - leftSpace_;
+        }
     }
 
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
@@ -355,6 +365,13 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     // initialize screen size and menu position
     CHECK_NULL_VOID(layoutWrapper);
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    if (!targetTag_.empty()) {
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu());
+    }
     Initialize(layoutWrapper);
 
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -400,9 +417,6 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu());
-    }
 
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
         auto geometryNode = layoutWrapper->GetGeometryNode();
