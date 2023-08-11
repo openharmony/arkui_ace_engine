@@ -717,8 +717,9 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             return nullptr;
         }
         auto nextMaxCrossCount = GetCrossCount();
-        auto weakChild =
-            SearchFocusableChildInCross(nextMainIndex, nextCrossIndex, nextMaxCrossCount, curMainIndex, curCrossIndex);
+        auto flag = (step == FocusStep::LEFT_END) || (step == FocusStep::RIGHT_END);
+        auto weakChild = SearchFocusableChildInCross(
+            nextMainIndex, nextCrossIndex, nextMaxCrossCount, flag ? -1 : curMainIndex, curCrossIndex);
         auto child = weakChild.Upgrade();
         if (child && child->IsFocusable()) {
             ScrollToFocusNode(weakChild);
