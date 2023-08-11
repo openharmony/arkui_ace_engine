@@ -85,6 +85,9 @@ public:
         return selected_;
     }
 
+    bool IsMeasureBoundary() const override;
+    void UpdateChildBoundary(RefPtr<FrameNode>& frameNode);
+ 
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
