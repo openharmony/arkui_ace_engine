@@ -20,6 +20,7 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
+#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -166,7 +167,7 @@ void WindowPattern::CreateStartingNode()
     startingNode_->MarkModifyDone();
 }
 
-void WindowPattern::CreateSnapshotNode(bool usePixelMap)
+void WindowPattern::CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot)
 {
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -177,15 +178,21 @@ void WindowPattern::CreateSnapshotNode(bool usePixelMap)
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     CHECK_NULL_VOID(session_);
-    if (usePixelMap) {
-        auto snapshot = session_->GetSnapshot();
+    if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
         CHECK_NULL_VOID(pixelMap);
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {
         CHECK_NULL_VOID(session_->GetScenePersistence());
-        imageLayoutProperty->UpdateImageSourceInfo(
-            ImageSourceInfo("file:/" + session_->GetScenePersistence()->GetSnapshotFilePath()));
+        ImageSourceInfo sourceInfo("file:/" + session_->GetScenePersistence()->GetSnapshotFilePath());
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto imageCache = pipelineContext->GetImageCache();
+        CHECK_NULL_VOID(imageCache);
+        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
+        auto cacheKey = ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second));
+        imageCache->ClearCacheImage(cacheKey);
     }
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
