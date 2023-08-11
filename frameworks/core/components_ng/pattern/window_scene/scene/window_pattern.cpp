@@ -286,6 +286,7 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
+    SetWindowSceneConsumed(pointerEvent->GetPointerAction());
     DispatchPointerEvent(pointerEvent);
 }
 
@@ -329,6 +330,7 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     if (action == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowDragEvent();
     }
+    SetWindowSceneConsumed(action);
     DispatchPointerEvent(pointerEvent);
 }
 
@@ -372,5 +374,21 @@ std::vector<Rosen::Rect> WindowPattern::GetHotAreas()
         return std::vector<Rosen::Rect>();
     }
     return session_->GetTouchHotAreas();
+}
+
+void WindowPattern::SetWindowSceneConsumed(int32_t action)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            pipeline->SetWindowSceneConsumed(true);
+        }
+        if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+            action == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+            pipeline->SetWindowSceneConsumed(false);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

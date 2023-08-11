@@ -320,6 +320,8 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+
+void PipelineContext::SetWindowSceneConsumed(bool isConsumed) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

@@ -1096,12 +1096,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if (scalePoint.type == TouchType::MOVE) {
         touchEvents_.emplace_back(point);
         auto container = Container::Current();
-        if (container && !container->IsScenceBoardWindow()) {
-            hasIdleTasks_ = true;
-            RequestFrame();
+        if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
+            FlushTouchEvents();
             return;
         } else {
-            FlushTouchEvents();
+            hasIdleTasks_ = true;
+            RequestFrame();
             return;
         }
     }
@@ -2013,5 +2013,15 @@ void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node)
     if (fontManager_) {
         fontManager_->RemoveFontNodeNG(node);
     }
+}
+
+void PipelineContext::SetWindowSceneConsumed(bool isConsumed)
+{
+    isWindowSceneConsumed_ = isConsumed;
+}
+
+bool PipelineContext::IsWindowSceneConsumed()
+{
+    return isWindowSceneConsumed_;
 }
 } // namespace OHOS::Ace::NG
