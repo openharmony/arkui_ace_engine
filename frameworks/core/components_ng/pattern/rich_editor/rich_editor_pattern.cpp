@@ -140,8 +140,8 @@ std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const 
     if (options.moduleName.has_value()) {
         moduleName = options.moduleName.value();
     }
-    auto createSourceInfoFunc = [&src, noPixMap = !options.imagePixelMap.has_value(), pixMap, &bundleName,
-                                    &moduleName]() -> ImageSourceInfo {
+    auto createSourceInfoFunc = [src, noPixMap = !options.imagePixelMap.has_value(), pixMap, bundleName,
+                                    moduleName]() -> ImageSourceInfo {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (noPixMap) {
             return ImageSourceInfo(src, bundleName, moduleName);
