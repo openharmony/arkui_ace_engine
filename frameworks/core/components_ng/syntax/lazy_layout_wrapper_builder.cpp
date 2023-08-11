@@ -119,7 +119,7 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndexLegac
             }
         }
         // create frame node.
-        auto itemInfo = builder_->CreateChildByIndex(realIndex);
+        auto itemInfo = builder_->GetChildByIndex(realIndex, true);
         id = itemInfo.first;
         uiNode = itemInfo.second;
     }
@@ -165,7 +165,7 @@ const std::list<RefPtr<LayoutWrapper>>& LazyLayoutWrapperBuilder::OnExpandChildL
 
     CHECK_NULL_RETURN(builder_, childWrappers_);
     for (int32_t index = 0; index < total; ++index) {
-        auto itemInfo = builder_->CreateChildByIndex(index);
+        auto itemInfo = builder_->GetChildByIndex(index, true);
         RefPtr<LayoutWrapper> wrapper;
         auto frameNode = DynamicCast<FrameNode>(itemInfo.second);
         auto uiNode = itemInfo.second;

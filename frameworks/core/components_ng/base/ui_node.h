@@ -352,7 +352,7 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
-    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index);
+    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild);
 
 #ifdef PREVIEW
     void SetDebugLine(const std::string& line)

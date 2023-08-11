@@ -104,6 +104,10 @@ public:
     // can call the RemoveChildInRenderTree method to explicitly remove the node from the area to be rendered.
     RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) override;
     const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) override;
+    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) override
+    {
+        return nullptr;
+    }
 
     int32_t GetTotalChildCount() const override
     {
