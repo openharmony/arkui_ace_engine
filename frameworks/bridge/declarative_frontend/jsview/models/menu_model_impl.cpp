@@ -22,9 +22,4 @@ void MenuModelImpl::SetFontWeight(FontWeight weight) {}
 void MenuModelImpl::SetFontStyle(Ace::FontStyle style) {}
 void MenuModelImpl::SetFontColor(const std::optional<Color>& color) {}
 void MenuModelImpl::SetFontFamily(const std::vector<std::string> &families) {}
-void MenuModelImpl::SetWidth(const Dimension& width) {}
-void MenuModelImpl::SetBorderRadius(const Dimension& radius) {}
-void MenuModelImpl::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
-    const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
-    const std::optional<Dimension>& radiusBottomRight) {}
 } // namespace OHOS::Ace::Framework

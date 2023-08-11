@@ -26,11 +26,6 @@ public:
     static void FontSize(const JSCallbackInfo& info);
     static void Font(const JSCallbackInfo& info);
     static void FontColor(const JSCallbackInfo& info);
-    static void SetWidth(const JSCallbackInfo& info);
-    static void SetRadius(const JSCallbackInfo& info);
-
-private:
-    static void HandleDifferentRadius(const JSRef<JSVal>& args);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MENU_H

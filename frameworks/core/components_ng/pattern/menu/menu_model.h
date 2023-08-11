@@ -30,11 +30,6 @@ public:
     virtual void SetFontStyle(Ace::FontStyle style);
     virtual void SetFontColor(const std::optional<Color>& color);
     virtual void SetFontFamily(const std::vector<std::string> &families);
-    virtual void SetWidth(const Dimension& width);
-    virtual void SetBorderRadius(const Dimension& radius);
-    virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
-        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
-        const std::optional<Dimension>& radiusBottomRight);
 
 private:
     static std::unique_ptr<MenuModel> instance_;

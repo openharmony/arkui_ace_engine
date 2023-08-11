@@ -61,8 +61,6 @@ public:
         value->propTitle_ = CloneTitle();
         value->propMenuPlacement_ = CloneMenuPlacement();
         value->propSelectMenuAlignOption_ = CloneSelectMenuAlignOption();
-        value->propBorderRadius_ = CloneBorderRadius();
-        value->propMenuWidth_ = CloneMenuWidth();
         return value;
     }
 
@@ -76,16 +74,12 @@ public:
         ResetTitle();
         ResetMenuPlacement();
         ResetSelectMenuAlignOption();
-        ResetBorderRadius();
-        ResetMenuWidth();
     }
 
     // target frameNode that this menu belongs to
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuOffset, NG::OffsetF, PROPERTY_UPDATE_MEASURE);
     // target frameNode size, null for click show menu
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetSize, NG::SizeF, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, NG::BorderRadiusProperty, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 
     // offset to cursor
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PositionOffset, NG::OffsetF, PROPERTY_UPDATE_LAYOUT);

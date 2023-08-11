@@ -205,7 +205,6 @@ public:
 
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
-    void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
     {
