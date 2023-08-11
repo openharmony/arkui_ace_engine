@@ -286,13 +286,15 @@ void RosenMediaPlayer::SetRenderSurface(const RefPtr<RenderSurface>& renderSurfa
 }
 
 void RosenMediaPlayer::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
-    StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent)
+    StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
+    CommonEvent&& startRenderFrameEvent)
 {
     mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
     mediaPlayerCallback_->SetPositionUpdatedEvent(std::move(positionUpdatedEvent));
     mediaPlayerCallback_->SetStateChangedEvent(std::move(stateChangedEvent));
     mediaPlayerCallback_->SetErrorEvent(std::move(errorEvent));
     mediaPlayerCallback_->SetResolutionChangeEvent(std::move(resolutionChangeEvent));
+    mediaPlayerCallback_->SetStartRenderFrameEvent(std::move(startRenderFrameEvent));
     mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
 }
 
