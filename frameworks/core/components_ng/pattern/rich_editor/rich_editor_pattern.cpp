@@ -1724,9 +1724,14 @@ int32_t RichEditorPattern::DeleteValueSetImageSpan(
     spanResult.SetEraseLength(1);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, IMAGE_SPAN_LENGTH);
-    auto imageNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(spanResult.GetSpanIndex()));
+    auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
+    CHECK_NULL_RETURN(uiNode, IMAGE_SPAN_LENGTH);
+    auto imageNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(imageNode, IMAGE_SPAN_LENGTH);
     auto geometryNode = imageNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, IMAGE_SPAN_LENGTH);
     auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(imageLayoutProperty, IMAGE_SPAN_LENGTH);
     spanResult.SetSizeWidth(geometryNode->GetMarginFrameSize().Width());
     spanResult.SetSizeHeight(geometryNode->GetMarginFrameSize().Height());
     if (!imageLayoutProperty->GetImageSourceInfo()->GetPixmap()) {
@@ -1770,10 +1775,14 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
     std::list<RefPtr<UINode>> deleteNode;
     std::set<int32_t, std::greater<int32_t>> deleteNodes;
     for (const auto& it : deleteSpans) {
-        auto spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(it.GetSpanIndex()));
         switch (it.GetType()) {
             case SpanResultType::TEXT: {
+                auto ui_node = host->GetChildAtIndex(it.GetSpanIndex());
+                CHECK_NULL_VOID(ui_node);
+                auto spanNode = DynamicCast<SpanNode>(ui_node);
+                CHECK_NULL_VOID(spanNode);
                 auto spanItem = spanNode->GetSpanItem();
+                CHECK_NULL_VOID(spanItem);
                 auto text = spanItem->content;
                 std::wstring textTemp = StringUtils::ToWstring(text);
                 textTemp.erase(it.OffsetInSpan(), it.GetEraseLength());
@@ -1797,6 +1806,11 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
     }
     if (info.GetRichEditorDeleteDirection() == RichEditorDeleteDirection::BACKWARD) {
         caretPosition_ = std::clamp(caretPosition_ - info.GetLength(), 0, static_cast<int32_t>(GetTextContentLength()));
+    }
+    int32_t spanTextLength = 0;
+    for (auto child = spanItemChildren_.begin(); child != spanItemChildren_.end(); child++) {
+        (*child)->position = spanTextLength + StringUtils::ToWstring((*child)->content).length();
+        spanTextLength += StringUtils::ToWstring((*child)->content).length();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     OnModifyDone();
@@ -2646,10 +2660,12 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     if (selectedRects.size() == 1 && (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top())) {
         std::vector<Rect> selectedNextRects;
         paragraph_->GetRectsForRange(currentPosition - 1, nextPosition - 1, selectedNextRects);
-        bool isInRange = pos.GetX() >= selectedNextRects[0].Left() && pos.GetX() <= selectedNextRects[0].Right() &&
-            pos.GetY() >= selectedNextRects[0].Top() && pos.GetY() <= selectedNextRects[0].Bottom();
-        if (isInRange) {
-            textSelector_.Update(currentPosition - 1, nextPosition - 1);
+        if (selectedNextRects.size() == 1) {
+            bool isInRange = pos.GetX() >= selectedNextRects[0].Left() && pos.GetX() <= selectedNextRects[0].Right() &&
+                             pos.GetY() >= selectedNextRects[0].Top() && pos.GetY() <= selectedNextRects[0].Bottom();
+            if (isInRange) {
+                textSelector_.Update(currentPosition - 1, nextPosition - 1);
+            }
         }
     }
 }
