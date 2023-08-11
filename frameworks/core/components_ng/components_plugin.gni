@@ -107,6 +107,7 @@ template("build_component_plugin") {
         "//foundation/graphic/graphic_2d/rosen/modules",
         "//third_party/bounds_checking_function/include",
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
       ]
 
       if (ace_use_new_skia) {
