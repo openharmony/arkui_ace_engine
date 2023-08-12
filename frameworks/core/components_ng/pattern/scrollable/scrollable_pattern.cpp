@@ -544,7 +544,8 @@ void ScrollablePattern::GetParentNavigition()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if ((host->GetTag() != V2::LIST_ETS_TAG) && (host->GetTag() != V2::GRID_ETS_TAG)) {
+    if ((host->GetTag() != V2::LIST_ETS_TAG) && (host->GetTag() != V2::GRID_ETS_TAG) &&
+        (host->GetTag() != V2::SCROLL_ETS_TAG)) {
         return;
     }
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
@@ -552,7 +553,8 @@ void ScrollablePattern::GetParentNavigition()
         if (!frameNode) {
             continue;
         }
-        if ((frameNode->GetTag() == V2::LIST_ETS_TAG) || (frameNode->GetTag() == V2::GRID_ETS_TAG)) {
+        if ((frameNode->GetTag() == V2::LIST_ETS_TAG) || (frameNode->GetTag() == V2::GRID_ETS_TAG) ||
+            (frameNode->GetTag() == V2::SCROLL_ETS_TAG)) {
             break;
         }
         navBarPattern_ = frameNode->GetPattern<NavBarPattern>();
