@@ -92,7 +92,7 @@ public:
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void BuildAllChildren();
-    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
 
     const std::list<RefPtr<UINode>>& GetChildren() const override;

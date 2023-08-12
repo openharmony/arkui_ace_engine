@@ -61,7 +61,7 @@ void LazyForEachNode::AdjustLayoutWrapperTree(
 void LazyForEachNode::BuildAllChildren()
 {
     for (int i = 0; i < FrameCount(); i++) {
-        GetFrameChildByIndex(i, true);
+        GetFrameChildByIndex(i);
     }
 }
 
@@ -217,10 +217,10 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
     }
 }
 
-RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild)
+RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index)
 {
     if (index < static_cast<uint32_t>(FrameCount())) {
-        auto child = builder_->GetChildByIndex(index, needBuild);
+        auto child = builder_->CreateChildByIndex(index);
         if (child.second) {
             child.second->SetJSViewActive(true);
             if (child.second->GetDepth() != GetDepth() + 1) {
@@ -233,7 +233,7 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
                 child.second->AttachToMainTree();
             }
             PostIdleTask();
-            return child.second->GetFrameChildByIndex(0, needBuild);
+            return child.second->GetFrameChildByIndex(0);
         }
     }
     return nullptr;

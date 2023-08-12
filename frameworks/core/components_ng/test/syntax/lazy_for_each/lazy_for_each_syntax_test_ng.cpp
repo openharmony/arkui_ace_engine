@@ -80,7 +80,7 @@ public:
         auto ids = LAZY_FOR_EACH_NODE_IDS;
         auto builder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
         for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
-            builder->GetChildByIndex(iter.value_or(0), true);
+            builder->CreateChildByIndex(iter.value_or(0));
         }
 
         /**

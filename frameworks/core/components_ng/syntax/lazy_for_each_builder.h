@@ -46,7 +46,7 @@ public:
         return OnGetTotalCount();
     }
 
-    std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild)
+    std::pair<std::string, RefPtr<UINode>> CreateChildByIndex(int32_t index)
     {
         auto keyIter = cachedItems_.find(index);
         if (keyIter != cachedItems_.end()) {
@@ -64,20 +64,18 @@ public:
                 }
             }
         }
-        if (needBuild) {
-            ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
-            auto itemInfo = OnGetChildByIndex(index, expiringItem_);
-            CHECK_NULL_RETURN(itemInfo.second, itemInfo);
-            {
-                auto result = generatedItem_.try_emplace(itemInfo.first, itemInfo.second);
-                if (!result.second) {
-                    LOGD("already has same key %{private}s child", itemInfo.first.c_str());
-                }
+
+        ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
+        auto itemInfo = OnGetChildByIndex(index, expiringItem_);
+        CHECK_NULL_RETURN(itemInfo.second, itemInfo);
+        {
+            auto result = generatedItem_.try_emplace(itemInfo.first, itemInfo.second);
+            if (!result.second) {
+                LOGD("already has same key %{private}s child", itemInfo.first.c_str());
             }
-            cachedItems_[index] = itemInfo.first;
-            return std::pair<std::string, RefPtr<NG::UINode>>(itemInfo.first, itemInfo.second);
         }
-        return {};
+        cachedItems_[index] = itemInfo.first;
+        return std::pair<std::string, RefPtr<NG::UINode>>(itemInfo.first, itemInfo.second);
     }
 
     RefPtr<UINode> GetChildByKey(const std::string& key)

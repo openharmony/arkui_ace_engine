@@ -59,7 +59,6 @@ public:
     virtual const RefPtr<LayoutProperty>& GetLayoutProperty() const = 0;
 
     virtual RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) = 0;
-    virtual RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) = 0;
     virtual const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;

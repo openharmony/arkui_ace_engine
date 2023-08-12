@@ -86,7 +86,7 @@ void FrameNode::ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeF
 void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag) {}
 void FrameNode::MarkResponseRegion(bool isResponseRegion) {}
 void FrameNode::MarkNeedSyncRenderTree(bool) {}
-RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild)
+RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index)
 {
     return nullptr;
 }
@@ -100,11 +100,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 void FrameNode::Layout() {}
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
-{
-    return nullptr;
-}
-
-RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index)
 {
     return nullptr;
 }
