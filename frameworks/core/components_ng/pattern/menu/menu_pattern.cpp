@@ -649,11 +649,11 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     radius.SetRadius(defaultRadius);
     if (menuProp->GetBorderRadius().has_value()) {
         auto borderRadius = menuProp->GetBorderRadiusValue();
-        auto TopRadius = borderRadius.radiusTopLeft.value_or(Dimension())
+        auto topRadius = borderRadius.radiusTopLeft.value_or(Dimension())
             + borderRadius.radiusTopRight.value_or(Dimension());
         auto bottomRadius = borderRadius.radiusBottomLeft.value_or(Dimension())
             + borderRadius.radiusBottomRight.value_or(Dimension());
-        auto menuRadius = std::max(TopRadius.ConvertToVp(), bottomRadius.ConvertToVp());
+        auto menuRadius = std::max(topRadius.ConvertToPx(), bottomRadius.ConvertToPx());
         auto geometryNode = dirty->GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, false);
         auto idealSize = geometryNode->GetMarginFrameSize();
