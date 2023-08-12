@@ -320,7 +320,7 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
     if (valueType == napi_number) {
         int32_t num;
         napi_get_value_int32(env, asyncContext->alignmentApi, &num);
-        if (num >= 0 && num < DIALOG_ALIGNMENT.size()) {
+        if (num >= 0 && num < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             alignment = DIALOG_ALIGNMENT[num];
         }
     }
