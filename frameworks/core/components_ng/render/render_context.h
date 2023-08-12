@@ -452,6 +452,8 @@ public:
     virtual void SetUsingContentRectForRenderFrame(bool value) {}
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
+    virtual void AddFRCSceneInfo(const std::string& scene, float speed) {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

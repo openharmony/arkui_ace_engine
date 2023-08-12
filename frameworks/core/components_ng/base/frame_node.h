@@ -444,7 +444,8 @@ public:
         END,
     };
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
-    void AddFRCSceneInfo(const std::string& name, float speed, SceneStatus status);
+    // speed is measured by millimeter
+    void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
 
     OffsetF GetParentGlobalOffsetDuringLayout() const;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
