@@ -80,23 +80,40 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
 
 void ScrollablePattern::DraggedDownScrollEndProcess()
 {
-    if (!isCoordEventNeedMoveUp_) {
-        return;
-    }
-
-    if (coordinationEvent_ && !isDraggedDown_ && isReactInParentMovement_) {
+    CHECK_NULL_VOID_NOLOG(navBarPattern_);
+    if (!navBarPattern_->GetDraggedDown() && isReactInParentMovement_) {
         isReactInParentMovement_ = false;
-        auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
-        if (onScrollEnd) {
-            onScrollEnd();
-        }
+        navBarPattern_->OnCoordScrollEnd();
     }
+}
+
+void ScrollablePattern::ProcessNavBarReactOnStart()
+{
+    CHECK_NULL_VOID_NOLOG(navBarPattern_);
+    navBarPattern_->OnCoordScrollStart();
+}
+
+bool ScrollablePattern::ProcessNavBarReactOnUpdate(bool isDraggedDown, float offset)
+{
+    CHECK_NULL_RETURN_NOLOG(navBarPattern_, true);
+    navBarPattern_->OnCoordScrollUpdate(offset);
+    DraggedDownScrollEndProcess();
+    if (isDraggedDown && Negative(offset) && !OutBoundaryCallback()) {
+        return false;
+    }
+    return true;
+}
+
+void ScrollablePattern::ProcessNavBarReactOnEnd()
+{
+    CHECK_NULL_VOID_NOLOG(navBarPattern_);
+    navBarPattern_->OnCoordScrollEnd();
 }
 
 bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
     auto isAtTop = (IsAtTop() && Positive(offset));
-    auto isDraggedDown = (isDraggedDown_ && isCoordEventNeedMoveUp_);
+    auto isDraggedDown = navBarPattern_ ? navBarPattern_->GetDraggedDown() : false;
     if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
         (axis_ == Axis::VERTICAL)) {
         isReactInParentMovement_ = true;
@@ -106,27 +123,32 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
                 onScrollStart();
             }
         }
+        ProcessNavBarReactOnStart();
     }
-    if (coordinationEvent_ && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
+    if ((coordinationEvent_ || navBarPattern_) && source != SCROLL_FROM_UPDATE && isReactInParentMovement_) {
         isReactInParentMovement_ = false;
-        auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
-        if (onScrollEnd) {
-            onScrollEnd();
-        }
-    }
-    if (coordinationEvent_ && isReactInParentMovement_) {
-        auto onScroll = coordinationEvent_->GetOnScroll();
-        if (onScroll) {
-            onScroll(offset);
-            DraggedDownScrollEndProcess();
-            if (isDraggedDown && Negative(offset) && !OutBoundaryCallback()) {
-                return false;
+        if (coordinationEvent_) {
+            auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
+            if (onScrollEnd) {
+                onScrollEnd();
             }
-            return scrollEffect_ && scrollEffect_->IsSpringEffect();
+        }
+        ProcessNavBarReactOnEnd();
+    }
+    if (isReactInParentMovement_) {
+        bool needMove = ProcessNavBarReactOnUpdate(isDraggedDown, offset);
+        if (coordinationEvent_) {
+            auto onScroll = coordinationEvent_->GetOnScroll();
+            if (onScroll) {
+                onScroll(offset);
+                needMove &= scrollEffect_ && scrollEffect_->IsSpringEffect();
+            }
+            return needMove;
         }
     }
     if (source == SCROLL_FROM_START) {
         SetParentScrollable();
+        GetParentNavigition();
         StopScrollBarAnimatorByProxy();
         AbortScrollAnimator();
     } else if (!AnimateStoped()) {
@@ -137,11 +159,14 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 
 void ScrollablePattern::OnScrollEnd()
 {
-    if (coordinationEvent_ && isReactInParentMovement_) {
-        isReactInParentMovement_ = false;
-        auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
-        if (onScrollEnd) {
-            onScrollEnd();
+    if (isReactInParentMovement_) {
+        ProcessNavBarReactOnEnd();
+        if (coordinationEvent_) {
+            auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
+            if (onScrollEnd) {
+                onScrollEnd();
+            }
+            isReactInParentMovement_ = false;
             return;
         }
     }
@@ -510,6 +535,34 @@ RefPtr<ScrollablePattern> ScrollablePattern::GetParentScrollable()
         return pattern;
     }
     return nullptr;
+}
+
+void ScrollablePattern::GetParentNavigition()
+{
+    if (navBarPattern_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if ((host->GetTag() != V2::LIST_ETS_TAG) && (host->GetTag() != V2::GRID_ETS_TAG)) {
+        return;
+    }
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        if ((frameNode->GetTag() == V2::LIST_ETS_TAG) || (frameNode->GetTag() == V2::GRID_ETS_TAG)) {
+            break;
+        }
+        navBarPattern_ = frameNode->GetPattern<NavBarPattern>();
+        if (!navBarPattern_) {
+            continue;
+        }
+        return;
+    }
+    navBarPattern_ = nullptr;
+    return;
 }
 
 void ScrollablePattern::SetParentScrollable()

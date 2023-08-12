@@ -102,6 +102,11 @@ public:
     {
         return landscapeMenuNodeId_.has_value();
     }
+    
+    void OnCoordScrollStart();
+    void OnCoordScrollUpdate(float offset);
+    void OnCoordScrollEnd();
+    bool GetDraggedDown();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -114,10 +119,6 @@ private:
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
-    void InitCoordinationEvent();
-    void OnCoordScrollStart();
-    void OnCoordScrollUpdate(float offset);
-    void OnCoordScrollEnd();
     RefPtr<FrameNode> FindScrollableChild();
     float offset_ = 0.0f;
     RefPtr<PanEvent> panEvent_;
