@@ -76,6 +76,11 @@ public:
         needInitRealSideBarWidth_ = needInitRealSideBarWidth;
     }
 
+    void SetRealSideBarHeight(float realSideBarHeight)
+    {
+        realSideBarHeight_ = realSideBarHeight;
+    }
+
     float GetRealSideBarHeight() const
     {
         return realSideBarHeight_;
@@ -146,6 +151,16 @@ public:
         controlImageHeight_ = height;
     }
 
+    void SetPreSideBarWidth(Dimension value)
+    {
+        preSideBarWidth_ = value;
+    }
+
+    Dimension GetPreSideBarWidth() const
+    {
+        return preSideBarWidth_;
+    }
+
 private:
     void MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth);
@@ -198,6 +213,7 @@ private:
     Dimension controlImageWidth_;
     Dimension controlImageHeight_;
     Dimension realSideBarWidthDimension_;
+    Dimension preSideBarWidth_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerLayoutAlgorithm);
 };
