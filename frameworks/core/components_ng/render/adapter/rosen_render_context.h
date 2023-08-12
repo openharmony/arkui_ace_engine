@@ -239,6 +239,8 @@ public:
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    std::vector<double> transInfo_;
+    std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
     bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
 #else
