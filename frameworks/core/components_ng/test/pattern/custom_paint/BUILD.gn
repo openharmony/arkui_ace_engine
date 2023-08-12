@@ -28,12 +28,35 @@ ohos_unittest("custom_paint_test_ng") {
     "offscreen_canvas_paint_pattern_test_ng.cpp",
   ]
 
+  if (enable_graphic_text_gine) {
+    include_dirs = [
+      "//commonlibrary/c_utils/base/include",
+      "$ace_root",
+      "$ace_root/frameworks",
+      "$skia_root_new",
+      "$flutter_root/skia",
+      "$flutter_root/engine",
+      "$flutter_root/engine/flutter",
+      "$flutter_root/skia/third_party/externals/harfbuzz/src",
+      "$ace_graphic/rosen/modules/2d_engine/rosen_text/export",
+      "$ace_graphic/rosen/modules/2d_graphics/include",
+      "$ace_graphic/rosen/modules/2d_graphics/src",
+      "$ace_graphic/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    ]
+  }
+
   deps = [
     "$ace_root/build:ace_ohos_unittest_base",
     "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "//third_party/googletest:gmock_main",
   ]
+  if (enable_graphic_text_gine) {
+    deps += [
+      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text",
+      "//third_party/skia:skia_ohos",
+    ]
+  }
   if (is_ohos_standard_system) {
     deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
   }

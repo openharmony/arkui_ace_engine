@@ -100,5 +100,4 @@ void FlutterScrollFadePainter::PaintSide(RenderContext& context, const Size& siz
             break;
     }
 }
-
 } // namespace OHOS::Ace

@@ -43,4 +43,8 @@ build_component("scroll") {
     "rosen_render_multi_child_scroll.cpp",
     "rosen_render_single_child_scroll.cpp",
   ]
+  cflags = [
+    "-Wall",
+    "--Wunused-lambda-capture",
+  ]
 }

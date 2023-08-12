@@ -40,7 +40,11 @@ enum class TestingTextDecoration {
     NONE = 0x0,
     UNDERLINE = 0x1,
     OVERLINE = 0x2,
+#ifndef USE_GRAPHIC_TEXT_GINE
     LINETHROUGH = 0x4,
+#else
+    LINE_THROUGH = 0x4,
+#endif
 };
 
 enum class TestingTextDecorationStyle {
@@ -71,9 +75,15 @@ public:
         return false;
     }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     TestingColor color_;
     TestingPoint offset_;
     double blurRadius_ = 0.0;
+#else
+    TestingColor color;
+    TestingPoint offset;
+    double blurRadius = 0.0;
+#endif
 };
 
 class TestingFontFeatures {
@@ -92,6 +102,7 @@ public:
         return false;
     }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     double decorationThicknessMultiplier_ = 1.0;
     double fontSize_ = 14.0;
     double letterSpacing_ = 0.0;
@@ -114,6 +125,30 @@ public:
     TestingTextBaseline textBaseline_ = TestingTextBaseline::ALPHABETIC;
     std::vector<TestingTextShadow> textShadows_;
     TestingFontFeatures fontFeatures_;
+#else
+    double decorationThicknessMultiplier = 1.0;
+    double fontSize = 14.0;
+    double letterSpacing = 0.0;
+    double wordSpacing = 0.0;
+    double heightScale = 1.0;
+    bool heightOnly = false;
+    bool hasBackground = false;
+    bool hasForeground = false;
+    std::u16string ellipsis;
+    std::string locale;
+    std::vector<std::string> fontFamilies;
+    TestingColor color;
+    TestingTextDecoration decoration = TestingTextDecoration::NONE;
+    TestingColor decorationColor;
+    TestingPen background;
+    TestingPen foreground;
+    TestingTextDecorationStyle decorationStyle = TestingTextDecorationStyle::SOLID;
+    TestingFontWeight fontWeight = TestingFontWeight::W400;
+    TestingFontStyle fontStyle = TestingFontStyle::NORMAL;
+    TestingTextBaseline baseline = TestingTextBaseline::ALPHABETIC;
+    std::vector<TestingTextShadow> textShadows;
+    TestingFontFeatures fontFeatures;
+#endif
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TEXT_STYLE_H

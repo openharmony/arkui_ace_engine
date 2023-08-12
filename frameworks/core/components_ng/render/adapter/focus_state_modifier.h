@@ -54,6 +54,7 @@ public:
     void SetRoundRect(const RoundRect& rect, float borderWidth)
     {
 #ifndef USE_ROSEN_DRAWING
+#ifndef USE_GRAPHIC_TEXT_GINE
         roundRect_.SetRect(
             rosen::Rect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
         roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::TOP_LEFT_POS,
@@ -68,6 +69,22 @@ public:
         roundRect_.SetCornerRadius(rosen::RoundRect::CornerPos::BOTTOM_RIGHT_POS,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x,
             rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y);
+#else
+        roundRect_.SetRect(
+            RSRect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::TOP_LEFT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y);
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::TOP_RIGHT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS).y);
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::BOTTOM_LEFT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS).y);
+        roundRect_.SetCornerRadius(RSRoundRect::CornerPos::BOTTOM_RIGHT_POS,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).x,
+            rect.GetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS).y);
+#endif
 #else
         roundRect_.SetRect(
             RSRect(rect.GetRect().Left(), rect.GetRect().Top(), rect.GetRect().Right(), rect.GetRect().Bottom()));

@@ -36,11 +36,30 @@ public:
         return std::make_unique<TestingTypographyCreate>();
     }
 
+#ifdef USE_GRAPHIC_TEXT_GINE
+    static std::unique_ptr<TestingTypographyCreate> Create(
+        const TestingTypographyStyle &style, std::shared_ptr<TestingFontCollection> collection)
+    {
+        return std::make_unique<TestingTypographyCreate>();
+    }
+
+    std::unique_ptr<TestingTypography> CreateTypography()
+    {
+        return std::make_unique<TestingTypography>();
+    }
+#endif
+
     virtual void PushStyle(const TestingTextStyle& style) {}
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     virtual void Pop() {}
 
     virtual void AddText(const std::u16string& text) {}
+#else
+    virtual void PopStyle() {}
+
+    virtual void AppendText(const std::u16string& text) {}
+#endif
 
     virtual std::unique_ptr<TestingTypography> Build()
     {

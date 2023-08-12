@@ -41,19 +41,34 @@ bool TxtParagraph::IsValid()
 
 void TxtParagraph::CreateBuilder()
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_direction = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.text_align = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.max_lines = paraStyle_.maxLines;
+#else
+    Rosen::TypographyStyle style;
+    style.textDirection = Constants::ConvertTxtTextDirection(paraStyle_.direction);
+    style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
+    style.maxLines = paraStyle_.maxLines;
+#endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
+#ifndef USE_GRAPHIC_TEXT_GINE
     style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
+#else
+    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
 #endif
+#endif
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder_ = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection_);
+#else
+    builder_ = Rosen::TypographyCreate::Create(style, fontCollection_);
+#endif
 }
 
 void TxtParagraph::PushStyle(const TextStyle& style)
@@ -62,7 +77,11 @@ void TxtParagraph::PushStyle(const TextStyle& style)
         CreateBuilder();
     }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::TextStyle txtStyle;
+#else
+    Rosen::TextStyle txtStyle;
+#endif
     Constants::ConvertTxtStyle(style, PipelineContext::GetCurrentContext(), txtStyle);
     builder_->PushStyle(txtStyle);
 }
@@ -70,7 +89,11 @@ void TxtParagraph::PushStyle(const TextStyle& style)
 void TxtParagraph::PopStyle()
 {
     CHECK_NULL_VOID(builder_);
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder_->Pop();
+#else
+    builder_->PopStyle();
+#endif
 }
 
 void TxtParagraph::AddText(const std::u16string& text)
@@ -79,7 +102,11 @@ void TxtParagraph::AddText(const std::u16string& text)
         CreateBuilder();
     }
     text_ += text;
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder_->AddText(text);
+#else
+    builder_->AppendText(text);
+#endif
 }
 
 int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
@@ -87,16 +114,28 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
     if (!builder_) {
         CreateBuilder();
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::PlaceholderRun txtSpan;
+#else
+    OHOS::Rosen::PlaceholderSpan txtSpan;
+#endif
     Constants::ConvertPlaceholderRun(span, txtSpan);
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder_->AddPlaceholder(txtSpan);
+#else
+    builder_->AppendPlaceholder(txtSpan);
+#endif
     return ++placeHolderIndex_;
 }
 
 void TxtParagraph::Build()
 {
     CHECK_NULL_VOID_NOLOG(builder_);
+#ifndef USE_GRAPHIC_TEXT_GINE
     paragraph_ = builder_->Build();
+#else
+    paragraph_ = builder_->CreateTypography();
+#endif
 }
 
 void TxtParagraph::Reset()
@@ -122,9 +161,17 @@ float TxtParagraph::GetTextWidth()
 {
     CHECK_NULL_RETURN(paragraph_, 0.0f);
     if (GetLineCount() == 1) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         return std::max(paragraph_->GetLongestLine(), paragraph_->GetMaxIntrinsicWidth());
+#else
+        return std::max(paragraph_->GetActualWidth(), paragraph_->GetMaxIntrinsicWidth());
+#endif
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     return paragraph_->GetLongestLine();
+#else
+    return paragraph_->GetActualWidth();
+#endif
 }
 
 float TxtParagraph::GetMaxIntrinsicWidth()
@@ -142,7 +189,11 @@ bool TxtParagraph::DidExceedMaxLines()
 float TxtParagraph::GetLongestLine()
 {
     CHECK_NULL_RETURN(paragraph_, 0.0f);
+#ifndef USE_GRAPHIC_TEXT_GINE
     return static_cast<float>(paragraph_->GetLongestLine());
+#else
+    return static_cast<float>(paragraph_->GetActualWidth());
+#endif
 }
 
 float TxtParagraph::GetMaxWidth()
@@ -159,9 +210,14 @@ float TxtParagraph::GetAlphabeticBaseline()
 
 size_t TxtParagraph::GetLineCount()
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     CHECK_NULL_RETURN(paragraphTxt, 0);
     return paragraphTxt->GetLineCount();
+#else
+    CHECK_NULL_RETURN(paragraph_, 0);
+    return paragraph_->GetLineCount();
+#endif
 }
 
 void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
@@ -183,7 +239,11 @@ int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
     if (!paragraph_) {
         return 0;
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
+#else
+    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
+#endif
 }
 
 bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result)
@@ -203,18 +263,33 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
     result.Reset();
     int32_t graphemeClusterLength = StringUtils::NotInUtf16Bmp(prevChar) ? 2 : 1;
     int32_t prev = extent - graphemeClusterLength;
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto boxes = paragraph_->GetRectsForRange(
         prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+#else
+    auto boxes = paragraph_->GetTextRectsByBoundary(
+        prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+#endif
     while (boxes.empty() && !text_.empty()) {
         graphemeClusterLength *= 2;
         prev = extent - graphemeClusterLength;
         if (prev < 0) {
+#ifndef USE_GRAPHIC_TEXT_GINE
             boxes = paragraph_->GetRectsForRange(
                 0, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+#else
+            boxes = paragraph_->GetTextRectsByBoundary(
+                0, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+#endif
             break;
         }
+#ifndef USE_GRAPHIC_TEXT_GINE
         boxes = paragraph_->GetRectsForRange(
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+#else
+        boxes = paragraph_->GetTextRectsByBoundary(
+            prev, extent, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+#endif
     }
     if (boxes.empty()) {
         LOGD("boxes is empty.");
@@ -226,17 +301,34 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
     if (prevChar == NEWLINE_CODE) {
         // Return the start of next line.
         result.offset.SetX(0.0);
+#ifndef USE_GRAPHIC_TEXT_GINE
         result.offset.SetY(textBox.rect.fBottom);
+#else
+        result.offset.SetY(textBox.rect.GetBottom());
+#endif
         return true;
     }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     bool isLtr = textBox.direction == txt::TextDirection::ltr;
+#else
+    bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
+#endif
     // Caret is within width of the downstream glyphs.
+#ifndef USE_GRAPHIC_TEXT_GINE
     double caretStart = isLtr ? textBox.rect.fRight : textBox.rect.fLeft;
+#else
+    double caretStart = isLtr ? textBox.rect.GetLeft() : textBox.rect.GetRight();
+#endif
     double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
     result.offset.SetX(offsetX);
+#ifndef USE_GRAPHIC_TEXT_GINE
     result.offset.SetY(textBox.rect.fTop);
     result.height = textBox.rect.fBottom - textBox.rect.fTop;
+#else
+    result.offset.SetY(textBox.rect.GetTop());
+    result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+#endif
 
     return true;
 }
@@ -250,29 +342,52 @@ bool TxtParagraph::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics&
     result.Reset();
     const int32_t graphemeClusterLength = 1;
     const int32_t next = extent + graphemeClusterLength;
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto boxes = paragraph_->GetRectsForRange(
         extent, next, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+#else
+    auto boxes = paragraph_->GetTextRectsByBoundary(
+        extent, next, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+#endif
     if (boxes.empty()) {
         return false;
     }
 
     const auto& textBox = *boxes.begin();
+#ifndef USE_GRAPHIC_TEXT_GINE
     bool isLtr = textBox.direction == txt::TextDirection::ltr;
+#else
+    bool isLtr = textBox.direction == Rosen::TextDirection::LTR;
+#endif
     // Caret is within width of the downstream glyphs.
+#ifndef USE_GRAPHIC_TEXT_GINE
     double caretStart = isLtr ? textBox.rect.fLeft : textBox.rect.fRight;
+#else
+    double caretStart = isLtr ? textBox.rect.GetLeft() : textBox.rect.GetRight();
+#endif
     double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
     result.offset.SetX(offsetX);
+#ifndef USE_GRAPHIC_TEXT_GINE
     result.offset.SetY(textBox.rect.fTop);
     result.height = textBox.rect.fBottom - textBox.rect.fTop;
+#else
+    result.offset.SetY(textBox.rect.GetTop());
+    result.height = textBox.rect.GetBottom() - textBox.rect.GetTop();
+#endif
 
     return true;
 }
 
 void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect>& selectedRects)
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     CHECK_NULL_VOID(paragraph_);
     const auto& boxes = paragraph_->GetRectsForRange(
         start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+#else
+    const auto& boxes = paragraph_->GetTextRectsByBoundary(
+        start, end, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+#endif
     if (boxes.empty()) {
         return;
     }
@@ -285,7 +400,11 @@ void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect
 void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects)
 {
     CHECK_NULL_VOID(paragraph_);
+#ifndef USE_GRAPHIC_TEXT_GINE
     const auto& boxes = paragraph_->GetRectsForPlaceholders();
+#else
+    const auto& boxes = paragraph_->GetTextRectsOfPlaceholders();
+#endif
     if (boxes.empty()) {
         return;
     }
@@ -297,7 +416,11 @@ void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects)
 
 void TxtParagraph::SetIndents(const std::vector<float>& indents)
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragraph_.get());
+#endif
     CHECK_NULL_VOID(paragraphTxt);
     paragraphTxt->SetIndents(indents);
 }

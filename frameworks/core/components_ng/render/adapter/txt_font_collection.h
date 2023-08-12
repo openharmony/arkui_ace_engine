@@ -18,7 +18,11 @@
 
 #include <mutex>
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/font_collection.h"
+#else
+#include "rosen_text/font_collection.h"
+#endif
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
@@ -29,20 +33,32 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TxtFontCollection : public FontCollection {
     DECLARE_ACE_TYPE(TxtFontCollection, FontCollection)
 public:
+#ifndef USE_GRAPHIC_TEXT_GINE
     explicit TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection);
+#else
+    explicit TxtFontCollection(const std::shared_ptr<Rosen::FontCollection>& fontCollection);
+#endif
     TxtFontCollection();
     ~TxtFontCollection() override = default;
 
     static RefPtr<FontCollection> GetInstance();
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     const std::shared_ptr<txt::FontCollection>& GetRawFontCollection()
+#else
+    const std::shared_ptr<Rosen::FontCollection>& GetRawFontCollection()
+#endif
     {
         return collection_;
     }
 
 private:
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::shared_ptr<txt::FontCollection> collection_;
     sk_sp<txt::DynamicFontManager> dynamicFontManager_;
+#else
+    std::shared_ptr<Rosen::FontCollection> collection_;
+#endif
 };
 
 } // namespace OHOS::Ace::NG

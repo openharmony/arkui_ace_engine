@@ -23,6 +23,9 @@ config("ace_config") {
     "//third_party/zlib",
   ]
 
+  if (enable_graphic_text_gine) {
+    include_dirs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
+  }
   if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
     include_dirs += [
       "//base/global/resource_management/frameworks/resmgr/include",

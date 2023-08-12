@@ -740,16 +740,28 @@ float TextPattern::GetLineHeight() const
     return selectedRects.front().Height();
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 RSTypographyProperties::TextBox TextPattern::ConvertRect(const Rect& rect)
+#else
+RSTextRect TextPattern::ConvertRect(const Rect& rect)
+#endif
 {
     return { RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()), RSTextDirection::LTR };
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
+#else
+std::vector<RSTextRect> TextPattern::GetTextBoxes()
+#endif
 {
     std::vector<Rect> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> res;
+#else
+    std::vector<RSTextRect> res;
+#endif
     res.reserve(selectedRects.size());
     for (auto&& rect : selectedRects) {
         res.emplace_back(ConvertRect(rect));

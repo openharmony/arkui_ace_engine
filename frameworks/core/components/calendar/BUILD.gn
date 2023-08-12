@@ -27,6 +27,10 @@ build_component("calendar") {
   if (ace_use_new_skia) {
     sources -= [ "flutter_render_calendar.cpp" ]
   }
+  if (enable_graphic_text_gine) {
+    include_dirs = [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
+    defines = [ "USE_GRAPHIC_TEXT_GINE" ]
+  }
   rosen_sources = [ "rosen_render_calendar.cpp" ]
 
   component_deps = [
