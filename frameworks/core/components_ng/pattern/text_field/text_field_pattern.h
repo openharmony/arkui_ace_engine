@@ -960,7 +960,7 @@ public:
     {
         return inlinePadding_;
     }
-    
+
     bool GetScrollBarVisible() const
     {
         return scrollBarVisible_;
@@ -1190,6 +1190,7 @@ private:
     bool contChange_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
+    float paragraphWidth_ = 0.0f;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;

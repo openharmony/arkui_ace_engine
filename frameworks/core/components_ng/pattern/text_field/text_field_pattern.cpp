@@ -251,7 +251,14 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (!IsDragging()) {
         dragParagraph_ = paragraph_;
     }
-    textRect_ = textFieldLayoutAlgorithm->GetTextRect();
+
+    auto paragraphWidth = textFieldLayoutAlgorithm->GetParagraphWidth();
+    auto textRect = textFieldLayoutAlgorithm->GetTextRect();
+    if (SelectOverlayIsOn() && (paragraphWidth != paragraphWidth_ || textRect != textRect_)) {
+        needToRefreshSelectOverlay_ = true;
+    }
+    paragraphWidth_ = paragraphWidth;
+    textRect_ = textRect;
     imageRect_ = textFieldLayoutAlgorithm->GetImageRect();
     unitWidth_ = textFieldLayoutAlgorithm->GetUnitWidth();
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
@@ -2268,7 +2275,6 @@ void TextFieldPattern::OnModifyDone()
     }
     auto textWidth = static_cast<int32_t>(textEditingValue_.GetWideText().length());
     if (SelectOverlayIsOn()) {
-        needToRefreshSelectOverlay_ = true;
         UpdateSelection(
             std::clamp(textSelector_.GetStart(), 0, textWidth), std::clamp(textSelector_.GetEnd(), 0, textWidth));
         UpdateCaretPositionWithClamp(textSelector_.GetEnd());

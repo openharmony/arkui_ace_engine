@@ -286,6 +286,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
         pattern->SetSingleLineHeight(preferredHeight);
     }
+    paragraphWidth_ = paragraph_->GetLongestLine();
     // textarea size.
     if (pattern->IsTextArea()) {
         auto paragraphHeight =
