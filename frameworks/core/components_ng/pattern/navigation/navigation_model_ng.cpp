@@ -730,8 +730,6 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
         textLayoutProperty->UpdateMaxLines(1); // 1:title's maxLine.
     }
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
-    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
 }
@@ -937,9 +935,6 @@ void NavigationModelNG::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
     textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-    textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
-    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetSubtitle(subtitleNode);
 }

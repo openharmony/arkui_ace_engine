@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#define private public
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -32,8 +33,6 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-
-#define private public
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
