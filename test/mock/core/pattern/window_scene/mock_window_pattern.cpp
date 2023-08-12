@@ -24,7 +24,7 @@ void WindowPattern::InitContent() {}
 
 void WindowPattern::CreateStartingNode() {}
 
-void WindowPattern::CreateSnapshotNode(bool usePixelMap) {}
+void WindowPattern::CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot) {}
 
 void WindowPattern::OnAttachToFrameNode() {}
 

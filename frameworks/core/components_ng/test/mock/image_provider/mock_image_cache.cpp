@@ -38,4 +38,6 @@ RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
 void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImageData>& imageData) {}
 
 void ImageCache::Purge() {}
+
+void ImageCache::ClearCacheImage(const std::string& key) {}
 } // namespace OHOS::Ace
