@@ -65,6 +65,7 @@ public:
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollEndCallback() {};
+    virtual void OnScrollStartCallback() {};
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();

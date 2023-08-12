@@ -453,7 +453,20 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         }
         return true;
     };
-    ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction) };
+    auto scrollStartCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        pattern->OnScrollStartCallback();
+        return pattern->OnScrollCallback(static_cast<float>(offset), source);
+    };
+    auto scrollEndCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnScrollEnd();
+        pattern->OnScrollEndCallback();
+    };
+    ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction),
+        std::move(scrollStartCallback), std::move(scrollEndCallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
 }

@@ -218,6 +218,7 @@ public:
     }
 private:
     void OnScrollEndCallback() override;
+    void OnScrollStartCallback() override;
 
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
