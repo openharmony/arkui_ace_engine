@@ -163,8 +163,9 @@ void MenuPattern::OnModifyDone()
         ResetTheme(host, true);
     }
     auto menuFirstNode = GetFirstInnerMenu();
-    CHECK_NULL_VOID(menuFirstNode);
-    CopyMenuAttr(menuFirstNode);
+    if (menuFirstNode) {
+        CopyMenuAttr(menuFirstNode);
+    }
     SetAccessibilityAction();
 }
 
