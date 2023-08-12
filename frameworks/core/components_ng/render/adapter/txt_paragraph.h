@@ -79,7 +79,9 @@ public:
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) override;
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) override;
     void SetIndents(const std::vector<float>& indents) override;
+#ifndef USE_GRAPHIC_TEXT_GINE
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
+#endif
 
 private:
     void CreateBuilder();

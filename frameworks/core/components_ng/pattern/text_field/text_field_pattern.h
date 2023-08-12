@@ -788,14 +788,14 @@ public:
         for (const auto& textBoxes : textBoxes_) {
 #ifndef USE_GRAPHIC_TEXT_GINE
             bool isInRange = LessOrEqual(textBoxes.rect_.GetLeft(), offset.GetX()) &&
-                LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
-                LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
-                LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
+                             LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
+                             LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
+                             LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
 #else
             bool isInRange = LessOrEqual(textBoxes.rect.GetLeft(), offset.GetX()) &&
-                LessOrEqual(offset.GetX(), textBoxes.rect.GetRight()) &&
-                LessOrEqual(textBoxes.rect.GetTop(), offset.GetY()) &&
-                LessOrEqual(offset.GetY(), textBoxes.rect.GetBottom());
+                             LessOrEqual(offset.GetX(), textBoxes.rect.GetRight()) &&
+                             LessOrEqual(textBoxes.rect.GetTop(), offset.GetY()) &&
+                             LessOrEqual(offset.GetY(), textBoxes.rect.GetBottom());
 #endif
             if (isInRange) {
                 return true;
@@ -1133,7 +1133,9 @@ private:
 
     bool ResetObscureTickCountDown();
     bool IsInPasswordMode() const;
+#ifndef USE_GRAPHIC_TEXT_GINE
     void GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end);
+#endif
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
 

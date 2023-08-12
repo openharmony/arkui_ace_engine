@@ -293,7 +293,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
         pattern->SetSingleLineHeight(preferredHeight);
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     paragraphWidth_ = paragraph_->GetLongestLine();
+#else
+    paragraphWidth_ = paragraph_->GetActualWidth();
+#endif
     // textarea size.
     if (pattern->IsTextArea()) {
         auto paragraphHeight =
@@ -302,7 +306,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             static_cast<float>(paragraphHeight + (counterParagraph_ ? counterParagraph_->GetHeight() : 0.0f));
         if (isInlineStyle && pattern->GetTextInputFlag()) {
             idealHeight = pattern->GetSingleLineHeight() *
-                layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+                textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
 #ifndef USE_GRAPHIC_TEXT_GINE
             idealWidth = paragraph_->GetLongestLine();
 #else

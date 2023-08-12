@@ -120,6 +120,7 @@ void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
     int32_t extend = paragraph_->GetHandlePositionForClick(pos);
+#ifndef USE_GRAPHIC_TEXT_GINE
     int32_t start = 0;
     int32_t end = 0;
     if (!paragraph_->GetWordBoundary(extend, start, end)) {
@@ -128,6 +129,11 @@ void TextPattern::InitSelection(const Offset& pos)
             static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
     }
     textSelector_.Update(start, end);
+#else
+    int32_t extendEnd =
+        std::min(static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
+    textSelector_.Update(extend, extendEnd);
+#endif
 }
 
 OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)

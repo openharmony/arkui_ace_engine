@@ -147,8 +147,11 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 void TxtParagraph::GetRectsForPlaceholders(std::vector<Rect>& selectedRects) {}
 
 void TxtParagraph::SetIndents(const std::vector<float>& indents) {}
+
+#ifndef USE_GRAPHIC_TEXT_GINE
 bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
 {
     return false;
 }
+#endif
 } // namespace OHOS::Ace::NG

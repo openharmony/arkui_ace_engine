@@ -425,6 +425,7 @@ void TxtParagraph::SetIndents(const std::vector<float>& indents)
     paragraphTxt->SetIndents(indents);
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
 {
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
@@ -434,4 +435,5 @@ bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
     end = static_cast<int32_t>(range.end);
     return true;
 }
+#endif
 } // namespace OHOS::Ace::NG

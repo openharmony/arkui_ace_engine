@@ -51,7 +51,7 @@ declare_args() {
   ace_sanitize_debug = false
 
   # Enable when build for text engine adapter
-  enable_graphic_text_gine = false
+  enable_graphic_text_gine = true
 }
 
 enable_dump_drawcmd = false
