@@ -557,8 +557,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             }
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-            asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+        SubwindowManager::GetInstance()->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack),
+                                                    asyncContext->callbacks);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();

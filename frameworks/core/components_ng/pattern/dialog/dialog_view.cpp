@@ -44,6 +44,7 @@ void ProcessMaskRect(const DialogProperties& param, const RefPtr<FrameNode>& dia
                            width.ConvertToPxWithSize(rootWidth),
                            height.ConvertToPxWithSize(rootHeight));
         dialogContext->ClipWithRect(rect);
+        dialogContext->UpdateClipEdge(true);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         std::vector<DimensionRect> mouseResponseRegion;
         mouseResponseRegion.push_back(param.maskRect.value());
