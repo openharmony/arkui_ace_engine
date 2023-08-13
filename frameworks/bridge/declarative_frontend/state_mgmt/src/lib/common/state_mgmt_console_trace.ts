@@ -37,6 +37,9 @@ class stateMgmtConsole {
     public static error (...args : any) : void {
         aceConsole.error(...args);
     }
+    public static applicationError (...args : any) : void {
+        aceConsole.error(`FIX THIS APPLICATION ERROR vvvvvvvvvvvv\n`, ...args);
+    }
 }
 
 type TraceArgs = string | number | boolean;

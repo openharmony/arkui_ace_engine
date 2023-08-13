@@ -100,7 +100,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     constructor(initializingProperties = {}) {
         super();
-        
+        stateMgmtConsole.debug(`${this.constructor.name} constructor.`);
         this.storage_ = new Map();
         if (Object.keys(initializingProperties).length) {
             this.initializeProps(initializingProperties);
@@ -113,7 +113,7 @@ class LocalStorage extends NativeLocalStorage {
      * not a public / sdk function
      */
     initializeProps(initializingProperties = {}) {
-        
+        stateMgmtConsole.debug(`${this.constructor.name} initializing with Object keys: [${Object.keys(initializingProperties)}].`);
         this.storage_.clear();
         Object.keys(initializingProperties).filter((propName) => initializingProperties[propName] != undefined).forEach((propName) => this.addNewPropertyInternal(propName, initializingProperties[propName]));
     }
@@ -215,11 +215,11 @@ class LocalStorage extends NativeLocalStorage {
         }
         var p = this.storage_.get(propName);
         if (p) {
-            
+            stateMgmtConsole.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) update existing property`);
             p.set(newValue);
         }
         else {
-            
+            stateMgmtConsole.debug(`${this.constructor.name}.setOrCreate(${propName}, ${newValue}) create new entry and set value`);
             this.addNewPropertyInternal(propName, newValue);
         }
         return true;
@@ -402,7 +402,7 @@ class LocalStorage extends NativeLocalStorage {
             p.aboutToBeDeleted();
         }
         this.storage_.clear();
-        
+        stateMgmtConsole.debug(`${this.constructor.name}.deleteAll: success`);
         return true;
     }
     /**
@@ -503,7 +503,7 @@ class AppStorage extends LocalStorage {
     */
     static createSingleton(initializingPropersties) {
         if (!AppStorage.instance_) {
-            
+            stateMgmtConsole.debug("Creating AppStorage instance.");
             AppStorage.instance_ = new AppStorage(initializingPropersties);
         }
         else {
@@ -1098,11 +1098,11 @@ class SubscriberManager {
      * not a public / sdk function
      */
     dumpSubscriberInfo() {
-        
+        stateMgmtConsole.debug("Dump of SubscriberManager +++ (sart)");
         for (let [id, subscriber] of this.subscriberById_) {
-            
+            stateMgmtConsole.debug(`Id: ${id} -> ${subscriber['info'] ? subscriber['info']() : 'unknown'}`);
         }
-        
+        stateMgmtConsole.debug("Dump of SubscriberManager +++ (end)");
     }
     /**
      *
@@ -1119,7 +1119,7 @@ class SubscriberManager {
      */
     constructor() {
         this.subscriberById_ = new Map();
-        
+        stateMgmtConsole.debug("SubscriberManager has been created.");
     }
 }
 /*
@@ -1230,7 +1230,7 @@ class SubscribableAbstract {
      */
     constructor() {
         this.owningProperties_ = new Set();
-        
+        stateMgmtConsole.debug(`SubscribableAbstract: construcstor done`);
     }
     /**
     * A subsclass must call this function whenever one of its properties has
@@ -1241,7 +1241,7 @@ class SubscribableAbstract {
      * @since 10
      */
     notifyPropertyHasChanged(propName, newValue) {
-        
+        stateMgmtConsole.debug(`SubscribableAbstract: notifyPropertyHasChanged '${propName}'.`);
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
             if (owningProperty) {
@@ -1282,7 +1282,7 @@ class SubscribableAbstract {
      * @since 10
      */
     addOwningProperty(subscriber) {
-        
+        stateMgmtConsole.debug(`SubscribableAbstract: addOwningProperty: subscriber '${subscriber.id__()}'.`);
         this.owningProperties_.add(subscriber.id__());
     }
     /**
@@ -1304,7 +1304,7 @@ class SubscribableAbstract {
      * framework internal function, not to be used by applications.
      */
     removeOwningPropertyById(subscriberId) {
-        
+        stateMgmtConsole.debug(`SubscribableAbstract: removeOwningProperty '${subscriberId}'.`);
         this.owningProperties_.delete(subscriberId);
     }
     /**
@@ -1475,7 +1475,8 @@ class PersistentStorage {
       *
       */
     static notifyHasChanged(propName) {
-        
+        stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
+      '${PersistentStorage.getOrCreate().links_.get(propName)}' to storage`);
         PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
     /**
@@ -1483,7 +1484,8 @@ class PersistentStorage {
      * @deprecated
      */
     static NotifyHasChanged(propName) {
-        
+        stateMgmtConsole.debug(`PersistentStorage: force writing '${propName}'-
+        '${PersistentStorage.getOrCreate().links_.get(propName)}' to storage`);
         PersistentStorage.storage_.set(propName, PersistentStorage.getOrCreate().links_.get(propName).get());
     }
     /**
@@ -1500,14 +1502,14 @@ class PersistentStorage {
     persistProp(propName, defaultValue) {
         if (this.persistProp1(propName, defaultValue)) {
             // persist new prop
-            
+            stateMgmtConsole.debug(`PersistentStorage: writing '${propName}' - '${this.links_.get(propName)}' to storage`);
             PersistentStorage.storage_.set(propName, this.links_.get(propName).get());
         }
     }
     // helper function to persist a property
     // does everything except writing prop to disk
     persistProp1(propName, defaultValue) {
-        
+        stateMgmtConsole.debug(`PersistentStorage: persistProp1 ${propName} ${defaultValue}`);
         if (defaultValue == null || defaultValue == undefined) {
             stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
             return false;
@@ -1518,14 +1520,14 @@ class PersistentStorage {
         }
         let link = AppStorage.link(propName, this);
         if (link) {
-            
+            stateMgmtConsole.debug(`PersistentStorage: persistProp ${propName} in AppStorage, using that`);
             this.links_.set(propName, link);
         }
         else {
             let newValue = PersistentStorage.storage_.get(propName);
             let returnValue;
             if (newValue == undefined || newValue == null) {
-                
+                stateMgmtConsole.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
                 returnValue = defaultValue;
             }
             else {
@@ -1533,7 +1535,7 @@ class PersistentStorage {
             }
             link = AppStorage.setAndLink(propName, returnValue, this);
             this.links_.set(propName, link);
-            
+            stateMgmtConsole.debug(`PersistentStorage: created new persistent prop for ${propName}`);
         }
         return true;
     }
@@ -1547,7 +1549,7 @@ class PersistentStorage {
             link.aboutToBeDeleted();
             this.links_.delete(propName);
             PersistentStorage.storage_.delete(propName);
-            
+            stateMgmtConsole.debug(`PersistentStorage: deleteProp: no longer persisting '${propName}'.`);
         }
         else {
             stateMgmtConsole.warn(`PersistentStorage: '${propName}' is not a persisted property warning.`);
@@ -1555,23 +1557,23 @@ class PersistentStorage {
     }
     write() {
         this.links_.forEach((link, propName, map) => {
-            
+            stateMgmtConsole.debug(`PersistentStorage: writing ${propName} to storage`);
             PersistentStorage.storage_.set(propName, link.get());
         });
     }
     propertyHasChanged(info) {
-        
+        stateMgmtConsole.debug("PersistentStorage: property changed");
         this.write();
     }
     syncPeerHasChanged(eventSource) {
-        
+        stateMgmtConsole.debug(`PersistentStorage: sync peer ${eventSource.info()} has changed`);
         this.write();
     }
     // public required by the interface, use the static method instead!
     aboutToBeDeleted() {
-        
+        stateMgmtConsole.debug("PersistentStorage: about to be deleted");
         this.links_.forEach((val, key, map) => {
-            
+            stateMgmtConsole.debug(`PersistentStorage: removing ${key}`);
             val.aboutToBeDeleted();
         });
         this.links_.clear();
@@ -1709,13 +1711,13 @@ class Environment {
             return false;
         }
         this.props_.set(key, prop);
-        
+        stateMgmtConsole.debug(`Environment: envProp for '${key}' done.`);
         return true;
     }
     envProps(properties) {
         properties.forEach(property => {
             this.envProp(property.key, property.defaultValue);
-            
+            stateMgmtConsole.debug(`Environment: envProps for '${property.key}' done.`);
         });
     }
     keys() {
@@ -1731,7 +1733,7 @@ class Environment {
     onValueChanged(key, value) {
         let ok = AppStorage.set(key, value);
         if (ok) {
-            
+            stateMgmtConsole.debug(`Environment: onValueChanged: ${key} changed to ${value}`);
         }
         else {
             stateMgmtConsole.warn(`Environment: onValueChanged: error changing ${key}! See results above.`);
@@ -1780,6 +1782,9 @@ class stateMgmtConsole {
     }
     static error(...args) {
         aceConsole.error(...args);
+    }
+    static applicationError(...args) {
+        aceConsole.error(`FIX THIS APPLICATION ERROR vvvvvvvvvvvv\n`, ...args);
     }
 }
 class stateMgmtTrace {
@@ -1873,11 +1878,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 // define just once to get just one Symbol
 const __IS_OBSERVED_PROXIED = Symbol("_____is_observed_proxied__");
 function Observed(constructor_, _) {
-    
+    stateMgmtConsole.debug(`@Observed class decorator: Overwriting constructor for '${constructor_.name}', gets wrapped inside ObservableObject proxy.`);
     let ObservedClass = class extends constructor_ {
         constructor(...args) {
             super(...args);
-            
+            stateMgmtConsole.debug(`@Observed '${constructor_.name}' modified constructor.`);
             let isProxied = Reflect.has(this, __IS_OBSERVED_PROXIED);
             Object.defineProperty(this, __IS_OBSERVED_PROXIED, {
                 value: true,
@@ -1886,11 +1891,11 @@ function Observed(constructor_, _) {
                 writable: false
             });
             if (isProxied) {
-                
+                stateMgmtConsole.debug(`   ... new '${constructor_.name}', is proxied already`);
                 return this;
             }
             else {
-                
+                stateMgmtConsole.debug(`   ... new '${constructor_.name}', wrapping inside ObservedObject proxy`);
                 return ObservedObject.createNewInternal(this, undefined);
             }
         }
@@ -1919,11 +1924,11 @@ class SubscribableHandler {
         if (owningProperty) {
             this.addOwningProperty(owningProperty);
         }
-        
+        stateMgmtConsole.debug(`SubscribableHandler: constructor done`);
     }
     addOwningProperty(subscriber) {
         if (subscriber) {
-            
+            stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`);
             this.owningProperties_.add(subscriber.id__());
         }
         else {
@@ -1937,11 +1942,11 @@ class SubscribableHandler {
         return this.removeOwningPropertyById(property.id__());
     }
     removeOwningPropertyById(subscriberId) {
-        
+        stateMgmtConsole.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`);
         this.owningProperties_.delete(subscriberId);
     }
     notifyObjectPropertyHasChanged(propName, newValue) {
-        
+        stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`);
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
             if (owningProperty) {
@@ -1967,7 +1972,7 @@ class SubscribableHandler {
     // enable calling from 'get' trap handler functions to this function once
     // adding support for observed computed variables
     notifyObjectPropertyHasBeenRead(propName) {
-        
+        stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasBeenRead '${propName}'.`);
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
             if (owningProperty) {
@@ -1979,11 +1984,11 @@ class SubscribableHandler {
         });
     }
     has(target, property) {
-        
+        stateMgmtConsole.debug(`SubscribableHandler: has '${property.toString()}'.`);
         return (property === ObservedObject.__IS_OBSERVED_OBJECT) ? true : Reflect.has(target, property);
     }
     get(target, property, receiver) {
-        
+        stateMgmtConsole.debug(`SubscribableHandler: get '${property.toString()}'.`);
         return (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) ? target : Reflect.get(target, property, receiver);
     }
     set(target, property, newValue) {
@@ -2002,7 +2007,7 @@ class SubscribableHandler {
                 if (Reflect.get(target, property) == newValue) {
                     return true;
                 }
-                
+                stateMgmtConsole.debug(`SubscribableHandler: set '${property.toString()}'.`);
                 Reflect.set(target, property, newValue);
                 this.notifyObjectPropertyHasChanged(property.toString(), newValue);
                 return true;
@@ -2101,7 +2106,7 @@ class ObservedObject extends ExtendableProxy {
                     }
                     if (self.inPlaceModifications.has(prop)) {
                         // in place modfication function result == target, the raw array modified
-                        
+                        stateMgmtConsole.debug("return self mod function");
                         return function () {
                             const result = ret.apply(target, arguments);
                             // 'result' is the unproxied object               
@@ -2299,7 +2304,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
     // Method name is used to check object is of type ObservedPropertyAbstract
     // Do NOT override in derived classed, use addSubscriber
     subscribeMe(subscriber) {
-        
+        stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
         this.subscribers_.add(subscriber.id__());
     }
     /*
@@ -2329,7 +2334,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         }
     }
     notifyHasChanged(newValue) {
-        
+        stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2352,7 +2357,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         });
     }
     notifyPropertyRead() {
-        
+        stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`);
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2502,7 +2507,7 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     // It is NOT called when
     //    thisProp.aObsObj = new ClassA
     hasChanged(newValue) {
-        
+        stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
         this.notifyHasChanged(this.wrappedValue_);
     }
     unsubscribeFromOwningProperty() {
@@ -2522,37 +2527,37 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
     */
     setValueInternal(newValue) {
         if (typeof newValue !== 'object') {
-            
+            stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
             return false;
         }
         this.unsubscribeFromOwningProperty();
         if (ObservedObject.IsObservedObject(newValue)) {
-            
+            stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
             ObservedObject.addOwningProperty(newValue, this);
             this.wrappedValue_ = newValue;
         }
         else if (newValue instanceof SubscribaleAbstract) {
-            
+            stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
             this.wrappedValue_ = newValue;
             this.wrappedValue_.addOwningProperty(this);
         }
         else {
-            
+            stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
         }
         return true;
     }
     get() {
-        
+        stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: get`);
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            
+            stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set, changed`);
         this.setValueInternal(newValue);
         this.notifyHasChanged(newValue);
     }
@@ -2602,7 +2607,7 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
         super.aboutToBeDeleted();
     }
     hasChanged(newValue) {
-        
+        stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: hasChanged`);
         this.notifyHasChanged(this.wrappedValue_);
     }
     /*
@@ -2611,20 +2616,20 @@ class ObservedPropertySimple extends ObservedPropertySimpleAbstract {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
-        
+        stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}'] new value is of simple type`);
         this.wrappedValue_ = newValue;
     }
     get() {
-        
+        stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: get returns '${JSON.stringify(this.wrappedValue_)}' .`);
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            
+            stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: set, changed from '${JSON.stringify(this.wrappedValue_)}' to '${JSON.stringify(newValue)}.`);
         this.setValueInternal(newValue);
         this.notifyHasChanged(newValue);
     }
@@ -2700,22 +2705,22 @@ class SynchedPropertyObjectTwoWay extends ObservedPropertyObjectAbstract {
     // will call this cb function when property has changed
     hasChanged(newValue) {
         if (!this.changeNotificationIsOngoing_) {
-            
+            stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
             this.notifyHasChanged(this.getObject());
         }
     }
     // get 'read through` from the ObservedProperty
     get() {
-        
+        stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: get`);
         return this.getObject();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.getObject() == newValue) {
-            
+            stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`SynchedPropertyObjectTwoWay[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         ObservedObject.removeOwningProperty(this.getObject(), this);
         // the purpose of the changeNotificationIsOngoing_ is to avoid 
         // circular notifications @Link -> source @State -> other but alos same @Link
@@ -2772,16 +2777,16 @@ class SynchedPropertySimpleOneWay extends ObservedPropertySimpleAbstract {
     }
     // get 'read through` from the ObservedProperty
     get() {
-        
+        stateMgmtConsole.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: get returns '${this.wrappedValue_}'`);
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            
+            stateMgmtConsole.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value '${this.wrappedValue_}'- ignoring.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`SynchedPropertySimpleOneWay[${this.id__()}, '${this.info() || "unknown"}']: set from '${this.wrappedValue_} to '${newValue}'.`);
         this.wrappedValue_ = newValue;
         this.notifyHasChanged(newValue);
     }
@@ -2815,7 +2820,7 @@ class SynchedPropertySimpleOneWaySubscribing extends SynchedPropertySimpleOneWay
         super.aboutToBeDeleted();
     }
     hasChanged(newValue) {
-        
+        stateMgmtConsole.debug(`SynchedPropertySimpleOneWaySubscribing[${this.id__()}, '${this.info() || "unknown"}']: source property hasChanged'.`);
         this.set(newValue);
     }
     /**
@@ -2873,13 +2878,13 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
     // a set (newValue) is not done because get reads through for the source_
     hasChanged(newValue) {
         if (!this.changeNotificationIsOngoing_) {
-            
+            stateMgmtConsole.debug(`SynchedPropertySimpleTwoWay[${this.id__()}, '${this.info() || "unknown"}']: hasChanged to '${newValue}'.`);
             this.notifyHasChanged(newValue);
         }
     }
     // get 'read through` from the ObservedProperty
     get() {
-        
+        stateMgmtConsole.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: get`);
         if (!this.source_) {
             stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}'] source_ is undefined: get value is undefined.`);
             return undefined;
@@ -2894,10 +2899,10 @@ class SynchedPropertySimpleTwoWay extends ObservedPropertySimpleAbstract {
             return;
         }
         if (this.source_.get() == newValue) {
-            
+            stateMgmtConsole.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         // the source_ ObservedProeprty will call: this.hasChanged(newValue);
         // the purpose of the changeNotificationIsOngoing_ is to avoid 
         // circular notifications @Link -> source @State -> other but alos same @Link
@@ -2966,22 +2971,22 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
     // this object is subscriber to ObservedObject
     // will call this cb function when property has changed
     hasChanged(newValue) {
-        
+        stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`);
         this.notifyHasChanged(this.obsObject_);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        
+        stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: get`);
         this.notifyPropertyRead();
         return this.obsObject_;
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.obsObject_ == newValue) {
-            
+            stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${newValue}'- ignoring.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
         // unsubscribe from the old value ObservedObject
         ObservedObject.removeOwningProperty(this.obsObject_, this);
         this.obsObject_ = newValue;
@@ -3023,7 +3028,7 @@ class SynchedPropertyNesedObject extends ObservedPropertyObjectAbstract {
 class View extends NativeViewFullUpdate {
     get localStorage_() {
         if (!this.localStoragebackStore_) {
-            
+            stateMgmtConsole.info(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
             this.localStoragebackStore_ = new LocalStorage({ /* emty */});
         }
         return this.localStoragebackStore_;
@@ -3070,16 +3075,16 @@ class View extends NativeViewFullUpdate {
         this.localStoragebackStore_ = undefined;
         if (parent) {
             // this View is not a top-level View
-            
+            stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance of the parent View.`);
             this.setCardId(parent.getCardId());
             this.localStorage_ = parent.localStorage_;
         }
         else if (localStorage) {
             this.localStorage_ = localStorage;
-            
+            stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
         }
         SubscriberManager.Add(this);
-        
+        stateMgmtConsole.debug(`${this.constructor.name}: constructor done`);
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -3096,22 +3101,22 @@ class View extends NativeViewFullUpdate {
             // need to sync container instanceId to switch instanceId in C++ side.
             this.syncInstanceId();
             if (this.propsUsedForRender.has(info)) {
-                
+                stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View needs update`);
                 this.markNeedUpdate();
             }
             else {
-                
+                stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. View does NOT need update`);
             }
             let cb = this.watchedProps.get(info);
             if (cb) {
-                
+                stateMgmtConsole.debug(`${this.constructor.name}: propertyHasChanged ['${info || "unknowm"}']. calling @Watch function`);
                 cb.call(this, info);
             }
             this.restoreInstanceId();
         } // if info avail.
     }
     propertyRead(info) {
-        
+        stateMgmtConsole.debug(`${this.constructor.name}: propertyRead ['${info || "unknowm"}'].`);
         if (info && (info != "unknown") && this.isRenderingInProgress) {
             this.propsUsedForRender.add(info);
         }
@@ -3121,7 +3126,7 @@ class View extends NativeViewFullUpdate {
         return this.propsUsedForRender;
     }
     aboutToRender() {
-        
+        stateMgmtConsole.debug(`${this.constructor.name}: aboutToRender`);
         // reset
         this.propsUsedForRender = new Set();
         this.isRenderingInProgress = true;
@@ -3132,7 +3137,7 @@ class View extends NativeViewFullUpdate {
     }
     onRenderDone() {
         this.isRenderingInProgress = false;
-        
+        stateMgmtConsole.debug(`${this.constructor.name}: onRenderDone: render performed get access to these properties: ${JSON.stringify(Array.from(this.propsUsedForRender))}.`);
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -3235,6 +3240,46 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.subscriberRefs_.clear();
         this.owningView_ = undefined;
     }
+    // dump basic info about this variable to a string, non-recursive, no subscriber info
+    debugInfo() {
+        const propSource = this.isPropSourceObservedPropertyFakeName();
+        return (propSource)
+            ? `internal source (ObservedPropertyPU) of @Prop ${propSource} [${this.id__()}]`
+            : `${this.debugInfoDecorator()} '${this.info()}'[${this.id__()}] <${this.debugInfoOwningView()}>`;
+    }
+    debugInfoOwningView() {
+        return `${this.owningView_ ? this.owningView_.debugInfo() : "owning @Component UNKNOWN"}`;
+    }
+    // dump info about owning view and subscribers (PU ones only)
+    // use function only for debug output and DFX.
+    debugInfoSubscribers() {
+        let result = "";
+        let sepa = "";
+        if (this.owningView_) {
+            result = `owned by ${this.debugInfoOwningView()}, `;
+        }
+        result += `    sync peers: `;
+        this.subscriberRefs_.forEach((subscriber) => {
+            if (subscriber instanceof ObservedPropertyAbstractPU && "debugInfo" in subscriber) {
+                result += `    - ${sepa}${subscriber.debugInfo()}`;
+                sepa = ", ";
+            }
+        });
+        return result;
+    }
+    /* for @Prop value from source we need to generate a @State
+       that observes when this value changes. This ObservedPropertyPU
+       sits inside SynchedPropertyOneWayPU.
+       below methods invent a fake variable name for it
+    */
+    getPropSourceObservedPropertyFakeName() {
+        return `${this.info()}_prop_fake_state_source___`;
+    }
+    isPropSourceObservedPropertyFakeName() {
+        return this.info().endsWith("_prop_fake_state_source___")
+            ? this.info().substring(0, this.info().length - "_prop_fake_state_source___".length)
+            : false;
+    }
     /*
       Virtualized version of the subscription mechanism - add subscriber
       Overrides implementation in ObservedPropertyAbstract<T>
@@ -3268,7 +3313,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
      */
     enableDelayedNotification() {
         if (this.delayedNotification_ != ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) {
-            
+            stateMgmtConsole.debug(`${this.constructor.name}: enableDelayedNotification.`);
             this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_none_pending;
         }
     }
@@ -3284,16 +3329,15 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         const result = (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending)
             ? this.dependentElementIds_
             : undefined;
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
         return result;
     }
     notifyPropertyRead() {
-        stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
-        notifyPropertyRead, DO NOT USE with PU. Use notifyPropertyHasBeenReadPU`);
+        stateMgmtConsole.error(`${this.debugInfo()}: notifyPropertyRead, DO NOT USE with PU. Use notifyPropertyHasBeenReadPU`);
     }
     notifyPropertyHasBeenReadPU() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasBeenReadPU.`);
         this.subscriberRefs_.forEach((subscriber) => {
             if (subscriber) {
                 // TODO
@@ -3308,7 +3352,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.recordDependentUpdate();
     }
     notifyPropertyHasChangedPU() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`);
         if (this.owningView_) {
             if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
                 // send viewPropertyHasChanged right away
@@ -3325,7 +3369,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                     subscriber.syncPeerHasChanged(this);
                 }
                 else {
-                    stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
+                    stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
                 }
             }
         });
@@ -3333,7 +3377,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     markDependentElementsDirty(view) {
         // TODO ace-ets2bundle, framework, complicated apps need to update together
         // this function will be removed after a short transition period.
-        stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: markDependentElementsDirty no longer supported. App will work ok, but
+        stateMgmtConsole.warn(`${this.debugInfo()}: markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
     }
     numberOfSubscrbers() {
@@ -3407,11 +3451,11 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             // not access recording 
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: recordDependentUpdate on elmtId ${elmtId}.`);
         this.dependentElementIds_.add(elmtId);
     }
     purgeDependencyOnElmtId(rmElmtId) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: purgeDependencyOnElmtId ${rmElmtId}`);
         this.dependentElementIds_.delete(rmElmtId);
     }
     SetPropertyUnchanged() {
@@ -3421,18 +3465,17 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     // FIXME check, is this used from AppStorage.
     // unified Appstorage, what classes to use, and the API
     createLink(subscribeOwner, linkPropName) {
-        throw new Error("Can not create a AppStorage 'Link' from a @State property. ");
+        throw new Error(`${this.debugInfo()}: createLink: Can not create a AppStorage 'Link' from this property.`);
     }
     createProp(subscribeOwner, linkPropName) {
-        throw new Error("Can not create a AppStorage 'Prop' from a @State property. ");
+        throw new Error(`${this.debugInfo()}: createProp: Can not create a AppStorage 'Prop' from a @State property. `);
     }
     /*
       Below empty functions required to keep as long as this class derives from FU version
       ObservedPropertyAbstract. Need to overwrite these functions to do nothing for PU
       */
     notifyHasChanged(_) {
-        stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
-          notifyHasChanged, DO NOT USE with PU. Use syncPeerHasChanged() or objectPropertyHasChangedPU()`);
+        stateMgmtConsole.error(`${this.debugInfo()}: notifyHasChanged, DO NOT USE with PU. Use syncPeerHasChanged() or objectPropertyHasChangedPU()`);
     }
     hasChanged(_) {
         // unused for PU
@@ -3497,12 +3540,15 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         this.removeSubscriber(unsubscribeMe);
         super.aboutToBeDeleted();
     }
+    debugInfoDecorator() {
+        return `@State/@Provide (class ObservedPropertyPU)`;
+    }
     /**
      * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
      * @param eventSource
      */
     syncPeerHasChanged(eventSource) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}'.`);
         this.notifyPropertyHasChangedPU();
     }
     /**
@@ -3511,11 +3557,11 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
      * @param changedPropertyName
      */
     objectPropertyHasChangedPU(souceObject, changedPropertyName) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`);
         this.notifyPropertyHasChangedPU();
     }
     objectPropertyHasBeenReadPU(souceObject, changedPropertyName) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
         this.notifyPropertyHasBeenReadPU();
     }
     unsubscribeWrappedObject() {
@@ -3535,7 +3581,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
     */
     setValueInternal(newValue) {
         if (newValue == this.wrappedValue_) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: setValueInternal: newValue unchanged`);
             return false;
         }
         if (!this.checkIsSupportedValue(newValue)) {
@@ -3548,37 +3594,37 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
             this.wrappedValue_ = newValue;
         }
         else if (newValue instanceof SubscribableAbstract) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: setValueInternal: new value is an SubscribableAbstract, subscribing to it.`);
             this.wrappedValue_ = newValue;
             this.wrappedValue_.addOwningProperty(this);
         }
         else if (ObservedObject.IsObservedObject(newValue)) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: setValueInternal: new value is an ObservedObject already`);
             ObservedObject.addOwningProperty(newValue, this);
             this.wrappedValue_ = newValue;
         }
         else {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: setValueInternal: new value is an Object, needs to be wrapped in an ObservedObject.`);
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
         }
         return true;
     }
     get() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: get`);
         this.notifyPropertyHasBeenReadPU();
         return this.wrappedValue_;
     }
     getUnmonitored() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: getUnmonitored.`);
         // unmonitored get access , no call to notifyPropertyRead !
         return this.wrappedValue_;
     }
     set(newValue) {
         if (this.wrappedValue_ == newValue) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: set: unchanged value - ignoring.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: set: value about to changed.`);
         if (this.setValueInternal(newValue)) {
             this.notifyPropertyHasChangedPU();
         }
@@ -3665,19 +3711,19 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 // code path for 
                 // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
                 // 2- nested Object/Array inside observed another object/array in parent, source is its value
-                if (!((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
-                    stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class is not instance of SubscribableAbstract, 
-            it also lacks @Observed class decorator. Object property changes will not be observed.`);
+                if (typeof sourceValue == "object" && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
+                    stateMgmtConsole.applicationError(`${this.debugInfo()}:  Provided source object's class is not instance of SubscribableAbstract, 
+              it also lacks @Observed class decorator. Object property changes will not be observed. Application error!`);
                 }
-                
-                this.source_ = new ObservedPropertyObjectPU(sourceValue, this, this.getSourceObservedPropertyFakeName());
+                stateMgmtConsole.debug(`${this.debugInfo()}: constructor: wrapping source in a new ObservedPropertyObjectPU`);
+                this.source_ = new ObservedPropertyObjectPU(sourceValue, this, this.getPropSourceObservedPropertyFakeName());
                 this.sourceIsOwnObject = true;
             }
         }
         if (this.source_ != undefined) {
             this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: constructor: done!`);
     }
     /*
     like a destructor, need to call this before deleting
@@ -3687,35 +3733,33 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         if (this.source_) {
             this.source_.removeSubscriber(this);
             if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
-                
+                stateMgmtConsole.debug(`${this.debugInfo()}: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
                 this.source_.aboutToBeDeleted();
             }
             this.source_ = undefined;
         }
         super.aboutToBeDeleted();
     }
-    getSourceObservedPropertyFakeName() {
-        return `${this.info()}_source`;
+    debugInfoDecorator() {
+        return `@Prop (class SynchedPropertyOneWayPU)`;
     }
     syncPeerHasChanged(eventSource) {
         if (this.source_ == undefined) {
-            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-       @Prop syncPeerHasChanged peer '${eventSource ? eventSource.info() : "no eventSource info"}' but source_ undefned. Internal error.`);
+            stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
             return;
         }
         if (eventSource && this.source_ == eventSource) {
             // defensive programming: should always be the case!
-            
             const newValue = this.source_.getUnmonitored();
             if (this.checkIsSupportedValue(newValue)) {
-                
+                stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', local value about to change.`);
                 if (this.resetLocalValue(newValue, /* needCopyObject */ true)) {
                     this.notifyPropertyHasChangedPU();
                 }
             }
         }
         else {
-            stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. syncPeerHasChanged from different sender than source_. Ignoring event.`);
+            stateMgmtConsole.warn(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource === null || eventSource === void 0 ? void 0 : eventSource.debugInfo()}', Unexpected situation. syncPeerHasChanged from different sender than source_. Ignoring event.`);
         }
     }
     /**
@@ -3724,20 +3768,20 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
      * @param changedPropertyName
      */
     objectPropertyHasChangedPU(sourceObject, changedPropertyName) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' of object value has changed.`);
         this.notifyPropertyHasChangedPU();
     }
     objectPropertyHasBeenReadPU(sourceObject, changedPropertyName) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: property '${changedPropertyName}' of object value has been read.`);
         this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: getUnmonitored.`);
         // unmonitored get access , no call to notifyPropertyRead !
         return this.localCopyObservedObject_;
     }
     get() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: get.`);
         this.notifyPropertyHasBeenReadPU();
         return this.localCopyObservedObject_;
     }
@@ -3745,17 +3789,17 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
     // set 'writes through` to the ObservedObject
     set(newValue) {
         if (this.localCopyObservedObject_ == newValue) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: set with unchanged value  - nothing to do.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: set: value about to change.`);
         if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
             this.notifyPropertyHasChangedPU();
         }
     }
     // called when updated from parent
     reset(sourceChangedValue) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: reset (update from parent @Component).`);
         if (this.source_ !== undefined && this.checkIsSupportedValue(sourceChangedValue)) {
             // if this.source_.set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged method
             this.source_.set(sourceChangedValue);
@@ -3798,8 +3842,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             }
             else {
                 // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
-                stateMgmtConsole.error(`@Prop ${this.info()}  Provided source object's class \
-            lacks @Observed class decorator. Object property changes will not be observed.`);
+                stateMgmtConsole.debug(`${this.debugInfo()}: Provided source object's is not proxied (is not a ObservedObject). Wrapping it inside ObservedObject.`);
                 this.localCopyObservedObject_ = ObservedObject.createNew(this.localCopyObservedObject_, this);
             }
         }
@@ -3809,7 +3852,9 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         // ViewStackProcessor.getApiVersion function is not present in API9 
         // therefore shallowCopyObject will always be used in API version 9 and before
         // but the code in this file is the same regardless of API version
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: copyObject: Version: \
+    ${(typeof ViewStackProcessor["getApiVersion"] == "function") ? ViewStackProcessor["getApiVersion"]() : 'unknown'}, \
+    will use ${((typeof ViewStackProcessor["getApiVersion"] == "function") && (ViewStackProcessor["getApiVersion"]() >= 10)) ? 'deep copy' : 'shallow copy'} .`);
         return ((typeof ViewStackProcessor["getApiVersion"] == "function") &&
             (ViewStackProcessor["getApiVersion"]() >= 10))
             ? this.deepCopyObject(value, propName)
@@ -3824,7 +3869,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         }
         else if (typeof rawValue != "object") {
             // FIXME would it be better to throw Exception here?
-            stateMgmtConsole.error(`@Prop ${this.info()} shallowCopyObject: request to copy non-object but defined value of type '${typeof rawValue}'. Internal error! Setting copy=original value.`);
+            stateMgmtConsole.error(`${this.debugInfo()}: shallowCopyObject: request to copy non-object value, actual type is '${typeof rawValue}'. Internal error! Setting copy:=original value.`);
             copy = rawValue;
         }
         else if (rawValue instanceof Array) {
@@ -3855,7 +3900,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         }
         else {
             // TODO in PR "F": change to exception throwing:
-            stateMgmtConsole.error(`@Prop ${this.info()} shallow failed. Attempt to copy unsupported value type '${typeof rawValue}' .`);
+            stateMgmtConsole.error(`${this.debugInfo()}: shallow failed. Attempt to copy unsupported value of type '${typeof rawValue}' .`);
             copy = rawValue;
         }
         return copy;
@@ -3891,7 +3936,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             if (alreadyCopiedObject) {
                 let msg = `@Prop deepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
                 stack.forEach(stackItem => msg += ` - ${stackItem.name}`);
-                
+                stateMgmtConsole.debug(msg);
                 return alreadyCopiedObject;
             }
             let copy;
@@ -3966,7 +4011,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
             this.source_.addSubscriber(this);
         }
         else {
-            throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source variable in parent/ancestor @ Component must be defined. Application error!`);
+            throw new SyntaxError(`${this.debugInfo()}: constructor: source variable in parent/ancestor @Component must be defined. Application error!`);
         }
     }
     /*
@@ -3982,19 +4027,21 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         }
         super.aboutToBeDeleted();
     }
+    debugInfoDecorator() {
+        return `@Link/@Consume (class SynchedPropertyTwoWayPU)`;
+    }
     isStorageLinkProp() {
         return (this.source_ && this.source_ instanceof ObservedPropertyAbstract && (!(this.source_ instanceof ObservedPropertyAbstractPU)));
     }
     setObject(newValue) {
         if (!this.source_) {
-            throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), \
-            @Link/@Consume: no source variable in parent/ancestor @Component. Application error.`);
+            throw new SyntaxError(`${this.debugInfo()}: setObject (assign a new value), no source variable in parent/ancestor @Component. Application error.`);
         }
         if (this.getUnmonitored() == newValue) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: set with unchanged value - ignoring.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: set: value has changed.`);
         if (this.checkIsSupportedValue(newValue)) {
             // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
             this.source_.set(newValue);
@@ -4008,7 +4055,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
      */
     syncPeerHasChanged(eventSource) {
         if (!this.changeNotificationIsOngoing_) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}' .`);
             this.notifyPropertyHasChangedPU();
         }
     }
@@ -4018,31 +4065,31 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
      * @param changedPropertyName
      */
     objectPropertyHasChangedPU(sourceObject, changedPropertyName) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' of object value has changed.`);
         this.notifyPropertyHasChangedPU();
     }
     objectPropertyHasBeenReadPU(sourceObject, changedPropertyName) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: property '${changedPropertyName}' of object value has been read.`);
         this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: getUnmonitored.`);
         // unmonitored get access , no call to otifyPropertyRead !
         return (this.source_ ? this.source_.getUnmonitored() : undefined);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: get`);
         this.notifyPropertyHasBeenReadPU();
         return this.getUnmonitored();
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.getUnmonitored() == newValue) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: set with unchanged value  - nothing to do.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: set: value about to change.`);
         // avoid circular notifications @Link -> source @State -> other but also back to same @Link
         this.changeNotificationIsOngoing_ = true;
         this.setObject(newValue);
@@ -4100,32 +4147,35 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
         ObservedObject.removeOwningProperty(this.obsObject_, this);
         super.aboutToBeDeleted();
     }
+    debugInfoDecorator() {
+        return `@ObjectLink (class SynchedPropertyNestedObjectPU)`;
+    }
     objectPropertyHasChangedPU(eventSource, changedPropertyName) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' of object value has changed.`);
         this.notifyPropertyHasChangedPU();
     }
     objectPropertyHasBeenReadPU(sourceObject, changedPropertyName) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: property '${changedPropertyName}' of object value has been read.`);
         this.notifyPropertyHasBeenReadPU();
     }
     getUnmonitored() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: getUnmonitored.`);
         // unmonitored get access , no call to notifyPropertyRead !
         return this.obsObject_;
     }
     // get 'read through` from the ObservedProperty
     get() {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: get`);
         this.notifyPropertyHasBeenReadPU();
         return this.obsObject_;
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
         if (this.obsObject_ == newValue) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: set with unchanged value - nothing to do.`);
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: set: value about to change.`);
         if (this.setValueInternal(newValue)) {
             // notify value change to subscribing View
             this.notifyPropertyHasChangedPU();
@@ -4156,7 +4206,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
                 ObservedObject.addOwningProperty(this.obsObject_, this);
             }
             else {
-                stateMgmtConsole.error(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set/init: @ObjectLink value is neither ObservedObject nor SubscribableAbstract. \
+                stateMgmtConsole.applicationError(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is neither ObservedObject nor SubscribableAbstract. \
       value changes will bot be observed and UI will not update. forgot @Observed class decorator? Application error.`);
             }
         }
@@ -4212,17 +4262,17 @@ class UINodeRegisterProxy {
      2. if not, memorize elmtId to still need un-registration
     */
     obtainDeletedElmtIds() {
-        
+        stateMgmtConsole.debug(`UINodeRegisterProxy.obtainDeletedElmtIds: `);
         let removedElementsInfo = new Array();
         ViewStackProcessor.moveDeletedElmtIds(removedElementsInfo);
-        
+        stateMgmtConsole.debug(`   ... ${removedElementsInfo.length} elmtIds newly obtained from ElementRegister: ${JSON.stringify(removedElementsInfo)} .`);
         removedElementsInfo.forEach(rmElmtInfo => {
             if (this.elmtIdsUnregisteredAheadOfTime_.has(rmElmtInfo.elmtId)) {
-                
+                stateMgmtConsole.debug(`   ... elmtId ${rmElmtInfo.elmtId}[${rmElmtInfo.tag}] listed as unregistered ahead of time. Done with it. `);
                 this.elmtIdsUnregisteredAheadOfTime_.delete(rmElmtInfo.elmtId);
             }
             else {
-                
+                stateMgmtConsole.debug(`   ... elmtId ${rmElmtInfo.elmtId}[${rmElmtInfo.tag}] need to be unregistered later.`);
                 this.elmtIdsToUnregister_.add(rmElmtInfo.elmtId);
                 this.tagByElmtId_.set(rmElmtInfo.elmtId, rmElmtInfo.tag);
             }
@@ -4234,7 +4284,7 @@ class UINodeRegisterProxy {
         memorize these elmtIds until obtainDeletedElmtIds finds them in ElementRegister later (see its step 1)
     */
     accountElmtIdsAsUnregistered(elmtIds) {
-        
+        stateMgmtConsole.debug(`UINodeRegisterProxy.accountElmtIdsAsUnregistered: ${elmtIds.length} elmtIds: [ ${JSON.stringify(elmtIds)} ] - start`);
         // get info about latest deleted elmtIds from C++ to UINodeRegisterProxy
         this.obtainDeletedElmtIds();
         elmtIds.filter((elmtId) => {
@@ -4253,7 +4303,7 @@ class UINodeRegisterProxy {
     */
     consume(elmtId) {
         if (this.elmtIdsToUnregister_.delete(elmtId)) {
-            
+            stateMgmtConsole.debug(`UINodeRegisterProxy.consume ${elmtId}[${this.tagByElmtId_.get(elmtId)}] has been removed from UINodeRegisterProxy.`);
             this.tagByElmtId_.delete(elmtId);
             return true;
         }
@@ -4274,9 +4324,9 @@ class UINodeRegisterProxy {
             result += ' ]';
             return result;
         };
-        
-        
-        
+        stateMgmtConsole.debug(`UINodeRegisterProxy dump: `);
+        stateMgmtConsole.debug(`- ${this.elmtIdsToUnregister_.size} elmtIds need unregister: ${formatElementInfo()}.`);
+        stateMgmtConsole.debug(`- ${this.elmtIdsUnregisteredAheadOfTime_.size} elmtIds marked as unregistered already: ${JSON.stringify(Array.from(this.elmtIdsUnregisteredAheadOfTime_))} .`);
     }
 }
 UINodeRegisterProxy.instance_ = new UINodeRegisterProxy();
@@ -4306,11 +4356,11 @@ const UndefinedElmtId = -1;
 class ViewPU extends NativeViewPartialUpdate {
     get localStorage_() {
         if (!this.localStoragebackStore_ && this.parent_) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: constructor: get localStorage_ : Using LocalStorage instance of the parent View.`);
             this.localStoragebackStore_ = this.parent_.localStorage_;
         }
         if (!this.localStoragebackStore_) {
-            
+            stateMgmtConsole.info(`${this.debugInfo()}: constructor: is accessing LocalStorage without being provided an instance. Creating a default instance.`);
             this.localStoragebackStore_ = new LocalStorage({ /* empty */});
         }
         return this.localStoragebackStore_;
@@ -4321,7 +4371,7 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         if (this.localStoragebackStore_) {
-            stateMgmtConsole.error(`${this.constructor.name} is setting LocalStorage instance twice`);
+            stateMgmtConsole.applicationError(`${this.debugInfo()}: constructor: is setting LocalStorage instance twice. Application error.`);
         }
         this.localStoragebackStore_ = instance;
     }
@@ -4371,7 +4421,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.providedVars_ = parent ? new Map(parent.providedVars_)
             : new Map();
         this.localStoragebackStore_ = undefined;
-        
+        stateMgmtConsole.log(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent === null || parent === void 0 ? void 0 : parent.constructor.name}}'`);
         if (parent) {
             // this View is not a top-level View
             this.setCardId(parent.getCardId());
@@ -4380,10 +4430,10 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         else if (localStorage) {
             this.localStorage_ = localStorage;
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: constructor: Using LocalStorage instance provided via @Entry.`);
         }
         SubscriberManager.Add(this);
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: constructor: done`);
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__() {
@@ -4395,9 +4445,13 @@ class ViewPU extends NativeViewPartialUpdate {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        stateMgmtConsole.debug(`${this.debugInfo()}: aboutToBeDeletedInternal`);
         // tell UINodeRegisterProxy that all elmtIds under 
         // this ViewPU should be treated as already unregistered
         UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
+        if (this.hasRecycleManager()) {
+            this.getRecycleManager().purgeAllCachedRecycleNode();
+        }
         // unregister the elmtId of this ViewPU / its CustomNode object
         UINodeRegisterProxy.consume(this.id__());
         this.updateFuncByElmtId.clear();
@@ -4410,16 +4464,56 @@ class ViewPU extends NativeViewPartialUpdate {
         this.localStoragebackStore_ = undefined;
         this.isDeleting_ = true;
     }
+    debugInfo() {
+        return `@Component '${this.constructor.name}'[${this.id__()}]`;
+    }
+    // dump info about known elmtIds to a string
+    // use function only for debug output and DFX.
+    debugInfoRegisteredElmtIds() {
+        let result = "";
+        let sepa = "";
+        this.updateFuncByElmtId.forEach((value, elmtId) => {
+            result += `${sepa}${value.componentName}[${elmtId}]`;
+            sepa = ", ";
+        });
+        return result;
+    }
+    // for given elmtIds look up their component name/type and format a string out of this info
+    // use function only for debug output and DFX.
+    debugInfoElmtIds(elmtIds) {
+        let result = "";
+        let sepa = "";
+        elmtIds.forEach((elmtId) => {
+            var _a;
+            const compName = (_a = this.updateFuncByElmtId.get(elmtId)) === null || _a === void 0 ? void 0 : _a.componentName;
+            result += `${sepa}${compName ? compName : 'unknown component type'}[${elmtId}]`;
+            sepa = ", ";
+        });
+        return result;
+    }
+    debugInfoStateVars() {
+        let result = `State variables: \n`;
+        Object.getOwnPropertyNames(this)
+            .filter((varName) => varName.startsWith("__"))
+            .forEach((varName) => {
+            const prop = Reflect.get(this, varName);
+            if ("debugInfoDecorator" in prop) {
+                const observedProp = prop;
+                result += `${observedProp.debugInfoDecorator()} '${observedProp.info()}'[${observedProp.id__()}] ${observedProp.debugInfoSubscribers()} \n`;
+            }
+        });
+        return result;
+    }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
    * @param active true for active, false for inactive
    */
     setActive(active) {
         if (this.isActive_ == active) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: setActive ${active} with unchanged state - ignoring`);
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
         this.isActive_ = active;
         if (this.isActive_) {
             this.onActiveInternal();
@@ -4432,7 +4526,7 @@ class ViewPU extends NativeViewPartialUpdate {
         if (!this.isActive_) {
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: onActiveInternal`);
         this.performDelayedUpdate();
         for (const child of this.childrenWeakrefMap_.values()) {
             const childViewPU = child.deref();
@@ -4445,7 +4539,7 @@ class ViewPU extends NativeViewPartialUpdate {
         if (this.isActive_) {
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: onInactiveInternal`);
         for (const storageProp of this.ownStorageLinksProps_) {
             storageProp.enableDelayedNotification();
         }
@@ -4458,7 +4552,7 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     setParent(parent) {
         if (this.parent_ && parent) {
-            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).setChild: changing parent to '${parent.constructor.name}', id ${parent.id__()} (unsafe operation)`);
+            stateMgmtConsole.warn(`${this.debugInfo()}: setChild: changing parent to '${parent === null || parent === void 0 ? void 0 : parent.debugInfo()} (unsafe operation)`);
         }
         this.parent_ = parent;
     }
@@ -4473,7 +4567,7 @@ class ViewPU extends NativeViewPartialUpdate {
      */
     addChild(child) {
         if (this.childrenWeakrefMap_.has(child.id__())) {
-            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).addChild '${child.constructor.name}' id already exists ${child.id__()} !`);
+            stateMgmtConsole.warn(`${this.debugInfo()}: addChild '${child === null || child === void 0 ? void 0 : child.debugInfo()}' id already exists ${child.id__()}. Internal error!`);
             return false;
         }
         this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
@@ -4488,7 +4582,7 @@ class ViewPU extends NativeViewPartialUpdate {
     removeChild(child) {
         const hasBeenDeleted = this.childrenWeakrefMap_.delete(child.id__());
         if (!hasBeenDeleted) {
-            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).removeChild '${child.constructor.name}', child id ${child.id__()} not known!`);
+            stateMgmtConsole.warn(`${this.debugInfo()}: removeChild '${child === null || child === void 0 ? void 0 : child.debugInfo()}', child id ${child.id__()} not known. Internal error!`);
         }
         else {
             child.setParent(undefined);
@@ -4505,7 +4599,7 @@ class ViewPU extends NativeViewPartialUpdate {
         return childWeakRef ? childWeakRef.deref() : undefined;
     }
     updateStateVars(params) {
-        stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.");
+        stateMgmtConsole.error(`${this.debugInfo()}: updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version. Application error.`);
     }
     initialRenderView() {
         this.isRenderInProgress = true;
@@ -4519,20 +4613,22 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         // do not process an Element that has been marked to be deleted
-        const updateFunc = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc1 = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc = updateFunc1 === null || updateFunc1 === void 0 ? void 0 : updateFunc1.updateFunc;
+        const componentName = updateFunc1 ? updateFunc1.componentName : "unknown component type";
         if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
-            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+            stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
         }
         else {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} start ...`);
             this.isRenderInProgress = true;
             updateFunc(elmtId, /* isFirstRender */ false);
             // continue in native JSView
             // Finish the Update in JSView::JsFinishUpdateFunc
-            // this function appends no longer used elmtIds (as recrded by VSP) to the given allRmElmtIds array
+            // this function appends no longer used elmtIds (as receded by VSP) to the given allRmElmtIds array
             this.finishUpdateFunc(elmtId);
             this.isRenderInProgress = false;
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} - DONE`);
         }
     }
     /**
@@ -4544,7 +4640,7 @@ class ViewPU extends NativeViewPartialUpdate {
      * framework internal functions, apps must not call
      */
     forceCompleteRerender(deep = false) {
-        stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - start.`);
+        stateMgmtConsole.warn(`${this.debugInfo()}: forceCompleteRerender - start.`);
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds();
@@ -4557,7 +4653,7 @@ class ViewPU extends NativeViewPartialUpdate {
                 }
             });
         }
-        stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).forceCompleteRerender - end`);
+        stateMgmtConsole.warn(`${this.debugInfo()}: forceCompleteRerender - end`);
     }
     /**
      * force a complete rerender / update on specific node by executing update function.
@@ -4575,26 +4671,25 @@ class ViewPU extends NativeViewPartialUpdate {
         this.dirtDescendantElementIds_.delete(elmtId);
     }
     updateStateVarsOfChildByElmtId(elmtId, params) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: updateChildViewById(${elmtId}) - start`);
         if (elmtId < 0) {
-            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
+            stateMgmtConsole.warn(`${this.debugInfo()}: updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
             return;
         }
         let child = this.getChildById(elmtId);
         if (!child) {
-            stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
+            stateMgmtConsole.warn(`${this.debugInfo()}: updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
             return;
         }
         child.updateStateVars(params);
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: updateChildViewById(${elmtId}) - end`);
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
         stateMgmtTrace.scopedTrace(() => {
             if (this.isRenderInProgress) {
-                stateMgmtConsole.error(`@Component '${this.constructor.name}' (id: ${this.id__()}) State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
+                stateMgmtConsole.applicationError(`${this.debugInfo()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
             }
-            
             this.syncInstanceId();
             if (dependentElmtIds.size && !this.isFirstRender()) {
                 if (!this.dirtDescendantElementIds_.size) {
@@ -4602,15 +4697,19 @@ class ViewPU extends NativeViewPartialUpdate {
                     // do not need to do this every time
                     this.markNeedUpdate();
                 }
-                
+                stateMgmtConsole.debug(`${this.debugInfo()}: viewPropertyHasChanged property: elmtIds that need re-render due to state variable change: ${this.debugInfoElmtIds(Array.from(dependentElmtIds))} .`);
                 for (const elmtId of dependentElmtIds) {
                     this.dirtDescendantElementIds_.add(elmtId);
                 }
-                
+                stateMgmtConsole.debug(`   ... updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
+            }
+            else {
+                stateMgmtConsole.debug(`${this.debugInfo()}: viewPropertyHasChanged: state variable change adds no elmtIds for re-render`);
+                stateMgmtConsole.debug(`   ... unchanged full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`);
             }
             let cb = this.watchedProps.get(varName);
             if (cb) {
-                
+                stateMgmtConsole.debug(`   ... calling @Watch function`);
                 cb.call(this, varName);
             }
             this.restoreInstanceId();
@@ -4618,7 +4717,7 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     performDelayedUpdate() {
         stateMgmtTrace.scopedTrace(() => {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: performDelayedUpdate start ...`);
             this.syncInstanceId();
             for (const storageProp of this.ownStorageLinksProps_) {
                 const changedElmtIds = storageProp.moveElmtIdsForDelayedUpdate();
@@ -4629,10 +4728,10 @@ class ViewPU extends NativeViewPartialUpdate {
                             this.dirtDescendantElementIds_.add(elmtId);
                         }
                     }
-                    
+                    stateMgmtConsole.debug(`${this.debugInfo()}: performDelayedUpdate: all elmtIds that need re-render [${Array.from(this.dirtDescendantElementIds_).toString()}].`);
                     const cb = this.watchedProps.get(varName);
                     if (cb) {
-                        
+                        stateMgmtConsole.debug(`   ... calling @Watch function`);
                         cb.call(this, varName);
                     }
                 }
@@ -4681,14 +4780,14 @@ class ViewPU extends NativeViewPartialUpdate {
     initializeConsume(providedPropName, consumeVarName) {
         let providedVarStore = this.providedVars_.get(providedPropName);
         if (providedVarStore === undefined) {
-            throw new ReferenceError(`${this.constructor.name}: missing @Provide property with name ${providedPropName}.
+            throw new ReferenceError(`${this.debugInfo()} missing @Provide property with name ${providedPropName}.
           Fail to resolve @Consume(${providedPropName}).`);
         }
         const factory = (source) => {
             const result = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
                 ? new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName)
                 : new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName);
-            stateMgmtConsole.error(`The @Consume is instance of ${result.constructor.name}`);
+            stateMgmtConsole.error(`${this.debugInfo()}: The @Consume is instance of ${result.constructor.name}`);
             return result;
         };
         return providedVarStore.createSync(factory);
@@ -4701,8 +4800,8 @@ class ViewPU extends NativeViewPartialUpdate {
     markElemenDirtyById(elmtId) {
         // TODO ace-ets2bundle, framework, compilated apps need to update together
         // this function will be removed after a short transiition periode
-        stateMgmtConsole.error(`markElemenDirtyById no longer supported.
-        Please update your ace-ets2bundle and recompile your application!`);
+        stateMgmtConsole.applicationError(`${this.debugInfo()}: markElemenDirtyById no longer supported.
+        Please update your ace-ets2bundle and recompile your application. Application error!`);
     }
     /**
      * For each recorded dirty Element in this custom component
@@ -4711,7 +4810,7 @@ class ViewPU extends NativeViewPartialUpdate {
      */
     updateDirtyElements() {
         do {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: updateDirtyElements (re-render): sorted dirty elmtIds: ${Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber)}, starting ....`);
             // see which elmtIds are managed by this View
             // and clean up all book keeping for them
             this.purgeDeletedElmtIds();
@@ -4723,26 +4822,27 @@ class ViewPU extends NativeViewPartialUpdate {
                 this.dirtDescendantElementIds_.delete(elmtId);
             });
             if (this.dirtDescendantElementIds_.size) {
-                stateMgmtConsole.error(`@Component '${this.constructor.name}' (id: ${this.id__()}): New UINode objects added to update queue while re-render! \
-            Likely caused by @Component state change during build phase, not allowed. Application error!`);
+                stateMgmtConsole.applicationError(`${this.debugInfo()}: New UINode objects added to update queue while re-render! - Likely caused by @Component state change during build phase, not allowed. Application error!`);
             }
         } while (this.dirtDescendantElementIds_.size);
+        stateMgmtConsole.debug(`${this.debugInfo()}: updateDirtyElements (re-render) - DONE, dump of ViewPU in next lines`);
+        stateMgmtConsole.debug(`${this.debugInfo()}: ${this.debugInfoStateVars()}`);
     }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
     purgeDeletedElmtIds() {
-        
+        stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) `);
         // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
         UINodeRegisterProxy.obtainDeletedElmtIds();
         if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: purgeDeletedElmtIds = no elmtIds to unregister (globally) - done!`);
             return;
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: purgeDeletedElmtIds -  start.`);
         UINodeRegisterProxy.dump();
         const elmtIdsOfThisView = this.updateFuncByElmtId.keys();
         for (const rmElmtId of elmtIdsOfThisView) {
             if (UINodeRegisterProxy.consume(rmElmtId)) {
-                
+                stateMgmtConsole.debug(`   ... purging elmtId ${rmElmtId}.`);
                 // remove entry from Map elmtId -> update function
                 this.updateFuncByElmtId.delete(rmElmtId);
                 // for each state var, remove dependent elmtId (if present)
@@ -4750,17 +4850,20 @@ class ViewPU extends NativeViewPartialUpdate {
                 this.purgeVariableDependenciesOnElmtId(rmElmtId);
             } // for all elmtIds that need to unregister
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: purgeDeletedElmtIds: DONE `);
+        stateMgmtConsole.debug(`   ... remaining known child components and their elmtIds ${this.debugInfoRegisteredElmtIds()} .`);
         UINodeRegisterProxy.dump();
     }
     // executed on first render only
     // kept for backward compatibility with old ace-ets2bundle
     observeComponentCreation(compilerAssignedUpdateFunc) {
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: First render for elmtId ${elmtId} start ....`);
         compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
-        this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
-        
+        // in observeComponentCreation function we do not get info about the component name, in 
+        // observeComponentCreation2 we do.
+        this.updateFuncByElmtId.set(elmtId, { updateFunc: compilerAssignedUpdateFunc, componentName: "unknown" });
+        stateMgmtConsole.debug(`${this.debugInfo()}: First render for elmtId ${elmtId} - DONE.`);
     }
     // executed on first render only
     // added July 2023, replaces observeComponentCreation
@@ -4771,19 +4874,18 @@ class ViewPU extends NativeViewPartialUpdate {
         const _componentName = (classObject && "name" in classObject) ? classObject.name : "unspecified UINode";
         const _popFunc = (classObject && "pop" in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
             }
             ViewStackProcessor.StopGetAccessRecording();
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} - DONE ....`);
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-        
         updateFunc(elmtId, /* is first render */ true);
-        this.updateFuncByElmtId.set(elmtId, updateFunc);
+        this.updateFuncByElmtId.set(elmtId, { updateFunc: updateFunc, componentName: _componentName });
     }
     getOrCreateRecycleManager() {
         if (!this.recycleManager) {
@@ -4799,7 +4901,7 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     initRecycleManager() {
         if (this.recycleManager) {
-            
+            stateMgmtConsole.error(`${this.debugInfo()}: init recycleManager multiple times. Internal error.`);
             return;
         }
         this.recycleManager = new RecycleManager;
@@ -4819,7 +4921,7 @@ class ViewPU extends NativeViewPartialUpdate {
         let node;
         // if there is no suitable recycle node, run a normal creation function.
         if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
-            
+            stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: cannot init node by recycle, crate new node`);
             this.observeComponentCreation(compilerAssignedUpdateFunc);
             return;
         }
@@ -4828,8 +4930,12 @@ class ViewPU extends NativeViewPartialUpdate {
         const oldElmtId = node.id__();
         // store the current id and origin id, used for dirty element sort in {compareNumber}
         recycleUpdateFunc(newElmtId, /* is first render */ true, node);
+        const oldEntry = this.updateFuncByElmtId.get(oldElmtId);
         this.updateFuncByElmtId.delete(oldElmtId);
-        this.updateFuncByElmtId.set(newElmtId, compilerAssignedUpdateFunc);
+        this.updateFuncByElmtId.set(newElmtId, {
+            updateFunc: compilerAssignedUpdateFunc,
+            componentName: oldEntry ? oldEntry.componentName : "unknown"
+        });
         node.updateId(newElmtId);
         node.updateRecycleElmtId(oldElmtId, newElmtId);
         SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
@@ -4848,9 +4954,10 @@ class ViewPU extends NativeViewPartialUpdate {
     ifElseBranchUpdateFunction(branchId, branchfunc) {
         const oldBranchid = If.getBranchId();
         if (branchId == oldBranchid) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: ifElseBranchUpdateFunction: IfElse branch unchanged, no work to do.`);
             return;
         }
+        stateMgmtConsole.debug(`${this.debugInfo()}: ifElseBranchUpdateFunction`);
         If.branchId(branchId);
         branchfunc();
     }
@@ -4866,17 +4973,17 @@ class ViewPU extends NativeViewPartialUpdate {
      * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
      */
     forEachUpdateFunction(elmtId, itemArray, itemGenFunc, idGenFunc, itemGenFuncUsesIndex = false, idGenFuncUsesIndex = false) {
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: forEachUpdateFunction (ForEach re-render) start ...`);
         if (itemArray === null || itemArray === undefined) {
-            stateMgmtConsole.error(`ForEach input array is null or undefined error.`);
+            stateMgmtConsole.applicationError(`${this.debugInfo()}: forEachUpdateFunction (ForEach re-render): input array is null or undefined error. Application error!`);
             return;
         }
         if (itemGenFunc === null || itemGenFunc === undefined) {
-            stateMgmtConsole.error(`Error: Item generation function not defined in forEach function.`);
+            stateMgmtConsole.applicationError(`${this.debugInfo()}: forEachUpdateFunction (ForEach re-render): Item generation function missing. Application error!`);
             return;
         }
         if (idGenFunc === undefined) {
-            
+            stateMgmtConsole.debug(`${this.debugInfo()}: forEachUpdateFunction: providing default id gen function `);
             idGenFuncUsesIndex = true;
             // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
             idGenFunc = (item, index) => {
@@ -4884,7 +4991,7 @@ class ViewPU extends NativeViewPartialUpdate {
                     return `${index}__${JSON.stringify(item)}`;
                 }
                 catch (e) {
-                    throw new Error(`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure. Need to specify id generator function (ForEach 3rd parameter).`);
+                    throw new Error(`${this.debugInfo()}: ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
                 }
             };
         }
@@ -4894,7 +5001,6 @@ class ViewPU extends NativeViewPartialUpdate {
         const arr = itemArray; // just to trigger a 'get' onto the array
         // ID gen is with index.
         if (idGenFuncUsesIndex) {
-            
             // Create array of new ids.
             arr.forEach((item, indx) => {
                 newIdArray.push(idGenFunc(item, indx));
@@ -4902,7 +5008,6 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         else {
             // Create array of new ids.
-            
             arr.forEach((item, index) => {
                 newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
             });
@@ -4916,11 +5021,11 @@ class ViewPU extends NativeViewPartialUpdate {
             idDuplicates.forEach((indx) => {
                 stateMgmtConsole.error(`Error: ${newIdArray[indx]} generated for ${indx}${indx < 4 ? indx == 2 ? "nd" : "rd" : "th"} array item ${arr[indx]}.`);
             });
-            stateMgmtConsole.error(`Ids generated by the ForEach id gen function must be unique, error.`);
+            stateMgmtConsole.applicationError(`${this.debugInfo()}: Ids generated by the ForEach id gen function must be unique. Application error!`);
         }
-        
+        stateMgmtConsole.debug(`${this.debugInfo()}: forEachUpdateFunction: diff indexes ${JSON.stringify(diffIndexArray)} . `);
         // Item gen is with index.
-        
+        stateMgmtConsole.debug(`   ... item Gen ${itemGenFuncUsesIndex ? 'with' : "without"} index`);
         // Create new elements if any.
         diffIndexArray.forEach((indx) => {
             ForEach.createNewChildStart(newIdArray[indx], this);
@@ -4932,6 +5037,7 @@ class ViewPU extends NativeViewPartialUpdate {
             }
             ForEach.createNewChildFinish(newIdArray[indx], this);
         });
+        stateMgmtConsole.debug(`${this.debugInfo()}: forEachUpdateFunction (ForEach re-render) - DONE.`);
     }
     /**
        * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
@@ -5083,29 +5189,29 @@ function makeBuilderParameterProxy(builderName, source) {
             const prop1 = prop.toString().trim().startsWith("__")
                 ? prop.toString().trim().substring(2)
                 : prop.toString().trim();
-            
+            stateMgmtConsole.debug(`get - prop ${prop.toString()} prop1 ${prop1}`);
             if (!(typeof target === "object") && (prop1 in target)) {
                 throw Error(`@Builder '${builderName}': '${prop1}' used but not a function parameter error!`);
             }
             const value = target[prop1];
             if (typeof value !== "function") {
-                
+                stateMgmtConsole.debug(`      - no fun`);
                 return value;
             }
             const funcRet = value();
             if ((typeof funcRet === "object") && ('get' in funcRet)) {
                 if (prop1 !== prop) {
-                    
+                    stateMgmtConsole.debug(`      - func - is ObservedPropertybstract - ret ObservedPropertyObject`);
                     return funcRet;
                 }
                 else {
-                    
+                    stateMgmtConsole.debug(`      - func - is ObservedPropertybstract - ret get()`);
                     const result = funcRet.get();
-                    
+                    stateMgmtConsole.debug(`                                          - returns ${result}`);
                     return result;
                 }
             }
-            
+            stateMgmtConsole.debug(`      - func - no ObservedPropertybstract - ret value ${funcRet}`);
             return funcRet;
         } // get
     }); // new Proxy
@@ -5124,7 +5230,6 @@ function makeBuilderParameterProxy(builderName, source) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+stateMgmtConsole.info("ACE State Management component is initiaizing ...");
 PersistentStorage.configureBackend(new Storage());
 Environment.configureBackend(new EnvironmentSetting());
-

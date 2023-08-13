@@ -92,12 +92,12 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         // code path for 
         // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
         // 2- nested Object/Array inside observed another object/array in parent, source is its value
-        if (!((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
-          stateMgmtConsole.warn(`@Prop ${this.info()}  Provided source object's class is not instance of SubscribableAbstract, 
-            it also lacks @Observed class decorator. Object property changes will not be observed.`);
+        if (typeof sourceValue == "object" && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
+          stateMgmtConsole.applicationError(`${this.debugInfo()}:  Provided source object's class is not instance of SubscribableAbstract, 
+              it also lacks @Observed class decorator. Object property changes will not be observed. Application error!`);
         }
-        stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Prop wrapping source in a new ObservedPropertyObjectPU`);
-        this.source_ = new ObservedPropertyObjectPU<C>(sourceValue, this, this.getSourceObservedPropertyFakeName());
+        stateMgmtConsole.debug(`${this.debugInfo()}: constructor: wrapping source in a new ObservedPropertyObjectPU`);
+        this.source_ = new ObservedPropertyObjectPU<C>(sourceValue, this, this.getPropSourceObservedPropertyFakeName());
         this.sourceIsOwnObject = true;
       }
     }
@@ -105,7 +105,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.source_ != undefined) {
       this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
     }
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor ready with local copy.`);
+    stateMgmtConsole.debug(`${this.debugInfo()}: constructor: done!`);
   }
 
 
@@ -117,7 +117,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.source_) {
       this.source_.removeSubscriber(this);
       if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers()==0){
-        stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
+        stateMgmtConsole.debug(`${this.debugInfo()}: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
         this.source_.aboutToBeDeleted();
      }
 
@@ -126,30 +126,29 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     super.aboutToBeDeleted();
   }
 
-  private getSourceObservedPropertyFakeName() : string {
-    return `${this.info()}_source`;
+  public debugInfoDecorator() : string {
+    return `@Prop (class SynchedPropertyOneWayPU)`;
   }
+
 
   public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
 
     if (this.source_ == undefined) {
-      stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-       @Prop syncPeerHasChanged peer '${eventSource ? eventSource.info() : "no eventSource info"}' but source_ undefned. Internal error.`);
+      stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
       return;
     }
 
     if (eventSource && this.source_ == eventSource) {
       // defensive programming: should always be the case!
-      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}]: syncPeerHasChanged(): Source '${eventSource.info()}' has changed'.`)
       const newValue = this.source_.getUnmonitored();
       if (this.checkIsSupportedValue(newValue)) {
-        stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged:  newValue '${JSON.stringify(newValue)}'.`);
+        stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', local value about to change.`);
         if (this.resetLocalValue(newValue, /* needCopyObject */ true)) {
           this.notifyPropertyHasChangedPU();
         }
       }
     } else {
-      stateMgmtConsole.warn(`SynchedPropertyObjectOneWayPU[${this.id__()}]: syncPeerHasChanged Unexpected situation. syncPeerHasChanged from different sender than source_. Ignoring event.`)
+      stateMgmtConsole.warn(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource?.debugInfo()}', Unexpected situation. syncPeerHasChanged from different sender than source_. Ignoring event.`)
     }
   }
 
@@ -159,24 +158,23 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
    * @param changedPropertyName 
    */
   public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName: string) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: objectPropertyHasChangedPU '${changedPropertyName}' has changed.`);
+      stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' of object value has changed.`);
       this.notifyPropertyHasChangedPU();
   }
 
   public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-    objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
+    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: property '${changedPropertyName}' of object value has been read.`);
     this.notifyPropertyHasBeenReadPU();
   }
 
   public getUnmonitored(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
+    stateMgmtConsole.debug(`${this.debugInfo()}: getUnmonitored.`);
     // unmonitored get access , no call to notifyPropertyRead !
     return this.localCopyObservedObject_;
   }
 
   public get(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get.`)
+    stateMgmtConsole.debug(`${this.debugInfo()}: get.`)
     this.notifyPropertyHasBeenReadPU()
     return this.localCopyObservedObject_;
   }
@@ -185,11 +183,11 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   // set 'writes through` to the ObservedObject
   public set(newValue: C): void {
     if (this.localCopyObservedObject_ == newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value  - nothing to do.`);
+      stateMgmtConsole.debug(`${this.debugInfo()}: set with unchanged value  - nothing to do.`);
       return;
     }
 
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newV value.`);
+    stateMgmtConsole.debug(`${this.debugInfo()}: set: value about to change.`);
     if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
       this.notifyPropertyHasChangedPU();
     }
@@ -197,7 +195,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   // called when updated from parent
   public reset(sourceChangedValue: C): void {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset.`);
+    stateMgmtConsole.debug(`${this.debugInfo()}: reset (update from parent @Component).`);
     if (this.source_ !== undefined && this.checkIsSupportedValue(sourceChangedValue)) {
       // if this.source_.set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged method
       this.source_.set(sourceChangedValue);
@@ -241,8 +239,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
           ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
         } else {
           // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
-          stateMgmtConsole.error(`@Prop ${this.info()}  Provided source object's class \
-            lacks @Observed class decorator. Object property changes will not be observed.`);
+          stateMgmtConsole.debug(`${this.debugInfo()}: Provided source object's is not proxied (is not a ObservedObject). Wrapping it inside ObservedObject.`);
           this.localCopyObservedObject_ = ObservedObject.createNew(this.localCopyObservedObject_, this);
         }
       }
@@ -253,7 +250,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     // ViewStackProcessor.getApiVersion function is not present in API9 
     // therefore shallowCopyObject will always be used in API version 9 and before
     // but the code in this file is the same regardless of API version
-    stateMgmtConsole.debug(`targetApiVersion: \
+    stateMgmtConsole.debug(`${this.debugInfo()}: copyObject: Version: \
     ${(typeof ViewStackProcessor["getApiVersion"] == "function") ? ViewStackProcessor["getApiVersion"]() : 'unknown'}, \
     will use ${((typeof ViewStackProcessor["getApiVersion"] == "function") && (ViewStackProcessor["getApiVersion"]() >= 10)) ? 'deep copy' : 'shallow copy'} .`);
 
@@ -272,7 +269,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       copy = rawValue;
     } else if (typeof rawValue != "object") {
       // FIXME would it be better to throw Exception here?
-      stateMgmtConsole.error(`@Prop ${this.info()} shallowCopyObject: request to copy non-object but defined value of type '${typeof rawValue}'. Internal error! Setting copy=original value.`);
+      stateMgmtConsole.error(`${this.debugInfo()}: shallowCopyObject: request to copy non-object value, actual type is '${typeof rawValue}'. Internal error! Setting copy:=original value.`);
       copy = rawValue;
     } else if (rawValue instanceof Array) {
       // case Array inside ObservedObject
@@ -298,7 +295,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       Object.setPrototypeOf(copy, Object.getPrototypeOf(rawValue));
     } else {
       // TODO in PR "F": change to exception throwing:
-      stateMgmtConsole.error(`@Prop ${this.info()} shallow failed. Attempt to copy unsupported value type '${typeof rawValue}' .`);
+      stateMgmtConsole.error(`${this.debugInfo()}: shallow failed. Attempt to copy unsupported value of type '${typeof rawValue}' .`);
       copy = rawValue;
     }
 

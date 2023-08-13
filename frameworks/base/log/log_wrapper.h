@@ -23,6 +23,8 @@
 #include "base/utils/macros.h"
 #include "base/utils/system_properties.h"
 
+#define ACE_DEBUG_LOG 1
+
 #ifdef ACE_INSTANCE_LOG
 #define ACE_FMT_PREFIX "[%{public}s(%{public}s)-(%{public}d)] "
 #define ACE_LOG_ID , OHOS::Ace::LogWrapper::GetId()
