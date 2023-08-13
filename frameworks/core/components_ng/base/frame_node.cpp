@@ -1471,7 +1471,19 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
         return HitTestResult::OUT_OF_REGION;
     }
+    auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
+    auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto name = GetInspectorId().value_or("");
+    auto param = renderContext_->GetTrans();
+    TransformConfig cfg = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7], param[8],
+        GetId() };
+    auto parent = GetAncestorNodeOfFrame();
+    translateCfg[GetId()] = cfg;
+    if (parent) {
+        AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
+        translateIds[GetId()] = ancestorNodeInfo;
+    }
     auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),

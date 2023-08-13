@@ -69,6 +69,9 @@ RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
 bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint)
 {
+    size_t idx = innerTargets.size();
+    size_t newIdx = 0;
+    auto host = GetFrameNode();
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
@@ -117,6 +120,11 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     for (auto const& eventTarget : innerTargets) {
         auto recognizer = AceType::DynamicCast<NGGestureRecognizer>(eventTarget);
         if (recognizer) {
+            auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(recognizer);
+            if (!recognizerGroup && newIdx >= idx) {
+                recognizer->SetTransInfo(host->GetId());
+            }
+            newIdx++; // 检查子手势是否都查询到
             recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
@@ -182,7 +190,10 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                 if (groupRecognizer) {
                     groupRecognizer->SetCoordinateOffset(offset);
                 }
+                groupRecognizer->SetTransInfo(host->GetId());
             }
+        } else {
+            recognizer->SetTransInfo(host->GetId());
         }
         recognizer->SetSize(size.Height(), size.Width());
         recognizer->SetCoordinateOffset(offset);

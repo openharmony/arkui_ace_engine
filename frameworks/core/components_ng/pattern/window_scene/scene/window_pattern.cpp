@@ -298,7 +298,65 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
     SetWindowSceneConsumed(pointerEvent->GetPointerAction());
+    AdapterRotation(pointerEvent);
     DispatchPointerEvent(pointerEvent);
+}
+
+void WindowPattern::AdapterRotation(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
+    auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
+    CHECK_NULL_VOID(pointerEvent);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto translateIter = translateIds.find(frameNode->GetId());
+    if (translateIter == translateIds.end()) {
+        return;
+    }
+    int32_t udegree = 0;
+    while (translateIter != translateIds.end()) {
+        int32_t translateId = translateIter->second.parentId;
+        auto translateCfgIter = translateCfg.find(translateId);
+        if (translateCfgIter != translateCfg.end() && translateCfgIter->second.degree != 0) {
+            udegree = static_cast<int32_t>(translateCfgIter->second.degree);
+            break;
+        }
+        translateIter = translateIds.find(translateId);
+    }
+    udegree = udegree % 360;
+    if (udegree == -1 || udegree == 0) {
+        return;
+    }
+    udegree += 360;
+    int32_t pointerId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerId, item);
+    if (!ret) {
+        return;
+    }
+    int32_t originWindowX = item.GetWindowX();
+    int32_t originWindowY = item.GetWindowY();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetPaintRectWithTransform();
+    int32_t width = static_cast<int32_t>(rect.Width());
+    int32_t height = static_cast<int32_t>(rect.Height());
+
+    if (udegree == 90) {
+        item.SetWindowX(originWindowY);
+        item.SetWindowY(height - originWindowX);
+    }
+    if (udegree == 180) {
+        item.SetWindowX(width - originWindowX);
+        item.SetWindowY(height - originWindowY);
+    }
+    if (udegree == 270) {
+        item.SetWindowX(width - originWindowY);
+        item.SetWindowY(originWindowX);
+    }
+    pointerEvent->UpdatePointerItem(pointerId, item);
+    LOGD("WindowPattern AdapterRotation udegree:%{public}d, windowX:%{public}d, windowY:%{public}d", udegree,
+        item.GetWindowX(), item.GetWindowY());
 }
 
 bool WindowPattern::IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

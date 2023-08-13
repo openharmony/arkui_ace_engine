@@ -26,5 +26,23 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& /* event */)
     return true;
 }
 
+std::unordered_map<int, TransformConfig>& NGGestureRecognizer::GetGlobalTransCfg()
+{
+    std::unordered_map<int, TransformConfig> transCfg {};
+    return transCfg;
+}
+
+std::unordered_map<int, AncestorNodeInfo>& NGGestureRecognizer::GetGlobalTransIds()
+{
+    std::unordered_map<int, AncestorNodeInfo> transVid {};
+    return transVid;
+}
+
+void NGGestureRecognizer::ResetGlobalTransCfg() {}
+
 void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) {}
+
+void NGGestureRecognizer::Transform(PointF& windowPointF, PointF& originPointF) {}
+
+void NGGestureRecognizer::SetTransInfo(int id) {}
 } // namespace OHOS::Ace::NG

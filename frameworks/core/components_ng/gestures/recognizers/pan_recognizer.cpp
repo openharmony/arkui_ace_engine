@@ -215,7 +215,14 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
-    delta_ = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
+    PointF originPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
+    PointF originTouchPoint(touchPoints_[event.id].GetOffset().GetX(), touchPoints_[event.id].GetOffset().GetY());
+    PointF windowPoint = originPoint;
+    PointF windowTouchPoint = originTouchPoint;
+    Transform(windowPoint, originPoint);
+    Transform(windowTouchPoint, originTouchPoint);
+    delta_ =
+        (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
     mainDelta_ = GetMainAxisDelta();
     velocityTracker_.UpdateTouchPoint(event);
     averageDistance_ += delta_;
