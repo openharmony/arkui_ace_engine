@@ -171,7 +171,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
 void ListLayoutAlgorithm::CalculateEstimateOffset(ScrollAlign align)
 {
     if (itemPosition_.empty()) {
-        estimateOffset_ = 0;
+        estimateOffset_ = 0.0f;
         return;
     }
     float itemsHeight = (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) + spaceWidth_;
@@ -211,7 +211,7 @@ void ListLayoutAlgorithm::CalculateEstimateOffset(ScrollAlign align)
                 break;
         }
     } else {
-        estimateOffset_ = 0;
+        estimateOffset_ = 0.0f;
     }
 }
 
