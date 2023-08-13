@@ -124,6 +124,7 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [
+      "file_uri_helper_ohos.cpp",
       "image_source_ohos.cpp",
       "mouse_style_ohos.cpp",
       "page_url_checker_ohos.cpp",
@@ -132,6 +133,7 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "ability_runtime:abilitykit_native",
       "ability_runtime:runtime",
+      "app_file_service:fileuri_native",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "graphic_2d:librender_service_client",

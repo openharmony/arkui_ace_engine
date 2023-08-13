@@ -70,7 +70,8 @@
                 "security_component",
                 "camera_framework",
                 "previewer",
-                "media_library"
+                "media_library",
+                "app_file_service"
             ],
             "third_party": [
                 "json",
