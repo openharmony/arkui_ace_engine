@@ -55,14 +55,14 @@ class SynchedPropertyNestedObjectPU<C extends Object>
   public objectPropertyHasChangedPU(eventSource: ObservedObject<C>, changedPropertyName: string) {
     stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
         objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
-    this.notifyPropertyHasChangedPU();
+    this.notifyPropertyHasChangedPU(changedPropertyName);
   }
 
 
   public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
     stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
     objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
-    this.notifyPropertyHasBeenReadPU();
+    this.notifyPropertyHasBeenReadPU(changedPropertyName);
   }
   
   public getUnmonitored(): C {
@@ -74,7 +74,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
   // get 'read through` from the ObservedProperty
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
-    this.notifyPropertyHasBeenReadPU()
+    this.notifyPropertyHasBeenReadPU(/* var read */ undefined)
     return this.obsObject_;
   }
 
@@ -89,7 +89,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
 
     if (this.setValueInternal(newValue)) {
       // notify value change to subscribing View
-      this.notifyPropertyHasChangedPU();
+      this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
     }
   }
 

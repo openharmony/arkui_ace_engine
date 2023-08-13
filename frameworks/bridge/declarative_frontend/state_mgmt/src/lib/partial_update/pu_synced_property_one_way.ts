@@ -130,7 +130,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     return `${this.info()}_source`;
   }
 
-  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedProperty : string | undefined) {
 
     if (this.source_ == undefined) {
       stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
@@ -145,7 +145,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       if (this.checkIsSupportedValue(newValue)) {
         stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged:  newValue '${JSON.stringify(newValue)}'.`);
         if (this.resetLocalValue(newValue, /* needCopyObject */ true)) {
-          this.notifyPropertyHasChangedPU();
+          this.notifyPropertyHasChangedPU(changedProperty);
         }
       }
     } else {
@@ -160,13 +160,13 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
    */
   public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName: string) {
       stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: objectPropertyHasChangedPU '${changedPropertyName}' has changed.`);
-      this.notifyPropertyHasChangedPU();
+      this.notifyPropertyHasChangedPU(/* object property has changed */ changedPropertyName);
   }
 
   public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
     objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
-    this.notifyPropertyHasBeenReadPU();
+    this.notifyPropertyHasBeenReadPU(/* changed object property */ changedPropertyName);
   }
 
   public getUnmonitored(): C {
@@ -177,7 +177,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get.`)
-    this.notifyPropertyHasBeenReadPU()
+    this.notifyPropertyHasBeenReadPU(/* variable value assignment */ undefined)
     return this.localCopyObservedObject_;
   }
 
@@ -191,7 +191,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newV value.`);
     if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
-      this.notifyPropertyHasChangedPU();
+      this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
     }
   }
 

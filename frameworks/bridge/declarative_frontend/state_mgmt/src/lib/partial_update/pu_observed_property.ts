@@ -46,9 +46,9 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
    * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
    * @param eventSource 
    */
-  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
+  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>, changedObjectProperty : string | undefined) {
     stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
-    this.notifyPropertyHasChangedPU();
+    this.notifyPropertyHasChangedPU(changedObjectProperty);
   }
 
   /**
@@ -59,13 +59,13 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
   public objectPropertyHasChangedPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
     stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
         objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
-    this.notifyPropertyHasChangedPU();
+    this.notifyPropertyHasChangedPU(/* object property has changed */ changedPropertyName);
   }
 
-  public objectPropertyHasBeenReadPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
+  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<T>, changedPropertyName : string) {
     stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
     objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
-    this.notifyPropertyHasBeenReadPU();
+    this.notifyPropertyHasBeenReadPU(/* property has been read */ changedPropertyName);
   }
   
   private unsubscribeWrappedObject() {
@@ -115,7 +115,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
 
   public get(): T {
     stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`);
-    this.notifyPropertyHasBeenReadPU();
+    this.notifyPropertyHasBeenReadPU(/* var value has been read */ undefined);
     return this.wrappedValue_;
   }
 
@@ -132,7 +132,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     }
     stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: set, changed`);
     if (this.setValueInternal(newValue)) {
-      this.notifyPropertyHasChangedPU();
+      this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
     }
   }
 }

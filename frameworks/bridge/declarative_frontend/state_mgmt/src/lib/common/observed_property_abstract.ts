@@ -136,7 +136,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
         // PU code path, only used for ObservedPropertySimple/Object stored inside App/LocalStorage
         // ObservedPropertySimplePU/ObjectPU  used in all other PU cases, has its own notifyPropertyHasChangedPU()
         if ('syncPeerHasChanged' in subscriber) {
-          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this as unknown as ObservedPropertyAbstractPU<T>);
+          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this as unknown as ObservedPropertyAbstractPU<T>, /* FIXME, we assume var assignment */ undefined);
         }
       } else {
         stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);

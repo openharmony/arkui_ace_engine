@@ -84,10 +84,10 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
    * that peer can be in either ancestor or descendant component if 'this' is used for a @Consume
    * @param eventSource 
    */
-  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
+  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedProperty : string | undefined) {
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasChangedPU: contained ObservedObject '${eventSource.info()}' hasChanged'.`)
-      this.notifyPropertyHasChangedPU();
+      this.notifyPropertyHasChangedPU(changedProperty);
     }
   }
 
@@ -99,25 +99,25 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
         objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
-    this.notifyPropertyHasChangedPU();
+    this.notifyPropertyHasChangedPU(/* object property has changed */ changedPropertyName);
   }
 
   public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
     objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
-    this.notifyPropertyHasBeenReadPU();
+    this.notifyPropertyHasBeenReadPU(/* changed object property*/ changedPropertyName);
   }
 
   public getUnmonitored(): C {
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
-    // unmonitored get access , no call to otifyPropertyRead !
+    // unmonitored get access , no call to notifyPropertyRead !
     return (this.source_ ? this.source_.getUnmonitored() : undefined);
   }
 
   // get 'read through` from the ObservedProperty
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
-    this.notifyPropertyHasBeenReadPU()
+    this.notifyPropertyHasBeenReadPU(/* variable read */ undefined)
     return this.getUnmonitored();
   }
 
@@ -133,7 +133,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     // avoid circular notifications @Link -> source @State -> other but also back to same @Link
     this.changeNotificationIsOngoing_ = true;
     this.setObject(newValue);
-    this.notifyPropertyHasChangedPU();
+    this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
     this.changeNotificationIsOngoing_ = false;
   }
 }
