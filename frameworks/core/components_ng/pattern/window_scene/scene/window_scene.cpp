@@ -67,15 +67,6 @@ void WindowScene::OnAttachToFrameNode()
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(host->GetAccessibilityId());
 
-    if (!IsMainWindow()) {
-        auto surfaceNode = session_->GetSurfaceNode();
-        CHECK_NULL_VOID(surfaceNode);
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
-        CHECK_NULL_VOID(context);
-        context->SetRSNode(surfaceNode);
-        return;
-    }
-
     auto sessionInfo = session_->GetSessionInfo();
     auto name = sessionInfo.bundleName_;
     auto pos = name.find_last_of('.');
