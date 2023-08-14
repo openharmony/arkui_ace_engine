@@ -46,7 +46,6 @@ const Dimension FONT_SIZE = Dimension(2.0);
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
 const int32_t ANIMATION_ZERO_TO_OUTER = 200;
-const int32_t ANIMATION_OUTER_TO_ZERO = 150;
 const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const float MOVE_DISTANCE = 5.0f;
@@ -560,7 +559,7 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, scale);
     textLayoutProperty->UpdateTextColor(updateColor);
-    if (scale == 0.0) {
+    if (scale < FONTWEIGHT) {
         if (index == midIndex) {
             textLayoutProperty->UpdateFontWeight(SelectedWeight_);
         } else {
@@ -590,7 +589,6 @@ void DatePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
         RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
-
         iter++;
     }
 }
@@ -762,7 +760,7 @@ void DatePickerColumnPattern::CreateAnimation()
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
     fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
     fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    fromController_->SetDuration(ANIMATION_OUTER_TO_ZERO); // 150ms for animation that from outer to zero.
+    fromController_->SetDuration(CLICK_ANIMATION_DURATION); // 300ms for animation that from outer to zero.
     animationCreated_ = true;
 }
 
