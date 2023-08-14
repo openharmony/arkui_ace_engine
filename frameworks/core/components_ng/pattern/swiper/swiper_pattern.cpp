@@ -275,9 +275,8 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
-    } else if (isVoluntarilyClear_) {
-        isVoluntarilyClear_ = false;
     }
+    isVoluntarilyClear_ = false;
     if (jumpIndex_) {
         if ((jumpIndex_.value() < 0 || jumpIndex_.value() >= TotalCount()) && !IsLoop()) {
             jumpIndex_ = 0;
