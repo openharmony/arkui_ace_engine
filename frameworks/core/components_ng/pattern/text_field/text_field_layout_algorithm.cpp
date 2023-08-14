@@ -236,8 +236,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(scrollBarTheme, std::nullopt);
     if (isInlineStyle) {
         // for InlineStyle, max width is content width with safe boundary.
-        paragraph_->Layout(idealWidth + textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
-                           textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
+        paragraph_->Layout(pattern->GetPreviewWidth() == 0
+                               ? idealWidth
+                               : pattern->GetPreviewWidth() + textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
+                                     textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
     } else if (showPlaceHolder) {
         // for placeholder.
         if (isPasswordType) {
