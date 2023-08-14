@@ -400,11 +400,11 @@ public:
 
     bool HasGlobalAlpha() const
     {
-        return !NearEqual(alpha_, 1.0);
+        return !NearEqual(alpha_, -1.0);
     }
 
 private:
-    double alpha_ = 1.0;
+    double alpha_ = -1.0;
     CompositeOperation type_ = CompositeOperation::SOURCE_OVER;
 };
 

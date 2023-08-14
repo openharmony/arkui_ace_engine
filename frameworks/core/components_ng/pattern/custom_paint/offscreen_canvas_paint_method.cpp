@@ -287,6 +287,17 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     InitImagePaint(imagePaint_);
 #else
     InitImagePaint(imagePaint_, sampleOptions_);
+
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
+
+    if (HasShadow()) {
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        SkPath path;
+        path.addRect(skRect);
+        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas, &imagePaint_);
+    }
 #endif
     switch (canvasImage.flag) {
         case 0:

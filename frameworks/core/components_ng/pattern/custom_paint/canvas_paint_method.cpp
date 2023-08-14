@@ -276,9 +276,26 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     InitImagePaint(imagePaint_, sampleOptions_);
 #endif
     InitPaintBlend(imagePaint_);
+
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
+
+    const auto skCanvas = skCanvas_.get();
+    if (HasShadow()) {
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        SkPath path;
+        path.addRect(skRect);
+        PaintShadow(path, shadow_, skCanvas, &imagePaint_);
+    }
+
     switch (canvasImage.flag) {
         case 0:
+#ifndef NEW_SKIA
             skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy);
+#else
+            skCanvas_->drawImage(image, canvasImage.dx, canvasImage.dy, sampleOptions_, &imagePaint_);
+#endif
             break;
         case 1: {
             SkRect rect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
