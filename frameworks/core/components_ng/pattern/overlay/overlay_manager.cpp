@@ -2039,9 +2039,11 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
 {
     auto root = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID_NOLOG(root);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
     for (auto&& child : root->GetChildren()) {
-        // first child is Stage node
-        if (child != root->GetFirstChild()) {
+        // first child is Stage node in main window, subwindow not has Stage node.
+        if (child != root->GetFirstChild() || pipeline->IsSubPipeline()) {
             child->MarkDirtyNode(flag);
         }
     }
