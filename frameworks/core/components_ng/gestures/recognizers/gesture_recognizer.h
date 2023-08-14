@@ -250,7 +250,7 @@ protected:
     SourceType deviceType_ = SourceType::NONE;
     // size of recognizer target.
     std::optional<EventTarget> recognizerTarget_ = std::nullopt;
-    int transId_;
+    int32_t transId_ = 0;
 
     int32_t currentFingers_ = 0;
 private:
