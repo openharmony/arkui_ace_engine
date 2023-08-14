@@ -51,6 +51,7 @@ public:
     static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     static bool DispatchRotationEvent(AceViewOhos* view, float rotationValue);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    static void DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
 
     static uint32_t GetBackgroundColor();
