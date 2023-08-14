@@ -1110,6 +1110,7 @@ private:
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
     bool CheckHandleVisible(const RectF& paintRect);
+    void SetTextRectOffset();
 
     bool ResetObscureTickCountDown();
     bool IsInPasswordMode() const;
@@ -1207,6 +1208,8 @@ private:
     float inlineSingleLineHeight_ = 0.0f;
     float inlinePadding_ = 0.0f;
     float previewWidth_ = 0.0f;
+    float lastTextRectY_ = 0.0f;
+    std::optional<DisplayMode> barState_;
     InputStyle preInputStyle_ = InputStyle::DEFAULT;
 
     uint32_t twinklingInterval_ = 0;
