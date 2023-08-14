@@ -327,7 +327,7 @@ void WindowPattern::AdapterRotation(const std::shared_ptr<MMI::PointerEvent>& po
     if (udegree == -1 || udegree == 0) {
         return;
     }
-    udegree += 360;
+    udegree = udegree < 0 ? udegree + 360 : udegree;
     int32_t pointerId = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
     bool ret = pointerEvent->GetPointerItem(pointerId, item);

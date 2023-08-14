@@ -885,8 +885,9 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto radian = Degree2Radian(degree);
     if (degree != 0) {
         auto newRect = GetPaintRectWithoutTransform();
-        double leftX = 0;
-        double leftY = 0;
+        double leftX = 0.0;
+        double leftY = 0.0;
+        degree = degree < 0 ? degree + 360 : degree;
         SetCorner(leftX, leftY, oldSize.Width(), oldSize.Height(), degree);
         double centerX = oldSize.Width() * center[0];
         double centerY = oldSize.Height() * center[1];
@@ -899,7 +900,11 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
         leftY = newRect.GetOffset().GetY() + leftYCalc;
         auto offset = OffsetF(leftX + translate[0], leftY + translate[1]);
         rect.SetOffset(offset);
-        newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
+        if (degree == 180) {
+            newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
+        } else {
+            newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
+        }
         rect.SetSize(newSize);
     }
     gRect = rect;
