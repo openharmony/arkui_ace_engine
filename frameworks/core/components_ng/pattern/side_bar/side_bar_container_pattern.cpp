@@ -95,6 +95,19 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
         return;
     }
 
+    controlImageWidth_ = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+    controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
+    auto imageNode = controlButtonNode->GetFirstChild();
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
+    if (!imageFrameNode || imageFrameNode ->GetTag() != V2::IMAGE_ETS_TAG) {
+        LOGW("OnUpdateShowControlButton: Get control image node failed.");
+        return;
+    }
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    CalcSize imageCalcSize((CalcLength(controlImageWidth_)), CalcLength(controlImageHeight_));
+    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
+
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(controlButtonNode);
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
