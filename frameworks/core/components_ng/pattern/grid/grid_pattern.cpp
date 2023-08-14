@@ -414,7 +414,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     CheckRestartSpring();
     CheckScrollable();
-    FlushCurrentFocus();
     MarkSelectedItems();
     return false;
 }
@@ -606,42 +605,6 @@ void GridPattern::OnScrollEndCallback()
 void GridPattern::OnScrollStartCallback()
 {
     FireOnScrollStart();
-}
-
-void GridPattern::FlushCurrentFocus()
-{
-    auto gridFrame = GetHost();
-    CHECK_NULL_VOID(gridFrame);
-    auto gridFocus = gridFrame->GetFocusHub();
-    CHECK_NULL_VOID(gridFocus);
-    if (!gridFocus->IsCurrentFocus()) {
-        return;
-    }
-    auto childFocusList = gridFocus->GetChildren();
-    for (const auto& childFocus : childFocusList) {
-        if (childFocus->IsCurrentFocus()) {
-            auto curFrame = childFocus->GetFrameNode();
-            CHECK_NULL_VOID(curFrame);
-            auto curPattern = curFrame->GetPattern();
-            CHECK_NULL_VOID(curPattern);
-            auto curItemPattern = AceType::DynamicCast<GridItemPattern>(curPattern);
-            CHECK_NULL_VOID(curItemPattern);
-
-            lastFocusItemMainIndex_ = curItemPattern->GetMainIndex();
-            lastFocusItemCrossIndex_ = curItemPattern->GetCrossIndex();
-            return;
-        }
-    }
-    if (gridLayoutInfo_.gridMatrix_.find(lastFocusItemMainIndex_) == gridLayoutInfo_.gridMatrix_.end()) {
-        LOGD("Can not find last focus item main index: %{public}d", lastFocusItemMainIndex_);
-        return;
-    }
-    auto curCrossNum = GetCrossCount();
-    auto weakChild = SearchFocusableChildInCross(lastFocusItemMainIndex_, lastFocusItemCrossIndex_, curCrossNum);
-    auto child = weakChild.Upgrade();
-    if (child) {
-        child->RequestFocusImmediately();
-    }
 }
 
 std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)
