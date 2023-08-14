@@ -53,6 +53,8 @@ public:
     static void SetListItemAlign(int32_t itemAlignment);
     static void SetLanes(const JSCallbackInfo& info);
     static void SetSticky(int32_t sticky);
+    static void SetContentStartOffset(float startOffset);
+    static void SetContentEndOffset(float endOffset);
     static void SetNestedScroll(const JSCallbackInfo& args);
     static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetScrollSnapAlign(int32_t scrollSnapAlign);
