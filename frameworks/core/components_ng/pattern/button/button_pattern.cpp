@@ -196,7 +196,7 @@ void ButtonPattern::OnTouchUp()
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    if (buttonEventHub->GetStateEffect()) {
+    if (buttonEventHub->GetStateEffect() && buttonEventHub->IsEnabled()) {
         auto renderContext = host->GetRenderContext();
         if (isSetClickedColor_) {
             renderContext->UpdateBackgroundColor(backgroundColor_);
