@@ -69,7 +69,8 @@
                 "soc_perf",
                 "security_component",
                 "camera_framework",
-                "previewer"
+                "previewer",
+                "media_library"
             ],
             "third_party": [
                 "json",
