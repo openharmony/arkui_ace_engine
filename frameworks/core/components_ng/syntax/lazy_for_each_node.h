@@ -98,8 +98,10 @@ public:
     const std::list<RefPtr<UINode>>& GetChildren() const override;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
-        cacheCount_ = cacheCount;
         itemConstraint_ = itemConstraint;
+        if (builder_) {
+            builder_->SetCacheCount(cacheCount);
+        }
     }
 
 private:
@@ -132,8 +134,6 @@ private:
     void NotifyDataCountChanged(int32_t index);
 
     // The index values of the start and end of the current children nodes and the corresponding keys.
-    mutable int32_t startIndex_ = -1;
-    mutable int32_t endIndex_ = -1;
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
     std::optional<LayoutConstraintF> itemConstraint_;
@@ -144,7 +144,6 @@ private:
     mutable std::list<RefPtr<UINode>> children_;
     mutable bool needPredict_ = false;
     bool needMarkParent_ = true;
-    int32_t cacheCount_ = 1;
 
     RefPtr<LazyForEachBuilder> builder_;
 
