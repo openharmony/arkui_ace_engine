@@ -747,10 +747,9 @@ void TextLayoutAlgorithm::GetSpanAndImageSpanList(
         auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
         if (imageSpanItem) {
             int32_t index = child->placeHolderIndex;
-            if (index > static_cast<int32_t>(rectsForPlaceholders.size())) {
-                continue;
+            if (index >= 0 && index < static_cast<int32_t>(rectsForPlaceholders.size())) {
+                imageSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
             }
-            imageSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
         } else {
             spanList.emplace_back(child);
         }
