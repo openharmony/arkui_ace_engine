@@ -459,7 +459,8 @@ public:
     {
         isBuildByJS_ = isBuildByJS;
     }
-    void AddAttachToMainTreeTask(std::function<void()>&& func) {
+    void AddAttachToMainTreeTask(std::function<void()>&& func)
+    {
         attachToMainTreeTasks_.emplace_back(std::move(func));
     }
 
@@ -467,6 +468,9 @@ public:
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
     virtual void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint);
+
+    // return value: true if the node can be removed immediately.
+    virtual bool OnRemoveFromParent(bool allowTransition);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -504,8 +508,6 @@ protected:
 
     bool isRemoving_ = false;
 
-    // return value: true if the node can be removed immediately.
-    virtual bool OnRemoveFromParent(bool allowTransition);
     virtual bool RemoveImmediately() const;
     void ResetParent();
 

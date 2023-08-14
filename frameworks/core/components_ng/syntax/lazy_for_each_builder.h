@@ -22,6 +22,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "base/log/ace_trace.h"
@@ -34,6 +35,9 @@
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 
 namespace OHOS::Ace::NG {
+
+using LazyForEachChild = std::pair<std::string, RefPtr<UINode>>;
+using LazyForEachCacheChild = std::pair<int32_t, RefPtr<UINode>>;
 
 class ACE_EXPORT LazyForEachBuilder : public virtual AceType {
     DECLARE_ACE_TYPE(NG::LazyForEachBuilder, AceType)
@@ -48,66 +52,29 @@ public:
 
     std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild)
     {
-        auto keyIter = cachedItems_.find(index);
-        if (keyIter != cachedItems_.end()) {
-            {
-                auto iter = generatedItem_.find(keyIter->second);
-                if (iter != generatedItem_.end()) {
-                    return std::pair<std::string, RefPtr<NG::UINode>>(iter->first, iter->second);
-                }
+        auto iter = cachedItems_.find(index);
+        if (iter != cachedItems_.end()) {
+            if (iter->second.second) {
+                return iter->second;
             }
-            {
-                auto iter = expiringItem_.find(keyIter->second);
-                if (iter != expiringItem_.end()) {
-                    generatedItem_.try_emplace(iter->first, iter->second);
-                    return std::pair<std::string, RefPtr<NG::UINode>>(iter->first, iter->second);
-                }
+            auto keyIter = expiringItem_.find(iter->second.first);
+            if (keyIter != expiringItem_.end() && keyIter->second.second) {
+                iter->second.second = keyIter->second.second;
+                expiringItem_.erase(keyIter);
+                return iter->second;
             }
         }
+
         if (needBuild) {
             ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
             auto itemInfo = OnGetChildByIndex(index, expiringItem_);
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             {
-                auto result = generatedItem_.try_emplace(itemInfo.first, itemInfo.second);
-                if (!result.second) {
-                    LOGD("already has same key %{private}s child", itemInfo.first.c_str());
-                }
+                cachedItems_[index] = itemInfo;
             }
-            cachedItems_[index] = itemInfo.first;
-            return std::pair<std::string, RefPtr<NG::UINode>>(itemInfo.first, itemInfo.second);
+            return itemInfo;
         }
         return {};
-    }
-
-    RefPtr<UINode> GetChildByKey(const std::string& key)
-    {
-        auto iter = generatedItem_.find(key);
-        if (iter != generatedItem_.end()) {
-            return iter->second;
-        }
-        return nullptr;
-    }
-
-    void UpdateCachedItems(const std::list<std::optional<std::string>>& nodeIds,
-        std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems)
-    {}
-
-    void SetCacheItemInfo(int32_t index, const std::string& info) {}
-
-    std::optional<std::string> GetCacheItemInfo(int32_t index) const
-    {
-        return std::nullopt;
-    }
-
-    void Clean()
-    {
-        generatedItem_.clear();
-    }
-
-    void RemoveChild(const std::string& id)
-    {
-        generatedItem_.erase(id);
     }
 
     void ExpandChildrenOnInitial()
@@ -117,9 +84,13 @@ public:
 
     void OnDataReloaded()
     {
+        for (auto& [index, node] : cachedItems_) {
+            if (node.second) {
+                expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
+            }
+        }
         cachedItems_.clear();
-        expiringItem_.merge(generatedItem_);
-        generatedItem_.clear();
+        needTransition = true;
     }
 
     bool OnDataAdded(size_t index)
@@ -127,45 +98,62 @@ public:
         if (cachedItems_.empty()) {
             return true;
         }
-        if (index > static_cast<size_t>(cachedItems_.rbegin()->first) ||
-            index < static_cast<size_t>(cachedItems_.begin()->first)) {
-            return false;
-        }
-        decltype(cachedItems_) temp(std::move(cachedItems_));
+        if (index <= static_cast<size_t>(cachedItems_.rbegin()->first) ||
+            index >= static_cast<size_t>(cachedItems_.begin()->first)) {
+            decltype(cachedItems_) temp(std::move(cachedItems_));
 
-        for (auto& [oldindex, id] : temp) {
-            cachedItems_.try_emplace(index > static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
+            for (auto& [oldindex, id] : temp) {
+                cachedItems_.try_emplace(
+                    index > static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
+            }
         }
+        for (auto& [key, node] : expiringItem_) {
+            if (static_cast<size_t>(node.first) >= index) {
+                node.first++;
+            }
+        }
+
         return true;
     }
 
-    bool OnDataDeleted(size_t index)
+    RefPtr<UINode> OnDataDeleted(size_t index)
     {
+        RefPtr<UINode> node;
         if (cachedItems_.empty()) {
-            return false;
+            return node;
         }
-        if (index > static_cast<size_t>(cachedItems_.rbegin()->first)) {
-            return false;
-        }
-        decltype(cachedItems_) temp(std::move(cachedItems_));
+        if (index <= static_cast<size_t>(cachedItems_.rbegin()->first)) {
+            decltype(cachedItems_) temp(std::move(cachedItems_));
 
-        for (auto& [oldindex, id] : temp) {
-            cachedItems_.try_emplace(index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(id));
+            for (auto& [oldindex, child] : temp) {
+                if (oldindex == index) {
+                    node = child.second;
+                } else {
+                    cachedItems_.try_emplace(
+                        index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(child));
+                }
+            }
         }
-        return true;
+        for (auto& [key, child] : expiringItem_) {
+            if (static_cast<size_t>(child.first) > index) {
+                child.first--;
+            }
+            if (static_cast<size_t>(child.first) == index) {
+                child.first = -1;
+                node = child.second;
+            }
+        }
+
+        return node;
     }
 
     bool OnDataChanged(size_t index)
     {
         auto keyIter = cachedItems_.find(index);
         if (keyIter != cachedItems_.end()) {
-            auto iter = generatedItem_.find(keyIter->second);
+            expiringItem_.erase(keyIter->second.first);
             cachedItems_.erase(keyIter);
-            if (iter != generatedItem_.end()) {
-                expiringItem_.try_emplace(iter->first, std::move(iter->second));
-                generatedItem_.erase(iter);
-                return true;
-            }
+            return true;
         }
         return false;
     }
@@ -175,108 +163,131 @@ public:
         return true;
     }
 
-    void UpdateCachedItems(int start, int end) {}
-
-    std::map<int32_t, RefPtr<UINode>> GetItems() const
+    RefPtr<UINode> GetChildByKey(const std::string& key)
     {
-        std::map<int32_t, RefPtr<UINode>> items;
-        for (auto& [index, key] : cachedItems_) {
-            auto itor = generatedItem_.find(key);
-            if (itor == generatedItem_.end()) {
+        return nullptr;
+    }
+
+    std::map<int32_t, LazyForEachChild>& GetItems(std::list<RefPtr<UINode>>& childList)
+    {
+        startIndex_ = -1;
+        endIndex_ = -1;
+
+        decltype(cachedItems_) items(std::move(cachedItems_));
+
+        for (auto& [index, node] : items) {
+            if (!node.second) {
+                cachedItems_.try_emplace(index, std::move(node));
                 continue;
             }
-            items.try_emplace(index, itor->second);
+
+            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+            if (frameNode && !frameNode->IsActive()) {
+                frameNode->SetJSViewActive(false);
+                expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
+                continue;
+            }
+            cachedItems_.try_emplace(index, std::move(node));
+            if (startIndex_ == -1) {
+                startIndex_ = index;
+            }
+            endIndex_ = std::max(endIndex_, index);
         }
 
-        return items;
+        if (needTransition) {
+            for (auto& [key, node] : expiringItem_) {
+                if (!node.second) {
+                    continue;
+                }
+                auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+                if (frameNode->IsOnMainTree()) {
+                    childList.push_back(node.second);
+                }
+            }
+            needTransition = false;
+        }
+
+        return cachedItems_;
     }
 
     void RemoveAllChild()
     {
-        ACE_SCOPED_TRACE("RemoveAllChild");
-        expiringItem_.merge(generatedItem_);
-        for (const auto& iter : generatedItem_) {
-            iter.second->SetJSViewActive(false);
-        }
-        generatedItem_.clear();
-    }
-
-    RefPtr<UINode> RemoveChildByIndex(int32_t index)
-    {
-        ACE_SCOPED_TRACE("RemoveChildByIndex %d", index);
-        RefPtr<UINode> child;
-        auto keyIter = cachedItems_.find(index);
-        if (keyIter != cachedItems_.end()) {
-            auto iter = generatedItem_.find(keyIter->second);
-            if (iter != generatedItem_.end()) {
-                child = iter->second;
-                iter->second->SetJSViewActive(false);
-                expiringItem_.try_emplace(iter->first, std::move(iter->second));
-                generatedItem_.erase(iter);
+        for (auto& [index, node] : cachedItems_) {
+            if (!node.second) {
+                continue;
             }
+            auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
+            if (frameNode) {
+                frameNode->SetActive(false);
+            }
+            node.second->SetJSViewActive(false);
+            expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
         }
-        return child;
-    }
-
-    void ClearExpiringItem()
-    {
-        expiringItem_.clear();
     }
 
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
     {
-        for (const auto& item : generatedItem_) {
-            item.second->ForceUpdateLayoutPropertyFlag(propertyChangeFlag);
+        for (const auto& item : cachedItems_) {
+            if (!item.second.second) {
+                continue;
+            }
+            item.second.second->ForceUpdateLayoutPropertyFlag(propertyChangeFlag);
         }
     }
 
-    RefPtr<UINode> CacheItem(int32_t index, std::unordered_map<std::string, RefPtr<UINode>>& cache,
+    RefPtr<UINode> CacheItem(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
         const std::optional<LayoutConstraintF>& itemConstraint)
     {
-        auto keyIter = cachedItems_.find(index);
-        if (keyIter != cachedItems_.end()) {
-            auto iter = expiringItem_.find(keyIter->second);
-            if (iter != expiringItem_.end()) {
-                cache.try_emplace(iter->first, iter->second);
-                return iter->second;
-            }
-        }
         ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
         auto itemInfo = OnGetChildByIndex(index, expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
-        cache.try_emplace(itemInfo.first, itemInfo.second);
-        cachedItems_[index] = itemInfo.first;
+        cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
         itemInfo.second->Build();
         ViewStackProcessor::GetInstance()->ResetPredict();
         itemInfo.second->SetJSViewActive(false);
+        cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
+
         return itemInfo.second;
     }
 
-    bool PreBuild(int32_t start, int32_t end, int32_t cacheCount, int64_t deadline,
-        const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
+    bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
+        ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
         auto count = OnGetTotalCount();
-        std::unordered_map<std::string, RefPtr<UINode>> cache;
-        std::list<int32_t> idleIndexes;
-        if (start != -1 && end != -1) {
-            for (int32_t i = 1; i <= cacheCount; i++) {
-                if (start >= i) {
-                    idleIndexes.emplace_back(start - i);
+        std::unordered_map<std::string, LazyForEachCacheChild> cache;
+        std::unordered_set<int32_t> idleIndexes;
+        if (startIndex_ != -1 && endIndex_ != -1) {
+            for (int32_t i = 1; i <= cacheCount_; i++) {
+                if (startIndex_ >= i) {
+                    idleIndexes.emplace(startIndex_ - i);
                 }
-                if (end + i < count) {
-                    idleIndexes.emplace_back(end + i);
+                if (endIndex_ + i < count) {
+                    idleIndexes.emplace(endIndex_ + i);
                 }
             }
         }
 
+        for (auto& [key, node] : expiringItem_) {
+            auto iter = idleIndexes.find(node.first);
+            if (iter != idleIndexes.end() && node.second) {
+                cache.try_emplace(key, std::move(node));
+                idleIndexes.erase(iter);
+            }
+        }
+
+        bool result = true;
         for (auto index : idleIndexes) {
-            if ((GetSysTimestamp() > deadline) || (itemConstraint && !canRunLongPredictTask)) {
-                expiringItem_.swap(cache);
-                return false;
+            if (GetSysTimestamp() > deadline) {
+                result = false;
+                continue;
             }
             auto uiNode = CacheItem(index, cache, itemConstraint);
-            if (uiNode && itemConstraint) {
+            if (!canRunLongPredictTask && itemConstraint) {
+                result = false;
+                continue;
+            }
+            if (canRunLongPredictTask && uiNode && itemConstraint) {
                 RefPtr<FrameNode> frameNode = DynamicCast<FrameNode>(uiNode);
                 while (!frameNode) {
                     uiNode = uiNode->GetFirstChild();
@@ -291,9 +302,8 @@ public:
                 }
             }
         }
-
         expiringItem_.swap(cache);
-        return true;
+        return result;
     }
 
     virtual void ReleaseChildGroupById(const std::string& id) = 0;
@@ -302,22 +312,27 @@ public:
 
     virtual void UnregisterDataChangeListener(const RefPtr<V2::DataChangeListener>& listener) = 0;
 
+    void SetCacheCount(int32_t cacheCount)
+    {
+        cacheCount_ = cacheCount;
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
-    virtual std::pair<std::string, RefPtr<UINode>> OnGetChildByIndex(
-        int32_t index, const std::unordered_map<std::string, RefPtr<UINode>>& cachedItems) = 0;
+    virtual LazyForEachChild OnGetChildByIndex(
+        int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
 
     virtual void OnExpandChildrenOnInitialInNG() = 0;
 
 private:
-    // [key, UINode]
-    std::unordered_map<std::string, RefPtr<UINode>> generatedItem_;
-    // [index, key]
-    std::map<int32_t, std::string> cachedItems_;
+    std::map<int32_t, LazyForEachChild> cachedItems_;
+    std::unordered_map<std::string, LazyForEachCacheChild> expiringItem_;
 
-    std::unordered_map<std::string, RefPtr<UINode>> expiringItem_;
-
+    int32_t startIndex_ = -1;
+    int32_t endIndex_ = -1;
+    int32_t cacheCount_ = 1;
+    bool needTransition = false;
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
 } // namespace OHOS::Ace::NG
