@@ -125,16 +125,16 @@ private:
             if (!nodeLeft || !nodeRight) {
                 return false;
             }
-            if (nodeLeft->GetLayoutPriority() == nodeRight->GetLayoutPriority()) {
-                if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
-                    return true;
-                }
-                if (nodeLeft->GetDepth() == nodeRight->GetDepth()) {
-                    return nodeLeft < nodeRight;
-                }
-                return false;
+            if (nodeLeft->GetLayoutPriority() != nodeRight->GetLayoutPriority()) {
+                return nodeLeft->GetLayoutPriority() > nodeRight->GetLayoutPriority();
             }
-            return nodeLeft->GetLayoutPriority() > nodeRight->GetLayoutPriority();
+            if (nodeLeft->GetPageId() != nodeRight->GetPageId()) {
+                return nodeLeft->GetPageId() < nodeRight->GetPageId();
+            }
+            if (nodeLeft->GetDepth() != nodeRight->GetDepth()) {
+                return nodeLeft->GetDepth() < nodeRight->GetDepth();
+            }
+            return nodeLeft < nodeRight;
         }
     };
 

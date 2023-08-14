@@ -49,36 +49,32 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (dirtyLayoutNodes_.empty()) {
+        return;
+    }
     isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
-
-    RootDirtyMap dirtyLayoutNodesMap;
-    for (auto&& dirty : dirtyLayoutNodes) {
-        dirtyLayoutNodesMap[dirty->GetPageId()].emplace(dirty);
-    }
+    PageDirtySet dirtyLayoutNodesSet(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
 
     // Priority task creation
     int64_t time = 0;
-    for (auto&& pageNodes : dirtyLayoutNodesMap) {
-        for (auto&& node : pageNodes.second) {
-            // need to check the node is destroying or not before CreateLayoutTask
-            if (!node || node->IsInDestroying()) {
-                continue;
+    for (auto&& node : dirtyLayoutNodesSet) {
+        // need to check the node is destroying or not before CreateLayoutTask
+        if (!node || node->IsInDestroying()) {
+            continue;
+        }
+        time = GetSysTimestamp();
+        auto task = node->CreateLayoutTask(forceUseMainThread);
+        if (task) {
+            if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
+                (*task)();
+                time = GetSysTimestamp() - time;
+            } else {
+                LOGW("need to use multithread feature");
             }
-            time = GetSysTimestamp();
-            auto task = node->CreateLayoutTask(forceUseMainThread);
-            if (task) {
-                if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
-                    (*task)();
-                    time = GetSysTimestamp() - time;
-
-                } else {
-                    LOGW("need to use multithread feature");
-                }
-            }
-            if (frameInfo_ != nullptr) {
-                frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
-            }
+        }
+        if (frameInfo_ != nullptr) {
+            frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
     }
     isLayouting_ = false;

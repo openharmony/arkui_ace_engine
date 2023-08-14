@@ -663,7 +663,8 @@ void Animator::NotifyInterpolator(int32_t playedTime)
         // notify repeat before on timestamp changed.
         StatusListenable::NotifyRepeatListener();
     }
-    for (const auto& interpolator : interpolators_) {
+    auto interpolators = interpolators_;
+    for (const auto& interpolator : interpolators) {
         if (needStop && (fillMode_ == FillMode::NONE || fillMode_ == FillMode::BACKWARDS)) {
             // notify init value set by user.
             interpolator->OnInitNotify(normalizedTime, isReverse_);
