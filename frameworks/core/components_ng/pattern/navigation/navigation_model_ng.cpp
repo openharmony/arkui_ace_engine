@@ -1241,6 +1241,12 @@ void NavigationModelNG::SetNavBarPosition(NG::NavBarPosition mode)
 void NavigationModelNG::SetNavBarWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetUserSetNavBarWidthFlag(true);
 }
 
 void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
