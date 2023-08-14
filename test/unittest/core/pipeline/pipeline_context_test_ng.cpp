@@ -292,6 +292,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg003, TestSize.Level1)
      *             FlushLayoutTask and FlushRenderTask of the UITaskScheduler.
      */
     context_->taskScheduler_->AddDirtyLayoutNode(frameNode_);
+    context_->taskScheduler_->dirtyLayoutNodes_[frameNode_->GetPageId()].emplace(nullptr);
     context_->taskScheduler_->AddDirtyRenderNode(frameNode_);
     context_->taskScheduler_->dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
 
@@ -1995,6 +1996,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg001, TestSize.Level1)
      * @tc.expected: frame info not record.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode);
+    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     taskScheduler.FlushLayoutTask(false);
     EXPECT_EQ(frameInfo.layoutInfos_.size(), 1);
@@ -2118,6 +2120,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg004, TestSize.Level1)
      * @tc.expected: NeedAdditionalLayout return false.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode);
+    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     EXPECT_FALSE(taskScheduler.NeedAdditionalLayout());
 
