@@ -49,7 +49,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
 
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
-    auto task = [currentId, dialogProperties, dialogs, func = std::move(buildFunc),
+    auto task = [currentId, dialogProperties, &dialogs, func = std::move(buildFunc),
                     weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
         ContainerScope scope(currentId);
         WeakPtr<NG::FrameNode> dialog;
