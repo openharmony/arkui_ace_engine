@@ -315,7 +315,7 @@ void CanvasRendererModelNG::DrawImage(const BaseInfo& baseInfo, const ImageInfo&
     }
 }
 
-void CanvasRendererModelNG::PutImageData(const BaseInfo& baseInfo, const ImageData& imageData)
+void CanvasRendererModelNG::PutImageData(const BaseInfo& baseInfo, const Ace::ImageData& imageData)
 {
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
@@ -343,9 +343,10 @@ void CanvasRendererModelNG::CloseImageBitmap(const BaseInfo& baseInfo, const std
     }
 }
 
-std::unique_ptr<ImageData> CanvasRendererModelNG::GetImageData(const BaseInfo& baseInfo, const ImageSize& imageSize)
+std::unique_ptr<Ace::ImageData> CanvasRendererModelNG::GetImageData(
+    const BaseInfo& baseInfo, const ImageSize& imageSize)
 {
-    std::unique_ptr<ImageData> data;
+    std::unique_ptr<Ace::ImageData> data;
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
         CHECK_NULL_RETURN(offscreenPattern, data);

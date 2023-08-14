@@ -43,7 +43,7 @@ std::list<FileInfo> ImageCache::cacheFileInfo_;
 #ifdef FLUTTER_2_5
 class MockImageCache : public ImageCache {
     void Clear() override {};
-    RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) override
+    RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& filePath) override
     {
         return nullptr;
     }
@@ -128,13 +128,13 @@ void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObj
     if (key.empty() || imgObjCapacity_ == 0) {
         return;
     }
-    std::scoped_lock lock(imgObjCacheMutex_);
+    std::scoped_lock lock(imgObjMutex_);
     CacheWithCountLimitLRU<RefPtr<NG::ImageObject>>(key, imgObj, cacheImgObjListNG_, imgObjCacheNG_, imgObjCapacity_);
 }
 
 RefPtr<NG::ImageObject> ImageCache::GetCacheImgObjNG(const std::string& key)
 {
-    std::scoped_lock lock(imgObjCacheMutex_);
+    std::scoped_lock lock(imgObjMutex_);
     return GetCacheObjWithCountLimitLRU<RefPtr<NG::ImageObject>>(key, cacheImgObjListNG_, imgObjCacheNG_);
 }
 
@@ -143,17 +143,17 @@ void ImageCache::CacheImgObj(const std::string& key, const RefPtr<ImageObject>& 
     if (key.empty() || imgObjCapacity_ == 0) {
         return;
     }
-    std::scoped_lock lock(imgObjCacheMutex_);
+    std::scoped_lock lock(imgObjMutex_);
     CacheWithCountLimitLRU<RefPtr<ImageObject>>(key, imgObj, cacheImgObjList_, imgObjCache_, imgObjCapacity_);
 }
 
 RefPtr<ImageObject> ImageCache::GetCacheImgObj(const std::string& key)
 {
-    std::scoped_lock lock(imgObjCacheMutex_);
+    std::scoped_lock lock(imgObjMutex_);
     return GetCacheObjWithCountLimitLRU<RefPtr<ImageObject>>(key, cacheImgObjList_, imgObjCache_);
 }
 
-void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImageData>& imageData)
+void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData)
 {
     if (key.empty() || !imageData || dataSizeLimit_ == 0) {
         return;
@@ -173,14 +173,14 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
         dataCacheList_.emplace_front(key, imageData);
         imageDataCache_.emplace(key, dataCacheList_.begin());
     } else {
-        auto oldSize = iter->second->imageDataPtr->GetSize();
+        auto oldSize = iter->second->cacheObj->GetSize();
         if (oldSize != dataSize) {
             curDataSize_ -= oldSize;
             if (!ProcessImageDataCacheInner(dataSize)) {
                 return;
             }
         }
-        iter->second->imageDataPtr = imageData;
+        iter->second->cacheObj = imageData;
         dataCacheList_.splice(dataCacheList_.begin(), dataCacheList_, iter->second);
         iter->second = dataCacheList_.begin();
     }
@@ -189,8 +189,8 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
 bool ImageCache::ProcessImageDataCacheInner(size_t dataSize)
 {
     while (dataSize + curDataSize_ > dataSizeLimit_ && !dataCacheList_.empty()) {
-        curDataSize_ -= dataCacheList_.back().imageDataPtr->GetSize();
-        imageDataCache_.erase(dataCacheList_.back().imageDataKey);
+        curDataSize_ -= dataCacheList_.back().cacheObj->GetSize();
+        imageDataCache_.erase(dataCacheList_.back().cacheKey);
         dataCacheList_.pop_back();
     }
     if (dataSize + curDataSize_ > dataSizeLimit_) {
@@ -200,14 +200,14 @@ bool ImageCache::ProcessImageDataCacheInner(size_t dataSize)
     return true;
 }
 
-RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
+RefPtr<NG::ImageData> ImageCache::GetCacheImageData(const std::string& key)
 {
     std::scoped_lock lock(dataCacheMutex_);
     auto iter = imageDataCache_.find(key);
     if (iter != imageDataCache_.end()) {
         dataCacheList_.splice(dataCacheList_.begin(), dataCacheList_, iter->second);
         iter->second = dataCacheList_.begin();
-        return iter->second->imageDataPtr;
+        return iter->second->cacheObj;
     }
     return nullptr;
 }
@@ -329,4 +329,12 @@ void ImageCache::SetCacheFileInfo()
     hasSetCacheFileInfo_ = true;
 }
 
+void ImageCache::Clear()
+{
+    std::scoped_lock clearLock(imageCacheMutex_, dataCacheMutex_);
+    cacheList_.clear();
+    imageCache_.clear();
+    dataCacheList_.clear();
+    imageDataCache_.clear();
+}
 } // namespace OHOS::Ace

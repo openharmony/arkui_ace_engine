@@ -37,7 +37,6 @@
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
 #include "core/event/ace_event_helper.h"
-#include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {
@@ -266,10 +265,11 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
         if (cacheData) {
 #ifndef USE_ROSEN_DRAWING
             LOGD("sk data from memory cache.");
-            return AceType::DynamicCast<SkiaCachedImageData>(cacheData)->imageData;
+            const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(cacheData->GetDataWrapper());
+            return *skData;
 #else
             LOGD("drawing data from memory cache.");
-            return AceType::DynamicCast<RosenCachedImageData>(cacheData)->imageData;
+            return AceType::DynamicCast<NG::RsImageData>(cacheData)->GetRsData();
 #endif
         }
     }
@@ -283,10 +283,10 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
     if (data && imageCache) {
 #ifndef USE_ROSEN_DRAWING
         // cache sk data.
-        imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<SkiaCachedImageData>(data));
+        imageCache->CacheImageData(imageInfo.GetSrc(), NG::ImageData::MakeFromDataWrapper(&data));
 #else
         // cache drawing data.
-        imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<RosenCachedImageData>(data));
+        imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<NG::RsImageData>(data));
 #endif
     }
     return data;
@@ -308,9 +308,10 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawDataFromFileCache(
         auto data = imageCache->GetDataFromCacheFile(cacheFilePath);
         if (data) {
 #ifndef USE_ROSEN_DRAWING
-            return AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
+            const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(data->GetDataWrapper());
+            return *skData;
 #else
-            return AceType::DynamicCast<RosenCachedImageData>(data)->imageData;
+            return AceType::DynamicCast<NG::RsImageData>(data)->GetRsData();
 #endif
         }
     }

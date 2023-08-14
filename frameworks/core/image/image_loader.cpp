@@ -22,7 +22,6 @@
 #include <string_view>
 #include <unistd.h>
 
-#include "include/codec/SkCodec.h"
 #include "include/utils/SkBase64.h"
 
 #ifdef USE_ROSEN_DRAWING
@@ -188,19 +187,17 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     CHECK_NULL_RETURN(imageCache, nullptr);
     auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetKey());
     CHECK_NULL_RETURN_NOLOG(cacheData, nullptr);
-    // TODO: add adapter layer and use [SkiaCachedImageData] there
 #ifndef USE_ROSEN_DRAWING
-    auto skiaCachedImageData = AceType::DynamicCast<SkiaCachedImageData>(cacheData);
-    CHECK_NULL_RETURN(skiaCachedImageData, nullptr);
-    return skiaCachedImageData->imageData;
+    const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(cacheData->GetDataWrapper());
+    return *skData;
 #else
     auto rosenCachedImageData = AceType::DynamicCast<RosenCachedImageData>(cacheData);
     CHECK_NULL_RETURN(rosenCachedImageData, nullptr);
-    return rosenCachedImageData->imageData;
+    return rosenCachedImageData->GetRsData();
 #endif
 }
 
-void ImageLoader::CacheImageDataToImageCache(const std::string& key, const RefPtr<CachedImageData>& imageData)
+void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData)
 {
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineCtx);
@@ -218,40 +215,26 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
     CHECK_NULL_RETURN(imageCache, nullptr);
     std::string filePath = ImageCache::GetImageCacheFilePath(key) + suffix;
     auto data = imageCache->GetDataFromCacheFile(filePath);
-    CHECK_NULL_RETURN_NOLOG(data, nullptr);
-    // add adapter layer to replace [SkiaCachedImageData]
-#ifndef USE_ROSEN_DRAWING
-    auto skdata = AceType::DynamicCast<SkiaCachedImageData>(data)->imageData;
-    CHECK_NULL_RETURN(skdata, nullptr);
-    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skdata));
-#else
-    auto rsdata = AceType::DynamicCast<RosenCachedImageData>(data)->imageData;
-    CHECK_NULL_RETURN(rsdata, nullptr);
-    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsdata));
-#endif
+    return data;
 }
 
 // NG ImageLoader entrance
-RefPtr<NG::ImageData> ImageLoader::GetImageData(
-    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
+RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
 {
     ACE_FUNCTION_TRACE();
     if (src.IsPixmap()) {
         return LoadDecodedImageData(src, context);
     }
 #ifndef USE_ROSEN_DRAWING
-    sk_sp<SkData> skData;
-    do {
-        skData = ImageLoader::QueryImageDataFromImageCache(src);
-        if (skData) {
-            break;
-        }
-        skData = LoadImageData(src, context);
-        CHECK_NULL_RETURN(skData, nullptr);
-        ImageLoader::CacheImageDataToImageCache(
-            src.GetKey(), AceType::MakeRefPtr<SkiaCachedImageData>(skData));
-    } while (0);
-    return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&skData));
+    auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
+    if (cachedData) {
+        return NG::ImageData::MakeFromDataWrapper(&cachedData);
+    }
+    auto skData = LoadImageData(src, context);
+    CHECK_NULL_RETURN(skData, nullptr);
+    auto data = NG::ImageData::MakeFromDataWrapper(&skData);
+    ImageLoader::CacheImageData(src.GetKey(), data);
+    return data;
 #else
     std::shared_ptr<RSData> rsData = nullptr;
     do {
@@ -261,8 +244,7 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(
         }
         rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
-        ImageLoader::CacheImageDataToImageCache(
-            src.GetKey(), AceType::MakeRefPtr<RosenCachedImageData>(rsData));
+        ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<RosenCachedImageData>(rsData));
     } while (0);
     return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsData));
 #endif
@@ -746,9 +728,9 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 
     auto cache = pipeline->GetImageCache();
     if (cache) {
-        cache->CacheImageData(src.GetKey(), MakeRefPtr<PixmapCachedData>(pixmap));
+        cache->CacheImageData(src.GetKey(), MakeRefPtr<NG::PixmapData>(pixmap));
     }
-    return MakeRefPtr<NG::ImageData>(pixmap);
+    return MakeRefPtr<NG::PixmapData>(pixmap);
 #endif
 }
 
@@ -773,7 +755,7 @@ RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
         LOGW("no pixel map in imageSourceInfo, imageSourceInfo: %{public}s", imageSourceInfo.ToString().c_str());
         return nullptr;
     }
-    return MakeRefPtr<NG::ImageData>(imageSourceInfo.GetPixmap());
+    return MakeRefPtr<NG::PixmapData>(imageSourceInfo.GetPixmap());
 #endif
 }
 
