@@ -144,11 +144,11 @@ void PipelineBase::ClearImageCache()
     }
 }
 
-void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
+void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageCache)
 {
     std::lock_guard<std::shared_mutex> lock(imageMtx_);
-    if (imageChache) {
-        imageCache_ = imageChache;
+    if (imageCache) {
+        imageCache_ = imageCache;
     }
 }
 
