@@ -34,6 +34,9 @@ public:
 
 private:
     std::optional<SizeF> HandleLabelCircleButtonConstraint(LayoutWrapper* layoutWrapper);
+    void HandleChildLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
+    void HandleAdaptiveText(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
+    void HandleBorderRadius(LayoutWrapper* layoutWrapper);
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
     void HandleLabelCircleButtonFrameSize(const LayoutConstraintF& layoutConstraint, SizeF& frameSize);
     void MeasureCircleButton(LayoutWrapper* layoutWrapper);
