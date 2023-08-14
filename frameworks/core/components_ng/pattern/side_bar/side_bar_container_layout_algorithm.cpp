@@ -224,6 +224,10 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
     auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidth().value_or(-1.0_vp);
 
     realSideBarWidth_ = ConvertToPx(realSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
+    if (preSideBarWidth_.IsValid()) {
+        realSideBarWidth_ = ConvertToPx(preSideBarWidth_, scaleProperty, parentWidth).value_or(-1.0f);
+    }
+
     minSideBarWidth_ = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
     minContentWidth_ = ConvertToPx(minContentWidth, scaleProperty, parentWidth).value_or(-1.0f);
     maxSideBarWidth_ = ConvertToPx(maxSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
@@ -534,7 +538,7 @@ void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
+        LOGE("SideBarContainerLayoutAlgorithm::Layout, children is less than 3.");
         return;
     }
 

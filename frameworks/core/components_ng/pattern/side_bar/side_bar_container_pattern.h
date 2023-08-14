@@ -52,6 +52,8 @@ public:
         layoutAlgorithm->SetSideBarStatus(sideBarStatus_);
         layoutAlgorithm->SetNeedInitRealSideBarWidth(needInitRealSideBarWidth_);
         layoutAlgorithm->SetRealSideBarWidth(realSideBarWidth_);
+        layoutAlgorithm->SetPreSideBarWidth(preSidebarWidth_);
+        layoutAlgorithm->SetRealSideBarHeight(realSideBarHeight_);
         layoutAlgorithm->SetRealDividerWidth(realDividerWidth_);
         layoutAlgorithm->SetControlButtonClick(isControlButtonClick_);
         auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
@@ -186,6 +188,7 @@ private:
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;
+    Dimension userSetSidebarWidth_;
     Dimension adjustMaxSideBarWidth_;
     Dimension adjustMinSideBarWidth_;
     SideBarContainerType type_ = SideBarContainerType::EMBED;
@@ -193,6 +196,7 @@ private:
     float minSideBarWidth_ = -1.0f;
     float maxSideBarWidth_ = -1.0f;
     float typeUpdateWidth_ = 0.0f;
+    float realSideBarHeight_ = 0.0f;
     Dimension controlImageWidth_;
     Dimension controlImageHeight_;
 

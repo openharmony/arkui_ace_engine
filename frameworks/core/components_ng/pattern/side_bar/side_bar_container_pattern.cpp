@@ -61,6 +61,10 @@ void SideBarContainerPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
+
+    auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
 }
 
 void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
@@ -281,6 +285,12 @@ void SideBarContainerPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         OnUpdateSideBarAndContent(host);
+    }
+
+    CHECK_NULL_VOID(layoutProperty);
+    if (userSetSidebarWidth_ != layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE)) {
+        preSidebarWidth_.Reset();
+        userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
     }
 }
 
@@ -597,6 +607,7 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
 
     realDividerWidth_ = layoutAlgorithm->GetRealDividerWidth();
     realSideBarWidth_ = layoutAlgorithm->GetRealSideBarWidth();
+    realSideBarHeight_ = layoutAlgorithm->GetRealSideBarHeight();
     AddDividerHotZoneRect(layoutAlgorithm);
 
     if (needInitRealSideBarWidth_) {
@@ -636,7 +647,7 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     SizeF hotZoneSize;
     hotZoneSize.SetWidth(realDividerWidth_ + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
-    hotZoneSize.SetHeight(layoutAlgorithm->GetRealSideBarHeight());
+    hotZoneSize.SetHeight(realSideBarHeight_);
 
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
@@ -651,11 +662,10 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     CHECK_NULL_VOID(dividerGestureHub);
     dividerGestureHub->SetMouseResponseRegion(mouseRegion);
 
-    auto dragRegionHeight = layoutAlgorithm->GetRealSideBarHeight();
     auto dragRectOffset = layoutAlgorithm->GetSideBarOffset();
     dragRectOffset.SetX(-DEFAULT_DRAG_REGION.ConvertToPx());
     dragRect_.SetOffset(dragRectOffset);
-    dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * 2 + realDividerWidth_, dragRegionHeight));
+    dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * 2 + realDividerWidth_, realSideBarHeight_));
 
     std::vector<DimensionRect> responseRegion;
     DimensionOffset responseOffset(dragRectOffset);
