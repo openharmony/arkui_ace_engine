@@ -98,7 +98,7 @@ bool ImageCache::GetFromCacheFile(const std::string& filePath)
 
 bool ImageCache::GetFromCacheFileInner(const std::string& filePath)
 {
-    std::list<FileInfo>::iterator iter = std::find_if(cacheFileInfo_.begin(), cacheFileInfo_.end(),
+    auto iter = std::find_if(cacheFileInfo_.begin(), cacheFileInfo_.end(),
         [&filePath](const FileInfo& fileInfo) { return fileInfo.filePath == filePath; });
     if (iter == cacheFileInfo_.end()) {
         return false;
@@ -128,13 +128,13 @@ void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObj
     if (key.empty() || imgObjCapacity_ == 0) {
         return;
     }
-    std::scoped_lock lock(cacheImgObjListMutex_, imgObjCacheMutex_);
+    std::scoped_lock lock(imgObjCacheMutex_);
     CacheWithCountLimitLRU<RefPtr<NG::ImageObject>>(key, imgObj, cacheImgObjListNG_, imgObjCacheNG_, imgObjCapacity_);
 }
 
 RefPtr<NG::ImageObject> ImageCache::GetCacheImgObjNG(const std::string& key)
 {
-    std::scoped_lock lock(cacheImgObjListMutex_, imgObjCacheMutex_);
+    std::scoped_lock lock(imgObjCacheMutex_);
     return GetCacheObjWithCountLimitLRU<RefPtr<NG::ImageObject>>(key, cacheImgObjListNG_, imgObjCacheNG_);
 }
 
@@ -143,13 +143,13 @@ void ImageCache::CacheImgObj(const std::string& key, const RefPtr<ImageObject>& 
     if (key.empty() || imgObjCapacity_ == 0) {
         return;
     }
-    std::scoped_lock lock(cacheImgObjListMutex_, imgObjCacheMutex_);
+    std::scoped_lock lock(imgObjCacheMutex_);
     CacheWithCountLimitLRU<RefPtr<ImageObject>>(key, imgObj, cacheImgObjList_, imgObjCache_, imgObjCapacity_);
 }
 
 RefPtr<ImageObject> ImageCache::GetCacheImgObj(const std::string& key)
 {
-    std::scoped_lock lock(cacheImgObjListMutex_, imgObjCacheMutex_);
+    std::scoped_lock lock(imgObjCacheMutex_);
     return GetCacheObjWithCountLimitLRU<RefPtr<ImageObject>>(key, cacheImgObjList_, imgObjCache_);
 }
 
@@ -158,7 +158,7 @@ void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImage
     if (key.empty() || !imageData || dataSizeLimit_ == 0) {
         return;
     }
-    std::scoped_lock lock(dataCacheListMutex_, imageDataCacheMutex_);
+    std::scoped_lock lock(dataCacheMutex_);
     auto dataSize = imageData->GetSize();
     if (dataSize > (dataSizeLimit_ >> 1)) { // if data is longer than half limit, do not cache it.
         LOGW("data is %{public}d, bigger than half limit %{public}d, do not cache it", static_cast<int32_t>(dataSize),
@@ -202,7 +202,7 @@ bool ImageCache::ProcessImageDataCacheInner(size_t dataSize)
 
 RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
 {
-    std::scoped_lock lock(dataCacheListMutex_, imageDataCacheMutex_);
+    std::scoped_lock lock(dataCacheMutex_);
     auto iter = imageDataCache_.find(key);
     if (iter != imageDataCache_.end()) {
         dataCacheList_.splice(dataCacheList_.begin(), dataCacheList_, iter->second);
@@ -276,10 +276,22 @@ void ImageCache::ClearCacheFile(const std::vector<std::string>& removeFiles)
 
 void ImageCache::ClearCacheImage(const std::string& key)
 {
-    auto iter = imageCache_.find(key);
-    if (iter != imageCache_.end()) {
-        cacheList_.erase(iter->second);
-        imageCache_.erase(iter);
+    {
+        std::scoped_lock lock(imageCacheMutex_);
+        auto iter = imageCache_.find(key);
+        if (iter != imageCache_.end()) {
+            cacheList_.erase(iter->second);
+            imageCache_.erase(iter);
+        }
+    }
+
+    {
+        std::scoped_lock lock(dataCacheMutex_);
+        auto iter = imageDataCache_.find(key);
+        if (iter != imageDataCache_.end()) {
+            dataCacheList_.erase(iter->second);
+            imageDataCache_.erase(iter);
+        }
     }
 }
 
