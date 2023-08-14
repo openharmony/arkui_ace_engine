@@ -206,7 +206,6 @@ private:
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t tarIndex = -1);
     std::unordered_set<int32_t> GetFocusableChildCrossIndexesAt(int32_t tarMainIndex);
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
-    void FlushCurrentFocus();
     void FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo);
     std::pair<bool, bool> IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex);
     std::pair<FocusStep, FocusStep> GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step);
@@ -245,9 +244,6 @@ private:
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
     bool firstShow_ = true;
-
-    int32_t lastFocusItemMainIndex_ = 0;
-    int32_t lastFocusItemCrossIndex_ = 0;
 
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
 
