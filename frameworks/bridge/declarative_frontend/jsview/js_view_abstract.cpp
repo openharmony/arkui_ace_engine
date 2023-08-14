@@ -2234,6 +2234,7 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     }
     if (info[0]->IsNumber()) {
         int32_t align = info[0]->ToNumber<int32_t>();
+        bgImgPosition.SetIsAlign(true);
         switch (align) {
             case 0:
                 SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, 0.0, bgImgPosition);
@@ -2285,11 +2286,11 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         DimensionUnit typeX = DimensionUnit::PX;
         DimensionUnit typeY = DimensionUnit::PX;
         if (x.Unit() == DimensionUnit::PERCENT) {
-            valueX = x.Value() * FULL_DIMENSION;
+            valueX = x.Value();
             typeX = DimensionUnit::PERCENT;
         }
         if (y.Unit() == DimensionUnit::PERCENT) {
-            valueY = y.Value() * FULL_DIMENSION;
+            valueY = y.Value();
             typeY = DimensionUnit::PERCENT;
         }
         SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);

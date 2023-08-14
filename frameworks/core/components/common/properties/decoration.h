@@ -693,6 +693,11 @@ public:
         valueY_ = AnimatableDimension(value);
     }
 
+    void SetIsAlign(bool isAlign)
+    {
+        isAlign_ = isAlign;
+    }
+
     BackgroundImagePositionType GetSizeTypeX() const
     {
         return typeX_;
@@ -723,6 +728,11 @@ public:
         return valueY_.Value();
     }
 
+    bool IsAlign() const
+    {
+        return isAlign_;
+    }
+
     BackgroundImagePosition operator+(const BackgroundImagePosition& position) const;
 
     BackgroundImagePosition operator-(const BackgroundImagePosition& position) const;
@@ -740,6 +750,7 @@ private:
     BackgroundImagePositionType typeY_ { BackgroundImagePositionType::PX };
     AnimatableDimension valueX_ = AnimatableDimension(-1.0);
     AnimatableDimension valueY_ = AnimatableDimension(0.0);
+    bool isAlign_ = false;
 };
 
 class ImageObjectPosition final : public BackgroundImagePosition {
