@@ -604,6 +604,7 @@ public:
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset);
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
+    int GetWebId();
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -659,7 +660,6 @@ private:
     int GetHitTestResult();
     void GetHitTestValue(HitTestResult& result);
     int GetPageHeight();
-    int GetWebId();
     std::string GetTitle();
     std::string GetDefaultUserAgent();
     bool SaveCookieSync();
