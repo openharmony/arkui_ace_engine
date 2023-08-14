@@ -3849,6 +3849,9 @@ int32_t TextFieldPattern::GetLineBeginPosition(int32_t originCaretPosition, bool
         // stop moving caret if reaches \n, text head or caret line changed
     } while (((strIndex > 0) && (wideTextValue[strIndex] != L'\n')) ||
              (needToCheckLineChanged && !CharLineChanged(strIndex)));
+    if (strIndex < 0 || strIndex >= wideTextValue.length()) {
+        return 0;
+    }
     if (wideTextValue[strIndex] == L'\n') {
         moveLineBeginOffset--;
     }
