@@ -39,9 +39,13 @@ namespace {
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 constexpr uint32_t RATE = 2;
+const Dimension OFFSET = 3.5_vp;
+const Dimension OFFSET_LENGTH = 5.5_vp;
+const Dimension DIALOG_OFFSET = 1.0_vp;
+const Dimension DIALOG_OFFSET_LENGTH = 1.0_vp;
 constexpr uint32_t HALF = 2;
-constexpr uint32_t FOUCS_WIDTH = 2;
-constexpr uint32_t MARGIN_SIZE = 12;
+const Dimension FOUCS_WIDTH = 2.0_vp;
+const Dimension MARGIN_SIZE = 12.0_vp;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -417,11 +421,18 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
     float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
     float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
-    if (piantRectWidth > columnWidth) {
-        piantRectWidth = columnWidth - FOUCS_WIDTH;
-        centerX = focusKeyID_ * piantRectWidth + FOUCS_WIDTH / HALF;
+    if (!GetIsShowInDialog()) {
+        piantRectHeight = piantRectHeight - OFFSET_LENGTH.ConvertToPx();
+        centerY = centerY + OFFSET.ConvertToPx();
     } else {
-        centerX = centerX - MARGIN_SIZE / HALF;
+        piantRectHeight = piantRectHeight - DIALOG_OFFSET.ConvertToPx();
+        centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
+    }
+    if (piantRectWidth > columnWidth) {
+        piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx();
+        centerX = focusKeyID_ * piantRectWidth + FOUCS_WIDTH.ConvertToPx() / HALF;
+    } else {
+        centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
