@@ -67,6 +67,11 @@ public:
         return static_cast<int32_t>(navPathList_.size());
     }
 
+    int32_t PreSize() const
+    {
+        return static_cast<int32_t>(preNavPathList_.size());
+    }
+
     std::optional<std::pair<std::string, RefPtr<UINode>>> GetTopNavPath() const
     {
         if (navPathList_.empty()) {
