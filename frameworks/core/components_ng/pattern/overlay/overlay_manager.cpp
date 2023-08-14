@@ -1037,6 +1037,7 @@ bool OverlayManager::RemoveModalInOverlay()
     CHECK_NULL_RETURN(rootNode, true);
     auto topModalNode = modalStack_.top().Upgrade();
     CHECK_NULL_RETURN(topModalNode, false);
+    ModalPageLostFocus(topModalNode);
     if (!ModalExitProcess(topModalNode)) {
         return false;
     }
@@ -1058,6 +1059,7 @@ bool OverlayManager::RemoveAllModalInOverlay()
         if (!topModalNode) {
             continue;
         }
+        ModalPageLostFocus(topModalNode);
         if (!ModalExitProcess(topModalNode)) {
             continue;
         }
@@ -1315,6 +1317,8 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         auto modalPresentationPattern = topModalNode->GetPattern<ModalPresentationPattern>();
         CHECK_NULL_VOID(modalPresentationPattern);
         modalTransition = modalPresentationPattern->GetType();
+        // lost focus
+        ModalPageLostFocus(topModalNode);
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(topModalNode, false);
         } else if (modalTransition == ModalTransition::ALPHA) {
@@ -1362,6 +1366,14 @@ void OverlayManager::FireModalPageShow()
     CHECK_NULL_VOID(topModalFocusHub);
     topModalFocusHub->SetParentFocusable(true);
     topModalFocusHub->RequestFocusWithDefaultFocusFirstly();
+}
+
+void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node)
+{
+    auto modalFocusHub = node->GetFocusHub();
+    CHECK_NULL_VOID(modalFocusHub);
+    modalFocusHub->SetParentFocusable(false);
+    modalFocusHub->LostFocus();
 }
 
 void OverlayManager::FireModalPageHide()
@@ -1564,6 +1576,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
             topSheetNode->Clean();
             topSheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        ModalPageLostFocus(topSheetNode);
         PlaySheetTransition(topSheetNode, false);
         modalStack_.pop();
         if (!modalList_.empty()) {
@@ -1693,6 +1706,7 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
         CHECK_NULL_VOID(rootNode);
         auto root = DynamicCast<FrameNode>(rootNode);
         OverlayManager::DestroySheetMask(sheetNode);
+        ModalPageLostFocus(topSheetNode);
         root->RemoveChild(sheetNode);
         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         modalStack_.pop();
