@@ -141,6 +141,7 @@ public:
             auto textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_primary", PRIMARY_RGBA_OPACITY);
             theme->titleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
             theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
+            theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
             textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_secondary", SECONDARY_RGBA_OPACITY);
             theme->subtitleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
             theme->subtitleTextStyle_.SetFontSize(
