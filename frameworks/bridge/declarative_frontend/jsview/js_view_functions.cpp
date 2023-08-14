@@ -18,6 +18,8 @@
 #include <memory>
 #include <string>
 
+#include "base/geometry/calc_dimension.h"
+#include "base/geometry/dimension.h"
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
@@ -98,6 +100,35 @@ JSRef<JSObject> GenPositionInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
     return position;
 }
 
+JSRef<JSObject> GenSelfLayoutInfo(NG::LayoutWrapper* layoutWrapper)
+{
+    JSRef<JSObject> selfLayoutInfo = JSRef<JSObject>::New();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (!layoutProperty) {
+        return selfLayoutInfo;
+    }
+
+    const std::unique_ptr<NG::PaddingProperty> defaultPadding = std::make_unique<NG::PaddingProperty>();
+    const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
+    selfLayoutInfo->SetPropertyObject("borderWidth",
+        GenEdgeWidths(
+            layoutProperty->GetBorderWidthProperty() ? layoutProperty->GetBorderWidthProperty() : defaultEdgeWidth));
+    selfLayoutInfo->SetPropertyObject("margin",
+        GenPadding(layoutProperty->GetMarginProperty() ? layoutProperty->GetMarginProperty() : defaultPadding));
+    selfLayoutInfo->SetPropertyObject("padding",
+        GenPadding(layoutProperty->GetPaddingProperty() ? layoutProperty->GetPaddingProperty() : defaultPadding));
+    selfLayoutInfo->SetProperty(
+        "width", layoutProperty->GetCalcLayoutConstraint()
+                     ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp()
+                     : 0.0f);
+    selfLayoutInfo->SetProperty(
+        "height", layoutProperty->GetCalcLayoutConstraint()
+                      ? layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height()->GetDimension().ConvertToVp()
+                      : 0.0f);
+
+    return selfLayoutInfo;
+}
+
 void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapper>& layoutWrapper, const size_t& index)
 {
     info->SetProperty<std::string>("name", layoutWrapper->GetHostNode()->GetTag());
@@ -105,6 +136,18 @@ void FillSubComponetProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapp
     info->SetPropertyObject("constraint", GenConstraint(layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()));
     info->SetPropertyObject("borderInfo", GenBorderInfo(layoutWrapper));
     info->SetPropertyObject("position", GenPositionInfo(layoutWrapper));
+}
+
+void FillPlaceSizeProperty(JSRef<JSObject>& info, const RefPtr<NG::LayoutWrapper>& layoutWrapper)
+{
+    auto frameRect = layoutWrapper->GetGeometryNode()->GetFrameRect();
+    JSRef<JSObject> size = JSRef<JSObject>::New();
+
+    Dimension measureWidth(frameRect.GetSize().Width(), DimensionUnit::PX);
+    Dimension measureHeight(frameRect.GetSize().Height(), DimensionUnit::PX);
+    size->SetProperty("width", measureWidth.ConvertToVp());
+    size->SetProperty("height", measureHeight.ConvertToVp());
+    info->SetPropertyObject("measureResult", size);
 }
 
 JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
@@ -123,7 +166,23 @@ JSRef<JSArray> GenLayoutChildArray(std::list<RefPtr<NG::LayoutWrapper>> children
     return childInfo;
 }
 
-JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> children)
+JSRef<JSArray> GenPlaceChildrenArray(std::list<RefPtr<NG::LayoutWrapper>> children)
+{
+    JSRef<JSArray> childInfo = JSRef<JSArray>::New();
+    JSRef<JSFunc> layoutFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSPlaceChildren);
+    size_t index = 0;
+
+    for (const auto& iter : children) {
+        JSRef<JSObject> info = JSRef<JSObject>::New();
+        FillPlaceSizeProperty(info, iter);
+        info->SetPropertyObject("layout", layoutFunc);
+        childInfo->SetValueAt(index++, info);
+    }
+
+    return childInfo;
+}
+
+JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> children, bool isMeasureSize)
 {
     JSRef<JSArray> childInfo = JSRef<JSArray>::New();
     JSRef<JSFunc> measureFunc = JSRef<JSFunc>::New<FunctionCallback>(ViewMeasureLayout::JSMeasure);
@@ -131,7 +190,9 @@ JSRef<JSArray> GenMeasureChildArray(std::list<RefPtr<NG::LayoutWrapper>> childre
 
     for (const auto& iter : children) {
         JSRef<JSObject> info = JSRef<JSObject>::New();
-        FillSubComponetProperty(info, iter, index);
+        if (!isMeasureSize) {
+            FillSubComponetProperty(info, iter, index);
+        }
         info->SetPropertyObject("measure", measureFunc);
         childInfo->SetValueAt(index++, info);
     }
@@ -154,6 +215,12 @@ void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper)
     ViewMeasureLayout::SetLayoutChildren(layoutWrapper->GetAllChildrenWithBuild());
     ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
     jsLayoutFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
+
+    for (const auto& child : children) {
+        if (child->GetLayoutProperty()->GetPositionProperty()) {
+            child->Layout();
+        }
+    }
 }
 
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
@@ -163,7 +230,7 @@ void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
     auto constraint = GenConstraint(parentConstraint);
-    auto childArray = GenMeasureChildArray(children);
+    auto childArray = GenMeasureChildArray(children, false);
     JSRef<JSVal> params[2];
 
     params[0] = childArray;
@@ -172,6 +239,78 @@ void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper)
     ViewMeasureLayout::SetMeasureChildren(children);
     ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
     jsMeasureFunc_.Lock()->Call(jsObject_.Lock(), 2, params);
+
+    for (const auto& child : children) {
+        if (child->GetGeometryNode()->GetFrameRect().IsEmpty()) {
+            child->Measure(parentConstraint.value());
+        }
+    }
+}
+
+void ViewFunctions::ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    ACE_SCOPED_TRACE("ViewFunctions::ExecutePlaceChildren");
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+
+    auto selfLayoutInfo = GenSelfLayoutInfo(layoutWrapper);
+    auto childArray = GenPlaceChildrenArray(children);
+    auto constraint = GenConstraint(parentConstraint);
+
+    JSRef<JSVal> params[3] = { selfLayoutInfo, childArray, constraint };
+
+    ViewMeasureLayout::SetLayoutChildren(layoutWrapper->GetAllChildrenWithBuild());
+    ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
+    jsPlaceChildrenFunc_.Lock()->Call(jsObject_.Lock(), 3, params);
+
+    for (const auto& child : children) {
+        if (child->GetLayoutProperty()->GetPositionProperty()) {
+            child->Layout();
+        }
+    }
+}
+
+void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    ACE_SCOPED_TRACE("ViewFunctions::ExecutePlaceChildren");
+    auto children = layoutWrapper->GetAllChildrenWithBuild();
+    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+
+    auto selfLayoutInfo = GenSelfLayoutInfo(layoutWrapper);
+    auto childArray = GenMeasureChildArray(children, true);
+    auto constraint = GenConstraint(parentConstraint);
+
+    JSRef<JSVal> params[3];
+
+    params[0] = selfLayoutInfo;
+    params[1] = childArray;
+    params[2] = constraint;
+
+    ViewMeasureLayout::SetMeasureChildren(children);
+    ViewMeasureLayout::SetDefaultMeasureConstraint(parentConstraint.value());
+    JSRef<JSObject> result = jsMeasureSizeFunc_.Lock()->Call(jsObject_.Lock(), 3, params);
+
+    for (const auto& child : children) {
+        if (child->GetGeometryNode()->GetFrameRect().IsEmpty()) {
+            child->Measure(parentConstraint.value());
+        }
+    }
+
+    CalcDimension measureWidth;
+    CalcDimension measureHeight;
+    if (!JSViewAbstract::ParseJsDimensionVp(result->GetProperty("width"), measureWidth)) {
+        measureWidth = { -1.0f };
+    }
+    if (!JSViewAbstract::ParseJsDimensionVp(result->GetProperty("height"), measureHeight)) {
+        measureWidth = { -1.0f };
+    }
+    NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    NG::CalcSize idealSize = { NG::CalcLength(measureWidth.ConvertToPx()),
+        NG::CalcLength(measureHeight.ConvertToPx()) };
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(idealSize);
 }
 
 void ViewFunctions::ExecuteReload(bool deep)
@@ -232,6 +371,10 @@ void ViewFunctions::ExecuteSetActive(bool active)
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
 
 void ViewFunctions::ExecuteMeasure(NG::LayoutWrapper* layoutWrapper) {}
+
+void ViewFunctions::ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper) {}
+
+void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper) {}
 
 void ViewFunctions::ExecuteReload(bool deep) {}
 
@@ -317,6 +460,16 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsMeasureFunc = jsObject->GetProperty("onMeasure");
     if (jsMeasureFunc->IsFunction()) {
         jsMeasureFunc_ = JSRef<JSFunc>::Cast(jsMeasureFunc);
+    }
+
+    JSRef<JSVal> jsPlaceChildrenFunc = jsObject->GetProperty("onPlaceChildren");
+    if (jsPlaceChildrenFunc->IsFunction()) {
+        jsPlaceChildrenFunc_ = JSRef<JSFunc>::Cast(jsPlaceChildrenFunc);
+    }
+
+    JSRef<JSVal> jsMeasureSizeFunc = jsObject->GetProperty("onMeasureSize");
+    if (jsMeasureSizeFunc->IsFunction()) {
+        jsMeasureSizeFunc_ = JSRef<JSFunc>::Cast(jsMeasureSizeFunc);
     }
 
     JSRef<JSVal> jsAboutToBeDeletedFunc = jsObject->GetProperty("aboutToBeDeleted");
@@ -458,6 +611,16 @@ bool ViewFunctions::HasLayout() const
 bool ViewFunctions::HasMeasure() const
 {
     return !jsMeasureFunc_.IsEmpty();
+}
+
+bool ViewFunctions::HasPlaceChildren() const
+{
+    return !jsPlaceChildrenFunc_.IsEmpty();
+}
+
+bool ViewFunctions::HasMeasureSize() const
+{
+    return !jsMeasureSizeFunc_.IsEmpty();
 }
 
 void ViewFunctions::ExecuteAboutToBeDeleted()
