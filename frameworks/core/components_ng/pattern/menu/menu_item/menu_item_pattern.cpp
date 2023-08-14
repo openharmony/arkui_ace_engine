@@ -432,6 +432,23 @@ bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
+bool CustomMenuItemPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+        focusHub->OnClick(event);
+        CloseMenu();
+        return true;
+    }
+    return false;
+}
+
 void MenuItemPattern::RegisterWrapperMouseEvent()
 {
     auto menuWrapper = GetMenuWrapper();
