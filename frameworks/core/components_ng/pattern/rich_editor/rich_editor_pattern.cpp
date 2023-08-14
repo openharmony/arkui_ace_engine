@@ -2659,6 +2659,7 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     CHECK_NULL_VOID(paragraph_);
     int32_t currentPosition = paragraph_->GetHandlePositionForClick(pos);
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(currentPosition);
+    nextPosition = std::min(nextPosition, GetTextContentLength());
     textSelector_.Update(currentPosition, nextPosition);
     std::vector<Rect> selectedRects;
     paragraph_->GetRectsForRange(currentPosition, nextPosition, selectedRects);
