@@ -327,7 +327,7 @@ void BubblePattern::PopBubble()
         } else {
             auto overlay = weakOverlayManger.Upgrade();
             CHECK_NULL_VOID(overlay);
-            overlay->UpdatePopupNode(targetId, popupInfo);
+            overlay->HidePopup(targetId, popupInfo);
         }
     });
 }

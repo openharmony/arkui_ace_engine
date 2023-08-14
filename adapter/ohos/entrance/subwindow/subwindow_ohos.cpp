@@ -244,7 +244,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     ShowWindow();
     ResizeWindow();
     ContainerScope scope(childContainerId_);
-    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->ShowPopup(targetId, popupInfo);
 }
 
 void SubwindowOhos::HidePopupNG(int32_t targetId)
