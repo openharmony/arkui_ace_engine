@@ -79,7 +79,8 @@ private:
     OffsetF outNodeParentPos_;
     WeakPtr<FrameNode> holder_;
     bool followWithoutTransition_ = false;
-    RefPtr<LayoutProperty> layoutProperty_;
+    RefPtr<LayoutProperty> layoutPropertyIn_;
+    RefPtr<LayoutProperty> layoutPropertyOut_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GeometryTransition);
 };
