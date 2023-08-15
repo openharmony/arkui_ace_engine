@@ -354,6 +354,9 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrap
         auto startIndex = index;
         for (const auto& pos: posMap) {
             auto wrapper = layoutWrapper->GetChildByIndex(pos.first);
+            if (!wrapper) {
+                break;
+            }
             LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
             SyncGeometry(wrapper);
             wrapper->SetActive(false);
@@ -400,6 +403,9 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineBackward(LayoutWra
         auto startIndex = index - cnt + 1;
         for (const auto& pos: posMap) {
             auto wrapper = layoutWrapper->GetChildByIndex(pos.first);
+            if (!wrapper) {
+                break;
+            }
             LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
             SyncGeometry(wrapper);
             wrapper->SetActive(false);
