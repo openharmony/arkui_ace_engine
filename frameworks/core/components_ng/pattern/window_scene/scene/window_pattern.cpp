@@ -184,7 +184,7 @@ void WindowPattern::CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {
         CHECK_NULL_VOID(session_->GetScenePersistence());
-        ImageSourceInfo sourceInfo("file:/" + session_->GetScenePersistence()->GetSnapshotFilePath());
+        ImageSourceInfo sourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
