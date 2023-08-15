@@ -404,7 +404,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     auto pattern = weak.Upgrade();
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
-                    if (hostNode->GetContentNode()->GetChildren().size() == 1 &&
+                    if (pattern->navigationStack_->Size() == 1 &&
                         pattern->GetNavigationMode() == NavigationMode::SPLIT) {
                         // set backButton gone for the first level page in SPLIT mode
                         hostNode->SetBackButtonVisible(curTopNavDestination, false);
