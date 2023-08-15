@@ -330,7 +330,7 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineForward(LayoutWrap
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (int32_t i = 0; i < lanes && index + i <= GetMaxListItemIndex(); i++) {
         auto wrapper = layoutWrapper->GetChildByIndex(index + i);
-        if (!wrapper) {
+        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
             predictBuildList.emplace_back(index + i);
             continue;
         }
@@ -375,7 +375,7 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedALineBackward(LayoutWra
     for (int32_t i = 0; i < lanes && index >= 0; i++) {
         auto idx = index - i;
         auto wrapper = layoutWrapper->GetChildByIndex(idx);
-        if (!wrapper) {
+        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
             predictBuildList.emplace_back(idx);
             continue;
         }
@@ -413,6 +413,8 @@ std::list<int32_t> ListLanesLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* lay
 {
     std::list<int32_t> predictBuildList;
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
     float crossSize = GetCrossAxisSize(size, axis_);
 
     auto itemPosition = GetItemPosition();
