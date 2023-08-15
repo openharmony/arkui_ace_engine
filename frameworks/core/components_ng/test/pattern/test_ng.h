@@ -34,6 +34,8 @@ constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr float DEVICE_WIDTH = 480.f;
 constexpr float DEVICE_HEIGHT = 800.f;
 constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
+constexpr double DEFAULT_FRICTION = 0.6;
+constexpr int32_t NULL_INDEX = -1;
 } // namespace
 
 class TestNG {
@@ -73,6 +75,12 @@ public:
     {
         RefPtr<LayoutProperty> layoutProperty = GetChildFrameNode(frameNode, index)->GetLayoutProperty();
         return AceType::DynamicCast<T>(layoutProperty);
+    }
+
+    template<typename T>
+    RefPtr<T> GetChildAccessibilityProperty(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        return GetChildFrameNode(frameNode, index)->GetAccessibilityProperty<T>();
     }
     
     const RectF& GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)
