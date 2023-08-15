@@ -634,24 +634,20 @@ void TextFieldPattern::UpdateSelectionOffset()
                 OffsetF(textBoxes_.rbegin()->rect_.GetRight() + (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()),
                     textBoxes_.rbegin()->rect_.GetTop() + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) +
                         BOX_EPSILON);
-            if (contentRect_.IsInRegion({ textBoxLocalOffsetBegin.GetX(), textBoxLocalOffsetBegin.GetY() })) {
-                OffsetF firstHandleOffset(textBoxLocalOffsetBegin.GetX() + parentGlobalOffset_.GetX(),
-                    textBoxLocalOffsetBegin.GetY() + parentGlobalOffset_.GetY() - BOX_EPSILON);
-                textSelector_.firstHandleOffset_ = firstHandleOffset;
-                RectF firstHandle;
-                firstHandle.SetOffset(firstHandleOffset);
-                firstHandle.SetSize(handlePaintSize);
-                firstHandleOption = firstHandle;
-            }
-            if (contentRect_.IsInRegion({ textBoxLocalOffsetEnd.GetX(), textBoxLocalOffsetEnd.GetY() })) {
-                OffsetF secondHandleOffset(textBoxLocalOffsetEnd.GetX() + parentGlobalOffset_.GetX(),
-                    textBoxLocalOffsetEnd.GetY() + parentGlobalOffset_.GetY() - BOX_EPSILON);
-                textSelector_.secondHandleOffset_ = secondHandleOffset;
-                RectF secondHandle;
-                secondHandle.SetOffset(secondHandleOffset);
-                secondHandle.SetSize(handlePaintSize);
-                secondHandleOption = secondHandle;
-            }
+            OffsetF firstHandleOffset(textBoxLocalOffsetBegin.GetX() + parentGlobalOffset_.GetX(),
+                textBoxLocalOffsetBegin.GetY() + parentGlobalOffset_.GetY() - BOX_EPSILON);
+            textSelector_.firstHandleOffset_ = firstHandleOffset;
+            RectF firstHandle;
+            firstHandle.SetOffset(firstHandleOffset);
+            firstHandle.SetSize(handlePaintSize);
+            firstHandleOption = firstHandle;
+            OffsetF secondHandleOffset(textBoxLocalOffsetEnd.GetX() + parentGlobalOffset_.GetX(),
+                textBoxLocalOffsetEnd.GetY() + parentGlobalOffset_.GetY() - BOX_EPSILON);
+            textSelector_.secondHandleOffset_ = secondHandleOffset;
+            RectF secondHandle;
+            secondHandle.SetOffset(secondHandleOffset);
+            secondHandle.SetSize(handlePaintSize);
+            secondHandleOption = secondHandle;
             if (firstHandleOption.has_value() || secondHandleOption.has_value()) {
                 ShowSelectOverlay(firstHandleOption, secondHandleOption, true);
             }
@@ -896,7 +892,6 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
     caretRect_.SetTop(caretRect_.GetY() + offset);
     currentOffset_ = textRect_.GetY() + offset;
     textRect_.SetOffset(OffsetF(textRect_.GetX(), currentOffset_));
-    UpdateSelectionOffset();
     if (SelectOverlayIsOn()) {
         SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
         textSelector_.secondHandleOffset_.SetY(textSelector_.secondHandleOffset_.GetY() + offset);
@@ -930,12 +925,11 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
             RectF(firstHandle->Left(), firstHandle->Top(), firstHandle->Width(), firstHandle->Height());
         secondHandleInfo.paintRect =
             RectF(secondHandle->Left(), secondHandle->Top(), secondHandle->Width(), secondHandle->Height());
-        CheckHandles(firstHandle, secondHandle, firstHandleHeight, secondHandleHeight);
-        if (!firstHandle.has_value()) {
-            firstHandleInfo.isShow = false;
+        if (firstHandle.has_value()) {
+            firstHandleInfo.isShow = CheckHandleVisible(firstHandle.value());
         }
-        if (!secondHandle.has_value()) {
-            secondHandleInfo.isShow = false;
+        if (secondHandle.has_value()) {
+            secondHandleInfo.isShow = CheckHandleVisible(secondHandle.value());
         }
         if (!isSingleHandle_) {
             selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
@@ -959,7 +953,6 @@ void TextFieldPattern::OnTextInputScroll(float offset)
     caretRect_.SetLeft(caretRect_.GetX() + offset);
     currentOffset_ = textRect_.GetX() + offset;
     textRect_.SetOffset(OffsetF(currentOffset_, textRect_.GetY()));
-    UpdateSelectionOffset();
     if (SelectOverlayIsOn()) {
         SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
         textSelector_.secondHandleOffset_.SetX(textSelector_.secondHandleOffset_.GetX() + offset);
