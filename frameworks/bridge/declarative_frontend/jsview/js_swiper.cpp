@@ -777,8 +777,17 @@ void JSSwiper::SetDisplayMode(int32_t index)
     SwiperModel::GetInstance()->SetDisplayMode(DISPLAY_MODE[index]);
 }
 
-void JSSwiper::SetCachedCount(int32_t cachedCount)
+void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    int32_t cachedCount = 1;
+    if (info[0]->IsNumber()) {
+        cachedCount = info[0]->ToNumber<int32_t>();
+    }
     SwiperModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
