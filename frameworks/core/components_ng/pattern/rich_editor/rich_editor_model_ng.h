@@ -31,9 +31,16 @@ public:
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
     void SetCustomKeyboard(std::function<void()>&& func) override;
+    void SetCopyOption(CopyOptions& copyOptions) override;
+    void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
+        std::function<void()>& buildFunc, MenuParam& menuParam) override;
 
 private:
     void SetDraggable(bool draggable);
+    void RegisterSelectionMenuDisappearCallback(ResponseType type, const MenuParam& menuParam);
+    void RegisterSelectionMenuAppearCallback(ResponseType type, const MenuParam& menuParam);
+    void RegisterSelectionMenuKeyEvent(
+        const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_MODEL_NG_H

@@ -368,7 +368,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu());
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern->IsRichEditorSelectMenu());
     }
     Initialize(layoutWrapper);
 
@@ -517,7 +517,7 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
         }
     }
 
-    bool needArrow = menuPattern->IsContextMenu() && !targetTag_.empty() && arrowInMenu_;
+    bool needArrow = (menuPattern->IsContextMenu() || menuPattern->IsRichEditorSelectMenu()) && !targetTag_.empty() && arrowInMenu_;
     if (needArrow) {
         if (!menuProp->GetMenuPlacement().has_value()) {
             menuProp->UpdateMenuPlacement(Placement::TOP);
@@ -712,6 +712,10 @@ LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layo
     CHECK_NULL_RETURN(menuLayoutProperty, LayoutConstraintF());
 
     auto childConstraint = menuLayoutProperty->CreateChildConstraint();
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    if (menuPattern->IsRichEditorSelectMenu()) {
+        return LayoutConstraintF();
+    }
     UpdateConstraintWidth(layoutWrapper, childConstraint);
     UpdateConstraintHeight(layoutWrapper, childConstraint);
     UpdateConstraintBaseOnOptions(layoutWrapper, childConstraint);
@@ -876,7 +880,7 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
-void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu)
+void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu, bool isRichEditorSelectMenu)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
@@ -887,7 +891,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     CHECK_NULL_VOID(pipelineContext);
 
     targetOffset_ = targetNode->GetPaintRectOffset();
-    if (isContextMenu) {
+    if (isContextMenu || isRichEditorSelectMenu) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
         float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());

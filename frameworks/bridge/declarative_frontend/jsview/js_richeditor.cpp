@@ -16,8 +16,10 @@
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 
 #include <string>
-
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
@@ -61,6 +63,9 @@ RichEditorModel* RichEditorModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
+constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
+constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 void JSRichEditor::Create(const JSCallbackInfo& info)
 {
     JSRichEditorController* jsController = nullptr;
@@ -408,6 +413,90 @@ void JSRichEditor::JsFocusable(const JSCallbackInfo& info)
     JSInteractableView::SetFocusNode(false);
 }
 
+void JSRichEditor::SetCopyOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    auto copyOptions = CopyOptions::None;
+    auto tmpInfo = info[0];
+    if (tmpInfo->IsNumber()) {
+        auto emunNumber = tmpInfo->ToNumber<int>();
+        copyOptions = static_cast<CopyOptions>(emunNumber);
+    }
+    RichEditorModel::GetInstance()->SetCopyOption(copyOptions);
+}
+
+void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
+{   
+    RichEditorType editorType = RichEditorType::TEXT;
+    if (info.Length() >= PARAMETER_LENGTH_FIRST && info[0]->IsNumber()) {
+        auto spanType = info[0]->ToNumber<int32_t>();
+        LOGI("Set the spanType is %{public}d.", spanType);
+        editorType = static_cast<RichEditorType>(spanType);
+    }
+
+    // Builder
+    if (info.Length() < PARAMETER_LENGTH_SECOND || !info[1]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
+    auto builder = menuObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("builder param is not a function.");
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+
+    // responseType
+    ResponseType responseType = ResponseType::LONG_PRESS;
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsNumber()) {
+        auto response = info[2]->ToNumber<int32_t>();
+        LOGI("Set the responseType is %{public}d.", response);
+        responseType = static_cast<ResponseType>(response);
+    }
+    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("BindSelectionMenu");
+        func->Execute();
+    };
+    NG::MenuParam menuParam;
+    if (info.Length() > PARAMETER_LENGTH_THIRD && info[3]->IsObject()) {
+        ParseMenuParam(info, info[3], menuParam);
+    }
+    RichEditorModel::GetInstance()->BindSelectionMenu(editorType, responseType, buildFunc, menuParam);
+}
+
+void JSRichEditor::ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam) {
+    auto onAppearValue = menuOptions->GetProperty("onAppear");
+    if (onAppearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGI("About to call onAppear method on js");
+            ACE_SCORING_EVENT("onAppear");
+            func->Execute();
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
+
+    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
+    if (onDisappearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            LOGI("About to call onAppear method on js");
+            ACE_SCORING_EVENT("onDisappear");
+            func->Execute();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }    
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -426,6 +515,8 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRichEditor>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRichEditor>::StaticMethod("focusable", &JSRichEditor::JsFocusable);
+    JSClass<JSRichEditor>::StaticMethod("copyOptions", &JSRichEditor::SetCopyOptions);
+    JSClass<JSRichEditor>::StaticMethod("bindSelectionMenu", &JSRichEditor::BindSelectionMenu);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -724,6 +815,13 @@ void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
     controller->DeleteSpans(options);
 }
 
+void JSRichEditorController::CloseSelectionMenu()
+{
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    controller->CloseSelectionMenu();
+}
+
 void JSRichEditorController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditorController>::Declare("RichEditorController");
@@ -734,6 +832,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("updateSpanStyle", &JSRichEditorController::UpdateSpanStyle);
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
+    JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
     JSClass<JSRichEditorController>::Bind(
         globalObj, JSRichEditorController::Constructor, JSRichEditorController::Destructor);
 }
