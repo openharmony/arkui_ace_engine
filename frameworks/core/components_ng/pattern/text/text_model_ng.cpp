@@ -71,7 +71,7 @@ void TextModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
-void TextModelNG::SetTextShadow(const Shadow& value)
+void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value);
 }
