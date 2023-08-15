@@ -40,7 +40,6 @@ protected:
     }
 
     void OnAttachToFrameNode() override;
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnConnect() override;
     void OnForeground() override;
@@ -49,6 +48,7 @@ protected:
 
 private:
     void BufferAvailableCallback();
+    void OnBoundsSizeChanged(const Rosen::Vector4f& bounds);
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };

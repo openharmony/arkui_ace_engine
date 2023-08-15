@@ -38,6 +38,11 @@ const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 {
     session_ = session;
+    sizeChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->OnBoundsSizeChanged(bounds);
+    };
     CHECK_NULL_VOID_NOLOG(IsMainWindow());
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -73,6 +78,7 @@ void WindowScene::OnAttachToFrameNode()
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
+        surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
         return;
     }
 
@@ -88,6 +94,7 @@ void WindowScene::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
+    surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
 
     WindowPattern::OnAttachToFrameNode();
 }
@@ -111,25 +118,17 @@ void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
     context->SetRSNode(surfaceNode);
 }
 
-bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+void WindowScene::OnBoundsSizeChanged(const Rosen::Vector4f& bounds)
 {
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameRect = geometryNode->GetFrameRect();
     Rosen::WSRect windowRect {
-        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
-        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
-        .width_ = std::round(frameRect.Width()),
-        .height_ = std::round(frameRect.Height())
+        .posX_ = std::round(bounds.x_),
+        .posY_ = std::round(bounds.y_),
+        .width_ = std::round(bounds.z_),
+        .height_ = std::round(bounds.w_),
     };
 
-    CHECK_NULL_RETURN(session_, false);
+    CHECK_NULL_VOID(session_);
     session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
-    return false;
 }
 
 void WindowScene::BufferAvailableCallback()
