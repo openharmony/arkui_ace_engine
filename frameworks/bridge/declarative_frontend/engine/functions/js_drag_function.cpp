@@ -23,6 +23,7 @@
 #include "js_native_api_types.h"
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
+#include "native_engine/native_value.h"
 
 #include "core/common/udmf/udmf_client.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -31,6 +32,24 @@
 #endif
 
 namespace OHOS::Ace::Framework {
+namespace {
+#ifdef ENABLE_DRAG_FRAMEWORK
+void NapiThrow(const RefPtr<Framework::JsEngine>& engine, int32_t errCode, const std::string& message)
+{
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value code = nullptr;
+    std::string strCode = std::to_string(errCode);
+    napi_create_string_utf8(env, strCode.c_str(), strCode.length(), &code);
+    napi_value msg = nullptr;
+    napi_create_string_utf8(env, message.c_str(), message.length(), &msg);
+    napi_value error = nullptr;
+    napi_create_error(env, code, msg, &error);
+    napi_throw(env, error);
+}
+#endif
+} // namespace
+
 class JsPasteData : public Referenced {
 public:
     static void JSBind(BindingTarget globalObj)
@@ -197,7 +216,13 @@ void JsDragEvent::GetData(const JSCallbackInfo& args)
         int ret = UdmfClient::GetInstance()->GetData(dragData, udKey);
         if (ret != 0) {
             LOGW("UDMF GetData failed: %{public}d", ret);
-            args.SetReturnValue(JSVal::Undefined());
+            auto engine = EngineHelper::GetCurrentEngine();
+            if (!engine) {
+                args.SetReturnValue(JSVal::Undefined());
+                return;
+            }
+            auto errorInfo = UdmfClient::GetInstance()->GetErrorInfo(ret);
+            NapiThrow(engine, errorInfo.first, errorInfo.second);
             return;
         } else {
             dragEvent_->SetData(dragData);
