@@ -1447,11 +1447,11 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     if (NearZero(keyboard)) {
         drawSize_.SetSize(drawSizeCache_);
         UpdateWebLayoutSize(width, height);
-        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         if (isVirtualKeyBoardShow_ == VkState::VK_HIDE) {
             LOGI("Web ProcessVirtualKeyBoard no need to process");
             return false;
         }
+        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);
         if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
