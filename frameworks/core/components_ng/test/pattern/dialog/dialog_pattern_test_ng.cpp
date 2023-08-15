@@ -717,4 +717,37 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest005, TestSize.Level1)
         dialogPattern->GetSubtitle();
     }
 }
+
+/**
+ * @tc.name: DialogPatternTest006
+ * @tc.desc: CreateDialogNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set properties
+     */
+    const DialogButtonDirection directions[] = {
+        DialogButtonDirection::AUTO, DialogButtonDirection::HORIZONTAL, DialogButtonDirection::VERTICAL };
+    SetDialogTheme();
+    /**
+     * @tc.steps: step2. call CreateDialogNode function with different props.
+     * @tc.expected: the dialog node created successfully.
+     */
+    for (size_t i = 0; i < sizeof(directions) / sizeof(directions[0]); i++) {
+        DialogProperties props;
+        props.type = DialogType::ALERT_DIALOG;
+        props.title = "dialog test";
+        props.content = "dialog content test";
+        props.buttons = btnItems2;
+        props.buttonDirection = directions[i];
+        auto dialog = DialogView::CreateDialogNode(props, nullptr);
+        ASSERT_NE(dialog, nullptr);
+        auto dialogPattern = dialog->GetPattern<DialogPattern>();
+        EXPECT_TRUE(dialogPattern);
+        ASSERT_NE(dialogPattern, nullptr);
+        EXPECT_EQ(dialogPattern->GetDialogProperties().buttonDirection, directions[i]);
+    }
+}
 } // namespace OHOS::Ace::NG

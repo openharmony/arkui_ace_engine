@@ -60,6 +60,8 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -85,6 +87,7 @@ constexpr double DEFAULT_DOUBLE0 = 0.0;
 constexpr double DEFAULT_DOUBLE1 = 1.0;
 constexpr double DEFAULT_DOUBLE2 = 2.0;
 constexpr double DEFAULT_DOUBLE4 = 4.0;
+constexpr int32_t CLOSE_BUTTON_INDEX = 5;
 const std::string TEST_TAG("test");
 const std::string ACCESS_TAG("-accessibility");
 } // namespace
@@ -2197,5 +2200,47 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg005, TestSize.Level1)
     taskScheduler.FinishRecordFrameInfo();
     taskScheduler.FlushRenderTask(true);
     EXPECT_EQ(frameInfo.renderInfos_.size(), 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg043
+ * @tc.desc: Test SetCloseButtonStatus function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg043, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize root node and containerModal node.
+     * @tc.expected: root node and containerModal node are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    ASSERT_NE(context_->window_, nullptr);
+    context_->SetupRootElement();
+    ASSERT_NE(context_->GetRootElement(), nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerPattern, nullptr);
+    auto columNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+    CHECK_NULL_VOID(columNode);
+    auto titleNode = AceType::DynamicCast<FrameNode>(columNode->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    auto closeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(CLOSE_BUTTON_INDEX));
+    CHECK_NULL_VOID(closeButton);
+    auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEvent);
+    /**
+     * @tc.steps2: call SetCloseButtonStatus with params true.
+     * @tc.expected: CloseButton IsEnabled return true.
+     */
+    context_->SetCloseButtonStatus(true);
+    EXPECT_EQ(buttonEvent->IsEnabled(), true);
+    /**
+     * @tc.steps3: call SetCloseButtonStatus with params false.
+     * @tc.expected: CloseButton IsEnabled return false.
+     */
+    context_->SetCloseButtonStatus(false);
+    EXPECT_EQ(buttonEvent->IsEnabled(), false);
 }
 } // namespace OHOS::Ace::NG
