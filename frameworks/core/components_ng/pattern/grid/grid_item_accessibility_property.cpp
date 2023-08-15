@@ -52,8 +52,8 @@ AceCollectionItemInfo GridItemAccessibilityProperty::GetCollectionItemInfo() con
     auto gridPattern = gridNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(gridPattern, aceCollectionItemInfo);
     auto gridAxis = gridPattern->GetAxis();
-    aceCollectionItemInfo.row = gridItemPattern->GetMainIndex();
-    aceCollectionItemInfo.column = gridItemPattern->GetCrossIndex();
+    aceCollectionItemInfo.row = gridItemLayoutProperty->GetMainIndex().value_or(-1);
+    aceCollectionItemInfo.column = gridItemLayoutProperty->GetCrossIndex().value_or(-1);
     aceCollectionItemInfo.rowSpan = gridItemLayoutProperty->GetMainSpan(gridAxis);
     aceCollectionItemInfo.columnSpan = gridItemLayoutProperty->GetCrossSpan(gridAxis);
 
