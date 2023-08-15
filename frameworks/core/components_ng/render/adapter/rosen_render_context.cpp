@@ -3166,6 +3166,7 @@ void RosenRenderContext::OnRenderFitUpdate(RenderFit renderFit)
 void RosenRenderContext::SetContentRectToFrame(RectF rect)
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto&& padding = host->GetGeometryNode()->GetPadding();
     // minus padding to get contentRect
     if (padding) {
