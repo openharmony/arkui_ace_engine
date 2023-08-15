@@ -26,9 +26,6 @@ struct PositionProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
         json->Put("align", propAlignment.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str());
-        // for Stack
-        json->Put(
-            "alignContent", propAlignment.value_or(Alignment::CENTER).GetAlignmentStr(TextDirection::LTR).c_str());
     }
 };
 } // namespace OHOS::Ace::NG

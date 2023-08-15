@@ -146,7 +146,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     if (isDefaultPickerItemHeight_) {
         childStartCoordinate +=
-            static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ * PICKER_HEIGHT_HALF);
+            static_cast<float>(size.Height() / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ * PICKER_HEIGHT_HALF);
     } else {
         childStartCoordinate += static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
                                                    pickerTheme->GetGradientHeight().ConvertToPx() * ITEM_HEIGHT_HALF -
