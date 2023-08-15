@@ -62,6 +62,13 @@ void LazyForEachNode::BuildAllChildren()
     for (int i = 0; i < FrameCount(); i++) {
         GetFrameChildByIndex(i, true);
     }
+    children_.clear();
+    auto items = builder_->GetAllChildren();
+    for (auto& [index, item] : items) {
+        if (item.second) {
+            children_.push_back(item.second);
+        }
+    }
 }
 
 void LazyForEachNode::PostIdleTask()
