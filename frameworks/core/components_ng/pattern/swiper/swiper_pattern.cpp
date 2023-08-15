@@ -597,6 +597,13 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             targetPos = iter->second.startPos;
             auto context = PipelineContext::GetCurrentContext();
             if (context) {
+                // displayCount is auto, loop is false, if the content width less than windows size
+                // need offset to keep right aligned
+                bool isNeedOffset = (GetLoopIndex(iter->first) == TotalCount() - 1)
+                    && !layoutProperty->GetDisplayCount().has_value() && !IsLoop()
+                    && LessNotEqual(iter->second.endPos - iter->second.startPos, contentMainSize_);
+                float offset = isNeedOffset ? contentMainSize_ - iter->second.endPos + iter->second.startPos : 0.0;
+                targetPos -= offset;
                 context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
                                                 nextIndex = iter->first]() {
                     auto swiper = weak.Upgrade();
