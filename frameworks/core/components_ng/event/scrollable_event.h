@@ -34,6 +34,7 @@ class GestureEventHub;
 
 using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const GetEventTargetImpl&, TouchTestResult&)>;
 using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)>;
+using GetAnimateVelocityCallback = std::function<double()>;
 
 class ScrollableEvent : public AceType {
     DECLARE_ACE_TYPE(ScrollableEvent, AceType)
@@ -87,6 +88,9 @@ public:
         if (scrollable_ && !scrollable_->Idle()) {
             return std::abs(scrollable_->GetCurrentVelocity()) > SystemProperties::Vp2Px(HTMBLOCK_VELOCITY);
         }
+        if (getAnimateVelocityCallback_) {
+            return std::abs(getAnimateVelocityCallback_()) > SystemProperties::Vp2Px(HTMBLOCK_VELOCITY);
+        }
         return false;
     }
 
@@ -113,12 +117,18 @@ public:
         }
     }
 
+    void SetAnimateVelocityCallback(const GetAnimateVelocityCallback&& getAnimateVelocityCallback)
+    {
+        getAnimateVelocityCallback_ = std::move(getAnimateVelocityCallback);
+    }
+
 private:
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
     RefPtr<Scrollable> scrollable_;
     BarCollectTouchTargetCallback barCollectTouchTarget_;
     InBarRegionCallback inBarRegionCallback_;
+    GetAnimateVelocityCallback getAnimateVelocityCallback_;
 };
 
 class ScrollableActuator : public GestureEventActuator {
