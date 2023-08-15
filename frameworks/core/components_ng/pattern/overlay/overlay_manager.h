@@ -296,6 +296,7 @@ private:
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void FireModalPageShow();
     void FireModalPageHide();
+    void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
         bool isModeChangeToAuto = false);
