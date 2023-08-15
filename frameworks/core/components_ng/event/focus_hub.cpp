@@ -1489,10 +1489,15 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id)
         LOGI("Request focus id: %{public}s can not found.", id.c_str());
         return false;
     }
+    auto result = true;
+    if (!focusNode->IsFocusable()) {
+        LOGI("Request focus id: %{public}s is not focusable.", id.c_str());
+        result = false;
+    }
     LOGI("Request focus immediately by id: %{public}s. The node is %{public}s/%{public}d.", id.c_str(),
         focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
     focusNode->RequestFocus();
-    return true;
+    return result;
 }
 
 int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes)
