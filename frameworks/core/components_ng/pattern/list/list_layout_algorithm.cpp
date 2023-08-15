@@ -1070,7 +1070,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     for (int32_t i = 0; i < cacheCount && currIndex + i < totalItemCount_; i++) {
         int32_t index = currIndex + i;
         auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper) {
+        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
             predictBuildList.emplace_back(index);
             continue;
         }
@@ -1090,7 +1090,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     for (int32_t i = 0; i < cacheCount && currIndex - i >= 0; i++) {
         int32_t index = currIndex - i;
         auto wrapper = layoutWrapper->GetChildByIndex(index);
-        if (!wrapper) {
+        if (!wrapper || wrapper->CheckNeedForceMeasureAndLayout()) {
             predictBuildList.emplace_back(index);
             continue;
         }
@@ -1147,6 +1147,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
             }
             auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false);
             PredictBuildItem(wrapper, param.layoutConstraint);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             param.items.erase(it++);
         }
         pattern->SetPredictLayoutParam(std::nullopt);
