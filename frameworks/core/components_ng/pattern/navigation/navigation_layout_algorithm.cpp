@@ -241,6 +241,7 @@ void NavigationLayoutAlgorithm::GetRange(const RefPtr<NavigationGroupNode>& host
     minContentWidthValue_ = navigationPattern->GetMinContentWidthValue();
     userSetNavBarRangeFlag_ = navigationPattern->GetUserSetNavBarRangeFlag();
     userSetMinContentFlag_ = navigationPattern->GetUserSetMinContentFlag();
+    userSetNavBarWidthFlag_ = navigationPattern->GetUserSetNavBarWidthFlag();
 }
 
 void NavigationLayoutAlgorithm::UpdateNavigationMode(LayoutWrapper* layoutWrapper,
@@ -322,7 +323,10 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
     float frameWidth = frameSize.Width();
     auto parentSize = CreateIdealSizeByPercentRef(
         navigationLayoutProperty->GetLayoutConstraint().value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+    auto navBarWidthValue = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH);
+    auto userSetNavBarWidth = navBarWidthValue.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+    auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     auto minContentWidth = minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     realContentWidth_ = minContentWidth;
 
@@ -332,31 +336,7 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
         realNavBarWidth_ = 0.0f;
         realContentWidth_ = frameWidth;
     } else {
-        if (userSetMinContentFlag_ && !userSetNavBarRangeFlag_) {
-            if (minContentWidth >= frameWidth) {
-                realContentWidth_ = frameWidth;
-                realNavBarWidth_ = 0.0f;
-            } else if (realNavBarWidth_ + dividerWidth + minContentWidth <= frameWidth) {
-                realContentWidth_ = frameWidth - realNavBarWidth_ - dividerWidth;
-            } else {
-                realContentWidth_ = minContentWidth;
-                realNavBarWidth_ = frameWidth - realContentWidth_ - dividerWidth;
-            }
-        } else {
-            auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-            float remainingSpace = frameWidth - realNavBarWidth_ - dividerWidth;
-            float remainingMaxSpace = frameWidth - minNavBarWidth - dividerWidth;
-            if (remainingSpace >= minContentWidth) {
-                realContentWidth_ = remainingSpace;
-            } else if (remainingSpace < minContentWidth && remainingMaxSpace > minContentWidth &&
-                       realNavBarWidth_ > minNavBarWidth) {
-                realContentWidth_ = minContentWidth;
-                realNavBarWidth_ = frameWidth - minContentWidth - dividerWidth;
-            } else {
-                realNavBarWidth_ = minNavBarWidth;
-                realContentWidth_ = frameWidth - minNavBarWidth - dividerWidth;
-            }
-        }
+        CheckSizeInSplit(frameWidth, userSetNavBarWidth, minNavBarWidth, minContentWidth);
     }
 
     realDividerWidth_ = std::max(realDividerWidth_, 0.0f);
@@ -371,6 +351,40 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(
     navBarSize_.SetWidth(realNavBarWidth_);
     dividerSize_.SetWidth(realDividerWidth_);
     contentSize_.SetWidth(realContentWidth_);
+}
+
+void NavigationLayoutAlgorithm::CheckSizeInSplit(
+    const float frameWidth, const float userSetNavBarWidth, const float minNavBarWidth, const float minContentWidth)
+{
+    auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+
+    if (userSetMinContentFlag_ && !userSetNavBarRangeFlag_) {
+        if (minContentWidth >= frameWidth) {
+            realContentWidth_ = frameWidth;
+            realNavBarWidth_ = 0.0f;
+        } else if (realNavBarWidth_ + dividerWidth + minContentWidth <= frameWidth) {
+            realContentWidth_ = frameWidth - realNavBarWidth_ - dividerWidth;
+        } else {
+            realContentWidth_ = minContentWidth;
+            realNavBarWidth_ = frameWidth - realContentWidth_ - dividerWidth;
+        }
+    } else if (!userSetNavBarRangeFlag_ && !userSetMinContentFlag_ && userSetNavBarWidthFlag_) {
+        realNavBarWidth_ = userSetNavBarWidth;
+        realContentWidth_ = frameWidth - realNavBarWidth_ - dividerWidth;
+    } else {
+        float remainingSpace = frameWidth - realNavBarWidth_ - dividerWidth;
+        float remainingMaxSpace = frameWidth - minNavBarWidth - dividerWidth;
+        if (remainingSpace >= minContentWidth) {
+            realContentWidth_ = remainingSpace;
+        } else if (remainingSpace < minContentWidth && remainingMaxSpace > minContentWidth &&
+                   realNavBarWidth_ > minNavBarWidth) {
+            realContentWidth_ = minContentWidth;
+            realNavBarWidth_ = frameWidth - minContentWidth - dividerWidth;
+        } else {
+            realNavBarWidth_ = minNavBarWidth;
+            realContentWidth_ = frameWidth - minNavBarWidth - dividerWidth;
+        }
+    }
 }
 
 void NavigationLayoutAlgorithm::SizeCalculationStack(const RefPtr<NavigationGroupNode>& hostNode,
