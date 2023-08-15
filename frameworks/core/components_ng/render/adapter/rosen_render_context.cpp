@@ -2676,6 +2676,12 @@ void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
     rsNode_->SetFrameGravity(gravity);
 }
 
+void RosenRenderContext::AddFRCSceneInfo(const std::string& scene, float speed)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->AddFRCSceneInfo(scene, speed);
+}
+
 void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();
