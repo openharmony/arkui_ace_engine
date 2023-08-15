@@ -647,7 +647,10 @@ void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t
     CHECK_NULL_VOID(buttonFrameNode);
     auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
-
+    auto buttonPattern = buttonFrameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    auto buttonHoverListener = buttonPattern->GetHoverListener();
+    inputHub->RemoveOnHoverEvent(buttonHoverListener);
     auto mouseTask = [weak = WeakClaim(this), childId](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {

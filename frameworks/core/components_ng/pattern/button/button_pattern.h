@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -211,6 +212,16 @@ public:
     bool GetIsInHover() const
     {
         return isInHover_;
+    }
+
+    RefPtr<InputEvent>& GetHoverListener()
+    {
+        return hoverListener_;
+    }
+
+    RefPtr<TouchEventImpl>& GetTouchListener()
+    {
+        return touchListener_;
     }
 
     void OnColorConfigurationUpdate() override;
