@@ -5953,8 +5953,11 @@ void TextFieldPattern::FilterExistText()
     auto inputType = layoutProperty->GetTextInputType();
     if ((inputFilter.has_value() || inputType.has_value()) && !textEditingValue_.text.empty()) {
         std::string result;
-        EditingValueFilter(textEditingValue_.text, result);
-        InitEditingValueText(result);
+        auto textEditorValue = textEditingValue_.text;
+        EditingValueFilter(textEditorValue, result);
+        if (textEditingValue_.text != result) {
+            InitEditingValueText(result);
+        }
     }
 }
 
