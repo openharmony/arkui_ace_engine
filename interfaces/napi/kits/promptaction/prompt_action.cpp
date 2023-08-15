@@ -296,7 +296,7 @@ bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValu
         double value = 0;
         napi_get_value_double(env, napiValue, &value);
         result.SetUnit(defaultUnit);
-        result = value;
+        result.SetValue(value);
         return true;
     } else if (valueType == napi_string) {
         std::string valueString;
@@ -304,6 +304,21 @@ bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValu
             return false;
         }
         result = StringUtils::StringToCalcDimension(valueString, false, defaultUnit);
+        return true;
+    } else if (valueType == napi_object) {
+        int32_t id = 0;
+        int32_t type = 0;
+        std::vector<std::string> params;
+        std::string parameterStr;
+        if (!ParseResourceParam(env, napiValue, id, type, params)) {
+            LOGE("can not parse resource info from inout params.");
+            return false;
+        }
+        if (!ParseString(id, type, params, parameterStr)) {
+            LOGE("can not get message from resource manager.");
+            return false;
+        }
+        result = StringUtils::StringToDimensionWithUnit(parameterStr);
         return true;
     }
     return false;
