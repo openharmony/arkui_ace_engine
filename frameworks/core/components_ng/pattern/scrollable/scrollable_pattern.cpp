@@ -668,6 +668,13 @@ void ScrollablePattern::PlaySpringAnimation(
         const RefPtr<SpringProperty> DEFAULT_OVER_SPRING_PROPERTY =
             AceType::MakeRefPtr<SpringProperty>(mass, stiffness, damping);
         springMotion_ = AceType::MakeRefPtr<SpringMotion>(start, position, velocity, DEFAULT_OVER_SPRING_PROPERTY);
+        CHECK_NULL_VOID(scrollableEvent_);
+        scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
+            auto pattern = weakScroll.Upgrade();
+            CHECK_NULL_RETURN_NOLOG(pattern, 0.0);
+            CHECK_NULL_RETURN_NOLOG(pattern->springMotion_, 0.0);
+            return pattern->springMotion_->GetCurrentVelocity();
+        });
     } else {
         springMotion_->Reset(start, position, velocity, DEFAULT_OVER_SPRING_PROPERTY);
         springMotion_->ClearListeners();
