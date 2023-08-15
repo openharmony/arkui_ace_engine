@@ -93,7 +93,7 @@ const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
-const std::string EMAIL_WHITE_LIST = "[\\w.]";
+const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
@@ -1586,7 +1586,7 @@ void TextFieldPattern::HandleOnPaste()
         }
         std::string result;
         std::string valueToUpdate(data);
-        textfield->EditingValueFilter(valueToUpdate, result);
+        textfield->EditingValueFilter(valueToUpdate, result, true);
         LOGD("After filter paste value is %{private}s", result.c_str());
         std::wstring pasteData;
         std::wstring wData = StringUtils::ToWstring(result);
@@ -3529,7 +3529,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     } else {
         caretStart = textEditingValue_.caretPosition;
     }
-    EditingValueFilter(valueToUpdate, result);
+    EditingValueFilter(valueToUpdate, result, true);
     if (result.empty()) {
         return;
     }
@@ -3622,7 +3622,7 @@ bool TextFieldPattern::FilterWithRegex(
     return !errorText.empty();
 }
 
-void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::string& result)
+void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::string& result, bool isInsertValue)
 {
     auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
@@ -3647,7 +3647,7 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
             break;
         }
         case TextInputType::EMAIL_ADDRESS: {
-            if (valueToUpdate == "@") {
+            if (valueToUpdate == "@" && isInsertValue) {
                 auto charExists = textEditingValue_.text.find('@') != std::string::npos;
                 result = charExists ? "" : valueToUpdate;
                 return;
