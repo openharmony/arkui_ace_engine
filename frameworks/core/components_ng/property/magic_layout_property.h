@@ -18,9 +18,11 @@
 
 #include <memory>
 
+#include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 struct MagicItemProperty {
@@ -30,7 +32,17 @@ struct MagicItemProperty {
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const
     {
         json->Put("layoutWeight", propLayoutWeight.value_or(0));
-        json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value_or(0.0)) * 100) / 100);
+        auto context = PipelineBase::GetCurrentContext();
+        // add version protection, null as default start from API 10 or higher
+        if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
+            if (propAspectRatio.has_value()) {
+                json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value()) * 100) / 100);
+            } else {
+                json->Put("aspectRatio", "");
+            }
+        } else {
+            json->Put("aspectRatio", round(static_cast<double>(propAspectRatio.value_or(0.0)) * 100) / 100);
+        }
     }
 };
 } // namespace OHOS::Ace::NG
