@@ -1796,7 +1796,7 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
 
 int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
 {
-    LOGI("create ui extension modal page start");
+    LOGI("UIExtension create modal page start");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN_NOLOG(container, 0);
     ContainerScope scope(instanceId_);
@@ -1812,15 +1812,15 @@ int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const Mod
             sessionId = overlay->CreateModalUIExtension(want, callbacks);
         },
         TaskExecutor::TaskType::UI);
-    LOGI("create ui extension modal page end, sessionId=%{public}d", sessionId);
+    LOGI("UIExtension create modal page end, sessionId=%{public}d", sessionId);
     return sessionId;
 }
 
 void UIContentImpl::CloseModalUIExtension(int32_t sessionId)
 {
-    LOGI("close ui extension modal page, sessionId=%{public}d", sessionId);
+    LOGI("UIExtension close modal page start, sessionId=%{public}d", sessionId);
     if (sessionId == 0) {
-        LOGW("refuse to close ui extension modal page");
+        LOGW("UIExtension refuse to close modal page");
         return;
     }
     auto container = Platform::AceContainer::GetContainer(instanceId_);

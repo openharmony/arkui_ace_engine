@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 #include <cstdint>
+#include <memory>
 
 #include "session/host/include/extension_session.h"
 #include "session_manager/include/extension_session_manager.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/event/ace_events.h"
@@ -128,6 +130,9 @@ void UIExtensionPattern::OnConnectInner()
     if (onRemoteReadyCallback_) {
         onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(session_));
     }
+    if (onModalRemoteReadyCallback_) {
+        onModalRemoteReadyCallback_(std::make_shared<ModalUIExtensionProxyImpl>(session_));
+    }
     RegisterVisibleAreaChange();
     TransferFocusState(IsCurrentFocus());
 }
@@ -208,7 +213,7 @@ void UIExtensionPattern::RequestExtensionSessionActivation()
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
-    LOGI("ui_extension request host windowId %{public}u", hostWindowId);
+    LOGI("UIExtension request host windowId %{public}u", hostWindowId);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         extensionSession, hostWindowId);
@@ -227,8 +232,9 @@ void UIExtensionPattern::RequestExtensionSessionActivation()
 
 void UIExtensionPattern::RequestExtensionSessionBackground()
 {
-    LOGI("UIExtension request UIExtensionAbility background, isDestruction_=%{public}u", isDestruction_);
-    if (!isDestruction_) {
+    LOGI("UIExtension request UIExtensionAbility background, isDestruction_=%{public}u, isBackground_=%{public}u",
+            isDestruction_, isBackground_);
+    if (!isDestruction_ && !isBackground_) {
         sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
         auto errcode =
             Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession);
@@ -239,6 +245,8 @@ void UIExtensionPattern::RequestExtensionSessionBackground()
                 std::string message = "background ui extension ability failed, please check AMS log.";
                 onErrorCallback_(code, name, message);
             }
+        } else {
+            isBackground_ = true;
         }
     }
 }
@@ -494,6 +502,31 @@ void UIExtensionPattern::SetOnRemoteReadyCallback(const std::function<void(const
                 auto pattern = weak.Upgrade();
                 if (pattern && pattern->onRemoteReadyCallback_) {
                     pattern->onRemoteReadyCallback_(MakeRefPtr<UIExtensionProxy>(pattern->session_));
+                }
+            }, TaskExecutor::TaskType::UI);
+        };
+}
+
+void UIExtensionPattern::SetModalOnRemoteReadyCallback(
+    const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback)
+{
+    onModalRemoteReadyCallback_ = std::move(callback);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
+    extSessionEventCallback->notifyRemoteReadyFunc_ =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor]() {
+            taskExecutor->PostTask([weak, instanceId]() {
+                ContainerScope scope(instanceId);
+                LOGI("UIExtension native OnModalRemoteReady called");
+                auto pattern = weak.Upgrade();
+                if (pattern && pattern->onModalRemoteReadyCallback_) {
+                    pattern->onModalRemoteReadyCallback_(
+                        std::make_shared<ModalUIExtensionProxyImpl>(pattern->session_));
                 }
             }, TaskExecutor::TaskType::UI);
         };
