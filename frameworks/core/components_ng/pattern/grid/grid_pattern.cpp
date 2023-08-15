@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -658,8 +659,8 @@ WeakPtr<FocusHub> GridPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto curItemProperty = curItemPattern->GetLayoutProperty<GridItemLayoutProperty>();
     CHECK_NULL_RETURN(curItemProperty, nullptr);
 
-    auto curMainIndex = curItemPattern->GetMainIndex();
-    auto curCrossIndex = curItemPattern->GetCrossIndex();
+    auto curMainIndex = curItemProperty->GetMainIndex().value_or(-1);
+    auto curCrossIndex = curItemProperty->GetCrossIndex().value_or(-1);
     auto curMainSpan = curItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
     auto curCrossSpan = curItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
     if (curMainIndex < 0 || curCrossIndex < 0) {
@@ -888,8 +889,8 @@ WeakPtr<FocusHub> GridPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
         if (!childItemProperty) {
             continue;
         }
-        auto curMainIndex = childItemPattern->GetMainIndex();
-        auto curCrossIndex = childItemPattern->GetCrossIndex();
+        auto curMainIndex = childItemProperty->GetMainIndex().value_or(-1);
+        auto curCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
         if (tarIndex < 0) {
             auto curMainSpan = childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
             auto curCrossSpan = childItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
@@ -940,8 +941,12 @@ std::unordered_set<int32_t> GridPattern::GetFocusableChildCrossIndexesAt(int32_t
         if (!childItemPattern) {
             continue;
         }
-        auto curMainIndex = childItemPattern->GetMainIndex();
-        auto curCrossIndex = childItemPattern->GetCrossIndex();
+        auto childItemProperty = childItemPattern->GetLayoutProperty<GridItemLayoutProperty>();
+        if (!childItemProperty) {
+            continue;
+        }
+        auto curMainIndex = childItemProperty->GetMainIndex().value_or(-1);
+        auto curCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
         if (curMainIndex == tarMainIndex) {
             result.emplace(curCrossIndex);
         }
@@ -969,8 +974,10 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
     CHECK_NULL_RETURN(tarPattern, -1);
     auto tarItemPattern = AceType::DynamicCast<GridItemPattern>(tarPattern);
     CHECK_NULL_RETURN(tarItemPattern, -1);
-    auto tarMainIndex = tarItemPattern->GetMainIndex();
-    auto tarCrossIndex = tarItemPattern->GetCrossIndex();
+    auto tarItemProperty = tarItemPattern->GetLayoutProperty<GridItemLayoutProperty>();
+    CHECK_NULL_RETURN(tarItemProperty, -1);
+    auto tarMainIndex = tarItemProperty->GetMainIndex().value_or(-1);
+    auto tarCrossIndex = tarItemProperty->GetCrossIndex().value_or(-1);
     if (gridLayoutInfo_.gridMatrix_.find(tarMainIndex) == gridLayoutInfo_.gridMatrix_.end()) {
         LOGE("Can not find target main index: %{public}d", tarMainIndex);
         if (tarMainIndex == 0) {
@@ -1357,8 +1364,10 @@ void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
     for (const auto& item : children) {
         auto itemPattern = item->GetPattern<GridItemPattern>();
         CHECK_NULL_VOID(itemPattern);
-        auto mainIndex = itemPattern->GetMainIndex();
-        auto crossIndex = itemPattern->GetCrossIndex();
+        auto itemProperty = itemPattern->GetLayoutProperty<GridItemLayoutProperty>();
+        CHECK_NULL_VOID(itemProperty);
+        auto mainIndex = itemProperty->GetMainIndex().value_or(-1);
+        auto crossIndex = itemProperty->GetCrossIndex().value_or(-1);
         if (mainIndex * gridLayoutInfo_.crossCount_ + crossIndex == insertIndex) {
             auto size = item->GetRenderContext()->GetPaintRectWithTransform();
             size.SetOffset(item->GetTransformRelativeOffset());
