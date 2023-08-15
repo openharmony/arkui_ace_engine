@@ -217,7 +217,6 @@ public:
             normalWidthUpdate_ = true;
             normalWidth_ = normalWidth;
             CalcReservedHeight();
-            FlushBarWidth();
             MarkNeedRender();
         }
     }
@@ -411,16 +410,6 @@ public:
         return isUserNormalWidth_;
     }
 
-    void SetReservedHeightUpdate(bool reservedHeightUpdate)
-    {
-        reservedHeightUpdate_ = reservedHeightUpdate;
-    }
-
-    bool GetReservedHeightUpdate() const
-    {
-        return reservedHeightUpdate_;
-    }
-
     void SetStartReservedHeight(const Dimension& startReservedHeight)
     {
         startReservedHeight_ = startReservedHeight;
@@ -542,7 +531,6 @@ private:
     bool positionModeUpdate_ = false;
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;
-    bool reservedHeightUpdate_ = false; // has reserved hight been updated
 
     Offset paintOffset_;
     Size viewPortSize_;
