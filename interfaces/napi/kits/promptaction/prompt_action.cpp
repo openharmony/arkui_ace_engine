@@ -309,16 +309,16 @@ bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValu
         int32_t id = 0;
         int32_t type = 0;
         std::vector<std::string> params;
-        std::string ParameterStr;
+        std::string parameterStr;
         if (!ParseResourceParam(env, napiValue, id, type, params)) {
             LOGE("can not parse resource info from inout params.");
             return false;
         }
-        if (!ParseString(id, type, params, ParameterStr)) {
+        if (!ParseString(id, type, params, parameterStr)) {
             LOGE("can not get message from resource manager.");
             return false;
         }
-        result = StringUtils::StringToDimensionWithUnit(ParameterStr);
+        result = StringUtils::StringToDimensionWithUnit(parameterStr);
         return true;
     }
     return false;
