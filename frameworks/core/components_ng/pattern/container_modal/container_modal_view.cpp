@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -128,6 +129,10 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& con
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(TITLE_ICON_SIZE), CalcLength(TITLE_ICON_SIZE)));
     MarginProperty margin = { CalcLength(TITLE_PADDING_START), CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL) };
     imageLayoutProperty->UpdateMargin(margin);
+    // anti-alias
+    auto imagePaintProp = titleIcon->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imagePaintProp, nullptr);
+    imagePaintProp->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
     titleIcon->MarkModifyDone();
 
     // create title label
