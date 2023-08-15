@@ -200,7 +200,7 @@ public:
                     continue;
                 }
                 auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
-                if (frameNode->IsOnMainTree()) {
+                if (frameNode && frameNode->IsOnMainTree()) {
                     childList.push_back(node.second);
                 }
             }
@@ -315,6 +315,11 @@ public:
     void SetCacheCount(int32_t cacheCount)
     {
         cacheCount_ = cacheCount;
+    }
+
+    const std::map<int32_t, LazyForEachChild>& GetAllChildren() const
+    {
+        return cachedItems_;
     }
 
 protected:
