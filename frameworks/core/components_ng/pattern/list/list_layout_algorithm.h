@@ -169,7 +169,7 @@ public:
         return spaceWidth_;
     }
 
-    float GetEstimateOffset() const
+    std::optional<float> GetEstimateOffset() const
     {
         return estimateOffset_;
     }
@@ -359,7 +359,7 @@ private:
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
-    float estimateOffset_ = 0.0f;
+    std::optional<float> estimateOffset_;
 
     bool mainSizeIsDefined_ = false;
     bool crossMatchChild_ = false;

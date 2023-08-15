@@ -104,7 +104,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     if (jumpIndex_) {
-        float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset();
+        float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset().value_or(currentOffset_);
         relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
         jumpIndex_.reset();
