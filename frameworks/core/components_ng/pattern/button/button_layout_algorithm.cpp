@@ -28,13 +28,32 @@ namespace OHOS::Ace::NG {
 
 void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    HandleChildLayoutConstraint(layoutWrapper, layoutConstraint);
+    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    if (buttonLayoutProperty->HasLabel()) {
+        // If the button has label, according to whether the font size is set to do the corresponding expansion button,
+        // font reduction, truncation and other operations.
+        HandleAdaptiveText(layoutWrapper, layoutConstraint);
+    } else {
+        // If the button has not label, measure the child directly.
+        for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            child->Measure(layoutConstraint);
+        }
+    }
+    PerformMeasureSelf(layoutWrapper);
+}
+
+void ButtonLayoutAlgorithm::HandleChildLayoutConstraint(
+    LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint)
+{
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
     const auto& selfLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     isNeedToSetDefaultHeight_ = buttonLayoutProperty->HasLabel() &&
                                 buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE &&
                                 selfLayoutConstraint && !selfLayoutConstraint->selfIdealSize.Height().has_value();
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     if (buttonLayoutProperty->HasLabel() &&
@@ -47,37 +66,6 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutConstraint.maxSize.SetHeight(maxHeight > defaultHeight ? defaultHeight : maxHeight);
         layoutConstraint.percentReference.SetHeight(maxHeight > defaultHeight ? defaultHeight : maxHeight);
     }
-
-    // If the button has label, according to whether the font size is set to do the corresponding expansion button, font
-    // reduction, truncation and other operations.
-    if (buttonLayoutProperty->HasLabel()) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-        CHECK_NULL_VOID(childWrapper);
-        auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
-        childWrapper->Measure(childConstraint);
-        childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
-        if (buttonLayoutProperty->HasFontSize()) {
-            // Fonsize is set. When the font height is larger than the button height, make the button fit the font
-            // height.
-            if (GreatOrEqual(childSize_.Height(), layoutConstraint.maxSize.Height())) {
-                layoutConstraint.maxSize.SetHeight(childSize_.Height());
-            }
-        } else {
-            // Fonsize is not set. When the font width is greater than the button width, dynamically change the font
-            // size to no less than 9sp.
-            auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
-            textLayoutProperty->UpdateAdaptMaxFontSize(
-                buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
-            textLayoutProperty->UpdateAdaptMinFontSize(
-                buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
-            childWrapper->Measure(layoutConstraint);
-            childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
-        }
-    }
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(layoutConstraint);
-    }
-    PerformMeasureSelf(layoutWrapper);
 }
 
 // If the ButtonType is CIRCLE, then omit text by the smaller edge.
@@ -119,13 +107,66 @@ std::optional<SizeF> ButtonLayoutAlgorithm::HandleLabelCircleButtonConstraint(La
     return ConstrainSize(constraintSize, selfLayoutConstraint->minSize, selfLayoutConstraint->maxSize);
 }
 
+void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint)
+{
+    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(childWrapper);
+    auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+    childWrapper->Measure(childConstraint);
+    auto textSize = childWrapper->GetGeometryNode()->GetContentSize();
+    if (buttonLayoutProperty->HasFontSize()) {
+        // Fonsize is set. When the font height is larger than the button height, make the button fit the font
+        // height.
+        if (GreatOrEqual(textSize.Height(), layoutConstraint.maxSize.Height())) {
+            layoutConstraint.maxSize.SetHeight(textSize.Height());
+        }
+    } else {
+        // Fonsize is not set. When the font width is greater than the button width, dynamically change the font
+        // size to no less than 9sp.
+        auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
+        textLayoutProperty->UpdateAdaptMaxFontSize(
+            buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
+        textLayoutProperty->UpdateAdaptMinFontSize(
+            buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
+        childWrapper->Measure(layoutConstraint);
+    }
+    childSize_ = childWrapper->GetGeometryNode()->GetContentSize();
+}
+
+void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto renderContext = host->GetRenderContext();
+    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
+        auto minSize = std::min(frameSize.Height(), frameSize.Width());
+        auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
+            minSize = GetFirstValidRadius(buttonLayoutProperty->GetBorderRadius().value()).ConvertToPx() * 2;
+        }
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(minSize / 2)));
+        MeasureCircleButton(layoutWrapper);
+    } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(frameSize.Height() / 2)));
+    } else {
+        auto normalRadius =
+            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
+        renderContext->UpdateBorderRadius(normalRadius);
+    }
+}
+
 // Called to perform measure current render node.
 void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
 {
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
@@ -146,7 +187,6 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto actualHeight = static_cast<float>(childSize_.Height() + topPadding + bottomPadding);
         actualHeight = std::min(actualHeight, maxHeight);
         frameSize.SetHeight(maxHeight > defaultHeight ? std::max(defaultHeight, actualHeight) : maxHeight);
-        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     }
     // Determine if the button needs to fit the font size.
     if (buttonLayoutProperty->HasLabel() && buttonLayoutProperty->HasFontSize() && padding) {
@@ -154,28 +194,10 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
         if (GreatOrEqual(childSize_.Height() + topPadding + bottomPadding, frameSize.Height())) {
             frameSize = SizeF(frameSize.Width(), childSize_.Height() + topPadding + bottomPadding);
-
-            layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
         }
     }
-    Dimension radius;
-    auto renderContext = host->GetRenderContext();
-    if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
-        auto minSize = std::min(frameSize.Height(), frameSize.Width());
-        if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
-            minSize = GetFirstValidRadius(buttonLayoutProperty->GetBorderRadius().value()).ConvertToPx() * 2;
-        }
-        radius.SetValue(minSize / 2.0);
-        renderContext->UpdateBorderRadius(BorderRadiusProperty(radius));
-        MeasureCircleButton(layoutWrapper);
-    } else if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CAPSULE) {
-        radius.SetValue(frameSize.Height() / 2.0);
-        renderContext->UpdateBorderRadius(BorderRadiusProperty(radius));
-    } else {
-        auto normalRadius =
-            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty({ 0.0_vp, 0.0_vp, 0.0_vp, 0.0_vp }));
-        renderContext->UpdateBorderRadius(normalRadius);
-    }
+    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    HandleBorderRadius(layoutWrapper);
 }
 
 void ButtonLayoutAlgorithm::HandleLabelCircleButtonFrameSize(
