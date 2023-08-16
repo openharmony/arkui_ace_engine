@@ -193,6 +193,7 @@ void WindowPattern::CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot
         auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
         auto cacheKey = ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second));
         imageCache->ClearCacheImage(cacheKey);
+        imageCache->ClearCacheImage(sourceInfo.GetKey());
     }
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
