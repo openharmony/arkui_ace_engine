@@ -152,7 +152,6 @@ private:
     void HandleTouchClick(const GestureEvent& info);
     void InitHoverMouseEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
     void HoverInAnimation(const Color& hoverColor);
@@ -161,7 +160,6 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
     void HandleDragStart(const GestureEvent& info);
-    void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
     void GetMouseClickIndex();
     void UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
@@ -178,7 +176,6 @@ private:
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
-    RefPtr<PanEvent> panEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<LongPressEvent> longPressEvent_;
     bool isHover_ = false;
@@ -190,8 +187,6 @@ private:
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
-    Axis axis_ = Axis::NONE;
-    bool isLongPress_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
 } // namespace OHOS::Ace::NG
