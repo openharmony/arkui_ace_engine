@@ -297,6 +297,8 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
 {
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    // The buttons in popupNode can not get focus, if the textNode in the button is not focusable
+    textNode->GetOrCreateFocusHub()->SetFocusable(true);
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateContent(message);
     auto popupTheme = GetPopupTheme();
@@ -438,7 +440,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
         popupInfo.markNeedUpdate = true;
         popupInfo.popupId = -1;
         popupInfo.markNeedUpdate = isShow;
-        overlayManager->UpdatePopupNode(targetId, popupInfo);
+        overlayManager->HidePopup(targetId, popupInfo);
     };
     if (buttonParam.action) {
         buttonEventHub->AddClickEvent(buttonParam.action);
