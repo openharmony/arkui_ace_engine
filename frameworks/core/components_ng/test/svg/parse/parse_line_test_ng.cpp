@@ -64,7 +64,7 @@ HWTEST_F(ParseLineTestNg, ParseTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(lineDeclaration->GetX2().ConvertToPx(), X2);
     EXPECT_FLOAT_EQ(lineDeclaration->GetY2().ConvertToPx(), Y2);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::NONE, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::NONE, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
