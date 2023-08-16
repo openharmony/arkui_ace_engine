@@ -71,6 +71,7 @@ void FormPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->UpdateRenderGroup(true);
     // Init the render context for RSSurfaceNode from FRS.
     externalRenderContext_ = RenderContext::Create();
     // for external RSNode, name is meaningless.
