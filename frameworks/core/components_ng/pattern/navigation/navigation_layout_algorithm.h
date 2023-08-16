@@ -87,8 +87,7 @@ private:
 
     void GetRange(const RefPtr<NavigationGroupNode>& hostNode);
 
-    void UpdateNavigationMode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
-        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+    void UpdateNavigationMode(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
 
     void SizeCalculation(LayoutWrapper* layoutWrapper,
         const RefPtr<NavigationGroupNode>& hostNode,
