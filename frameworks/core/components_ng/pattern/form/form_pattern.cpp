@@ -354,7 +354,12 @@ void FormPattern::OnVisibleChange(bool isVisible)
 void FormPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    GetHost()->GetOrCreateGestureEventHub()->ClearUserOnClick();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    // FormComponent do not response to user's onClick callback.
+    gestureEventHub->ClearUserOnClick();
 }
 
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
