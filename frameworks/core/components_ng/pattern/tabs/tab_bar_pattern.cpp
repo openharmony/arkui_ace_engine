@@ -641,6 +641,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
 
 void TabBarPattern::HandleBottomTabBarChange(int32_t index)
 {
+    AnimationUtils::CloseImplicitAnimation();
+    UpdateImageColor(index);
     if (indicator_ != index && (tabBarStyles_[indicator_] == TabBarStyle::BOTTOMTABBATSTYLE ||
                                    tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE)) {
         int32_t selectedIndex = -1;
@@ -779,6 +781,7 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
             CHECK_NULL_VOID(host);
             MaskAnimationFinish(host, selectedIndex, true);
             MaskAnimationFinish(host, unselectedIndex, false);
+            tabBar->UpdateImageColor(selectedIndex);
         }
     });
 
@@ -888,7 +891,10 @@ void TabBarPattern::ChangeMask(const RefPtr<FrameNode>& host, float imageSize,
         auto selectedImageGeometryNode = selectedImageNode->GetGeometryNode();
         CHECK_NULL_VOID(selectedImageGeometryNode);
         selectedImageGeometryNode->SetFrameSize(SizeF(imageSize, imageSize));
-        selectedImageGeometryNode->SetContentSize(SizeF(imageSize, imageSize));
+        auto selectedImageProperty = selectedImageNode->GetLayoutProperty<ImageLayoutProperty>();
+        selectedImageProperty->UpdateUserDefinedIdealSize(
+            CalcSize(NG::CalcLength(Dimension(imageSize)), NG::CalcLength(Dimension(imageSize))));
+        selectedImageRenderContext->SetVisible(false);
         selectedImageRenderContext->SyncGeometryProperties(nullptr);
     }
     selectedImageRenderContext->UpdateOpacity(opacity);
