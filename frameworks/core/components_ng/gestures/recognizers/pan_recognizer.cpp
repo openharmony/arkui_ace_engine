@@ -168,7 +168,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         LOGW("PanGesture current finger number is less than requiried finger number.");
         return;
     }
-    ResSchedReport::GetInstance().ResSchedDataReport("click");
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     velocityTracker_.UpdateTouchPoint(event, true);
@@ -185,6 +184,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED) {
         if (static_cast<int32_t>(touchPoints_.size()) == 1) {
+            ResSchedReport::GetInstance().ResSchedDataReport("click");
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
         }
