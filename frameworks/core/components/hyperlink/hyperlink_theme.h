@@ -62,7 +62,9 @@ public:
                 return;
             }
             theme->textColor_ = pattern->GetAttr<Color>("text_color", Color(0xff007dff));
-            theme->textLinkedColor_ = pattern->GetAttr<Color>("text_linked_opacity", Color(0x19182431));
+            theme->textTouchedColor_ = pattern->GetAttr<Color>("text_touched_color", Color(0x19182431));
+            theme->textLinkedColor_ = pattern->GetAttr<Color>("text_color", Color(0xff007dff))
+                .BlendOpacity(pattern->GetAttr<double>("text_linked_opacity", 0.0));
             theme->textDisabledColor_ = pattern->GetAttr<Color>("text_color", Color(0xff007dff))
                 .BlendOpacity(pattern->GetAttr<double>("text_disabled_opacity", 0.0));
             theme->textFocusedColor_ = pattern->GetAttr<Color>("text_focused_color", Color(0xff007dff));
@@ -81,6 +83,11 @@ public:
     const Color& GetTextColor() const
     {
         return textColor_;
+    }
+
+    const Color& GetTextTouchedColor() const
+    {
+        return textTouchedColor_;
     }
 
     const Color& GetTextLinkedColor() const
@@ -113,6 +120,7 @@ protected:
 private:
     bool draggable_ = false;
     Color textColor_;
+    Color textTouchedColor_;
     Color textLinkedColor_;
     Color textDisabledColor_;
     Color textFocusedColor_;

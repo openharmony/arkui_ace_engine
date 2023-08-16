@@ -75,6 +75,7 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
 
+    isLinked_ = false;
     auto enabled = hub->IsEnabled();
     auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(hyperlinkLayoutProperty);
@@ -105,7 +106,7 @@ void HyperlinkPattern::LinkToAddress()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
-    hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(theme->GetTextLinkedColor()));
+    hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextLinkedColor());
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     pipeline->HyperlinkStartAbility(address_);
 #endif
@@ -167,10 +168,12 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::DOWN) {
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
         if (isLinked_) {
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
-                theme->GetTextLinkedColor()));
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextLinkedColor());
         } else {
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor());
+            hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(
+                theme->GetTextTouchedColor()));
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
+                theme->GetTextTouchedColor()));
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (touchType == TouchType::UP) {
@@ -232,8 +235,7 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
         if (isLinked_) {
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
-                theme->GetTextLinkedColor()));
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextLinkedColor());
         } else {
             hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor());
         }
