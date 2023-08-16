@@ -239,6 +239,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto textFieldLayoutAlgorithm = DynamicCast<TextFieldLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textFieldLayoutAlgorithm, false);
     auto paragraph = textFieldLayoutAlgorithm->GetParagraph();
+    if (paragraph) {
+        paragraph_ = paragraph;
+    }
     auto counterParagraph = textFieldLayoutAlgorithm->GetCounterParagraph();
     if (counterParagraph) {
         counterParagraph_ = counterParagraph;
@@ -268,7 +271,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
     if (paragraph) {
-        paragraph_ = paragraph;
         if (inlineFocusState_) {
             CalcSize idealSize;
             auto paragraphWidth = paragraph_->GetLongestLine();
@@ -405,16 +407,12 @@ bool TextFieldPattern::UpdateCaretPosition()
     // text input has higher priority than events such as mouse press
     if (caretUpdateType_ == CaretUpdateType::INPUT) {
         UpdateCaretPositionByTextEdit();
-        StartTwinkling();
     } else if (caretUpdateType_ == CaretUpdateType::PRESSED || caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         UpdateCaretByPressOrLongPress();
         MarkRedrawOverlay();
     } else if (caretUpdateType_ == CaretUpdateType::EVENT || caretUpdateType_ == CaretUpdateType::DEL ||
                caretUpdateType_ == CaretUpdateType::ICON_PRESSED) {
         UpdateCaretOffsetByEvent();
-        if (!NeedShowPasswordIcon() && !needToRefreshSelectOverlay_ && GetCursorVisible()) {
-            StartTwinkling();
-        }
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
         if (GetEditingValue().text.empty()) {
             UpdateSelection(0);
@@ -1688,6 +1686,7 @@ void TextFieldPattern::HandleOnCut()
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay(true);
+    StartTwinkling();
     UpdateEditingValueToRecord();
     UpdateSelection(textEditingValue_.caretPosition);
     MarkRedrawOverlay();
@@ -1739,6 +1738,11 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetNeedFireOnChangeValue(false)) {
+        return;
+    }
     // If the parent node is a Search, the Search callback is executed.
     if (IsSearchParentNode()) {
         auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -1751,8 +1755,6 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
     if (!visible && layoutProperty->GetShowUnderlineValue(false) &&
         layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
@@ -2295,7 +2297,7 @@ void TextFieldPattern::OnModifyDone()
         SetEditingValueToProperty(textEditingValue_.text);
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
+        layoutProperty->UpdateNeedFireOnChange(true);
     }
 #endif
     FireOnChangeIfNeeded();
@@ -2348,8 +2350,8 @@ void TextFieldPattern::OnModifyDone()
     }
     auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
     if ((!IsSelected() && IsNormalInlineState()) || ((inputStyle == InputStyle::DEFAULT) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED &&
-        preInputStyle_ != InputStyle::INLINE)) {
+            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED &&
+            preInputStyle_ != InputStyle::INLINE)) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
     }
@@ -2364,8 +2366,6 @@ void TextFieldPattern::OnModifyDone()
         RestorePreInlineStates();
     }
     preInputStyle_ = inputStyle;
-    host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                 : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::CalculateDefaultCursor()
@@ -2399,10 +2399,10 @@ void TextFieldPattern::FireOnChangeIfNeeded()
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetNeedFireOnChangeWhenCreateValue(false)) {
+    if (!layoutProperty->GetNeedFireOnChangeValue(false)) {
         return;
     }
-    layoutProperty->UpdateNeedFireOnChangeWhenCreate(false);
+    layoutProperty->UpdateNeedFireOnChange(false);
     auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnChange(textEditingValue_.text);
@@ -2629,7 +2629,7 @@ void TextFieldPattern::ShowSelectOverlay(
     CHECK_NULL_VOID(pipeline);
     auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, animation, isMenuShow](
                                bool hasData) {
-        LOGI("HasData callback from clipboard, data available ? %{public}d", hasData);                    
+        LOGI("HasData callback from clipboard, data available ? %{public}d", hasData);
         auto pattern = weak.Upgrade();
         SelectOverlayInfo selectInfo;
         if (!pattern->IsUsingMouse()) {
@@ -2977,7 +2977,7 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     SetEditingValueToProperty(textEditingValue_.text);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
+    layoutProperty->UpdateNeedFireOnChange(true);
 }
 
 void TextFieldPattern::InitCaretPosition(std::string content)
@@ -3575,6 +3575,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     cursorVisible_ = true;
     selectionMode_ = SelectionMode::NONE;
     CloseSelectOverlay(true);
+    StartTwinkling();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
@@ -4151,7 +4152,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::DEL;
     CloseSelectOverlay();
-    cursorVisible_ = true;
+    StartTwinkling();
     UpdateEditingValueToRecord();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -4173,7 +4174,10 @@ void TextFieldPattern::SetEditingValueToProperty(const std::string& newValueText
     auto textCache = layoutProperty->GetValueValue("");
     layoutProperty->UpdateValue(newValueText);
     if (textCache != newValueText) {
+        layoutProperty->UpdateNeedFireOnChange(true);
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, newValueText.c_str());
+    } else {
+        layoutProperty->UpdateNeedFireOnChange(false);
     }
 }
 
@@ -4283,6 +4287,7 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     caretUpdateType_ = CaretUpdateType::INPUT;
     selectionMode_ = SelectionMode::NONE;
     CloseSelectOverlay();
+    StartTwinkling();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
@@ -4360,6 +4365,9 @@ void TextFieldPattern::OnVisibleChange(bool isVisible)
         caretUpdateType_ = CaretUpdateType::INPUT;
         selectionMode_ = SelectionMode::NONE;
         CloseKeyboard(true);
+        if (SelectOverlayIsOn()) {
+            StartTwinkling();
+        }
         CloseSelectOverlay();
     }
 }
@@ -4445,7 +4453,7 @@ void TextFieldPattern::DeleteBackward(int32_t length)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::DEL;
     CloseSelectOverlay();
-    cursorVisible_ = true;
+    StartTwinkling();
     UpdateEditingValueToRecord();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -4476,6 +4484,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::INPUT;
     CloseSelectOverlay();
+    StartTwinkling();
     UpdateEditingValueToRecord();
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -5965,7 +5974,7 @@ void TextFieldPattern::DumpInfo()
 {
     if (customKeyboardBulder_) {
         DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
-            .append(", Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
+                                           .append(", Attached: ").append(std::to_string(isCustomKeyboardAttached_)));
     }
 }
 

@@ -75,10 +75,10 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetHeight(std::min(layoutConstraint->maxSize.Width(),
                     contentWidth + pattern->GetHorizontalPaddingSum()));
             } else if (!calcLayoutConstraint) {
-            // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
+                // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
                 frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
             } else {
-            // If maxWidth is not set and calcLayoutConstraint is set, set minWidth to layoutConstraint
+                // If maxWidth is not set and calcLayoutConstraint is set, set minWidth to layoutConstraint
                 frameSize.SetWidth(layoutConstraint->minSize.Width());
             }
         }
@@ -92,8 +92,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetHeight(std::min(layoutConstraint->maxSize.Height(),
                     contentHeight + pattern->GetVerticalPaddingSum()));
             } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
-            // calcLayoutConstraint initialized once when setting width, set minHeight=0,
-            // so add "minHeight=0" to the constraint.
+                // calcLayoutConstraint initialized once when setting width, set minHeight=0,
+                // so add "minHeight=0" to the constraint.
                 frameSize.SetHeight(
                     std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
             } else {
@@ -377,12 +377,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // if handler is moving, no need to adjust text rect in pattern
     auto isHandleMoving = pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE;
-    auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::DEL ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED ||
-                          layoutProperty->GetTextAlignChangedValue(false) ||
-                          pattern->GetTextEditingValue().text.empty();
-    auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
+    auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE ||
                               pattern->GetIsMousePressed();
     if (needToKeepTextRect) {
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
