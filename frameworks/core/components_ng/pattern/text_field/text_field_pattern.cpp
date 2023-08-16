@@ -55,6 +55,9 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
+#ifdef USE_GRAPHIC_TEXT_GINE
+#include "core/components_ng/render/adapter/txt_font_collection.h"
+#endif
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/paragraph.h"
@@ -3893,7 +3896,8 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
 #ifndef USE_GRAPHIC_TEXT_GINE
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
 #else
-    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(textEditingValue_.text, static_cast<int32_t>(textStyle.GetTextCase()));

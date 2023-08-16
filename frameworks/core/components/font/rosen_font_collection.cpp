@@ -19,6 +19,7 @@
 #include "txt/src/minikin/FontFamily.h"
 #include "txt/src/minikin/FontLanguageListCache.h"
 #else
+#include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "rosen_text/font_collection.h"
 #endif
 #include "include/core/SkTypeface.h"
@@ -59,7 +60,10 @@ sk_sp<txt::DynamicFontManager> RosenFontCollection::GetDynamicFontManager()
 #else
 std::shared_ptr<Rosen::FontCollection> RosenFontCollection::GetFontCollection()
 {
-    std::call_once(fontFlag_, [this]() { fontCollection_ = Rosen::FontCollection::Create(); });
+    std::call_once(fontFlag_, [this]() {
+        auto fontCollection = AceType::DynamicCast<NG::TxtFontCollection>(NG::FontCollection::Current());
+        fontCollection_ = fontCollection->GetRawFontCollection();
+    });
     return fontCollection_;
 }
 #endif
@@ -76,7 +80,8 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
             dynamicFontManager_ = collectionTxt->GetDynamicFontManager();
         }
 #else
-        fontCollection_ = Rosen::FontCollection::Create();
+        auto fontCollection = AceType::DynamicCast<NG::TxtFontCollection>(NG::FontCollection::Current());
+        fontCollection_ = fontCollection->GetRawFontCollection();
 #endif
     });
 

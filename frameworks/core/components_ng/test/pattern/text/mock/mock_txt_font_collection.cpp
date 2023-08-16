@@ -15,6 +15,9 @@
 
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/font_collection.h"
+#ifdef USE_GRAPHIC_TEXT_GINE
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace::NG {
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -22,7 +25,7 @@ TxtFontCollection::TxtFontCollection(const std::shared_ptr<txt::FontCollection>&
     : collection_(fontCollection)
 {}
 #else
-TxtFontCollection::TxtFontCollection(const std::shared_ptr<Rosen::FontCollection>& fontCollection)
+TxtFontCollection::TxtFontCollection(const std::shared_ptr<RSFontCollection>& fontCollection)
     : collection_(fontCollection)
 {}
 #endif
@@ -31,7 +34,7 @@ RefPtr<FontCollection> FontCollection::Current()
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::shared_ptr<txt::FontCollection> fontCollection;
 #else
-    std::shared_ptr<Rosen::FontCollection> fontCollection;
+    std::shared_ptr<RSFontCollection> fontCollection;
 #endif
     return AceType::MakeRefPtr<TxtFontCollection>(fontCollection);
 }

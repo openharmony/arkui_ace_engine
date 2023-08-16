@@ -25,6 +25,7 @@ ohos_unittest("text_test_ng") {
       "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
       "//third_party/flutter/build/skia",
     ]
+    defines = [ "USE_GRAPHIC_TEXT_GINE" ]
   } else {
     include_dirs =
         [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include" ]

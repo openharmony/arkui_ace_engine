@@ -38,7 +38,12 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "core/components_ng/render/font_collection.h"
+#else
+#include "core/common/font_manager.h"
+#include "core/components_ng/render/adapter/txt_font_collection.h"
+#endif
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -681,7 +686,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
 #ifndef USE_GRAPHIC_TEXT_GINE
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
 #else
-    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     for (size_t i = 0; i < contents.size(); i++) {
         std::string splitStr = contents[i];
@@ -734,7 +740,8 @@ void TextFieldLayoutAlgorithm::CreateCounterParagraph(
     paraStyle.fontSize = countTextStyle.GetFontSize().ConvertToPx();
     paraStyle.textAlign = ToRSTextAlign(TextAlign::END);
     paraStyle.maxLines = COUNTER_TEXT_MAXLINE;
-    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), countTextStyle));
     StringUtils::TransformStrCase(counterText, static_cast<int32_t>(countTextStyle.GetTextCase()));
@@ -767,7 +774,8 @@ void TextFieldLayoutAlgorithm::CreateErrorParagraph(const std::string& content, 
 #else
     paraStyle.fontSize = errorTextStyle.GetFontSize().ConvertToPx();
     paraStyle.textAlign = ToRSTextAlign(TextAlign::START);
-    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), errorTextStyle));
     StringUtils::TransformStrCase(counterText, static_cast<int32_t>(errorTextStyle.GetTextCase()));

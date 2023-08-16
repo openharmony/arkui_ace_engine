@@ -24,9 +24,19 @@
 
 namespace OHOS::Ace::NG {
 
+#ifdef USE_GRAPHIC_TEXT_GINE
+RefPtr<TxtFontCollection> TxtFontCollection::instance;
+#endif
+
 RefPtr<FontCollection> TxtFontCollection::GetInstance()
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     static RefPtr<TxtFontCollection> instance = AceType::MakeRefPtr<TxtFontCollection>();
+#else
+    if (instance == nullptr) {
+        instance = AceType::MakeRefPtr<TxtFontCollection>();
+    }
+#endif
     return instance;
 }
 

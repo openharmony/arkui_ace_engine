@@ -27,6 +27,9 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/render/font_collection.h"
+#ifdef USE_GRAPHIC_TEXT_GINE
+#include "core/components_ng/render/drawing.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -36,7 +39,7 @@ public:
 #ifndef USE_GRAPHIC_TEXT_GINE
     explicit TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection);
 #else
-    explicit TxtFontCollection(const std::shared_ptr<Rosen::FontCollection>& fontCollection);
+    explicit TxtFontCollection(const std::shared_ptr<RSFontCollection>& fontCollection);
 #endif
     TxtFontCollection();
     ~TxtFontCollection() override = default;
@@ -46,7 +49,7 @@ public:
 #ifndef USE_GRAPHIC_TEXT_GINE
     const std::shared_ptr<txt::FontCollection>& GetRawFontCollection()
 #else
-    const std::shared_ptr<Rosen::FontCollection>& GetRawFontCollection()
+    const std::shared_ptr<RSFontCollection>& GetRawFontCollection()
 #endif
     {
         return collection_;
@@ -57,7 +60,8 @@ private:
     std::shared_ptr<txt::FontCollection> collection_;
     sk_sp<txt::DynamicFontManager> dynamicFontManager_;
 #else
-    std::shared_ptr<Rosen::FontCollection> collection_;
+    static RefPtr<TxtFontCollection> instance;
+    std::shared_ptr<RSFontCollection> collection_;
 #endif
 };
 

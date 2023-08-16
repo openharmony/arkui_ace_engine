@@ -21,7 +21,7 @@
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
 #else
-#include "rosen_text/typography_create.h"
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "base/utils/noncopyable.h"
@@ -39,7 +39,7 @@ public:
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
 #else
-    TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<Rosen::FontCollection> fontCollection)
+    TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
 #endif
@@ -96,9 +96,9 @@ private:
     std::unique_ptr<txt::ParagraphBuilder> builder_;
     std::shared_ptr<txt::FontCollection> fontCollection_;
 #else
-    std::unique_ptr<Rosen::Typography> paragraph_;
-    std::unique_ptr<Rosen::TypographyCreate> builder_;
-    std::shared_ptr<Rosen::FontCollection> fontCollection_;
+    std::unique_ptr<RSParagraph> paragraph_;
+    std::unique_ptr<RSParagraphBuilder> builder_;
+    std::shared_ptr<RSFontCollection> fontCollection_;
 #endif
     std::u16string text_;
     int32_t placeHolderIndex_ = -1;
