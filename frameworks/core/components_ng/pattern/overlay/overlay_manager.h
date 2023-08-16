@@ -280,8 +280,16 @@ private:
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
 
+    // The focus logic of overlay node (menu and dialog): 
+    // 1. before start show animation: lower level node set unfocusabel and lost focus;
+    // 2. end show animation: overlay node get focus;
+    // 3. before start hide animation: lower level node set focusable;
+    // 4. end hide animation: overlay node lost focus, lower level node get focus.
     void FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow = false);
-    void BlurOverlayNode(bool isInSubWindow = false);
+    void BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bool isInSubWindow = false);
+    void BlurLowerNode(const RefPtr<FrameNode>& currentOverlay);
+    void ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay);
+    void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu);
