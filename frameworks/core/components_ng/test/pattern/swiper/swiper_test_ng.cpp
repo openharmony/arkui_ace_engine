@@ -3698,10 +3698,14 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout003, TestSize.Level1)
     auto swiperNode = swiperPattern->GetHost();
     ASSERT_NE(swiperNode, nullptr);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(swiperNode->GetLayoutProperty());
+    auto indicatorLayoutProperty =
+            AceType::DynamicCast<SwiperIndicatorLayoutProperty>(indicatorNode->GetLayoutProperty());
     swiperLayoutProperty->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
     Dimension dimension = 20.0_vp;
     swiperLayoutProperty->UpdateLeft(dimension);
+    indicatorLayoutProperty->UpdateLeft(dimension);
     swiperLayoutProperty->UpdateTop(dimension);
+    indicatorLayoutProperty->UpdateTop(dimension);
     swiperLayoutProperty->UpdateDirection(Axis::HORIZONTAL);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -3745,10 +3749,14 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout004, TestSize.Level1)
     auto swiperNode = swiperPattern->GetHost();
     ASSERT_NE(swiperNode, nullptr);
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(swiperNode->GetLayoutProperty());
+    auto indicatorLayoutProperty =
+            AceType::DynamicCast<SwiperIndicatorLayoutProperty>(indicatorNode->GetLayoutProperty());
     swiperLayoutProperty->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
     Dimension dimension = 20.0_vp;
     swiperLayoutProperty->UpdateRight(dimension);
+    indicatorLayoutProperty->UpdateRight(dimension);
     swiperLayoutProperty->UpdateBottom(dimension);
+    indicatorLayoutProperty->UpdateBottom(dimension);
     swiperLayoutProperty->UpdateDirection(Axis::VERTICAL);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
