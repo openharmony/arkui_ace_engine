@@ -96,6 +96,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnVisibleChange(bool isVisible) override;
+    void OnModifyDone() override;
 
     void InitFormManagerDelegate();
     void CreateCardContainer();
