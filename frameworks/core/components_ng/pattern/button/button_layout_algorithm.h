@@ -33,14 +33,15 @@ public:
     void OnReset() override {}
 
 private:
-    std::optional<SizeF> HandleLabelCircleButtonConstraint(LayoutWrapper* layoutWrapper);
+    void HandleAdaptiveText(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
-    void HandleLabelCircleButtonFrameSize(const LayoutConstraintF& layoutConstraint, SizeF& frameSize);
-    void MeasureCircleButton(LayoutWrapper* layoutWrapper);
-    Dimension GetFirstValidRadius(const BorderRadiusProperty& borderRadius);
-
+    static void HandleChildLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
+    static std::optional<SizeF> HandleLabelCircleButtonConstraint(LayoutWrapper* layoutWrapper);
+    static void HandleBorderRadius(LayoutWrapper* layoutWrapper);
+    static void HandleLabelCircleButtonFrameSize(const LayoutConstraintF& layoutConstraint, SizeF& frameSize);
+    static void MeasureCircleButton(LayoutWrapper* layoutWrapper);
+    static Dimension GetFirstValidRadius(const BorderRadiusProperty& borderRadius);
     SizeF childSize_;
-    bool isNeedToSetDefaultHeight_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutAlgorithm);
 };
