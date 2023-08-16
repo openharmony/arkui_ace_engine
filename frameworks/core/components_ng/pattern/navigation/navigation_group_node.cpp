@@ -160,7 +160,9 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             if (shallowBuilder) {
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
             }
-            navDestination->GetContentNode()->Clean();
+            if (navDestination->GetContentNode()) {
+                navDestination->GetContentNode()->Clean();
+            }
             navigationContentNode->RemoveChild(navDestination, true);
             hasChanged = true;
         } else {
@@ -370,7 +372,9 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
                     if (shallowBuilder) {
                         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                     }
-                    node->GetContentNode()->Clean();
+                    if (node->GetContentNode()) {
+                        node->GetContentNode()->Clean();
+                    }
                     auto parent = node->GetParent();
                     CHECK_NULL_VOID(parent);
                     parent->RemoveChild(node);
