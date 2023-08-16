@@ -338,6 +338,8 @@ void ScrollPattern::ValidateOffset(int32_t source)
             SetScrollBarOutBoundaryExtent(currentOffset_);
         } else if ((-currentOffset_) >= (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_)) && ReachMaxCount()) {
             SetScrollBarOutBoundaryExtent((-currentOffset_) - (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_)));
+        } else {
+            SetScrollBarOutBoundaryExtent(0.0f);
         }
         HandleScrollBarOutBoundary();
     }
