@@ -93,6 +93,8 @@ public:
                 theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
                 theme->defaultTabBarName_ = pattern->GetAttr<std::string>("default_tab_bar_name", "");
                 theme->bottomTabBarSpace_ = pattern->GetAttr<Dimension>("bottom_tab_bar_space", 0.0_vp);
+                theme->horizontalBottomTabBarSpace_ =
+                    pattern->GetAttr<Dimension>("horizontal_bottom_tab_bar_space", 0.0_vp);
                 theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
                 theme->subTabBarHoverToPressDuration_ =
                     pattern->GetAttr<double>("sub_tab_bar_hover_to_press_duration", 0.0);
@@ -106,6 +108,10 @@ public:
                 theme->tabBarGradientWidth_ = pattern->GetAttr<Dimension>("tab_bar_gradient_width", 0.0_vp);
                 theme->colorBottomTabSubBg_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg", Color::WHITE);
                 theme->colorBottomTabSubBgBlur_ = pattern->GetAttr<Color>("color_bottom_tab_sub_bg_blur", Color::WHITE);
+                theme->tabBarColumnGutter_ = pattern->GetAttr<Dimension>("tab_bar_column_gutter", 0.0_vp);
+                theme->tabBarColumnMargin_ = pattern->GetAttr<Dimension>("tab_bar_column_margin", 0.0_vp);
+                theme->horizontalBottomTabMinWidth_ =
+                    pattern->GetAttr<Dimension>("horizontal_bottom_tab_min_width", 0.0_vp);
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -285,6 +291,11 @@ public:
         return bottomTabBarSpace_;
     }
 
+    const Dimension& GetHorizontalBottomTabBarSpace() const
+    {
+        return horizontalBottomTabBarSpace_;
+    }
+
     double GetSubTabBarHoverDuration() const
     {
         return subTabBarHoverDuration_;
@@ -339,6 +350,22 @@ public:
     {
         return colorBottomTabSubBgBlur_;
     }
+
+    const Dimension& GetTabBarColumnGutter() const
+    {
+        return tabBarColumnGutter_;
+    }
+
+    const Dimension& GetTabBarColumnMargin() const
+    {
+        return tabBarColumnMargin_;
+    }
+
+    const Dimension& GetHorizontalBottomTabMinWidth() const
+    {
+        return horizontalBottomTabMinWidth_;
+    }
+
 protected:
     TabTheme() = default;
 
@@ -377,6 +404,7 @@ private:
     Dimension bottomTabTextSize_;
     std::string defaultTabBarName_;
     Dimension bottomTabBarSpace_;
+    Dimension horizontalBottomTabBarSpace_;
     double subTabBarHoverDuration_;
     double subTabBarHoverToPressDuration_;
     double tabContentAnimationDuration_;
@@ -388,6 +416,9 @@ private:
     Dimension tabBarGradientWidth_;
     Color colorBottomTabSubBg_;
     Color colorBottomTabSubBgBlur_;
+    Dimension tabBarColumnGutter_;
+    Dimension tabBarColumnMargin_;
+    Dimension horizontalBottomTabMinWidth_;
 };
 
 } // namespace OHOS::Ace

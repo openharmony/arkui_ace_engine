@@ -84,19 +84,14 @@ public:
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkImage> GetImage(const std::string& src) override;
-#else
-    std::shared_ptr<RSImage> GetImage(const std::string& src) override;
-#endif
-
     void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
         bool isStroke, bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = false);
     void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
 #ifndef USE_ROSEN_DRAWING
-    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
+    void PaintShadow(
+        const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint = nullptr) override;
 #else
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas) override;
 #endif
@@ -120,7 +115,6 @@ private:
     std::list<TaskFunc> tasks_;
 
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
-    RefPtr<ImageCache> imageCache_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };

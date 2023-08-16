@@ -32,37 +32,17 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
-
-    frameNode->Clean();
     int32_t indexerSize = arrayValue.size();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-    CHECK_NULL_VOID(indexerTheme);
-    for (int32_t index = 0; index < indexerSize; index++) {
-        auto indexerChildNode = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_VOID(indexerChildNode);
-        auto textLayoutProperty = indexerChildNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(arrayValue[index]);
-        Dimension borderWidth;
-        textLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
-        auto defaultFont = indexerTheme->GetDefaultTextStyle();
-        textLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
-        textLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
-        textLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
-        textLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
-        textLayoutProperty->UpdateTextColor(indexerTheme->GetDefaultTextColor());
-        auto childRenderContext = indexerChildNode->GetRenderContext();
-        CHECK_NULL_VOID(childRenderContext);
-        childRenderContext->ResetBlendBorderColor();
-        childRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        Dimension radiusZeroSize;
-        childRenderContext->UpdateBorderRadius({ radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
-        indexerChildNode->MarkModifyDone();
-        indexerChildNode->MarkDirtyNode();
-        frameNode->AddChild(indexerChildNode);
+    auto children = frameNode->GetChildren();
+    auto lastChildCount = static_cast<int32_t>(children.size());
+    if (indexerSize != lastChildCount) {
+        frameNode->Clean();
+        for (int32_t index = 0; index < indexerSize; index++) {
+            auto indexerChildNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_VOID(indexerChildNode);
+            frameNode->AddChild(indexerChildNode);
+        }
     }
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ArrayValue, arrayValue);
@@ -78,7 +58,7 @@ void IndexerModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
     if (selectedColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedColor, selectedColor.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, SelectedColor, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, SelectedColor, PROPERTY_UPDATE_NORMAL);
     }
 }
 
@@ -87,7 +67,7 @@ void IndexerModelNG::SetColor(const std::optional<Color>& color)
     if (color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Color, color.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, Color, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, Color, PROPERTY_UPDATE_NORMAL);
     }
 }
 
@@ -96,7 +76,7 @@ void IndexerModelNG::SetPopupColor(const std::optional<Color>& popupColor)
     if (popupColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupColor, popupColor.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupColor, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupColor, PROPERTY_UPDATE_NORMAL);
     }
 }
 
@@ -211,7 +191,7 @@ void IndexerModelNG::SetPopupPositionX(const std::optional<Dimension>& popupPosi
     if (popupPositionXOpt.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionXOpt.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionX, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionX, PROPERTY_UPDATE_NORMAL);
     }
 }
 
@@ -220,7 +200,7 @@ void IndexerModelNG::SetPopupPositionY(const std::optional<Dimension>& popupPosi
     if (popupPositionYOpt.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionYOpt.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionY, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionY, PROPERTY_UPDATE_NORMAL);
     }
 }
 

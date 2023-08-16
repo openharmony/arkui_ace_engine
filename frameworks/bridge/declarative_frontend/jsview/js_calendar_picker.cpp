@@ -369,6 +369,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
 
     auto theme = GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     NG::CalendarSettingData settingData;
     auto selectedDate = paramObj->GetProperty("selected");
     auto parseSelectedDate = ParseDate(selectedDate);
@@ -390,6 +391,9 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     }
     properties.customStyle = false;
     properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    NG::BorderRadiusProperty dialogRadius;
+    dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
+    properties.borderRadius = dialogRadius;
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

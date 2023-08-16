@@ -125,7 +125,7 @@ public:
         return allFrameNodeChildren_;
     }
 
-    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index)
+    RefPtr<LayoutWrapper> FindFrameNodeByIndex(uint32_t index, bool needBuild)
     {
         while (cursor_ != children_.end()) {
             if (cursor_->startIndex > index) {
@@ -134,8 +134,8 @@ public:
             }
 
             if (cursor_->startIndex + cursor_->count > index) {
-                auto frameNode =
-                    AceType::DynamicCast<FrameNode>(cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex));
+                auto frameNode = AceType::DynamicCast<FrameNode>(
+                    cursor_->node->GetFrameChildByIndex(index - cursor_->startIndex, needBuild));
                 return frameNode;
             }
             cursor_++;
@@ -147,12 +147,12 @@ public:
         return nullptr;
     }
 
-    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index)
+    RefPtr<LayoutWrapper> GetFrameNodeByIndex(uint32_t index, bool needBuild)
     {
         auto itor = partFrameNodeChildren_.find(index);
         if (itor == partFrameNodeChildren_.end()) {
             Build();
-            auto child = FindFrameNodeByIndex(index);
+            auto child = FindFrameNodeByIndex(index, needBuild);
             if (child) {
                 partFrameNodeChildren_[index] = child;
                 return child;
@@ -276,6 +276,7 @@ FrameNode::~FrameNode()
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
+
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false);
@@ -291,7 +292,9 @@ FrameNode::~FrameNode()
         pipeline->FreeMouseStyleHoldNode(GetId());
         pipeline->RemoveStoredNode(GetRestoreId());
         auto dragManager = pipeline->GetDragDropManager();
-        dragManager->RemoveDragFrameNode(AceType::WeakClaim(this));
+        if (dragManager) {
+            dragManager->RemoveDragFrameNode(GetId());
+        }
     }
 }
 
@@ -975,16 +978,16 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     }
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
-    auto weak = AceType::WeakClaim(this);
-    auto task = [weak, wrapper, paintProperty = paintProperty_]() {
+    auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
-        auto ref = weak.Upgrade();
+        auto self = weak.Upgrade();
         wrapper->FlushRender();
         paintProperty->CleanDirty();
 
-        if (ref->GetInspectorId().has_value()) {
-            auto renderContext = ref->GetRenderContext();
-            renderContext->RequestNextFrame();
+        if (self->GetInspectorId()) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetNeedRenderNode(self);
         }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
@@ -1468,7 +1471,19 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
         return HitTestResult::OUT_OF_REGION;
     }
+    auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
+    auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto name = GetInspectorId().value_or("");
+    auto param = renderContext_->GetTrans();
+    TransformConfig cfg = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7], param[8],
+        GetId() };
+    auto parent = GetAncestorNodeOfFrame();
+    translateCfg[GetId()] = cfg;
+    if (parent) {
+        AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
+        translateIds[GetId()] = ancestorNodeInfo;
+    }
     auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
@@ -1484,7 +1499,6 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             return HitTestResult::OUT_OF_REGION;
         }
     }
-    pattern_->OnTouchTestHit(touchRestrict.hitTestType);
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
@@ -1538,6 +1552,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
         (InResponseRegionList(parentLocalPoint, responseRegionList))) {
+        pattern_->OnTouchTestHit(touchRestrict.hitTestType);
         consumed = true;
         if (touchRestrict.hitTestType == SourceType::TOUCH) {
             auto gestureHub = eventHub_->GetGestureEventHub();
@@ -1904,9 +1919,10 @@ std::optional<RectF> FrameNode::GetViewPort() const
         return viewPort_;
     }
     auto parent = GetAncestorNodeOfFrame();
-    while (parent) {
-        if (parent->GetViewPort().has_value()) {
-            return parent->GetViewPort();
+    while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
+        auto parentViewPort = parent->GetSelfViewPort();
+        if (parentViewPort.has_value()) {
+            return parentViewPort;
         }
         parent = parent->GetAncestorNodeOfFrame();
     }
@@ -2018,9 +2034,11 @@ bool FrameNode::OnRemoveFromParent(bool allowTransition)
 RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
 {
     std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
-    std::list<RefPtr<FrameNode>> children;
-    GenerateOneDepthAllFrame(children);
-    for (const auto& child : children) {
+    for (const auto& iter : frameChildren_) {
+        const auto& child = iter.Upgrade();
+        if (!child) {
+            continue;
+        }
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             continue;
@@ -2126,10 +2144,14 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
-void FrameNode::AddFRCSceneInfo(const std::string& name, float speed, SceneStatus status)
+void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
 {
-    // [PLANNING]: Frame Rate Controller(FRC):
-    // Based on scene, speed and scene status, FrameRateRange will be sent to RSNode.
+    if (status == SceneStatus::RUNNING) {
+        return;
+    }
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->AddFRCSceneInfo(scene, speed);
 }
 
 void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)
@@ -2186,9 +2208,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     RestoreGeoState();
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
-    if (!oldGeometryNode_) {
-        oldGeometryNode_ = geometryNode_->Clone();
-    }
+
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         layoutAlgorithm_->SetSkipMeasure();
         layoutAlgorithm_->SetSkipLayout();
@@ -2350,7 +2370,7 @@ void FrameNode::SyncGeometryNode()
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
-    if ((config.skipMeasure == false) && (config.skipLayout == false) && GetInspectorId().has_value()) {
+    if (!config.skipMeasure && !config.skipLayout && GetInspectorId()) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
@@ -2394,6 +2414,7 @@ void FrameNode::SyncGeometryNode()
         SetBackgroundLayoutConstraint(columnNode);
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
+        backgroundNode_ = columnNode;
     }
 
     // update focus state
@@ -2414,11 +2435,16 @@ void FrameNode::SyncGeometryNode()
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
 {
-    auto child = frameProxy_->GetFrameNodeByIndex(index);
+    auto child = frameProxy_->GetFrameNodeByIndex(index, true);
     if (addToRenderTree && child) {
         child->SetActive(true);
     }
     return child;
+}
+
+RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index)
+{
+    return frameProxy_->GetFrameNodeByIndex(index, false);
 }
 
 const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
@@ -2476,7 +2502,7 @@ void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
     needSyncRenderTree_ = true;
 }
 
-RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index)
+RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild)
 {
     if (index != 0) {
         return nullptr;

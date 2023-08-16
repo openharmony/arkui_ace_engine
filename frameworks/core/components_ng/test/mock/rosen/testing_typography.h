@@ -85,6 +85,13 @@ public:
         TestingTypographyProperties::PositionAndAffinity res(1, TestingTypographyProperties::Affinity::UPSTREAM);
         return res;
     }
+
+    virtual TestingTypographyProperties::Range<size_t> GetWordBoundary(size_t offset)
+    {
+        TestingTypographyProperties::Range<size_t> range =
+            TestingTypographyProperties::Range<size_t>(offset, offset + 1);
+        return range;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H

@@ -2316,6 +2316,54 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderPatternTest012
+ * @tc.desc: Test slider_pattern InitPanEvent and event callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto hub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+
+    /**
+     * @tc.steps: step2. start SliderPattern InitPanEvent func.
+     */
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    sliderPattern->sliderContentModifier_ =
+        AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr);
+    GestureEvent info = GestureEvent();
+    sliderPattern->InitPanEvent(gestureHub);
+
+    /**
+     * @tc.steps: step3. call event callback func.
+     */
+    sliderPattern->sliderContentModifier_->needAnimate_ = false;
+    sliderPattern->panEvent_->actionStart_(info);
+    ASSERT_TRUE(sliderPattern->sliderContentModifier_->needAnimate_);
+
+    sliderPattern->sliderContentModifier_->needAnimate_ = false;
+    sliderPattern->panEvent_->actionUpdate_(info);
+    ASSERT_TRUE(sliderPattern->sliderContentModifier_->needAnimate_);
+
+    sliderPattern->sliderContentModifier_->needAnimate_ = true;
+    sliderPattern->panEvent_->actionEnd_(info);
+    ASSERT_FALSE(sliderPattern->sliderContentModifier_->needAnimate_);
+
+    sliderPattern->sliderContentModifier_->needAnimate_ = true;
+    sliderPattern->panEvent_->actionCancel_();
+    ASSERT_FALSE(sliderPattern->sliderContentModifier_->needAnimate_);
+}
+
+/**
  * @tc.name: SliderLayoutAlgorithmTest001
  * @tc.desc: Test slider_layout_algorithm Measure and Layout(Reverse=false)
  * @tc.type: FUNC
@@ -2897,6 +2945,144 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest017, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
 }
 
+/**
+ * @tc.name: SliderContentModifierTest018
+ * @tc.desc: Test StopSelectAnimation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create content modifier and set property callback.
+     */
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    OffsetF value;
+    bool set = false;
+    auto animatablePropertySetCallback = [&value, &set](const OffsetF& arg) {
+        value = arg;
+        set = true;
+    };
+    auto animatablePropertyGetCallback = [&value]() { return value; };
+    sliderContentModifier.selectEnd_->SetUpCallbacks(animatablePropertyGetCallback, animatablePropertySetCallback);
+
+    /**
+     * @tc.steps: step2. start SliderContentModifier StopSelectAnimation func.
+     * @tc.cases: case1. when sliderPaintProperty's direction is HORIZONTAL.
+     */
+    sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
+    sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
+    sliderContentModifier.targetSelectEnd_ = SELECT_START - PointF();
+    sliderContentModifier.StopSelectAnimation(SELECT_END);
+    ASSERT_TRUE(set);
+
+    sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
+    sliderContentModifier.targetSelectEnd_ = SELECT_END - PointF();
+    set = false;
+    sliderContentModifier.StopSelectAnimation(SELECT_START);
+    ASSERT_TRUE(set);
+
+    sliderContentModifier.selectEnd_->Set(SELECT_END - PointF());
+    sliderContentModifier.targetSelectEnd_ = POINTF_CENTER - PointF();
+    set = false;
+    sliderContentModifier.StopSelectAnimation(SELECT_START);
+    ASSERT_FALSE(set);
+
+    /**
+     * @tc.cases: case2. when sliderPaintProperty's direction is VERTICAL.
+     */
+    sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::VERTICAL));
+    sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
+    sliderContentModifier.targetSelectEnd_ = SELECT_START - PointF();
+    set = false;
+    sliderContentModifier.StopSelectAnimation(SELECT_END);
+    ASSERT_TRUE(set);
+
+    sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
+    sliderContentModifier.targetSelectEnd_ = SELECT_END - PointF();
+    set = false;
+    sliderContentModifier.StopSelectAnimation(SELECT_START);
+    ASSERT_TRUE(set);
+
+    sliderContentModifier.selectEnd_->Set(SELECT_END - PointF());
+    sliderContentModifier.targetSelectEnd_ = POINTF_CENTER - PointF();
+    set = false;
+    sliderContentModifier.StopSelectAnimation(SELECT_START);
+    ASSERT_FALSE(set);
+}
+
+/**
+ * @tc.name: SliderContentModifierTest019
+ * @tc.desc: Test StopSelectAnimation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderContentModifierTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create content modifier and set property callback.
+     */
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr);
+    float blockCenterX;
+    float blockCenterY;
+    bool set = false;
+    auto animatablePropertySetCallback = [&blockCenterX, &set](const float& arg) {
+        blockCenterX = arg;
+        set = true;
+    };
+    auto animatablePropertyGetCallback = [&blockCenterX]() { return blockCenterX; };
+    sliderContentModifier.blockCenterX_->SetUpCallbacks(animatablePropertyGetCallback, animatablePropertySetCallback);
+
+    /**
+     * @tc.steps: step2. start SliderContentModifier StopCircleCenterAnimation func.
+     * @tc.cases: case1. when sliderPaintProperty's direction is HORIZONTAL.
+     */
+    sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
+    sliderContentModifier.blockCenterX_->Set(POINTF_CENTER.GetX());
+    sliderContentModifier.targetCenter_ = POINTF_START;
+    sliderContentModifier.StopCircleCenterAnimation(POINTF_END);
+    ASSERT_TRUE(set);
+
+    sliderContentModifier.blockCenterX_->Set(POINTF_CENTER.GetX());
+    sliderContentModifier.targetCenter_ = POINTF_END;
+    set = false;
+    sliderContentModifier.StopCircleCenterAnimation(SELECT_START);
+    ASSERT_TRUE(set);
+
+    sliderContentModifier.blockCenterX_->Set(POINTF_END.GetX());
+    sliderContentModifier.targetCenter_ = POINTF_CENTER;
+    set = false;
+    sliderContentModifier.StopCircleCenterAnimation(SELECT_START);
+    ASSERT_FALSE(set);
+
+    /**
+     * @tc.cases: case2. when sliderPaintProperty's direction is VERTICAL.
+     */
+    auto animatablePropertySetCallback2 = [&blockCenterY, &set](const float& arg) {
+        blockCenterY = arg;
+        set = true;
+    };
+    auto animatablePropertyGetCallback2 = [&blockCenterY]() { return blockCenterY; };
+    sliderContentModifier.blockCenterY_->SetUpCallbacks(animatablePropertyGetCallback2, animatablePropertySetCallback2);
+    sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::VERTICAL));
+    sliderContentModifier.blockCenterY_->Set(POINTF_CENTER.GetY());
+    sliderContentModifier.targetCenter_ = POINTF_START;
+    set = false;
+    sliderContentModifier.StopCircleCenterAnimation(POINTF_END);
+    ASSERT_TRUE(set);
+
+    sliderContentModifier.blockCenterY_->Set(POINTF_CENTER.GetY());
+    sliderContentModifier.targetCenter_ = POINTF_END;
+    set = false;
+    sliderContentModifier.StopCircleCenterAnimation(SELECT_START);
+    ASSERT_TRUE(set);
+
+    sliderContentModifier.blockCenterY_->Set(POINTF_END.GetY());
+    sliderContentModifier.targetCenter_ = POINTF_CENTER;
+    set = false;
+    sliderContentModifier.StopCircleCenterAnimation(SELECT_START);
+    ASSERT_FALSE(set);
+}
 /**
  * @tc.name: SliderPatternChangeEventTestNg001
  * @tc.desc: Test the Text property of Slider

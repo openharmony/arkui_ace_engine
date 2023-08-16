@@ -291,7 +291,7 @@ var PanelType;
 
 var PanelHeight;
 (function (PanelHeight) {
-  PanelHeight[PanelHeight["WRAP_CONTENT"] = 0] = "WRAP_CONTENT";
+  PanelHeight[PanelHeight["WRAP_CONTENT"] = "wrapContent"] = "WRAP_CONTENT";
 })(PanelHeight || (PanelHeight = {}));
 
 var PanelMode;
@@ -608,6 +608,20 @@ var SelectedMode;
   SelectedMode[SelectedMode["INDICATOR"] = 0] = "INDICATOR";
   SelectedMode[SelectedMode["BOARD"] = 1] = "BOARD";
 })(SelectedMode || (SelectedMode = {}));
+
+var LayoutMode;
+(function (LayoutMode) {
+  LayoutMode[LayoutMode["AUTO"] = 0] = "AUTO";
+  LayoutMode[LayoutMode["VERTICAL"] = 1] = "VERTICAL";
+  LayoutMode[LayoutMode["HORIZONTAL"] = 2] = "HORIZONTAL";
+})(LayoutMode || (LayoutMode = {}));
+
+var LayoutStyle;
+(function (LayoutStyle) {
+  LayoutStyle[LayoutStyle["ALWAYS_CENTER"] = 0] = "ALWAYS_CENTER";
+  LayoutStyle[LayoutStyle["ALWAYS_AVERAGE_SPLIT"] = 1] = "ALWAYS_AVERAGE_SPLIT";
+  LayoutStyle[LayoutStyle["SPACE_BETWEEN_OR_CENTER"] = 2] = "SPACE_BETWEEN_OR_CENTER";
+})(LayoutStyle || (LayoutStyle = {}));
 
 var SizeType;
 (function (SizeType) {
@@ -1178,6 +1192,10 @@ class SubTabBarStyle {
     this.labelStyle = arg;
     return this;
   }
+  padding(arg) {
+    this.padding = arg;
+    return this;
+  }
 }
 
 
@@ -1208,6 +1226,26 @@ class BottomTabBarStyle {
   }
   static of(icon, text) {
     return new BottomTabBarStyle(icon, text);
+  }
+  padding(arg) {
+    this.padding = arg;
+    return this;
+  }
+  layoutMode(arg) {
+    this.layoutMode = arg;
+    return this;
+  }
+  verticalAlign(arg) {
+    this.verticalAlign = arg;
+    return this;
+  }
+  symmetricExtensible(arg) {
+    this.symmetricExtensible = arg;
+    return this;
+  }
+  labelStyle(arg) {
+    this.labelStyle = arg;
+    return this;
   }
 }
 
@@ -1755,3 +1793,10 @@ var PatternLockChallengeResult;
   PatternLockChallengeResult[PatternLockChallengeResult["CORRECT"] = 1] = "CORRECT";
   PatternLockChallengeResult[PatternLockChallengeResult["WRONG"] = 2] = "WRONG";
 })(PatternLockChallengeResult || (PatternLockChallengeResult = {}));
+
+var DialogButtonDirection;
+(function (DialogButtonDirection) {
+  DialogButtonDirection[DialogButtonDirection["AUTO"] = 0] = "AUTO";
+  DialogButtonDirection[DialogButtonDirection["HORIZONTAL"] = 1] = "HORIZONTAL";
+  DialogButtonDirection[DialogButtonDirection["VERTICAL"] = 2] = "VERTICAL";
+})(DialogButtonDirection || (DialogButtonDirection = {}));

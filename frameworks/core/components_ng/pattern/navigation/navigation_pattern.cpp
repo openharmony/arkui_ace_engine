@@ -179,27 +179,6 @@ void NavigationPattern::OnModifyDone()
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
     }
-
-    // if current title is custom node, return
-    if (navBarNode->GetPrevTitleIsCustomValue(false)) {
-        return;
-    }
-    auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
-    CHECK_NULL_VOID(titleNode);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        textLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
-        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
-    } else {
-        textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
-        textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
-    }
-    titleNode->MarkModifyDone();
 }
 
 void NavigationPattern::CheckTopNavPathChange(
@@ -238,11 +217,18 @@ void NavigationPattern::CheckTopNavPathChange(
             focusHub->LostFocus();
 
             // in STACK mode with pop page, need to remain page until animation is finished
-            if (navigationMode_ == NavigationMode::STACK && isPopPage) {
-                contentNode->AddChild(preTopNavDestination, contentNode->GetChildren().size() - 1);
-            } else if (isPopPage) {
+            if (navigationMode_ != NavigationMode::STACK && isPopPage) {
                 // without animation, clean content directly
+                auto navDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+                auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
+                if (shallowBuilder) {
+                    shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+                }
                 preTopNavDestination->GetContentNode()->Clean();
+                auto parent = preTopNavDestination->GetParent();
+                if (parent) {
+                    parent->RemoveChild(preTopNavDestination);
+                }
             }
         } else {
             LOGW("prev page is illegal");
@@ -418,7 +404,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     auto pattern = weak.Upgrade();
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
-                    if (hostNode->GetContentNode()->GetChildren().size() == 1 &&
+                    if (pattern->navigationStack_->Size() == 1 &&
                         pattern->GetNavigationMode() == NavigationMode::SPLIT) {
                         // set backButton gone for the first level page in SPLIT mode
                         hostNode->SetBackButtonVisible(curTopNavDestination, false);
@@ -429,6 +415,8 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 TaskExecutor::TaskType::UI);
         }
     }
+    auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(navigationLayoutProperty, false);
 
     UpdateTitleModeChangeEventHub(hostNode);
     UpdateResponseRegion(navigationLayoutAlgorithm->GetRealDividerWidth(),
@@ -492,52 +480,54 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
 {
     auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(navigationLayoutProperty);
-    auto minNavBarWidth = navigationLayoutProperty->GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH);
-    auto maxNavBarWidth = navigationLayoutProperty->GetMaxNavBarWidthValue(DEFAULT_MAX_NAV_BAR_WIDTH);
-    auto minContentWidth = navigationLayoutProperty->GetMinContentWidthValue(DEFAULT_MIN_CONTENT_WIDTH);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    auto parentWidth = frameSize.Width();
+    auto frameWidth = frameSize.Width();
     auto constraint = navigationLayoutProperty->GetLayoutConstraint();
     auto parentSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
 
-    auto minNavBarWidthPx = minNavBarWidth.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    auto maxNavBarWidthPx = maxNavBarWidth.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    auto minContentWidthPx = minContentWidth.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+    float minNavBarWidthPx = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+    float maxNavBarWidthPx = maxNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+    float minContentWidthPx = minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+    auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
+
     auto navigationPosition = navigationLayoutProperty->GetNavBarPosition().value_or(NavBarPosition::START);
     bool isNavBarStart = navigationPosition == NavBarPosition::START;
     auto navBarLine = preNavBarWidth_ + (isNavBarStart ? xOffset : -xOffset);
     float currentNavBarWidth = realNavBarWidth_;
-    if (navBarLine > minNavBarWidthPx && navBarLine < maxNavBarWidthPx) {
-        if (navBarLine + static_cast<float>(DIVIDER_WIDTH.ConvertToPx()) + minContentWidthPx > parentWidth) {
-            realNavBarWidth_ = parentWidth - minContentWidthPx - static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
-        } else {
+
+    if (maxNavBarWidthPx + dividerWidth + minContentWidthPx > frameWidth) {
+        maxNavBarWidthPx = frameWidth - minContentWidthPx - dividerWidth;
+    }
+    navBarLine = std::min(navBarLine, maxNavBarWidthPx);
+
+    if (userSetMinContentFlag_ && !userSetNavBarRangeFlag_) {
+        if (minContentWidthPx >= frameWidth) {
+            realNavBarWidth_ = 0.0f;
+        } else if (navBarLine + dividerWidth + minContentWidthPx <= frameWidth) {
             realNavBarWidth_ = navBarLine;
+        } else {
+            realNavBarWidth_ = frameWidth - minContentWidthPx - dividerWidth;
         }
-        if (realNavBarWidth_ != currentNavBarWidth) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    } else {
+        realDividerWidth_ = dividerWidth;
+        float remainingSpace = frameWidth - navBarLine - dividerWidth;
+        if (remainingSpace >= minContentWidthPx) {
+            realNavBarWidth_ = navBarLine;
+        } else if (remainingSpace < minContentWidthPx && navBarLine > minNavBarWidthPx) {
+            realNavBarWidth_ = frameWidth - minContentWidthPx - dividerWidth;
+        } else {
+            realNavBarWidth_ = minNavBarWidthPx;
         }
-        return;
     }
-    if (navBarLine >= maxNavBarWidthPx) {
-        realNavBarWidth_ = maxNavBarWidthPx;
-        if (realNavBarWidth_ != currentNavBarWidth) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        }
-        return;
-    }
-    auto halfDragRegionWidth = dragRect_.Width() / 2;
-    if (navBarLine > minNavBarWidthPx - halfDragRegionWidth) {
-        realNavBarWidth_ = minNavBarWidthPx;
-        if (realNavBarWidth_ != currentNavBarWidth) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        }
-        return;
-    }
-    realNavBarWidth_ = minNavBarWidthPx;
+    realNavBarWidth_ = std::min(realNavBarWidth_, frameWidth);
+    realNavBarWidth_ = std::min(realNavBarWidth_, maxNavBarWidthPx);
+    realNavBarWidth_ = std::max(realNavBarWidth_, minNavBarWidthPx);
+
+    // MEASURE
     if (realNavBarWidth_ != currentNavBarWidth) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }

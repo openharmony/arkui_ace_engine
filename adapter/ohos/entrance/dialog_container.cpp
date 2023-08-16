@@ -240,8 +240,27 @@ void DialogContainer::Destroy()
 {
     LOGI("DialogContainer::Destroy begin");
     ContainerScope scope(instanceId_);
-    if (frontend_) {
-        frontend_->UpdateState(Frontend::State::ON_DESTROY);
+    if (pipelineContext_ && taskExecutor_) {
+        // 1. Destroy Pipeline on UI thread.
+        RefPtr<PipelineBase>& context = pipelineContext_;
+        if (GetSettings().usePlatformAsUIThread) {
+            context->Destroy();
+        } else {
+            taskExecutor_->PostTask([context]() { context->Destroy(); }, TaskExecutor::TaskType::UI);
+        }
+        // 2. Destroy Frontend on JS thread.
+        RefPtr<Frontend>& frontend = frontend_;
+        if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
+            frontend->UpdateState(Frontend::State::ON_DESTROY);
+            frontend->Destroy();
+        } else {
+            taskExecutor_->PostTask(
+                [frontend]() {
+                    frontend->UpdateState(Frontend::State::ON_DESTROY);
+                    frontend->Destroy();
+                },
+                TaskExecutor::TaskType::JS);
+        }
     }
     resRegister_.Reset();
     assetManager_.Reset();
@@ -442,6 +461,27 @@ void DialogContainer::ShowDialog(int32_t instanceId, const std::string& title, c
     CHECK_NULL_VOID(delegate);
     delegate->ShowDialog(
         title, message, buttons, autoCancel, std::move(callback), callbacks, [instanceId = instanceId](bool isShow) {
+            LOGI("DialogContainer::ShowDialog HideWindow instanceId = %{public}d", instanceId);
+            if (!isShow) {
+                DialogContainer::HideWindow(instanceId);
+            }
+        });
+    LOGI("DialogContainer::ShowDialog end");
+}
+
+void DialogContainer::ShowDialog(int32_t instanceId, const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    LOGI("DialogContainer::ShowDialog begin");
+    auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_VOID(container);
+    auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
+    CHECK_NULL_VOID(frontend);
+    auto delegate = frontend->GetDelegate();
+    CHECK_NULL_VOID(delegate);
+    delegate->ShowDialog(
+        dialogAttr, buttons, std::move(callback), callbacks, [instanceId = instanceId](bool isShow) {
             LOGI("DialogContainer::ShowDialog HideWindow instanceId = %{public}d", instanceId);
             if (!isShow) {
                 DialogContainer::HideWindow(instanceId);

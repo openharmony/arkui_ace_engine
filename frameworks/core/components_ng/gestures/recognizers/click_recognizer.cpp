@@ -33,9 +33,7 @@ constexpr int32_t MULTI_FINGER_TIMEOUT_MOUSE = 300;
 int32_t MULTI_TAP_TIMEOUT = 300;
 constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 350;
 constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 300;
-int32_t MULTI_TAP_SLOP = 100;
-constexpr int32_t MULTI_TAP_SLOP_TOUCH = 30;
-constexpr int32_t MULTI_TAP_SLOP_MOUSE = 15;
+constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 
 } // namespace
@@ -46,13 +44,11 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
         case SourceType::TOUCH:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_TOUCH;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_TOUCH;
-            MULTI_TAP_SLOP = MULTI_TAP_SLOP_TOUCH;
             break;
         case SourceType::MOUSE:
         case SourceType::TOUCH_PAD:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_MOUSE;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_MOUSE;
-            MULTI_TAP_SLOP = MULTI_TAP_SLOP_MOUSE;
             break;
         default:
             LOGI("Unrecognized input source type: %{public}d", sourceType);
@@ -154,6 +150,10 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    if (currentFingers_ < fingers_) {
+        LOGW("ClickGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
@@ -196,6 +196,10 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    if (currentFingers_ < fingers_) {
+        LOGW("ClickGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
@@ -259,7 +263,7 @@ bool ClickRecognizer::ExceedSlop()
     if (tappedCount_ > 0 && tappedCount_ < count_) {
         Offset currentFocusPoint = ComputeFocusPoint();
         Offset slop = currentFocusPoint - focusPoint_;
-        if (GreatOrEqual(slop.GetDistance(), MULTI_TAP_SLOP)) {
+        if (GreatOrEqual(SystemProperties::Px2Vp(slop.GetDistance()), MAX_THRESHOLD_MANYTAP)) {
             return true;
         }
     }

@@ -231,7 +231,7 @@ public:
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        return RSShaderEffect::CreateLinearGradient(pts[0], pts[1], colors, pos, tileMode);
+        return RSRecordingShaderEffect::CreateLinearGradient(pts[0], pts[1], colors, pos, tileMode);
     }
 
     static std::unique_ptr<GradientShader> CreateLinearGradient(const NG::Gradient& gradient, const RSSize& size)
@@ -397,7 +397,7 @@ public:
         ToRSColors(pos, colors);
         radius0_ = std::max(radius0_, 0.0f);
         radius1_ = std::max(radius1_, 0.0f);
-        return RSShaderEffect::CreateTwoPointConical(
+        return RSRecordingShaderEffect::CreateTwoPointConical(
             center_, radius0_, center_, radius1_, colors, pos, tileMode);
     }
 
@@ -613,7 +613,7 @@ public:
         if (isRepeat_) {
             tileMode = RSTileMode::REPEAT;
         }
-        return RSShaderEffect::CreateSweepGradient(center_, colors, pos, tileMode, startAngle_, endAngle_);
+        return RSRecordingShaderEffect::CreateSweepGradient(center_, colors, pos, tileMode, startAngle_, endAngle_);
     }
 
     static std::unique_ptr<GradientShader> CreateSweepGradient(const NG::Gradient& gradient, const RSSize& size)
@@ -773,7 +773,8 @@ void DrawingDecorationPainter::DrawingCreateInset(
     CHECK_NULL_VOID(inset);
     double left = DrawingDimensionToPx(inset->GetLeft(), size, LengthMode::HORIZONTAL) + position.GetX();
     double top = DrawingDimensionToPx(inset->GetTop(), size, LengthMode::VERTICAL) + position.GetY();
-    double right = size.Width() - DrawingDimensionToPx(inset->GetRight(), size, LengthMode::HORIZONTAL) + position.GetX();
+    double right =
+        size.Width() - DrawingDimensionToPx(inset->GetRight(), size, LengthMode::HORIZONTAL) + position.GetX();
     double bottom =
         size.Height() - DrawingDimensionToPx(inset->GetBottom(), size, LengthMode::VERTICAL) + position.GetY();
     RSRect rect(left, top, right, bottom);
@@ -788,7 +789,8 @@ void DrawingDecorationPainter::DrawingCreateInset(
         DrawingDimensionToPx(inset->GetBottomRightRadius().GetY(), radiusSize, LengthMode::VERTICAL);
     float bottomLeftRadiusX =
         DrawingDimensionToPx(inset->GetBottomLeftRadius().GetX(), radiusSize, LengthMode::HORIZONTAL);
-    float bottomLeftRadiusY = DrawingDimensionToPx(inset->GetBottomLeftRadius().GetY(), radiusSize, LengthMode::VERTICAL);
+    float bottomLeftRadiusY =
+        DrawingDimensionToPx(inset->GetBottomLeftRadius().GetY(), radiusSize, LengthMode::VERTICAL);
     std::vector<RSPoint> fRadii = { { topLeftRadiusX, topLeftRadiusY }, { topRightRadiusX, topRightRadiusY },
         { bottomRightRadiusX, bottomRightRadiusY }, { bottomLeftRadiusX, bottomLeftRadiusY } };
     RSRoundRect roundRect(rect, fRadii);
@@ -807,7 +809,8 @@ void DrawingDecorationPainter::DrawingCreateCircle(
     } else {
         float width = DrawingDimensionToPx(circle->GetWidth(), size, LengthMode::HORIZONTAL);
         float height = DrawingDimensionToPx(circle->GetHeight(), size, LengthMode::VERTICAL);
-        float offsetX = DrawingDimensionToPx(circle->GetOffset().GetX(), size, LengthMode::HORIZONTAL) + position.GetX();
+        float offsetX =
+            DrawingDimensionToPx(circle->GetOffset().GetX(), size, LengthMode::HORIZONTAL) + position.GetX();
         float offsetY = DrawingDimensionToPx(circle->GetOffset().GetY(), size, LengthMode::VERTICAL) + position.GetY();
         rsPath.AddCircle(width * 0.5 + offsetX, height * 0.5 + offsetY, std::min(width, height) * 0.5);
     }
@@ -920,7 +923,7 @@ void DrawingDecorationPainter::PaintGrayScale(const RSRoundRect& rRect, RSCanvas
             RSColorMatrix colorMatrix;
             colorMatrix.SetArray(matrix);
             RSFilter filter;
-            filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+            filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
             brush.SetFilter(filter);
             RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);
             canvas->SaveLayer(slr);
@@ -946,7 +949,7 @@ void DrawingDecorationPainter::PaintBrightness(const RSRoundRect& rRect, RSCanva
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(matrix);
         RSFilter filter;
-        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
         brush.SetFilter(filter);
         RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);
         canvas->SaveLayer(slr);
@@ -969,7 +972,7 @@ void DrawingDecorationPainter::PaintContrast(const RSRoundRect& rRect, RSCanvas*
         RSColorMatrix colorMatrix;
         colorMatrix.SetArray(matrix);
         RSFilter filter;
-        filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
         brush.SetFilter(filter);
         RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);
         canvas->SaveLayer(slr);
@@ -985,7 +988,7 @@ void DrawingDecorationPainter::PaintColorBlend(const RSRoundRect& rRect, RSCanva
             RSBrush brush;
             brush.SetAntiAlias(true);
             RSFilter filter;
-            filter.SetColorFilter(RSColorFilter::CreateBlendModeColorFilter(RSColor::ColorQuadSetARGB(
+            filter.SetColorFilter(RSRecordingColorFilter::CreateBlendModeColorFilter(RSColor::ColorQuadSetARGB(
                 colorBlend.GetRed(), colorBlend.GetGreen(), colorBlend.GetBlue(), colorBlend.GetAlpha()),
                 RSBlendMode::PLUS));
             brush.SetFilter(filter);
@@ -1014,7 +1017,7 @@ void DrawingDecorationPainter::PaintSaturate(const RSRoundRect& rRect, RSCanvas*
             RSColorMatrix colorMatrix;
             colorMatrix.SetArray(matrix);
             RSFilter filter;
-            filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+            filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
             brush.SetFilter(filter);
             RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);
             canvas->SaveLayer(slr);
@@ -1049,7 +1052,7 @@ void DrawingDecorationPainter::PaintSepia(const RSRoundRect& rRect, RSCanvas* ca
             RSColorMatrix colorMatrix;
             colorMatrix.SetArray(matrix);
             RSFilter filter;
-            filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+            filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
             brush.SetFilter(filter);
             RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);
             canvas->SaveLayer(slr);
@@ -1078,7 +1081,7 @@ void DrawingDecorationPainter::PaintInvert(const RSRoundRect& rRect, RSCanvas* c
             RSColorMatrix colorMatrix;
             colorMatrix.SetArray(matrix);
             RSFilter filter;
-            filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+            filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
             brush.SetFilter(filter);
             RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);
             canvas->SaveLayer(slr);
@@ -1125,7 +1128,7 @@ void DrawingDecorationPainter::PaintHueRotate(const RSRoundRect& rRect, RSCanvas
             RSColorMatrix colorMatrix;
             colorMatrix.SetArray(matrix);
             RSFilter filter;
-            filter.SetColorFilter(RSColorFilter::CreateMatrixColorFilter(colorMatrix));
+            filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
             brush.SetFilter(filter);
             RSSaveLayerOps slr(nullptr, &brush, RSSaveLayerOps::Flags::INIT_WITH_PREVIOUS);
             canvas->SaveLayer(slr);
@@ -1143,7 +1146,11 @@ RSBrush DrawingDecorationPainter::CreateMaskDrawingBrush(const RefPtr<BasicShape
 
 RSImage DrawingDecorationPainter::CreateBorderImageGradient(const NG::Gradient& gradient, const SizeF& paintSize)
 {
-    auto shader = DrawingDecorationPainter::CreateGradientShader(gradient, paintSize);
+    auto recordingShader = DrawingDecorationPainter::CreateGradientShader(gradient, paintSize);
+    std::shared_ptr<RSShaderEffect> shader = nullptr;
+    if (recordingShader != nullptr) {
+        shader = std::static_pointer_cast<RSRecordingShaderEffect>(recordingShader)->GetCmdList()->Playback();
+    }
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetShaderEffect(std::move(shader));

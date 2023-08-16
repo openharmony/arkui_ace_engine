@@ -118,9 +118,8 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(props, nullptr);
     UpdatePaintConfig(props, paintWrapper);
-    auto&& fillColor = props->GetSvgFillColor();
-    if (InstanceOf<SvgCanvasImage>(canvasImage_) && fillColor) {
-        DynamicCast<SvgCanvasImage>(canvasImage_)->SetFillColor(fillColor);
+    if (InstanceOf<SvgCanvasImage>(canvasImage_)) {
+        DynamicCast<SvgCanvasImage>(canvasImage_)->SetFillColor(props->GetSvgFillColor());
     }
     ImagePainter imagePainter(canvasImage_);
     return [imagePainter, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, {}, contentSize); };

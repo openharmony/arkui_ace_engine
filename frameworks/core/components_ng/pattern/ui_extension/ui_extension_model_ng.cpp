@@ -54,6 +54,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const Moda
     pattern->SetOnErrorCallback(std::move(callbacks.onError));
     pattern->SetOnResultCallback(std::move(callbacks.onResult));
     pattern->SetOnReceiveCallback(std::move(callbacks.onReceive));
+    pattern->SetModalOnRemoteReadyCallback(std::move(callbacks.onRemoteReady));
     return frameNode;
 }
 

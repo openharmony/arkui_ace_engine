@@ -450,7 +450,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
     virtual void SetUsingContentRectForRenderFrame(bool value) {}
+    virtual std::vector<double> GetTrans()
+    {
+        return std::vector<double>();
+    }
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
+
+    virtual void AddFRCSceneInfo(const std::string& scene, float speed) {}
 
 protected:
     RenderContext() = default;

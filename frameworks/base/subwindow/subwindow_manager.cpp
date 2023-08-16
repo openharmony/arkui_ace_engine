@@ -268,7 +268,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [containerId, newComponent, disableTouchEvent] {
+        [containerId, newComponentWeak = WeakPtr<Component>(newComponent), disableTouchEvent] {
             auto manager = SubwindowManager::GetInstance();
             CHECK_NULL_VOID(manager);
             auto subwindow = manager->GetSubwindow(containerId);
@@ -278,6 +278,8 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
                 subwindow->InitContainer();
                 manager->AddSubwindow(containerId, subwindow);
             }
+            auto newComponent = newComponentWeak.Upgrade();
+            CHECK_NULL_VOID(newComponent);
             subwindow->ShowPopup(newComponent, disableTouchEvent);
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -475,6 +477,35 @@ void SubwindowManager::ShowDialog(const std::string& title, const std::string& m
             AddSubwindow(containerId, subwindow);
         }
         subwindow->ShowDialog(title, message, buttons, autoCancel, std::move(napiCallback), dialogCallbacks);
+    }
+}
+
+void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+    std::function<void(int32_t, int32_t)>&& napiCallback, const std::set<std::string>& dialogCallbacks)
+{
+    auto containerId = Container::CurrentId();
+    // Get active container when current instanceid is less than 0
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    // for pa service
+    if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
+        auto subWindow = GetOrCreateSubWindow();
+        CHECK_NULL_VOID(subWindow);
+        subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
+        // for ability
+    } else {
+        auto subWindow = GetSubwindow(containerId);
+        if (!subWindow) {
+            LOGI("SubWindow is null, add a new one.");
+            subWindow = Subwindow::CreateSubwindow(containerId);
+            subWindow->InitContainer();
+            AddSubwindow(containerId, subWindow);
+        }
+        subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
     }
 }
 

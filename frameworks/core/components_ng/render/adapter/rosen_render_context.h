@@ -239,6 +239,8 @@ public:
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    std::vector<double> transInfo_;
+    std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
     bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
 #else
@@ -252,6 +254,8 @@ public:
 
     void SetUsingContentRectForRenderFrame(bool value) override;
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
+
+    void AddFRCSceneInfo(const std::string& scene, float speed) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -425,7 +429,6 @@ private:
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
-    std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
     // translate modifiers for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;

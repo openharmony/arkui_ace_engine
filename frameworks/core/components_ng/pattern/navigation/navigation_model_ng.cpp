@@ -730,8 +730,6 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
         textLayoutProperty->UpdateMaxLines(1); // 1:title's maxLine.
     }
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
-    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
 }
@@ -772,6 +770,18 @@ void NavigationModelNG::SetTitleHeight(const Dimension& height)
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     titleBarLayoutProperty->UpdateTitleHeight(height);
+    SetHideBackButton(true);
+
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    auto navTitleMode = navBarLayoutProperty->GetTitleMode();
+    if (navTitleMode.has_value()) {
+        if (navTitleMode.value() == NavigationTitleMode::MINI) {
+            navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::NONE);
+        } else {
+            navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(NavigationTitleMode::MINI));
+        }
+    }
 }
 
 void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
@@ -785,12 +795,20 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     CHECK_NULL_VOID(navBarLayoutProperty);
     bool needAddBackButton = false;
     bool needRemoveBackButton = false;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    const auto& titleHeightProperty = titleBarLayoutProperty->GetTitleHeight();
+    if (titleHeightProperty.has_value()) {
+        mode = NavigationTitleMode::MINI;
+    }
 
     do {
         // add back button if current mode is mini and one of the following condition:
         // first create or not first create but previous mode is not mini
         if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI &&
-            mode == NavigationTitleMode::MINI) {
+            mode == NavigationTitleMode::MINI && !titleHeightProperty.has_value()) {
             needAddBackButton = true;
             break;
         }
@@ -917,9 +935,6 @@ void NavigationModelNG::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
     textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-    textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
-    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetSubtitle(subtitleNode);
 }
@@ -1221,6 +1236,12 @@ void NavigationModelNG::SetNavBarPosition(NG::NavBarPosition mode)
 void NavigationModelNG::SetNavBarWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetUserSetNavBarWidthFlag(true);
 }
 
 void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)

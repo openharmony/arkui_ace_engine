@@ -84,8 +84,9 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
-        LOGW("Child node already exists. Existing child nodeId %{public}d, add. child nodeId nodeId %{public}d",
-            (*it)->GetId(), child->GetId());
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
+             "%{public}d",
+            (*it)->GetId(), child->GetTag().c_str(), child->GetId());
         return;
     }
 
@@ -245,8 +246,8 @@ void UINode::ResetParent()
     depth_ = -1;
 }
 
-void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently,
-    bool allowTransition)
+void UINode::DoAddChild(
+    std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool allowTransition)
 {
     children_.insert(it, child);
 
@@ -434,6 +435,12 @@ void UINode::OnDetachFromMainTree(bool) {}
 void UINode::OnAttachToMainTree(bool)
 {
     useOffscreenProcess_ = false;
+    decltype(attachToMainTreeTasks_) tasks(std::move(attachToMainTreeTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
 }
 
 void UINode::DumpTree(int32_t depth)
@@ -789,12 +796,12 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
     return nullptr;
 }
 
-RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index)
+RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild)
 {
     for (const auto& child : children_) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         if (count > index) {
-            return child->GetFrameChildByIndex(index);
+            return child->GetFrameChildByIndex(index, needBuild);
         }
         index -= count;
     }

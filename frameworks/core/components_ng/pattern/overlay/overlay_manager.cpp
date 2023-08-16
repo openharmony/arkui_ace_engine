@@ -241,6 +241,13 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     pipeline->RequestFrame();
 }
 
+void OverlayManager::SetContainerButtonEnable(bool isEnabled)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetCloseButtonStatus(isEnabled);
+}
+
 void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow)
 {
     AnimationOption option;
@@ -882,6 +889,9 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
     BeforeShowDialog(dialog);
     OpenDialogAnimation(dialog);
+    dialogCount_++;
+    // set close button disable
+    SetContainerButtonEnable(false);
     return dialog;
 }
 
@@ -969,6 +979,11 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     }
     dialogNode->MarkRemoving();
     CloseDialogAnimation(dialogNode);
+    dialogCount_--;
+    // set close button enable
+    if (dialogCount_ == 0) {
+        SetContainerButtonEnable(true);
+    }
     dialogNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     CallOnHideDialogCallback();
@@ -1037,6 +1052,7 @@ bool OverlayManager::RemoveModalInOverlay()
     CHECK_NULL_RETURN(rootNode, true);
     auto topModalNode = modalStack_.top().Upgrade();
     CHECK_NULL_RETURN(topModalNode, false);
+    ModalPageLostFocus(topModalNode);
     if (!ModalExitProcess(topModalNode)) {
         return false;
     }
@@ -1058,6 +1074,7 @@ bool OverlayManager::RemoveAllModalInOverlay()
         if (!topModalNode) {
             continue;
         }
+        ModalPageLostFocus(topModalNode);
         if (!ModalExitProcess(topModalNode)) {
             continue;
         }
@@ -1315,6 +1332,8 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         auto modalPresentationPattern = topModalNode->GetPattern<ModalPresentationPattern>();
         CHECK_NULL_VOID(modalPresentationPattern);
         modalTransition = modalPresentationPattern->GetType();
+        // lost focus
+        ModalPageLostFocus(topModalNode);
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(topModalNode, false);
         } else if (modalTransition == ModalTransition::ALPHA) {
@@ -1362,6 +1381,14 @@ void OverlayManager::FireModalPageShow()
     CHECK_NULL_VOID(topModalFocusHub);
     topModalFocusHub->SetParentFocusable(true);
     topModalFocusHub->RequestFocusWithDefaultFocusFirstly();
+}
+
+void OverlayManager::ModalPageLostFocus(const RefPtr<FrameNode>& node)
+{
+    auto modalFocusHub = node->GetFocusHub();
+    CHECK_NULL_VOID(modalFocusHub);
+    modalFocusHub->SetParentFocusable(false);
+    modalFocusHub->LostFocus();
 }
 
 void OverlayManager::FireModalPageHide()
@@ -1564,6 +1591,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
             topSheetNode->Clean();
             topSheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        ModalPageLostFocus(topSheetNode);
         PlaySheetTransition(topSheetNode, false);
         modalStack_.pop();
         if (!modalList_.empty()) {
@@ -1693,6 +1721,7 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
         CHECK_NULL_VOID(rootNode);
         auto root = DynamicCast<FrameNode>(rootNode);
         OverlayManager::DestroySheetMask(sheetNode);
+        ModalPageLostFocus(topSheetNode);
         root->RemoveChild(sheetNode);
         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         modalStack_.pop();
@@ -1766,6 +1795,7 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, i
     customKeyboard_ = KeyboardView::CreateKeyboard(targetId, keybordBuilder);
     customKeyboard_->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    PlayDefaultModalTransition(customKeyboard_, true);
 }
 
 void OverlayManager::DestroyKeyboard()
@@ -1943,8 +1973,8 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(pixelMap);
     int32_t height = pixelMap->GetHeight();
     int32_t width = pixelMap->GetWidth();
-    int32_t deviceWidth = PipelineContext::GetCurrentRootWidth();
-    int32_t deviceHeight = PipelineContext::GetCurrentRootHeight();
+    int32_t deviceWidth = SystemProperties::GetDeviceWidth();
+    int32_t deviceHeight = SystemProperties::GetDeviceHeight();
     int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
     int32_t minDeviceLength = std::min(deviceHeight, deviceWidth);
     if (maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength) {
@@ -2023,9 +2053,11 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
 {
     auto root = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID_NOLOG(root);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
     for (auto&& child : root->GetChildren()) {
-        // first child is Stage node
-        if (child != root->GetFirstChild()) {
+        // first child is Stage node in main window, subwindow not has Stage node.
+        if (child != root->GetFirstChild() || pipeline->IsSubPipeline()) {
             child->MarkDirtyNode(flag);
         }
     }

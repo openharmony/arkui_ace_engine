@@ -347,7 +347,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 
     RefPtr<NG::FrameNode> contentRowNode_;
-    bool isPicker_ = false;
+    bool isPicker_ = true;
 };
 } // namespace OHOS::Ace::NG
 

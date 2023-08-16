@@ -79,13 +79,6 @@ void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
 void NavRouterGroupNode::OnDetachFromMainTree(bool recursive)
 {
     FrameNode::OnDetachFromMainTree(recursive);
-    auto parent = GetParent();
-    while (parent) {
-        if (CleanNodeInNavigation(parent)) {
-            return;
-        }
-        parent = parent->GetParent();
-    }
 }
 
 void NavRouterGroupNode::OnAttachToMainTree(bool recursive)
@@ -169,8 +162,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         name = navDestinationPattern->GetName();
-        // process shallowBuilder
-        navDestination->ProcessShallowBuilder();
     }
     CHECK_NULL_VOID(navDestination);
     // the one at the top of the stack
@@ -197,8 +188,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         parentNode = parentNode->GetParent();
     }
     auto navBarNode = AceType::DynamicCast<NavBarNode>(parentNode);
-    auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
-    CHECK_NULL_VOID(navigationContentNode);
     // deal with split mode without user provided navigation stack
     if (navBarNode && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT &&
         !navigationPattern->GetNavigationStackProvided()) {
@@ -217,7 +206,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     // when js navigationStack is provided, modifyDone will be called by state manager.
     if (!navigationPattern->GetNavigationStackProvided()) {
         navigationNode->MarkModifyDone();
-        navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        navigationNode->MarkDirtyNode();
     }
 }
 
@@ -241,7 +230,7 @@ bool NavRouterGroupNode::CleanNodeInNavigation(const RefPtr<UINode>& parent)
         const auto& childNode = *iter;
         auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(childNode);
         if (navDestinationNode == navDestination) {
-            navigationContentNode->RemoveChildAtIndex(navDestinationNode);
+            navigationContentNode->RemoveChild(navDestinationNode);
             return true;
         }
     }

@@ -34,6 +34,7 @@ class GestureEventHub;
 
 using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const GetEventTargetImpl&, TouchTestResult&)>;
 using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)>;
+using GetAnimateVelocityCallback = std::function<double()>;
 
 class ScrollableEvent : public AceType {
     DECLARE_ACE_TYPE(ScrollableEvent, AceType)
@@ -87,6 +88,9 @@ public:
         if (scrollable_ && !scrollable_->Idle()) {
             return std::abs(scrollable_->GetCurrentVelocity()) > SystemProperties::Vp2Px(HTMBLOCK_VELOCITY);
         }
+        if (getAnimateVelocityCallback_) {
+            return std::abs(getAnimateVelocityCallback_()) > SystemProperties::Vp2Px(HTMBLOCK_VELOCITY);
+        }
         return false;
     }
 
@@ -113,12 +117,18 @@ public:
         }
     }
 
+    void SetAnimateVelocityCallback(const GetAnimateVelocityCallback&& getAnimateVelocityCallback)
+    {
+        getAnimateVelocityCallback_ = std::move(getAnimateVelocityCallback);
+    }
+
 private:
     Axis axis_ = Axis::VERTICAL;
     bool enable_ = true;
     RefPtr<Scrollable> scrollable_;
     BarCollectTouchTargetCallback barCollectTouchTarget_;
     InBarRegionCallback inBarRegionCallback_;
+    GetAnimateVelocityCallback getAnimateVelocityCallback_;
 };
 
 class ScrollableActuator : public GestureEventActuator {
@@ -141,24 +151,7 @@ public:
     bool RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect);
 
     void CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint)
-    {
-        for (const auto& [axis, event] : scrollableEvents_) {
-            if (!event || !event->GetEnable()) {
-                continue;
-            }
-            if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
-                event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
-            } else if (event->GetScrollable()) {
-                const auto& scrollable = event->GetScrollable();
-                scrollable->SetGetEventTargetImpl(getEventTargetImpl);
-                scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-                scrollable->OnCollectTouchTarget(result);
-            }
-        }
-    }
-
-    bool IsHitTestBlock() const;
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint);
 
 private:
     void InitializeScrollable(RefPtr<ScrollableEvent> event);
@@ -166,6 +159,7 @@ private:
     std::unordered_map<Axis, RefPtr<ScrollableEvent>> scrollableEvents_;
     std::unordered_map<Axis, RefPtr<ScrollEdgeEffect>> scrollEffects_;
     WeakPtr<GestureEventHub> gestureEventHub_;
+    RefPtr<ClickRecognizer> clickRecognizer_;
 };
 
 } // namespace OHOS::Ace::NG

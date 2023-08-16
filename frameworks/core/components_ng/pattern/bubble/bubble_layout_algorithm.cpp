@@ -90,7 +90,8 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     child->Measure(childLayoutConstraint);
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
     if (useCustom && !showInSubWindow) {
-        auto context = layoutWrapper->GetHostNode()->GetContext();
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         float rootH = context->GetRootHeight();
         float rootW = context->GetRootWidth();
         auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
@@ -154,6 +155,9 @@ OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr
     CHECK_NULL_RETURN(frameNode, OffsetT<Dimension> {});
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(bubblePattern, OffsetT<Dimension> {});
+    auto bubblePaintProperty = frameNode->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_RETURN(bubblePaintProperty, OffsetT<Dimension> {});
+    bool UseArrowOffset = bubblePaintProperty->GetArrowOffset().has_value();
     auto ShowInSubWindow = bubbleProp->GetShowInSubWindow().value_or(false);
     if (!bubblePattern->IsExiting()) {
         InitTargetSizeAndPosition(ShowInSubWindow);
@@ -169,7 +173,7 @@ OffsetT<Dimension> BubbleLayoutAlgorithm::GetChildOffsetAfterLayout(const RefPtr
     }
     selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize();       // window's size
     childSize_ = childWrapper->GetGeometryNode()->GetMarginFrameSize(); // bubble's size
-    childOffset_ = GetChildPosition(childSize_, bubbleProp);            // bubble's offset
+    childOffset_ = GetChildPosition(childSize_, bubbleProp, UseArrowOffset);            // bubble's offset
     UpdateChildPosition(bubbleProp);
     UpdateTouchRegion();
 
@@ -211,7 +215,8 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
 }
 
-OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
+OffsetF BubbleLayoutAlgorithm::GetChildPosition(
+    const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset)
 {
     OffsetF bottomPosition;
     OffsetF topPosition;
@@ -246,6 +251,10 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
     }
 
     childPosition = FitToScreen(fitPosition, childSize);
+    if (UseArrowOffset) {
+        arrowPosition_.SetX(
+            childPosition.GetX() + border_.TopLeftRadius().GetX().ConvertToPx() + BEZIER_WIDTH_HALF.ConvertToPx());
+    }
 
     if (GetErrorPositionType(childPosition, childSize) == ErrorPositionType::NORMAL) {
         return childPosition;
@@ -257,6 +266,10 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
     arrowPlacement_ = arrowPlacement_ == Placement::TOP ? Placement::BOTTOM : Placement::TOP;
 
     childPosition = FitToScreen(fitPosition, childSize);
+    if (UseArrowOffset) {
+        arrowPosition_.SetX(
+            childPosition.GetX() + border_.TopLeftRadius().GetX().ConvertToPx() + BEZIER_WIDTH_HALF.ConvertToPx());
+    }
 
     if (GetErrorPositionType(childPosition, childSize) == ErrorPositionType::NORMAL) {
         return childPosition;
@@ -283,6 +296,7 @@ void BubbleLayoutAlgorithm::InitArrowTopAndBottomPosition(OffsetF& topArrowPosit
 
     // move the arrow to safe position while arrow too close to window
     // In order not to separate the bubble from the arrow
+    // If ArrowOffset is not set, arrow always point to the middle of the targetNode
     if (arrowCenter < safePosition) {
         topArrowPosition = topArrowPosition + OffsetF(safePosition - arrowCenter, 0);
         bottomArrowPosition = bottomArrowPosition + OffsetF(safePosition - arrowCenter, 0);

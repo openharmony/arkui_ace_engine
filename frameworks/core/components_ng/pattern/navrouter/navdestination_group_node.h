@@ -107,6 +107,8 @@ public:
 
     void ProcessShallowBuilder();
 
+    void UpdateTitleFontSize(bool showBackButton);
+
     void SetTransitionType(PageTransitionType type)
     {
         transitionType_ = type;

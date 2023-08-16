@@ -250,46 +250,22 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& r
     rotate.zDirection = static_cast<float>(dzVal);
     // if specify centerX
     CalcDimension length;
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length, true)) {
-            LOGW("centerX is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
-        if (length.Unit() == DimensionUnit::INVALID) {
-            LOGW("centerX is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-        rotate.centerX = length;
+    if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length, true)) {
+        length = Dimension(0.5f, DimensionUnit::PERCENT);
     }
+    rotate.centerX = length;
     // if specify centerY
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length, true)) {
-            LOGW("centerY is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
-        if (length.Unit() == DimensionUnit::INVALID) {
-            LOGW("centerY is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-        rotate.centerY = length;
+
+    if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length, true)) {
+        length = Dimension(0.5f, DimensionUnit::PERCENT);
     }
+    rotate.centerY = length;
+
     // if specify centerZ
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length, true)) {
-            LOGW("centerZ is invalid");
-            length = Dimension(0.5f, DimensionUnit::PERCENT);
-        }
-    } else if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
-        if (length.Unit() == DimensionUnit::INVALID) {
-            LOGW("centerZ is invalid");
-        }
-        rotate.centerZ = length;
+    if (!JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length, true)) {
+        length = Dimension(0.5f, DimensionUnit::PERCENT);
     }
+    rotate.centerZ = length;
     // if specify angle
     JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
     float perspective = 0.0f;
@@ -1677,7 +1653,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
     std::optional<CalcDimension> offsetX;
     std::optional<CalcDimension> offsetY;
 
-    if (info.Length() > 1 && !info[1]->IsNull()) {
+    if (info[1]->IsObject()) {
         JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSVal> alignVal = optionObj->GetProperty("align");
         auto value = alignVal->ToNumber<int32_t>();
@@ -2070,7 +2046,7 @@ void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
-        saturation = (saturation > 0.0f || NearZero(saturation))? saturation : 1.0f;
+        saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
     }
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
@@ -2204,10 +2180,13 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
+    BackgroundImageSize bgImgSize;
     if (!CheckJSCallbackInfo("JsBackgroundImageSize", info, checkList)) {
+        bgImgSize.SetSizeTypeX(BackgroundImageSizeType::AUTO);
+        bgImgSize.SetSizeTypeY(BackgroundImageSizeType::AUTO);
+        ViewAbstractModel::GetInstance()->SetBackgroundImageSize(bgImgSize);
         return;
     }
-    BackgroundImageSize bgImgSize;
     if (info[0]->IsNumber()) {
         auto sizeType = static_cast<BackgroundImageSizeType>(info[0]->ToNumber<int32_t>());
         bgImgSize.SetSizeTypeX(sizeType);
@@ -2247,12 +2226,15 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
+    BackgroundImagePosition bgImgPosition;
     if (!CheckJSCallbackInfo("JsBackgroundImagePosition", info, checkList)) {
+        SetBgImgPosition(DimensionUnit::PX, DimensionUnit::PX, 0.0, 0.0, bgImgPosition);
+        ViewAbstractModel::GetInstance()->SetBackgroundImagePosition(bgImgPosition);
         return;
     }
-    BackgroundImagePosition bgImgPosition;
     if (info[0]->IsNumber()) {
         int32_t align = info[0]->ToNumber<int32_t>();
+        bgImgPosition.SetIsAlign(true);
         switch (align) {
             case 0:
                 SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, 0.0, bgImgPosition);
@@ -2304,11 +2286,11 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         DimensionUnit typeX = DimensionUnit::PX;
         DimensionUnit typeY = DimensionUnit::PX;
         if (x.Unit() == DimensionUnit::PERCENT) {
-            valueX = x.Value() * FULL_DIMENSION;
+            valueX = x.Value();
             typeX = DimensionUnit::PERCENT;
         }
         if (y.Unit() == DimensionUnit::PERCENT) {
-            valueY = y.Value() * FULL_DIMENSION;
+            valueY = y.Value();
             typeY = DimensionUnit::PERCENT;
         }
         SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
@@ -2554,7 +2536,8 @@ void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderWidth", info, checkList)) {
-        LOGE("args need a string or number or object");
+        LOGW("args need a string or number or object");
+        ViewAbstractModel::GetInstance()->SetBorderWidth({});
         return;
     }
     ParseBorderWidth(info[0]);
@@ -2946,7 +2929,8 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderRadius", info, checkList)) {
-        LOGE("args need a string or number or object");
+        LOGW("args need a string or number or object");
+        ViewAbstractModel::GetInstance()->SetBorderRadius({});
         return;
     }
     ParseBorderRadius(info[0]);
@@ -5858,6 +5842,10 @@ bool JSViewAbstract::ParseJsonDimension(
 bool JSViewAbstract::ParseJsonDimensionVp(
     const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, bool checkIllegal)
 {
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, true);
+    }
     return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, checkIllegal);
 }
 
@@ -6039,6 +6027,9 @@ void JSViewAbstract::SetDirection(const std::string& dir)
     } else if (dir == "Rtl") {
         direction = TextDirection::RTL;
     } else if (dir == "Auto") {
+        direction = TextDirection::AUTO;
+    } else if (dir == "undefined" && PipelineBase::GetCurrentContext() &&
+               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         direction = TextDirection::AUTO;
     }
     ViewAbstractModel::GetInstance()->SetLayoutDirection(direction);

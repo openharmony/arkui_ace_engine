@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,7 +104,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     if (jumpIndex_) {
-        float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset();
+        float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset().value_or(currentOffset_);
         relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
         jumpIndex_.reset();
@@ -183,7 +182,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         indexChanged = (startIndex_ != listLayoutAlgorithm->GetStartIndex()) ||
             (endIndex_ != listLayoutAlgorithm->GetEndIndex()) ||
-            (centerIndex_ != listLayoutAlgorithm->GetMidIndex());
+            (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
     } else {
         indexChanged =
             (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
@@ -191,7 +190,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (indexChanged) {
         startIndex_ = listLayoutAlgorithm->GetStartIndex();
         endIndex_ = listLayoutAlgorithm->GetEndIndex();
-        centerIndex_ = listLayoutAlgorithm->GetMidIndex();
+        centerIndex_ = listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty));
     }
     ProcessEvent(indexChanged, relativeOffset, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();
@@ -439,9 +438,8 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (listLayoutProperty->HasLanes() || listLayoutProperty->HasLaneMinLength() ||
         listLayoutProperty->HasLaneMaxLength()) {
         auto lanesLayoutAlgorithm = MakeRefPtr<ListLanesLayoutAlgorithm>();
-        if ((listLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT) == 0) {
-            lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
-        }
+        RefreshLanesItemRange();
+        lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
         lanesLayoutAlgorithm->SetLanes(lanes_);
         listLayoutAlgorithm.Swap(lanesLayoutAlgorithm);
     } else {
@@ -709,6 +707,11 @@ void ListPattern::OnScrollEndCallback()
 {
     scrollStop_ = true;
     MarkDirtyNodeSelf();
+}
+
+void ListPattern::OnScrollStartCallback()
+{
+    FireOnScrollStart();
 }
 
 SizeF ListPattern::GetContentSize() const
@@ -1696,5 +1699,29 @@ bool ListPattern::IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node)
         }
     }
     return false;
+}
+
+void ListPattern::RefreshLanesItemRange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto updatePos = host->GetChildrenUpdated();
+    if (updatePos == -1) {
+        return;
+    }
+    if (updatePos == 0) {
+        lanesItemRange_.clear();
+        return;
+    }
+    for (auto it = lanesItemRange_.begin(); it != lanesItemRange_.end();) {
+        if (it->second < updatePos) {
+            it++;
+        } else if (it->first >= updatePos) {
+            lanesItemRange_.erase(it++);
+        } else {
+            it->second = updatePos - 1;
+            it++;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

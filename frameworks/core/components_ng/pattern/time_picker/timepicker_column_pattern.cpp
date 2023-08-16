@@ -41,7 +41,6 @@ const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_HOUR24_HEIGHT_NUMBER = 9.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
 const int32_t ANIMATION_ZERO_TO_OUTER = 200; // 200ms for animation that from zero to outer.
-const int32_t ANIMATION_OUTER_TO_ZERO = 150; // 150ms for animation that from outer to zero.
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const int32_t MIDDLE_CHILD_INDEX = 2;
 const float MOVE_DISTANCE = 5.0f;
@@ -561,7 +560,7 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, scale);
     textLayoutProperty->UpdateTextColor(updateColor);
-    if (scale == 0.0) {
+    if (scale < FONTWEIGHT) {
         if (index == midIndex) {
             textLayoutProperty->UpdateFontWeight(SelectedWeight_);
         } else {
@@ -591,7 +590,6 @@ void TimePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
         RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
-
         iter++;
     }
 }
@@ -721,14 +719,14 @@ void TimePickerColumnPattern::CreateAnimation()
     fromBottomCurve_ = CreateAnimation(jumpInterval_, 0.0);
     fromTopCurve_ = CreateAnimation(0.0 - jumpInterval_, 0.0);
     fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
-    fromController_->SetDuration(ANIMATION_OUTER_TO_ZERO);
+    fromController_->SetDuration(CLICK_ANIMATION_DURATION);
     animationCreated_ = true;
 }
 
 RefPtr<CurveAnimation<double>> TimePickerColumnPattern::CreateAnimation(double from, double to)
 {
     auto weak = AceType::WeakClaim(this);
-    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::LINEAR_OUT_SLOW_IN);
+    auto curve = AceType::MakeRefPtr<CurveAnimation<double>>(from, to, Curves::FAST_OUT_SLOW_IN);
     curve->AddListener(Animation<double>::ValueCallback([weak](double value) {
         auto column = weak.Upgrade();
         CHECK_NULL_VOID(column);

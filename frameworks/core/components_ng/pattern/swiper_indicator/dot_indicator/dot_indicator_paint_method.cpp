@@ -74,6 +74,10 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * 0.5;
     dotIndicatorModifier_->SetCenterY(centerY_);
     if (touchBottomType_ != TouchBottomType::NONE) {
+        if (!dotIndicatorModifier_->GetIsPressed()) {
+            PaintPressIndicator(paintWrapper);
+            dotIndicatorModifier_->SetIsPressed(true);
+        }
         UpdateBackground(paintWrapper);
     } else if (isPressed_) {
         PaintPressIndicator(paintWrapper);
@@ -480,7 +484,7 @@ void DotIndicatorPaintMethod::BackwardCalculation(
             } else {
                 endVectorBlackPointCenterX[i] = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.endLongPointRightCenterX = endCenterX - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                pointCenter.endLongPointLeftCenterX = pointCenter.endLongPointLeftCenterX - selectedItemWidth;
+                pointCenter.endLongPointLeftCenterX = pointCenter.endLongPointRightCenterX - selectedItemWidth;
                 endCenterX -= selectedItemWidth * TWOFOLD;
             }
         }

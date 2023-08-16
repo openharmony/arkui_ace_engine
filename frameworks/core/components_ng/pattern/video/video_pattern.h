@@ -100,6 +100,7 @@ public:
 
     virtual bool IsFullScreen();
 
+    void OnColorConfigurationUpdate() override;
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
@@ -265,7 +266,7 @@ private:
     void UpdateVideoProperty();
     
     static RefPtr<FrameNode> CreateSVG();
-    static RefPtr<FrameNode> CreateText(uint32_t time);
+    RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag();
     void ChangePlayButtonTag(RefPtr<FrameNode>& playBtn);
@@ -289,6 +290,7 @@ private:
     }
 
     RefPtr<VideoControllerV2> videoControllerV2_;
+    RefPtr<FrameNode> controlBar_;
 
     GestureEventFunc playBtnCallBack_;
     GestureEventFunc pauseBtnCallBack_;

@@ -208,8 +208,17 @@ public:
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 
+    void SetPredictLayoutParam(std::optional<ListPredictLayoutParam> param)
+    {
+        predictLayoutParam_ = param;
+    }
+    std::optional<ListPredictLayoutParam> GetPredictLayoutParam() const
+    {
+        return predictLayoutParam_;
+    }
 private:
     void OnScrollEndCallback() override;
+    void OnScrollStartCallback() override;
 
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -257,6 +266,7 @@ private:
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
+    void RefreshLanesItemRange();
 
     RefPtr<ListContentModifier> listContentModifier_;
 
@@ -310,6 +320,7 @@ private:
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
+    std::optional<ListPredictLayoutParam> predictLayoutParam_;
 };
 } // namespace OHOS::Ace::NG
 

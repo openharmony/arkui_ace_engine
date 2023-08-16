@@ -445,6 +445,9 @@ HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level1)
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
     EXPECT_NE(frameNode, nullptr);
+    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(blankFrameNode, nullptr);
+    frameNode->AddChild(blankFrameNode);
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -493,6 +496,9 @@ HWTEST_F(BubbleTestNg, BubblePatternTest005, TestSize.Level1)
     auto bubbleLayoutAlgorithm =
         AceType::DynamicCast<BubbleLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     EXPECT_NE(bubbleLayoutAlgorithm, nullptr);
+    auto host = bubblePattern->GetHost();
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    EXPECT_NE(childNode, nullptr);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     bool flag = bubblePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config.skipMeasure, config.skipLayout);
     EXPECT_EQ(flag, true);
@@ -820,6 +826,9 @@ HWTEST_F(BubbleTestNg, BubblePatternTest012, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, pattern);
     ASSERT_NE(frameNode, nullptr);
+    auto blankFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(blankFrameNode, nullptr);
+    frameNode->AddChild(blankFrameNode);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper =

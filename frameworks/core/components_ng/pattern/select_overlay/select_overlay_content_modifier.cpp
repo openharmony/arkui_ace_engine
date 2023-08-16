@@ -31,6 +31,8 @@ SelectOverlayContentModifier::SelectOverlayContentModifier()
       isSingleHandle_(AceType::MakeRefPtr<PropertyBool>(false)),
       firstHandleIsShow_(AceType::MakeRefPtr<PropertyBool>(false)),
       secondHandleIsShow_(AceType::MakeRefPtr<PropertyBool>(false)),
+      isHiddenHandle_(AceType::MakeRefPtr<PropertyBool>(false)),
+      isHandleLineShow_(AceType::MakeRefPtr<PropertyBool>(false)),
       viewPort_(AceType::MakeRefPtr<PropertyRectF>(RectF(0, 0, 0, 0))),
       firstHandle_(AceType::MakeRefPtr<PropertyRectF>(RectF(0, 0, 0, 0))),
       secondHandle_(AceType::MakeRefPtr<PropertyRectF>(RectF(0, 0, 0, 0))),
@@ -45,6 +47,8 @@ SelectOverlayContentModifier::SelectOverlayContentModifier()
     AttachProperty(isSingleHandle_);
     AttachProperty(firstHandleIsShow_);
     AttachProperty(secondHandleIsShow_);
+    AttachProperty(isHiddenHandle_);
+    AttachProperty(isHandleLineShow_);
     AttachProperty(viewPort_);
     AttachProperty(firstHandle_);
     AttachProperty(secondHandle_);
@@ -57,6 +61,10 @@ SelectOverlayContentModifier::SelectOverlayContentModifier()
 
 void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
 {
+    if (isHiddenHandle_->Get()) {
+        return;
+    }
+
     if (!inShowArea_->Get()) {
         LOGD("hide handles due to handle is out of show area");
         return;
@@ -71,9 +79,9 @@ void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
     if (isSingleHandle_->Get()) {
         // Paint one handle.
         if (firstHandleIsShow_->Get()) {
-            PaintHandle(canvas, firstHandle_->Get(), false);
+            PaintHandle(canvas, firstHandle_->Get(), false, isHandleLineShow_->Get());
         } else if (secondHandleIsShow_->Get()) {
-            PaintHandle(canvas, secondHandle_->Get(), false);
+            PaintHandle(canvas, secondHandle_->Get(), false, isHandleLineShow_->Get());
         }
     } else {
         if (firstHandleIsShow_->Get()) {
@@ -86,7 +94,8 @@ void SelectOverlayContentModifier::onDraw(DrawingContext& drawingContext)
     canvas.Restore();
 }
 
-void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop)
+void SelectOverlayContentModifier::PaintHandle(
+    RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow)
 {
     auto rectTopX = (handleRect.Left() + handleRect.Right()) / 2.0f;
     auto centerOffset = OffsetF(rectTopX, 0.0f);
@@ -120,15 +129,17 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const RectF& ha
     canvas.DrawCircle(RSPoint(0.0, 0.0), innerHandleRadius_->Get());
     canvas.DetachBrush();
 
-    RSPen pen;
-    pen.SetAntiAlias(true);
-    // Paint line of handle.
-    pen.SetColor(handleColor.GetValue());
-    pen.SetWidth(handleRect.Width());
-    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-    canvas.AttachPen(pen);
-    canvas.DrawLine(RSPoint(startPoint.GetX(), startPoint.GetY()), RSPoint(endPoint.GetX(), endPoint.GetY()));
-    canvas.DetachPen();
+    if (isHandleLineShow) {
+        RSPen pen;
+        pen.SetAntiAlias(true);
+        // Paint line of handle.
+        pen.SetColor(handleColor.GetValue());
+        pen.SetWidth(handleRect.Width());
+        pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+        canvas.AttachPen(pen);
+        canvas.DrawLine(RSPoint(startPoint.GetX(), startPoint.GetY()), RSPoint(endPoint.GetX(), endPoint.GetY()));
+        canvas.DetachPen();
+    }
     canvas.Restore();
 }
 } // namespace OHOS::Ace::NG

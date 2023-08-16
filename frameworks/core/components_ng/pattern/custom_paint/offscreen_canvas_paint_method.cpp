@@ -160,16 +160,17 @@ void OffscreenCanvasPaintMethod::DrawImage(
     InitImagePaint(imagePaint_, sampleOptions_);
 #endif
 
-    if (HasImageShadow()) {
-        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-        SkPath path;
-        path.addRect(skRect);
-        RosenDecorationPainter::PaintShadow(path, *imageShadow_, skCanvas);
-    }
-
     if (globalState_.HasGlobalAlpha()) {
         imagePaint_.setAlphaf(globalState_.GetAlpha());
     }
+
+    if (HasShadow()) {
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        SkPath path;
+        path.addRect(skRect);
+        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas, &imagePaint_);
+    }
+
     switch (canvasImage.flag) {
         case 0:
             skCanvas->drawImage(image, canvasImage.dx, canvasImage.dy);
@@ -286,6 +287,17 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     InitImagePaint(imagePaint_);
 #else
     InitImagePaint(imagePaint_, sampleOptions_);
+
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
+
+    if (HasShadow()) {
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        SkPath path;
+        path.addRect(skRect);
+        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas, &imagePaint_);
+    }
 #endif
     switch (canvasImage.flag) {
         case 0:
@@ -743,13 +755,16 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
 }
 
 #ifndef USE_ROSEN_DRAWING
-void OffscreenCanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
+void OffscreenCanvasPaintMethod::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint)
+{
+    RosenDecorationPainter::PaintShadow(path, shadow, canvas, paint);
+}
 #else
 void OffscreenCanvasPaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas)
-#endif
 {
     RosenDecorationPainter::PaintShadow(path, shadow, canvas);
 }
+#endif
 
 void OffscreenCanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
 {

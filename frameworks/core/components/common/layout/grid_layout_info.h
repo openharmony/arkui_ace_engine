@@ -38,6 +38,7 @@ enum class GridColumnType {
     TOAST,
     PANEL,
     TOOL_BAR,
+    TAB_BAR,
     DIALOG,
     CAR_DIALOG,
     LIST_CARD,

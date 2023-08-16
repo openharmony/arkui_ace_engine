@@ -58,6 +58,8 @@ public:
     void SetSelectInfo(const std::string& selectInfo) const;
     void ShowOrHiddenMenu(bool isHidden);
     void DisableMenu(bool isDisabled);
+    bool IsMenuShow();
+    bool IsHandleShow();
 
 private:
     int32_t selectOverlayId_ = 0;

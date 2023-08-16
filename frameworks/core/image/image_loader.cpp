@@ -29,6 +29,7 @@
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #endif
 
+#include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
 #include "base/log/ace_trace.h"
 #include "base/network/download_manager.h"
@@ -294,6 +295,8 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
                        .append(bundleName)
                        .append("/files/")           // infix of absolute path
                        .append(filePath.substr(4)); // 4 is the length of "app/" from "internal://app/"
+    } else if (imageSourceInfo.GetSrcType() == SrcType::FILE) {
+        filePath = FileUriHelper::GetRealPath(src);
     }
     if (filePath.length() > PATH_MAX) {
         LOGE("src path is too long");
@@ -366,16 +369,6 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
     auto data = std::make_shared<RSData>();
     data->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(skData);
 #endif
-    BackgroundTaskExecutor::GetInstance().PostTask(
-        [src, data]() {
-            // cache file content
-#ifndef USE_ROSEN_DRAWING
-            ImageCache::WriteCacheFile(src, data->data(), data->size());
-#else
-            ImageCache::WriteCacheFile(src, data->GetData(), data->GetSize());
-#endif
-        },
-        BgTaskPriority::LOW);
     return data;
 }
 

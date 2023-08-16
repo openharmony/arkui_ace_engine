@@ -157,6 +157,10 @@ void PipelineContext::FlushReload() {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
+
+void PipelineContext::SetCloseButtonStatus(bool isEnabled) {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
@@ -318,6 +322,8 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+
+void PipelineContext::SetWindowSceneConsumed(bool isConsumed) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

@@ -120,8 +120,14 @@ void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
     int32_t extend = paragraph_->GetHandlePositionForClick(pos);
-    int32_t extendEnd = extend + GetGraphemeClusterLength(extend);
-    textSelector_.Update(extend, extendEnd);
+    int32_t start = 0;
+    int32_t end = 0;
+    if (!paragraph_->GetWordBoundary(extend, start, end)) {
+        start = extend;
+        end = std::min(
+            static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
+    }
+    textSelector_.Update(start, end);
 }
 
 OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
@@ -135,10 +141,10 @@ OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectL
                           paragraph_->ComputeOffsetForCaretDownstream(position, metrics);
     if (!computeSuccess) {
         LOGW("Get caret offset failed, set it to text tail");
-        return OffsetF(rect.Width(), 0.0f);
+        return { rect.Width(), 0.0f };
     }
     selectLineHeight = metrics.height;
-    return OffsetF(static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY()));
+    return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY()) };
 }
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
@@ -531,6 +537,29 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
     }
 }
 
+void TextPattern::InitTouchEvent()
+{
+    CHECK_NULL_VOID_NOLOG(!touchEventInitialized_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleTouchEvent(info);
+    };
+    auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gesture->AddTouchEvent(touchListener_);
+    touchEventInitialized_ = true;
+}
+
+void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    return;
+}
+
 void TextPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID_NOLOG(!panEventInitialized_);
@@ -807,6 +836,7 @@ void TextPattern::OnModifyDone()
 #endif
         }
         InitMouseEvent();
+        InitTouchEvent();
         SetAccessibilityAction();
     }
     if (onClick_ || copyOption_ != CopyOptions::None) {
@@ -892,7 +922,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
         LOGD("no need to refresh span node");
         return;
     }
-
+    imageCount_ = 0;
     // When dirty areas are marked because of child node changes, the text rendering node tree is reset.
     const auto& children = host->GetChildren();
     if (children.empty()) {
@@ -916,7 +946,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (!nodes.empty()) {
         textCache = textForDisplay_;
         textForDisplay_.clear();
-        imageCount_ = 0;
     }
 
     bool isSpanHasClick = false;

@@ -109,6 +109,7 @@ ohos_unittest("window_scene_test") {
     # components_ng_syntax
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
@@ -146,7 +147,9 @@ ohos_unittest("window_scene_test") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "window_manager:libwm",

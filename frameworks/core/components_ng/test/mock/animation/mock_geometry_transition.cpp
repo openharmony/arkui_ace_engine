@@ -19,9 +19,7 @@
 namespace OHOS::Ace::NG {
 GeometryTransition::GeometryTransition(const std::string& id, const WeakPtr<FrameNode>& frameNode,
     bool followWithoutTransition) : id_(id), inNode_(frameNode), followWithoutTransition_(followWithoutTransition)
-{
-    layoutProperty_ = nullptr;
-}
+{}
 
 void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
 void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}

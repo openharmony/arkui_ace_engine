@@ -43,6 +43,8 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            theme->textSelectedDecoration_ = TextDecoration::UNDERLINE;
+            theme->textUnSelectedDecoration_ = TextDecoration::NONE;
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -59,6 +61,11 @@ public:
                 LOGW("find pattern of hyperlink fail");
                 return;
             }
+            theme->textColor_ = pattern->GetAttr<Color>("text_color", Color(0xff007dff));
+            theme->textLinkedColor_ = pattern->GetAttr<Color>("text_linked_opacity", Color(0x19182431));
+            theme->textDisabledColor_ = pattern->GetAttr<Color>("text_color", Color(0xff007dff))
+                .BlendOpacity(pattern->GetAttr<double>("text_disabled_opacity", 0.0));
+            theme->textFocusedColor_ = pattern->GetAttr<Color>("text_focused_color", Color(0xff007dff));
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
         }
@@ -71,11 +78,46 @@ public:
         return draggable_;
     }
 
+    const Color& GetTextColor() const
+    {
+        return textColor_;
+    }
+
+    const Color& GetTextLinkedColor() const
+    {
+        return textLinkedColor_;
+    }
+
+    const Color& GetTextDisabledColor() const
+    {
+        return textDisabledColor_;
+    }
+
+    const Color& GetTextFocusedColor() const
+    {
+        return textFocusedColor_;
+    }
+
+    TextDecoration GetTextSelectedDecoration() const
+    {
+        return textSelectedDecoration_;
+    }
+
+    TextDecoration GetTextUnSelectedDecoration() const
+    {
+        return textUnSelectedDecoration_;
+    }
 protected:
     HyperlinkTheme() = default;
 
 private:
     bool draggable_ = false;
+    Color textColor_;
+    Color textLinkedColor_;
+    Color textDisabledColor_;
+    Color textFocusedColor_;
+    TextDecoration textSelectedDecoration_;
+    TextDecoration textUnSelectedDecoration_;
 };
 } // namespace OHOS::Ace
 

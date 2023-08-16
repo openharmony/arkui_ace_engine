@@ -324,4 +324,14 @@ void ProgressModelNG::SetSmoothEffect(bool value)
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, value);
 }
 
+void ProgressModelNG::SetStrokeRadius(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, value);
+}
+
+void ProgressModelNG::ResetStrokeRadius()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, StrokeRadius, PROPERTY_UPDATE_RENDER);
+}
+
 } // namespace OHOS::Ace::NG

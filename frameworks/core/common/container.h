@@ -333,6 +333,11 @@ public:
         return false;
     }
 
+    virtual bool IsSceneBoardEnabled()
+    {
+        return false;
+    }
+
     virtual bool GetCurPointerEventInfo(
         int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
     {

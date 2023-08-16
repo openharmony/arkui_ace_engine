@@ -44,6 +44,7 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
     idNodeMap_.clear();
     reliedOnMap_.clear();
+    recordOffsetMap_.clear();
     incomingDegreeMap_.clear();
     auto layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
@@ -93,15 +94,24 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (!childWrapper->IsActive()) {
             continue;
         }
-        if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
+        if (!childWrapper->GetLayoutProperty() || !childWrapper->GetLayoutProperty()->GetFlexItemProperty()) {
             auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
             childWrapper->Measure(childConstraint);
+            recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
             continue;
         }
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        // if child has no align rules, measure it with container constraint and place it at top left corner
+        if (!flexItem->HasAlignRules()) {
+            auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
+            childWrapper->Measure(childConstraint);
+            recordOffsetMap_[nodeName] = OffsetF(0.0f, 0.0f);
+            continue;
+        }
+        flexItem->ClearAlignValue();
         auto alignRules = flexItem->GetAlignRulesValue();
         auto frameNode = childWrapper->GetHostNode();
-        if (!alignRules.empty() && frameNode) {
+        if (!alignRules.empty() && frameNode && frameNode->GetLayoutProperty()) {
             // when child has alignRules and position, the position property do not work.
             frameNode->GetLayoutProperty()->SetUsingPosition(false);
         }
@@ -157,7 +167,7 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
                 idNodeMap_.emplace(childHostNode->GetInspectorIdValue(), childWrapper);
             }
             if (idNodeMap_.find(childHostNode->GetInspectorIdValue()) != idNodeMap_.end()) {
-                LOGE("Component %{public}s ID is duplicated", childHostNode->GetInspectorIdValue().c_str());
+                LOGW("Component %{public}s ID is duplicated", childHostNode->GetInspectorIdValue().c_str());
             }
             idNodeMap_.emplace(childHostNode->GetInspectorIdValue(), childWrapper);
         } else {
@@ -173,9 +183,12 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
         const auto& flexItem = childWrapper->GetLayoutProperty()->GetFlexItemProperty();
         auto childHostNode = childWrapper->GetHostNode();
         if (!flexItem) {
+            LOGD("Componemt %{public}s has no alignRules", node.first.c_str());
             continue;
         }
         for (const auto& alignRule : flexItem->GetAlignRulesValue()) {
+            // if anchor is not other children components,
+            // then we don't need to put current align rule in dependency map
             if (IsAnchorContainer(alignRule.second.anchor) ||
                 idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end()) {
                 continue;
@@ -187,6 +200,8 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
             if (anchorChildVisibility == VisibleType::GONE) {
                 childWrapper->SetActive(false);
             }
+            // if a is the anchor of b, then reliedOnMap should place <a, [b]> for the first appearance
+            // of key a. Otherwise b will be inserted into the exsiting value list
             if (reliedOnMap_.count(alignRule.second.anchor) == 0) {
                 std::set<std::string> reliedList;
                 reliedList.insert(childHostNode->GetInspectorIdValue());
@@ -359,8 +374,9 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
             itemMinWidth = std::max(widthValue, 0.0f);
         }
         if (LessNotEqual(widthValue, 0.0f)) {
-            childConstraint.maxSize = SizeF(0.0f, 0.0f);
-            childConstraint.minSize = SizeF(0.0f, 0.0f);
+            childConstraint.selfIdealSize.SetWidth(0.0f);
+            childConstraint.selfIdealSize.SetHeight(0.0f);
+            childWrapper->Measure(childConstraint);
             LOGE("Component %{public}s horizontal alignment illegal, will layout with size (0, 0)", nodeName.c_str());
             return;
         }
@@ -394,8 +410,9 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
             itemMinHeight = std::max(heightValue, 0.0f);
         }
         if (LessNotEqual(heightValue, 0.0f)) {
-            childConstraint.maxSize = SizeF(0.0f, 0.0f);
-            childConstraint.minSize = SizeF(0.0f, 0.0f);
+            childConstraint.selfIdealSize.SetWidth(0.0f);
+            childConstraint.selfIdealSize.SetHeight(0.0f);
+            childWrapper->Measure(childConstraint);
             LOGE("Component %{public}s vertical alignment illegal, will layout with size (0, 0)", nodeName.c_str());
             return;
         }

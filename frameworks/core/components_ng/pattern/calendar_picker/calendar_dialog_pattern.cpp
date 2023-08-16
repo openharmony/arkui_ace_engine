@@ -17,11 +17,13 @@
 
 #include "base/utils/date_util.h"
 #include "core/components/calendar/calendar_data_adapter.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -47,8 +49,144 @@ void CalendarDialogPattern::OnModifyDone()
     InitClickEvent();
     InitOnKeyEvent();
     InitOnTouchEvent();
+    InitHoverEvent();
     InitTitleArrowsEvent();
     InitEntryChangeEvent();
+
+    UpdateDialogBackgroundColor();
+    UpdateTitleArrowsColor();
+    UpdateOptionsButtonColor();
+}
+
+void CalendarDialogPattern::UpdateDialogBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    host->GetRenderContext()->UpdateBackgroundColor(theme->GetDialogBackgroundColor());
+}
+
+void CalendarDialogPattern::UpdateTitleArrowsColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto title = host->GetChildAtIndex(TITLE_NODE_INDEX);
+    CHECK_NULL_VOID(title);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+
+    for (const auto& child : title->GetChildren()) {
+        CHECK_NULL_VOID(child);
+        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+            auto buttonNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(buttonNode);
+            buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+            buttonNode->MarkModifyDone();
+
+            auto image = buttonNode->GetChildren().front();
+            CHECK_NULL_VOID(image);
+            auto imageNode = AceType::DynamicCast<FrameNode>(image);
+            auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+            CHECK_NULL_VOID(imageLayoutProperty);
+            auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+            imageInfo->SetFillColor(theme->GetEntryArrowColor());
+            imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
+            imageNode->MarkModifyDone();
+        }
+    }
+}
+
+void CalendarDialogPattern::UpdateOptionsButtonColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
+    CHECK_NULL_VOID(options);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+
+    for (const auto& child : options->GetChildren()) {
+        CHECK_NULL_VOID(child);
+        if (child->GetTag() == V2::BUTTON_ETS_TAG) {
+            auto button = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(button);
+            button->GetRenderContext()->UpdateBackgroundColor(SystemProperties::GetDeviceType() == DeviceType::PHONE
+                                                                  ? Color::TRANSPARENT
+                                                                  : calendarTheme->GetDialogButtonBackgroundColor());
+            button->MarkModifyDone();
+
+            auto text = button->GetChildren().front();
+            CHECK_NULL_VOID(text);
+            auto textNode = AceType::DynamicCast<FrameNode>(text);
+            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+            textNode->MarkModifyDone();
+        }
+    }
+}
+
+void CalendarDialogPattern::InitHoverEvent()
+{
+    CHECK_NULL_VOID_NOLOG(!hoverListener_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inputHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+
+    auto mouseCallback = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern->GetHoverState());
+        pattern->HandleEntryNodeHoverEvent(
+            pattern->IsInEntryRegion(info.GetGlobalLocation()), info.GetGlobalLocation());
+    };
+    inputHub->SetMouseEvent(std::move(mouseCallback));
+
+    auto hoverCallback = [weak = WeakClaim(this)](bool state) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetHoverState(state);
+        if (!state) {
+            Offset location;
+            pattern->HandleEntryNodeHoverEvent(false, location);
+        }
+    };
+    hoverListener_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
+    inputHub->AddOnHoverEvent(hoverListener_);
+}
+
+bool CalendarDialogPattern::IsInEntryRegion(const Offset& globalLocation)
+{
+    CHECK_NULL_RETURN_NOLOG(entryNode_, false);
+    return entryNode_->GetTransformRectRelativeToWindow().IsInRegion(
+        PointF(globalLocation.GetX(), globalLocation.GetY()));
+}
+
+void CalendarDialogPattern::HandleEntryNodeHoverEvent(bool state, const Offset& globalLocation)
+{
+    CHECK_NULL_VOID_NOLOG(entryNode_);
+    auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleHoverEvent(state, globalLocation);
+}
+
+void CalendarDialogPattern::HandleEntryNodeTouchEvent(bool isPressed, const Offset& globalLocation)
+{
+    CHECK_NULL_VOID_NOLOG(entryNode_);
+    if (IsInEntryRegion(globalLocation)) {
+        auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTouchEvent(isPressed, globalLocation);
+    }
 }
 
 void CalendarDialogPattern::InitClickEvent()
@@ -69,16 +207,10 @@ void CalendarDialogPattern::InitClickEvent()
 void CalendarDialogPattern::HandleClickEvent(const GestureEvent& info)
 {
     CHECK_NULL_VOID_NOLOG(entryNode_);
-    auto geometryNode = entryNode_->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-
-    geometryNode->SetFrameOffset(entryNode_->GetPaintRectOffset());
-    auto clickGlobalPosition = info.GetGlobalLocation();
-    auto clickPoint = PointF(clickGlobalPosition.GetX(), clickGlobalPosition.GetY());
-    if (geometryNode->GetFrameRect().IsInRegion(clickPoint)) {
+    if (IsInEntryRegion(info.GetGlobalLocation())) {
         auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleClickEvent(info);
+        pattern->HandleClickEvent(info.GetGlobalLocation());
     }
 }
 
@@ -95,12 +227,17 @@ void CalendarDialogPattern::InitOnTouchEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            pattern->HandleEntryNodeTouchEvent(true, info.GetTouches().front().GetGlobalLocation());
             if (!pattern->isFocused_) {
                 return;
             }
             pattern->isFocused_ = false;
             pattern->isCalendarFirstFocused_ = false;
             pattern->ClearCalendarFocusedState();
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP ||
+            info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            pattern->HandleEntryNodeTouchEvent(false, info.GetTouches().front().GetGlobalLocation());
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -117,7 +254,7 @@ void CalendarDialogPattern::InitOnKeyEvent()
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN_NOLOG(pattern, false);
-        if (event.IsNumberKey()&& event.action == KeyAction::DOWN) {
+        if (event.IsNumberKey() && event.action == KeyAction::DOWN) {
             CHECK_NULL_RETURN(pattern->entryNode_, false);
             auto entryPattern = pattern->entryNode_->GetPattern<CalendarPickerPattern>();
             CHECK_NULL_RETURN(entryPattern, false);
@@ -135,6 +272,15 @@ void CalendarDialogPattern::InitOnKeyEvent()
         return false;
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->isFocused_ = false;
+        pattern->isCalendarFirstFocused_ = false;
+        pattern->ClearCalendarFocusedState();
+    };
+    focusHub->SetOnBlurInternal(std::move(blurTask));
 
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
@@ -219,15 +365,10 @@ bool CalendarDialogPattern::HandleKeyEvent(const KeyEvent& event)
             ChangeEntryState();
             return true;
         }
-        case KeyCode::KEY_SPACE: {
-            return ActClick(focusAreaID_, focusAreaChildID_);
-        }
+        case KeyCode::KEY_SPACE:
         case KeyCode::KEY_NUMPAD_ENTER:
         case KeyCode::KEY_ENTER: {
-            if (focusAreaID_ == OPTIONS_NODE_INDEX) {
-                return ActClick(focusAreaID_, focusAreaChildID_);
-            }
-            return false;
+            return ActClick(focusAreaID_, focusAreaChildID_);
         }
         default:
             break;
@@ -336,7 +477,7 @@ bool CalendarDialogPattern::HandleTabKeyEvent(const KeyEvent& event)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-        auto childSize = static_cast<int32_t>(host->GetChildren().size());
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
     if (event.IsShiftWith(KeyCode::KEY_TAB)) {
         focusAreaID_ = (focusAreaID_ + childSize - 1) % childSize;
     } else {
@@ -712,10 +853,12 @@ void CalendarDialogPattern::GetCalendarMonthData(int32_t year, int32_t month, Ob
     CHECK_NULL_VOID_NOLOG(calendarPattern);
     PickerDate selectedDay = calendarPattern->GetSelectedDay();
     for (size_t i = 0; i < calendarMonthData.days.size(); i++) {
-        calendarMonthData.days[i].isKeyFocused = (focusedDay_.month.year == calendarMonthData.year) &&
-                                                 (focusedDay_.month.month == calendarMonthData.month) &&
-                                                 (focusedDay_.month == calendarMonthData.days[i].month) &&
-                                                 (focusedDay_.day == calendarMonthData.days[i].day);
+        calendarMonthData.days[i].isKeyFocused = isFocused_
+                                                     ? ((focusedDay_.month.year == calendarMonthData.year) &&
+                                                           (focusedDay_.month.month == calendarMonthData.month) &&
+                                                           (focusedDay_.month == calendarMonthData.days[i].month) &&
+                                                           (focusedDay_.day == calendarMonthData.days[i].day))
+                                                     : false;
         calendarMonthData.days[i].isSelected =
             (selectedDay.GetYear() == static_cast<uint32_t>(calendarMonthData.year)) &&
             (selectedDay.GetMonth() == static_cast<uint32_t>(calendarMonthData.month)) &&
@@ -815,6 +958,7 @@ void CalendarDialogPattern::HandleEntryLayoutChange()
     auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pattern);
     dialogLayoutProp->UpdateDialogOffset(DimensionOffset(pattern->CalculateDialogOffset()));
+    dialogOffset_ = pattern->CalculateDialogOffset();
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     isFirstAddhotZoneRect_ = false;
 }
@@ -848,6 +992,7 @@ void CalendarDialogPattern::HandleEntryChange(const std::string& info)
     }
 
     calendarPattern->SetSelectedDay(selectedDay);
+    calendarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     calendarNode->MarkModifyDone();
 }
 

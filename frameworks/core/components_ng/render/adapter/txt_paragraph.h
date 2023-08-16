@@ -69,9 +69,15 @@ public:
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) override;
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) override;
     void SetIndents(const std::vector<float>& indents) override;
+    bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
 
 private:
     void CreateBuilder();
+    inline size_t GetParagraphLength() const
+    {
+        return text_.length() + placeHolderIndex_ + 1;
+    }
+
     ParagraphStyle paraStyle_;
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::ParagraphBuilder> builder_;

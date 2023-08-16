@@ -95,7 +95,7 @@ shared_ptr<JsValue> AppSetImageCacheCount(const shared_ptr<JsRuntime>& runtime, 
         return runtime->NewNull();
     }
     int32_t size = argv[0]->ToInt32(runtime);
-    if (size <= 0) {
+    if (size < 0) {
         LOGE("size: %{public}d less than zero is invalid for cache image", size);
         return runtime->NewNull();
     }
@@ -139,7 +139,7 @@ shared_ptr<JsValue> AppSetImageRawDataCacheSize(
         return runtime->NewNull();
     }
     int32_t size = argv[0]->ToInt32(runtime);
-    if (size <= 0) {
+    if (size < 0) {
         LOGE("size: %{public}d less than zero is invalid for cache image raw data", size);
         return runtime->NewNull();
     }
@@ -181,7 +181,7 @@ shared_ptr<JsValue> AppSetImageFileCacheSize(const shared_ptr<JsRuntime>& runtim
         return runtime->NewNull();
     }
     int32_t size = argv[0]->ToInt32(runtime);
-    if (size <= 0) {
+    if (size < 0) {
         LOGE("size: %{public}d less than zero is invalid for cache image files", size);
         return runtime->NewNull();
     }

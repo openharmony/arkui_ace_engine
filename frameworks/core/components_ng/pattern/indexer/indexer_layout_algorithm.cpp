@@ -67,8 +67,6 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(childWrapper);
         auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(childLayoutProperty);
-        childLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        childLayoutProperty->UpdateAlignment(Alignment::CENTER);
         childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
         childWrapper->Measure(childLayoutConstraint);
     }

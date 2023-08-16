@@ -33,4 +33,8 @@ ohos_unittest("register_test") {
     "//third_party/googletest:gmock_main",
     "//third_party/libuv:uv",
   ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }

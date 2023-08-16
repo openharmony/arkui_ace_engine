@@ -122,13 +122,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        actuator->previewLongPressRecognizer_->OnRejected();
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
-        auto menuLongPressRecognizer = gestureHub->GetLongPressRecognizer();
-        if (menuLongPressRecognizer && isNotInPreviewState_) {
-            menuLongPressRecognizer->OnRejected();
-        }
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
@@ -236,6 +231,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 LOGI("In setThumbnailPixelMap callback, set DragWindowVisible true.");
             }
             Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+            dragDropManager->SetIsDragWindowShow(true);
         };
         auto gestureHub = gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
@@ -294,7 +290,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        actuator->previewLongPressRecognizer_->OnRejected();
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (!GetIsBindOverlayValue(actuator)) {
@@ -386,6 +381,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (gestureHub->GetTextDraggable()) {
+            actuator->SetIsNotInPreviewState(false);
             if (gestureHub->GetIsTextDraggable()) {
                 actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
             }
@@ -418,7 +414,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
     };
     longPressUpdate_ = longPressUpdate;
-    previewLongPressRecognizer_->SetOnActionUpdate(longPressUpdate);
+    previewLongPressRecognizer_->SetOnAction(longPressUpdate);
 #endif // ENABLE_DRAG_FRAMEWORK
     previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     auto frameNode = gestureHub->GetFrameNode();
@@ -763,6 +759,7 @@ void DragEventActuator::GetTextPixelMap(bool startDrag)
         LOGI("In function getTextPixelMap, set DragWindowVisible true.");
     }
     Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+    dragDropManager->SetIsDragWindowShow(true);
     gestureHub->SetPixelMap(nullptr);
 }
 

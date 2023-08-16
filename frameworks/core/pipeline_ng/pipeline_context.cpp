@@ -129,7 +129,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    taskScheduler_.AddDirtyLayoutNode(dirty);
+    taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -148,7 +148,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    taskScheduler_.AddDirtyRenderNode(dirty);
+    taskScheduler_->AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -235,15 +235,16 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
     }
-    if (!taskScheduler_.isEmpty()) {
+    if (!taskScheduler_->isEmpty()) {
 #if !defined(PREVIEW)
         LayoutInspector::SupportInspector();
 #endif
     }
 
-    taskScheduler_.StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
-    taskScheduler_.FlushTask();
-    taskScheduler_.FinishRecordFrameInfo();
+    taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
+    taskScheduler_->FlushTask();
+    taskScheduler_->FinishRecordFrameInfo();
+    FlushAnimationClosure();
     TryCallNextFrameLayoutCallback();
 
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -272,7 +273,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isNeedFlushMouseEvent_ = false;
     }
     needRenderNode_.clear();
-    taskScheduler_.FlushAfterRenderTask();
+    taskScheduler_->FlushAfterRenderTask();
     // Keep the call sent at the end of the function
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().FlushEnd();
@@ -420,7 +421,8 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     ACE_FUNCTION_TRACE();
     FlushBuild();
     FlushTouchEvents();
-    taskScheduler_.FlushTask();
+    taskScheduler_->FlushTask();
+    FlushAnimationClosure();
     FlushMessages();
     FlushFocus();
 }
@@ -431,6 +433,28 @@ void PipelineContext::FlushBuild()
     FlushDirtyNodeUpdate();
     isRebuildFinished_ = true;
     FlushBuildFinishCallbacks();
+}
+
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
+{
+    animationClosuresList_.emplace_back(std::move(animation));
+}
+
+void PipelineContext::FlushAnimationClosure()
+{
+    if (animationClosuresList_.empty()) {
+        return;
+    }
+    taskScheduler_->FlushTask();
+
+    decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
+    auto scheduler = std::move(taskScheduler_);
+    taskScheduler_ = std::make_unique<UITaskScheduler>();
+    for (const auto& animation : temp) {
+        animation();
+        taskScheduler_->CleanUp();
+    }
+    taskScheduler_ = std::move(scheduler);
 }
 
 void PipelineContext::FlushBuildFinishCallbacks()
@@ -1072,12 +1096,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if (scalePoint.type == TouchType::MOVE) {
         touchEvents_.emplace_back(point);
         auto container = Container::Current();
-        if (container && !container->IsScenceBoardWindow()) {
-            hasIdleTasks_ = true;
-            RequestFrame();
+        if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
+            FlushTouchEvents();
             return;
         } else {
-            FlushTouchEvents();
+            hasIdleTasks_ = true;
+            RequestFrame();
             return;
         }
     }
@@ -1688,7 +1712,7 @@ void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
     LOGI("PipelineContext::Destroy begin.");
-    taskScheduler_.CleanUp();
+    taskScheduler_->CleanUp();
     scheduleTasks_.clear();
     dirtyNodes_.clear();
     rootNode_.Reset();
@@ -1817,7 +1841,6 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END &&
         action != DragEventAction::DRAG_EVENT_START) {
-        manager->SetIsWindowConsumed(false);
         LOGI("current context is the source of drag");
         return;
     }
@@ -1835,17 +1858,14 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
 #endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
 #ifdef ENABLE_DRAG_FRAMEWORK
-        if (manager->GetExtraInfo().empty()) {
-            manager->GetExtraInfoFromClipboard(extraInfo);
-            manager->SetExtraInfo(extraInfo);
-        }
+        manager->GetExtraInfoFromClipboard(extraInfo);
+        manager->SetExtraInfo(extraInfo);
 #endif // ENABLE_DRAG_FRAMEWORK
         manager->OnDragEnd(Point(x, y, x, y), extraInfo);
         manager->RestoreClipboardData();
         return;
     }
     manager->OnDragMove(Point(x, y, x, y), extraInfo);
-    manager->SetIsWindowConsumed(false);
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)
@@ -1874,7 +1894,7 @@ void PipelineContext::NotifyMemoryLevel(int32_t level)
 }
 void PipelineContext::AddPredictTask(PredictTask&& task)
 {
-    taskScheduler_.AddPredictTask(std::move(task));
+    taskScheduler_->AddPredictTask(std::move(task));
     RequestFrame();
 }
 
@@ -1892,7 +1912,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     }
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnIdle, targettime:%" PRId64 "", deadline);
-    taskScheduler_.FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
+    taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
 }
 
@@ -1909,12 +1929,12 @@ void PipelineContext::Finish(bool /*autoFinish*/) const
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
 {
-    taskScheduler_.AddAfterLayoutTask(std::move(task));
+    taskScheduler_->AddAfterLayoutTask(std::move(task));
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
-    taskScheduler_.AddAfterRenderTask(std::move(task));
+    taskScheduler_->AddAfterRenderTask(std::move(task));
 }
 
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
@@ -1993,5 +2013,27 @@ void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node)
     if (fontManager_) {
         fontManager_->RemoveFontNodeNG(node);
     }
+}
+
+void PipelineContext::SetWindowSceneConsumed(bool isConsumed)
+{
+    isWindowSceneConsumed_ = isConsumed;
+}
+
+bool PipelineContext::IsWindowSceneConsumed()
+{
+    return isWindowSceneConsumed_;
+}
+
+void PipelineContext::SetCloseButtonStatus(bool isEnabled)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetCloseButtonStatus(isEnabled);
 }
 } // namespace OHOS::Ace::NG

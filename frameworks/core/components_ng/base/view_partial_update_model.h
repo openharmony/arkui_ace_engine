@@ -38,7 +38,9 @@ struct NodeInfoPU {
     std::function<void(const std::string&)> updateViewIdFunc;
     std::function<void()> pageTransitionFunc;
     std::function<void(NG::LayoutWrapper*)> measureFunc;
+    std::function<void(NG::LayoutWrapper*)> measureSizeFunc;
     std::function<void(NG::LayoutWrapper*)> layoutFunc;
+    std::function<void(NG::LayoutWrapper*)> placeChildrenFunc;
     std::function<void(bool)> reloadFunc;
     std::function<RefPtr<AceType>()> completeReloadFunc;
     std::function<void(int32_t)> nodeUpdateFunc;

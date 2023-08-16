@@ -66,6 +66,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     CHECK_NULL_RETURN(textPickerPattern, nullptr);
     textPickerPattern->SetColumnsKind(settingData.columnKind);
     textPickerPattern->SetIsShowInDialog(true);
+    textPickerPattern->SetPickerTag(false);
     auto context = textPickerNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto themeManager = context->GetThemeManager();
@@ -183,6 +184,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, nullptr);
     textPickerPattern->SetIsShowInDialog(true);
+    textPickerPattern->SetPickerTag(false);
     auto context = textPickerNode->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto themeManager = context->GetThemeManager();
@@ -389,6 +391,19 @@ RefPtr<FrameNode> TextPickerDialogView::CreateButtonNode(const RefPtr<FrameNode>
     return contentRow;
 }
 
+void TextPickerDialogView::UpdateButtonConfirmLayoutProperty(const RefPtr<FrameNode>& buttonConfirmNode,
+    RefPtr<PickerTheme> pickerTheme)
+{
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
+    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
+    buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+}
+
 RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
     const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& textPickerNode, DialogEvent& acceptEvent)
 {
@@ -415,12 +430,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(
     CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
     buttonConfirmEventHub->SetStateEffect(true);
 
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
-    buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
-    buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+    UpdateButtonConfirmLayoutProperty(buttonConfirmNode, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 
@@ -485,6 +495,7 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);

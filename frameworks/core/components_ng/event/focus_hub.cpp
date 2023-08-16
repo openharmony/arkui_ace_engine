@@ -518,6 +518,10 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
 
     auto info = KeyEventInfo(keyEvent);
+    if (pipeline &&
+        (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT))) {
+        info.SetMetaKey(1);
+    }
     auto retCallback = false;
     auto onKeyEventCallback = GetOnKeyCallback();
     if (onKeyEventCallback) {
@@ -718,7 +722,9 @@ void FocusHub::OnClick(const KeyEvent& event)
     if (onClickCallback) {
         auto info = GestureEvent();
         info.SetTimeStamp(event.timeStamp);
-        auto rect = GetGeometryNode()->GetFrameRect();
+        auto geometryNode = GetGeometryNode();
+        CHECK_NULL_VOID_NOLOG(geometryNode);
+        auto rect = geometryNode->GetFrameRect();
         info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
         info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
         info.SetSourceDevice(event.sourceType);
@@ -1221,11 +1227,7 @@ bool FocusHub::AcceptFocusByRectOfLastFocus(const RectF& rect)
         return AcceptFocusByRectOfLastFocusNode(rect);
     }
     if (focusType_ == FocusType::SCOPE) {
-        SetScopeFocusAlgorithm();
-        if (focusAlgorithm_.scopeType == ScopeType::FLEX) {
-            return AcceptFocusByRectOfLastFocusFlex(rect);
-        }
-        return AcceptFocusByRectOfLastFocusScope(rect);
+        return AcceptFocusByRectOfLastFocusFlex(rect);
     }
     return false;
 }

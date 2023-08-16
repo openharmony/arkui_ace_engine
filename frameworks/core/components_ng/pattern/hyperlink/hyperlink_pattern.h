@@ -44,6 +44,11 @@ public:
         return true;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::NODE, true, FocusStyleType::OUTER_BORDER };
+    }
+
 private:
     void LinkToAddress();
     void OnAttachToFrameNode() override;
@@ -54,9 +59,16 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void OnHoverEvent(bool isHovered);
     void OnMouseEvent(MouseInfo& info);
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void OnTouchEvent(const TouchEventInfo& info);
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
 
+    bool isLinked_ = false;
+    RefPtr<TouchEventImpl> onTouchEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<InputEvent> onMouseEvent_;
+    RefPtr<ClickEvent> clickListener_;
 
     // Mark the address in the pattern, used to link to the website.
     std::string address_;

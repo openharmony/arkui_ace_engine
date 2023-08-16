@@ -56,9 +56,11 @@ void SlidingPanelPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
-    if (layoutProperty->GetPanelType() == PanelType::CUSTOM &&
-        NearEqual(layoutProperty->GetCustomHeight().value_or(Dimension(0.0)).Value(), 0.0)) {
+    if (layoutProperty->GetPanelType() == PanelType::CUSTOM) {
+        auto calc = layoutProperty->GetCustomHeight().value();
+        if (!calc.CalcValue().empty() && calc.CalcValue().find("wrapContent") != std::string::npos) {
             ResetLayoutWeight();
+        }
     }
     Update();
     AddOrRemoveDragBarNode(layoutProperty);

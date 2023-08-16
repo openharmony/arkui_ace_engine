@@ -37,7 +37,7 @@ public:
     virtual void SetPanelType(PanelType type) = 0;
     virtual void SetPanelMode(PanelMode mode) = 0;
     virtual void SetHasDragBar(bool hasDragBar) = 0;
-    virtual void SetCustomHeight(const Dimension& customHeight) {};
+    virtual void SetCustomHeight(const CalcDimension& customHeight) {};
     virtual void SetMiniHeight(const Dimension& miniHeight) = 0;
     virtual void SetHalfHeight(const Dimension& halfHeight) = 0;
     virtual void SetFullHeight(const Dimension& fullHeight) = 0;

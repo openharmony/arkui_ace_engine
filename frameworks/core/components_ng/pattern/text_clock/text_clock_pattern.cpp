@@ -28,11 +28,18 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+#ifdef WINDOWS_PLATFORM
+constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
+#endif
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t BASE_YEAR = 1900;
 constexpr int32_t INTERVAL_OF_U_SECOND = 1000000;
 constexpr int32_t MICROSECONDS_OF_MILLISECOND = 1000;
 const std::string DEFAULT_FORMAT = "hms";
+constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
+constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
+constexpr char TEXTCLOCK_MONTH[] = "textclock.month";
+constexpr char TEXTCLOCK_DAY[] = "textclock.day";
 
 enum class TextClockElementIndex {
     CUR_YEAR_INDEX = 0,
@@ -66,7 +73,15 @@ std::unordered_map<char, TextClockElementIndex> curDateTimeMap = { { 'y', TextCl
 
 int32_t GetSystemTimeZone()
 {
+#ifndef WINDOWS_PLATFORM
     return timezone / TOTAL_SECONDS_OF_HOUR;
+#else
+    struct timeval currentTime;
+    struct timezone timeZone;
+    gettimeofday(&currentTime, &timeZone);
+    int32_t timeZoneHour = timeZone.tz_minuteswest / TOTAL_MINUTE_OF_HOUR;
+    return timeZoneHour;
+#endif
 }
 
 /**
@@ -279,7 +294,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
 std::vector<std::string> TextClockPattern::ParseInputFormat(
     bool& is24H, int32_t& weekType, int32_t& month, int32_t& day, bool& isMilliSecond)
 {
-    std::string inputFormat = (GetFormat() == DEFAULT_FORMAT) ? "h:m:s" : GetFormat();
+    std::string inputFormat = (GetFormat() == DEFAULT_FORMAT) ? "aa h:m:s" : GetFormat();
     std::vector<std::string> formatSplitter;
     auto i = 0;
     auto j = 0;
@@ -430,8 +445,8 @@ std::string TextClockPattern::GetWeek(const bool& isShortType, const int32_t& we
 
     if (week < (int32_t)weeks.size()) {
         if ((strcmp(language.c_str(), "zh") == 0) && isShortType) {
-            // add 周 for chinese E/EE/EEE
-            curWeek = "周" + weeks[week];
+            // chinese E/EE/EEE
+            curWeek = Localization::GetInstance()->GetEntryLetters(TEXTCLOCK_WEEK) + weeks[week];
         } else {
             curWeek = weeks[week];
         }
@@ -484,13 +499,13 @@ std::string TextClockPattern::CheckDateTimeElement(const std::vector<std::string
         if ((oneElement)) {
             switch (element) {
                 case 'y':
-                    format += "年";
+                    format += Localization::GetInstance()->GetEntryLetters(TEXTCLOCK_YEAR);
                     break;
                 case 'M':
-                    format += "月";
+                    format += Localization::GetInstance()->GetEntryLetters(TEXTCLOCK_MONTH);
                     break;
                 case 'd':
-                    format += "日";
+                    format += Localization::GetInstance()->GetEntryLetters(TEXTCLOCK_DAY);
                     break;
                 default:
                     break;

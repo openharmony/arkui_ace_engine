@@ -209,7 +209,6 @@ void JSBadge::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badg
     badge->SetBadgePositionY(badgeTheme->GetBadgePositionY());
     badge->SetIsPositionXy(badgeTheme->GetIsPositionXy());
     badge->SetBadgeTextColor(badgeTheme->GetBadgeTextColor());
-    badge->SetBadgeFontSize(badgeTheme->GetBadgeFontSize());
     badge->SetBadgeCircleSize(badgeTheme->GetBadgeCircleSize());
 }
 

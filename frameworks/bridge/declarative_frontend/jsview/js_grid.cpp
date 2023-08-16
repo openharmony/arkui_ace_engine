@@ -259,11 +259,15 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
-void JSGrid::SetScrollBar(int32_t displayMode)
+void JSGrid::SetScrollBar(const JSCallbackInfo& info)
 {
-    if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
-        LOGE("Param is not valid");
-        return;
+    int32_t displayMode = 1;
+    if (!info[0]->IsUndefined() && info[0]->IsNumber()) {
+        ParseJsInt32(info[0], displayMode);
+        if (displayMode < 0 || displayMode >= static_cast<int32_t>(DISPLAY_MODE.size())) {
+            LOGE("Param is not valid");
+            return;
+        }
     }
     GridModel::GetInstance()->SetScrollBarMode(displayMode);
 }

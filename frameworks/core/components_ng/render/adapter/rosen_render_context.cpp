@@ -137,6 +137,9 @@ float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimensi
 RosenRenderContext::~RosenRenderContext()
 {
     StopRecordingIfNeeded();
+    if (transitionEffect_) {
+        transitionEffect_->Detach(this);
+    }
 }
 
 void RosenRenderContext::StartRecording()
@@ -829,21 +832,42 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
     RequestNextFrame();
 }
 
-const int degree90 = 90;
-const int degree180 = 180;
-const int degree135 = 135;
-const int degree45 = 45;
+RectF gRect;
+
+double Degree2Radian(int32_t degree)
+{
+    const float pi = 3.14159265;
+    degree = degree % 360;
+    if (degree < 0) {
+        degree += 360;
+    }
+    return degree * pi / 180;
+}
+
+void SetCorner(double& x, double& y, double width, double height, int32_t degree)
+{
+    if (degree == 90) {
+        x = 0;
+        y = height;
+    } else if (degree == 180) {
+        x = width;
+        y = height;
+    } else if (degree == 270) {
+        x = width;
+        y = 0;
+    }
+}
 
 RectF RosenRenderContext::GetPaintRectWithTransform()
 {
     RectF rect;
 
-    const float pi = 3.14159265;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
+    auto degree = rsNode_->GetStagingProperties().GetRotation();
     // calculate new pos.
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
@@ -854,26 +878,42 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto oldSize = rect.GetSize();
     auto newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
     rect.SetSize(newSize);
+    transInfo_ = { scale[0], scale[1], centerPos.GetX(), centerPos.GetY(), rect.GetX(), rect.GetY(), translate[0],
+        translate[1], degree };
     // calculate rotate
-    int degree = rsNode_->GetStagingProperties().GetRotation();
-
-    if ((abs(degree) % degree180 > degree45) && (abs(degree) % degree180 < degree135)) {
-        degree = degree90;
-        OffsetF leftCornerRotate(0, 0);
-        OffsetF leftCorner(-1 * oldSize.Width() * scale[0] / 2, -1 * oldSize.Height() * scale[1] / 2);
-        leftCornerRotate.SetX(leftCorner.GetX() * cos(degree * pi / degree180) * -1 -
-                              leftCorner.GetY() * sin(degree * pi / degree180) * -1);
-        leftCornerRotate.SetY(leftCorner.GetX() * sin(degree * pi / degree180) * -1 +
-                              leftCorner.GetY() * cos(degree * pi / degree180) * -1);
-        OffsetF screenRotate(rect.GetX() + leftCornerRotate.GetX() - leftCorner.GetX(),
-            rect.GetY() + oldSize.Height() * scale[1] - leftCornerRotate.GetY() + leftCorner.GetY());
-        rect.SetOffset(screenRotate);
-        if (abs(degree) % degree180 != 0) {
+    degree = static_cast<int32_t>(degree) % 360;
+    auto radian = Degree2Radian(degree);
+    if (degree != 0) {
+        auto newRect = GetPaintRectWithoutTransform();
+        double leftX = 0.0;
+        double leftY = 0.0;
+        degree = degree < 0 ? degree + 360 : degree;
+        SetCorner(leftX, leftY, oldSize.Width(), oldSize.Height(), degree);
+        double centerX = oldSize.Width() * center[0];
+        double centerY = oldSize.Height() * center[1];
+        auto tmp = leftX;
+        leftX = (leftX - centerX) * cos(-1 * radian) + (leftY - centerY) * sin(-1 * radian);
+        leftY = -1 * (tmp - centerX) * sin(-1 * radian) + (leftY - centerY) * cos(-1 * radian);
+        auto leftXCalc = leftX + centerX;
+        auto leftYCalc = leftY + centerY;
+        leftX = newRect.GetOffset().GetX() + leftXCalc;
+        leftY = newRect.GetOffset().GetY() + leftYCalc;
+        auto offset = OffsetF(leftX + translate[0], leftY + translate[1]);
+        rect.SetOffset(offset);
+        if (degree == 180) {
+            newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
+        } else {
             newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
-            rect.SetSize(newSize);
         }
+        rect.SetSize(newSize);
     }
+    gRect = rect;
     return rect;
+}
+
+std::vector<double> RosenRenderContext::GetTrans()
+{
+    return transInfo_;
 }
 
 RectF RosenRenderContext::GetPaintRectWithTranslate()
@@ -892,7 +932,28 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
+    RectF rect = GetPaintRectWithoutTransform();
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+    int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+    degree = degree % 360;
+    auto radian = Degree2Radian(degree);
+    if (degree != 0) {
+        point = point + gRect.GetOffset();
+        point = point - OffsetF(translate[0], translate[1]);
+        auto centOffset = OffsetF(center[0] * gRect.Width(), center[1] * gRect.Height());
+        auto centerPos = gRect.GetOffset() + centOffset - OffsetF(translate[0], translate[1]);
+        auto centerX = centerPos.GetX();
+        auto centerY = centerPos.GetY();
+
+        double currentPointX = (point.GetX() - centerX) * cos(radian) + (point.GetY() - centerY) * sin(radian);
+        double currentPointY = -1 * (point.GetX() - centerX) * sin(radian) + (point.GetY() - centerY) * cos(radian);
+        currentPointX = currentPointX + centerX;
+        currentPointY = currentPointY + centerY;
+        point.SetX(currentPointX - rect.Left());
+        point.SetY(currentPointY - rect.Top());
+    }
 }
+
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
 {
@@ -2193,7 +2254,7 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     return effect;
 }
 
-void RosenRenderContext::PaintGradient(const SizeF& /*frameSize*/)
+void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
     auto& gradientProperty = GetOrCreateGradient();
@@ -2207,17 +2268,8 @@ void RosenRenderContext::PaintGradient(const SizeF& /*frameSize*/)
     if (gradientProperty->HasSweepGradient()) {
         gradient = gradientProperty->GetSweepGradientValue();
     }
-    if (!gradientStyleModifier_) {
-        gradientStyleModifier_ = std::make_shared<GradientStyleModifier>();
-        rsNode_->AddModifier(gradientStyleModifier_);
-    }
-    auto borderRadius = GetBorderRadius();
-    if (borderRadius.has_value()) {
-        Rosen::Vector4f rsRadius;
-        ConvertRadius(*borderRadius, rsRadius);
-        gradientStyleModifier_->SetCornerRadius(rsRadius);
-    }
-    gradientStyleModifier_->SetGradient(gradient);
+    auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
+    rsNode_->SetBackgroundShader(RSShader::CreateRSShader(shader));
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)
@@ -2624,6 +2676,12 @@ void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
     rsNode_->SetFrameGravity(gravity);
 }
 
+void RosenRenderContext::AddFRCSceneInfo(const std::string& scene, float speed)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->AddFRCSceneInfo(scene, speed);
+}
+
 void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();
@@ -2739,8 +2797,8 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
         if (RosenTransitionEffect::UpdateRosenTransitionEffect(transitionEffect_, effect)) {
             return;
         }
-        LOGW("transition effect struct changed");
-        transitionEffect_->Detach(Claim(this));
+        LOGD("transition effect struct changed");
+        transitionEffect_->Detach(this);
     }
     transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
     hasDefaultTransition_ = false;
@@ -2839,7 +2897,7 @@ void RosenRenderContext::RemoveDefaultTransition()
 {
     if (hasDefaultTransition_ && transitionEffect_ && disappearingTransitionCount_ == 0 &&
         appearingTransitionCount_ == 0) {
-        transitionEffect_->Detach(Claim(this));
+        transitionEffect_->Detach(this);
         transitionEffect_ = nullptr;
         hasDefaultTransition_ = false;
     }
@@ -3119,6 +3177,7 @@ void RosenRenderContext::OnRenderFitUpdate(RenderFit renderFit)
 void RosenRenderContext::SetContentRectToFrame(RectF rect)
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto&& padding = host->GetGeometryNode()->GetPadding();
     // minus padding to get contentRect
     if (padding) {

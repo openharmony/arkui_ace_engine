@@ -48,6 +48,7 @@ ohos_unittest("CheckableComponentTest") {
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/components/declaration/common/declaration_constants.cpp",
     "$ace_root/frameworks/core/components/declaration/common/declaration_creator_manager.cpp",

@@ -16,6 +16,7 @@ import("$ace_root/frameworks/core/components_ng/components.gni")
 
 build_component_ng("ui_extension_pattern_ng") {
   sources = [
+    "modal_ui_extension_proxy_impl.cpp",
     "ui_extension_model_ng.cpp",
     "ui_extension_pattern.cpp",
     "ui_extension_proxy.cpp",
@@ -24,7 +25,9 @@ build_component_ng("ui_extension_pattern_ng") {
   if (is_ohos_standard_system) {
     external_deps = [
       "ability_runtime:abilitykit_native",
+      "c_utils:utils",
       "graphic_2d:librender_service_client",
+      "hilog:libhilog",
       "input:libmmi-client",
       "ipc:ipc_single",
       "napi:ace_napi",

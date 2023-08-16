@@ -74,6 +74,8 @@ private:
         uint32_t showCount, RefPtr<PickerTheme> pickerTheme);
     static void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     static bool OnKeyEvent(const KeyEvent& event);
+    static void UpdateButtonConfirmLayoutProperty(const RefPtr<FrameNode>& buttonConfirmNode,
+        RefPtr<PickerTheme> pickerTheme);
     static RefPtr<FrameNode> dialogNode_;
 };
 } // namespace OHOS::Ace::NG

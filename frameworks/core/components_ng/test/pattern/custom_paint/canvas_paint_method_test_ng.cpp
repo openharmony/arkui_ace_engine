@@ -478,12 +478,6 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg010, TestSize.Level1)
     paintMethod_->loadingSource_.SetSrc(loadingSrc);
     paintMethod_->ImageObjReady(imageObj);
     EXPECT_EQ(paintMethod_->currentSource_.GetSrc(), loadingSrc);
-
-    /**
-     * @tc.steps4: Call the function GetForegroundDrawFunction.
-     * @tc.expected: The return value is non-null.
-     */
-    EXPECT_NE(paintMethod_->GetForegroundDrawFunction(nullptr), nullptr);
 }
 
 #ifndef NEW_SKIA

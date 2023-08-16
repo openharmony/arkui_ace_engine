@@ -291,10 +291,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg003, TestSize.Level1)
      * @tc.steps2: Add dirty layout and render nodes to taskScheduler_ to test functions
      *             FlushLayoutTask and FlushRenderTask of the UITaskScheduler.
      */
-    context_->taskScheduler_.AddDirtyLayoutNode(frameNode_);
-    context_->taskScheduler_.dirtyLayoutNodes_[frameNode_->GetPageId()].emplace(nullptr);
-    context_->taskScheduler_.AddDirtyRenderNode(frameNode_);
-    context_->taskScheduler_.dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
+    context_->taskScheduler_->AddDirtyLayoutNode(frameNode_);
+    context_->taskScheduler_->AddDirtyRenderNode(frameNode_);
+    context_->taskScheduler_->dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
 
     /**
      * @tc.steps3: Call the function FlushVsync with isEtsCard=true.
@@ -1716,20 +1715,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
     frameNode_3->layoutProperty_ = AceType::MakeRefPtr<ImageLayoutProperty>();
     auto rt = context_->GetNavDestinationBackButtonNode();
     EXPECT_EQ(rt, nullptr);
-    /**
-     * @tc.steps3: set propVisibility_ equals GONE and call GetNavDestinationBackButtonNode.
-     * @tc.expected: rt is nullptr.
-     */
-    frameNode_3->layoutProperty_->propVisibility_ = VisibleType::GONE;
-    rt = context_->GetNavDestinationBackButtonNode();
-    EXPECT_EQ(rt, nullptr);
-    /**
-     * @tc.steps4: set propVisibility_ equals VISIBLE and call GetNavDestinationBackButtonNode.
-     * @tc.expected: rt is not nullptr.
-     */
-    frameNode_3->layoutProperty_->propVisibility_ = VisibleType::VISIBLE;
-    rt = context_->GetNavDestinationBackButtonNode();
-    EXPECT_NE(rt, nullptr);
 }
 
 /**
@@ -2010,38 +1995,37 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg001, TestSize.Level1)
      * @tc.expected: frame info not record.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode);
-    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
     taskScheduler.AddDirtyLayoutNode(frameNode2);
-    taskScheduler.FlushLayoutTask(false);
-    EXPECT_EQ(frameInfo.layoutInfos_.size(), 0);
-
-    /**
-     * @tc.steps6: add layoutNode again and set isLayoutDirtyMarked_ true  and recall FlushLayoutTask with false .
-     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 1.
-     */
-    taskScheduler.AddDirtyLayoutNode(frameNode2);
-    frameNode2->isLayoutDirtyMarked_ = true;
     taskScheduler.FlushLayoutTask(false);
     EXPECT_EQ(frameInfo.layoutInfos_.size(), 1);
 
     /**
-     * @tc.steps7: add layoutNode again and call FlushLayoutTask with true .
+     * @tc.steps6: add layoutNode again and set isLayoutDirtyMarked_ true  and recall FlushLayoutTask with false .
      * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 2.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     frameNode2->isLayoutDirtyMarked_ = true;
-    taskScheduler.FlushLayoutTask(true);
+    taskScheduler.FlushLayoutTask(false);
     EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
 
     /**
+     * @tc.steps7: add layoutNode again and call FlushLayoutTask with true .
+     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 3.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    frameNode2->isLayoutDirtyMarked_ = true;
+    taskScheduler.FlushLayoutTask(true);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 3);
+
+    /**
      * @tc.steps8: finish FinishRecordFrameInfo and do step7.
-     * @tc.expected: frame info stop record frameInfo.layoutInfos_.size is 2.
+     * @tc.expected: frame info stop record frameInfo.layoutInfos_.size is 3.
      */
     taskScheduler.FinishRecordFrameInfo();
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     frameNode2->isLayoutDirtyMarked_ = true;
     taskScheduler.FlushLayoutTask(true);
-    EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 3);
 }
 
 /**
@@ -2134,7 +2118,6 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg004, TestSize.Level1)
      * @tc.expected: NeedAdditionalLayout return false.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode);
-    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     EXPECT_FALSE(taskScheduler.NeedAdditionalLayout());
 

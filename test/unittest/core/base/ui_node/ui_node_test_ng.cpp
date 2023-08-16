@@ -819,7 +819,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg024, TestSize.Level1)
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
     HitTestResult retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
-    EXPECT_EQ(retResult, HitTestResult::BUBBLING);
+    EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
     retResult = ZERO->UINode::MouseTest(GLOBAL_POINT, LOCAL_POINT, result, result, TEST_HOVERNODE);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);

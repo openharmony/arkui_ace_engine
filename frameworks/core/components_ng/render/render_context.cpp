@@ -40,12 +40,12 @@ void RenderContext::RequestNextFrame() const
 {
     if (requestFrame_) {
         requestFrame_();
-        auto framenode = GetHost();
-        CHECK_NULL_VOID(framenode);
-        if (framenode->GetInspectorId().has_value()) {
+        auto node = GetHost();
+        CHECK_NULL_VOID(node);
+        if (node->GetInspectorId().has_value()) {
             auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
             CHECK_NULL_VOID(pipeline);
-            pipeline->SetNeedRenderNode(framenode);
+            pipeline->SetNeedRenderNode(node);
         }
     }
 }

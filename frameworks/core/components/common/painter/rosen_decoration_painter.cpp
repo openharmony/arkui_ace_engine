@@ -2990,7 +2990,7 @@ void RosenDecorationPainter::PaintBoxShadows(
 #ifndef USE_ROSEN_DRAWING
             PaintShadow(SkPath(), shadow, rsNode);
 #else
-            PaintShadow(RSPath(), shadow, rsNode);
+            PaintShadow(RSRecordingPath(), shadow, rsNode);
 #endif
         }
     } else {
@@ -3028,7 +3028,8 @@ void RosenDecorationPainter::PaintShadow(
 }
 
 #ifndef USE_ROSEN_DRAWING
-void RosenDecorationPainter::PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas)
+void RosenDecorationPainter::PaintShadow(
+    const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint)
 {
     if (!canvas) {
         LOGE("PaintShadow failed, canvas is null.");
@@ -3056,11 +3057,20 @@ void RosenDecorationPainter::PaintShadow(const SkPath& path, const Shadow& shado
         SkShadowUtils::DrawShadow(canvas, skPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor,
             spotColor, SkShadowFlags::kTransparentOccluder_ShadowFlag);
     } else {
-        SkPaint paint;
-        paint.setColor(spotColor);
-        paint.setAntiAlias(true);
-        paint.setMaskFilter(SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, ConvertRadiusToSigma(shadow.GetBlurRadius())));
-        canvas->drawPath(skPath, paint);
+        SkPaint ShadowPaint;
+        ShadowPaint.setColor(spotColor);
+        ShadowPaint.setAntiAlias(true);
+        if (paint) {
+            ShadowPaint.setStyle(paint->getStyle());
+            ShadowPaint.setStrokeWidth(paint->getStrokeWidth());
+            ShadowPaint.setStrokeMiter(paint->getStrokeMiter());
+            ShadowPaint.setStrokeCap(paint->getStrokeCap());
+            ShadowPaint.setStrokeJoin(paint->getStrokeJoin());
+            ShadowPaint.setAlphaf(paint->getAlphaf());
+        }
+        ShadowPaint.setMaskFilter(
+            SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, ConvertRadiusToSigma(shadow.GetBlurRadius())));
+        canvas->drawPath(skPath, ShadowPaint);
     }
     canvas->restore();
 }
@@ -3087,7 +3097,8 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path,
 
         // LightPos is the location of a spot light source, which is by default located directly above the center
         // of the component.
-        auto drRect = drPath.GetBounds();
+        auto tmpPath = drPath.GetCmdList()->Playback();
+        auto drRect = tmpPath->GetBounds();
         RSPoint3 lightPos = RSPoint3(
             drRect.GetLeft() * FLOAT_HALF + drRect.GetRight() * FLOAT_HALF,
             drRect.GetTop() * FLOAT_HALF + drRect.GetBottom() * FLOAT_HALF, shadow.GetLightHeight());
@@ -3101,7 +3112,7 @@ void RosenDecorationPainter::PaintShadow(const RSPath& path,
         brush.SetColor(spotColor);
         brush.SetAntiAlias(true);
         RSFilter filter;
-        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
+        filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(
             RSBlurType::NORMAL, ConvertRadiusToSigma(shadow.GetBlurRadius())));
         brush.SetFilter(filter);
         canvas->AttachBrush(brush);

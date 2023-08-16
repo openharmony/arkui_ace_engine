@@ -49,6 +49,11 @@ public:
         isVertical_ = false;
     }
 
+    void SetIsVertical(bool isVertical)
+    {
+        isVertical_ = isVertical;
+    }
+
     bool IsVertical() const
     {
         return isVertical_;

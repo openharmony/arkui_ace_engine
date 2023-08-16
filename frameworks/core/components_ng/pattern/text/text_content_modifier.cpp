@@ -29,7 +29,7 @@ constexpr uint32_t RACE_DURATION = 2000;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
-constexpr float OBSCRUED_ALPHA = 0.2f;
+constexpr float OBSCURED_ALPHA = 0.2f;
 const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W100,
     FontWeight::W200,
@@ -165,7 +165,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
-    if (ifPaintObscuration == false || ifHaveSpanItemChildren_ == true) {
+    if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
         CHECK_NULL_VOID_NOLOG(paragraph_);
         auto canvas = drawingContext.canvas;
         canvas.Save();
@@ -173,8 +173,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
             auto contentSize = contentSize_->Get();
             auto contentOffset = contentOffset_->Get();
             if (clip_ && clip_->Get() &&
-                !(fontSize_.has_value() && fontSizeFloat_ &&
-                    !NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
+                (!fontSize_.has_value() || !fontSizeFloat_ ||
+                    NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
                 RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
                     contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
                 canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
@@ -216,7 +216,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
     CHECK_NULL_VOID(animatableTextColor_);
     Color fillColor = Color(animatableTextColor_->Get().GetValue());
     RSColor rrSColor(fillColor.GetRed(), fillColor.GetGreen(), fillColor.GetBlue(),
-        (uint32_t)(fillColor.GetAlpha() * OBSCRUED_ALPHA));
+        (uint32_t)(fillColor.GetAlpha() * OBSCURED_ALPHA));
     brush.SetColor(rrSColor);
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
@@ -448,12 +448,8 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type)
         return;
     }
 
-    if ((oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
-        (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE)) {
-        textDecorationAnimatable_ = true;
-    } else {
-        textDecorationAnimatable_ = false;
-    }
+    textDecorationAnimatable_ = (oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
+        (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE);
 
     textDecoration_ = type;
     CHECK_NULL_VOID(textDecorationColorAlpha_);

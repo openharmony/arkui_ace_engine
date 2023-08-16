@@ -80,6 +80,7 @@ template("ace_core_source_set") {
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
       "common/font_manager.cpp",
+      "common/frontend.cpp",
       "common/platform_bridge.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
@@ -640,6 +641,7 @@ template("ace_core_ng_source_set") {
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
       "common/font_manager.cpp",
+      "common/frontend.cpp",
       "common/platform_bridge.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
@@ -784,8 +786,9 @@ template("ace_core_ng_source_set") {
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_thread_model.cpp",
     ]
+    include_dirs = []
     if (is_cross_platform_build) {
-      include_dirs = [
+      include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
       ]
@@ -883,6 +886,12 @@ template("ace_core_ng_source_set") {
       sources += [
         "animation/native_curve_helper.cpp",
         "common/rosen/rosen_convert_helper.cpp",
+      ]
+      include_dirs += [
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
       ]
       if (is_ohos) {
         external_deps += [ "graphic_2d:libtexgine" ]

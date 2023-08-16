@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_CONTENT_PATTERN_H
 
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -30,7 +31,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<BoxLayoutAlgorithm>();
+        return MakeRefPtr<NavigationContentLayoutAlgorithm>();
     }
 
     bool IsAtomicNode() const override

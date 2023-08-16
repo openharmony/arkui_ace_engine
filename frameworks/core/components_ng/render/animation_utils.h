@@ -20,6 +20,8 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/render_context.h"
 
+#include "foundation/arkui/ace_engine/frameworks/base/utils/macros.h"
+
 namespace OHOS::Ace {
 
 namespace {
@@ -30,7 +32,7 @@ using RepeatCallback = std::function<void()>;
 
 } // namespace
 
-class AnimationUtils {
+class ACE_FORCE_EXPORT AnimationUtils {
 public:
     class Animation;
 

@@ -65,11 +65,11 @@ public:
 
         if (paintMethodCreated_) {
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
-                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, true);
+                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_);
         } else {
             paintMethodCreated_ = true;
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
-                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, false);
+                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, false, isHiddenHandle_);
         }
     }
 
@@ -136,6 +136,9 @@ public:
     {
         closedByGlobalTouchEvent_ = closedByGlobalTouch;
     }
+	
+    bool IsMenuShow();
+    bool IsHandleShow();
 
     void SetHasShowAnimation(bool animation)
     {
@@ -157,6 +160,9 @@ private:
     void HandlePanCancel();
 
     void CheckHandleReverse();
+    void StartHiddenHandleTask();
+    void StopHiddenHandleTask();
+    void HiddenHandle();
 
     std::shared_ptr<SelectOverlayInfo> info_;
     RefPtr<PanEvent> panEvent_;
@@ -187,6 +193,8 @@ private:
     bool paintMethodCreated_ = false;
 
     bool closedByGlobalTouchEvent_ = false;
+    CancelableCallback<void()> hiddenHandleTask_;
+    bool isHiddenHandle_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

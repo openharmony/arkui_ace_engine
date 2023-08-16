@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "adapter/preview/entrance/ace_resource_register.h"
+#include "adapter/preview/external/multimodalinput/pointer_event.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
 #include "core/event/key_event_recognizer.h"
@@ -179,6 +180,9 @@ public:
     void NotifySurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
+
+    bool HandleMouseEvent(const MouseEvent& mouseEvent);
+    bool HandleAxisEvent(const AxisEvent& axisEvent);
     bool HandleTouchEvent(const TouchEvent& touchEvent) override;
     std::unique_ptr<DrawDelegate> GetDrawDelegate() override;
 

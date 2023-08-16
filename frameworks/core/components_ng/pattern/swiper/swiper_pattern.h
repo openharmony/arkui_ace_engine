@@ -421,6 +421,7 @@ public:
 
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
+    void SwipeToWithoutAnimationAutoPlay();
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -548,6 +549,7 @@ private:
     void StopAndResetSpringAnimation();
     void OnLoopChange();
     void StopSpringAnimationAndFlushImmediately();
+    void UpdateItemRenderGroup(bool itemRenderGroup);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -634,6 +636,7 @@ private:
     bool usePropertyAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
+    bool isVoluntarilyClear_ = false;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;

@@ -352,7 +352,7 @@ public:
         newChild->MountToParent(AceType::Claim(this), slot, false);
     }
     virtual void FastPreviewUpdateChildDone() {}
-    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index);
+    virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild);
 
 #ifdef PREVIEW
     void SetDebugLine(const std::string& line)
@@ -459,11 +459,18 @@ public:
     {
         isBuildByJS_ = isBuildByJS;
     }
+    void AddAttachToMainTreeTask(std::function<void()>&& func)
+    {
+        attachToMainTreeTasks_.emplace_back(std::move(func));
+    }
 
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
     virtual void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint);
+
+    // return value: true if the node can be removed immediately.
+    virtual bool OnRemoveFromParent(bool allowTransition);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -501,8 +508,6 @@ protected:
 
     bool isRemoving_ = false;
 
-    // return value: true if the node can be removed immediately.
-    virtual bool OnRemoveFromParent(bool allowTransition);
     virtual bool RemoveImmediately() const;
     void ResetParent();
 
@@ -539,6 +544,8 @@ private:
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;
+
+    std::list<std::function<void()>> attachToMainTreeTasks_;
 
 #ifdef PREVIEW
     std::string debugLine_;

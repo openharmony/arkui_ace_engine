@@ -62,7 +62,7 @@ private:
     std::vector<Dimension> colorStops_;
 };
 
-class GradientStyleModifier : public Rosen::RSBackgroundStyleModifier {
+class [[deprecated]] GradientStyleModifier : public Rosen::RSBackgroundStyleModifier {
 public:
     GradientStyleModifier() = default;
     ~GradientStyleModifier() override = default;

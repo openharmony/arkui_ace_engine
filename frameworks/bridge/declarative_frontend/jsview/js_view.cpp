@@ -661,7 +661,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
         .setActiveFunc = std::move(setActiveFunc),
-        .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
+        .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
+                              jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };
 
@@ -683,6 +684,26 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     };
     if (jsViewFunction_->HasLayout()) {
         info.layoutFunc = std::move(layoutFunc);
+    }
+
+    if (jsViewFunction_->HasMeasureSize()) {
+        auto measureSizeFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+            auto jsView = weak.Upgrade();
+            CHECK_NULL_VOID(jsView);
+            ContainerScope scope(jsView->GetInstanceId());
+            jsView->jsViewFunction_->ExecuteMeasureSize(layoutWrapper);
+        };
+        info.measureSizeFunc = std::move(measureSizeFunc);
+    }
+
+    if (jsViewFunction_->HasPlaceChildren()) {
+        auto placeChildren = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
+            auto jsView = weak.Upgrade();
+            CHECK_NULL_VOID(jsView);
+            ContainerScope scope(jsView->GetInstanceId());
+            jsView->jsViewFunction_->ExecutePlaceChildren(layoutWrapper);
+        };
+        info.placeChildrenFunc = std::move(placeChildren);
     }
 
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
@@ -842,7 +863,6 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
         auto uiNode = AceType::DynamicCast<NG::UINode>(node);
         ElementRegister::GetInstance()->UpdateRecycleElmtId(uiNode->GetId(), newElmtId);
         uiNode->UpdateRecycleElmtId(newElmtId);
-        NG::LayoutProperty::UpdateAllGeometryTransition(uiNode);
         ViewStackModel::GetInstance()->Push(node, true);
     } else {
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);

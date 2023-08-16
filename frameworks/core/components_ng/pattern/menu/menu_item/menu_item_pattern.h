@@ -167,16 +167,16 @@ public:
     }
 
 protected:
+    void RegisterOnKeyEvent();
     void RegisterOnTouch();
 
 private:
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
-    void RegisterOnKeyEvent();
     virtual void OnTouch(const TouchEventInfo& info);
     void OnHover(bool isHover);
-    bool OnKeyEvent(const KeyEvent& event);
+    virtual bool OnKeyEvent(const KeyEvent& event);
 
     void RegisterWrapperMouseEvent();
 
@@ -234,6 +234,7 @@ public:
 
 private:
     void OnTouch(const TouchEventInfo& info) override;
+    bool OnKeyEvent(const KeyEvent& event) override;
     std::unique_ptr<Offset> lastTouchOffset_;
 };
 } // namespace OHOS::Ace::NG

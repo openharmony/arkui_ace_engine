@@ -28,6 +28,8 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
 
 void TextPattern::HandleOnSelectAll() {}
 
+void TextPattern::HandleOnCopy() {}
+
 void TextPattern::OnModifyDone() {}
 
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -71,4 +73,5 @@ void TextPattern::OnColorConfigurationUpdate() {}
 
 void TextPattern::InitSurfaceChangedCallback() {}
 void TextPattern::OnAttachToFrameNode() {}
+void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {};
 } // namespace OHOS::Ace::NG

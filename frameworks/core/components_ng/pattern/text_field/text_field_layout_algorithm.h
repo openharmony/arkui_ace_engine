@@ -93,6 +93,11 @@ public:
         return unitWidth_;
     }
 
+    float GetParagraphWidth() const
+    {
+        return paragraphWidth_;
+    }
+
     static TextDirection GetTextDirection(const std::string& content);
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
@@ -130,6 +135,7 @@ private:
     RectF textRect_;
     RectF imageRect_;
     OffsetF parentGlobalOffset_;
+    float paragraphWidth_ = 0.0f;
 
     float caretOffsetX_ = 0.0f;
     float unitWidth_ = 0.0f;

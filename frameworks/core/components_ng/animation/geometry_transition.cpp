@@ -185,9 +185,10 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     }
     auto hostNode = layoutWrapper->GetHostNode();
     if (IsNodeInAndActive(hostNode)) {
-        layoutProperty_ = hostNode->GetLayoutProperty()->Clone();
+        layoutPropertyIn_ = hostNode->GetLayoutProperty()->Clone();
         ModifyLayoutConstraint(layoutWrapper, true);
     } else if (IsNodeOutAndActive(hostNode)) {
+        layoutPropertyOut_ = hostNode->GetLayoutProperty()->Clone();
         ModifyLayoutConstraint(layoutWrapper, false);
     }
 }
@@ -207,9 +208,9 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         auto geometryNode = node->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         inNodeActiveFrameSize_ = geometryNode->GetFrameSize();
-        layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-        node->SetLayoutProperty(layoutProperty_);
-        layoutProperty_.Reset();
+        layoutPropertyIn_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        node->SetLayoutProperty(layoutPropertyIn_);
+        layoutPropertyIn_.Reset();
     } else if (IsNodeInAndIdentity(node)) {
         LOGD("GeometryTransition: node: %{public}d in and identity", node->GetId());
         state_ = State::IDLE;
@@ -230,6 +231,14 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
             auto geometryTransition = weak.Upgrade();
             CHECK_NULL_VOID(geometryTransition);
             geometryTransition->SyncGeometry(isNodeIn);
+            if (!isNodeIn) {
+                auto outNode = geometryTransition->outNode_.Upgrade();
+                if (outNode && geometryTransition->layoutPropertyOut_) {
+                    outNode->SetLayoutProperty(geometryTransition->layoutPropertyOut_);
+                    geometryTransition->layoutPropertyOut_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+                    geometryTransition->layoutPropertyOut_.Reset();
+                }
+            }
         });
     }
 }

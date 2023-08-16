@@ -178,6 +178,64 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+    Dimension GetMinNavBarWidthValue() const
+    {
+        return minNavBarWidthValue_;
+    }
+    void SetMinNavBarWidthValue(Dimension minNavBarWidthValue)
+    {
+        minNavBarWidthValue_ = minNavBarWidthValue;
+    }
+
+    Dimension GetMaxNavBarWidthValue() const
+    {
+        return maxNavBarWidthValue_;
+    }
+    void SetMaxNavBarWidthValue(Dimension maxNavBarWidthValue)
+    {
+        maxNavBarWidthValue_ = maxNavBarWidthValue;
+    }
+
+    Dimension GetMinContentWidthValue() const
+    {
+        return minContentWidthValue_;
+    }
+
+    void SetMinContentWidthValue(Dimension minContentWidthValue)
+    {
+        minContentWidthValue_ = minContentWidthValue;
+    }
+
+    bool GetUserSetNavBarRangeFlag() const
+    {
+        return userSetNavBarRangeFlag_;
+    }
+
+    void SetUserSetNavBarRangeFlag(bool userSetNavBarRangeFlag)
+    {
+        userSetNavBarRangeFlag_ = userSetNavBarRangeFlag;
+    }
+
+    bool GetUserSetMinContentFlag() const
+    {
+        return userSetMinContentFlag_;
+    }
+
+    void SetUserSetMinContentFlag(bool userSetMinContentFlag)
+    {
+        userSetMinContentFlag_ = userSetMinContentFlag;
+    }
+
+    bool GetUserSetNavBarWidthFlag() const
+    {
+        return userSetNavBarWidthFlag_;
+    }
+
+    void SetUserSetNavBarWidthFlag(bool userSetNavBarWidthFlag)
+    {
+        userSetNavBarWidthFlag_ = userSetNavBarWidthFlag;
+    }
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
@@ -212,6 +270,7 @@ private:
     bool navBarVisibilityChange_ = false;
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
+    bool userSetNavBarWidthFlag_ = false;
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;

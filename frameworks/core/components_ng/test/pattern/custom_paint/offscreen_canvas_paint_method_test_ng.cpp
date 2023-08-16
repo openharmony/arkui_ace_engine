@@ -588,7 +588,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg011, 
      * @tc.expected: The return value is false and the output string is corrected.
      */
     paintMethod->filterParam_ = "blur(targetParam";
-    EXPECT_FALSE(paintMethod->GetFilterType(filterType, filterParam));
+    EXPECT_TRUE(paintMethod->GetFilterType(filterType, filterParam));
     EXPECT_EQ(filterType, FilterType::BLUR);
     EXPECT_EQ(filterParam, targetParam);
 

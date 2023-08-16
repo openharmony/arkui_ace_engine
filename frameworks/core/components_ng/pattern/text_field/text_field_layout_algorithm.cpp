@@ -25,6 +25,7 @@
 #include "base/i18n/localization.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/text/text_theme.h"
@@ -39,7 +40,6 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -180,7 +180,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
-    auto contentModifier = pattern->GetContentModifier();
+
+    // Construct a textstyle.
     TextStyle textStyle;
     std::string textContent;
     bool showPlaceHolder = false;
@@ -190,10 +191,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     idealSize.UpdateSizeWhenSmaller(contentConstraint.maxSize);
     idealWidth = idealSize.Width();
     idealHeight = idealSize.Height();
-    auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
-    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, std::nullopt);
     auto isInlineStyle = pattern->IsNormalInlineState();
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
@@ -207,13 +204,17 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
+
+    // use for modifier.
+    auto contentModifier = pattern->GetContentModifier();
     if (contentModifier) {
         SetPropertyToModifier(textStyle, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
-    auto disableTextAlign = !pattern->IsTextArea() && textFieldLayoutProperty->GetWidthAutoValue(false);
+    auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder && !isInlineStyle;
+    // Create paragraph.
     if (pattern->IsDragging() && !showPlaceHolder) {
         TextStyle dragTextStyle = textStyle;
         Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
@@ -225,38 +226,49 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         CreateParagraph(textStyle, textContent, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder,
             pattern->GetNakedCharPosition(), disableTextAlign);
     }
+
+    // paragraph  Layout.
     float imageSize = 0.0f;
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     imageSize = showPasswordIcon ? pattern->GetIconSize() : 0.0f;
-    auto imageHotZoneWidth = showPasswordIcon ? imageSize + pattern->GetIconRightOffset() : 0.0;
+    auto imageHotZoneWidth = showPasswordIcon ? imageSize + pattern->GetIconRightOffset() : 0.0f;
     auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
     CHECK_NULL_RETURN(scrollBarTheme, std::nullopt);
-    if (textStyle.GetMaxLines() == 1 && !showPlaceHolder && !isInlineStyle) {
+    if (isInlineStyle) {
+        // for InlineStyle, max width is content width with safe boundary.
+        paragraph_->Layout(pattern->GetPreviewWidth() == 0
+                               ? idealWidth
+                               : pattern->GetPreviewWidth() + textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
+                                     textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
+    } else if (showPlaceHolder) {
+        // for placeholder.
+        if (isPasswordType) {
+            paragraph_->Layout(idealWidth - imageHotZoneWidth);
+        } else {
+            paragraph_->Layout(idealWidth);
+        }
+    } else if (textStyle.GetMaxLines() == 1) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
-        // for text area or placeholder, max width is content width without password icon
-        if (isInlineStyle) {
-            paragraph_->Layout(idealWidth + textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
-                textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
-        } else if (showPlaceHolder && isPasswordType) {
-            paragraph_->Layout(idealWidth - imageHotZoneWidth);
-        } else {
-            paragraph_->Layout(
-                idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
-        }
+        // for text area, max width is content width without scroll bar.
+        paragraph_->Layout(
+            idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
     }
-    if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength()) {
+
+    // counterParagraph Layout.
+    if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength()) {
         auto textLength = showPlaceHolder ? 0 : StringUtils::ToWstring(textContent).length();
-        auto maxLength = layoutProperty->GetMaxLength().value();
+        auto maxLength = textFieldLayoutProperty->GetMaxLength().value();
         CreateCounterParagraph(textLength, maxLength, textFieldTheme);
         if (counterParagraph_) {
             counterParagraph_->Layout(
                 idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
         }
     }
-    if (layoutProperty->GetShowErrorTextValue(false)) {
-        CreateErrorParagraph(layoutProperty->GetErrorTextValue(""), textFieldTheme);
+    // errorParagraph  Layout.
+    if (textFieldLayoutProperty->GetShowErrorTextValue(false)) {
+        CreateErrorParagraph(textFieldLayoutProperty->GetErrorTextValue(""), textFieldTheme);
         if (errorParagraph_) {
             errorParagraph_->Layout(std::numeric_limits<double>::infinity());
         }
@@ -276,6 +288,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
         pattern->SetSingleLineHeight(preferredHeight);
     }
+    paragraphWidth_ = paragraph_->GetLongestLine();
+    // textarea size.
     if (pattern->IsTextArea()) {
         auto paragraphHeight =
             (textContent.empty() || !showPlaceHolder) ? preferredHeight : static_cast<float>(paragraph_->GetHeight());
@@ -283,7 +297,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             static_cast<float>(paragraphHeight + (counterParagraph_ ? counterParagraph_->GetHeight() : 0.0f));
         if (isInlineStyle && pattern->GetTextInputFlag()) {
             idealHeight = pattern->GetSingleLineHeight() *
-                layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+                          textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
             idealWidth = paragraph_->GetLongestLine();
         }
         textRect_.SetSize(SizeF(
@@ -308,13 +322,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         return SizeF(idealWidth, std::min(preferredHeight, idealHeight));
     }
 
-    if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
-        // for textArea, need to delete imageWidth and remeasure.
-        paragraph_->Layout(idealWidth - imageSize);
-        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
-        imageRect_.SetSize(SizeF(0.0f, 0.0f));
-        return SizeF(idealWidth, imageSize);
-    }
+    // password type size.
     imageRect_.SetSize(SizeF(imageSize, imageSize));
     if (pattern->GetTextObscured() && pattern->GetHidePasswordIconCtx()) {
         pattern->GetHidePasswordIconCtx()->MakeCanvasImage(imageRect_.GetSize(), true, ImageFit::NONE);
@@ -372,7 +380,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::DEL ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED ||
-                          layoutProperty->GetTextAlignChangedValue(false);
+                          layoutProperty->GetTextAlignChangedValue(false) ||
+                          pattern->GetTextEditingValue().text.empty();
     auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
                               pattern->GetIsMousePressed();
     if (needToKeepTextRect) {
@@ -414,7 +423,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto frameBottom = pattern->GetMarginBottom();
     MarginProperty errorMargin;
     if (layoutProperty->GetShowUnderlineValue(false) && layoutProperty->GetShowErrorTextValue(false) &&
-        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN)  &&
+        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN) &&
         layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         errorMargin.bottom = CalcLength(ERROR_TEXT_UNDERLINE_MARGIN);
         frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
@@ -617,7 +626,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
         if (splitStr.empty()) {
             continue;
         }
-        auto &style = textStyles[i];
+        auto& style = textStyles[i];
         builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), style));
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
         if (needObscureText) {

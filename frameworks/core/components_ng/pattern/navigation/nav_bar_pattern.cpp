@@ -552,7 +552,7 @@ bool CheckWhetherHideToolbarIfDeviceRotation(const float& navbarWidth)
     float gutterWidth = columnInfo->GetParent()->GetGutterWidth().ConvertToPx();
     float hideLimitWidth = gridWidth + gutterWidth * 2;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        if (static_cast<uint32_t>(currentColumns) >= rotationLimitCount && GreatOrEqual(navbarWidth, hideLimitWidth)) {
+        if (static_cast<uint32_t>(currentColumns) >= rotationLimitCount && GreatOrEqual(navbarWidth, gridWidth)) {
             return true;
         }
     } else if (SystemProperties::GetDeviceType() == DeviceType::TABLET) {
@@ -608,7 +608,7 @@ void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::VERTICAL };
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->SetPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void NavBarPattern::HandleOnDragStart(float offset)
@@ -644,36 +644,16 @@ void NavBarPattern::HandleOnDragEnd()
     titlePattern->ProcessTittleDragEnd();
 }
 
-void NavBarPattern::InitCoordinationEvent()
+bool NavBarPattern::GetDraggedDown()
 {
-    auto scrollableNode = FindScrollableChild();
-    scrollableNode_ = WeakClaim(AceType::RawPtr(scrollableNode));
-    CHECK_NULL_VOID(scrollableNode);
-    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(scrollablePattern);
-    auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
-    auto onScrollEvent = [weak = WeakClaim(this)](double offset) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnCoordScrollUpdate(static_cast<float>(offset));
-    };
-    coordinationEvent->SetOnScrollEvent(onScrollEvent);
-    auto onScrollStartEvent = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnCoordScrollStart();
-    };
-    coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
-    auto onScrollEndEvent = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnCoordScrollEnd();
-    };
-    coordinationEvent->SetOnScrollEndEvent(onScrollEndEvent);
-    scrollablePattern->SetCoordinationEvent(coordinationEvent);
-    scrollablePattern->SetParentDraggedDown(true);
-    scrollablePattern->SetCoordEventNeedSpringEffect(false);
-    scrollablePattern->SetCoordEventNeedMoveUp(true);
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, false);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, false);
+    auto isDraggedDown = titlePattern->IsTitleDraggedDown();
+    return isDraggedDown;
 }
 
 void NavBarPattern::OnCoordScrollStart()
@@ -691,7 +671,6 @@ void NavBarPattern::OnCoordScrollStart()
     auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollablePattern);
     scrollablePattern->SetParentDraggedDown(titlePattern->IsTitleDraggedDown());
-    springEffect_ = scrollablePattern->IsScrollableSpringEffect();
 }
 
 void NavBarPattern::OnCoordScrollUpdate(float offset)
@@ -763,7 +742,6 @@ void NavBarPattern::OnModifyDone()
     auto gesture = hostNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     InitPanEvent(gesture);
-    InitCoordinationEvent();
 
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);

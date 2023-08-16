@@ -22,9 +22,11 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_base_component.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
@@ -199,6 +201,7 @@ void DatePickerPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
@@ -208,16 +211,17 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
     pickerProperty->UpdateColor(normalStyle.GetTextColor());
     pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
     if (isPicker_) {
-        host->SetNeedCallChildrenUpdate(false);
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
+    CHECK_NULL_VOID(buttonTitleNode_);
     auto titleLayoutRenderContext = buttonTitleNode_->GetRenderContext();
+    CHECK_NULL_VOID(titleLayoutRenderContext);
     titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
-
     auto childButton = buttonTitleNode_->GetFirstChild();
     CHECK_NULL_VOID(childButton);
     auto ButtonNode = DynamicCast<FrameNode>(childButton);
@@ -225,24 +229,18 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto buttonTitleRenderContext = ButtonNode->GetRenderContext();
     CHECK_NULL_VOID(buttonTitleRenderContext);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-
-    auto childRow = ButtonNode->GetFirstChild();
-    CHECK_NULL_VOID(childRow);
-    auto childText = childRow->GetFirstChild();
-    CHECK_NULL_VOID(childRow);
+    auto childText = ButtonNode->GetFirstChild();
+    CHECK_NULL_VOID(childText);
     auto textTitleNode = DynamicCast<FrameNode>(childText);
     CHECK_NULL_VOID(textTitleNode);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-
     textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-
-    auto contentChildren = contentRowNode_->GetChildren();
+    CHECK_NULL_VOID(contentRowNode_);
     auto layoutRenderContext = contentRowNode_->GetRenderContext();
+    CHECK_NULL_VOID(layoutRenderContext);
     layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
-
     OnModifyDone();
-    host->SetNeedCallChildrenUpdate(false);
 }
 
 void DatePickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)

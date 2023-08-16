@@ -218,7 +218,7 @@ public:
     // ===========================================================
 
     void InitSurfaceChangedCallback();
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     bool HasSurfaceChangedCallback()
     {
         return surfaceChangedCallbackId_.has_value();
@@ -264,12 +264,20 @@ public:
 
     void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
     void CheckHandles(SelectHandleInfo& handleInfo);
+    bool IsMeasureBoundary() const override
+    {
+        return isMeasureBoundary_;
+    }
+    void SetIsMeasureBoundary(bool isMeasureBoundary)
+    {
+        isMeasureBoundary_ = isMeasureBoundary;
+    }
 
 protected:
-    void HandleOnCopy();
+    virtual void HandleOnCopy();
     void InitMouseEvent();
     void ResetSelection();
-    void HandleOnSelectAll();
+    virtual void HandleOnSelectAll();
     void InitSelection(const Offset& pos);
     void HandleLongPress(GestureEvent& info);
     void HandleClickEvent(GestureEvent& info);
@@ -307,9 +315,11 @@ protected:
     bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
+    bool touchEventInitialized_ = false;
     std::vector<Rect> rectsForPlaceholders_;
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
+    bool isMeasureBoundary_ = false;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -321,6 +331,8 @@ private:
     void HandlePanStart(const GestureEvent& info);
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
+    void InitTouchEvent();
+    void HandleTouchEvent(const TouchEventInfo& info);
     inline RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);

@@ -192,8 +192,8 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
     }
     auto children = parentNode->GetChildren();
 
-    for (auto index = static_cast<int>(children.size()) - 1; index >= 0; index--) {
-        auto child = parentNode->GetChildAtIndex(index);
+    for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
+        auto child = *iter;
         if (child == nullptr) {
             LOGW("when findding target in child nodes, find child is nullptr");
             continue;
@@ -226,7 +226,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
 RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
     float globalX, float globalY, DragType dragType, bool findDrop)
 {
-    std::set<WeakPtr<FrameNode>> frameNodes;
+    std::map<int32_t, WeakPtr<FrameNode>> frameNodes;
     switch (dragType) {
         case DragType::COMMON:
             frameNodes = dragFrameNodes_;
@@ -253,8 +253,8 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(
 
     PointF point(globalX, globalY);
     std::vector<RefPtr<FrameNode>> hitFrameNodes;
-    for (const auto& weakNode : frameNodes) {
-        auto frameNode = weakNode.Upgrade();
+    for (auto iterOfFrameNode = frameNodes.begin(); iterOfFrameNode != frameNodes.end(); iterOfFrameNode++) {
+        auto frameNode = iterOfFrameNode->second.Upgrade();
         if (!frameNode || !frameNode->IsVisible()) {
             continue;
         }
@@ -297,13 +297,12 @@ bool DragDropManager::CheckDragDropProxy(int64_t id) const
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-void DragDropManager::UpdateDragAllowDrop(
-    const RefPtr<FrameNode>& dragFrameNode, const RefPtr<OHOS::Ace::DragEvent>& event)
+void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy)
 {
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
-        auto records = event->GetData();
-        if (records && records->GetSize() > 1) {
+        auto recordSize = summaryMap_.size();
+        if (recordSize > 1) {
             InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
         } else {
             InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::DEFAULT);
@@ -316,7 +315,7 @@ void DragDropManager::UpdateDragAllowDrop(
             return;
         }
     }
-    InteractionManager::GetInstance()->UpdateDragStyle(event->IsCopy() ? DragCursorStyle::COPY : DragCursorStyle::MOVE);
+    InteractionManager::GetInstance()->UpdateDragStyle(isCopy ? DragCursorStyle::COPY : DragCursorStyle::MOVE);
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -331,21 +330,9 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     }
 }
 
-void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
+void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
-    auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
-        if (IsDragged() && IsWindowConsumed()) {
-            LOGD("The event does not need to be handled");
-            return;
-        }
-    }
-#endif // ENABLE_DRAG_FRAMEWORK
-    UpdateVelocityTrackerPoint(point, false);
-
-    auto dragFrameNode = FindDragFrameNodeByPosition(
-        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON, false);
+    CHECK_NULL_VOID(dragFrameNode);
     if (SystemProperties::GetDebugEnabled()) {
         if (preTargetFrameNode_) {
             LOGI("Position is %{public}f and %{public}f.",
@@ -362,6 +349,25 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
                 dragFrameNode->GetTag().c_str(), dragFrameNode->GetDepth());
         }
     }
+}
+
+void DragDropManager::OnDragMove(const Point& point, const std::string& extraInfo)
+{
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        if (IsDragged() && IsWindowConsumed()) {
+            LOGD("The event does not need to be handled");
+            SetIsWindowConsumed(false);
+            return;
+        }
+    }
+    SetIsWindowConsumed(false);
+#endif // ENABLE_DRAG_FRAMEWORK
+    UpdateVelocityTrackerPoint(point, false);
+    auto dragFrameNode = FindDragFrameNodeByPosition(
+        static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), DragType::COMMON, false);
+    PrintDragFrameNode(point, dragFrameNode);
     if (!dragFrameNode) {
         if (preTargetFrameNode_) {
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
@@ -369,7 +375,10 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
         }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-        InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::MOVE);
+        if (!isMouseDragged_ || isDragWindowShow_) {
+            InteractionManager::GetInstance()->UpdateDragStyle(
+                summaryMap_.size() > 1 ? DragCursorStyle::MOVE : DragCursorStyle::DEFAULT);
+        }
 #endif // ENABLE_DRAG_FRAMEWORK
         return;
     }
@@ -385,7 +394,6 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
         }
     }
-
     FireOnDragEvent(dragFrameNode, point, DragEventType::ENTER, extraInfo);
     preTargetFrameNode_ = dragFrameNode;
 }
@@ -556,6 +564,9 @@ void DragDropManager::FireOnDragEvent(
     }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
+    if (isMouseDragged_ && !isDragWindowShow_) {
+        return;
+    }
     if (event->GetResult() == DragRet::ENABLE_DROP) {
         if (event->IsCopy()) {
             InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::COPY);
@@ -565,7 +576,7 @@ void DragDropManager::FireOnDragEvent(
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         InteractionManager::GetInstance()->UpdateDragStyle(DragCursorStyle::FORBIDDEN);
     } else {
-        UpdateDragAllowDrop(frameNode, event);
+        UpdateDragAllowDrop(frameNode, event->IsCopy());
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 }
@@ -855,6 +866,7 @@ void DragDropManager::DestroyDragWindow()
     }
     LOGI("DestroyDragWindow");
     SetIsDragged(false);
+    SetIsDragWindowShow(false);
     isMouseDragged_ = false;
     currentId_ = -1;
 }

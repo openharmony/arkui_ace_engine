@@ -285,6 +285,9 @@ void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
         frictionController_->Stop();
     }
     if (scrollPositionCallback_) {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->NotifyScrollStart();
+        }
         scrollPositionCallback_(0, SCROLL_FROM_START);
     }
 }
@@ -340,6 +343,9 @@ void ScrollBarPattern::ProcessFrictionMotion(double value)
 void ScrollBarPattern::ProcessFrictionMotionStop()
 {
     if (scrollEndCallback_) {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->NotifyScrollStop();
+        }
         scrollEndCallback_();
     }
 }

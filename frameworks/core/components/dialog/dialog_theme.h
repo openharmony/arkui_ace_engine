@@ -141,6 +141,7 @@ public:
             auto textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_primary", PRIMARY_RGBA_OPACITY);
             theme->titleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
             theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
+            theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
             textOpacity = dialogPattern->GetAttr<double>("attribute_alpha_content_secondary", SECONDARY_RGBA_OPACITY);
             theme->subtitleTextStyle_.SetTextColor(textColor.BlendOpacity(textOpacity));
             theme->subtitleTextStyle_.SetFontSize(
@@ -152,6 +153,7 @@ public:
             theme->dividerLength_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_LENGTH, 24.0_vp);
             theme->dividerBetweenButtonWidth_ =
                 dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH, 2.0_px);
+            theme->dividerColor_ = dialogPattern->GetAttr<Color>("divider_color", Color(0x33000000));
 
             auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 24.0_vp);
             theme->contentAdjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
@@ -163,6 +165,16 @@ public:
             theme->buttonDefaultBgColor_ = dialogPattern->GetAttr<Color>("button_default_bg_color", Color::TRANSPARENT);
             theme->buttonDefaultFontColor_ =
                 dialogPattern->GetAttr<Color>("button_default_font_color", Color(0xff007dff));
+            theme->buttonPaddingBottom_ = dialogPattern->GetAttr<Dimension>("button_padding_bottom", 16.0_vp);
+            theme->singleButtonPaddingStart_ =
+                dialogPattern->GetAttr<Dimension>("single_button_padding_start", 16.0_vp);
+            theme->singleButtonPaddingEnd_ = dialogPattern->GetAttr<Dimension>("single_button_padding_end", 16.0_vp);
+            theme->mutiButtonPaddingStart_ = dialogPattern->GetAttr<Dimension>("muti_button_padding_start", 16.0_vp);
+            theme->mutiButtonPaddingEnd_ = dialogPattern->GetAttr<Dimension>("muti_button_padding_end", 16.0_vp);
+            theme->mutiButtonPaddingHorizontal_ =
+                dialogPattern->GetAttr<Dimension>("muti_button_padding_horizontal", 8.0_vp);
+            theme->mutiButtonPaddingVertical_ =
+                dialogPattern->GetAttr<Dimension>("muti_button_padding_vertical", 4.0_vp);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
@@ -298,6 +310,41 @@ public:
     const Edge& GetButtonPaddingCenter() const
     {
         return buttonPaddingCenter_;
+    }
+
+    const Dimension& GetButtonPaddingBottom() const
+    {
+        return buttonPaddingBottom_;
+    }
+
+    const Dimension& GetSingleButtonPaddingStart() const
+    {
+        return singleButtonPaddingStart_;
+    }
+
+    const Dimension& GetSingleButtonPaddingEnd() const
+    {
+        return singleButtonPaddingEnd_;
+    }
+
+    const Dimension& GetMutiButtonPaddingStart() const
+    {
+        return mutiButtonPaddingStart_;
+    }
+
+    const Dimension& GetMutiButtonPaddingEnd() const
+    {
+        return mutiButtonPaddingEnd_;
+    }
+
+    const Dimension& GetMutiButtonPaddingHorizontal() const
+    {
+        return mutiButtonPaddingHorizontal_;
+    }
+
+    const Dimension& GetMutiButtonPaddingVertical() const
+    {
+        return mutiButtonPaddingVertical_;
     }
 
     const Dimension& GetButtonSpacingHorizontal() const
@@ -536,6 +583,13 @@ private:
     Dimension minButtonWidth_;
     Dimension maxButtonWidth_;
     Dimension defaultPaddingBottomFixed_;
+    Dimension buttonPaddingBottom_;
+    Dimension singleButtonPaddingStart_;
+    Dimension singleButtonPaddingEnd_;
+    Dimension mutiButtonPaddingStart_;
+    Dimension mutiButtonPaddingEnd_;
+    Dimension mutiButtonPaddingHorizontal_;
+    Dimension mutiButtonPaddingVertical_;
 };
 
 } // namespace OHOS::Ace

@@ -20,6 +20,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -76,23 +77,23 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (axis == Axis::HORIZONTAL) {
             if (!barOverlap) {
                 childLayoutConstraint.selfIdealSize.SetHeight(
-                    childLayoutConstraint.maxSize.Height() - tabBarSize.Height() - dividerStrokeWidth);
-                childLayoutConstraint.selfIdealSize.SetWidth(childLayoutConstraint.maxSize.Width());
+                    idealSize.Height() - tabBarSize.Height() - dividerStrokeWidth);
+                childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
                 parentIdealSize.SetHeight(idealSize.Height() - tabBarSize.Height() - dividerStrokeWidth);
             } else {
-                childLayoutConstraint.selfIdealSize.SetHeight(childLayoutConstraint.maxSize.Height());
-                childLayoutConstraint.selfIdealSize.SetWidth(childLayoutConstraint.maxSize.Width());
+                childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
+                childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
                 parentIdealSize.SetHeight(idealSize.Height());
             }
         } else if (axis == Axis::VERTICAL) {
             if (!barOverlap) {
                 childLayoutConstraint.selfIdealSize.SetWidth(
-                    childLayoutConstraint.maxSize.Width() - tabBarSize.Width() - dividerStrokeWidth);
-                childLayoutConstraint.selfIdealSize.SetHeight(childLayoutConstraint.maxSize.Height());
+                    idealSize.Width() - tabBarSize.Width() - dividerStrokeWidth);
+                childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
                 parentIdealSize.SetWidth(idealSize.Width() - tabBarSize.Width() - dividerStrokeWidth);
             } else {
-                childLayoutConstraint.selfIdealSize.SetWidth(childLayoutConstraint.maxSize.Width());
-                childLayoutConstraint.selfIdealSize.SetHeight(childLayoutConstraint.maxSize.Height());
+                childLayoutConstraint.selfIdealSize.SetWidth(idealSize.Width());
+                childLayoutConstraint.selfIdealSize.SetHeight(idealSize.Height());
                 parentIdealSize.SetWidth(idealSize.Width());
             }
         }
@@ -126,13 +127,13 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     dividerWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[DIVIDER_INDEX]);
     dividerWrapper->Layout();
-	
+
     tabBarWrapper->GetGeometryNode()->SetMarginFrameOffset(offsetList[TAB_BAR_INDEX]);
     tabBarWrapper->Layout();
 }
 
-std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(LayoutWrapper* layoutWrapper,
-    const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const
+std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const
 {
     std::vector<OffsetF> offsetList;
     OffsetF tabBarOffset;

@@ -39,6 +39,13 @@ namespace {
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 constexpr uint32_t RATE = 2;
+const Dimension OFFSET = 3.5_vp;
+const Dimension OFFSET_LENGTH = 5.5_vp;
+const Dimension DIALOG_OFFSET = 1.0_vp;
+const Dimension DIALOG_OFFSET_LENGTH = 1.0_vp;
+constexpr uint32_t HALF = 2;
+const Dimension FOUCS_WIDTH = 2.0_vp;
+const Dimension MARGIN_SIZE = 12.0_vp;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -98,7 +105,6 @@ void TextPickerPattern::SetButtonIdeaSize()
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
-        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -173,7 +179,6 @@ void TextPickerPattern::InitDisabled()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 RefPtr<FrameNode> TextPickerPattern::GetColumnNode()
@@ -348,7 +353,6 @@ double TextPickerPattern::CalculateHeight()
         CHECK_NULL_RETURN(textPickerColumnPattern, height);
         textPickerColumnPattern->SetDefaultPickerItemHeight(height);
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return height;
 }
 
@@ -398,6 +402,11 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
+    auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    CHECK_NULL_VOID(stackChild);
+    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
+    CHECK_NULL_VOID(pickerChild);
+    auto columnWidth = pickerChild->GetGeometryNode()->GetFrameSize().Width();
     auto frameWidth = host->GetGeometryNode()->GetFrameSize().Width();
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
     auto pickerThemeWidth = dividerSpacing * RATE;
@@ -407,9 +416,22 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
                    PRESS_INTERVAL.ConvertToPx() * RATE;
     auto centerY =
         (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
-
-    paintRect.SetRect(RectF(centerX, centerY, (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE,
-        dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE));
+    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
+    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
+    if (!GetIsShowInDialog()) {
+        piantRectHeight = piantRectHeight - OFFSET_LENGTH.ConvertToPx();
+        centerY = centerY + OFFSET.ConvertToPx();
+    } else {
+        piantRectHeight = piantRectHeight - DIALOG_OFFSET.ConvertToPx();
+        centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
+    }
+    if (piantRectWidth > columnWidth) {
+        piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx();
+        centerX = focusKeyID_ * piantRectWidth + FOUCS_WIDTH.ConvertToPx() / HALF;
+    } else {
+        centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
+    }
+    paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
@@ -821,8 +843,7 @@ void TextPickerPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::string tag = host->GetTag();
-    auto child = host->GetChildren();
+    host->SetNeedCallChildrenUpdate(false);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
@@ -830,24 +851,23 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto dialogContext = host->GetRenderContext();
-    CHECK_NULL_VOID(dialogContext);
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
     pickerProperty->UpdateColor(normalStyle.GetTextColor());
     pickerProperty->UpdateDisappearColor(disappearStyle.GetTextColor());
     if (isPicker_) {
-        host->SetNeedCallChildrenUpdate(false);
         return;
     }
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
-    auto contentChildren = contentRowNode_->GetChildren();
-    auto layoutRenderContext = contentRowNode_->GetRenderContext();
-    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    if (contentRowNode_) {
+        auto layoutRenderContext = contentRowNode_->GetRenderContext();
+        CHECK_NULL_VOID(layoutRenderContext);
+        layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    }
     auto frameNode = DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(frameNode);
     FrameNode::ProcessOffscreenNode(frameNode);
-    host->SetNeedCallChildrenUpdate(false);
-    OnModifyDone();
+    host->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

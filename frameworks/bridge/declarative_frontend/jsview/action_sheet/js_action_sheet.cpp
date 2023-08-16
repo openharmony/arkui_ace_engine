@@ -249,6 +249,13 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         properties.offset = DimensionOffset(dx, dy);
     }
 
+    // Parse maskRect.
+    auto maskRectValue = obj->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        properties.maskRect = maskRect;
+    }
+
     // Parses gridCount.
     auto gridCountValue = obj->GetProperty("gridCount");
     if (gridCountValue->IsNumber()) {

@@ -198,8 +198,9 @@ if (is_emulator) {
 }
 
 if (defined(global_parts_info)) {
-  if (defined(global_parts_info.resourceschedule_frame_aware_sched) || defined(
-          global_parts_info.hmosresourceschedule_resourceschedule_frame_aware_sched_override)) {
+  if (defined(global_parts_info.resourceschedule_frame_aware_sched) ||
+      defined(
+          global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
     frame_trace_support = true
   } else {
     frame_trace_support = false

@@ -135,6 +135,7 @@ struct PreInlineState {
     RectF frameRect;
     bool setHeight = false;
     bool saveInlineState = false;
+    bool hasBorderColor = false;
 };
 
 class TextFieldPattern : public ScrollablePattern,
@@ -753,7 +754,7 @@ public:
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+        dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
     }
 
     void CreateHandles() override;
@@ -779,9 +780,9 @@ public:
                         Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
         for (const auto& textBoxes : textBoxes_) {
             bool isInRange = LessOrEqual(textBoxes.rect_.GetLeft(), offset.GetX()) &&
-                LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
-                LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
-                LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
+                             LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
+                             LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
+                             LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
             if (isInRange) {
                 return true;
             }
@@ -918,7 +919,7 @@ public:
     }
 
     void StopEditing();
-    
+
     void MarkContentChange()
     {
         contChange_ = true;
@@ -960,6 +961,21 @@ public:
         return inlinePadding_;
     }
 
+    bool GetScrollBarVisible() const
+    {
+        return scrollBarVisible_;
+    }
+
+    float GetPreviewWidth() const
+    {
+        return inlineState_.frameRect.Width();
+    }
+
+    void ResetTouchAtLeftOffsetFlag()
+    {
+        isTouchAtLeftOffset_ = true;
+    }
+
     bool IsNormalInlineState() const;
     void TextIsEmptyRect(RectF &rect);
     void TextAreaInputRectUpdate(RectF &rect);
@@ -969,11 +985,14 @@ public:
 
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
-        if (customKeyboardBulder_ && isCustomKeyboardAttached_) {
+        if (customKeyboardBulder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
             CloseCustomKeyboard();
         }
         customKeyboardBulder_ = keyboardBuilder;
     }
+
+    void DumpInfo() override;
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -989,7 +1008,7 @@ private:
     std::function<void(Offset)> GetThumbnailCallback();
 #endif
     bool CaretPositionCloseToTouchPosition();
-    void CreateSingleHandle(bool animation = false);
+    void CreateSingleHandle(bool animation = false, bool isMenuShow = true);
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
@@ -1007,8 +1026,8 @@ private:
     // assert handles are inside the contentRect, reset them if not
     void CheckHandles(std::optional<RectF>& firstHandle,
         std::optional<RectF>& secondHandle, float firstHandleSize = 0.0f, float secondHandleSize = 0.0f);
-    void ShowSelectOverlay(
-        const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle, bool animation = false);
+    void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle,
+        bool animation = false, bool isMenuShow = true);
 
     void CursorMoveOnClick(const Offset& offset);
     void UpdateCaretInfoToController() const;
@@ -1057,7 +1076,7 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     bool FilterWithAscii(const std::string& valueToUpdate, std::string& result);
-    void EditingValueFilter(std::string& valueToUpdate, std::string& result);
+    void EditingValueFilter(std::string& valueToUpdate, std::string& result, bool isInsertValue = false);
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     float FitCursorInSafeArea();
@@ -1088,13 +1107,15 @@ private:
 
     void UpdateCopyAllStatus();
     void SaveInlineStates();
-    void TextRectSetOffset(RefPtr<TextFieldLayoutProperty> layoutProperty);
     void ApplyInlineStates(bool focusStatus);
     void RestorePreInlineStates();
     bool CheckHandleVisible(const RectF& paintRect);
 
     bool ResetObscureTickCountDown();
     bool IsInPasswordMode() const;
+    void GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end);
+    bool IsTouchAtLeftOffset(float currentOffsetX);
+    void FilterExistText();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1169,6 +1190,7 @@ private:
     bool contChange_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
+    float paragraphWidth_ = 0.0f;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
@@ -1196,6 +1218,7 @@ private:
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = UNDERLINE_WIDTH;
     Color underlineColor_;
+    bool scrollBarVisible_ = false;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
@@ -1239,8 +1262,11 @@ private:
     bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
+    bool isFocusedBeforeClick_ = false;
+    bool originalIsMenuShow_ = false;
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
+    bool isTouchAtLeftOffset_ = true;
 };
 } // namespace OHOS::Ace::NG
 

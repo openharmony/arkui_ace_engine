@@ -235,25 +235,6 @@ RefPtr<Frontend> Frontend::Create()
     return AceType::MakeRefPtr<JsFrontend>();
 }
 
-bool Frontend::MaybeRelease()
-{
-    CHECK_RUN_ON(JS);
-    CHECK_NULL_RETURN(taskExecutor_, (Destroy(), true));
-    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
-        LOGI("Destroy Frontend on JS thread.");
-        Destroy();
-        return true;
-    } else {
-        LOGI("Post Destroy Frontend Task to JS thread.");
-        return !taskExecutor_->PostTask(
-            [this]() {
-                Destroy();
-                delete this;
-            },
-            TaskExecutor::TaskType::JS);
-    }
-}
-
 JsFrontend::~JsFrontend() noexcept
 {
     LOG_DESTROY();

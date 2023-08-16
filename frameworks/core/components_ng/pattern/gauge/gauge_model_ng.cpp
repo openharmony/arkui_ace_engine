@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,14 @@ void GaugeModelNG::SetColors(const std::vector<Color>& colors, const std::vector
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Colors, colors);
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Values, values);
+}
+
+void GaugeModelNG::SetGradientColors(
+    const std::vector<ColorStopArray>& colors, const std::vector<float>& values, const GaugeType& type)
+{
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, GradientColors, colors);
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Values, values);
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, GaugeType, type);
 }
 
 void GaugeModelNG::SetStrokeWidth(const Dimension& strokeWidth)

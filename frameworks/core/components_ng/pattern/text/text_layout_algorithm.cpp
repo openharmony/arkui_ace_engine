@@ -61,6 +61,10 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    if (!contentConstraint.maxSize.IsPositive()) {
+        return std::nullopt;
+    }
+
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = frameNode->GetContext();
@@ -70,10 +74,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto contentModifier = pattern->GetContentModifier();
-
-    if (!contentConstraint.maxSize.IsPositive()) {
-        return std::nullopt;
-    }
 
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
@@ -106,7 +106,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     baselineOffset_ = static_cast<float>(baselineOffset);
 
-    float heightFinal = static_cast<float>(height + std::fabs(baselineOffset));
+    auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset));
     if (contentConstraint.selfIdealSize.Height().has_value()) {
         heightFinal = std::min(
             static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.selfIdealSize.Height().value());
@@ -312,7 +312,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             placeHolderIndex.emplace_back(child->placeHolderIndex);
         }
     }
-    if (spanItemChildren_.empty() || placeHolderIndex.size() == 0) {
+    if (spanItemChildren_.empty() || placeHolderIndex.empty()) {
         return;
     }
 
@@ -731,7 +731,7 @@ void TextLayoutAlgorithm::ApplyIndents(const TextStyle& textStyle, double width)
 bool TextLayoutAlgorithm::IncludeImageSpan(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
-    return (layoutWrapper->GetAllChildrenWithBuild().size() > 0);
+    return (!layoutWrapper->GetAllChildrenWithBuild().empty());
 }
 
 void TextLayoutAlgorithm::GetSpanAndImageSpanList(
@@ -747,10 +747,9 @@ void TextLayoutAlgorithm::GetSpanAndImageSpanList(
         auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
         if (imageSpanItem) {
             int32_t index = child->placeHolderIndex;
-            if (index > static_cast<int32_t>(rectsForPlaceholders.size())) {
-                continue;
+            if (index >= 0 && index < static_cast<int32_t>(rectsForPlaceholders.size())) {
+                imageSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
             }
-            imageSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
         } else {
             spanList.emplace_back(child);
         }

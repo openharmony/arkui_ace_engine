@@ -408,7 +408,9 @@ void JSSlidingPanel::SetCustomHeight(const JSCallbackInfo& info)
         return;
     }
     CalcDimension customHeight;
-    if (!ParseJsDimensionVp(info[0], customHeight)) {
+    if (info[0]->IsString() && info[0]->ToString().find("wrapContent") != std::string::npos) {
+        customHeight = CalcDimension(info[0]->ToString());
+    } else if (!ParseJsDimensionVp(info[0], customHeight)) {
         customHeight = Dimension(0.0);
     }
 

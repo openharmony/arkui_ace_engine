@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 240.0_vp;
 
 class ACE_EXPORT NavigationLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(NavigationLayoutProperty, LayoutProperty);

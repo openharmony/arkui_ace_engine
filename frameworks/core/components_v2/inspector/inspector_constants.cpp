@@ -128,10 +128,10 @@ const char NAVBAR_CONTENT_ETS_TAG[] = "NavBarContent";
 const char NAVBAR_ETS_TAG[] = "NavBar";
 
 // navRouter view
-const char NAVROUTER_VIEW_ETS_TAG[] = "NavRouterView";
+const char NAVROUTER_VIEW_ETS_TAG[] = "NavRouter";
 
 // navDestination view
-const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestinationView";
+const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 const char NAVDESTINATION_TITLE_BAR_ETS_TAG[] = "NavDestinationTitleBar";
 const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 

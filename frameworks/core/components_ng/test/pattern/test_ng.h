@@ -67,6 +67,13 @@ public:
         RefPtr<Pattern> pattern = GetChildFrameNode(frameNode, index)->GetPattern();
         return AceType::DynamicCast<T>(pattern);
     }
+
+    template<typename T>
+    RefPtr<T> GetChildLayoutProperty(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        RefPtr<LayoutProperty> layoutProperty = GetChildFrameNode(frameNode, index)->GetLayoutProperty();
+        return AceType::DynamicCast<T>(layoutProperty);
+    }
     
     const RectF& GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)
     {

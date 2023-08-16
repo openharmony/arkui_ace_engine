@@ -53,11 +53,16 @@ void HyperlinkModelNG::SetTextStyle(const RefPtr<FrameNode>& hyperlinkNode, cons
     CHECK_NULL_VOID(textLayoutProperty);
     auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
     textLayoutProperty->UpdateContent(content);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
+    CHECK_NULL_VOID(theme);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
-    textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
+    textLayoutProperty->UpdateTextColor(theme->GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
-    textLayoutProperty->UpdateTextDecoration(TextDecoration::UNDERLINE);
+    textLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
+    textLayoutProperty->UpdateAdaptMinFontSize(10.0_vp);
+    textLayoutProperty->UpdateAdaptMaxFontSize(textStyle.GetFontSize());
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     hyperlinkNode->MarkModifyDone();
     hyperlinkNode->MarkDirtyNode();
 }

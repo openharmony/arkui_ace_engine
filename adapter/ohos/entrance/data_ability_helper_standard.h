@@ -18,6 +18,7 @@
 
 #include "base/resource/data_ability_helper.h"
 
+#include "media_library_manager.h"
 #include "pixel_map.h"
 
 namespace OHOS::AppExecFwk {
@@ -59,6 +60,7 @@ private:
     std::shared_ptr<AppExecFwk::DataAbilityHelper> dataAbilityHelper_;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
     std::weak_ptr<OHOS::AppExecFwk::Context> context_;
+    OHOS::Media::MediaLibraryManager mgr_;
 };
 
 } // namespace OHOS::Ace

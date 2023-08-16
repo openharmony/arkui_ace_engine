@@ -169,7 +169,7 @@ HWTEST_F(CustomTestNg, CustomTest002, TestSize.Level1)
     customNode->SetRenderFunction(std::move(renderFunction));
     customNode->Build();
     customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
-    EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_0);
+    EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_1);
 }
 
 /**

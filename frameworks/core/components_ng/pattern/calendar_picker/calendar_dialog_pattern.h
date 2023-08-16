@@ -87,6 +87,16 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
+    void SetHoverState(bool state)
+    {
+        hoverState_ = state;
+    }
+
+    bool GetHoverState() const
+    {
+        return hoverState_;
+    }
+
     void GetCalendarMonthData(int32_t year, int32_t month, ObtainedMonth& calendarMonthData);
     CalendarMonth GetNextMonth(const CalendarMonth& calendarMonth);
     CalendarMonth GetLastMonth(const CalendarMonth& calendarMonth);
@@ -98,6 +108,7 @@ private:
     void InitOnTouchEvent();
     void InitTitleArrowsEvent();
     void InitEntryChangeEvent();
+    void InitHoverEvent();
     void AddHotZoneRect();
     bool HandleKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -116,6 +127,12 @@ private:
     bool HandleTabKeyEvent(const KeyEvent& event);
     void FireChangeByKeyEvent(PickerDate& selectedDay);
     bool IsIndexInCurrentMonth(int32_t focusedDayIndex, const ObtainedMonth& currentMonthData);
+    bool IsInEntryRegion(const Offset& globalLocation);
+    void HandleEntryNodeHoverEvent(bool state, const Offset& globalLocation);
+    void HandleEntryNodeTouchEvent(bool isPressed, const Offset& globalLocation);
+    void UpdateDialogBackgroundColor();
+    void UpdateTitleArrowsColor();
+    void UpdateOptionsButtonColor();
 
     RefPtr<FrameNode> GetCalendarFrameNode();
     RefPtr<CalendarPattern> GetCalendarPattern();
@@ -131,9 +148,11 @@ private:
     bool isFirstAddhotZoneRect_ = true;
     bool isFocused_ = false;
     bool isCalendarFirstFocused_ = false;
+    bool hoverState_ = false;
     OffsetF dialogOffset_;
     RefPtr<FrameNode> entryNode_ = nullptr;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
+    RefPtr<InputEvent> hoverListener_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarDialogPattern);
 };
 } // namespace OHOS::Ace::NG

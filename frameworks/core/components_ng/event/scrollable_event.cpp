@@ -49,13 +49,30 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
     return false;
 }
 
-bool ScrollableActuator::IsHitTestBlock() const
+void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint)
 {
     for (const auto& [axis, event] : scrollableEvents_) {
-        if (event && event->IsHitTestBlock()) {
-            return true;
+        if (!event || !event->GetEnable()) {
+            continue;
+        }
+        if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
+            event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+        } else if (event->GetScrollable()) {
+            const auto& scrollable = event->GetScrollable();
+            scrollable->SetGetEventTargetImpl(getEventTargetImpl);
+            scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            scrollable->OnCollectTouchTarget(result);
+        }
+        if (event->IsHitTestBlock()) {
+            if (!clickRecognizer_) {
+                clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+            }
+            clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+            result.emplace_front(clickRecognizer_);
+            break;
         }
     }
-    return false;
 }
 } // namespace OHOS::Ace::NG

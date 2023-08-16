@@ -88,7 +88,7 @@ public:
         return calendarData_;
     }
 
-    void HandleClickEvent(const GestureEvent& info);
+    void HandleClickEvent(const Offset& globalLocation);
     void HandleTextHoverEvent(bool state, int32_t index);
     void HandleAddButtonClick();
     void HandleSubButtonClick();
@@ -108,7 +108,7 @@ public:
         isDialogShow_ = flag;
     }
 
-    CalendarPickerSelectedType CheckClickRegion(const GestureEvent& info);
+    CalendarPickerSelectedType CheckRegion(const Offset& globalLocation);
     CalendarPickerSelectedType GetSelectedType() const
     {
         return selected_;
@@ -167,8 +167,13 @@ public:
         const RefPtr<LayoutWrapper>& dirty, bool /* skipMeasure */, bool /* skipLayout */) override;
 
     OffsetF CalculateDialogOffset();
+    void HandleHoverEvent(bool state, const Offset& globalLocation);
+    void HandleTouchEvent(bool isPressed, const Offset& globalLocation);
+
+    bool IsContainerModal();
 private:
     void OnModifyDone() override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent();
     void InitOnKeyEvent();
     void InitOnHoverEvent();
@@ -178,6 +183,8 @@ private:
     void HandleTaskCallback();
     void HandleTextFocusEvent(int32_t index);
     void HandleBlurEvent();
+    void HandleButtonHoverEvent(bool state, int32_t index);
+    void HandleButtonTouchEvent(bool isPressed, int32_t index);
     void ResetTextState();
     void ResetTextStateByNode(const RefPtr<FrameNode>& textFrameNode);
     void FlushTextStyle();
@@ -186,7 +193,7 @@ private:
     bool HandleMonthKeyEvent(uint32_t number);
     bool HandleDayKeyEvent(uint32_t number);
     void FireChangeEvents(const std::string& info);
-    bool IsContainerModal();
+    void UpdateEntryButtonColor();
 
     std::string GetEntryDateInfo();
     void SetDate(const std::string& info);

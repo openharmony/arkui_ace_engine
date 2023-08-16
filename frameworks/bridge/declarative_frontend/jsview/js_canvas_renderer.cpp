@@ -1073,9 +1073,8 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
     std::unique_ptr<ImageData> data;
     data = GetImageDataFromCanvas(left, top, width, height);
-
-    final_height = static_cast<uint32_t>(data->dirtyHeight);
-    final_width = static_cast<uint32_t>(data->dirtyWidth);
+    final_height = (data == nullptr) ? static_cast<uint32_t>(height) : static_cast<uint32_t>(data->dirtyHeight);
+    final_width = (data == nullptr) ? static_cast<uint32_t>(width) : static_cast<uint32_t>(data->dirtyWidth);
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(final_height * final_width * 4);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
     if (data != nullptr) {

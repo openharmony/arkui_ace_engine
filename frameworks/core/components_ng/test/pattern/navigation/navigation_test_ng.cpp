@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -809,15 +810,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_013, TestSize.Level1)
     EXPECT_EQ(pattern->preNavBarWidth_, 360.0);
     pattern->preNavBarWidth_ = 0;
     pattern->HandleDragUpdate(FLOAT_260);
-    EXPECT_EQ(pattern->realNavBarWidth_, -361.0f);
-    pattern->HandleDragUpdate(500.0f);
-    EXPECT_EQ(pattern->realNavBarWidth_, 280.0f);
-    pattern->dragRect_.width_ = 200.0f;
-    pattern->HandleDragUpdate(100.0f);
-    EXPECT_EQ(pattern->realNavBarWidth_, 240.0f);
-    pattern->dragRect_.width_ = 500.0f;
-    pattern->HandleDragUpdate(100.0f);
-    EXPECT_EQ(pattern->realNavBarWidth_, 240.0f);
+    EXPECT_EQ(pattern->realNavBarWidth_, 0.0);
 }
 
 /**
@@ -1320,14 +1313,12 @@ HWTEST_F(NavigationTestNg, NavigationLayoutAlgorithm001, TestSize.Level1)
     layoutWrapper->layoutAlgorithm_ = layoutAlgorithmWrapper;
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
     ASSERT_NE(layoutWrapper->layoutAlgorithm_, nullptr);
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
     ASSERT_TRUE(navigationLayoutProperty->propHideNavBar_.value());
 
     navigation->contentNode_ =
         NavBarNode::GetOrCreateNavBarNode("navBarNode", 66, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
-    ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
     ASSERT_EQ(navigationLayoutProperty->propNavigationMode_.value(), NavigationMode::SPLIT);
 }
 

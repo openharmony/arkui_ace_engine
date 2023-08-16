@@ -39,32 +39,32 @@ public:
     RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<UINode>& customNode, const GestureEvent& info);
     RefPtr<DragDropProxy> CreateTextDragDropProxy();
 
-    void AddDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void AddDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        dragFrameNodes_.insert(dragFrameNode);
+        dragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
-    void RemoveDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void RemoveDragFrameNode(int32_t id)
     {
-        dragFrameNodes_.erase(dragFrameNode);
-        gridDragFrameNodes_.erase(dragFrameNode);
-        listDragFrameNodes_.erase(dragFrameNode);
-        textFieldDragFrameNodes_.erase(dragFrameNode);
+        dragFrameNodes_.erase(id);
+        gridDragFrameNodes_.erase(id);
+        listDragFrameNodes_.erase(id);
+        textFieldDragFrameNodes_.erase(id);
     }
 
-    void AddGridDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void AddGridDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        gridDragFrameNodes_.insert(dragFrameNode);
+        gridDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
-    void AddListDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void AddListDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        listDragFrameNodes_.insert(dragFrameNode);
+        listDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
-    void AddTextFieldDragFrameNode(const WeakPtr<FrameNode>& dragFrameNode)
+    void AddTextFieldDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
-        textFieldDragFrameNodes_.insert(dragFrameNode);
+        textFieldDragFrameNodes_.try_emplace(id, dragFrameNode);
     }
 
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
@@ -82,7 +82,7 @@ public:
     void RestoreClipboardData();
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const RefPtr<OHOS::Ace::DragEvent>& event);
+    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
@@ -131,6 +131,16 @@ public:
         isMouseDragged_ = isMouseDragged;
     }
 
+    void SetIsDragWindowShow(bool isDragWindowShow)
+    {
+        isDragWindowShow_ = isDragWindowShow;
+    }
+
+    bool IsDragWindowShow()
+    {
+        return isDragWindowShow_;
+    }
+
     RefPtr<FrameNode> FindTargetInChildNodes(const RefPtr<UINode> parentNode,
         std::vector<RefPtr<FrameNode>> hitFrameNodes, bool findDrop);
 
@@ -152,11 +162,12 @@ private:
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
     void ClearVelocityInfo();
     void UpdateVelocityTrackerPoint(const Point& point, bool isEnd = false);
+    void PrintDragFrameNode(const Point& point, const RefPtr<FrameNode>& dragFrameNode);
 
-    std::set<WeakPtr<FrameNode>> dragFrameNodes_;
-    std::set<WeakPtr<FrameNode>> gridDragFrameNodes_;
-    std::set<WeakPtr<FrameNode>> listDragFrameNodes_;
-    std::set<WeakPtr<FrameNode>> textFieldDragFrameNodes_;
+    std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
+    std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
+    std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
+    std::map<int32_t, WeakPtr<FrameNode>> textFieldDragFrameNodes_;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<FrameNode> draggedFrameNode_;
     RefPtr<FrameNode> preTargetFrameNode_;
@@ -179,6 +190,7 @@ private:
     bool isDragged_ = false;
     bool isMouseDragged_ = false;
     bool isWindowConsumed_ = false;
+    bool isDragWindowShow_ = false;
     VelocityTracker velocityTracker_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);

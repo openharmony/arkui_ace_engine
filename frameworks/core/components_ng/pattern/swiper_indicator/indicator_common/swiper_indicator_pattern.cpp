@@ -680,6 +680,13 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
         if (NonPositive(turnPageRateOffset)) {
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() - 1);
         }
+
+        auto swiperPaintProperty = swiperPattern->GetPaintProperty<SwiperPaintProperty>();
+        CHECK_NULL_VOID(swiperPaintProperty);
+        auto autoPlay = swiperPaintProperty->GetAutoPlay().value_or(false);
+        if (autoPlay) {
+            swiperPattern->SwipeToWithoutAnimationAutoPlay();
+        }
         dragStartPoint_ = dragPoint;
     }
 }

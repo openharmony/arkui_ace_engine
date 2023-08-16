@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 
 #include <cstdint>
+#include <functional>
+#include <memory>
 
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
@@ -29,6 +31,10 @@ namespace OHOS::AAFwk {
 class Want;
 class WantParams;
 } // namespace OHOS::AAFwk
+
+namespace OHOS::Ace {
+class ModalUIExtensionProxy;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 class UIExtensionProxy;
@@ -54,6 +60,8 @@ public:
 
     int32_t GetSessionId();
 
+    void SetModalOnRemoteReadyCallback(
+        const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
     void SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
     void SetOnReleaseCallback(const std::function<void(int32_t)>&& callback);
     void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
@@ -104,12 +112,14 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
 
+    std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;
     std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
     std::function<void(int32_t)> onReleaseCallback_;
     std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
 
+    bool isBackground_ = false;
     bool isDestruction_ = false;
     ErrorMsg lastError_;
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);

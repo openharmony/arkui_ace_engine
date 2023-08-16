@@ -116,4 +116,12 @@ void ElementRegister::ClearPendingRemoveNodes() {}
 
 void ElementRegister::ReSyncGeometryTransition() {}
 
+RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
+    const std::string& id, const WeakPtr<NG::FrameNode>& frameNode, bool followWithoutTransition)
+{
+    return nullptr;
+}
+
+void ElementRegister::DumpGeometryTransition() {}
+
 } // namespace OHOS::Ace

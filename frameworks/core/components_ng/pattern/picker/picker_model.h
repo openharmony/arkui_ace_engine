@@ -35,6 +35,9 @@ struct PickerDialogInfo {
     bool isStartDate;
     bool isEndDate;
     bool isSelectedDate;
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
+    std::optional<DimensionRect> maskRect;
 };
 class DatePickerModel {
 public:

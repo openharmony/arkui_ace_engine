@@ -48,12 +48,15 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         self->BufferAvailableCallback();
+        Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
     };
 }
 
 WindowScene::~WindowScene()
 {
     CHECK_NULL_VOID_NOLOG(IsMainWindow());
+    CHECK_NULL_VOID_NOLOG(session_);
+    session_->SetShowRecent(false);
     UnregisterLifecycleListener();
 }
 
@@ -61,9 +64,10 @@ void WindowScene::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(session_);
+    session_->SetUINodeId(host->GetAccessibilityId());
 
     if (!IsMainWindow()) {
-        CHECK_NULL_VOID(session_);
         auto surfaceNode = session_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
@@ -72,7 +76,6 @@ void WindowScene::OnAttachToFrameNode()
         return;
     }
 
-    CHECK_NULL_VOID(session_);
     auto sessionInfo = session_->GetSessionInfo();
     auto name = sessionInfo.bundleName_;
     auto pos = name.find_last_of('.');
@@ -131,8 +134,6 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void WindowScene::BufferAvailableCallback()
 {
-    ContainerScope scope(instanceId_);
-
     const auto& config =
         Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
     if (config.enabled_) {
@@ -152,11 +153,21 @@ void WindowScene::BufferAvailableCallback()
         });
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->RemoveChild(startingNode_);
-    startingNode_.Reset();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChild(self->startingNode_);
+        self->startingNode_.Reset();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnConnect()
@@ -200,7 +211,7 @@ void WindowScene::OnForeground()
         host->RemoveChild(self->snapshotNode_);
         self->snapshotNode_.Reset();
         host->AddChild(self->contentNode_);
-        if (!self->session_->GetBufferAvailable()) {
+        if (!self->session_->GetBufferAvailable() && !self->startingNode_) {
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
         }
@@ -215,15 +226,18 @@ void WindowScene::OnForeground()
 
 void WindowScene::OnBackground()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    CHECK_NULL_VOID(session_);
+    auto snapshot = session_->GetSnapshot();
+
+    auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->CreateSnapshotNode();
         host->RemoveChild(self->contentNode_);
-        host->AddChild(self->snapshotNode_);
+        self->CreateSnapshotNode(snapshot);
+        host->AddChild(self->snapshotNode_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
@@ -235,18 +249,21 @@ void WindowScene::OnBackground()
 
 void WindowScene::OnDisconnect()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    CHECK_NULL_VOID(session_);
+    auto snapshot = session_->GetSnapshot();
+
+    auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->CreateSnapshotNode();
         host->RemoveChild(self->contentNode_);
         self->contentNode_.Reset();
-        host->RemoveChild(self->startingNode_);
-        self->startingNode_.Reset();
-        host->AddChild(self->snapshotNode_);
+        if (!self->snapshotNode_) {
+            self->CreateSnapshotNode(snapshot);
+            host->AddChild(self->snapshotNode_, 0);
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 

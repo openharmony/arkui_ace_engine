@@ -411,6 +411,13 @@ HWTEST_F(TabsTestNg, TabsModelMeasure002, TestSize.Level1)
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(TABBAR_WIDTH)));
+
+    RefPtr<GeometryNode> tabbarChildGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> tabBarChild =
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, tabbarChildGeometryNode, tabBarNode->GetLayoutProperty());
+    tabBarLayoutWrapper->AppendChild(tabBarChild);
+    tabBarLayoutWrapper->AppendChild(tabBarChild);
+    tabBarLayoutWrapper->AppendChild(tabBarChild);
     layoutWrapper.AppendChild(tabBarLayoutWrapper);
 
     tabsLayoutAlgorithm->Measure(&layoutWrapper);
@@ -528,6 +535,14 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TABBAR_WIDTH), CalcLength(FIRST_ITEM_WIDTH)));
+    
+    RefPtr<GeometryNode> tabbarChildGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> tabBarChild =
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, tabbarChildGeometryNode, tabBarNode->GetLayoutProperty());
+    tabBarLayoutWrapper->AppendChild(tabBarChild);
+    tabBarLayoutWrapper->AppendChild(tabBarChild);
+    tabBarLayoutWrapper->AppendChild(tabBarChild);
+
     layoutWrapper.AppendChild(tabBarLayoutWrapper);
 
     tabsLayoutAlgorithm->Measure(&layoutWrapper);
