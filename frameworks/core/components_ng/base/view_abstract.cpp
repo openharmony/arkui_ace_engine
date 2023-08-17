@@ -1175,7 +1175,7 @@ void ViewAbstract::BindPopup(
     }
     if (isShow) {
         LOGI("begin to update popup node.");
-        overlayManager->ShowPopup(targetId, popupInfo);
+        overlayManager->UpdatePopupNode(targetId, popupInfo);
         if (popupPattern) {
             popupPattern->StartEnteringAnimation(nullptr);
         }
@@ -1186,7 +1186,7 @@ void ViewAbstract::BindPopup(
                     auto overlay = weakOverlayManger.Upgrade();
                     CHECK_NULL_VOID(overlay);
                     LOGI("begin to update popup node.");
-                    overlay->HidePopup(targetId, popupInfo);
+                    overlay->UpdatePopupNode(targetId, popupInfo);
                 });
         }
     }
