@@ -232,12 +232,19 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto imageHotZoneWidth = showPasswordIcon ? imageSize + pattern->GetIconRightOffset() : 0.0f;
     auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
     CHECK_NULL_RETURN(scrollBarTheme, std::nullopt);
+    const auto& layoutConstraint = textFieldLayoutProperty->GetLayoutConstraint();
     if (isInlineStyle) {
         // for InlineStyle, max width is content width with safe boundary.
-        paragraph_->Layout(pattern->GetPreviewWidth() == 0
-                               ? idealWidth
-                               : pattern->GetPreviewWidth() + textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
-                                     textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
+        float inlineBoxWidth = 0.0f;
+        auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2 + INLINE_SAFE_BOUNDARY_VALUE;
+        if (pattern->IsSelected()) {
+            inlineBoxWidth = pattern->GetPreviewWidth() < layoutConstraint->maxSize.Width()
+                ? (pattern->GetPreviewWidth() + safeBoundary)
+                : (layoutConstraint->maxSize.Width() - safeBoundary);
+        } else {
+            inlineBoxWidth = idealWidth;
+        }
+        paragraph_->Layout(pattern->GetPreviewWidth() == 0 ? idealWidth : inlineBoxWidth);
     } else if (showPlaceHolder) {
         // for placeholder.
         if (isPasswordType) {
