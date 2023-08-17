@@ -31,14 +31,22 @@
 
 namespace OHOS::Ace::Napi {
 
+struct ResourceInfo {
+    int32_t resId = 0;
+    int32_t type = 0;
+    std::vector<std::string> params;
+    std::optional<std::string> bundleName = std::nullopt;
+    std::optional<std::string> moduleName = std::nullopt;
+};
+
 size_t GetParamLen(napi_value param);
 bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_valuetype& valueType);
 
 void NapiThrow(napi_env env, const std::string& message, int32_t errCode);
 
-bool ParseResourceParam(napi_env env, napi_value value, int32_t& id, int32_t& type, std::vector<std::string>& params);
+bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info);
 
-bool ParseString(int32_t resId, int32_t type, std::vector<std::string>& params, std::string& result);
+bool ParseString(const ResourceInfo& info, std::string& result);
 
 std::string ErrorToMessage(int32_t code);
 
