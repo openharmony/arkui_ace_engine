@@ -709,7 +709,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             LOGI("Drag window start for not in previewState, set DragWindowVisible true.");
         }
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
-    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && dragDropInfo.pixelMap) {
+    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON &&
+               (dragDropInfo.pixelMap || dragDropInfo.customNode)) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("Drag window start for Mouse with custom pixelMap, set DragWindowVisible true.");
         }
