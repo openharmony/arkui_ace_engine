@@ -84,6 +84,7 @@ constexpr float HOVER_ANIMATION_OPACITY = 0.05f;
 constexpr float PRESS_ANIMATION_OPACITY = 0.1f;
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
+constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
@@ -2329,8 +2330,9 @@ void TextFieldPattern::OnModifyDone()
             SetScrollEnable(false);
         }
     }
-
-    SetShowError();
+    if (!IsNormalInlineState()) {
+        SetShowError();
+    }
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         if (setBorderFlag_) {
             auto pipeline = PipelineContext::GetCurrentContext();
@@ -5348,6 +5350,14 @@ void TextFieldPattern::SetShowError()
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         underlineColor_ = textFieldTheme->GetUnderlineColor();
         underlineWidth_ = UNDERLINE_WIDTH;
+    }
+
+    auto frameBottom = GetMarginBottom();
+    MarginProperty errorMargin;
+    if (layoutProperty->GetShowErrorTextValue(false) && (frameBottom < ERROR_TEXT_CAPSULE_MARGIN) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+        errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
+        layoutProperty->UpdateMargin(errorMargin);
     }
 }
 
