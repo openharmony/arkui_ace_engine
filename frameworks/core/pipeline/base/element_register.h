@@ -126,6 +126,15 @@ public:
     void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
     void ClearPendingRemoveNodes();
 
+    void RegisterJSUINodeRegisterCallbackFunc(const std::function<void(void)>& jsCallback) {
+        jsUnregisterCallback_ = jsCallback;
+    }
+    void CallJSUINodeRegisterCallbackFunc() {
+        if (jsUnregisterCallback_) {
+            jsUnregisterCallback_();
+        }
+    }
+
 private:
     // private constructor
     ElementRegister() = default;
@@ -153,6 +162,8 @@ private:
     std::unordered_map<std::string, RefPtr<NG::GeometryTransition>> geometryTransitionMap_;
 
     std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
+
+    std::function<void(void)> jsUnregisterCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };

@@ -240,6 +240,7 @@ void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
 void ElementRegister::ClearPendingRemoveNodes()
 {
     pendingRemoveNodes_.clear();
+    CallJSUINodeRegisterCallbackFunc();
 }
 
 } // namespace OHOS::Ace

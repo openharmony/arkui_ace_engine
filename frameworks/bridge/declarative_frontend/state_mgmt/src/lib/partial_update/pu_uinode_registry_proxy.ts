@@ -51,6 +51,9 @@ Flow B:
 type RemovedElementInfo = { elmtId : number, tag : string };
 
 class UINodeRegisterProxy {
+    public static UINodeRegisterCleanUpFunction() : void {
+        UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
+    }
 
     public static obtainDeletedElmtIds(): void {
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
@@ -163,3 +166,5 @@ class UINodeRegisterProxy {
     private tagByElmtId_ : Map<number, string> = new Map<number, string>();
     private elmtIdsUnregisteredAheadOfTime_: Set<number> = new Set<number>();
 }
+
+const UINodeRegisterCleanUpFunction = UINodeRegisterProxy.UINodeRegisterCleanUpFunction;

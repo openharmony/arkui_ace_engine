@@ -308,6 +308,9 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             return false;
         });
         auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(pageRootNode);
+
+
+
         pagePattern->SetPageTransitionFunc(
             [weakCustom = WeakPtr<NG::CustomNodeBase>(customNode), weakPage = WeakPtr<NG::FrameNode>(pageNode)]() {
                 auto custom = weakCustom.Upgrade();
@@ -781,6 +784,20 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     (*func).second(globalObj);
 }
 
+void JsUINodeRegisterCleanUp(BindingTarget globalObj)
+{
+    // globalObj is panda::Local<panda::ObjectRef>
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("UINodeRegisterCleanUpFunction");
+    if (globalFuncVal->IsFunction()) {
+        const auto globalFunc = JSRef<JSFunc>::Cast(globalFuncVal);
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() { jsFunc->Call(globalObject); };
+        ElementRegister::GetInstance()->RegisterJSUINodeRegisterCallbackFunc(callback);
+    } else {
+        LOGE("Could not find UINodeRegisterCleanUpFunction global JS function. ElmtId unregistration will not work. Internal error!");
+    }
+}
+
 void JsRegisterModules(BindingTarget globalObj, std::string modules)
 {
     std::stringstream input(modules);
@@ -788,6 +805,8 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     while (std::getline(input, moduleName, ',')) {
         RegisterModuleByName(globalObj, moduleName);
     }
+    JsUINodeRegisterCleanUp(globalObj);
+
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
