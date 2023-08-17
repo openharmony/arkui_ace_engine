@@ -1303,4 +1303,42 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg040, TestSize.Level1)
     pattern->HandleDragUpdate(CURRENT_OFFSET_VALUE);
     EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
 }
+
+/**
+ * @tc.name: SideBarPatternTestNg041
+ * @tc.desc: Test SideBar UpdateControlButtonIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg041, TestSize.Level1)
+{
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
+    SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+    auto children = frameNode->GetChildren();
+    ASSERT_FALSE(children.empty());
+    auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();
+    ASSERT_NE(sideBarTheme, nullptr);
+    Color controlButtonColor = sideBarTheme->GetControlImageColor();
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(children.front());
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonChildren = buttonFrameNode->GetChildren();
+    ASSERT_FALSE(buttonChildren.empty());
+    auto imgFrameNode = AceType::DynamicCast<FrameNode>(buttonChildren.front());
+    ASSERT_NE(imgFrameNode, nullptr);
+    auto imageLayoutProperty = imgFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    pattern->sideBarStatus_ = SideBarStatus::AUTO;
+    pattern->UpdateControlButtonIcon();
+    auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
+}
 } // namespace OHOS::Ace::NG
