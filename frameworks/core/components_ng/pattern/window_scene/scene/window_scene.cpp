@@ -169,6 +169,32 @@ void WindowScene::BufferAvailableCallback()
     pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
+void WindowScene::OnActivation()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        if (self->destroyed_) {
+            self->destroyed_ = false;
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->RemoveChild(self->startingNode_);
+            host->RemoveChild(self->contentNode_);
+            host->RemoveChild(self->snapshotNode_);
+            self->startingNode_.Reset();
+            self->contentNode_.Reset();
+            self->snapshotNode_.Reset();
+            self->OnAttachToFrameNode();
+        }
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+}
+
 void WindowScene::OnConnect()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
@@ -254,6 +280,7 @@ void WindowScene::OnDisconnect()
     auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
+        self->destroyed_ = true;
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);

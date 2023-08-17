@@ -37,6 +37,13 @@ public:
     explicit LifecycleListener(const WeakPtr<WindowPattern>& windowPattern) : windowPattern_(windowPattern) {}
     virtual ~LifecycleListener() = default;
 
+    void OnActivation() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnActivation();
+    }
+
     void OnConnect() override
     {
         auto windowPattern = windowPattern_.Upgrade();

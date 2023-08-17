@@ -41,6 +41,7 @@ protected:
 
     void OnAttachToFrameNode() override;
 
+    void OnActivation() override;
     void OnConnect() override;
     void OnForeground() override;
     void OnBackground() override;
@@ -49,6 +50,8 @@ protected:
 private:
     void BufferAvailableCallback();
     void OnBoundsSizeChanged(const Rosen::Vector4f& bounds);
+
+    bool destroyed_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };
