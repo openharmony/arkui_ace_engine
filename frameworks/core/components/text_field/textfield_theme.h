@@ -128,6 +128,7 @@ public:
             const double defaultUnderlineAlpha = 0.6;
             const Color defaultUnderlineColor = Color(0x33182431);
             const Color defaultUnderlineTextColor = Color(0x99182431);
+            const Dimension defaultHeight = 48.0_vp;
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp);
             theme->textColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color());
             theme->focusTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_FOCUSED, Color());
@@ -184,6 +185,7 @@ public:
             theme->inlineBorderColor_ = pattern->GetAttr<Color>(INLINE_BORDER_COLOR, Color());
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
+            theme->passwordStyleHeight_ = pattern->GetAttr<Dimension>(PASSWORD_STYLE_HEIGHT, defaultHeight);
         }
     };
 
@@ -459,6 +461,11 @@ public:
         return draggable_;
     }
 
+    const Dimension& GetPasswordStyleHeight() const
+    {
+        return passwordStyleHeight_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -507,6 +514,7 @@ private:
     Radius inlineRadiusSize_;
     Color inlineBgColor_;
     Color inlineBorderColor_;
+    Dimension passwordStyleHeight_;
 
     // UX::disable state: opacity is set to 38% of the default
     double disableOpacityRatio_ = 1.0;
