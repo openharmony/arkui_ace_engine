@@ -143,7 +143,6 @@ private:
     void DoAnimation();
     void DoSideBarAnimation();
     void CreateAnimation();
-    void InitSideBar();
     void FireChangeEvent(bool isShow);
     void UpdateControlButtonIcon();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -185,6 +184,7 @@ private:
     bool hasControlButton_ = false;
     SideBarAnimationDirection animDir_ = SideBarAnimationDirection::LTR;
     bool isControlButtonClick_ = false;
+    bool hasInit_ = false;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;
