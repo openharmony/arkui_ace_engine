@@ -82,15 +82,9 @@ void WindowScene::OnAttachToFrameNode()
         return;
     }
 
-    auto sessionInfo = session_->GetSessionInfo();
-    auto name = sessionInfo.bundleName_;
-    auto pos = name.find_last_of('.');
-    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
-
-    Rosen::RSSurfaceNodeConfig config;
-    config.SurfaceNodeName = "WindowScene_" + name + std::to_string(session_->GetPersistentId());
-    auto surfaceNode = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
-
+    auto surfaceNode = session_->GetLeashWinSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
