@@ -367,11 +367,12 @@ public:
 
     void SetAspectRatio(float ratio) override
     {
-        if (LessOrEqual(ratio, 0.0)) {
-            LOGW("the %{public}f value is illegal, use default", ratio);
-            ratio = 1.0;
-        }
         ViewAbstract::SetAspectRatio(ratio);
+    }
+
+    void ResetAspectRatio() override
+    {
+        ViewAbstract::ResetAspectRatio();
     }
 
     void SetAlign(const Alignment& alignment) override

@@ -71,6 +71,7 @@ public:
     void SetLayoutWeight(int32_t value) override;
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
+    void ResetAspectRatio() override {};
     void SetAlign(const Alignment& alignment) override;
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
     void SetUseAlign(

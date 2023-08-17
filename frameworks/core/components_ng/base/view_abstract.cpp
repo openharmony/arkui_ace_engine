@@ -212,6 +212,15 @@ void ViewAbstract::SetAspectRatio(float ratio)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio);
 }
 
+void ViewAbstract::ResetAspectRatio()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, AspectRatio);
+}
+
 void ViewAbstract::SetBackgroundAlign(const Alignment& align)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
