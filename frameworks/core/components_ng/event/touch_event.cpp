@@ -79,7 +79,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     }
     event.SetSourceDevice(lastPoint.sourceType);
     event.SetForce(lastPoint.force);
-    for (const auto& item : lastPoint.history) {
+    for (const auto& item : point.history) {
         float globalX = item.x;
         float globalY = item.y;
         float screenX = item.screenX;
