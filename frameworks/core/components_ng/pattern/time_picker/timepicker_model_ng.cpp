@@ -31,6 +31,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t BUFFER_NODE_NUMBER = 2;
+} // namespace
 void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -39,7 +42,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         V2::TIME_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
 
     CHECK_NULL_VOID(pickerTheme);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerRowPattern);
     timePickerRowPattern->SetShowCount(showCount);
