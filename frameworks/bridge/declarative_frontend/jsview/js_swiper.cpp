@@ -697,7 +697,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         parseOk = ParseJsDimensionVp(bottomValue, dimPosition);
         swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
         parseOk = ParseJsDimensionVp(sizeValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
-        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
+        SetIsIndicatorCustomSize(dimPosition, parseOk);
         swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.selectedItemWidth =
