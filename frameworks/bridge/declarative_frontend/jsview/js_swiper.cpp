@@ -226,6 +226,7 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
 
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
         SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+        SwiperModel::GetInstance()->ResetDisplayCount();
     } else if (info[0]->IsNumber()) {
         SwiperModel::GetInstance()->SetDisplayCount(info[0]->ToNumber<int32_t>());
     }
