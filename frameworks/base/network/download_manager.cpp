@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,13 +24,13 @@
 #include "base/utils/singleton.h"
 #include "base/utils/utils.h"
 
-#define ACE_CURL_EASY_SET_OPTION(handle, opt, data) \
-    do { \
-        CURLcode result = curl_easy_setopt(handle, opt, data); \
-        if (result != CURLE_OK) { \
+#define ACE_CURL_EASY_SET_OPTION(handle, opt, data)                                                 \
+    do {                                                                                            \
+        CURLcode result = curl_easy_setopt(handle, opt, data);                                      \
+        if (result != CURLE_OK) {                                                                   \
             LOGE("Failed to set option: %{public}s, %{public}s", #opt, curl_easy_strerror(result)); \
-            return false; \
-        } \
+            return false;                                                                           \
+        }                                                                                           \
     } while (0)
 
 namespace OHOS::Ace {
@@ -68,6 +68,17 @@ public:
 #endif
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_VERBOSE, 1L);
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_ERRORBUFFER, errorStr.data());
+
+        ProxyInfo proxy;
+        if (GetProxy(proxy)) {
+            ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_PROXY, proxy.host.c_str());
+            ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_PROXYPORT, proxy.port);
+            if (!proxy.exclusions.empty()) {
+                ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_NOPROXY, proxy.exclusions.c_str());
+            }
+            ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+            ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_HTTPPROXYTUNNEL, 1L);
+        }
 
 #if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_SSL_VERIFYPEER, 0L);
@@ -126,7 +137,7 @@ DownloadManagerImpl::~DownloadManagerImpl()
     curl_global_cleanup();
 }
 
-}
+} // namespace
 
 DownloadManager& DownloadManager::GetInstance()
 {
