@@ -95,15 +95,4 @@ ohos_unittest("gesture_event_hub_test_ng") {
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  if (enable_graphic_text_gine) {
-    include_dirs = [
-      "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
-      "//foundation/graphic/graphic_2d/rosen/modules//2d_graphics/include",
-      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
-      "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
-      "//third_party/flutter/skia",
-    ]
-    deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
-  }
 }

@@ -140,12 +140,7 @@ template("ace_ohos_standard_source_set") {
     ]
 
     if (enable_graphic_text_gine) {
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
-      include_dirs += [
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
-        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
-      ]
+      external_deps += [ "graphic_2d:rosen_text" ]
     }
   }
 }

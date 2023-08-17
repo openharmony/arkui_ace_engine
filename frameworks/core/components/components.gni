@@ -81,9 +81,6 @@ template("build_component") {
 
       external_deps = []
 
-      if (enable_graphic_text_gine) {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
-      }
       if (defined(invoker.external_deps)) {
         external_deps += invoker.external_deps
       }
@@ -138,6 +135,7 @@ template("build_component") {
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
+        external_deps += [ "graphic_2d:rosen_text" ]
         if (is_cross_platform_build) {
           deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
         } else {

@@ -406,9 +406,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
-    if (enable_graphic_text_gine) {
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text" ]
-    }
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ability_component_ng_$platform" ]
@@ -430,7 +427,10 @@ template("ace_core_source_set") {
         "common/rosen/rosen_convert_helper.cpp",
       ]
       if (is_ohos) {
-        external_deps += [ "graphic_2d:libtexgine" ]
+        external_deps += [
+          "graphic_2d:libtexgine",
+          "graphic_2d:rosen_text",
+        ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
@@ -897,7 +897,10 @@ template("ace_core_ng_source_set") {
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
       ]
       if (is_ohos) {
-        external_deps += [ "graphic_2d:libtexgine" ]
+        external_deps += [
+          "graphic_2d:libtexgine",
+          "graphic_2d:rosen_text",
+        ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
