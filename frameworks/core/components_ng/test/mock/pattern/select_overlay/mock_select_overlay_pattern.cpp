@@ -41,6 +41,16 @@ void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
     GTEST_LOG_(INFO) << "ShowOrHiddenMenu has called";
 }
 
+bool SelectOverlayPattern::IsMenuShow()
+{
+    return true;
+}
+
+bool SelectOverlayPattern::IsHandleShow()
+{
+    return true;
+}
+
 void SelectOverlayPattern::OnAttachToFrameNode() {}
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* frameNode) {}

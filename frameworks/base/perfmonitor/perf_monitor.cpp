@@ -354,8 +354,10 @@ int64_t PerfMonitor::GetInputTime(PerfActionType type)
             inputTime = mInputTime[FIRST_MOVE];
             break;
         default:
-            inputTime = GetCurrentRealTimeNs();
             break;
+    }
+    if (inputTime <= 0) {
+        inputTime = GetCurrentRealTimeNs();
     }
     return inputTime;
 }

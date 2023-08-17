@@ -71,12 +71,24 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
 {
     CHECK_NULL_VOID(layoutProperty);
 
+    type_ = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
+
+    if (realSideBarWidth_.IsNegative()) {
+        realSideBarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
+    }
+
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
-    if (newShowSideBar != showSideBar_) {
-        SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
-        UpdateControlButtonIcon();
+    if (newShowSideBar == showSideBar_) {
+        return;
+    }
+
+    if (hasInit_ && ((sideBarStatus_ == SideBarStatus::HIDDEN && newShowSideBar) ||
+        (sideBarStatus_ == SideBarStatus::SHOW && !newShowSideBar))) {
         FireChangeEvent(newShowSideBar);
     }
+
+    SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
+    UpdateControlButtonIcon();
 }
 
 void SideBarContainerPattern::OnUpdateShowControlButton(
@@ -278,7 +290,6 @@ void SideBarContainerPattern::OnUpdateSideBarAndContent(const RefPtr<FrameNode>&
 void SideBarContainerPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    InitSideBar();
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -304,6 +315,10 @@ void SideBarContainerPattern::OnModifyDone()
     if (userSetSidebarWidth_ != layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE)) {
         preSidebarWidth_.Reset();
         userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
+    }
+
+    if (!hasInit_) {
+        hasInit_ = true;
     }
 }
 
@@ -344,23 +359,6 @@ void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto dividerGestureHub = dividerNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
     dividerGestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-}
-
-void SideBarContainerPattern::InitSideBar()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    auto showSideBar = layoutProperty->GetShowSideBar().value_or(true);
-    sideBarStatus_ = showSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN;
-    type_ = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
-
-    if (realSideBarWidth_.IsNegative()) {
-        realSideBarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
-    }
 }
 
 void SideBarContainerPattern::CreateAnimation()

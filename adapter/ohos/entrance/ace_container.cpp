@@ -992,7 +992,9 @@ void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* co
             auto sp = frontend.Upgrade();
             CHECK_NULL_VOID_NOLOG(sp);
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(sp);
+            CHECK_NULL_VOID(declarativeFrontend);
             auto jsEngine = declarativeFrontend->GetJsEngine();
+            CHECK_NULL_VOID(jsEngine);
             if (context) {
                 jsEngine->SetContext(id, context);
             }

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 
+#include "common/rs_vector4.h"
 #include "key_event.h"
 #include "pointer_event.h"
 #include "session/host/include/session.h"
@@ -53,6 +54,7 @@ protected:
     void CreateStartingNode();
     void CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot = nullptr);
 
+    virtual void OnActivation() {}
     virtual void OnConnect() {}
     virtual void OnForeground() {}
     virtual void OnBackground() {}
@@ -66,6 +68,7 @@ protected:
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
     std::function<void()> callback_;
+    std::function<void(const Rosen::Vector4f&)> sizeChangedCallback_;
 
 private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);

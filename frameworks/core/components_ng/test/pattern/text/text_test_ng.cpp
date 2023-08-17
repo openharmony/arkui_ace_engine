@@ -18,8 +18,6 @@
 
 #include "gtest/gtest.h"
 
-#include "core/components_ng/base/geometry_node.h"
-
 #define private public
 #define protected public
 
@@ -28,6 +26,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"

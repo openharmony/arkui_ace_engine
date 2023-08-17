@@ -71,8 +71,8 @@ public:
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
+    void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
-    void ShowPopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();

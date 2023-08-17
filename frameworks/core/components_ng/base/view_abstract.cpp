@@ -212,6 +212,15 @@ void ViewAbstract::SetAspectRatio(float ratio)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio);
 }
 
+void ViewAbstract::ResetAspectRatio()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, AspectRatio);
+}
+
 void ViewAbstract::SetBackgroundAlign(const Alignment& align)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1166,7 +1175,7 @@ void ViewAbstract::BindPopup(
     }
     if (isShow) {
         LOGI("begin to update popup node.");
-        overlayManager->ShowPopup(targetId, popupInfo);
+        overlayManager->UpdatePopupNode(targetId, popupInfo);
         if (popupPattern) {
             popupPattern->StartEnteringAnimation(nullptr);
         }
@@ -1177,7 +1186,7 @@ void ViewAbstract::BindPopup(
                     auto overlay = weakOverlayManger.Upgrade();
                     CHECK_NULL_VOID(overlay);
                     LOGI("begin to update popup node.");
-                    overlay->HidePopup(targetId, popupInfo);
+                    overlay->UpdatePopupNode(targetId, popupInfo);
                 });
         }
     }

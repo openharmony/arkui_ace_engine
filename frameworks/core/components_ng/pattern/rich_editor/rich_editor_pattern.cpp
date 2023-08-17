@@ -957,6 +957,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         // prevent long press event from being triggered when dragging
 #ifdef ENABLE_DRAG_FRAMEWORK
         gestureHub->SetIsTextDraggable(true);
+        isMouseTryDragging_ = isMousePressed_;
 #endif
         return;
     }
@@ -1934,7 +1935,12 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         }
         return;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE &&
+        !isMouseTryDragging_) {
+#else
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
+#endif
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -1959,6 +1965,9 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         isMouseSelect_ = false;
         isMousePressed_ = false;
         isFirstMouseSelect_ = true;
+#ifdef ENABLE_DRAG_FRAMEWORK
+        isMouseTryDragging_ = false;
+#endif
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<RichEditorEventHub>();

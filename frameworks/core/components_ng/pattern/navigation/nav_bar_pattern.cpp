@@ -112,7 +112,6 @@ void InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode, bool isMoreBut
 {
     auto eventHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
     if (isMoreButton) {
         auto hoverTask = [weakTargetNode = WeakPtr<FrameNode>(buttonNode)](bool isHover) {
@@ -571,27 +570,18 @@ void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
-            return;
-        }
         pattern->HandleOnDragStart(info.GetOffsetY());
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this), this](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
-            return;
-        }
         pattern->HandleOnDragUpdate(info.GetOffsetY());
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
-            return;
-        }
         pattern->HandleOnDragEnd();
     };
 

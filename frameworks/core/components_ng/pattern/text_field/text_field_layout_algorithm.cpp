@@ -44,8 +44,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
-constexpr float ERROR_TEXT_UNDERLINE_MARGIN = 27.0f;
-constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
 constexpr float INLINE_SAFE_BOUNDARY_VALUE = 2.0f;
 } // namespace
 
@@ -75,10 +73,10 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetHeight(std::min(layoutConstraint->maxSize.Width(),
                     contentWidth + pattern->GetHorizontalPaddingSum()));
             } else if (!calcLayoutConstraint) {
-            // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
+                // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
                 frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
             } else {
-            // If maxWidth is not set and calcLayoutConstraint is set, set minWidth to layoutConstraint
+                // If maxWidth is not set and calcLayoutConstraint is set, set minWidth to layoutConstraint
                 frameSize.SetWidth(layoutConstraint->minSize.Width());
             }
         }
@@ -92,8 +90,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetHeight(std::min(layoutConstraint->maxSize.Height(),
                     contentHeight + pattern->GetVerticalPaddingSum()));
             } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
-            // calcLayoutConstraint initialized once when setting width, set minHeight=0,
-            // so add "minHeight=0" to the constraint.
+                // calcLayoutConstraint initialized once when setting width, set minHeight=0,
+                // so add "minHeight=0" to the constraint.
                 frameSize.SetHeight(
                     std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
             } else {
@@ -234,12 +232,19 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto imageHotZoneWidth = showPasswordIcon ? imageSize + pattern->GetIconRightOffset() : 0.0f;
     auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
     CHECK_NULL_RETURN(scrollBarTheme, std::nullopt);
+    const auto& layoutConstraint = textFieldLayoutProperty->GetLayoutConstraint();
     if (isInlineStyle) {
         // for InlineStyle, max width is content width with safe boundary.
-        paragraph_->Layout(pattern->GetPreviewWidth() == 0
-                               ? idealWidth
-                               : pattern->GetPreviewWidth() + textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
-                                     textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
+        float inlineBoxWidth = 0.0f;
+        auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2 + INLINE_SAFE_BOUNDARY_VALUE;
+        if (pattern->IsSelected()) {
+            inlineBoxWidth = pattern->GetPreviewWidth() < layoutConstraint->maxSize.Width()
+                ? (pattern->GetPreviewWidth() + safeBoundary)
+                : (layoutConstraint->maxSize.Width() - safeBoundary);
+        } else {
+            inlineBoxWidth = idealWidth;
+        }
+        paragraph_->Layout(pattern->GetPreviewWidth() == 0 ? idealWidth : inlineBoxWidth);
     } else if (showPlaceHolder) {
         // for placeholder.
         if (isPasswordType) {
@@ -377,21 +382,15 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // if handler is moving, no need to adjust text rect in pattern
     auto isHandleMoving = pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE;
-    auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::DEL ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED ||
-                          layoutProperty->GetTextAlignChangedValue(false) ||
-                          pattern->GetTextEditingValue().text.empty();
-    auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
+    auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE ||
                               pattern->GetIsMousePressed();
     if (needToKeepTextRect) {
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
     }
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!pattern->IsTextArea() && !needToKeepTextRect && !(paintProperty->GetInputStyleValue(InputStyle::DEFAULT) ==
-        InputStyle::INLINE && layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
-        TextInputType::UNSPECIFIED)) {
+    if (!pattern->IsTextArea() && !needToKeepTextRect && (!pattern->IsNormalInlineState() ||
+        layoutProperty->GetValueValue("").empty())) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft() + pattern->GetBorderLeft();
@@ -420,19 +419,6 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         imageRect_.SetOffset(imageOffset);
     }
 
-    auto frameBottom = pattern->GetMarginBottom();
-    MarginProperty errorMargin;
-    if (layoutProperty->GetShowUnderlineValue(false) && layoutProperty->GetShowErrorTextValue(false) &&
-        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
-        errorMargin.bottom = CalcLength(ERROR_TEXT_UNDERLINE_MARGIN);
-        frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
-    }
-    if (pattern->NeedShowPasswordIcon() && layoutProperty->GetShowErrorTextValue(false) &&
-        (frameBottom < ERROR_TEXT_CAPSULE_MARGIN)) {
-        errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
-        frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
-    }
     UpdateUnitLayout(layoutWrapper);
 }
 

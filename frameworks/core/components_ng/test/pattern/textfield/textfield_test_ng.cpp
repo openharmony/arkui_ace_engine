@@ -82,6 +82,7 @@ const std::string PLACEHOLDER("DEFAULT PLACEHOLDER");
 const std::string PLACE_HOLDER_TEXT("Placeholdertext");
 const std::string TEXT_CONTENT("Textvalue");
 const std::string DEFAULT_PASSWORD = "******";
+constexpr int32_t SELECT_OVERLAY_ID = 143;
 } // namespace
 class TextFieldPatternTestNg : public testing::Test {
 public:
@@ -601,6 +602,11 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
     textFieldPattern->cursorVisible_ = true;
     textFieldPattern->isMousePressed_ = true;
     textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    textFieldPattern->isMousePressed_ = false;
+    textFieldPattern->isFocusedBeforeClick_ = true;
     EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
 
     /**
@@ -1369,6 +1375,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.L
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateMaxLines(5);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
     // Is TextArea, textRect_.Height() < contentRect_.Height()
     pattern->textRect_.SetHeight(TEXT_RECT_HEIGHT);
     pattern->textRect_.SetWidth(TEXT_RECT_WIDTH);
@@ -1400,6 +1407,37 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.L
     pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
     EXPECT_EQ(pattern->caretRect_.GetY(), oldCaretRectY);
     EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->textRect_.GetX(), pattern->currentOffset_));
+
+    // Scroll down, secondHandleOffset Y > contentRect Y
+    pattern->isSingleHandle_ = false;
+    pattern->contentRect_.SetTop(12.0f);
+    pattern->contentRect_.SetLeft(24.0f);
+    pattern->contentRect_.SetWidth(500.0f);
+    pattern->contentRect_.SetHeight(400.0f);
+    pattern->textRect_.SetTop(-300.0f);
+    pattern->textRect_.SetHeight(800.0f);
+    pattern->textSelector_.firstHandleOffset_.SetX(300.0f);
+    pattern->textSelector_.firstHandleOffset_.SetY(300.0f);
+    pattern->textSelector_.secondHandleOffset_.SetX(400.0f);
+    pattern->textSelector_.secondHandleOffset_.SetY(300.0f);
+    pattern->parentGlobalOffset_ = OffsetF(60.0f, 8.0f);
+    pattern->OnTextAreaScroll(1.0f);
+    EXPECT_EQ(pattern->textSelector_.secondHandleOffset_.GetY(), 301.0f);
+
+    // Scroll up, secondHandleOffset Y + secondHandle Height > contentRect Y + contentRect Height
+    pattern->textRect_.SetTop(-130.0f);
+    pattern->textSelector_.firstHandleOffset_.SetX(400.0f);
+    pattern->textSelector_.firstHandleOffset_.SetY(500.0f);
+    pattern->textSelector_.secondHandleOffset_.SetX(500.0f);
+    pattern->textSelector_.secondHandleOffset_.SetY(500.0f);
+    pattern->OnTextAreaScroll(-20.0f);
+    EXPECT_EQ(pattern->textSelector_.secondHandleOffset_.GetY(), 480.0f);
+
+    // Select overlay is not on.
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
+    pattern->textRect_.SetTop(30.0f);
+    pattern->OnTextAreaScroll(-20.0f);
+    EXPECT_EQ(pattern->textRect_.GetY(), 10.0f);
 }
 
 /**
@@ -5850,6 +5888,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextInputScroll001, TestSize.
     layoutProperty->UpdateMaxLines(2);
     pattern->OnTextInputScroll(0.0f);
     layoutProperty->UpdateMaxLines(1);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
     pattern->textRect_.x_ = 10.0f;
     pattern->textRect_.width_ = 200.0f;
     pattern->contentRect_.x_ = 20.0f;
@@ -5861,6 +5900,28 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextInputScroll001, TestSize.
     pattern->OnTextInputScroll(0.0f);
     EXPECT_EQ(pattern->caretRect_.GetX(), -90.0f);
     EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->currentOffset_, pattern->textRect_.GetY()));
+
+    // first handle and second handle are in contentRect's region.
+    pattern->isSingleHandle_ = false;
+    pattern->contentRect_.SetTop(20.0f);
+    pattern->contentRect_.SetLeft(24.0f);
+    pattern->contentRect_.SetWidth(500.0f);
+    pattern->contentRect_.SetHeight(30.0f);
+    pattern->textRect_.SetLeft(-50.0f);
+    pattern->textRect_.SetWidth(800.0f);
+    pattern->textSelector_.firstHandleOffset_.SetX(260.0f);
+    pattern->textSelector_.firstHandleOffset_.SetY(40.0f);
+    pattern->textSelector_.secondHandleOffset_.SetX(300.0f);
+    pattern->textSelector_.secondHandleOffset_.SetY(40.0f);
+    pattern->parentGlobalOffset_ = OffsetF(60.0f, 8.0f);
+    pattern->OnTextInputScroll(-1.0f);
+    EXPECT_EQ(pattern->textSelector_.firstHandleOffset_.GetX(), 259.0f);
+
+    // select overlay is not on.
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
+    pattern->textRect_.SetLeft(-50.0f);
+    pattern->OnTextInputScroll(-1.0f);
+    EXPECT_EQ(pattern->textRect_.GetX(), -51.0f);
 }
 
 /**
@@ -5906,5 +5967,113 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     dy = pattern->AdjustTextAreaOffsetY();
     EXPECT_EQ(dy, 0.0f);
     EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
+}
+
+/**
+ * @tc.name: UpdateSelectorByPosition
+ * @tc.desc: Verify that the UpdateSelectorByPosition interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateSelectorByPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldPattern.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    /*
+     * @tc.steps: step2. call UpdateSelectorByPosition function.
+     * @tc.expected: The UpdateSelectorByPosition function will exit without exception.
+     */
+    pattern->textSelector_.baseOffset = 0;
+    pattern->textSelector_.destinationOffset = 5;
+    pattern->UpdateSelectorByPosition(10);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), 10);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), 11);
+}
+
+/**
+ * @tc.name: OnScrollEndCallback001
+ * @tc.desc: test textfield OnScrollEndCallback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnScrollEndCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+
+    /**
+     * @tc.steps: step2. Call the OnScrollEndCallback.
+     * @tc.expected: the OnScrollEndCallback function called success without expection.
+     */
+    bool originalIsMenuShow[2] = { true, false };
+    for (int i = 0; i < 2; i++) {
+        pattern->originalIsMenuShow_ = originalIsMenuShow[i];
+        EXPECT_EQ(pattern->originalIsMenuShow_, originalIsMenuShow[i]);
+        pattern->OnScrollEndCallback();
+        EXPECT_NE(pattern->GetSelectOverlay(), nullptr);
+    }
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test textfield OnHandleMove001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnHandleMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Call the OnHandleMove.
+     * @tc.expected: caretUpdateType_ is HANDLE_MOVE.
+     */
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+    pattern->UpdateEditingValue(TEXT_VALUE, 0);
+    pattern->OnHandleMove(RectF(110.0f, 110.0f, 10.0f, 10.0f), false);
+    EXPECT_EQ(pattern->caretUpdateType_, CaretUpdateType::HANDLE_MOVE);
+}
+
+/**
+ * @tc.name: OnHandleMoveDone001
+ * @tc.desc: test textfield OnHandleMoveDone001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnHandleMoveDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Call the OnHandleMoveDone.
+     * @tc.expected: caretUpdateType_ is HANDLE_MOVE_DONE.
+     */
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+    pattern->isSingleHandle_ = true;
+    pattern->OnHandleMoveDone(RectF(0.0f, 0.0f, 10.0f, 10.0f), false);
+    pattern->isSingleHandle_ = false;
+    pattern->OnHandleMoveDone(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
+    EXPECT_EQ(pattern->caretUpdateType_, CaretUpdateType::HANDLE_MOVE_DONE);
 }
 } // namespace OHOS::Ace::NG

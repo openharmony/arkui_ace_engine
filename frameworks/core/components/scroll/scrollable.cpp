@@ -32,7 +32,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr float SPRING_SCROLL_MASS = 1.0f;
-constexpr float SPRING_SCROLL_STIFFNESS = 288.0f;
+constexpr float SPRING_SCROLL_STIFFNESS = 228.0f;
 constexpr float SPRING_SCROLL_DAMPING = 30.0f;
 constexpr double CAP_COEFFICIENT = 0.45;
 constexpr int32_t FIRST_THRESHOLD = 5;
