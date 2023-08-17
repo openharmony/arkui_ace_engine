@@ -85,10 +85,10 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     if (this.owningView_) {
       result=`owned by ${this.debugInfoOwningView()}, `;
     }
-    result += `    sync peers: `;
+    result += `    sync peers:\n`;
     this.subscriberRefs_.forEach((subscriber : IPropertySubscriber) => {
       if (subscriber instanceof ObservedPropertyAbstractPU && "debugInfo" in subscriber) {
-        result+=`    - ${sepa}${(subscriber as ObservedPropertyAbstractPU<any>).debugInfo()}`;
+        result+=`    ${sepa}${(subscriber as ObservedPropertyAbstractPU<any>).debugInfo()}`;
         sepa = ", ";
       }
     });
