@@ -31,6 +31,7 @@
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "test/mock/base/mock_task_executor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -211,6 +212,8 @@ HWTEST_F(SelectOverlayTestNg, OnAttachToFrameNode001, TestSize.Level1)
          * @tc.expected: the function exits normally.
          */
         EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+        ASSERT_NE(pattern->info_, nullptr);
+        pattern->info_->isHandleLineShow = isShow[turn];
         pattern->OnAttachToFrameNode();
         EXPECT_NE(pattern->GetSelectOverlayInfo(), nullptr);
     }
@@ -383,7 +386,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator001, TestSize.Level1)
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     ASSERT_NE(pattern, nullptr);
     /**
-     * @tc.steps: step4. Construct GestureEvent and Call UpdateShowArea
+     * @tc.steps: step3. Construct GestureEvent and Call UpdateShowArea
      * @tc.expected: the function exits normally
      */
     GestureEvent info;
@@ -392,6 +395,17 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator001, TestSize.Level1)
     EXPECT_FALSE(pattern->GetSelectOverlayInfo()->isSingleHandle);
     pattern->HandlePanEnd(info);
     EXPECT_FALSE(pattern->GetSelectOverlayInfo()->isSingleHandle);
+
+    /**
+     * @tc.steps: step4. Menu is not show, call HandleOnClick
+     * @tc.expected: menuIsShow is true.
+     */
+    ASSERT_NE(pattern->info_, nullptr);
+    pattern->info_->isSingleHandle = true;
+    pattern->info_->isHandleLineShow = false;
+    pattern->info_->menuInfo.menuIsShow = false;
+    pattern->HandleOnClick(info);
+    EXPECT_TRUE(pattern->info_->menuInfo.menuIsShow);
 }
 /**
  * @tc.name: HandleOperator002
@@ -440,6 +454,8 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
      */
     GestureEvent info2;
     info2.localLocation_ = Offset(11, 11);
+    ASSERT_NE(pattern->info_, nullptr);
+    pattern->info_->isHandleLineShow = false;
     pattern->HandlePanStart(info2);
     EXPECT_TRUE(pattern->secondHandleDrag_);
     const auto& offset2 = OffsetF(info2.GetDelta().GetX(), info2.GetDelta().GetY());
@@ -455,6 +471,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
      */
     GestureEvent info3;
     info3.localLocation_ = Offset(21, 21);
+    pattern->info_->isSingleHandle = false;
     pattern->HandlePanStart(info3);
     pattern->HandlePanMove(info3);
     EXPECT_FALSE(pattern->firstHandleDrag_);
@@ -1608,5 +1625,154 @@ HWTEST_F(SelectOverlayTestNg, SelectOverlayLayout002, TestSize.Level1)
         selectOverlayLayoutAlgorithm->Layout(layoutWrapper);
         EXPECT_FALSE(layoutWrapper->isActive_);
     }
+}
+
+/**
+ * @tc.name: IsMenuShow001
+ * @tc.desc: Test IsMenuShow function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, IsMenuShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern and call IsMenuShow function.
+     * @tc.expected: The isMenuShow returns false
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_FALSE(pattern->IsMenuShow());
+}
+
+/**
+ * @tc.name: IsHandleShow001
+ * @tc.desc: Test IsHandleShow function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, IsHandleShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern and call IsHandleShow function.
+     * @tc.expected: The IsHandleShow returns true.
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->IsHandleShow());
+}
+
+/**
+ * @tc.name: StartHiddenHandleTask001
+ * @tc.desc: Test StartHiddenHandleTask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, StartHiddenHandleTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    ASSERT_NE(taskExecutor, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = taskExecutor;
+    /**
+     * @tc.steps: step2. Create pattern and call StartHiddenHandleTask function.
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->StartHiddenHandleTask();
+}
+
+/**
+ * @tc.name: HiddenHandle001
+ * @tc.desc: Test HiddenHandle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, HiddenHandle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern and call HiddenHandle function.
+     * @tc.expected: The selectInfo->isHiddenHandle_ value is true
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isHiddenHandle_ = false;
+    pattern->HiddenHandle();
+    EXPECT_TRUE(pattern->isHiddenHandle_);
+}
+
+/**
+ * @tc.name: StopHiddenHandleTask001
+ * @tc.desc: Test StopHiddenHandleTask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, StopHiddenHandleTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    selectInfo.singleLineHeight = NODE_ID;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    /**
+     * @tc.steps: step2. Create pattern and call StopHiddenHandleTask function.
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->StopHiddenHandleTask();
 }
 } // namespace OHOS::Ace::NG
