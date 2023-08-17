@@ -433,7 +433,7 @@ RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
     CHECK_NULL_RETURN(host, nullptr);
     uint32_t depth = 0;
     auto child = host->GetChildAtIndex(0);
-        while (child && depth < MAX_SEARCH_DEPTH) {
+    while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
         if (child->GetTag() == V2::MENU_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(child);
@@ -459,9 +459,6 @@ void MenuPattern::CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const
     CHECK_NULL_VOID(layoutProperty);
     auto rootMenuLayoutProperty = rootMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(rootMenuLayoutProperty);
-    if (layoutProperty->GetMenuWidth().has_value()) {
-        rootMenuLayoutProperty->UpdateMenuWidth(layoutProperty->GetMenuWidthValue());
-    }
     if (layoutProperty->GetBorderRadius().has_value()) {
         rootMenuLayoutProperty->UpdateBorderRadius(layoutProperty->GetBorderRadiusValue());
     }
@@ -663,12 +660,6 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
     }
     renderContext->UpdateBorderRadius(radius);
-
-    for (const auto& child : dirty->GetAllChildrenWithBuild()) {
-        auto renderScroll = child->GetHostNode()->GetRenderContext();
-        CHECK_NULL_RETURN(renderScroll, false);
-        renderScroll->UpdateBorderRadius(radius);
-    }
     return true;
 }
 
