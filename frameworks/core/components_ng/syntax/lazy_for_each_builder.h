@@ -151,7 +151,10 @@ public:
     {
         auto keyIter = cachedItems_.find(index);
         if (keyIter != cachedItems_.end()) {
-            expiringItem_.erase(keyIter->second.first);
+            if (keyIter->second.second) {
+                expiringItem_.try_emplace(
+                    keyIter->second.first, LazyForEachCacheChild(-1, std::move(keyIter->second.second)));
+            }
             cachedItems_.erase(keyIter);
             return true;
         }

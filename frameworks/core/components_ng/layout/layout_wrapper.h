@@ -127,6 +127,16 @@ public:
     // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
     void RestoreGeoState();
 
+    bool SkipSyncGeometryNode() const
+    {
+        return needSkipSyncGeometryNode_;
+    }
+
+    void SetSkipSyncGeometryNode(bool needSkip = true)
+    {
+        needSkipSyncGeometryNode_ = needSkip;
+    }
+
 protected:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
@@ -140,6 +150,7 @@ protected:
     bool isConstraintNotChanged_ = false;
     bool isRootNode_ = false;
     bool isOverlayNode_ = false;
+    bool needSkipSyncGeometryNode_ = false;
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
 
