@@ -450,7 +450,7 @@ void SubwindowOhos::HideMenuNG()
     overlay->HideMenuInSubWindow();
 }
 
-void SubwindowOhos::HideMenuNG(int32_t targetId)
+void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
 {
     if (!isShowed_) {
         return;
@@ -464,7 +464,7 @@ void SubwindowOhos::HideMenuNG(int32_t targetId)
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->HideMenuInSubWindow(targetId_);
+    overlay->HideMenuInSubWindow(menu, targetId_);
 #ifdef ENABLE_DRAG_FRAMEWORK
     HideEventColumn();
     HidePixelMap(false, 0, 0, false);

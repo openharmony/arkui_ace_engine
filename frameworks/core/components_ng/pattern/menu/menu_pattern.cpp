@@ -350,14 +350,14 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 void MenuPattern::HideMenu(bool isMenuOnTouch) const
 {
     if (IsContextMenu()) {
-        SubwindowManager::GetInstance()->HideMenuNG(targetId_);
+        SubwindowManager::GetInstance()->HideMenuNG(GetMenuWrapper(), targetId_);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->HideMenu(targetId_, isMenuOnTouch);
+    overlayManager->HideMenu(GetMenuWrapper(), targetId_, isMenuOnTouch);
     LOGI("MenuPattern closing menu %{public}d", targetId_);
 }
 
