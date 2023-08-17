@@ -122,6 +122,7 @@ private:
         const std::vector<float>& rightBuffer, float allocatedWidth);
     void UpdateHorizontalPadding(LayoutWrapper* layoutWrapper, float horizontalPadding) const;
     void AdjustFixedItem(const RefPtr<LayoutWrapper>& childWrapper, const OptionalSizeF& frameSize, Axis axis) const;
+    void MeasureMask(LayoutWrapper* layoutWrapper, int32_t childCount) const;
 
     std::vector<OffsetF> tabItemOffset_;
     float currentOffset_ = 0.0f;
@@ -130,6 +131,7 @@ private:
     bool isBuilder_ = false;
     float scrollMargin_ = 0.0f;
     float maxHeight_ = 0.0f;
+    float previousChildrenMainSize_ = 0.0f;
 
     TabBarStyle tabBarStyle_;
     bool needSetCentered_ = false;

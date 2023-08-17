@@ -41,8 +41,12 @@
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -3022,6 +3026,27 @@ HWTEST_F(TabsTestNg, TabBarPatternChangeMask001, TestSize.Level1)
     auto tabBarGeometryNode = tabBarNode->GetGeometryNode();
     ASSERT_NE(tabBarGeometryNode, nullptr);
     auto tabBarOffset = tabBarGeometryNode->GetMarginFrameOffset();
+
+    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext1, nullptr);
+    auto maskNode1 = AceType::DynamicCast<FrameNode>(
+        tabBarNode->GetChildAtIndex(tabBarNode->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
+    ASSERT_NE(maskNode1, nullptr);
+    auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
+    ASSERT_NE(imageNode1, nullptr);
+    imageNode1->renderContext_ = mockRenderContext1;
+    EXPECT_CALL(*mockRenderContext1, SetVisible(_)).Times(1);
+
+    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext2, nullptr);
+    auto maskNode2 = AceType::DynamicCast<FrameNode>(
+        tabBarNode->GetChildAtIndex(tabBarNode->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
+    ASSERT_NE(maskNode2, nullptr);
+    auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
+    ASSERT_NE(imageNode2, nullptr);
+    imageNode2->renderContext_ = mockRenderContext2;
+    EXPECT_CALL(*mockRenderContext2, SetVisible(_)).Times(1);
+
     tabBarPattern->ChangeMask(tabBarNode, 1.0f, tabBarOffset, 1.0f, TEST_MASK_MIDDLE_RADIUS_RATIO, true);
     tabBarPattern->ChangeMask(tabBarNode, 1.0f, tabBarOffset, 0.99f, TEST_MASK_MIDDLE_RADIUS_RATIO, false);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
@@ -5473,6 +5498,27 @@ HWTEST_F(TabsTestNg, TabBarPatternPlayMaskAnimation001, TestSize.Level1)
     float unselectedImageSize = 0.2f;
     OffsetF originalUnselectedMaskOffset(0.1f, 0.2f);
     int32_t unselectedIndex = 1;
+
+    auto mockRenderContext1 = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext1, nullptr);
+    auto maskNode1 = AceType::DynamicCast<FrameNode>(
+        tabBarNode->GetChildAtIndex(tabBarNode->GetChildren().size() - TEST_SELECTED_MASK_COUNT));
+    ASSERT_NE(maskNode1, nullptr);
+    auto imageNode1 = AceType::DynamicCast<FrameNode>(maskNode1->GetChildren().front());
+    ASSERT_NE(imageNode1, nullptr);
+    imageNode1->renderContext_ = mockRenderContext1;
+    EXPECT_CALL(*mockRenderContext1, SetVisible(_)).Times(1);
+
+    auto mockRenderContext2 = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext2, nullptr);
+    auto maskNode2 = AceType::DynamicCast<FrameNode>(
+        tabBarNode->GetChildAtIndex(tabBarNode->GetChildren().size() - TEST_SELECTED_MASK_COUNT + 1));
+    ASSERT_NE(maskNode2, nullptr);
+    auto imageNode2 = AceType::DynamicCast<FrameNode>(maskNode2->GetChildren().front());
+    ASSERT_NE(imageNode2, nullptr);
+    imageNode2->renderContext_ = mockRenderContext2;
+    EXPECT_CALL(*mockRenderContext2, SetVisible(_)).Times(1);
+
     tabBarPattern->PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
 }
@@ -6467,5 +6513,87 @@ HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator001, TestSize.Leve
     tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 1);
     tabBarPattern->ApplyTurnPageRateToIndicator(-0.9f);
     EXPECT_EQ(tabBarPattern->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmLayoutMask004
+ * @tc.desc: Test the LayoutMask function in the TabBarLayoutAlgorithm class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabsModel.
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    tabsModel.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    tabBarLayoutProperty->UpdateSelectedMask(0);
+    tabBarLayoutProperty->UpdateUnselectedMask(1);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode, geometryNode, tabBarLayoutProperty);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step2. build selectedMaskNode and unselectedMaskNode.
+     */
+    auto selectedmaskPosition = tabBarNode->GetChildren().size() - TEST_SELECTED_MASK_COUNT;
+    auto selectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(selectedmaskPosition));
+    ASSERT_NE(selectedMaskNode, nullptr);
+    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> selectedMaskLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(selectedMaskNode, geometryNode1, selectedMaskNode->GetLayoutProperty());
+    layoutWrapper.AppendChild(selectedMaskLayoutWrapper);
+
+    auto unselectedmaskPosition = tabBarNode->GetChildren().size() - TEST_UNSELECTED_MASK_COUNT;
+    auto unselectedMaskNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(unselectedmaskPosition));
+    ASSERT_NE(unselectedMaskNode, nullptr);
+    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+    auto unselectedProperty = unselectedMaskNode->GetLayoutProperty();
+    RefPtr<LayoutWrapperNode> unselectedMaskLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(unselectedMaskNode, geometryNode2, unselectedProperty);
+    layoutWrapper.AppendChild(unselectedMaskLayoutWrapper);
+
+    /**
+     * @tc.steps: steps3. Create a child named imageLayoutWrapper for currentWrapper.
+     */
+    auto currentWrapper = selectedMaskLayoutWrapper;
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    RefPtr<GeometryNode> geometryNode5 = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> imageLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(imageNode, geometryNode5, imageNode->GetLayoutProperty());
+    auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageLayoutWrapper->GetLayoutProperty());
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    selectedMaskLayoutWrapper->AppendChild(imageLayoutWrapper);
+
+    /**
+     * @tc.steps: step4. call LayoutMask function.
+     * @tc.expected: step4. expect The function is run ok.
+     */
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    imageNode->renderContext_ = mockRenderContext;
+    EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(1);
+
+    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper);
+    EXPECT_EQ(tabBarLayoutProperty->GetSelectedMask().value_or(-1), 0);
+    EXPECT_EQ(tabBarLayoutProperty->GetUnselectedMask().value_or(-1), 1);
 }
 } // namespace OHOS::Ace::NG
