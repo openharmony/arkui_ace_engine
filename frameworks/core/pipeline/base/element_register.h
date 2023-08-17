@@ -135,11 +135,14 @@ public:
         }
     }
 
+    // FIXME, give a meaningful function name
     void ElementUnregisterCallback(std::function<void()>&& onElementUnReg) {
         LOGE("ElementUnregisterCallback called");
         onElementUnReg_ = std::move(onElementUnReg);
     }
 
+    // FIXME: add function exec function
+    
 private:
     // private constructor
     ElementRegister() = default;

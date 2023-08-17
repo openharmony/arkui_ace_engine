@@ -52,6 +52,7 @@ type RemovedElementInfo = { elmtId : number, tag : string };
 
 class UINodeRegisterProxy {
     public static UINodeRegisterCleanUpFunction() : void {
+        stateMgmtConsole.debug(`UINodeRegisterProxy. static UINodeRegisterCleanUpFunction:`);
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
 
@@ -68,9 +69,7 @@ class UINodeRegisterProxy {
     }
 
     public static consume(elmtId: number): boolean {
-        let tmpFlag = UINodeRegisterProxy.instance_.consume(elmtId);
-         stateMgmtConsole.debug(`UINodeRegisterProxy.consume status: ${tmpFlag}`,tmpFlag);
-        return tmpFlag;
+        return UINodeRegisterProxy.instance_.consume(elmtId);
     }
 
     /*

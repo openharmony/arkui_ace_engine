@@ -165,15 +165,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.id_ = elmtId;
   }
 
-  onUnRegElementID(): void {
-    stateMgmtConsole.debug(`ViewPU onUnRegElementID called.`);
-      UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
-      // unregister the elmtId of this ViewPU / its CustomNode object
-      UINodeRegisterProxy.consume(this.id__());
-
-  }
-
-  // inform the subscribed propertybash
+    // inform the subscribed property
   // that the View and thereby all properties
   // are about to be deleted
   abstract aboutToBeDeleted(): void;
@@ -629,13 +621,40 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) `)
     // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
     UINodeRegisterProxy.obtainDeletedElmtIds();
+    UINodeRegisterProxy.dump();
+    this.purgeDeletedElmtIdsInternal();
+    UINodeRegisterProxy.dump();
+  }
+
+  // FIXME: give this function a meaningful name
+  // function called from elementRegister to the root ViewPU of the page
+  public onUnRegElementID(): void {
+    stateMgmtConsole.debug(`${this.debugInfo()}: onUnRegElementID  - start`);
+    // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
+    UINodeRegisterProxy.obtainDeletedElmtIds();
+    this.purgeDeletedElmtIdsRecursively();
+    UINodeRegisterProxy.dump();
+    stateMgmtConsole.debug(`${this.debugInfo()}: onUnRegElementID  - DONE`);
+  }
+
+
+  private purgeDeletedElmtIdsRecursively() {
+    this.purgeDeletedElmtIdsInternal();
+    this.childrenWeakrefMap_.forEach((weakRefChild: WeakRef<ViewPU>) => {
+      const child = weakRefChild.deref();
+      if (child) {
+        (child as ViewPU).purgeDeletedElmtIdsRecursively();
+      }
+    });
+  }
+
+  private purgeDeletedElmtIdsInternal(): void {
     if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
       stateMgmtConsole.debug(`${this.debugInfo()}: purgeDeletedElmtIds = no elmtIds to unregister (globally) - done!`)
       return;
     }
 
     stateMgmtConsole.debug(`${this.debugInfo()}: purgeDeletedElmtIds -  start.`);
-    UINodeRegisterProxy.dump();
 
     const elmtIdsOfThisView = this.updateFuncByElmtId.keys();
     for (const rmElmtId of elmtIdsOfThisView) {
@@ -653,7 +672,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     stateMgmtConsole.debug(`${this.debugInfo()}: purgeDeletedElmtIds: DONE `);
     stateMgmtConsole.debug(`   ... remaining known child components and their elmtIds ${this.debugInfoRegisteredElmtIds()} .`);
-    UINodeRegisterProxy.dump();
   }
 
   // executed on first render only

@@ -556,9 +556,13 @@ void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
     }
     ACE_SCOPED_TRACE("%s", debugInfo);
     JSRef<JSVal> jsObject = jsObject_.Lock();
-    std::string functionName(debugInfo);
-    AceScopedPerformanceCheck scoped(functionName);
-    func.Lock()->Call(jsObject);
+    if (!jsObject->IsUndefined()) {
+        std::string functionName(debugInfo);
+        AceScopedPerformanceCheck scoped(functionName);
+        func.Lock()->Call(jsObject);
+    } else {
+        LOGE("jsObject is undefined. Internal error while trying to exec %{public}s", debugInfo);
+    }
 }
 
 JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, const char* debugInfo)

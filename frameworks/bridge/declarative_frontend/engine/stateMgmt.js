@@ -4237,6 +4237,7 @@ class UINodeRegisterProxy {
         this.elmtIdsUnregisteredAheadOfTime_ = new Set();
     }
     static UINodeRegisterCleanUpFunction() {
+        stateMgmtConsole.debug(`UINodeRegisterProxy. static UINodeRegisterCleanUpFunction:`);
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
     static obtainDeletedElmtIds() {
@@ -4248,9 +4249,13 @@ class UINodeRegisterProxy {
         UINodeRegisterProxy.instance_.accountElmtIdsAsUnregistered(elmtIds);
     }
     static consume(elmtId) {
-        let tmpFlag = UINodeRegisterProxy.instance_.consume(elmtId);
-        stateMgmtConsole.debug(`UINodeRegisterProxy.consume status: ${tmpFlag}`, tmpFlag);
-        return tmpFlag;
+        if (UINodeRegisterProxy.instance_.consume(elmtId)) {
+            stateMgmtConsole.debug(`UINodeRegisterProxy.consume unregistered ${elmtId}`);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     /*
     a function to enable an optimization, returns true if UINodeRegisterProxy
@@ -4450,12 +4455,6 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     updateId(elmtId) {
         this.id_ = elmtId;
-    }
-    onUnRegElementID() {
-        stateMgmtConsole.debug(`ViewPU onUnRegElementID called.`);
-        UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
-        // unregister the elmtId of this ViewPU / its CustomNode object
-        UINodeRegisterProxy.consume(this.id__());
     }
     // super class will call this function from
     // its aboutToBeDeleted implementation
@@ -4850,12 +4849,35 @@ class ViewPU extends NativeViewPartialUpdate {
         stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) `);
         // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
         UINodeRegisterProxy.obtainDeletedElmtIds();
+        UINodeRegisterProxy.dump();
+        this.purgeDeletedElmtIdsInternal();
+        UINodeRegisterProxy.dump();
+    }
+    // FIXME: give this function a meaningful name
+    // function called from elementRegister to the root ViewPU of the page
+    onUnRegElementID() {
+        stateMgmtConsole.debug(`${this.debugInfo()}: onUnRegElementID  - start`);
+        // request list of all (global) elmtIds of deleted UINodes that need to be unregistered
+        UINodeRegisterProxy.obtainDeletedElmtIds();
+        this.purgeDeletedElmtIdsRecursively();
+        UINodeRegisterProxy.dump();
+        stateMgmtConsole.debug(`${this.debugInfo()}: onUnRegElementID  - DONE`);
+    }
+    purgeDeletedElmtIdsRecursively() {
+        this.purgeDeletedElmtIdsInternal();
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                child.purgeDeletedElmtIdsRecursively();
+            }
+        });
+    }
+    purgeDeletedElmtIdsInternal() {
         if (!UINodeRegisterProxy.hasElmtIdsPendingUnregister()) {
             stateMgmtConsole.debug(`${this.debugInfo()}: purgeDeletedElmtIds = no elmtIds to unregister (globally) - done!`);
             return;
         }
         stateMgmtConsole.debug(`${this.debugInfo()}: purgeDeletedElmtIds -  start.`);
-        UINodeRegisterProxy.dump();
         const elmtIdsOfThisView = this.updateFuncByElmtId.keys();
         for (const rmElmtId of elmtIdsOfThisView) {
             if (UINodeRegisterProxy.consume(rmElmtId)) {
@@ -4869,7 +4891,6 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         stateMgmtConsole.debug(`${this.debugInfo()}: purgeDeletedElmtIds: DONE `);
         stateMgmtConsole.debug(`   ... remaining known child components and their elmtIds ${this.debugInfoRegisteredElmtIds()} .`);
-        UINodeRegisterProxy.dump();
     }
     // executed on first render only
     // kept for backward compatibility with old ace-ets2bundle
