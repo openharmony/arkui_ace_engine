@@ -18,8 +18,7 @@ group("core_base_unittest") {
     "geometry_node:geometry_node_test_ng",
     "inspector:inspector_test_ng",
     "ui_node:ui_node_test_ng",
-
-    #"view_abstract:view_abstract_test_ng",
+    "view_abstract:view_abstract_test_ng",
     "view_full_update_model_ng:view_full_update_model_ng_test",
     "view_partial_update_model_ng:view_partial_update_model_test_ng",
     "view_stack_processor:view_stack_processor_test_ng",
