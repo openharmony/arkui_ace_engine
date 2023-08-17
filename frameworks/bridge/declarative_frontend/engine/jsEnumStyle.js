@@ -1470,6 +1470,14 @@ class NavPathStack {
     this.changeFlag = 0;
     this.type = this.constructor.name;
   }
+  pushName(name, param) {
+    this.pathArray.push(new NavPathInfo(name, param));
+    this.changeFlag = this.changeFlag + 1;
+  }
+  push(info) {
+    this.pathArray.push(info);
+    this.changeFlag = this.changeFlag + 1;
+  }
   pushPathByName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
@@ -1485,6 +1493,15 @@ class NavPathStack {
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
     return pathInfo;
+  }
+  popTo(name) {
+    let index = this.pathArray.findIndex(element => element.name === name);
+    if (index === -1) {
+      return -1;
+    }
+    this.pathArray.splice(index + 1);
+    this.changeFlag = this.changeFlag + 1;
+    return index;
   }
   popToName(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
