@@ -27,6 +27,7 @@ public:
 
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
+    void OnLanguageConfigurationUpdate() override;
 
     ACE_DISALLOW_COPY_AND_MOVE(AtomicServicePattern);
 };
