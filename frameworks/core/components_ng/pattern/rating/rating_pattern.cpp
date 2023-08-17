@@ -92,7 +92,7 @@ DataReadyNotifyTask RatingPattern::CreateDataReadyCallback(int32_t imageFlag)
 
 LoadFailNotifyTask RatingPattern::CreateLoadFailCallback(int32_t imageFlag)
 {
-    auto task = [weak = WeakClaim(this), imageFlag](const ImageSourceInfo& sourceInfo) {
+    auto task = [weak = WeakClaim(this), imageFlag](const ImageSourceInfo& sourceInfo, const std::string& msg) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         // check image info has changed or not
@@ -181,8 +181,8 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     // is true, pattern will update ratingModifier's CanvasImage.
     if (ratingModifier_->JudgeImageUri(
         layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),
-        layoutProperty->GetSecondaryImageSourceInfo()->GetSrc(),
-        layoutProperty->GetBackgroundImageSourceInfo()->GetSrc(), foregroundConfig_) &&
+            layoutProperty->GetSecondaryImageSourceInfo()->GetSrc(),
+            layoutProperty->GetBackgroundImageSourceInfo()->GetSrc(), foregroundConfig_) &&
         imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
         ratingModifier_->UpdateImageUri(
             layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),
@@ -265,9 +265,9 @@ void RatingPattern::ConstrainsRatingScore()
     if (ratingRenderProperty->HasStepSize()) {
         if (GreatNotEqual(
             ratingRenderProperty->GetStepSizeValue(
-                GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE)),
-            ratingLayoutProperty->GetStarsValue(
-                GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)))) {
+                              GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE)),
+                ratingLayoutProperty->GetStarsValue(
+                    GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)))) {
             ratingRenderProperty->UpdateStepSize(GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE));
         }
     }

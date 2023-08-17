@@ -160,17 +160,21 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
-        std::string errorMessage("Fail to create image loader, Image source type not supported");
+        std::string errorMessage("Failed to create image loader, Image source type not supported");
         FailCallback(src.GetKey(), errorMessage, sync);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
+    if (!data) {
+        FailCallback(src.GetKey(), "Failed to load image data", sync);
+        return;
+    }
 
     // build ImageObject
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
     if (!imageObj) {
-        FailCallback(src.GetKey(), "Fail to build image object", sync);
+        FailCallback(src.GetKey(), "Failed to build image object", sync);
         return;
     }
     CacheImageObject(imageObj);
@@ -338,7 +342,7 @@ void ImageProvider::MakeCanvasImageHelper(
     if (image) {
         SuccessCallback(image, key, sync);
     } else {
-        FailCallback(key, "Make CanvasImage failed.");
+        FailCallback(key, "Failed to decode image");
     }
 }
 } // namespace OHOS::Ace::NG
