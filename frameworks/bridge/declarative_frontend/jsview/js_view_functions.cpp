@@ -387,6 +387,13 @@ void ViewFunctions::InitViewFunctions(
         jsSetInitiallyProvidedValueFunc_ = JSRef<JSFunc>::Cast(jsSetInitiallyProvidedValueFunc);
     }
 
+    JSRef<JSVal> jsonUnRegElementIDFunc = jsObject->GetProperty("onUnRegElementID");
+    if (jsonUnRegElementIDFunc->IsFunction()) {
+        jsonUnRegElementIDFunc_ = JSRef<JSFunc>::Cast(jsonUnRegElementIDFunc);
+    } else {
+        LOGD("onUnRegElementID is not a function");
+    }
+
     if (!partialUpdate) {
         JSRef<JSVal> jsUpdateWithValueParamsFunc = jsObject->GetProperty("updateWithValueParams");
         if (jsUpdateWithValueParamsFunc->IsFunction()) {
@@ -512,6 +519,12 @@ void ViewFunctions::ExecuteShow()
 void ViewFunctions::ExecuteHide()
 {
     ExecuteFunction(jsOnHideFunc_, "onPageHide");
+}
+
+void ViewFunctions::ExecuteUnRegElemtIDs()
+{
+    LOGE("ViewFunctions ExecuteUnRegElemtIDs");
+    ExecuteFunction(jsonUnRegElementIDFunc_, "onUnRegElementID");
 }
 
 void ViewFunctions::ExecuteInitiallyProvidedValue(const std::string& jsonData)

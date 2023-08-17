@@ -66,6 +66,7 @@ public:
     void ExecuteRecycle(const std::string& viewName);
     void ExecuteAboutToRecycle();
     void ExecuteSetActive(bool active);
+    void ExecuteUnRegElemtIDs();
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
@@ -109,6 +110,8 @@ private:
     JSWeak<JSFunc> jsRecycleFunc_;
     JSWeak<JSFunc> jsAboutToRecycleFunc_;
     JSWeak<JSFunc> jsSetActive_;
+    JSWeak<JSFunc> jsonUnRegElementIDFunc_;
+
 
     JSExecutionContext context_;
 };

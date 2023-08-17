@@ -135,6 +135,11 @@ public:
         }
     }
 
+    void ElementUnregisterCallback(std::function<void()>&& onElementUnReg) {
+        LOGE("ElementUnregisterCallback called");
+        onElementUnReg_ = std::move(onElementUnReg);
+    }
+
 private:
     // private constructor
     ElementRegister() = default;
@@ -164,6 +169,7 @@ private:
     std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
 
     std::function<void(void)> jsUnregisterCallback_;
+    std::function<void()> onElementUnReg_;  
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };

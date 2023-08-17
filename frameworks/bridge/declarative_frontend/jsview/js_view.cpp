@@ -650,6 +650,14 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         jsView->jsViewFunction_->ExecuteSetActive(active);
     };
 
+    unRegisterElmtIDFunc = [weak = AceType::WeakClaim(this)]() -> void {
+        LOGE("unRegisterElmtIDFunc js_view called");
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteUnRegElemtIDs();
+    };
+
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),

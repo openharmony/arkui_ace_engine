@@ -3258,10 +3258,10 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         if (this.owningView_) {
             result = `owned by ${this.debugInfoOwningView()}, `;
         }
-        result += `    sync peers: `;
+        result += `    sync peers:\n`;
         this.subscriberRefs_.forEach((subscriber) => {
             if (subscriber instanceof ObservedPropertyAbstractPU && "debugInfo" in subscriber) {
-                result += `    - ${sepa}${subscriber.debugInfo()}`;
+                result += `    ${sepa}${subscriber.debugInfo()}`;
                 sepa = ", ";
             }
         });
@@ -4236,14 +4236,21 @@ class UINodeRegisterProxy {
         this.tagByElmtId_ = new Map();
         this.elmtIdsUnregisteredAheadOfTime_ = new Set();
     }
+    static UINodeRegisterCleanUpFunction() {
+        UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
+    }
     static obtainDeletedElmtIds() {
+        stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
     static accountElmtIdsAsUnregistered(elmtIds) {
+        stateMgmtConsole.debug(`UINodeRegisterProxy.accountElmtIdsAsUnregistered elmtIds`, elmtIds);
         UINodeRegisterProxy.instance_.accountElmtIdsAsUnregistered(elmtIds);
     }
     static consume(elmtId) {
-        return UINodeRegisterProxy.instance_.consume(elmtId);
+        let tmpFlag = UINodeRegisterProxy.instance_.consume(elmtId);
+        stateMgmtConsole.debug(`UINodeRegisterProxy.consume status: ${tmpFlag}`, tmpFlag);
+        return tmpFlag;
     }
     /*
     a function to enable an optimization, returns true if UINodeRegisterProxy
@@ -4330,6 +4337,7 @@ class UINodeRegisterProxy {
     }
 }
 UINodeRegisterProxy.instance_ = new UINodeRegisterProxy();
+const UINodeRegisterCleanUpFunction = UINodeRegisterProxy.UINodeRegisterCleanUpFunction;
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4392,6 +4400,7 @@ class ViewPU extends NativeViewPartialUpdate {
     */
     constructor(parent, localStorage, elmtId = -1) {
         super();
+        this.bDeleted = false;
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
         // flag for initgial rendering or re-render on-going.
@@ -4442,12 +4451,20 @@ class ViewPU extends NativeViewPartialUpdate {
     updateId(elmtId) {
         this.id_ = elmtId;
     }
+    onUnRegElementID() {
+        stateMgmtConsole.debug(`ViewPU onUnRegElementID called.`);
+        UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
+        // unregister the elmtId of this ViewPU / its CustomNode object
+        UINodeRegisterProxy.consume(this.id__());
+    }
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
         stateMgmtConsole.debug(`${this.debugInfo()}: aboutToBeDeletedInternal`);
         // tell UINodeRegisterProxy that all elmtIds under 
         // this ViewPU should be treated as already unregistered
+        this.bDeleted = true;
+        stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
         UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
         if (this.hasRecycleManager()) {
             this.getRecycleManager().purgeAllCachedRecycleNode();

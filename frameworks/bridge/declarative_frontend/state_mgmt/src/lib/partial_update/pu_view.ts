@@ -52,6 +52,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   private id_: number;
 
+  private bDeleted : boolean = false;
+
   private parent_: ViewPU = undefined;
   private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
@@ -163,7 +165,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.id_ = elmtId;
   }
 
-  // inform the subscribed property
+  onUnRegElementID(): void {
+    stateMgmtConsole.debug(`ViewPU onUnRegElementID called.`);
+      UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
+      // unregister the elmtId of this ViewPU / its CustomNode object
+      UINodeRegisterProxy.consume(this.id__());
+
+  }
+
+  // inform the subscribed propertybash
   // that the View and thereby all properties
   // are about to be deleted
   abstract aboutToBeDeleted(): void;
@@ -175,6 +185,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     // tell UINodeRegisterProxy that all elmtIds under 
     // this ViewPU should be treated as already unregistered
+
+    this.bDeleted = true;
+    stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
+ 
     UINodeRegisterProxy.accountElmtIdsAsUnregistered(Array.from(this.updateFuncByElmtId.keys()));
 
     if (this.hasRecycleManager()) {
@@ -183,6 +197,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     // unregister the elmtId of this ViewPU / its CustomNode object
     UINodeRegisterProxy.consume(this.id__());
+
     
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();

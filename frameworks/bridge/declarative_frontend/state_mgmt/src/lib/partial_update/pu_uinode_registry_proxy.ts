@@ -55,16 +55,22 @@ class UINodeRegisterProxy {
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
 
+    
     public static obtainDeletedElmtIds(): void {
+ 
+        stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);
         UINodeRegisterProxy.instance_.obtainDeletedElmtIds();
     }
 
     public static accountElmtIdsAsUnregistered(elmtIds: number[]): void {
+         stateMgmtConsole.debug(`UINodeRegisterProxy.accountElmtIdsAsUnregistered elmtIds`,elmtIds);
         UINodeRegisterProxy.instance_.accountElmtIdsAsUnregistered(elmtIds);
     }
 
     public static consume(elmtId: number): boolean {
-        return UINodeRegisterProxy.instance_.consume(elmtId);
+        let tmpFlag = UINodeRegisterProxy.instance_.consume(elmtId);
+         stateMgmtConsole.debug(`UINodeRegisterProxy.consume status: ${tmpFlag}`,tmpFlag);
+        return tmpFlag;
     }
 
     /*

@@ -35,7 +35,11 @@ class JSView : public JSViewAbstract, public virtual AceType {
 
 public:
     JSView() : instanceId_(Container::CurrentId()) {}
-    ~JSView() override = default;
+    //~JSView() override = default;
+    ~JSView() override {
+        LOGE("~JSView destructor");
+
+    }
     virtual void Destroy(JSView* parentCustomView) = 0;
 
     virtual RefPtr<AceType> CreateViewNode()
@@ -47,6 +51,7 @@ public:
     void SyncInstanceId();
     void RestoreInstanceId();
     void GetInstanceId(const JSCallbackInfo& info);
+    std::function<void()> unRegisterElmtIDFunc;
 
     void FireOnShow()
     {

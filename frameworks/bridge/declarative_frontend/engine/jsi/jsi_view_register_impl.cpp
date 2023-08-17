@@ -220,6 +220,7 @@ namespace OHOS::Ace::Framework {
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
+    LOGE("UpdateRootComponent ...");
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         LOGE("loadDocument: argument provided is not a View!");
@@ -303,10 +304,23 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         pagePattern->SetOnBackPressed([weak = Referenced::WeakClaim(view)]() {
             auto view = weak.Upgrade();
             if (view) {
+                LOGE("updateRootComponent return on FireOnBackPress");
+
                 return view->FireOnBackPress();
             }
+            LOGE("updateRootComponent return false SetOnBackPressed");
             return false;
         });
+
+        LOGE("ElementRegister::GetInstance()->ElementUnregisterCallback jsi_view_register_impl.cpp ");
+        ElementRegister::GetInstance()->ElementUnregisterCallback([weak = AceType::WeakClaim(view)]() {
+            LOGE("FireCleanUp jsi_view_register_impl.cpp ");
+            auto view = weak.Upgrade();
+            if (view) {
+                view->unRegisterElmtIDFunc();
+            }
+        });
+
         auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(pageRootNode);
 
 
@@ -322,6 +336,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
                     NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
                 }
             });
+        LOGE("updateRootComponent return on SetPageTransitionFunc");
         return;
     }
 
@@ -364,8 +379,12 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     page->SetDeclarativeOnBackPressCallback([weak]() {
         auto view = weak.Upgrade();
         if (view) {
+            LOGE("updateRootComponent return on FireOnBackPress");
+
             return view->FireOnBackPress();
         }
+        LOGE("updateRootComponent return false SetDeclarativeOnBackPressCallback");
+
         return false;
     });
     page->SetDeclarativeOnPageRefreshCallback([weak]() {
@@ -380,6 +399,8 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             view->ExecuteUpdateWithValueParams(params);
         }
     });
+
+ 
 }
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> formBindFuncs = {

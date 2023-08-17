@@ -146,7 +146,7 @@ bool ElementRegister::RemoveItem(ElementIdType elementId, const std::string& tag
     if (removed) {
         auto iter = deletedCachedItems_.find(elementId);
         if (iter != deletedCachedItems_.end()) {
-            LOGD("ElmtId %{public}d has already deleted by custom node", elementId);
+            LOGD("RemoveItem ElmtId %{public}d has already deleted by custom node", elementId);
             deletedCachedItems_.erase(iter);
             return true;
         }
@@ -154,7 +154,7 @@ bool ElementRegister::RemoveItem(ElementIdType elementId, const std::string& tag
         removedItems_.insert(std::pair(elementId, tag));
         LOGD("Size of removedItems_ removedItems_ %{public}d", static_cast<int32_t>(removedItems_.size()));
     } else {
-        LOGD("ElmtId %{public}d not found. Cannot be removed.", elementId);
+        LOGD("RemoveItem ElmtId %{public}d not found. Cannot be removed.", elementId);
     }
     return removed;
 }
@@ -167,9 +167,9 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
 
     auto removed = itemMap_.erase(elementId);
     if (removed) {
-        LOGD("ElmtId %{public}d successfully removed from registry, NOT added to list of removed Elements.", elementId);
+        LOGD("RemoveItemSilently ElmtId %{public}d successfully removed from registry, NOT added to list of removed Elements.", elementId);
     } else {
-        LOGD("ElmtId %{public}d not found. Cannot be removed.", elementId);
+        LOGD(" RemoveItemSilently ElmtId %{public}d not found. Cannot be removed.", elementId);
     }
 
     return removed;
@@ -177,7 +177,7 @@ bool ElementRegister::RemoveItemSilently(ElementIdType elementId)
 
 void ElementRegister::MoveRemovedItems(RemovedElementsType& removedItems)
 {
-    LOGD("return set of %{public}d elmtIds", static_cast<int32_t>(removedItems_.size()));
+    LOGD("MoveRemovedItems return set of %{public}d elmtIds", static_cast<int32_t>(removedItems_.size()));
     removedItems = removedItems_;
     removedItems_ = std::unordered_set<std::pair<ElementIdType, std::string>, deleted_element_hash>();
 }
@@ -239,8 +239,13 @@ void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node)
 
 void ElementRegister::ClearPendingRemoveNodes()
 {
+    LOGE("ElementRegister::ClearPendingRemoveNodes()");
     pendingRemoveNodes_.clear();
     CallJSUINodeRegisterCallbackFunc();
+    if (onElementUnReg_) {
+        LOGE("ElementRegister::onElementUnReg");
+        onElementUnReg_();
+    }
 }
 
 } // namespace OHOS::Ace

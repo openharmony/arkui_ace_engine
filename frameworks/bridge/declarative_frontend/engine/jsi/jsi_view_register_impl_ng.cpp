@@ -188,6 +188,8 @@ namespace OHOS::Ace::Framework {
 
 void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 {
+    LOGE("UpdateRootComponent NG");
+
     auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         LOGE("loadDocument: argument provided is not a View!");
@@ -258,6 +260,15 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         }
         return false;
     });
+
+    ElementRegister::GetInstance()->ElementUnregisterCallback([weak = AceType::WeakClaim(view)]() {
+        LOGE("ElementRegister::GetInstance()->ElementUnregisterCallback jsi_view_register_impl.cpp ");
+        auto view = weak.Upgrade();
+        if (view) {
+            view->unRegisterElmtIDFunc();
+        }
+    });
+
     auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(pageRootNode);
     pagePattern->SetPageTransitionFunc(
         [weakCustom = WeakPtr<NG::CustomNodeBase>(customNode), weakPage = WeakPtr<NG::FrameNode>(pageNode)]() {
@@ -270,6 +281,8 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
                 NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
             }
         });
+
+ 
 }
 
 #ifdef USE_COMPONENTS_LIB
