@@ -4617,43 +4617,13 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsShadow", info, checkList)) {
         return;
     }
-
-    int32_t shadowStyle = 0;
-    if (ParseJsInteger<int32_t>(info[0], shadowStyle)) {
-        auto style = static_cast<ShadowStyle>(shadowStyle);
-        Shadow shadow = Shadow::CreateShadow(style);
-        std::vector<Shadow> shadows = { shadow };
-        ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
-        return;
-    }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+    Shadow shadow;
+    if (!ParseShadowProps(info[0], shadow)) {
+        LOGI("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
         info.ReturnSelf();
         return;
     }
-    double radius = 0.0;
-    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
-    std::vector<Shadow> shadows(1);
-    shadows.begin()->SetBlurRadius(radius);
-    CalcDimension offsetX;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
-        shadows.begin()->SetOffsetX(offsetX.Value());
-    }
-    CalcDimension offsetY;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
-        shadows.begin()->SetOffsetY(offsetY.Value());
-    }
-    Color color;
-    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        shadows.begin()->SetColor(color);
-    }
-    auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
-    type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
-    shadows.begin()->SetShadowType(static_cast<ShadowType>(type));
+    std::vector<Shadow> shadows { shadow };
     ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
 }
 
@@ -5941,6 +5911,42 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         return false;
     }
     result = themeConstants->GetColor(resId->GetUInt());
+    return true;
+}
+
+bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow)
+{
+    int32_t shadowStyle = 0;
+    if (ParseJsInteger<int32_t>(jsValue, shadowStyle)) {
+        auto style = static_cast<ShadowStyle>(shadowStyle);
+        shadow = Shadow::CreateShadow(style);
+        return true;
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        return false;
+    }
+    double radius = 0.0;
+    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
+    }
+    shadow.SetBlurRadius(radius);
+    CalcDimension offsetX;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
+        shadow.SetOffsetX(offsetX.Value());
+    }
+    CalcDimension offsetY;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
+        shadow.SetOffsetY(offsetY.Value());
+    }
+    Color color;
+    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
+        shadow.SetColor(color);
+    }
+    auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
+    type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
+    shadow.SetShadowType(static_cast<ShadowType>(type));
     return true;
 }
 
