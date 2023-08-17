@@ -65,7 +65,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float menuWidth = layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     if (!layoutConstraint->selfIdealSize.Width().has_value()) {
         float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
-        if (leftRowWidth == menuWidth || LessOrEqual(menuWidth, MIN_MENU_WIDTH.ConvertToPx())) {
+        if (!isMenuWidth_) {
             layoutConstraint->selfIdealSize.SetWidth(std::max(minRowWidth, contentWidth));
         } else {
             layoutConstraint->selfIdealSize.SetWidth(menuWidth);
@@ -157,10 +157,9 @@ void MenuItemLayoutAlgorithm::MeasureItem(LayoutWrapper* layoutWrapper)
     float menuHeight = 0.0f;
     if (itemProperty->GetMenuWidth().has_value()) {
         auto menuWidth = itemProperty->GetMenuWidthValue().ConvertToPx();
-        if (GreatOrEqual(menuWidth, MIN_MENU_WIDTH.ConvertToPx())) {
-            menuWidth -= iconContentPadding;
-            layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(menuWidth, menuHeight));
-        }
+        menuWidth -= iconContentPadding;
+        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(menuWidth, menuHeight));
+        isMenuWidth_ = true;
     }
 }
 } // namespace OHOS::Ace::NG

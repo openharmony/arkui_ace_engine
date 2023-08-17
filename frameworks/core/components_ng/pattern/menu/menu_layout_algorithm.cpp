@@ -670,14 +670,6 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     }
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
-    if (menuLayoutProperty->GetMenuWidth().has_value()) {
-        auto menuWidth = menuLayoutProperty->GetMenuWidthValue().ConvertToPxWithSize(wrapperSize_.Width());
-        if (LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth) && LessNotEqual(menuWidth, wrapperSize_.Width())) {
-            constraint.maxSize.SetWidth(menuWidth);
-            constraint.minSize.SetWidth(MIN_MENU_WIDTH.ConvertToPx());
-            return;
-        }
-    }
     // set max width
     const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
     auto maxHorizontalSpace = std::max(leftSpace_, rightSpace_) - 2.0f * padding.Width();
@@ -700,6 +692,12 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
         minWidth = constraint.maxSize.Width();
     }
     constraint.minSize.SetWidth(minWidth);
+    if (menuLayoutProperty->GetMenuWidth().has_value()) {
+        auto menuWidth = menuLayoutProperty->GetMenuWidthValue().ConvertToPxWithSize(wrapperSize_.Width());
+        if (LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth) && LessNotEqual(menuWidth, wrapperSize_.Width())) {
+            constraint.minSize.SetWidth(MIN_MENU_WIDTH.ConvertToPx());
+        }
+    }
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
