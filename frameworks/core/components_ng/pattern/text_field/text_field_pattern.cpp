@@ -299,7 +299,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     if (inlineSelectAllFlag_) {
         inlineSelectAllFlag_ = false;
-        HandleOnSelectAll(true);
+        HandleOnSelectAll(false, true);
     }
     if (updateSelectionAfterObscure_) {
         GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
@@ -1386,7 +1386,7 @@ void TextFieldPattern::HandleExtendAction(int32_t action)
     LOGI("HandleExtendAction %{public}d", action);
     switch (action) {
         case ACTION_SELECT_ALL: {
-            HandleOnSelectAll();
+            HandleOnSelectAll(false);
             break;
         }
         case ACTION_CUT: {
@@ -1570,7 +1570,7 @@ void TextFieldPattern::HandleOnRedoAction()
     FireEventHubOnChange(GetEditingValue().text);
 }
 
-void TextFieldPattern::HandleOnSelectAll(bool inlineStyle)
+void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
 {
     LOGI("TextFieldPattern::HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(GetEditingValue().GetWideText().length());
@@ -1592,6 +1592,9 @@ void TextFieldPattern::HandleOnSelectAll(bool inlineStyle)
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     CloseSelectOverlay(true);
+    if (isKeyEvent) {
+        return;
+    }
     std::optional<RectF> firstHandle = textSelector_.firstHandle;
     std::optional<RectF> secondHandle = textSelector_.secondHandle;
     ShowSelectOverlay(firstHandle, secondHandle);
@@ -2795,7 +2798,7 @@ void TextFieldPattern::ShowSelectOverlay(
         selectInfo.menuCallback.onSelectAll = [weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->HandleOnSelectAll();
+            pattern->HandleOnSelectAll(false);
             pattern->UpdateCopyAllStatus();
             pattern->SetNeedCloseOverlay(false);
         };
