@@ -557,8 +557,7 @@ private:
     void LayoutOverlay();
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
-    void OnGenerateOneDepthVisibleFrameWithTransition(
-        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) override;
+    void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
     bool IsMeasureBoundary();

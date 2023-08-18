@@ -485,8 +485,7 @@ protected:
         }
     }
 
-    virtual void OnGenerateOneDepthVisibleFrameWithTransition(
-        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX);
+    virtual void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
 
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {

@@ -1340,7 +1340,7 @@ void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList
     allList.emplace_back(Claim(this));
 }
 
-void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
@@ -1348,13 +1348,7 @@ void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Fr
     if (!isActive_ || (!IsVisible() && !context->HasTransitionOutAnimation())) {
         return;
     }
-    if (index > visibleList.size()) {
-        visibleList.emplace_back(Claim(this));
-    } else {
-        auto iter = visibleList.begin();
-        std::advance(iter, index);
-        visibleList.insert(iter, Claim(this));
-    }
+    visibleList.emplace_back(Claim(this));
 }
 
 bool FrameNode::IsMeasureBoundary()

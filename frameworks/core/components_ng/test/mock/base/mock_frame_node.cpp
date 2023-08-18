@@ -76,7 +76,7 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary) {}
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag) {}
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
 void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
-void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {}
 void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout)
 {}
