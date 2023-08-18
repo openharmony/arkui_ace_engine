@@ -1559,6 +1559,9 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest005, TestSize.Level1)
 
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    OffsetT<Dimension> offset;
+    offset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(layoutWrapper);
+    EXPECT_EQ(offset, OffsetT<Dimension> {});
 
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
@@ -1566,6 +1569,24 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest005, TestSize.Level1)
     /**
      * @tc.steps: step5. use layoutAlgorithm to measure and layout.
      */
+    auto textFrameNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
+    EXPECT_FALSE(textFrameNode == nullptr);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    textGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    textLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BUBBLE_WIDTH), CalcLength(BUBBLE_HEIGHT)));
+    auto boxLayoutAlgorithm = textFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    bubblePattern->arrowPlacement_.reset();
+    bubbleLayoutProperty->UpdatePlacement(Placement::BOTTOM_RIGHT);
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
 }
 
@@ -1615,5 +1636,102 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
      */
     ASSERT_TRUE(property.GetPositionOffset().has_value());
     EXPECT_EQ(property.GetPositionOffset().value(), OffsetF(25.0f, 30.0f));
+}
+
+/**
+ * @tc.name: BubbleLayoutTest008
+ * @tc.desc: Test BubbleLayoutAlgorithm::Measure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    // set popupTheme and  buttonTheme to themeManager before using themeManager
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(bubbleLayoutAlgorithm, nullptr);
+    bubbleLayoutAlgorithm->targetTag_ = targetTag;
+    bubbleLayoutAlgorithm->targetNodeId_ = targetId;
+    /**
+     * @tc.steps: step3. update layoutWrapper and layoutProperty.
+     */
+    bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
+    bubbleLayoutProperty->UpdatePlacement(BUBBLE_LAYOUT_PROPERTY_PLACEMENT);
+    bubbleLayoutProperty->UpdateUseCustom(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_TRUE);
+    bubbleLayoutProperty->UpdateShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_OUT_SUBWINDOW);
+
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+    /**
+     * @tc.steps: step5. create child and use layoutAlgorithm to measure and layout.
+     */
+    auto textFrameNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
+    EXPECT_FALSE(textFrameNode == nullptr);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    textGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    textLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BUBBLE_WIDTH), CalcLength(BUBBLE_HEIGHT)));
+    auto boxLayoutAlgorithm = textFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+    auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    EXPECT_FALSE(children.empty());
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+
+    OffsetT<Dimension> offset;
+    EXPECT_TRUE(!bubblePattern->IsSkipHotArea());
+    offset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(layoutWrapper);
+    EXPECT_TRUE(!bubblePattern->IsSkipHotArea());
+
+    auto targetNode1 = FrameNode::GetFrameNode(bubbleLayoutAlgorithm->targetTag_, bubbleLayoutAlgorithm->targetNodeId_);
+    targetNode1->onMainTree_ = true;
+    offset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(layoutWrapper);
+    bubbleLayoutProperty->UpdateShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
+    offset = bubbleLayoutAlgorithm->GetChildOffsetAfterLayout(layoutWrapper);
+    EXPECT_FALSE(offset == bubblePattern->GetInvisibleOffset());
+    EXPECT_FALSE(bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), bubbleLayoutProperty, true)
+        == DISPLAY_WINDOW_OFFSET);
 }
 } // namespace OHOS::Ace::NG

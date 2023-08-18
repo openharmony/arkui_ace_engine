@@ -4160,6 +4160,21 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     textFieldPattern->clipboard_ = clipboard;
     EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    textFieldPattern->inlineFocusState_ = true;
+    textFieldPattern->inlineSelectAllFlag_ = true;
+    textFieldPattern->updateSelectionAfterObscure_ = true;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    dirtySwapConfig.frameSizeChange = true;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    textFieldPattern->inlineFocusState_ = false;
+    dirtySwapConfig.skipMeasure = false;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    layoutWrapper->skipMeasureContent_ = false;
+    dirtySwapConfig.frameSizeChange = false;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    dirtySwapConfig.skipMeasure = true;
+    EXPECT_FALSE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    layoutWrapper->skipMeasureContent_ = true;
 }
 
 /**
@@ -5808,6 +5823,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     auto context = PipelineContext::GetCurrentContext();
     context->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
     pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->imeAttached_ = true;
 
     KeyEvent event;
     EXPECT_FALSE(pattern->OnKeyEvent(event));
@@ -5885,6 +5901,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     EXPECT_TRUE(pattern->OnKeyEvent(event));
     event.code = KeyCode::KEY_FORWARD_DEL;
     EXPECT_TRUE(pattern->OnKeyEvent(event));
+    pattern->imeAttached_ = false;
 }
 
 /**
@@ -6017,6 +6034,38 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     dy = pattern->AdjustTextAreaOffsetY();
     EXPECT_EQ(dy, 0.0f);
     EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
+    int32_t charPosition[3] = {-1, 0, 2};
+    auto content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[1], true);;
+    for (int i=0; i<3; i++) {
+        content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], true);
+        content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], false);
+        content = pattern->CreateDisplayText(EMPTY_TEXT_VALUE, charPosition[i], true);
+        content = pattern->CreateDisplayText(EMPTY_TEXT_VALUE, charPosition[i], false);
+    }
+}
+
+/**
+ * @tc.name: GetTextOrPlaceHolderFontSize
+ * @tc.desc: test GetTextOrPlaceHolderFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetTextOrPlaceHolderFontSize, TestSize.Level2)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto size = textFieldPattern->GetTextOrPlaceHolderFontSize();
+    EXPECT_EQ(size, 0.0f);
+    const Dimension fontSize = Dimension(5.0);
+    layoutProperty->UpdateFontSize(fontSize);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+    size = textFieldPattern->GetTextOrPlaceHolderFontSize();
+    EXPECT_EQ(size, 5.0f);
 }
 
 /**
