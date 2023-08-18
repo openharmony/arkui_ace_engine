@@ -225,6 +225,17 @@ public:
     {
         userSetMinContentFlag_ = userSetMinContentFlag;
     }
+
+    bool GetUserSetNavBarWidthFlag() const
+    {
+        return userSetNavBarWidthFlag_;
+    }
+
+    void SetUserSetNavBarWidthFlag(bool userSetNavBarWidthFlag)
+    {
+        userSetNavBarWidthFlag_ = userSetNavBarWidthFlag;
+    }
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
@@ -259,6 +270,7 @@ private:
     bool navBarVisibilityChange_ = false;
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
+    bool userSetNavBarWidthFlag_ = false;
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;

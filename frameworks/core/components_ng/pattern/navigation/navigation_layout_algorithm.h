@@ -92,14 +92,15 @@ private:
 
     void GetRange(const RefPtr<NavigationGroupNode>& hostNode);
 
-    void UpdateNavigationMode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
-        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+    void UpdateNavigationMode(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
 
     void SizeCalculation(LayoutWrapper* layoutWrapper,
         const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
 
     void SizeCalculationSplit(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+    void CheckSizeInSplit(const float frameWidth, const float userSetNavBarWidth, const float minNavBarWidth,
+        const float minContentWidth);
 
     void SizeCalculationStack(const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
@@ -111,6 +112,7 @@ private:
 
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
+    bool userSetNavBarWidthFlag_ = false;
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;
