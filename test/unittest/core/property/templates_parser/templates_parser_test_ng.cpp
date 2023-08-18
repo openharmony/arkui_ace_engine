@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <functional>
-#include <stdint.h>
 #include <tuple>
 #include <vector>
 
 #include "gtest/gtest.h"
+
 #include "base/geometry/dimension.h"
 
 #define protected public
@@ -212,7 +213,7 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg002, TestSize.Level1)
     size = 6;
     gap = 100;
     childrenCount = 6;
-    vector<int> gt{4, 4, 4, 2, 2, 2};
+    vector<int> gt { 4, 4, 4, 2, 2, 2 };
 
     retVal = ParseTemplateArgs(args, size, gap, childrenCount);
     EXPECT_EQ(retVal.first.size(), 100);
