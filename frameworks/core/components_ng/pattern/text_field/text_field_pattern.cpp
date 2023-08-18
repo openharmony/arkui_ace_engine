@@ -3584,7 +3584,8 @@ DataReadyNotifyTask TextFieldPattern::CreateDataReadyCallback(bool checkHidePass
 
 LoadFailNotifyTask TextFieldPattern::CreateLoadFailCallback(bool checkHidePasswordIcon)
 {
-    auto task = [weak = WeakClaim(this), checkHidePasswordIcon](const ImageSourceInfo& /* sourceInfo */) {
+    auto task = [weak = WeakClaim(this), checkHidePasswordIcon](
+                    const ImageSourceInfo& /* sourceInfo */, const std::string& msg) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnImageLoadFail(checkHidePasswordIcon);

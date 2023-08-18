@@ -131,7 +131,7 @@ private:
     void OnLanguageConfigurationUpdate() override;
 
     void OnImageDataReady();
-    void OnImageLoadFail();
+    void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
     void SetImagePaintConfig(
         const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
