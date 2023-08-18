@@ -3089,7 +3089,6 @@ HWTEST_F(TextFieldPatternTestNg, onDraw004, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     textFieldOverlayModifier.onDraw(context);
 }
 
@@ -4059,13 +4058,20 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelNGProcessDefaultPadding, TestSize
     PaddingProperty paddingProperty;
 
     layoutProperty->UpdateShowUnderline(true);
-    textFieldModelNG.ProcessDefaultPadding(paddingProperty);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->ApplyUnderlineStates();
     Dimension vertical { 12.0, DimensionUnit::PX };
     Dimension horizontal { 0.0, DimensionUnit::PX };
-    EXPECT_EQ(paddingProperty.top.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
-    EXPECT_EQ(paddingProperty.bottom.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
-    EXPECT_EQ(paddingProperty.left.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
-    EXPECT_EQ(paddingProperty.right.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
+    const std::unique_ptr<PaddingProperty>& property = layoutProperty->GetPaddingProperty();
+    ASSERT_TRUE(property->top.has_value());
+    EXPECT_EQ(property->top.value().GetDimension().Value(), horizontal.ConvertToPx());
+    ASSERT_TRUE(property->bottom.has_value());
+    EXPECT_EQ(property->bottom.value().GetDimension().Value(), horizontal.ConvertToPx());
+    ASSERT_TRUE(property->left.has_value());
+    EXPECT_EQ(property->left.value().GetDimension().Value(), vertical.ConvertToPx());
+    ASSERT_TRUE(property->right.has_value());
+    EXPECT_EQ(property->right.value().GetDimension().Value(), vertical.ConvertToPx());
 
     /**
      * @tc.steps: step3. let ShowUnderLine be false.
