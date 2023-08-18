@@ -14,10 +14,12 @@
  */
 
 #include <functional>
+#include <stdint.h>
 #include <tuple>
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "base/geometry/dimension.h"
 
 #define protected public
 #define private public
@@ -186,5 +188,48 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg001, TestSize.Level1)
             EXPECT_EQ(rt[i], result.first[i]);
         }
     }
+}
+
+HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test ParseArgsWithAutoFit.
+     * @tc.expected: retVal.first is empty.
+     */
+    std::string args = "repeat(auto-fit,4px) 2px 2px 2px";
+    double size = 100;
+    double gap = -10;
+    int32_t childrenCount = 6;
+
+    auto retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_EQ(retVal.first.size(), 97);
+
+    /**
+     * @tc.steps: step2. Test ParseArgsWithAutoFill.
+     * @tc.expected: retVal.first.size() is 100.
+     */
+    args = "repeat(auto-fill,4px) 2px 2px 2px";
+    size = 6;
+    gap = 100;
+    childrenCount = 6;
+    vector<int> gt{4, 4, 4, 2, 2, 2};
+
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_EQ(retVal.first.size(), 100);
+    for (int i = 0; i < gt.size(); i++) {
+        EXPECT_EQ(retVal.first[i], gt[i]);
+    }
+
+    /**
+     * @tc.steps: step2. Test ParseAutoFill.
+     * @tc.expected: retVal.first.size() is empty.
+     */
+    args = "auto-fill,4px 2px 2px 2px";
+    size = 6;
+    gap = -10;
+    childrenCount = 6;
+
+    retVal = ParseTemplateArgs(args, size, gap, childrenCount);
+    EXPECT_TRUE(retVal.first.empty());
 }
 } // namespace OHOS::Ace::NG

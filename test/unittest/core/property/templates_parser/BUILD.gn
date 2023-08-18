@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,19 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-group("core_unittest") {
-  testonly = true
-  deps = [
-    "accessibility:accessibility_unittest",
-    "base:core_base_unittest",
-    "common:core_common_unittest",
-    "gestures:gestures_test_ng",
-    "pattern:core_pattern_unittest",
-    "pipeline:pipeline_context_test_ng",
-    "property:core_property_unittest",
-    "render:render_unittest",
+ace_unittest("templates_parser_test_ng") {
+  sources = [
+    "$ace_root/frameworks/core/components_ng/property/templates_parser.cpp",
+    "templates_parser_test_ng.cpp",
   ]
 }
