@@ -573,6 +573,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
+    if (!eventHub->HasOnDragStart()) {
+        return;
+    }
     if (!IsAllowedDrag(eventHub)) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGW("FrameNode is not allow drag.");
