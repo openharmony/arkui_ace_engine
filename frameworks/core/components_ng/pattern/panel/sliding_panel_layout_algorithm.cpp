@@ -48,7 +48,7 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<SlidingPanelLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
         LOGE("fail to measure slidingPanel due to layoutConstraint is nullptr");
         return;
@@ -75,7 +75,10 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
     }
     childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    childLayoutConstraint.parentIdealSize =
+        OptionalSizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
     childLayoutConstraint.percentReference = childLayoutConstraint.maxSize;
+    layoutConstraint->percentReference = childLayoutConstraint.maxSize;
     auto colunmNodeWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::COLUMN_ETS_TAG);
     if (colunmNodeWrapper) {
         colunmNodeWrapper->Measure(childLayoutConstraint);
