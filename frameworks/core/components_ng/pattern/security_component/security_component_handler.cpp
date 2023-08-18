@@ -347,9 +347,10 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
     if (iconNode != nullptr) {
         CHECK_NULL_RETURN(iconNode->GetGeometryNode(), false);
-        buttonInfo.iconSize_ = SystemProperties::Px2Vp(iconNode->GetGeometryNode()->GetFrameSize().Width());
         auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_RETURN(iconProp, false);
+        buttonInfo.iconSize_ =
+            iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp();
         buttonInfo.iconColor_.value =
             iconProp->GetImageSourceInfo().value().GetFillColor().value().GetValue();
     }
