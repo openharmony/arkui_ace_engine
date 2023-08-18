@@ -120,6 +120,7 @@ void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
     int32_t extend = paragraph_->GetHandlePositionForClick(pos);
+#ifndef USE_GRAPHIC_TEXT_GINE
     int32_t start = 0;
     int32_t end = 0;
     if (!paragraph_->GetWordBoundary(extend, start, end)) {
@@ -128,6 +129,11 @@ void TextPattern::InitSelection(const Offset& pos)
             static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
     }
     textSelector_.Update(start, end);
+#else
+    int32_t extendEnd =
+        std::min(static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
+    textSelector_.Update(extend, extendEnd);
+#endif
 }
 
 OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
@@ -740,16 +746,28 @@ float TextPattern::GetLineHeight() const
     return selectedRects.front().Height();
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 RSTypographyProperties::TextBox TextPattern::ConvertRect(const Rect& rect)
+#else
+RSTextRect TextPattern::ConvertRect(const Rect& rect)
+#endif
 {
     return { RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()), RSTextDirection::LTR };
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
+#else
+std::vector<RSTextRect> TextPattern::GetTextBoxes()
+#endif
 {
     std::vector<Rect> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> res;
+#else
+    std::vector<RSTextRect> res;
+#endif
     res.reserve(selectedRects.size());
     for (auto&& rect : selectedRects) {
         res.emplace_back(ConvertRect(rect));

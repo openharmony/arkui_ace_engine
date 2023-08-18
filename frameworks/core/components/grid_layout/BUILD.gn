@@ -29,4 +29,8 @@ build_component("grid_layout") {
     sources -= [ "flutter_render_grid_layout.cpp" ]
   }
   rosen_sources = [ "rosen_render_grid_layout.cpp" ]
+  cflags = [
+    "-Wall",
+    "--Wunused-lambda-capture",
+  ]
 }

@@ -248,4 +248,7 @@ ohos_unittest("view_abstract_test_ng") {
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+  include_dirs = [
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
+  ]
 }

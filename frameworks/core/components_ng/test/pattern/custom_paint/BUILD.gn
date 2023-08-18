@@ -34,6 +34,7 @@ ohos_unittest("custom_paint_test_ng") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "//third_party/googletest:gmock_main",
   ]
+
   if (is_ohos_standard_system) {
     deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
   }

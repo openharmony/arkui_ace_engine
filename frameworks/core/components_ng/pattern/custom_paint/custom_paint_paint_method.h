@@ -22,7 +22,11 @@
 #else
 #include "experimental/svg/model/SkSVGDOM.h"
 #endif
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph.h"
+#else
+#include "rosen_text/typography.h"
+#endif
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
 
@@ -426,8 +430,13 @@ protected:
         return OffsetF(0.0f, 0.0f);
     }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     double GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
     txt::TextAlign GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const;
+#else
+    double GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
+    OHOS::Rosen::TextAlign GetEffectiveAlign(OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const;
+#endif
 
     PaintState fillState_;
     StrokePaintState strokeState_;
@@ -444,7 +453,11 @@ protected:
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
     Shadow shadow_;
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph_;
+#else
+    std::unique_ptr<Rosen::Typography> paragraph_;
+#endif
 
     WeakPtr<PipelineBase> context_;
 

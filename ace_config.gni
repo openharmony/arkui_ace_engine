@@ -49,6 +49,9 @@ declare_args() {
 
   # Sanitize debug
   ace_sanitize_debug = false
+
+  # Enable when build for text engine adapter
+  enable_graphic_text_gine = true
 }
 
 enable_dump_drawcmd = false
@@ -62,6 +65,7 @@ use_linux = "${current_os}_${current_cpu}" == "linux_x64"
 
 # Config path
 ace_root = "//foundation/arkui/ace_engine"
+ace_napi_frameworks = "//foundation/arkui/ace_engine/frameworks"
 ace_napi = "//foundation/arkui/napi"
 ace_graphic = "//foundation/graphic/graphic_2d"
 ace_hitrace = "//base/hiviewdfx/hitrace"
@@ -179,6 +183,10 @@ ace_use_rosen_drawing = false
 if (defined(use_rosen_drawing) && use_rosen_drawing) {
   ace_use_rosen_drawing = true
   ace_common_defines += [ "USE_ROSEN_DRAWING" ]
+}
+
+if (enable_graphic_text_gine) {
+  ace_common_defines += [ "USE_GRAPHIC_TEXT_GINE" ]
 }
 
 if (enable_ng_build) {

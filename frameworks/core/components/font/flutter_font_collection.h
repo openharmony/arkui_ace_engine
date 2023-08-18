@@ -32,7 +32,11 @@ class ACE_EXPORT FlutterFontCollection : public FontCollection {
 public:
     static FlutterFontCollection& GetInstance();
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::shared_ptr<txt::FontCollection> GetFontCollection() override;
+#else
+    std::shared_ptr<Rosen::FontCollection> GetFontCollection() override;
+#endif
 
     void LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName);
 

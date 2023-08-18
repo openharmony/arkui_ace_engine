@@ -19,7 +19,11 @@
 #include <future>
 
 #include "flutter/common/task_runners.h"
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/font_collection.h"
+#else
+#include "rosen_text/font_collection.h"
+#endif
 
 #include "core/components/font/font_collection.h"
 
@@ -29,7 +33,11 @@ class ACE_EXPORT RosenFontCollection : public FontCollection {
 public:
     static RosenFontCollection& GetInstance();
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::shared_ptr<txt::FontCollection> GetFontCollection() override;
+#else
+    std::shared_ptr<Rosen::FontCollection> GetFontCollection() override;
+#endif
 
     void LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName);
 
@@ -39,11 +47,17 @@ public:
 
     void SetIsZawgyiMyanmar(bool isZawgyiMyanmar);
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     sk_sp<txt::DynamicFontManager> GetDynamicFontManager();
-    
+#endif
+
 private:
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::shared_ptr<txt::FontCollection> fontCollection_;
     sk_sp<txt::DynamicFontManager> dynamicFontManager_;
+#else
+    std::shared_ptr<Rosen::FontCollection> fontCollection_;
+#endif
     std::vector<std::string> families_;
 
     bool isZawgyiMyanmar_ = false;

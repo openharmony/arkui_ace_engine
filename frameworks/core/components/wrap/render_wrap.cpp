@@ -532,6 +532,7 @@ void RenderWrap::TraverseContent(const Offset& startPosition, const Offset& betw
         }
         auto contentSpace = NormalizeToPx(contentSpace_);
         startItemIndex += itemNum;
+        LOGD("Wrap::mainAlignment startItemIndex=%{public}d", startItemIndex);
         accumulateOffset += betweenPosition;
         accumulateOffset += (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE)
                                 ? Offset(0.0, content.crossLength_ + contentSpace)

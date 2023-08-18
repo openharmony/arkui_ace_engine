@@ -76,17 +76,28 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {
+#ifndef USE_GRAPHIC_TEXT_GINE
             if (LessOrEqual(box.rect_.GetLeft(), rect.Left()) &&
                 GreatOrEqual(box.rect_.GetRight(), rect.Right()) &&
                 LessOrEqual(box.rect_.GetTop(), rect.Top()) &&
                 GreatOrEqual(box.rect_.GetBottom(), rect.Bottom())) {
+#else
+            if (LessOrEqual(box.rect.GetLeft(), rect.Left()) &&
+                GreatOrEqual(box.rect.GetRight(), rect.Right()) &&
+                LessOrEqual(box.rect.GetTop(), rect.Top()) &&
+                GreatOrEqual(box.rect.GetBottom(), rect.Bottom())) {
+#endif
                 realImageChildren.emplace_back(child);
                 realRectsForPlaceholders.emplace_back(rect);
             }
         }
         ++index;
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     dragPattern->SetLastLineHeight(boxes.back().rect_.GetHeight());
+#else
+    dragPattern->SetLastLineHeight(boxes.back().rect.GetHeight());
+#endif
     dragPattern->InitSpanImageLayout(realImageChildren, realRectsForPlaceholders);
     return dragNode;
 }
@@ -106,10 +117,17 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
     CHECK_NULL_RETURN(!boxes.empty(), {});
     auto boxFirst = boxes.front();
     auto boxLast = boxes.back();
+#ifndef USE_GRAPHIC_TEXT_GINE
     float leftHandleX = boxFirst.rect_.GetLeft() + textStartX;
     float leftHandleY = boxFirst.rect_.GetTop() + textStartY;
     float rightHandleX = boxLast.rect_.GetRight() + textStartX;
     float rightHandleY = boxLast.rect_.GetTop() + textStartY;
+#else
+    float leftHandleX = boxFirst.rect.GetLeft() + textStartX;
+    float leftHandleY = boxFirst.rect.GetTop() + textStartY;
+    float rightHandleX = boxLast.rect.GetRight() + textStartX;
+    float rightHandleY = boxLast.rect.GetTop() + textStartY;
+#endif
     bool oneLineSelected = (leftHandleY == rightHandleY);
     if (oneLineSelected) {
         if (leftHandleX < contentRect.Left()) {
@@ -123,7 +141,11 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
             leftHandleX = contentRect.Left();
             leftHandleY = contentRect.Top();
         }
+#ifndef USE_GRAPHIC_TEXT_GINE
         if ((boxLast.rect_.GetBottom() + textStartY) > contentRect.Bottom()) {
+#else
+        if ((boxLast.rect.GetBottom() + textStartY) > contentRect.Bottom()) {
+#endif
             rightHandleX = contentRect.Right();
             rightHandleY = contentRect.Bottom() - lineHeight;
         }
@@ -139,13 +161,22 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
             width += delta;
             globalX -= delta / 2; // 2 : half
         }
+#ifndef USE_GRAPHIC_TEXT_GINE
         dragPattern->SetContentOffset(OffsetF(boxes.front().rect_.GetLeft() - TEXT_DRAG_OFFSET.ConvertToPx(),
             boxes.front().rect_.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
+#else
+        dragPattern->SetContentOffset(OffsetF(boxes.front().rect.GetLeft() - TEXT_DRAG_OFFSET.ConvertToPx(),
+            boxes.front().rect.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
+#endif
     } else {
         globalX = contentRect.Left() + hostGlobalOffset.GetX() - TEXT_DRAG_OFFSET.ConvertToPx();
         width = contentRect.Width();
         dragPattern->SetContentOffset(
+#ifndef USE_GRAPHIC_TEXT_GINE
             OffsetF(0 - TEXT_DRAG_OFFSET.ConvertToPx(), boxes.front().rect_.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
+#else
+            OffsetF(0 - TEXT_DRAG_OFFSET.ConvertToPx(), boxes.front().rect.GetTop() - TEXT_DRAG_OFFSET.ConvertToPx()));
+#endif
     }
     dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalX), Dimension(globalY)));
     RectF dragTextRect(
