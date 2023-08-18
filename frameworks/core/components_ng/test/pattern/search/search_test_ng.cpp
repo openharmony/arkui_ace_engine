@@ -449,7 +449,6 @@ HWTEST_F(SearchTestNg, Pattern001, TestSize.Level1)
     auto renderContext = buttonFrameNode->GetRenderContext();
     auto mouseStyle = MouseFormat::TEXT_CURSOR;
     pattern->isCancelButtonHover_ = true;
-    pattern->isHover_ = false;
     pattern->UpdateChangeEvent("");
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(pattern->buttonSize_.Height(), 0);
@@ -462,11 +461,6 @@ HWTEST_F(SearchTestNg, Pattern001, TestSize.Level1)
     pattern->OnButtonTouchUp(3);
     ASSERT_FALSE(pattern->isSearchButtonHover_);
     pattern->SetMouseStyle(mouseStyle);
-    pattern->HandleHoverEvent(true);
-    ASSERT_TRUE(pattern->isHover_);
-    pattern->HandleHoverEvent(false);
-    ASSERT_FALSE(pattern->isHover_);
-    pattern->HandleMouseEvent(info);
     pattern->HandleButtonMouseEvent(true, 3);
     ASSERT_TRUE(pattern->isCancelButtonHover_);
     pattern->HandleButtonMouseEvent(true, 0);
@@ -584,72 +578,6 @@ HWTEST_F(SearchTestNg, Pattern003, TestSize.Level1)
     pattern->UpdateChangeEvent("");
     pattern->ToJsonValue(json);
     EXPECT_EQ(layoutProperty->GetCancelButtonStyle(), CancelButtonStyle::INVISIBLE);
-}
-
-/**
- * @tc.name: Pattern004
- * @tc.desc: HandleMouseEvent while mouse not in button
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, Pattern004, TestSize.Level1)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    pattern->isHover_ = true;
-    MouseInfo info;
-    const Offset offset1(-1000000.0, -1000000.0);
-    info.SetLocalLocation(offset1);
-    ASSERT_NE(pattern, nullptr);
-    pattern->HandleMouseEvent(info);
-}
-
-/**
- * @tc.name: Pattern005
- * @tc.desc: InitTouchEvent TouchType = DOWN
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, Pattern005, TestSize.Level1)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    TouchTestResult result;
-    pattern->InitTouchEvent();
-    const Offset offset1(-1000000.0, -1000000.0);
-    TouchEventInfo info("onTouch");
-    TouchLocationInfo touchInfo1(1);
-    touchInfo1.SetTouchType(TouchType::DOWN);
-    touchInfo1.SetLocalLocation(offset1);
-    info.AddTouchLocationInfo(std::move(touchInfo1));
-    ASSERT_NE(pattern->touchListener_, nullptr);
-    pattern->touchListener_->GetTouchEventCallback()(info);
-}
-
-/**
- * @tc.name: Pattern006
- * @tc.desc: InitTouchEvent TouchType = UP
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, Pattern006, TestSize.Level1)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    TouchTestResult result;
-    pattern->InitTouchEvent();
-    const Offset offset1(-1000000.0, -1000000.0);
-    TouchEventInfo info("onTouch");
-    TouchLocationInfo touchInfo1(1);
-    touchInfo1.SetTouchType(TouchType::UP);
-    touchInfo1.SetLocalLocation(offset1);
-    info.AddTouchLocationInfo(std::move(touchInfo1));
-    ASSERT_NE(pattern->touchListener_, nullptr);
-    pattern->touchListener_->GetTouchEventCallback()(info);
 }
 
 /**
@@ -1337,64 +1265,8 @@ HWTEST_F(SearchTestNg, Pattern010, TestSize.Level1)
 }
 
 /**
- * @tc.name: Pattern011
- * @tc.desc: test InitMouseEvent, InitTextFieldMouseEvent, InitButtonMouseEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, Pattern011, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get frameNode and pattern.
-     */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    ASSERT_NE(pattern, nullptr);
-    /**
-     * @tc.step: step2. call GetOnHoverEventFunc()(false).
-     * @tc.expected: isHover_ is false.
-     */
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    auto checkboxTheme = AceType::MakeRefPtr<SearchTheme>();
-    checkboxTheme->searchButtonSpace_ = 0.0_vp;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
-    pattern->hoverEvent_->GetOnHoverEventFunc()(false);
-    EXPECT_FALSE(pattern->isHover_);
-    MouseInfo mouseInfo;
-    pattern->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
-    pattern->textFieldHoverEvent_->GetOnHoverEventFunc()(false);
-    pattern->searchButtonMouseEvent_->GetOnHoverEventFunc()(false);
-}
-
-/**
- * @tc.name: Pattern012
- * @tc.desc: test OnTouchDown, OnTouchUp when isHover_ = false
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, Pattern012, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. get frameNode and pattern.
-     */
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-    auto pattern = frameNode->GetPattern<SearchPattern>();
-    ASSERT_NE(pattern, nullptr);
-    /**
-     * @tc.step: step2. set isHover_ = false and call OnTouchDown, OnTouchUp.
-     */
-    pattern->isHover_ = false;
-    pattern->OnTouchDown();
-    pattern->OnTouchUp();
-}
-
-/**
  * @tc.name: Pattern013
- * @tc.desc: test HandleTextFieldHoverEvent, InitFocusEvent
+ * @tc.desc: test InitFocusEvent
  * @tc.type: FUNC
  */
 HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
@@ -1414,18 +1286,11 @@ HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
     /**
-     * @tc.step: step2. call HandleTextFieldHoverEvent().
-     */
-    pattern->isHover_ = false;
-    pattern->HandleTextFieldHoverEvent(false);
-    pattern->isHover_ = true;
-    pattern->HandleTextFieldHoverEvent(false);
-    /**
-     * @tc.step: step3. call onFocusInternal_().
+     * @tc.step: step2. call onFocusInternal_().
      */
     focusHub->onFocusInternal_();
     /**
-     * @tc.step: step4. call onBlurInternal_().
+     * @tc.step: step3. call onBlurInternal_().
      * @tc.expected: selectionMode_ = SelectionMode::NONE.
      */
     focusHub->onBlurInternal_();
