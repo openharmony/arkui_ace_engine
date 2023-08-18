@@ -105,5 +105,5 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag) {}
 
 void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId) {}
 void OverlayManager::DestroyKeyboard() {}
-
+void OverlayManager::CloseKeyboard(int32_t targetId) {}
 } // namespace OHOS::Ace::NG

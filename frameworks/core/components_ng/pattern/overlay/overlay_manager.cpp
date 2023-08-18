@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
@@ -81,6 +82,12 @@ constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
 
 // dialog animation params
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
+
+// custom keyboard animation params
+const RefPtr<Curve> SHOW_CUSTOM_KEYBOARD_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
+const RefPtr<Curve> HIDE_CUSTOM_KEYBOARD_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(4.0f, 1.0f, 342.0f, 37.0f);
 
 RefPtr<FrameNode> GetLastPage()
 {
@@ -1905,24 +1912,96 @@ void OverlayManager::DestroySheetMask(const RefPtr<FrameNode>& sheetNode)
     root->RemoveChild(*sheetChild);
 }
 
+void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn)
+{
+    CHECK_NULL_VOID(customKeyboard);
+    AnimationOption option;
+    if (isTransitionIn) {
+        option.SetCurve(SHOW_CUSTOM_KEYBOARD_ANIMATION_CURVE);
+    } else {
+        option.SetCurve(HIDE_CUSTOM_KEYBOARD_ANIMATION_CURVE);
+    }
+    option.SetFillMode(FillMode::FORWARDS);
+    auto context = customKeyboard->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pageNode = pipeline->GetStageManager()->GetLastPage();
+    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+    if (isTransitionIn) {
+        context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+        AnimationUtils::Animate(option, [context]() {
+            if (context) {
+                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            }
+        });
+    } else {
+        context->UpdateOpacity(1.0);
+        option.SetOnFinishEvent([id = Container::CurrentId(), customKeyboard] {
+            ContainerScope scope(id);
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            // animation finish event should be posted to UI thread.
+            taskExecutor->PostTask(
+                [customKeyboard]() {
+                    auto parent = customKeyboard->GetParent();
+                    CHECK_NULL_VOID(parent);
+                    parent->RemoveChild(customKeyboard);
+                },
+                TaskExecutor::TaskType::UI);
+        });
+        context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+        AnimationUtils::Animate(
+            option,
+            [context, pageHeight]() {
+                if (context) {
+                    context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+                }
+            },
+            option.GetOnFinishEvent());
+    }
+}
+
 void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId)
 {
+    if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
+        return;
+    }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    customKeyboard_ = KeyboardView::CreateKeyboard(targetId, keybordBuilder);
-    customKeyboard_->MountToParent(rootNode);
+    auto customKeyboard = KeyboardView::CreateKeyboard(targetId, keybordBuilder);
+    customKeyboard->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    PlayDefaultModalTransition(customKeyboard_, true);
+    customKeyboardMap_[targetId] = customKeyboard;
+    PlayKeyboardTransition(customKeyboard, true);
+}
+
+void OverlayManager::CloseKeyboard(int32_t targetId)
+{
+    auto it = customKeyboardMap_.find(targetId);
+    if (it == customKeyboardMap_.end()) {
+        return;
+    }
+    auto customKeyboard = it->second;
+    CHECK_NULL_VOID(customKeyboard);
+    auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
+    CHECK_NULL_VOID(pattern);
+    customKeyboardMap_.erase(pattern->GetTargetId());
+    PlayKeyboardTransition(customKeyboard, false);
 }
 
 void OverlayManager::DestroyKeyboard()
 {
-    if (!customKeyboard_) {
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    if (customKeyboardMap_.empty()) {
         return;
     }
-    auto rootNode = rootNodeWeak_.Upgrade();
-    rootNode->RemoveChild(customKeyboard_);
-    customKeyboard_ = nullptr;
+    for (auto it = customKeyboardMap_.begin(); it != customKeyboardMap_.end();) {
+        auto keyboard = it->second;
+        rootNode->RemoveChild(keyboard);
+        it = customKeyboardMap_.erase(it);
+    }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
