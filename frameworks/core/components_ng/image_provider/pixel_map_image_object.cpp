@@ -23,10 +23,6 @@ namespace OHOS::Ace::NG {
 void PixelMapImageObject::MakeCanvasImage(
     const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
 {
-    // TODO: support un-decoded pixel map that can specify size.
-    // For current situation, pixel map is already decoded.
-
-    // note that this function must be called on ui thread
     if (!pixmap_) {
         ctx->FailCallback("pixmap is null when PixelMapImageObject try MakeCanvasImage");
         return;
@@ -36,7 +32,9 @@ void PixelMapImageObject::MakeCanvasImage(
 
 RefPtr<PixelMapImageObject> PixelMapImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
-    auto pixelMap = data->GetPixelMapData();
+    auto pixmapData = DynamicCast<PixmapData>(data);
+    CHECK_NULL_RETURN(pixmapData, nullptr);
+    auto&& pixelMap = pixmapData->GetPixmap();
     if (!pixelMap) {
         LOGW("ImageData has no pixel map data when try CreateImageEncodedInfoForDecodedPixelMap, src: %{public}s",
             src.ToString().c_str());

@@ -87,10 +87,10 @@ RefPtr<ImageObject> ImageProvider::QueryThumbnailCache(const ImageSourceInfo& sr
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
-    auto data = DynamicCast<PixmapCachedData>(cache->GetCacheImageData(src.GetKey()));
+    auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(src.GetKey()));
     if (data) {
         LOGD("thumbnail cache found %{public}s", src.GetSrc().c_str());
-        return PixelMapImageObject::Create(src, MakeRefPtr<ImageData>(data->pixmap_));
+        return PixelMapImageObject::Create(src, data);
     }
     return nullptr;
 }
@@ -285,12 +285,10 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     }
 
 #ifndef USE_ROSEN_DRAWING
-    // standard skia image object
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
     auto [size, frameCount] = skiaImageData->Parse();
 #else
-    // standard drawing image object
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
     CHECK_NULL_RETURN(rosenImageData, nullptr);
     auto [size, frameCount] = rosenImageData->Parse();

@@ -28,6 +28,7 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
 
@@ -36,6 +37,7 @@ class ImageObject;
 
 namespace NG {
 class ImageObject;
+class ImageData;
 } // namespace NG
 
 template<typename T>
@@ -43,24 +45,6 @@ struct CacheNode {
     CacheNode(std::string key, const T& obj) : cacheKey(std::move(key)), cacheObj(obj) {}
     std::string cacheKey;
     T cacheObj;
-};
-
-struct CachedImageData : public AceType {
-    DECLARE_ACE_TYPE(CachedImageData, AceType);
-
-public:
-    CachedImageData() = default;
-    virtual ~CachedImageData() = default;
-    virtual size_t GetSize() = 0;
-    virtual const uint8_t* GetData() = 0;
-};
-
-struct CacheImageDataNode {
-    CacheImageDataNode(const std::string& key, const RefPtr<CachedImageData>& imageData)
-        : imageDataKey(key), imageDataPtr(imageData)
-    {}
-    std::string imageDataKey;
-    RefPtr<CachedImageData> imageDataPtr;
 };
 
 struct FileInfo {
@@ -88,10 +72,9 @@ public:
     void CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image);
     std::shared_ptr<CachedImage> GetCacheImage(const std::string& key);
 
-    void CacheImageData(const std::string& key, const RefPtr<CachedImageData>& imageData);
-    RefPtr<CachedImageData> GetCacheImageData(const std::string& key);
+    void CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData);
+    RefPtr<NG::ImageData> GetCacheImageData(const std::string& key);
 
-    // cache interface for [NG::ImageObject]
     RefPtr<NG::ImageObject> GetCacheImgObjNG(const std::string& key);
     void CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj);
 
@@ -175,10 +158,9 @@ public:
 
     static bool GetFromCacheFile(const std::string& filePath);
 
-    virtual void Clear() = 0;
+    virtual RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& filePath) = 0;
 
-    virtual RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) = 0;
-
+    void Clear();
     static void Purge();
 
     void ClearCacheImage(const std::string& key);
@@ -199,25 +181,28 @@ protected:
 
     bool ProcessImageDataCacheInner(size_t dataSize);
 
+    static std::mutex cacheFileInfoMutex_;
+
+private:
     std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
     mutable std::mutex imageCacheMutex_;
     std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
     std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<CachedImage>>>::iterator> imageCache_;
 
     std::mutex dataCacheMutex_;
-    std::list<CacheImageDataNode> dataCacheList_;
-    std::unordered_map<std::string, std::list<CacheImageDataNode>::iterator> imageDataCache_;
+    std::list<CacheNode<RefPtr<NG::ImageData>>> dataCacheList_;
+    std::unordered_map<std::string, std::list<CacheNode<RefPtr<NG::ImageData>>>::iterator> imageDataCache_;
 
     std::atomic<size_t> dataSizeLimit_ = 0; // by default, image data before decoded cache is 0 MB.;
     std::atomic<size_t> curDataSize_ = 0;
 
-    std::mutex imgObjCacheMutex_;
-    std::list<CacheNode<RefPtr<ImageObject>>> cacheImgObjList_;
-    std::unordered_map<std::string, std::list<CacheNode<RefPtr<ImageObject>>>::iterator> imgObjCache_;
+    std::mutex imgObjMutex_;
     std::atomic<size_t> imgObjCapacity_ = 2000; // imgObj is cached after clear image data.
 
     std::list<CacheNode<RefPtr<NG::ImageObject>>> cacheImgObjListNG_;
     std::unordered_map<std::string, std::list<CacheNode<RefPtr<NG::ImageObject>>>::iterator> imgObjCacheNG_;
+    std::list<CacheNode<RefPtr<ImageObject>>> cacheImgObjList_;
+    std::unordered_map<std::string, std::list<CacheNode<RefPtr<ImageObject>>>::iterator> imgObjCache_;
 
     static std::shared_mutex cacheFilePathMutex_;
     static std::string cacheFilePath_;
@@ -229,29 +214,10 @@ protected:
     static std::mutex cacheFileSizeMutex_;
     static int64_t cacheFileSize_;
 
-    static std::mutex cacheFileInfoMutex_;
     static std::list<FileInfo> cacheFileInfo_;
     static bool hasSetCacheFileInfo_;
-};
 
-struct PixmapCachedData : public CachedImageData {
-    DECLARE_ACE_TYPE(PixmapCachedData, CachedImageData);
-
-public:
-    explicit PixmapCachedData(const RefPtr<PixelMap>& data) : pixmap_(data) {}
-    ~PixmapCachedData() override = default;
-
-    size_t GetSize() override
-    {
-        return pixmap_ ? pixmap_->GetByteCount() : 0;
-    }
-
-    const uint8_t* GetData() override
-    {
-        return pixmap_ ? pixmap_->GetPixels() : nullptr;
-    }
-
-    const RefPtr<PixelMap> pixmap_;
+    ACE_DISALLOW_COPY_AND_MOVE(ImageCache);
 };
 
 } // namespace OHOS::Ace

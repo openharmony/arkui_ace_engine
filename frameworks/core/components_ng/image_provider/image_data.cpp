@@ -18,34 +18,12 @@
 
 namespace OHOS::Ace::NG {
 
-size_t ImageData::GetSize() const
+size_t PixmapData::GetSize() const
 {
-    CHECK_NULL_RETURN_NOLOG(pixelMap_, 0);
-    return pixelMap_->GetByteCount();
+    return pixmap_ ? pixmap_->GetByteCount() : 0;
 }
-
-const void* ImageData::GetData() const
+const void* PixmapData::GetData() const
 {
-    CHECK_NULL_RETURN_NOLOG(pixelMap_, nullptr);
-    return pixelMap_->GetPixels();
+    return pixmap_ ? pixmap_->GetPixels() : nullptr;
 }
-
-RefPtr<ImageData> ImageData::MakeFromPixelMap(const RefPtr<PixelMap>& pixelMap)
-{
-    if (!pixelMap) {
-        return nullptr;
-    }
-    return MakeRefPtr<ImageData>(pixelMap);
-}
-
-bool ImageData::HasPixelMapData()
-{
-    return pixelMap_;
-}
-
-RefPtr<PixelMap>& ImageData::GetPixelMapData()
-{
-    return pixelMap_;
-}
-
 } // namespace OHOS::Ace::NG

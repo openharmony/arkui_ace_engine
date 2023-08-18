@@ -16,6 +16,7 @@
 #include "core/image/test/unittest/image_cache_test.h"
 
 #include "gtest/gtest.h"
+#include "core/components_ng/image_provider/adapter/skia_image_data.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -126,21 +127,21 @@ HWTEST_F(ImageCacheTest, MemoryCache004, TestSize.Level1)
     // create 3 bytes data, cache it, current size is 3
     const uint8_t data1[] = {'a', 'b', 'c' };
     sk_sp<SkData> skData1 = SkData::MakeWithCopy(data1, 3);
-    auto cachedData1 = AceType::MakeRefPtr<SkiaCachedImageData>(skData1);
+    auto cachedData1 = AceType::MakeRefPtr<NG::SkiaImageData>(skData1);
     imageCache->CacheImageData(KEY_1, cachedData1);
     ASSERT_EQ(imageCache->curDataSize_, 3u);
 
     // create 2 bytes data, cache it, current size is 5. {abc} {de}
     const uint8_t data2[] = {'d', 'e' };
     sk_sp<SkData> skData2 = SkData::MakeWithCopy(data2, 2);
-    auto cachedData2 = AceType::MakeRefPtr<SkiaCachedImageData>(skData2);
+    auto cachedData2 = AceType::MakeRefPtr<NG::SkiaImageData>(skData2);
     imageCache->CacheImageData(KEY_2, cachedData2);
     ASSERT_EQ(imageCache->curDataSize_, 5u);
 
     // create 7 bytes data, cache it, current size is 5. new data not cached.
     const uint8_t data3[] = { 'f', 'g', 'h', 'i', 'j', 'k', 'l' };
     sk_sp<SkData> skData3 = SkData::MakeWithCopy(data3, 7);
-    auto cachedData3 = AceType::MakeRefPtr<SkiaCachedImageData>(skData3);
+    auto cachedData3 = AceType::MakeRefPtr<NG::SkiaImageData>(skData3);
     imageCache->CacheImageData(KEY_3, cachedData3);
     ASSERT_EQ(imageCache->curDataSize_, 5u);
     auto data = imageCache->GetCacheImageData(KEY_3);
@@ -149,35 +150,35 @@ HWTEST_F(ImageCacheTest, MemoryCache004, TestSize.Level1)
     // create 5 bytes data, cache it, current size is 10 {abc} {de} {mnopq}
     const uint8_t data4[] = { 'm', 'n', 'o', 'p', 'q' };
     sk_sp<SkData> skData4 = SkData::MakeWithCopy(data4, 5);
-    auto cachedData4 = AceType::MakeRefPtr<SkiaCachedImageData>(skData4);
+    auto cachedData4 = AceType::MakeRefPtr<NG::SkiaImageData>(skData4);
     imageCache->CacheImageData(KEY_4, cachedData4);
     ASSERT_EQ(imageCache->curDataSize_, 10u);
 
     // create 2 bytes data, cache it, current size is 9 {de}{mnopq}{rs}
     const uint8_t data5[] = { 'r', 's' };
     sk_sp<SkData> skData5 = SkData::MakeWithCopy(data5, 2);
-    auto cachedData5 = AceType::MakeRefPtr<SkiaCachedImageData>(skData5);
+    auto cachedData5 = AceType::MakeRefPtr<NG::SkiaImageData>(skData5);
     imageCache->CacheImageData(KEY_5, cachedData5);
     ASSERT_EQ(imageCache->curDataSize_, 9u);
 
     // create 5 bytes, cache it, current size is 7 {rs}{tuvwx}
     const uint8_t data6[] = { 't', 'u', 'v', 'w', 'x' };
     sk_sp<SkData> skData6 = SkData::MakeWithCopy(data6, 5);
-    auto cachedData6 = AceType::MakeRefPtr<SkiaCachedImageData>(skData6);
+    auto cachedData6 = AceType::MakeRefPtr<NG::SkiaImageData>(skData6);
     imageCache->CacheImageData(KEY_6, cachedData6);
     ASSERT_EQ(imageCache->curDataSize_, 7u);
 
     // cache data witch is already cached. {rs}{y}
     const uint8_t data7[] = { 'y' };
     sk_sp<SkData> skData7 = SkData::MakeWithCopy(data7, 1);
-    auto cachedData7 = AceType::MakeRefPtr<SkiaCachedImageData>(skData7);
+    auto cachedData7 = AceType::MakeRefPtr<NG::SkiaImageData>(skData7);
     imageCache->CacheImageData(KEY_6, cachedData7);
     ASSERT_EQ(imageCache->curDataSize_, 3u);
 
     // cache data witch is already cached. {y}{fg}
     const uint8_t data8[] = { 'f', 'g' };
     sk_sp<SkData> skData8 = SkData::MakeWithCopy(data8, 2);
-    auto cachedData8 = AceType::MakeRefPtr<SkiaCachedImageData>(skData8);
+    auto cachedData8 = AceType::MakeRefPtr<NG::SkiaImageData>(skData8);
     imageCache->CacheImageData(KEY_5, cachedData8);
     ASSERT_EQ(imageCache->curDataSize_, 3u);
     auto dataFront = imageCache->dataCacheList_.front().imageDataPtr->GetData();
