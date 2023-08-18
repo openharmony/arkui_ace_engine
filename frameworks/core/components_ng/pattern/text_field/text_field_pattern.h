@@ -1117,6 +1117,7 @@ private:
     void GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end);
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
+    void UpdateErrorTextMargin();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1211,6 +1212,8 @@ private:
     float lastTextRectY_ = 0.0f;
     std::optional<DisplayMode> barState_;
     InputStyle preInputStyle_ = InputStyle::DEFAULT;
+    bool preErrorState_ = false;
+    float preErrorMargin_ = 0.0f;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
