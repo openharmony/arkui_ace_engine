@@ -37,7 +37,8 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    groupDividerPadding_ = theme->GetDividerPaddingVertical() * 2 + theme->GetDefaultDividerWidth();
+    groupDividerPadding_ = static_cast<float>(theme->GetDividerPaddingVertical().ConvertToPx()) * 2 +
+                           static_cast<float>(theme->GetDefaultDividerWidth().ConvertToPx());
 
     const auto& props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
@@ -65,7 +66,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto paintProperty = host->GetPaintProperty<MenuItemGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     paintProperty->UpdateNeedHeaderPadding(needHeaderPadding_);
-    float headerPadding = needHeaderPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f;
+    float headerPadding = needHeaderPadding_ ? groupDividerPadding_ : 0.0f;
     totalHeight += headerPadding;
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
@@ -101,7 +102,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // set menu size
     needFooterPadding_ = NeedFooterPadding(host);
     paintProperty->UpdateNeedFooterPadding(needFooterPadding_);
-    float footerPadding = needFooterPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f;
+    float footerPadding = needFooterPadding_ ? groupDividerPadding_ : 0.0f;
     totalHeight += footerPadding;
     menuItemGroupSize.SetHeight(totalHeight);
 
@@ -147,7 +148,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(theme);
     auto headerHeight = wrapper->GetGeometryNode()->GetFrameSize().Height();
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
-    float headerPadding = (needHeaderPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
+    float headerPadding = (needHeaderPadding_ ? groupDividerPadding_ : 0.0f) +
                           (headerHeight < minItemHeight ? (minItemHeight - headerHeight) / 2 : 0.0f);
     LayoutIndex(wrapper, OffsetF(0.0f, headerPadding));
 }
@@ -168,7 +169,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(theme);
 
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
-    float footerPadding = (needFooterPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
+    float footerPadding = (needFooterPadding_ ? groupDividerPadding_ : 0.0f) +
                           (footerHeight < minItemHeight ? (minItemHeight - footerHeight) / 2 : 0.0f);
     LayoutIndex(wrapper, OffsetF(0.0f, (groupHeight - footerHeight - footerPadding)));
 }
