@@ -1101,8 +1101,6 @@ private:
     float FitCursorInSafeArea();
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
-    void ResetBackgroundColor();
-    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange = false);
 
     void ProcessPasswordIcon();
     void UpdateUserDefineResource(ImageSourceInfo& sourceInfo);

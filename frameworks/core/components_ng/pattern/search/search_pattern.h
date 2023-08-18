@@ -148,20 +148,13 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void RequestKeyboard();
     // Init touch and hover event
-    void InitTouchEvent();
-    void InitMouseEvent();
     void InitTextFieldMouseEvent();
     void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
-    void OnTouchDown();
-    void OnTouchUp();
     void SetMouseStyle(MouseFormat format);
     void OnButtonTouchDown(int32_t childId);
     void OnButtonTouchUp(int32_t childId);
-    void HandleHoverEvent(bool isHover);
-    void HandleMouseEvent(const MouseInfo& info);
     void HandleButtonMouseEvent(bool isHover, int32_t childId);
-    void HandleTextFieldHoverEvent(bool isHoverOverTextField);
 
     void ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const;
     void ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const;
@@ -191,17 +184,13 @@ private:
     RefPtr<TextFieldController> searchController_;
     FocusChoice focusChoice_ = FocusChoice::SEARCH;
 
-    RefPtr<TouchEventImpl> touchListener_;
     RefPtr<TouchEventImpl> searchButtonTouchListener_;
     RefPtr<TouchEventImpl> cancelButtonTouchListener_;
-    RefPtr<InputEvent> hoverEvent_;
-    RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> searchButtonMouseEvent_;
     RefPtr<InputEvent> cancelButtonMouseEvent_;
     RefPtr<InputEvent> textFieldHoverEvent_ = nullptr;
     RefPtr<ClickEvent> clickListener_;
 
-    bool isHover_ = false;
     bool isCancelButtonHover_ = false;
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
