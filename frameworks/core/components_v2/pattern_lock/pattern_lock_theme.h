@@ -37,7 +37,6 @@ public:
         static constexpr Dimension DEFAULT_BACKGROUND_CIRCLE_RADIUS = 11.0_vp;
         static constexpr Dimension DEFAULT_LIGHT_RING_CIRCLE_RADIUS_START = 6.0_vp;
         static constexpr Dimension DEFAULT_LIGHT_RING_CIRCLE_RADIUS_END = 37.5_vp;
-        static constexpr Dimension DEFAULT_PRESS_CIRCLE_RADIUS = 11.0_vp;
         static constexpr Dimension DEFAULT_HOVER_CIRCLE_RADIUS = 11.0_vp;
         static constexpr Dimension HOTSPOT_CIRCLE_RADIUS = 48.0_vp;
         static constexpr Dimension FOCUS_PADDING_RADIUS = 2.0_vp;
@@ -57,7 +56,6 @@ public:
             theme->correctColor_ = Color::BLUE;
             theme->hoverColor_ = Color::BLACK;
             theme->focusColor_ = Color::BLACK;
-            theme->pressColor_ = Color::BLACK;
             theme->sideLength_ = DEFAULT_SIDE_LENGTH;
             theme->circleRadius_ = DEFAULT_CIRCLE_RADIUS;
             theme->pathStrokeWidth_ = DEFAULT_PATH_STROKE_WIDTH;
@@ -65,7 +63,6 @@ public:
             theme->backgroundCircleRadius_ = DEFAULT_BACKGROUND_CIRCLE_RADIUS;
             theme->lightRingRadiusStart_ = DEFAULT_LIGHT_RING_CIRCLE_RADIUS_START;
             theme->lightRingRadiusEnd_ = DEFAULT_LIGHT_RING_CIRCLE_RADIUS_END;
-            theme->pressRadius_ = DEFAULT_PRESS_CIRCLE_RADIUS;
             theme->hoverRadius_ = DEFAULT_HOVER_CIRCLE_RADIUS;
             theme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
             theme->focusPaddingRadius_ = FOCUS_PADDING_RADIUS;
@@ -89,7 +86,6 @@ public:
                 theme->pathColor_ = pattern->GetAttr<Color>("path_color", Color::BLACK);
                 theme->hoverColor_ = pattern->GetAttr<Color>("hover_color", Color::BLACK);
                 theme->focusColor_ = pattern->GetAttr<Color>("focus_color", Color::BLACK);
-                theme->pressColor_ = pattern->GetAttr<Color>("press_color", Color::BLACK);
             }
         }
     };
@@ -129,11 +125,6 @@ public:
     const Color& GetFocusColor() const
     {
         return focusColor_;
-    }
-
-    const Color& GetPressColor() const
-    {
-        return pressColor_;
     }
 
     Dimension GetSideLength() const
@@ -183,14 +174,6 @@ public:
         return 1;
     }
 
-    float GetPressRadiusScale() const
-    {
-        if (!NearZero(circleRadius_.Value())) {
-            return pressRadius_.Value() / circleRadius_.Value();
-        }
-        return 1;
-    }
-
     float GetHoverRadiusScale() const
     {
         if (!NearZero(circleRadius_.Value())) {
@@ -226,7 +209,6 @@ private:
     Color correctColor_;
     Color hoverColor_;
     Color focusColor_;
-    Color pressColor_;
     Dimension sideLength_;
     Dimension circleRadius_;
     Dimension pathStrokeWidth_;
@@ -234,7 +216,6 @@ private:
     Dimension backgroundCircleRadius_;
     Dimension lightRingRadiusStart_;
     Dimension lightRingRadiusEnd_;
-    Dimension pressRadius_;
     Dimension hoverRadius_;
     Dimension hotSpotCircleRadius_;
     Dimension focusPaddingRadius_;
