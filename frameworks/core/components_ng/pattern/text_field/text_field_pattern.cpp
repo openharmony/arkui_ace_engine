@@ -2208,7 +2208,7 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
         keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
         needToResetKeyboard = true;
     }
-    if (action_ != TextInputAction::UNSPECIFIED) {
+    if (!needToResetKeyboard && action_ != TextInputAction::UNSPECIFIED) {
         needToResetKeyboard = action_ != GetTextInputActionValue(TextInputAction::DONE);
     }
     action_ = GetTextInputActionValue(TextInputAction::DONE);
@@ -2216,6 +2216,11 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     // if keyboard attached and keyboard is shown, pull up keyboard again
     if (needToResetKeyboard && imeAttached_ && imeShown_) {
+        CloseKeyboard(true);
+        RequestKeyboard(false, true, true);
+    }
+#else
+    if (needToResetKeyboard && HasConnection()) {
         CloseKeyboard(true);
         RequestKeyboard(false, true, true);
     }
