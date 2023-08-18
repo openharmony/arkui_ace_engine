@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -47,7 +46,7 @@ enum class MenuType {
     // ----- special menu used in other components ------
     NAVIGATION_MENU,               // menu used in a Navigation component
     SELECT_OVERLAY_EXTENSION_MENU, // menu used in SelectOverlay Extension of text component
-    RICH_EDIT_SELECT_MENU, // menu used in Rich Editor component
+    RICH_EDIT_SELECT_MENU,         // menu used in Rich Editor component
 };
 
 class MenuPattern : public Pattern {

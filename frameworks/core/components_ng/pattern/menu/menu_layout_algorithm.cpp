@@ -341,7 +341,7 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    if (menuPattern->IsContextMenu()) {
+    if (menuPattern->IsContextMenu() || menuPattern->IsRichEditorSelectMenu()) {
         // no need to modify for context menu, because context menu wrapper is full screen.
         return;
     }
@@ -517,7 +517,8 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
         }
     }
 
-    bool needArrow = (menuPattern->IsContextMenu() || menuPattern->IsRichEditorSelectMenu()) && !targetTag_.empty() && arrowInMenu_;
+    bool needArrow = (menuPattern->IsContextMenu() || menuPattern->IsRichEditorSelectMenu()) && !targetTag_.empty()
+        && arrowInMenu_;
     if (needArrow) {
         if (!menuProp->GetMenuPlacement().has_value()) {
             menuProp->UpdateMenuPlacement(Placement::TOP);
@@ -712,10 +713,6 @@ LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layo
     CHECK_NULL_RETURN(menuLayoutProperty, LayoutConstraintF());
 
     auto childConstraint = menuLayoutProperty->CreateChildConstraint();
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
-    if (menuPattern->IsRichEditorSelectMenu()) {
-        return LayoutConstraintF();
-    }
     UpdateConstraintWidth(layoutWrapper, childConstraint);
     UpdateConstraintHeight(layoutWrapper, childConstraint);
     UpdateConstraintBaseOnOptions(layoutWrapper, childConstraint);
@@ -880,7 +877,8 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
-void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu, bool isRichEditorSelectMenu)
+void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
+    bool isRichEditorSelectMenu)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);

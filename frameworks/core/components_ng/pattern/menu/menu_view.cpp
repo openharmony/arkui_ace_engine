@@ -18,7 +18,6 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/memory/type_info_base.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/base/frame_node.h"

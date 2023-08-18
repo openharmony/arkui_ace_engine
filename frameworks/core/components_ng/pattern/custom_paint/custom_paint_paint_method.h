@@ -258,7 +258,7 @@ public:
         strokeState_.SetFontSize(size);
     }
 
-    void SetFontStyle(FontStyle style)
+    void SetFontStyle(OHOS::Ace::FontStyle style)
     {
         fillState_.SetFontStyle(style);
         strokeState_.SetFontStyle(style);

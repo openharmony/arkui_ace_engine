@@ -884,7 +884,7 @@ void RichEditorPattern::HandleBlurEvent()
 {
     StopTwinkling();
     CloseKeyboard(true);
-    if (textSelector_.IsValid() && !isBindSelectionMenu && isMouseRightPressed_) {
+    if (textSelector_.IsValid() && !isBindSelectionMenu_) {
         CloseSelectOverlay();
         ResetSelection();
     }
@@ -892,9 +892,6 @@ void RichEditorPattern::HandleBlurEvent()
 
 void RichEditorPattern::HandleFocusEvent()
 {
-    if (isMouseRightPressed_) {
-        return;
-    }
     UseHostToUpdateTextFieldManager();
     SetCaretOffset(GetTextContentLength());
     StartTwinkling();
@@ -1920,7 +1917,6 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::DOWN) {
     } else if (touchType == TouchType::UP) {
         isMousePressed_ = false;
-        isMouseRightPressed_ = false;
     }
 }
 
@@ -1930,7 +1926,6 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         if (info.GetAction() == MouseAction::PRESS) {
             LOGI("Handle mouse right button press");
             isMousePressed_ = true;
-            isMouseRightPressed_ = true;
         }
         if (info.GetAction() == MouseAction::RELEASE) {
             LOGI("Handle mouse right button release");
@@ -1940,7 +1935,6 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         }
         return;
     }
-    isMouseRightPressed_ = false;
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE &&
         !isMouseTryDragging_) {
@@ -2194,9 +2188,10 @@ RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end, 
 
 void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
 {
-    if (isBindSelectionMenu) {
+    if (isBindSelectionMenu_) {
         return;
     }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle](bool hasData) {
@@ -2552,7 +2547,9 @@ void RichEditorPattern::OnAreaChangedInner()
 }
 
 void RichEditorPattern::CloseSelectionMenu() {
-    SubwindowManager::GetInstance()->ClearMenuNG();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    SubwindowManager::GetInstance()->HideMenuNG(host->GetId());
 }
 
 void RichEditorPattern::CloseSelectOverlay()

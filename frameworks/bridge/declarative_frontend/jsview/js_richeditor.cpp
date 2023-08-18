@@ -63,9 +63,6 @@ RichEditorModel* RichEditorModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
-constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
-constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 void JSRichEditor::Create(const JSCallbackInfo& info)
 {
     JSRichEditorController* jsController = nullptr;
@@ -428,16 +425,16 @@ void JSRichEditor::SetCopyOptions(const JSCallbackInfo& info)
 }
 
 void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
-{   
+{
     RichEditorType editorType = RichEditorType::TEXT;
-    if (info.Length() >= PARAMETER_LENGTH_FIRST && info[0]->IsNumber()) {
+    if (info.Length() >= 1 && info[0]->IsNumber()) {
         auto spanType = info[0]->ToNumber<int32_t>();
         LOGI("Set the spanType is %{public}d.", spanType);
         editorType = static_cast<RichEditorType>(spanType);
     }
 
     // Builder
-    if (info.Length() < PARAMETER_LENGTH_SECOND || !info[1]->IsObject()) {
+    if (info.Length() < 2 || !info[1]->IsObject()) {
         return;
     }
 
@@ -452,7 +449,7 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
 
     // responseType
     ResponseType responseType = ResponseType::LONG_PRESS;
-    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsNumber()) {
+    if (info.Length() >= 3 && info[2]->IsNumber()) {
         auto response = info[2]->ToNumber<int32_t>();
         LOGI("Set the responseType is %{public}d.", response);
         responseType = static_cast<ResponseType>(response);
@@ -463,13 +460,15 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
         func->Execute();
     };
     NG::MenuParam menuParam;
-    if (info.Length() > PARAMETER_LENGTH_THIRD && info[3]->IsObject()) {
+    if (info.Length() > 3 && info[3]->IsObject()) {
         ParseMenuParam(info, info[3], menuParam);
     }
     RichEditorModel::GetInstance()->BindSelectionMenu(editorType, responseType, buildFunc, menuParam);
 }
 
-void JSRichEditor::ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam) {
+void JSRichEditor::ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions,
+    NG::MenuParam& menuParam)
+{
     auto onAppearValue = menuOptions->GetProperty("onAppear");
     if (onAppearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnAppearFunc =
@@ -494,7 +493,7 @@ void JSRichEditor::ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObje
             func->Execute();
         };
         menuParam.onDisappear = std::move(onDisappear);
-    }    
+    }
 }
 
 void JSRichEditor::JSBind(BindingTarget globalObj)

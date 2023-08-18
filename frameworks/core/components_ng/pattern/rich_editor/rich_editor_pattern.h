@@ -195,7 +195,7 @@ public:
     }
     void BindSelectionMenu()
     {
-        isBindSelectionMenu = true;
+        isBindSelectionMenu_ = true;
     }
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
@@ -285,7 +285,6 @@ private:
 #endif
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
-    bool isMouseRightPressed_ = false;
     bool isFirstMouseSelect_ = true;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool isMouseTryDragging_ = false;
@@ -320,7 +319,7 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
-    bool isBindSelectionMenu = false;
+    bool isBindSelectionMenu_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG
