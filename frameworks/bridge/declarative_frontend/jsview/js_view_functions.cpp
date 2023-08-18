@@ -52,20 +52,20 @@ JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parent
 JSRef<JSObject> GenPadding(const std::unique_ptr<NG::PaddingProperty>& paddingNative)
 {
     JSRef<JSObject> padding = JSRef<JSObject>::New();
-    padding->SetProperty("top", paddingNative->top->ToString());
-    padding->SetProperty("right", paddingNative->right->ToString());
-    padding->SetProperty("bottom", paddingNative->bottom->ToString());
-    padding->SetProperty("left", paddingNative->left->ToString());
+    padding->SetProperty("top", paddingNative->top->GetDimension().ConvertToVp());
+    padding->SetProperty("right", paddingNative->right->GetDimension().ConvertToVp());
+    padding->SetProperty("bottom", paddingNative->bottom->GetDimension().ConvertToVp());
+    padding->SetProperty("left", paddingNative->left->GetDimension().ConvertToVp());
     return padding;
 }
 
 JSRef<JSObject> GenEdgeWidths(const std::unique_ptr<NG::BorderWidthProperty>& edgeWidthsNative)
 {
     JSRef<JSObject> edgeWidths = JSRef<JSObject>::New();
-    edgeWidths->SetProperty("top", edgeWidthsNative->topDimen->ToString());
-    edgeWidths->SetProperty("right", edgeWidthsNative->rightDimen->ToString());
-    edgeWidths->SetProperty("bottom", edgeWidthsNative->bottomDimen->ToString());
-    edgeWidths->SetProperty("left", edgeWidthsNative->leftDimen->ToString());
+    edgeWidths->SetProperty("top", edgeWidthsNative->topDimen->ConvertToVp());
+    edgeWidths->SetProperty("right", edgeWidthsNative->rightDimen->ConvertToVp());
+    edgeWidths->SetProperty("bottom", edgeWidthsNative->bottomDimen->ConvertToVp());
+    edgeWidths->SetProperty("left", edgeWidthsNative->leftDimen->ConvertToVp());
     return edgeWidths;
 }
 
