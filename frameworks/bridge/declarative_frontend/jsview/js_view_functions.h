@@ -110,7 +110,7 @@ private:
     JSWeak<JSFunc> jsRecycleFunc_;
     JSWeak<JSFunc> jsAboutToRecycleFunc_;
     JSWeak<JSFunc> jsSetActive_;
-    JSWeak<JSFunc> jsonUnRegElementIDFunc_;
+    JSWeak<JSFunc> jsUnRegElementIDFunc_;
 
 
     JSExecutionContext context_;
