@@ -38,6 +38,9 @@
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
+#include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
@@ -1462,5 +1465,82 @@ HWTEST_F(NavigationTestNg, NavigationModelNG004, TestSize.Level1)
     navBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
     model.SetTitleMode(NavigationTitleMode::FREE);
     ASSERT_FALSE(navBarNode->propBackButtonNodeOperation_.has_value());
+}
+
+/**
+ * @tc.name: NavigationModelNG005
+ * @tc.desc: Test ToolbarLayoutAlgorithm::Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toolBarNode.
+     */
+    auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "toolBarNode", 1, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolBarNode, nullptr);
+    auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolBarPattern, nullptr);
+    auto toolbarLayoutAlgorithm = AceType::MakeRefPtr<ToolbarLayoutAlgorithm>();
+    ASSERT_NE(toolbarLayoutAlgorithm, nullptr);
+
+    auto toolBarWrapper = toolBarNode->CreateLayoutWrapper();
+    ASSERT_NE(toolBarWrapper, nullptr);
+
+    toolbarLayoutAlgorithm->Measure(AceType::RawPtr(toolBarWrapper));
+    ASSERT_FALSE(toolBarNode->isNewToolbar_);
+
+    auto toolbarContainerNode =
+        FrameNode::CreateFrameNode("toolbarContainerNode", 2, AceType::MakeRefPtr<TextPattern>());
+    auto toolbarContainerWrapper = toolbarContainerNode->CreateLayoutWrapper();
+    toolBarNode->isNewToolbar_ = true;
+    toolBarNode->toolbarContainerNode_ = toolbarContainerNode;
+    toolbarLayoutAlgorithm->Measure(AceType::RawPtr(toolBarWrapper));
+    ASSERT_TRUE(toolBarNode->isNewToolbar_);
+    /**
+     * @tc.steps: step2. create child1, child2 etc.
+     */
+    auto child1 = FrameNode::CreateFrameNode("child1", 3, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = FrameNode::CreateFrameNode("child2", 4, AceType::MakeRefPtr<ButtonPattern>());
+    auto child1Child = FrameNode::CreateFrameNode("child1Child", 5, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2Child = FrameNode::CreateFrameNode("child2Child", 6, AceType::MakeRefPtr<ButtonPattern>());
+    auto child1Wrapper = child1->CreateLayoutWrapper();
+    auto child2Wrapper = child2->CreateLayoutWrapper();
+    auto child1ChildWrapper = child1Child->CreateLayoutWrapper();
+    auto child2ChildWrapper = child2Child->CreateLayoutWrapper();
+    toolbarContainerNode->children_.emplace_back(child1);
+    toolbarContainerNode->children_.emplace_back(child2);
+    auto temp = LayoutConstraintF();
+    temp.selfIdealSize = OptionalSizeF(200.0f, 200.0f);
+    temp.parentIdealSize = OptionalSizeF(200.0f, 200.0f);
+
+    toolBarWrapper->GetLayoutProperty()->layoutConstraint_ = temp;
+    toolBarWrapper->AppendChild(toolbarContainerWrapper);
+    toolbarLayoutAlgorithm->Measure(AceType::RawPtr(toolBarWrapper));
+    ASSERT_TRUE(toolBarNode->isNewToolbar_);
+    /**
+     * @tc.steps: step3. change selfIdealSize.
+     * @tc.expected: check whether the properties is correct.
+     */
+    temp.selfIdealSize = OptionalSizeF(0.0f, 200.0f);
+    toolBarWrapper->GetLayoutProperty()->layoutConstraint_ = temp;
+    toolbarLayoutAlgorithm->Measure(AceType::RawPtr(toolBarWrapper));
+    ASSERT_TRUE(toolBarNode->isNewToolbar_);
+
+    temp.selfIdealSize = OptionalSizeF(200.0f, 0.0f);
+    toolBarWrapper->GetLayoutProperty()->layoutConstraint_ = temp;
+    toolbarLayoutAlgorithm->Measure(AceType::RawPtr(toolBarWrapper));
+    ASSERT_TRUE(toolBarNode->isNewToolbar_);
+
+    child2ChildWrapper->GetGeometryNode()->frame_.rect_ = RectF(0, 0, 400.0f, 400.0f);
+    toolbarContainerWrapper->AppendChild(child1Wrapper);
+    toolbarContainerWrapper->AppendChild(child2Wrapper);
+    child1Wrapper->AppendChild(child1ChildWrapper);
+    child2Wrapper->AppendChild(child2ChildWrapper);
+    temp.selfIdealSize = OptionalSizeF(200.0f, 200.0f);
+    toolBarWrapper->GetLayoutProperty()->layoutConstraint_ = temp;
+    toolbarLayoutAlgorithm->Measure(AceType::RawPtr(toolBarWrapper));
+    ASSERT_TRUE(toolBarNode->isNewToolbar_);
 }
 } // namespace OHOS::Ace::NG
