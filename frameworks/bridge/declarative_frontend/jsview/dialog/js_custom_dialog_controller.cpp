@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
@@ -67,13 +68,13 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 
         // check if owner object is set
         JSView* ownerView = ownerObj->Unwrap<JSView>();
+        auto instance = new JSCustomDialogController(ownerView);
         if (ownerView == nullptr) {
+            info.SetReturnValue(instance);
+            instance = nullptr;
             LOGE("JSCustomDialogController creation with invalid arguments. Missing \'ownerView\'");
             return;
         }
-
-        auto instance = new JSCustomDialogController(ownerView);
-        instance->ownerView_ = ownerView;
 
         // Process builder function.
         JSRef<JSVal> builderCallback = constructorArg->GetProperty("builder");
@@ -151,6 +152,28 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.maskColor = maskColor;
         }
 
+        // Parse maskRect.
+        auto maskRectValue = constructorArg->GetProperty("maskRect");
+        DimensionRect maskRect;
+        if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+            instance->dialogProperties_.maskRect = maskRect;
+        }
+
+        // Parse backgroundColor.
+        auto backgroundColorValue = constructorArg->GetProperty("backgroundColor");
+        Color backgroundColor;
+        if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+            instance->dialogProperties_.backgroundColor = backgroundColor;
+        }
+
+        // Parse cornerRadius.
+        auto cornerRadiusValue = constructorArg->GetProperty("cornerRadius");
+        NG::BorderRadiusProperty radius;
+        if (!cornerRadiusValue->IsUndefined()) {
+            ParseBorderRadius(cornerRadiusValue, radius);
+            instance->dialogProperties_.borderRadius = radius;
+        }
+
         auto execContext = info.GetExecutionContext();
         // Parse openAnimation.
         auto openAnimationValue = constructorArg->GetProperty("openAnimation");
@@ -190,6 +213,49 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
     }
 }
 
+void JSCustomDialogController::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
+{
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        LOGE("args need a object or number or string. %{public}s", args->ToString().c_str());
+        return;
+    }
+
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+    CalcDimension borderRadius;
+    if (JSViewAbstract::ParseJsDimensionVp(args, borderRadius)) {
+        radius = NG::BorderRadiusProperty(borderRadius);
+        radius.multiValued = false;
+    } else if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft;
+        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
+            radiusTopLeft = topLeft;
+        }
+        CalcDimension topRight;
+        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
+            radiusTopRight = topRight;
+        }
+        CalcDimension bottomLeft;
+        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
+            radiusBottomLeft = bottomLeft;
+        }
+        CalcDimension bottomRight;
+        if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
+            radiusBottomRight = bottomRight;
+        }
+        radius.radiusTopLeft = radiusTopLeft;
+        radius.radiusTopRight = radiusTopRight;
+        radius.radiusBottomLeft = radiusBottomLeft;
+        radius.radiusBottomRight = radiusBottomRight;
+        radius.multiValued = true;
+    } else {
+        LOGE("args format error. %{public}s", args->ToString().c_str());
+    }
+}
+
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(JsOpenDialog)");
@@ -198,6 +264,10 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         return;
     }
 
+    if (this->ownerView_ == nullptr) {
+        LOGE("JSCustomDialogController(JsOpenDialog) Missing \'ownerView\'");
+        return;
+    }
     auto containerId = this->ownerView_->GetInstanceId();
     ContainerScope containerScope(containerId);
 
@@ -222,6 +292,21 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         }
     });
 
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow() && !dialogProperties_.windowScene.Upgrade()) {
+        auto viewNode = this->ownerView_->GetViewNode();
+        CHECK_NULL_VOID(viewNode);
+        auto parentCustom = AceType::DynamicCast<NG::CustomNode>(viewNode);
+        CHECK_NULL_VOID(parentCustom);
+        auto parent = parentCustom->GetParent();
+        while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+            parent = parent->GetParent();
+        }
+        if (parent) {
+            dialogProperties_.windowScene = parent;
+        }
+    }
+
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, dialogs_, pending_, isShown_,
         std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
     return;
@@ -231,6 +316,10 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(JsCloseDialog)");
 
+    if (this->ownerView_ == nullptr) {
+        LOGE("JSCustomDialogController(JsCloseDialog) Missing \'ownerView\'");
+        return;
+    }
     auto containerId = this->ownerView_->GetInstanceId();
     ContainerScope containerScope(containerId);
 

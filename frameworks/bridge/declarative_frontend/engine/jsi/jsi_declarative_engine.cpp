@@ -894,7 +894,6 @@ void JsiDeclarativeEngine::Destroy()
 #if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
-        nativeEngine_->DeleteEngine();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
     }
@@ -1850,6 +1849,10 @@ void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName
     }
     switch (state) {
         case Frontend::State::ON_SHOW:
+            if (isFirstCallShow_) {
+                isFirstCallShow_ = false;
+                break;
+            }
             CallAppFunc("onShow");
             break;
         case Frontend::State::ON_HIDE:

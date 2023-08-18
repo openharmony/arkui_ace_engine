@@ -161,13 +161,6 @@ void WaterFlowPattern::CheckScrollable()
     }
 }
 
-void WaterFlowPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
-}
-
 void WaterFlowPattern::SetPositionController(RefPtr<WaterFlowPositionController> control)
 {
     controller_ = control;
@@ -182,12 +175,9 @@ void WaterFlowPattern::InitScrollableEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<WaterFlowEventHub>();
-    auto onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
-    if (onScrollFrameBegin) {
-        auto scrollableEvent = GetScrollableEvent();
-        CHECK_NULL_VOID(scrollableEvent);
-        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
-    }
+    CHECK_NULL_VOID(eventHub);
+    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
+    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
 }
 
 bool WaterFlowPattern::UpdateStartIndex(int32_t index)

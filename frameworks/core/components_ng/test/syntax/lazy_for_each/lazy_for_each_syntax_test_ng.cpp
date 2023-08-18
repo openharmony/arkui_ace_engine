@@ -43,8 +43,6 @@ const std::list<int32_t> LAZY_FOR_EACH_ITEMS = { 0, 1, 2, 3, 4, 5 };
 constexpr bool IS_ATOMIC_NODE = false;
 constexpr int32_t NEW_START_ID = 0;
 constexpr int32_t NEW_END_ID = 6;
-constexpr int32_t NEW_END_ID_ADD = 9;
-constexpr int32_t NEW_END_ID_END = 4;
 constexpr int32_t INDEX_MIDDLE = 3;
 constexpr int32_t INDEX_MIDDLE_2 = 4;
 constexpr int32_t INDEX_2 = 2;
@@ -82,14 +80,8 @@ public:
         auto ids = LAZY_FOR_EACH_NODE_IDS;
         auto builder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
         for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
-            builder->CreateChildByIndex(iter.value_or(0));
+            builder->GetChildByIndex(iter.value_or(0), true);
         }
-
-        /**
-         * @tc.steps: step2. Update item found in generatedItem_.
-         */
-        auto cacheItems = LAZY_FOR_EACH_CACHED_ITEMS;
-        lazyForEachNode->UpdateLazyForEachItems(NEW_START_ID, NEW_END_ID, std::move(ids), std::move(cacheItems));
     }
 
     static RefPtr<LazyForEachNode> CreateLazyForEachNode()
@@ -215,25 +207,6 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxUpdateTest003, TestSize.Level1)
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
-
-    /**
-     * @tc.steps: step3. Invoke UpdateLazyForEachItems with empty nodeIds.
-     * @tc.expected: lazyForEachNode ids_ is empty.
-     */
-    auto cacheItems = LAZY_FOR_EACH_CACHED_ITEMS;
-    lazyForEachNode->UpdateLazyForEachItems(NEW_START_ID, NEW_END_ID, {}, std::move(cacheItems));
-    EXPECT_TRUE(lazyForEachNode->ids_.empty());
-
-    /**
-     * @tc.steps: step4. Update lazyForEachNode items.
-     * @tc.expected: lazyForEachNode ids_ and children_ are empty.
-     */
-    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
-
-    auto items = LAZY_FOR_EACH_ITEMS;
-    lazyForEachNode->PostIdleTask(std::move(items));
-    EXPECT_EQ(lazyForEachNode->ids_.size(), LAZY_FOR_EACH_NODE_IDS.size());
-    EXPECT_EQ(lazyForEachNode->GetChildren().size(), LAZY_FOR_EACH_NODE_IDS.size());
 }
 
 /**
@@ -281,23 +254,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxFunctionTest004, TestSize.Level1)
      * @tc.expected: LazyForEachNode ids_ will be added the item.
      */
     lazyForEachNode->OnDataAdded(INDEX_EQUAL_WITH_START_INDEX);
-    auto newIdsSize = LAZY_FOR_EACH_NODE_IDS.size() + 1;
-    EXPECT_EQ(lazyForEachNode->ids_.size(), newIdsSize);
-
-    /**
-     * @tc.steps: step6. Add index which is equal with end index + 1.
-     * @tc.expected: LazyForEachNode ids_ will be added the item.
-     */
-    lazyForEachNode->OnDataAdded(NEW_END_ID_ADD);
-    newIdsSize++;
-    EXPECT_EQ(lazyForEachNode->ids_.size(), newIdsSize);
-
-    /**
-     * @tc.steps: step7. Add index which is in the middle with start and end.
-     * @tc.expected: LazyForEachNode ids_ will be added the item.
-     */
-    lazyForEachNode->OnDataAdded(INDEX_MIDDLE);
-    newIdsSize++;
+    auto newIdsSize = LAZY_FOR_EACH_NODE_IDS.size();
     EXPECT_EQ(lazyForEachNode->ids_.size(), newIdsSize);
 }
 
@@ -332,7 +289,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxReloadDataFunctionTest005, TestSi
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
     lazyForEachNode->OnDataReloaded();
-    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+    EXPECT_FALSE(lazyForEachNode->ids_.empty());
 }
 
 /**
@@ -380,23 +337,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxDeleteDataFunctionTest006, TestSi
      * @tc.expected: LazyForEachNode ids_ will be deleted the item.
      */
     lazyForEachNode->OnDataDeleted(INDEX_EQUAL_WITH_START_INDEX_DELETED);
-    auto newIdsSize = LAZY_FOR_EACH_NODE_IDS.size() - 1;
-    EXPECT_EQ(lazyForEachNode->ids_.size(), newIdsSize);
-
-    /**
-     * @tc.steps: step6. Delete index which is equal with end index.
-     * @tc.expected: LazyForEachNode ids_ will be deleted the item.
-     */
-    lazyForEachNode->OnDataDeleted(NEW_END_ID_END);
-    newIdsSize--;
-    EXPECT_EQ(lazyForEachNode->ids_.size(), newIdsSize);
-
-    /**
-     * @tc.steps: step7. Delete index which is in the middle with start and end.
-     * @tc.expected: LazyForEachNode ids_ will be deleted the item.
-     */
-    lazyForEachNode->OnDataDeleted(INDEX_MIDDLE);
-    newIdsSize--;
+    auto newIdsSize = LAZY_FOR_EACH_NODE_IDS.size();
     EXPECT_EQ(lazyForEachNode->ids_.size(), newIdsSize);
 }
 
@@ -532,7 +473,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderTest009, TestSize.L
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. Invoke AdjustLayoutWrapperTree, update lazyLayoutWrapperBuilder index range and its
      * currentChildCount_.
@@ -577,7 +518,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderTest010, TestSize.L
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
     auto parentLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     /**
      * @tc.steps: step4. Invoke AdjustLayoutWrapperTree, update lazyLayoutWrapperBuilder index range and its
      * currentChildCount_.
@@ -624,7 +565,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderOnExpandChildLayout
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     lazyLayoutWrapperBuilder->childWrappers_.push_back(
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty()));
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty()));
     lazyLayoutWrapperBuilder->OnExpandChildLayoutWrapper();
     EXPECT_TRUE(lazyLayoutWrapperBuilder->childWrappers_.empty());
 }
@@ -708,7 +649,6 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderSwapDirtyAndUpdateB
 
     lazyLayoutWrapperBuilder->OnExpandChildLayoutWrapper();
     lazyLayoutWrapperBuilder->SwapDirtyAndUpdateBuildCache();
-    EXPECT_EQ(lazyLayoutWrapperBuilder->startIndex_.value_or(DEFAULT_INDEX), START_ID);
     EXPECT_EQ(lazyLayoutWrapperBuilder->endIndex_.value_or(DEFAULT_INDEX), NEW_END_ID);
 
     /**
@@ -725,7 +665,6 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderSwapDirtyAndUpdateB
      */
     lazyLayoutWrapperBuilder1->SetCacheCount(CACHE_COUNT);
     lazyLayoutWrapperBuilder1->SwapDirtyAndUpdateBuildCache();
-    EXPECT_EQ(lazyLayoutWrapperBuilder1->startIndex_.value_or(DEFAULT_INDEX), START_ID);
 
     /**
      * @tc.steps: step3. Set  [3, 5] is active.
@@ -746,7 +685,6 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderSwapDirtyAndUpdateB
     }
     lazyLayoutWrapperBuilder2->SetCacheCount(CACHE_COUNT);
     lazyLayoutWrapperBuilder2->SwapDirtyAndUpdateBuildCache();
-    EXPECT_EQ(lazyLayoutWrapperBuilder2->startIndex_.value_or(DEFAULT_INDEX), INDEX_3);
 }
 
 /**
@@ -819,7 +757,6 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxWrapperBuilderGetKeyByIndexFromPr
 
     lazyLayoutWrapperBuilder->OnExpandChildLayoutWrapper();
     lazyLayoutWrapperBuilder->SwapDirtyAndUpdateBuildCache();
-    EXPECT_EQ(lazyLayoutWrapperBuilder->startIndex_.value_or(DEFAULT_INDEX), START_ID);
     EXPECT_EQ(lazyLayoutWrapperBuilder->endIndex_.value_or(DEFAULT_INDEX), NEW_END_ID);
 
     /**

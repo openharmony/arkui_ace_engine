@@ -56,10 +56,23 @@ public:
         contentModifier_ = modify;
     }
 
+    void SetScrollBarOverlayModifier(WeakPtr<ScrollBarOverlayModifier>&& scrollBarOverlayModifier)
+    {
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
+    }
+
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
+    {
+        return scrollBarOverlayModifier_.Upgrade();
+    }
+
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+
 private:
     RefPtr<WaterFlowContentModifier> contentModifier_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
+    WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_PAINT_METHOD_H

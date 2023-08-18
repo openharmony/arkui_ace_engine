@@ -32,12 +32,14 @@ void GridItemPattern::MarkIsSelected(bool isSelected)
         isSelected_ = isSelected;
         auto eventHub = GetEventHub<GridItemEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnSelect(isSelected);
+        eventHub->FireSelectChangeEvent(isSelected);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (isSelected) {
+            eventHub->UpdateCurrentUIState(UI_STATE_SELECTED);
             host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
         } else {
+            eventHub->ResetCurrentUIState(UI_STATE_SELECTED);
             host->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
         }
     }
@@ -51,7 +53,7 @@ void GridItemPattern::SetSelectable(bool selectable)
         auto context = host->GetRenderContext();
         CHECK_NULL_VOID(context);
         context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
-        MarkIsSelected(true);
+        MarkIsSelected(false);
     }
     selectable_ = selectable;
 }
@@ -72,7 +74,6 @@ void GridItemPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(host);
         auto context = host->GetRenderContext();
         CHECK_NULL_VOID(context);
-        context->OnMouseSelectUpdate(false, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         pattern->MarkIsSelected(true);
         context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
     });
@@ -97,11 +98,6 @@ void GridItemPattern::BeforeCreateLayoutWrapper()
     if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
         shallowBuilder_->ExecuteDeepRender();
         shallowBuilder_.Reset();
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (!host->IsActive()) {
-        host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 }
 } // namespace OHOS::Ace::NG

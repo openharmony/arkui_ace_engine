@@ -40,10 +40,14 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     if (info.hasMeasureOrLayout) {
         customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);
         auto customMeasureLayoutNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(customNode);
-        if (info.measureFunc && customMeasureLayoutNode) {
+        if (info.measureSizeFunc && customMeasureLayoutNode) {
+            customMeasureLayoutNode->SetMeasureFunction(std::move(info.measureSizeFunc));
+        } else if (info.measureFunc && customMeasureLayoutNode) {
             customMeasureLayoutNode->SetMeasureFunction(std::move(info.measureFunc));
         }
-        if (info.layoutFunc && customMeasureLayoutNode) {
+        if (info.placeChildrenFunc && customMeasureLayoutNode) {
+            customMeasureLayoutNode->SetLayoutFunction(std::move(info.placeChildrenFunc));
+        } else if (info.layoutFunc && customMeasureLayoutNode) {
             customMeasureLayoutNode->SetLayoutFunction(std::move(info.layoutFunc));
         }
     } else {
@@ -70,6 +74,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetCompleteReloadFunc(std::move(completeReloadFunc));
     customNode->SetJSViewName(std::move(info.jsViewName));
     customNode->SetRecycleFunction(std::move(info.recycleCustomNodeFunc));
+    customNode->SetSetActiveFunc(std::move(info.setActiveFunc));
     return customNode;
 }
 

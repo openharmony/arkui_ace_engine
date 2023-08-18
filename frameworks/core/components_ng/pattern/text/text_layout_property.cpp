@@ -102,8 +102,10 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put(
         "textOverflow", V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
     json->Put("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str());
-    auto jsonShadow = CovertShadowToJson(GetTextShadow().value_or(Shadow()));
-    json->Put("textShadow", jsonShadow);
+    if (GetTextShadow().has_value() && !GetTextShadow().value().empty()) {
+        auto jsonShadow = CovertShadowToJson(GetTextShadow().value().front());
+        json->Put("textShadow", jsonShadow);
+    }
     json->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
         GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     json->Put("copyOption", GetCopyOptionString().c_str());

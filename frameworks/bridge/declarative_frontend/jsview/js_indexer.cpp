@@ -88,11 +88,6 @@ void JSIndexer::Create(const JSCallbackInfo& args)
                 length = static_cast<uint32_t>(arrayVal->GetArraySize());
             }
         }
-        if (length <= 0) {
-            LOGE("info is invalid");
-            return;
-        }
-
         std::vector<std::string> indexerArray;
         for (size_t i = 0; i < length; i++) {
             auto value = arrayVal->GetArrayItem(i);
@@ -107,7 +102,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
             selectedVal = selectedProperty->ToNumber<int32_t>();
         }
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
-        if (!selectedProperty->IsObject()) {
+        if (length <= 0 || !selectedProperty->IsObject()) {
             return;
         }
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
@@ -333,13 +328,20 @@ void JSIndexer::SetItemSize(const JSCallbackInfo& args)
 
 void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsNumber()) {
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    int32_t value = args[0]->ToNumber<int32_t>();
-    if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
-        IndexerModel::GetInstance()->SetAlignStyle(value);
+    int32_t value = Container::IsCurrentUseNewPipeline() ? static_cast<int32_t>(NG::AlignStyle::RIGHT)
+                                                         : static_cast<int32_t>(V2::AlignStyle::RIGHT);
+    auto alignValue = -1;
+    if (args[0]->IsNumber()) {
+        alignValue = args[0]->ToNumber<int32_t>();
     }
+    if (alignValue >= 0 && alignValue < static_cast<int32_t>(ALIGN_STYLE.size())) {
+        value = alignValue;
+    }
+    IndexerModel::GetInstance()->SetAlignStyle(value);
     CalcDimension popupHorizontalSpace(-1.0);
     if (args.Length() > 1) {
         ParseJsDimensionVp(args[1], popupHorizontalSpace);
@@ -364,14 +366,20 @@ void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
 {
     if (args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        float positionX = 0.0f;
-        float positionY = 0.0f;
-        if (ConvertFromJSValue(obj->GetProperty("x"), positionX)) {
-            IndexerModel::GetInstance()->SetPopupPositionX(Dimension(positionX, DimensionUnit::VP));
+        std::optional<Dimension> xOpt;
+        std::optional<Dimension> yOpt;
+        CalcDimension x;
+        CalcDimension y;
+        JSRef<JSVal> xVal = obj->GetProperty("x");
+        JSRef<JSVal> yVal = obj->GetProperty("y");
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, x)) {
+            xOpt = x;
         }
-        if (ConvertFromJSValue(obj->GetProperty("y"), positionY)) {
-            IndexerModel::GetInstance()->SetPopupPositionY(Dimension(positionY, DimensionUnit::VP));
+        IndexerModel::GetInstance()->SetPopupPositionX(xOpt);
+        if (JSViewAbstract::ParseJsDimensionVp(yVal, y)) {
+            yOpt = y;
         }
+        IndexerModel::GetInstance()->SetPopupPositionY(yOpt);
     }
 }
 

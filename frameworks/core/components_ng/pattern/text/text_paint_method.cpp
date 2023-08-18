@@ -105,10 +105,13 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_VOID(context);
     const auto& selection = textPattern->GetTextSelector();
-    auto textValue = textPattern->GetTextForDisplay();
     std::vector<Rect> selectedRects;
-    if (!textValue.empty() && selection.GetTextStart() != selection.GetTextEnd()) {
+    if (selection.GetTextStart() != selection.GetTextEnd()) {
         paragraph_->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
     }
     auto contentRect = textPattern->GetTextContentRect();
@@ -121,5 +124,8 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto theme = themeManager->GetTheme<TextTheme>();
     auto selectedColor = theme->GetSelectedColor().GetValue();
     textOverlayModifier_->SetSelectedColor(selectedColor);
+    if (context->GetClipEdge().has_value()) {
+        textOverlayModifier_->SetIsClip(context->GetClipEdge().value());
+    }
 }
 } // namespace OHOS::Ace::NG

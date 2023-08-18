@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_PATTERN_H
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "core/components/text_field/text_field_controller.h"
@@ -75,6 +76,11 @@ public:
         searchController_ = searchController;
     }
 
+    const OffsetF& GetTextFieldOffset() const
+    {
+        return textFieldOffset_;
+    }
+
     FocusPattern GetFocusPattern() const override;
 
     bool HandleInputChildOnFocus() const;
@@ -106,6 +112,23 @@ public:
     enum class FocusChoice { SEARCH = 0, CANCEL_BUTTON, SEARCH_BUTTON };
 
     void UpdateChangeEvent(const std::string& value);
+
+    void SetCancelButtonNode(const RefPtr<FrameNode>& cancelButtonNode)
+    {
+        cancelButtonNode_ = cancelButtonNode;
+    }
+
+    void SetButtonNode(const RefPtr<FrameNode>& buttonNode)
+    {
+        buttonNode_ = buttonNode;
+    }
+
+    void SetTextFieldNode(const RefPtr<FrameNode>& textField)
+    {
+        textField_ = textField;
+    }
+
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnModifyDone() override;
@@ -160,6 +183,8 @@ private:
     OffsetF buttonOffset_;
     SizeF cancelButtonSize_;
     OffsetF cancelButtonOffset_;
+    SizeF textFieldSize_;
+    OffsetF textFieldOffset_;
     RefPtr<ClickEvent> imageClickListener_;
     RefPtr<ClickEvent> buttonClickListener_;
     RefPtr<ClickEvent> cancelButtonClickListener_;
@@ -180,6 +205,10 @@ private:
     bool isCancelButtonHover_ = false;
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
+
+    RefPtr<FrameNode> cancelButtonNode_;
+    RefPtr<FrameNode> buttonNode_;
+    RefPtr<FrameNode> textField_;
 };
 
 } // namespace OHOS::Ace::NG

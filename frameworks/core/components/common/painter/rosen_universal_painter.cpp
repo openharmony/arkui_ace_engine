@@ -18,6 +18,8 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
 #include "include/core/SkRRect.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 namespace OHOS::Ace {

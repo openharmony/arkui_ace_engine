@@ -83,6 +83,7 @@ void JSStack::SetOverflow(int value)
 bool GetAlignment(const JSCallbackInfo& info, Alignment& alignment)
 {
     if (info.Length() != 1 || !info[0]->IsNumber()) {
+        StackModel::GetInstance()->SetAlignment(Alignment::CENTER);
         return false;
     }
     auto value = info[0]->ToNumber<size_t>();

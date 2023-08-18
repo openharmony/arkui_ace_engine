@@ -20,12 +20,11 @@
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/utils/system_properties.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
+#include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -37,6 +36,13 @@ class LifecycleListener : public Rosen::ILifecycleListener {
 public:
     explicit LifecycleListener(const WeakPtr<WindowPattern>& windowPattern) : windowPattern_(windowPattern) {}
     virtual ~LifecycleListener() = default;
+
+    void OnActivation() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnActivation();
+    }
 
     void OnConnect() override
     {
@@ -66,14 +72,16 @@ public:
         windowPattern->OnDisconnect();
     }
 
+    void OnExtensionDied() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnExtensionDied();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
-
-WindowPattern::WindowPattern()
-{
-    instanceId_ = Container::CurrentId();
-}
 
 void WindowPattern::RegisterLifecycleListener()
 {
@@ -88,12 +96,19 @@ void WindowPattern::UnregisterLifecycleListener()
     session_->UnregisterLifecycleListener(lifecycleListener_);
 }
 
+bool WindowPattern::IsMainWindow() const
+{
+    CHECK_NULL_RETURN(session_, false);
+    return session_->GetWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
 void WindowPattern::InitContent()
 {
     contentNode_ = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
+
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
@@ -102,116 +117,93 @@ void WindowPattern::InitContent()
         context->SetRSNode(surfaceNode);
     }
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
     auto state = session_->GetSessionState();
-    LOGI("Session state is %{public}u.", state);
-    switch (state) {
-        case Rosen::SessionState::STATE_DISCONNECT: {
-            CreateStartingNode();
-            break;
+    auto bundleName = session_->GetSessionInfo().bundleName_;
+    LOGI("Session state: %{public}u, bundle name: %{public}s", state, bundleName.c_str());
+    if (state == Rosen::SessionState::STATE_DISCONNECT) {
+        if (!HasStartingPage()) {
+            return;
         }
-        case Rosen::SessionState::STATE_BACKGROUND: {
+        if (session_->GetShowRecent()) {
             CreateSnapshotNode();
-            break;
+            host->AddChild(snapshotNode_);
+            return;
         }
-        default: {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->AddChild(contentNode_);
-            break;
+        CreateStartingNode();
+        host->AddChild(startingNode_);
+        return;
+    }
+
+    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetBufferAvailable()) {
+        CreateSnapshotNode();
+        host->AddChild(snapshotNode_);
+        return;
+    }
+
+    host->AddChild(contentNode_);
+    if (!session_->GetBufferAvailable()) {
+        CreateStartingNode();
+        host->AddChild(startingNode_);
+        if (surfaceNode) {
+            surfaceNode->SetBufferAvailableCallback(callback_);
         }
     }
 }
 
 void WindowPattern::CreateStartingNode()
 {
-    if (!HasStartingPage() || CreatePersistentNode()) {
-        return;
-    }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
     startingNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    host->AddChild(startingNode_);
-
     startingNode_->SetHitTestMode(HitTestMode::HTMNONE);
-    std::string startPagePath;
+
+    std::string startupPagePath;
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     auto sessionInfo = session_->GetSessionInfo();
-    Rosen::SceneSessionManager::GetInstance().GetStartPage(sessionInfo, startPagePath, backgroundColor);
-    LOGI("start page path %{public}s, background color %{public}x", startPagePath.c_str(), backgroundColor);
+    Rosen::SceneSessionManager::GetInstance().GetStartPage(sessionInfo, startupPagePath, backgroundColor);
+    LOGI("startup page path %{public}s, background color %{public}x", startupPagePath.c_str(), backgroundColor);
 
     startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo(startPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
+        ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
     startingNode_->MarkModifyDone();
 }
 
-void WindowPattern::CreateSnapshotNode()
+void WindowPattern::CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot)
 {
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    snapshotNode_->SetHitTestMode(HitTestMode::HTMNONE);
+
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->AddChild(snapshotNode_);
-
     CHECK_NULL_VOID(session_);
-    auto snapshot = session_->GetSnapshot();
-    auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
-
-    CHECK_NULL_VOID(pixelMap);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    if (snapshot) {
+        auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
+        CHECK_NULL_VOID(pixelMap);
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    } else {
+        CHECK_NULL_VOID(session_->GetScenePersistence());
+        ImageSourceInfo sourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto imageCache = pipelineContext->GetImageCache();
+        CHECK_NULL_VOID(imageCache);
+        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
+        auto cacheKey = ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second));
+        imageCache->ClearCacheImage(cacheKey);
+        imageCache->ClearCacheImage(sourceInfo.GetKey());
+    }
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
-}
-
-void WindowPattern::OnConnect()
-{
-    ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(session_);
-    auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
-
-    CHECK_NULL_VOID(contentNode_);
-    auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID(context);
-    context->SetRSNode(surfaceNode);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->AddChild(contentNode_, 0);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-    if (!HasStartingPage()) {
-        return;
-    }
-    surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this)]() {
-        LOGI("RSSurfaceNode buffer available callback");
-        auto windowPattern = weak.Upgrade();
-        CHECK_NULL_VOID(windowPattern);
-        windowPattern->BufferAvailableCallback();
-    });
-}
-
-void WindowPattern::BufferAvailableCallback()
-{
-    ContainerScope scope(instanceId_);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    host->RemoveChild(startingNode_);
-    startingNode_.Reset();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void WindowPattern::OnAttachToFrameNode()
@@ -223,114 +215,29 @@ void WindowPattern::OnAttachToFrameNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameRect = geometryNode->GetFrameRect();
-    Rosen::WSRect windowRect {
-        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
-        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
-        .width_ = std::round(frameRect.Width()),
-        .height_ = std::round(frameRect.Height())
-    };
-
-    CHECK_NULL_RETURN(session_, false);
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
-    return false;
-}
-
 void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_VOID(session_);
     CHECK_NULL_VOID(pointerEvent);
-    PrintPointerEvent(pointerEvent);
     session_->TransferPointerEvent(pointerEvent);
-}
-
-void WindowPattern::PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event)
-{
-    CHECK_NULL_VOID(event);
-    std::vector<int32_t> pointerIds = event->GetPointerIds();
-    std::string str;
-    std::vector<uint8_t> buffer = event->GetBuffer();
-    for (const auto &buff : buffer) {
-        str += std::to_string(buff);
-    }
-    LOGD("EventType:%{public}d,ActionTime:%{public}" PRId64 ",Action:%{public}d,"
-        "ActionStartTime:%{public}" PRId64 ",Flag:%{public}d,PointerAction:%{public}s,"
-        "SourceType:%{public}s,ButtonId:%{public}d,VerticalAxisValue:%{public}.2f,"
-        "HorizontalAxisValue:%{public}.2f,PinchAxisValue:%{public}.2f,"
-        "XAbsValue:%{public}.2f,YAbsValue:%{public}.2f,ZAbsValue:%{public}.2f,"
-        "RzAbsValue:%{public}.2f,GasAbsValue:%{public}.2f,BrakeAbsValue:%{public}.2f,"
-        "Hat0xAbsValue:%{public}.2f,Hat0yAbsValue:%{public}.2f,ThrottleAbsValue:%{public}.2f,"
-        "PointerId:%{public}d,PointerCount:%{public}zu,EventNumber:%{public}d,"
-        "BufferCount:%{public}zu,Buffer:%{public}s",
-        event->GetEventType(), event->GetActionTime(), event->GetAction(),
-        event->GetActionStartTime(), event->GetFlag(), event->DumpPointerAction(), event->DumpSourceType(),
-        event->GetButtonId(), event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_VERTICAL),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_HORIZONTAL),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_PINCH),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_ABS_X),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_ABS_Y),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_ABS_Z),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_ABS_RZ),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_ABS_GAS),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_ABS_BRAKE),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_ABS_HAT0X),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_ABS_HAT0Y),
-        event->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_ABS_THROTTLE), event->GetPointerId(), pointerIds.size(),
-        event->GetId(), buffer.size(), str.c_str());
-
-    for (const auto &pointerId : pointerIds) {
-        MMI::PointerEvent::PointerItem item;
-        if (!event->GetPointerItem(pointerId, item)) {
-            LOGE("Invalid pointer: %{public}d.", pointerId);
-            return;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (pointerEvent->GetPointerAction() >= MMI::PointerEvent::POINTER_ACTION_PULL_DOWN &&
+        pointerEvent->GetPointerAction() <= MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        if (pipeline) {
+            auto manager = pipeline->GetDragDropManager();
+            CHECK_NULL_VOID(manager);
+            manager->SetIsWindowConsumed(true);
         }
-        LOGD("pointerId:%{public}d,DownTime:%{public}" PRId64 ",IsPressed:%{public}d,DisplayX:%{public}d,"
-            "DisplayY:%{public}d,WindowX:%{public}d,WindowY:%{public}d,Width:%{public}d,Height:%{public}d,"
-            "TiltX:%{public}.2f,TiltY:%{public}.2f,ToolDisplayX:%{public}d,ToolDisplayY:%{public}d,"
-            "ToolWindowX:%{public}d,ToolWindowY:%{public}d,ToolWidth:%{public}d,ToolHeight:%{public}d,"
-            "Pressure:%{public}.2f,ToolType:%{public}d,LongAxis:%{public}d,ShortAxis:%{public}d,RawDx:%{public}d,"
-            "RawDy:%{public}d",
-            pointerId, item.GetDownTime(), item.IsPressed(), item.GetDisplayX(), item.GetDisplayY(),
-            item.GetWindowX(), item.GetWindowY(), item.GetWidth(), item.GetHeight(), item.GetTiltX(),
-            item.GetTiltY(), item.GetToolDisplayX(), item.GetToolDisplayY(), item.GetToolWindowX(),
-            item.GetToolWindowY(), item.GetToolWidth(), item.GetToolHeight(), item.GetPressure(),
-            item.GetToolType(), item.GetLongAxis(), item.GetShortAxis(), item.GetRawDx(), item.GetRawDy());
     }
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void WindowPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     CHECK_NULL_VOID(session_);
+    CHECK_NULL_VOID(keyEvent);
     session_->TransferKeyEvent(keyEvent);
-}
-
-bool WindowPattern::CreatePersistentNode()
-{
-    CHECK_NULL_RETURN(session_, false);
-    if (session_->GetScenePersistence() == nullptr || !session_->GetScenePersistence()->IsSnapshotExisted()) {
-        return false;
-    }
-    startingNode_ = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    host->AddChild(startingNode_);
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo(std::string("file:/").append(session_->GetScenePersistence()->GetSnapshotFilePath())));
-    imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
-    startingNode_->MarkModifyDone();
-    return true;
 }
 
 void WindowPattern::DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
@@ -394,16 +301,75 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
+    SetWindowSceneConsumed(pointerEvent->GetPointerAction());
+    AdapterRotation(pointerEvent);
     DispatchPointerEvent(pointerEvent);
+}
+
+void WindowPattern::AdapterRotation(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
+    auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
+    CHECK_NULL_VOID(pointerEvent);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto translateIter = translateIds.find(frameNode->GetId());
+    if (translateIter == translateIds.end()) {
+        return;
+    }
+    int32_t udegree = 0;
+    while (translateIter != translateIds.end()) {
+        int32_t translateId = translateIter->second.parentId;
+        auto translateCfgIter = translateCfg.find(translateId);
+        if (translateCfgIter != translateCfg.end() && translateCfgIter->second.degree != 0) {
+            udegree = static_cast<int32_t>(translateCfgIter->second.degree);
+            break;
+        }
+        translateIter = translateIds.find(translateId);
+    }
+    udegree = udegree % 360;
+    if (udegree == -1 || udegree == 0) {
+        return;
+    }
+    udegree = udegree < 0 ? udegree + 360 : udegree;
+    int32_t pointerId = pointerEvent->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = pointerEvent->GetPointerItem(pointerId, item);
+    if (!ret) {
+        return;
+    }
+    int32_t originWindowX = item.GetWindowX();
+    int32_t originWindowY = item.GetWindowY();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rect = host->GetPaintRectWithTransform();
+    int32_t width = static_cast<int32_t>(rect.Width());
+    int32_t height = static_cast<int32_t>(rect.Height());
+
+    if (udegree == 90) {
+        item.SetWindowX(originWindowY);
+        item.SetWindowY(height - originWindowX);
+    }
+    if (udegree == 180) {
+        item.SetWindowX(width - originWindowX);
+        item.SetWindowY(height - originWindowY);
+    }
+    if (udegree == 270) {
+        item.SetWindowX(width - originWindowY);
+        item.SetWindowY(originWindowX);
+    }
+    pointerEvent->UpdatePointerItem(pointerId, item);
+    LOGD("WindowPattern AdapterRotation udegree:%{public}d, windowX:%{public}d, windowY:%{public}d", udegree,
+        item.GetWindowX(), item.GetWindowY());
 }
 
 bool WindowPattern::IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    return pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
-        ((pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) ||
-        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) ||
-        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_UP) ||
-        (pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE));
+    return (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE &&
+        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN ||
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE)) ||
+        (pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_PULL_UP);
 }
 
 void WindowPattern::HandleMouseEvent(const MouseInfo& info)
@@ -420,15 +386,24 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
     int32_t action = pointerEvent->GetPointerAction();
-    if (action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
-        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) {
-        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowEvent(
-            AceType::DynamicCast<WindowNode>(host), pointerEvent, false);
+    if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) ||
+        (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW)) {
+        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
+            AceType::DynamicCast<WindowNode>(host), pointerEvent);
     }
     if (action == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
-        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowEvent(
-            AceType::DynamicCast<WindowNode>(host), pointerEvent, true);
+        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowDragEvent(
+            AceType::DynamicCast<WindowNode>(host), pointerEvent);
     }
+    if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
+        (action == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW)) {
+        DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowMouseRecord();
+    }
+    if (action == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowDragEvent();
+    }
+    SetWindowSceneConsumed(action);
     DispatchPointerEvent(pointerEvent);
 }
 
@@ -440,7 +415,7 @@ bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
         (pointerAction != MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
         return true;
     }
-    return pointerEvent->GetButtonId() != MMI::PointerEvent::BUTTON_NONE &&
+    return pointerEvent->GetButtonId() == MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
         (pointerAction == MMI::PointerEvent::POINTER_ACTION_MOVE ||
         pointerAction == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP);
 }
@@ -460,9 +435,33 @@ void WindowPattern::OnModifyDone()
     InitMouseEvent(inputHub);
 }
 
-void WindowPattern::TransferFocusWindowId(uint32_t focusWindowId)
+void WindowPattern::TransferFocusState(bool focusState)
 {
     CHECK_NULL_VOID(session_);
-    session_->TransferFocusWindowIdEvent(focusWindowId);
+    session_->TransferFocusStateEvent(focusState);
+}
+
+std::vector<Rosen::Rect> WindowPattern::GetHotAreas()
+{
+    if (session_ == nullptr) {
+        return std::vector<Rosen::Rect>();
+    }
+    return session_->GetTouchHotAreas();
+}
+
+void WindowPattern::SetWindowSceneConsumed(int32_t action)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        if (action == MMI::PointerEvent::POINTER_ACTION_DOWN ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+            pipeline->SetWindowSceneConsumed(true);
+        }
+        if (action == MMI::PointerEvent::POINTER_ACTION_UP ||
+            action == MMI::PointerEvent::POINTER_ACTION_BUTTON_UP ||
+            action == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+            pipeline->SetWindowSceneConsumed(false);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

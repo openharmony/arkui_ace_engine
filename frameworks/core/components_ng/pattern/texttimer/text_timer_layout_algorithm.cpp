@@ -25,74 +25,28 @@
 namespace OHOS::Ace::NG {
 void TextTimerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = AceType::DynamicCast<TextTimerLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
-    const auto& selfIdealSize = layoutConstraint->selfIdealSize;
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto idealSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
-        Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+    auto childConstraint = layoutProperty->CreateChildConstraint();
 
-    // measure text
-    MinusPaddingToSize(padding, idealSize);
-    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    childLayoutConstraint.maxSize = idealSize;
-    auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(childWrapper);
-    childWrapper->Measure(childLayoutConstraint);
-    auto childFrameSize = childWrapper->GetGeometryNode()->GetFrameSize();
-    auto height = std::max(selfIdealSize.Height().value_or(0.0f), childFrameSize.Height());
-    auto width = std::max(selfIdealSize.Width().value_or(0.0f), childFrameSize.Width());
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(width, height));
-}
+    auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(textWrapper);
+    textWrapper->Measure(childConstraint);
 
-void TextTimerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
-{
-    PerformLayout(layoutWrapper);
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Layout();
+    auto textSize = textWrapper->GetGeometryNode()->GetFrameSize();
+    OptionalSizeF textTimerFrameSize = { textSize.Width(), textSize.Height() };
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    AddPaddingToSize(padding, textTimerFrameSize);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    const auto& minSize = constraint->minSize;
+    const auto& maxSize = constraint->maxSize;
+    textTimerFrameSize.Constrain(minSize, maxSize);
+    if (constraint->selfIdealSize.Width()) {
+        textTimerFrameSize.SetWidth(constraint->selfIdealSize.Width().value());
     }
-}
-
-void TextTimerLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
-{
-    // update child position.
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
-    if (layoutDirection == TextDirection::AUTO) {
-        layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    if (constraint->selfIdealSize.Height()) {
+        textTimerFrameSize.SetHeight(constraint->selfIdealSize.Height().value());
     }
-    MinusPaddingToSize(padding, size);
-    auto left = padding.left.value_or(0);
-    auto top = padding.top.value_or(0);
-    auto paddingOffset = OffsetF(left, top);
-    auto align = Alignment::CENTER;
-    auto layoutProperty = DynamicCast<TextTimerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-
-    if (layoutProperty->GetPositionProperty()) {
-        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
-    }
-
-    // Update child position.
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto translate =
-            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
-        if (layoutDirection == TextDirection::RTL) {
-            translate.SetX(size.Width() - translate.GetX() - child->GetGeometryNode()->GetMarginFrameSize().Width());
-        }
-        child->GetGeometryNode()->SetMarginFrameOffset(translate);
-    }
-    // Update content position.
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
-    if (content) {
-        auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
-        if (layoutDirection == TextDirection::RTL) {
-            translate.SetX(size.Width() - translate.GetX() - content->GetRect().GetSize().Width());
-        }
-        content->SetOffset(translate);
-    }
+    layoutWrapper->GetGeometryNode()->SetFrameSize(textTimerFrameSize.ConvertToSizeT());
 }
 } // namespace OHOS::Ace::NG

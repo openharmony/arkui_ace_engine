@@ -207,8 +207,8 @@ HWTEST_F(PanelTestNg, PanelTestNg001, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
     EXPECT_FALSE(layoutAlgorithmWrapper == nullptr);
@@ -376,8 +376,8 @@ HWTEST_F(PanelTestNg, PanelTestNg005, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
     auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(panelPattern == nullptr);
     auto panelLayoutProperty = panelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -715,8 +715,8 @@ HWTEST_F(PanelTestNg, PanelTestNg0012, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto panelPattern = frameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(panelPattern == nullptr);
     auto layoutAlgorithm = AceType::DynamicCast<SlidingPanelLayoutAlgorithm>(panelPattern->CreateLayoutAlgorithm());
@@ -800,8 +800,8 @@ HWTEST_F(PanelTestNg, PanelTestNg0014, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto panelPattern = frameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(panelPattern == nullptr);
     auto layoutAlgorithm = AceType::DynamicCast<SlidingPanelLayoutAlgorithm>(panelPattern->CreateLayoutAlgorithm());
@@ -824,8 +824,8 @@ HWTEST_F(PanelTestNg, PanelTestNg0014, TestSize.Level1)
     panelPattern->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     auto layoutProperty = frameNode->GetLayoutProperty();
-    RefPtr<LayoutWrapper> child =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapperNode> child =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     layoutWrapper->AppendChild(child);
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
@@ -1084,8 +1084,8 @@ HWTEST_F(PanelTestNg, PanelLayoutTest001, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
     auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(panelPattern == nullptr);
     auto panelLayoutProperty = panelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -1149,8 +1149,8 @@ HWTEST_F(PanelTestNg, PanelLayoutTest002, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
     auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(panelPattern == nullptr);
     auto panelLayoutProperty = panelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -1215,8 +1215,8 @@ HWTEST_F(PanelTestNg, PanelLayoutTest003, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
     auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(panelPattern == nullptr);
     auto panelLayoutProperty = panelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -1281,8 +1281,8 @@ HWTEST_F(PanelTestNg, PanelLayoutTest004, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
     auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(panelPattern == nullptr);
     auto panelLayoutProperty = panelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -1344,8 +1344,8 @@ HWTEST_F(PanelTestNg, PanelLayoutTest005, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
     auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(panelPattern == nullptr);
     auto panelLayoutProperty = panelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
@@ -1494,8 +1494,8 @@ HWTEST_F(PanelTestNg, PanelTestNg0021, TestSize.Level1)
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(panelFrameNode, geometryNode, panelFrameNode->GetLayoutProperty());
     auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
     ASSERT_NE(panelPattern, nullptr);
     panelPattern->mode_ = PanelMode::HALF;

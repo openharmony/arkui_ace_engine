@@ -82,6 +82,7 @@ const std::string PLACEHOLDER("DEFAULT PLACEHOLDER");
 const std::string PLACE_HOLDER_TEXT("Placeholdertext");
 const std::string TEXT_CONTENT("Textvalue");
 const std::string DEFAULT_PASSWORD = "******";
+constexpr int32_t SELECT_OVERLAY_ID = 143;
 } // namespace
 class TextFieldPatternTestNg : public testing::Test {
 public:
@@ -314,8 +315,8 @@ HWTEST_F(TextFieldPatternTestNg, DeleteBackward, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::NONE;
     auto deleteLen = 2;
     auto caretPosition = 4;
-    std::string expectStr = TEXT_VALUE.substr(0, caretPosition - deleteLen) +
-                            TEXT_VALUE.substr(caretPosition, TEXT_VALUE.size());
+    std::string expectStr =
+        TEXT_VALUE.substr(0, caretPosition - deleteLen) + TEXT_VALUE.substr(caretPosition, TEXT_VALUE.size());
     pattern->DeleteBackward(deleteLen);
     layoutProperty->UpdateMaxLines(1);
     pattern->UpdateEditingValue(TEXT_VALUE, caretPosition);
@@ -603,6 +604,11 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
     textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
     EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
 
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    textFieldPattern->isMousePressed_ = false;
+    textFieldPattern->isFocusedBeforeClick_ = true;
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+
     /**
      * @tc.steps: step3. set in search node and call UpdateCaretPosition.
      * @tc.expected: Check it is not nullptr.
@@ -631,7 +637,7 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. set isTextArea to true and call AdjustTextRectOffsetX,AdjustTextAreaOffsetY.
@@ -1052,10 +1058,9 @@ HWTEST_F(TextFieldPatternTestNg, SetFrameSize001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     SizeF value;
     textFieldOverlayModifier.SetFrameSize(value);
     EXPECT_EQ(textFieldOverlayModifier.frameSize_->Get(), value);
@@ -1070,10 +1075,9 @@ HWTEST_F(TextFieldPatternTestNg, SetCurrentOffset001, TestSize.Level1)
 {
     auto pattern = GetPattern();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     float value = 1.0;
     textFieldOverlayModifier.SetCurrentOffset(value);
     EXPECT_EQ(textFieldOverlayModifier.currentOffset_->Get(), value);
@@ -1090,10 +1094,9 @@ HWTEST_F(TextFieldPatternTestNg, GetContentModifier001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1117,10 +1120,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateContentModifier001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     textFieldContentModifier->contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     textFieldContentModifier->contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
@@ -1150,10 +1152,9 @@ HWTEST_F(TextFieldPatternTestNg, GetOverlayModifier001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1177,10 +1178,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateOverlayModifier001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1375,6 +1375,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.L
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateMaxLines(5);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
     // Is TextArea, textRect_.Height() < contentRect_.Height()
     pattern->textRect_.SetHeight(TEXT_RECT_HEIGHT);
     pattern->textRect_.SetWidth(TEXT_RECT_WIDTH);
@@ -1404,8 +1405,39 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.L
     pattern->isSingleHandle_ = true;
     float oldCaretRectY = pattern->caretRect_.GetY();
     pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
-    EXPECT_EQ(pattern->caretRect_.GetY(), oldCaretRectY + TEXT_AREA_SCROLL_OFFSET);
+    EXPECT_EQ(pattern->caretRect_.GetY(), oldCaretRectY);
     EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->textRect_.GetX(), pattern->currentOffset_));
+
+    // Scroll down, secondHandleOffset Y > contentRect Y
+    pattern->isSingleHandle_ = false;
+    pattern->contentRect_.SetTop(12.0f);
+    pattern->contentRect_.SetLeft(24.0f);
+    pattern->contentRect_.SetWidth(500.0f);
+    pattern->contentRect_.SetHeight(400.0f);
+    pattern->textRect_.SetTop(-300.0f);
+    pattern->textRect_.SetHeight(800.0f);
+    pattern->textSelector_.firstHandleOffset_.SetX(300.0f);
+    pattern->textSelector_.firstHandleOffset_.SetY(300.0f);
+    pattern->textSelector_.secondHandleOffset_.SetX(400.0f);
+    pattern->textSelector_.secondHandleOffset_.SetY(300.0f);
+    pattern->parentGlobalOffset_ = OffsetF(60.0f, 8.0f);
+    pattern->OnTextAreaScroll(1.0f);
+    EXPECT_EQ(pattern->textSelector_.secondHandleOffset_.GetY(), 301.0f);
+
+    // Scroll up, secondHandleOffset Y + secondHandle Height > contentRect Y + contentRect Height
+    pattern->textRect_.SetTop(-130.0f);
+    pattern->textSelector_.firstHandleOffset_.SetX(400.0f);
+    pattern->textSelector_.firstHandleOffset_.SetY(500.0f);
+    pattern->textSelector_.secondHandleOffset_.SetX(500.0f);
+    pattern->textSelector_.secondHandleOffset_.SetY(500.0f);
+    pattern->OnTextAreaScroll(-20.0f);
+    EXPECT_EQ(pattern->textSelector_.secondHandleOffset_.GetY(), 480.0f);
+
+    // Select overlay is not on.
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
+    pattern->textRect_.SetTop(30.0f);
+    pattern->OnTextAreaScroll(-20.0f);
+    EXPECT_EQ(pattern->textRect_.GetY(), 10.0f);
 }
 
 /**
@@ -1431,10 +1463,8 @@ HWTEST_F(TextFieldPatternTestNg, MakeEmptyOffset, TestSize.Level1)
      * @tc.expected: step2. Check the return value.
      */
     auto width = pattern->contentRect_.Width();
-    std::pair<TextAlign, OffsetF> textAlignPairs[] = {
-        std::make_pair(TextAlign::CENTER, OffsetF(width * 0.5f, 0.0f)),
-        std::make_pair(TextAlign::END, OffsetF(width, 0.0f)),
-        std::make_pair(TextAlign::START, OffsetF()),
+    std::pair<TextAlign, OffsetF> textAlignPairs[] = { std::make_pair(TextAlign::CENTER, OffsetF(width * 0.5f, 0.0f)),
+        std::make_pair(TextAlign::END, OffsetF(width, 0.0f)), std::make_pair(TextAlign::START, OffsetF()),
         std::make_pair(TextAlign::JUSTIFY, OffsetF()) };
     for (auto pair : textAlignPairs) {
         layoutProperty->UpdateTextAlign(pair.first);
@@ -1457,14 +1487,9 @@ HWTEST_F(TextFieldPatternTestNg, onDraw001, TestSize.Level1)
     pattern->AddScrollEvent();
     pattern->scrollable_ = true;
     pattern->CheckScrollable();
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
-    scrollBar->isScrollable_ = true;
-    scrollBar->displayMode_ = DisplayMode::AUTO;
-    scrollBar->SetNormalWidth(CURSOR_WIDTH_SIZE);
-    scrollBar->opacity_ = UINT8_MAX;
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1482,10 +1507,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -1506,10 +1530,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection002, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1539,10 +1562,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
     RSTypographyProperties::TextBox textBox;
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1568,10 +1590,9 @@ HWTEST_F(TextFieldPatternTestNg, SetCursortWidth001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     float value = 1.0;
     textFieldOverlayModifier.SetCursorWidth(value);
     EXPECT_EQ(textFieldOverlayModifier.cursorWidth_->Get(), value);
@@ -1589,10 +1610,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->selectionMode_ = SelectionMode::NONE;
     pattern->paragraph_ = std::make_shared<RSParagraph>();
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -1935,14 +1955,13 @@ HWTEST_F(TextFieldPatternTestNg, UpdateContentModifier002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
 
     /**
      * @tc.steps: step2. create textFieldOverlayModifier and textFieldContentModifier.
      */
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     textFieldContentModifier->contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     textFieldContentModifier->contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
@@ -1989,10 +2008,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateOverlayModifier002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollEdgeEffect);
     auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
     TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
 
@@ -2334,7 +2352,6 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback002, TestSize.Level1)
     const int32_t source = 0;
     bool ret = false;
     textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
-    textFieldPattern->scrollBar_->SetDriving(true);
 
     /**
      * @tc.steps: step2. call OnScrollCallback function.
@@ -2360,7 +2377,6 @@ HWTEST_F(TextFieldPatternTestNg, OnScrollCallback003, TestSize.Level1)
     const int32_t source = 0;
     bool ret = false;
     textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
-    textFieldPattern->scrollBar_->SetDriving(false);
 
     /**
      * @tc.steps: step2. call OnScrollCallback function.
@@ -2839,10 +2855,9 @@ HWTEST_F(TextFieldPatternTestNg, SetUnderlineWidth, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
 
     /**
      * @tc.steps: step2. call SetUnderlineWidth function.
@@ -2867,10 +2882,9 @@ HWTEST_F(TextFieldPatternTestNg, SetUnderlineColor, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
 
     /**
      * @tc.steps: step2. call SetUnderlineColor function.
@@ -2918,19 +2932,21 @@ HWTEST_F(TextFieldPatternTestNg, SetShowUnderline001, TestSize.Level1)
     TextFieldModelNG textFieldModelInstance;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
 
     /**
      * @tc.steps: step2. call SetShowUnderline function.
      * @tc.expected: The member variable value of textFieldModelInstance is the same as expected.
      */
-    renderContext->UpdateBackgroundColor(Color::BLUE);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
     const bool hideUnderLine = false;
     textFieldModelInstance.SetShowUnderline(hideUnderLine);
-    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLUE);
+    EXPECT_FALSE(layoutProperty->GetShowUnderlineValue(true));
     const bool showUnderLine = true;
     textFieldModelInstance.SetShowUnderline(showUnderLine);
-    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
@@ -2947,18 +2963,17 @@ HWTEST_F(TextFieldPatternTestNg, SetShowUnderline002, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(pattern, nullptr);
 
     /**
      * @tc.steps: step2. call SetShowUnderline function.
      * @tc.expected: The member variable value of textFieldModelInstance is the same as expected.
      */
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
-    const bool showUnderLine = true;
-    textFieldModelInstance.SetShowUnderline(showUnderLine);
-    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
+    textFieldModelInstance.SetShowUnderline(true);
+    EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
 }
 
 /**
@@ -3027,11 +3042,6 @@ HWTEST_F(TextFieldPatternTestNg, onDraw004, TestSize.Level1)
     pattern->CheckScrollable();
     bool showUnderLine = true;
     layoutProperty->UpdateShowUnderline(showUnderLine);
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
-    scrollBar->isScrollable_ = true;
-    scrollBar->displayMode_ = DisplayMode::AUTO;
-    scrollBar->SetNormalWidth(CURSOR_WIDTH_SIZE);
-    scrollBar->opacity_ = UINT8_MAX;
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
 
@@ -3039,7 +3049,7 @@ HWTEST_F(TextFieldPatternTestNg, onDraw004, TestSize.Level1)
      * @tc.steps: step2. Create the textFieldOverlayModifier.Set different properties.Call function onDraw.
      * @tc.expected: Check the properties.
      */
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -3461,10 +3471,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->selectionMode_ = SelectionMode::NONE;
     pattern->paragraph_ = std::make_shared<RSParagraph>();
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -3500,10 +3509,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
     RSTypographyProperties::TextBox textBox;
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
-    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
-    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -4079,7 +4087,7 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     ASSERT_NE(geometryNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         AceType::WeakClaim(AceType::RawPtr(frameNode)), geometryNode->Clone(), layoutProperty->Clone());
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
@@ -4135,7 +4143,7 @@ HWTEST_F(TextFieldPatternTestNg, MeasureContent, TestSize.Level2)
     contentConstraint.selfIdealSize.SetWidth(20);
     contentConstraint.selfIdealSize.SetHeight(20);
     cloneLayoutProperty->contentConstraint_ = contentConstraint;
-    LayoutWrapper layoutWrapper(
+    LayoutWrapperNode layoutWrapper(
         AceType::WeakClaim(AceType::RawPtr(frameNode)), geometryNode->Clone(), cloneLayoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
@@ -4161,7 +4169,7 @@ HWTEST_F(TextFieldPatternTestNg, MeasureContent, TestSize.Level2)
     pattern->CreateNodePaintMethod();
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(-40)));
-    pattern->dragContents_ = { "", "selected", "after"};
+    pattern->dragContents_ = { "", "selected", "after" };
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     cloneLayoutProperty->UpdateCalcMaxSize(CalcSize(CalcLength(40), CalcLength(40)));
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
@@ -4249,7 +4257,8 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldLayoutAlgorithmMeasure, TestSize.Level
     layoutConstraint.selfIdealSize.SetWidth(20);
     layoutConstraint.selfIdealSize.SetHeight(20);
     cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
-    LayoutWrapper layoutWrapper(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    LayoutWrapperNode layoutWrapper(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     layoutAlgorithm->Measure(&layoutWrapper);
@@ -4374,7 +4383,8 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldLayoutAlgorithmLayout, TestSize.Level2
     layoutConstraint.selfIdealSize.SetWidth(20);
     layoutConstraint.selfIdealSize.SetHeight(20);
     cloneLayoutProperty->layoutConstraint_ = layoutConstraint;
-    LayoutWrapper layoutWrapper(AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
+    LayoutWrapperNode layoutWrapper(
+        AceType::WeakClaim(AceType::RawPtr(frameNode)), cloneGeometryNode, cloneLayoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<TextFieldLayoutAlgorithm>();
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
     layoutAlgorithm->Layout(&layoutWrapper);
@@ -4803,7 +4813,7 @@ HWTEST_F(TextFieldPatternTestNg, SetShowError, TestSize.Level2)
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     layoutProperty->UpdateShowUnderline(true);
     pattern->SetShowError();
-    EXPECT_EQ(pattern->GetUnderlineWidth(), 2.0);
+    EXPECT_EQ(pattern->GetUnderlineWidth(), 1.0);
     auto borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
     ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
     EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 1.0);
@@ -4815,7 +4825,7 @@ HWTEST_F(TextFieldPatternTestNg, SetShowError, TestSize.Level2)
     layoutProperty->UpdateShowUnderline(false);
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
     pattern->SetShowError();
-    EXPECT_EQ(pattern->GetUnderlineWidth(), 2.0);
+    EXPECT_EQ(pattern->GetUnderlineWidth(), 1.0);
     borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
     ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
     EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 1.0);
@@ -5033,8 +5043,8 @@ HWTEST_F(TextFieldPatternTestNg, TextInputActionToString, TestSize.Level2)
      * @tc.steps: step2. update TextInputAction and call TextInputActionToString.
      * @tc.expected: Check the return string.
      */
-    std::pair<TextInputAction, std::string> inputTextInputActions[] = {
-        std::make_pair(TextInputAction::GO, "EnterKeyType.Go"),
+    std::pair<TextInputAction, std::string> inputTextInputActions[] = { std::make_pair(
+                                                                            TextInputAction::GO, "EnterKeyType.Go"),
         std::make_pair(TextInputAction::SEARCH, "EnterKeyType.Search"),
         std::make_pair(TextInputAction::SEND, "EnterKeyType.Send"),
         std::make_pair(TextInputAction::DONE, "EnterKeyType.Done"),
@@ -5370,8 +5380,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelSetPadding, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
     ASSERT_NE(theme, nullptr);
-    std::vector<AnimatableDimension*> paddings = {
-        &theme->padding_.top_, &theme->padding_.bottom_,
+    std::vector<AnimatableDimension*> paddings = { &theme->padding_.top_, &theme->padding_.bottom_,
         &theme->padding_.left_, &theme->padding_.right_ };
     for (auto pd : paddings) {
         pd->SetValue(5);
@@ -5379,8 +5388,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelSetPadding, TestSize.Level1)
         pd->SetUnit(DimensionUnit::CALC);
     }
     textFieldModelInstance.SetPadding(padding, edgePadding, true);
-    std::vector<std::optional<CalcLength>*> checkPaddings = {
-        &paddingProperty->top, &paddingProperty->bottom,
+    std::vector<std::optional<CalcLength>*> checkPaddings = { &paddingProperty->top, &paddingProperty->bottom,
         &paddingProperty->left, &paddingProperty->right };
     for (auto pd : checkPaddings) {
         ASSERT_TRUE(pd->has_value());
@@ -5424,9 +5432,9 @@ HWTEST_F(TextFieldPatternTestNg, GetInputStyleString, TestSize.Level2)
      * @tc.expected: Check the return value.
      */
     paintProperty->UpdateInputStyle(InputStyle::INLINE);
-    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextInputStyle.Inline");
+    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextContentStyle.INLINE");
     paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
-    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextInputStyle.Default");
+    EXPECT_STREQ(pattern->GetInputStyleString().c_str(), "TextContentStyle.DEFAULT");
 }
 
 /**
@@ -5759,8 +5767,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
      * @tc.steps: step2. test center keys.
      * @tc.expected: Check the return value.
      */
-    KeyCode centerCodes[] = { KeyCode::KEY_ENTER, KeyCode::KEY_NUMPAD_ENTER,
-        KeyCode::KEY_DPAD_CENTER };
+    KeyCode centerCodes[] = { KeyCode::KEY_ENTER, KeyCode::KEY_NUMPAD_ENTER, KeyCode::KEY_DPAD_CENTER };
     for (auto centerCode : centerCodes) {
         event.code = centerCode;
         EXPECT_TRUE(pattern->OnKeyEvent(event));
@@ -5773,8 +5780,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     std::chrono::milliseconds milliseconds(0);
     TimeStamp time(milliseconds);
     KeyEvent symbolKeyWithOnePressedCode(
-        KeyCode::KEY_EQUALS, KeyAction::DOWN, { KeyCode::KEY_EQUALS },
-        1, time, 0, 0, SourceType::KEYBOARD);
+        KeyCode::KEY_EQUALS, KeyAction::DOWN, { KeyCode::KEY_EQUALS }, 1, time, 0, 0, SourceType::KEYBOARD);
     EXPECT_TRUE(pattern->OnKeyEvent(symbolKeyWithOnePressedCode));
 
     KeyEvent symbolKeyWithMaxKeySize(KeyCode::KEY_EQUALS, KeyAction::DOWN,
@@ -5785,13 +5791,12 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
      * @tc.steps: step4. test direction keys.
      * @tc.expected: Check the return value.
      */
-    KeyCode directionCodes[] = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN,
-        KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT };
+    KeyCode directionCodes[] = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_DPAD_LEFT,
+        KeyCode::KEY_DPAD_RIGHT };
     KeyCode shiftKeyCodes[] = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
     for (auto directionKeyCode : directionCodes) {
         for (auto shiftCode : shiftKeyCodes) {
-            KeyEvent directionKey(directionKeyCode, KeyAction::DOWN,
-                { shiftCode, directionKeyCode }, 1, time, 0, 0,
+            KeyEvent directionKey(directionKeyCode, KeyAction::DOWN, { shiftCode, directionKeyCode }, 1, time, 0, 0,
                 SourceType::KEYBOARD);
             EXPECT_TRUE(pattern->OnKeyEvent(directionKey));
         }
@@ -5806,26 +5811,22 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
      * @tc.expected: Check the return value.
      */
     KeyCode ctrlCodes[] = { KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_CTRL_RIGHT };
-    KeyCode letterCodes[] = { KeyCode::KEY_Z, KeyCode::KEY_A,
-        KeyCode::KEY_C, KeyCode::KEY_V, KeyCode::KEY_X };
+    KeyCode letterCodes[] = { KeyCode::KEY_Z, KeyCode::KEY_A, KeyCode::KEY_C, KeyCode::KEY_V, KeyCode::KEY_X };
     // redo action
     for (auto ctrl : ctrlCodes) {
         for (auto shift : shiftKeyCodes) {
             KeyEvent letterKey(
-                KeyCode::KEY_Z, KeyAction::DOWN, { ctrl, shift, KeyCode::KEY_Z },
-                1, time, 0, 0, SourceType::KEYBOARD);
+                KeyCode::KEY_Z, KeyAction::DOWN, { ctrl, shift, KeyCode::KEY_Z }, 1, time, 0, 0, SourceType::KEYBOARD);
             EXPECT_FALSE(pattern->OnKeyEvent(letterKey));
         }
         KeyEvent letterKey(
-            KeyCode::KEY_Y, KeyAction::DOWN, { ctrl, KeyCode::KEY_Y },
-            1, time, 0, 0, SourceType::KEYBOARD);
+            KeyCode::KEY_Y, KeyAction::DOWN, { ctrl, KeyCode::KEY_Y }, 1, time, 0, 0, SourceType::KEYBOARD);
         EXPECT_FALSE(pattern->OnKeyEvent(letterKey));
     }
 
     for (auto ctrl : ctrlCodes) {
         for (auto letter : letterCodes) {
-            KeyEvent letterKey(letter, KeyAction::DOWN, { ctrl, letter },
-            1, time, 0, 0, SourceType::KEYBOARD);
+            KeyEvent letterKey(letter, KeyAction::DOWN, { ctrl, letter }, 1, time, 0, 0, SourceType::KEYBOARD);
             EXPECT_FALSE(pattern->OnKeyEvent(letterKey));
         }
     }
@@ -5834,5 +5835,245 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     EXPECT_TRUE(pattern->OnKeyEvent(event));
     event.code = KeyCode::KEY_FORWARD_DEL;
     EXPECT_TRUE(pattern->OnKeyEvent(event));
+}
+
+/**
+ * @tc.name: StopEditing001
+ * @tc.desc: test StopEditing
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, StopEditing001, TestSize.Level2)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldController = AceType::MakeRefPtr<TextFieldController>();
+    ASSERT_NE(textFieldController, nullptr);
+    textFieldController->SetPattern(textFieldPattern);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = false;
+    textFieldPattern->StopEditing();
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->OnModifyDone();
+    textFieldPattern->textEditingValue_.Reset();
+    textFieldPattern->StopEditing();
+    textFieldController->StopEditing();
+    textFieldController->stopEditing_ = []() {};
+    textFieldController->StopEditing();
+    EXPECT_EQ(textFieldPattern->imeAttached_, false);
+}
+
+/**
+ * @tc.name: TextFieldPatternOnTextInputScroll001
+ * @tc.desc: Verify that the AddScrollEvent interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextInputScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call the OnTextInputScroll.
+     * @tc.expected: step2. Check the value set in OnTextInputScroll.
+     */
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLines(2);
+    pattern->OnTextInputScroll(0.0f);
+    layoutProperty->UpdateMaxLines(1);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+    pattern->textRect_.x_ = 10.0f;
+    pattern->textRect_.width_ = 200.0f;
+    pattern->contentRect_.x_ = 20.0f;
+    pattern->contentRect_.width_ = 100.0f;
+    pattern->OnTextInputScroll(-1000.0f);
+    pattern->isSingleHandle_ = false;
+    pattern->OnTextInputScroll(0.0f);
+    pattern->isSingleHandle_ = true;
+    pattern->OnTextInputScroll(0.0f);
+    EXPECT_EQ(pattern->caretRect_.GetX(), -90.0f);
+    EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->currentOffset_, pattern->textRect_.GetY()));
+
+    // first handle and second handle are in contentRect's region.
+    pattern->isSingleHandle_ = false;
+    pattern->contentRect_.SetTop(20.0f);
+    pattern->contentRect_.SetLeft(24.0f);
+    pattern->contentRect_.SetWidth(500.0f);
+    pattern->contentRect_.SetHeight(30.0f);
+    pattern->textRect_.SetLeft(-50.0f);
+    pattern->textRect_.SetWidth(800.0f);
+    pattern->textSelector_.firstHandleOffset_.SetX(260.0f);
+    pattern->textSelector_.firstHandleOffset_.SetY(40.0f);
+    pattern->textSelector_.secondHandleOffset_.SetX(300.0f);
+    pattern->textSelector_.secondHandleOffset_.SetY(40.0f);
+    pattern->parentGlobalOffset_ = OffsetF(60.0f, 8.0f);
+    pattern->OnTextInputScroll(-1.0f);
+    EXPECT_EQ(pattern->textSelector_.firstHandleOffset_.GetX(), 259.0f);
+
+    // select overlay is not on.
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
+    pattern->textRect_.SetLeft(-50.0f);
+    pattern->OnTextInputScroll(-1.0f);
+    EXPECT_EQ(pattern->textRect_.GetX(), -51.0f);
+}
+
+/**
+ * @tc.name: FitInSafeArea
+ * @tc.desc: Test TextArea.FitInSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLines(2);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    AceType::DynamicCast<MockPipelineBase>(pipeline)->SetRootSize(1000, 1000);
+    pipeline->GetSafeAreaManager()->UpdateKeyboardSafeArea(500.0f);
+    pattern->caretUpdateType_ = CaretUpdateType::INPUT;
+
+    // test caret inside safeArea
+    pattern->contentRect_ = RectF { 0.0f, 0.0f, 1000.0f, 1000.0f };
+    const RectF CARET_RECT_SAFE { 0.0f, 0.0f, 100.0f, 100.0f };
+    pattern->caretRect_ = CARET_RECT_SAFE;
+    auto dy = pattern->AdjustTextAreaOffsetY();
+    EXPECT_EQ(dy, 0.0f);
+    EXPECT_EQ(pattern->caretRect_, CARET_RECT_SAFE);
+
+    // test caret outside safeArea
+    const RectF CARE_RECT_DANGEROUS { 600.0f, 600.0f, 100.0f, 100.0f };
+    pattern->caretRect_ = CARE_RECT_DANGEROUS;
+    dy = pattern->AdjustTextAreaOffsetY();
+    // caretBottom is 200 below safeAreaBottom
+    EXPECT_EQ(dy, -200.0f);
+    EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS - OffsetF(0.0f, 200.0f));
+
+    // test caret when keyboard is down
+    pipeline->GetSafeAreaManager()->UpdateKeyboardSafeArea(0.0f);
+    pattern->caretRect_ = CARE_RECT_DANGEROUS;
+    dy = pattern->AdjustTextAreaOffsetY();
+    EXPECT_EQ(dy, 0.0f);
+    EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
+}
+
+/**
+ * @tc.name: UpdateSelectorByPosition
+ * @tc.desc: Verify that the UpdateSelectorByPosition interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateSelectorByPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldPattern.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    /*
+     * @tc.steps: step2. call UpdateSelectorByPosition function.
+     * @tc.expected: The UpdateSelectorByPosition function will exit without exception.
+     */
+    pattern->textSelector_.baseOffset = 0;
+    pattern->textSelector_.destinationOffset = 5;
+    pattern->UpdateSelectorByPosition(10);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), 10);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), 11);
+}
+
+/**
+ * @tc.name: OnScrollEndCallback001
+ * @tc.desc: test textfield OnScrollEndCallback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnScrollEndCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+
+    /**
+     * @tc.steps: step2. Call the OnScrollEndCallback.
+     * @tc.expected: the OnScrollEndCallback function called success without expection.
+     */
+    bool originalIsMenuShow[2] = { true, false };
+    for (int i = 0; i < 2; i++) {
+        pattern->originalIsMenuShow_ = originalIsMenuShow[i];
+        EXPECT_EQ(pattern->originalIsMenuShow_, originalIsMenuShow[i]);
+        pattern->OnScrollEndCallback();
+        EXPECT_NE(pattern->GetSelectOverlay(), nullptr);
+    }
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test textfield OnHandleMove001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnHandleMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Call the OnHandleMove.
+     * @tc.expected: caretUpdateType_ is HANDLE_MOVE.
+     */
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+    pattern->UpdateEditingValue(TEXT_VALUE, 0);
+    pattern->OnHandleMove(RectF(110.0f, 110.0f, 10.0f, 10.0f), false);
+    EXPECT_EQ(pattern->caretUpdateType_, CaretUpdateType::HANDLE_MOVE);
+}
+
+/**
+ * @tc.name: OnHandleMoveDone001
+ * @tc.desc: test textfield OnHandleMoveDone001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnHandleMoveDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Call the OnHandleMoveDone.
+     * @tc.expected: caretUpdateType_ is HANDLE_MOVE_DONE.
+     */
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+    pattern->isSingleHandle_ = true;
+    pattern->OnHandleMoveDone(RectF(0.0f, 0.0f, 10.0f, 10.0f), false);
+    pattern->isSingleHandle_ = false;
+    pattern->OnHandleMoveDone(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
+    EXPECT_EQ(pattern->caretUpdateType_, CaretUpdateType::HANDLE_MOVE_DONE);
 }
 } // namespace OHOS::Ace::NG

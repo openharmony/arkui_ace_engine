@@ -37,6 +37,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -65,6 +66,14 @@ public:
     void ClearWidthOrHeight(bool isWidth) override
     {
         ViewAbstract::ClearWidthOrHeight(isWidth);
+    }
+    void ResetMinSize(bool resetWidth) override
+    {
+        ViewAbstract::ResetMinSize(resetWidth);
+    }
+    void ResetMaxSize(bool resetWidth) override
+    {
+        ViewAbstract::ResetMaxSize(resetWidth);
     }
 
     void SetMinWidth(const CalcDimension& minWidth) override
@@ -108,7 +117,7 @@ public:
         ViewAbstract::SetBackgroundColor(color);
     }
 
-    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override
+    void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override
     {
         ViewAbstract::SetBackgroundImage(src);
     }
@@ -131,6 +140,11 @@ public:
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override
     {
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
+    }
+
+    void SetBackgroundEffect(const EffectOption& effectOption) override
+    {
+        ViewAbstract::SetBackgroundEffect(effectOption);
     }
 
     void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
@@ -353,11 +367,12 @@ public:
 
     void SetAspectRatio(float ratio) override
     {
-        if (LessOrEqual(ratio, 0.0)) {
-            LOGW("the %{public}f value is illegal, use default", ratio);
-            ratio = 1.0;
-        }
         ViewAbstract::SetAspectRatio(ratio);
+    }
+
+    void ResetAspectRatio() override
+    {
+        ViewAbstract::ResetAspectRatio();
     }
 
     void SetAlign(const Alignment& alignment) override
@@ -409,9 +424,9 @@ public:
         ViewAbstract::SetTranslate(TranslateOptions(x, y, z));
     }
 
-    void SetRotate(float x, float y, float z, float angle) override
+    void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override
     {
-        ViewAbstract::SetRotate(NG::Vector4F(x, y, z, angle));
+        ViewAbstract::SetRotate(NG::Vector5F(x, y, z, angle, perspective));
     }
 
     void SetTransformMatrix(const std::vector<float>& matrix) override
@@ -453,8 +468,9 @@ public:
                 };
                 overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
                 CHECK_NULL_VOID(overlayNode);
-                frameNode->AddChild(overlayNode);
-                frameNode->SetOverlayNode(AceType::WeakClaim(AceType::RawPtr(overlayNode)));
+                frameNode->SetOverlayNode(overlayNode);
+                overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+                overlayNode->SetActive(true);
             } else {
                 overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
@@ -494,9 +510,9 @@ public:
         ViewAbstract::SetSharedTransition(shareId, option);
     }
 
-    void SetGeometryTransition(const std::string& id) override
+    void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) override
     {
-        ViewAbstract::SetGeometryTransition(id);
+        ViewAbstract::SetGeometryTransition(id, followWithoutTransition);
     }
 
     void SetMotionPath(const MotionPathOption& option) override
@@ -587,6 +603,11 @@ public:
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override
     {
         ViewAbstract::SetLinearGradientBlur(blurPara);
+    }
+
+    void SetDynamicLightUp(float rate, float lightUpDegree) override
+    {
+        ViewAbstract::SetDynamicLightUp(rate, lightUpDegree);
     }
 
     void SetFrontBlur(const Dimension& radius) override
@@ -862,18 +883,19 @@ public:
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
+    void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
+
     void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam) override;
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear) override;
 
     void BindSheet(bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc,
-        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
-        std::function<void()>&& onDisappear) override;
+        NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear) override;
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -946,9 +968,11 @@ private:
     void RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam);
     void RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam);
     void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
+    void RegisterContextMenuKeyEvent(
+        const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 
-    void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
-        const std::function<void(float)>& onCallbackEvent) override
+    void CreateAnimatablePropertyFloat(
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) override
     {
         ViewAbstract::CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent);
     }
@@ -964,8 +988,8 @@ private:
         ViewAbstract::CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
     }
 
-    void UpdateAnimatableArithmeticProperty(const std::string& propertyName,
-        RefPtr<CustomAnimatableArithmetic>& value) override
+    void UpdateAnimatableArithmeticProperty(
+        const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value) override
     {
         ViewAbstract::UpdateAnimatableArithmeticProperty(propertyName, value);
     }

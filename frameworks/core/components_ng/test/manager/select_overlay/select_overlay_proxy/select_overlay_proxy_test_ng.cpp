@@ -132,4 +132,36 @@ HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyTest002, TestSize.Level1)
     auto isClosed2 = selectOverlayProxy2->IsClosed();
     EXPECT_TRUE(isClosed2);
 }
+
+/**
+ * @tc.name: SelectOverlayProxyIsMenuShow001
+ * @tc.desc: test the IsMenuShow function
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyIsMenuShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a SelectOverlayProxy
+     * @tc.expected: step1. IsMenuShow method returns true.
+     */
+    auto selectOverlayProxy = AceType::MakeRefPtr<SelectOverlayProxy>(NODE_ID);
+    EXPECT_TRUE(selectOverlayProxy->IsMenuShow());
+}
+
+/**
+ * @tc.name: SelectOverlayProxyIsHandleShow001
+ * @tc.desc: test the IsHandleShow function
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SelectOverlayProxyTestNg, SelectOverlayProxyIsHandleShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a SelectOverlayProxy
+     * @tc.expected: step1. IsHandleShow method returns true.
+     */
+    auto selectOverlayProxy = AceType::MakeRefPtr<SelectOverlayProxy>(NODE_ID);
+    EXPECT_TRUE(selectOverlayProxy->IsHandleShow());
+}
 } // namespace OHOS::Ace::NG

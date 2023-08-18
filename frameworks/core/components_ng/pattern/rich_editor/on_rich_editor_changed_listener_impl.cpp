@@ -26,25 +26,9 @@ void OnRichEditorChangedListenerImpl::InsertText(const std::u16string& text)
         auto client = richEditorPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        if (!StringUtils::Str16ToStr8(text).compare("KEYCODE_DPAD_UP")) {
-            client->CursorMoveUp();
-            return;
-        }
-        if (!StringUtils::Str16ToStr8(text).compare("KEYCODE_DPAD_DOWN")) {
-            client->CursorMoveDown();
-            return;
-        }
-        if (!StringUtils::Str16ToStr8(text).compare("KEYCODE_DPAD_LEFT")) {
-            client->CursorMoveLeft();
-            return;
-        }
-        if (!StringUtils::Str16ToStr8(text).compare("KEYCODE_DPAD_RIGHT")) {
-            client->CursorMoveRight();
-            return;
-        }
         client->InsertValue(StringUtils::Str16ToStr8(text));
     };
-    PostTaskToUI(task);
+    PostSyncTaskToUI(task);
 }
 
 void OnRichEditorChangedListenerImpl::DeleteBackward(int32_t length)
@@ -60,7 +44,7 @@ void OnRichEditorChangedListenerImpl::DeleteBackward(int32_t length)
         ContainerScope scope(client->GetInstanceId());
         client->DeleteBackward(length);
     };
-    PostTaskToUI(task);
+    PostSyncTaskToUI(task);
 }
 
 void OnRichEditorChangedListenerImpl::DeleteForward(int32_t length)
@@ -76,7 +60,49 @@ void OnRichEditorChangedListenerImpl::DeleteForward(int32_t length)
         ContainerScope scope(client->GetInstanceId());
         client->DeleteForward(length);
     };
-    PostTaskToUI(task);
+    PostSyncTaskToUI(task);
+}
+
+std::u16string OnRichEditorChangedListenerImpl::GetLeftTextOfCursor(int32_t number)
+{
+    LOGI("[OnTextChangedListenerImpl] GetLeftTextOfCursor status: %{public}d", number);
+    std::u16string leftResult;
+    auto task = [textField = pattern_, &leftResult, number] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID_NOLOG(client);
+        ContainerScope scope(client->GetInstanceId());
+        leftResult = client->GetLeftTextOfCursor(number);
+    };
+    PostSyncTaskToUI(task);
+    return leftResult;
+}
+
+std::u16string OnRichEditorChangedListenerImpl::GetRightTextOfCursor(int32_t number)
+{
+    LOGI("[OnTextChangedListenerImpl] GetRightTextOfCursor status: %{public}d", number);
+    std::u16string rightResult;
+    auto task = [textField = pattern_, &rightResult, number] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID_NOLOG(client);
+        ContainerScope scope(client->GetInstanceId());
+        rightResult = client->GetRightTextOfCursor(number);
+    };
+    PostSyncTaskToUI(task);
+    return rightResult;
+}
+
+int32_t OnRichEditorChangedListenerImpl::GetTextIndexAtCursor()
+{
+    LOGI("[OnTextChangedListenerImpl] GetTextIndexAtCursor");
+    int32_t index = 0;
+    auto task = [textField = pattern_, &index] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID_NOLOG(client);
+        ContainerScope scope(client->GetInstanceId());
+        index = client->GetTextIndexAtCursor();
+    };
+    PostSyncTaskToUI(task);
+    return index;
 }
 
 void OnRichEditorChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) {}
@@ -157,6 +183,7 @@ void OnRichEditorChangedListenerImpl::MoveCursor(MiscServices::Direction directi
                 break;
         }
     };
+    PostSyncTaskToUI(task);
 }
 
 void OnRichEditorChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end) {}
@@ -164,6 +191,24 @@ void OnRichEditorChangedListenerImpl::HandleSetSelection(int32_t start, int32_t 
 void OnRichEditorChangedListenerImpl::HandleExtendAction(int32_t action) {}
 
 void OnRichEditorChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip) {}
+
+void OnRichEditorChangedListenerImpl::PostSyncTaskToUI(const std::function<void()>& task)
+{
+    CHECK_NULL_VOID(task);
+    auto textFieldPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto instanceId = textFieldPattern->GetInstanceId();
+    ContainerScope scope(instanceId);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    taskExecutor->PostSyncTask(task, TaskExecutor::TaskType::UI);
+}
 
 void OnRichEditorChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
 {

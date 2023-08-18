@@ -88,6 +88,21 @@ public:
         return badgePosition_;
     }
 
+    const Dimension& GetBadgePositionX() const
+    {
+        return badgePositionX_;
+    }
+
+    const Dimension& GetBadgePositionY() const
+    {
+        return badgePositionY_;
+    }
+
+    bool GetIsPositionXy() const
+    {
+        return isPositionXy_;
+    }
+
     bool GetShowMessage() const
     {
         return showMessage_;
@@ -142,6 +157,9 @@ private:
     Color badgeBorderColor_;
     int64_t messageCount_;
     BadgePosition badgePosition_ = BadgePosition::RIGHT_TOP;
+    Dimension badgePositionX_ = 0.0_vp;
+    Dimension badgePositionY_ = 0.0_vp;
+    bool isPositionXy_ = false;
     bool showMessage_;
     Dimension badgeFontSize_;
     Dimension badgeBorderWidth_;

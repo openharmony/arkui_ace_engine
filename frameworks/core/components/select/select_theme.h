@@ -24,6 +24,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
 
@@ -32,6 +33,10 @@ constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
+constexpr Dimension MENU_END_ICON_WIDTH = 12.0_vp;
+constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
+constexpr Dimension DEFAULT_MENU_WIDTH = 0.0_vp;
+constexpr Dimension MIN_MENU_WIDTH = 64.0_vp;
 
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
@@ -125,11 +130,13 @@ public:
             const double defaultDisabledColorAlpha = 0.4;
             const double defaultSecondaryColorAlpha = 0.6;
             const double defaultTertiaryColorAlpha = 0.6;
+            const double bgColorSelectedAlpha = 0.2;
 
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, theme->fontSize_);
             theme->menuFontSize_ = pattern->GetAttr<Dimension>("menu_text_font_size", theme->menuFontSize_);
             theme->menuTitleFontSize_ =
                 pattern->GetAttr<Dimension>("menu_title_text_font_size", theme->menuTitleFontSize_);
+            theme->menuTitleFontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuTitleFontColor_);
             theme->menuTitleHeight_ = pattern->GetAttr<Dimension>("menu_title_height", theme->menuTitleHeight_);
             theme->fontColor_ =
                 pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
@@ -145,7 +152,9 @@ public:
             theme->disabledMenuFontColor_ = theme->menuFontColor_.BlendOpacity(
                 pattern->GetAttr<double>("menu_text_tertiary_alpha", defaultTertiaryColorAlpha));
             theme->clickedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_CLICKED, theme->clickedColor_);
-            theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, theme->selectedColor_);
+            theme->selectedColor_ =
+                pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, theme->selectedColor_)
+                    .BlendOpacity(pattern->GetAttr<double>("bg_color_selected_alpha", bgColorSelectedAlpha));
             theme->selectedColorText_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_SELECTED, theme->selectedColorText_);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
             theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
@@ -182,8 +191,10 @@ public:
             theme->defaultDividerWidth_ =
                 pattern->GetAttr<Dimension>("default_divider_width", theme->defaultDividerWidth_);
             theme->selectMinWidth_ = pattern->GetAttr<Dimension>("select_min_width", theme->selectMinWidth_);
-            theme->selectMinHeight_ = pattern->GetAttr<Dimension>("select_min_height", theme->selectMinHeight_);
+            theme->selectDefaultHeight_ = pattern->GetAttr<Dimension>("select_min_height", theme->selectDefaultHeight_);
             theme->iconSideLength_ = pattern->GetAttr<Dimension>("icon_side_length", theme->iconSideLength_);
+            theme->endIconWidth_ = MENU_END_ICON_WIDTH;
+            theme->endIconHeight_ = MENU_END_ICON_HEIGHT;
             theme->contentMargin_ = pattern->GetAttr<Dimension>("content_margin", theme->contentMargin_);
         }
     };
@@ -249,6 +260,7 @@ public:
         theme->innerBorderRadius_ = innerBorderRadius_;
         theme->menuFontSize_ = menuFontSize_;
         theme->menuTitleFontSize_ = menuTitleFontSize_;
+        theme->menuTitleFontColor_ = menuTitleFontColor_;
         theme->menuTitleHeight_ = menuTitleHeight_;
         theme->menuFontColor_ = menuFontColor_;
         theme->disabledMenuFontColor_ = disabledMenuFontColor_;
@@ -269,8 +281,10 @@ public:
         theme->spinnerHeight_ = spinnerHeight_;
         theme->defaultDividerWidth_ = defaultDividerWidth_;
         theme->selectMinWidth_ = selectMinWidth_;
-        theme->selectMinHeight_ = selectMinHeight_;
+        theme->selectDefaultHeight_ = selectDefaultHeight_;
         theme->iconSideLength_ = iconSideLength_;
+        theme->endIconWidth_ = endIconWidth_;
+        theme->endIconHeight_ = endIconHeight_;
         theme->contentMargin_ = contentMargin_;
         return theme;
     }
@@ -675,6 +689,11 @@ public:
         return menuTitleFontSize_;
     }
 
+    const Color& GetMenuTitleFontColor() const
+    {
+        return menuTitleFontColor_;
+    }
+
     const Dimension& GetMenuTitleHeight() const
     {
         return menuTitleHeight_;
@@ -769,14 +788,24 @@ public:
         return selectMinWidth_;
     }
 
-    const Dimension& GetSelectMinHeight() const
+    const Dimension& GetSelectDefaultHeight() const
     {
-        return selectMinHeight_;
+        return selectDefaultHeight_;
     }
 
     const Dimension& GetIconSideLength() const
     {
         return iconSideLength_;
+    }
+
+    const Dimension& GetEndIconWidth() const
+    {
+        return endIconWidth_;
+    }
+
+    const Dimension& GetEndIconHeight() const
+    {
+        return endIconHeight_;
     }
 
     const Dimension& GetContentMargin() const
@@ -799,6 +828,7 @@ private:
     Color menuIconColor_ = Color(0x99182431);
     Color menuFontColor_;
     Color disabledMenuFontColor_;
+    Color menuTitleFontColor_;
 
     bool allowScale_ = true;
     Dimension fontSize_;
@@ -852,8 +882,10 @@ private:
     Dimension defaultDividerWidth_;
 
     Dimension selectMinWidth_;
-    Dimension selectMinHeight_;
+    Dimension selectDefaultHeight_;
     Dimension iconSideLength_;
+    Dimension endIconWidth_;
+    Dimension endIconHeight_;
     Dimension contentMargin_;
 
     Color tvFocusTextColor_;

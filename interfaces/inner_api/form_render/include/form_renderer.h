@@ -18,12 +18,11 @@
 
 #include "ability_context.h"
 #include "form_js_info.h"
+#include "form_renderer_delegate_interface.h"
+#include "form_renderer_dispatcher_impl.h"
 #include "js_runtime.h"
 #include "runtime.h"
 #include "ui_content.h"
-
-#include "form_renderer_delegate_interface.h"
-#include "form_renderer_dispatcher_impl.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -36,7 +35,7 @@ namespace Ace {
 class FormRenderer : public std::enable_shared_from_this<FormRenderer> {
 public:
     FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
-                 const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
+        const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
     ~FormRenderer() = default;
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
@@ -52,18 +51,20 @@ public:
     void OnActionEvent(const std::string& action);
     void OnError(const std::string& code, const std::string& msg);
     void OnSurfaceChange(float width, float height);
+    void OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos);
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     void AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
 private:
     void InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void ParseWant(const OHOS::AAFwk::Want& want);
-    void SetRenderDelegate(const sptr<IRemoteObject> &renderRemoteObj);
+    void SetRenderDelegate(const sptr<IRemoteObject>& renderRemoteObj);
     void AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
     bool allowUpdate_ = true;
     float width_ = 0.0f;
     float height_ = 0.0f;
+    std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     sptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
@@ -89,6 +90,6 @@ public:
 private:
     RemoteDiedHandler handler_;
 };
-}  // namespace Ace
-}  // namespace OHOS
-#endif  // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H
+} // namespace Ace
+} // namespace OHOS
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H

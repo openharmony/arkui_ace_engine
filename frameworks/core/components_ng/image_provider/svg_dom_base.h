@@ -33,7 +33,6 @@ class SvgDomBase : public AceType {
 public:
     virtual SizeF GetContainerSize() const = 0;
     virtual void SetContainerSize(const SizeF& containerSize) = 0;
-    virtual const std::optional<Color>& GetFillColor() = 0;
     virtual void SetFillColor(const std::optional<Color>& color) {}
 
     void SetRadius(const BorderRadiusArray& radiusXY)
@@ -54,7 +53,7 @@ public:
     virtual void ControlAnimation(bool play) {}
 
     virtual void DrawImage(
-        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) = 0;
+        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) = 0;
 
     void ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
     {

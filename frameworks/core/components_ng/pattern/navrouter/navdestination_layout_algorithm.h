@@ -33,6 +33,19 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
     ACE_DISALLOW_COPY_AND_MOVE(NavDestinationLayoutAlgorithm);
+
+    void SetIsShown(bool isShown)
+    {
+        isShown_ = isShown;
+    }
+
+    bool IsOnShown() const
+    {
+        return isShown_;
+    }
+
+private:
+    bool isShown_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 
+#define private public
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -32,8 +33,6 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-
-#define private public
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -412,7 +411,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest007, TestSize.Level1)
      * @tc.expected: step2. draggedFrameNode_ &  preTargetFrameNode_ are assigned to the frameNode created previously
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->OnDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
     auto draggedNode = dragDropManager->draggedFrameNode_;
     auto preTargetNode = dragDropManager->preTargetFrameNode_;
     ASSERT_TRUE(draggedNode);
@@ -477,7 +476,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
         .Times(1);
-    dragDropManager->OnDragMove(GLOBAL_X, GLOBAL_Y, EXTRA_INFO);
+    dragDropManager->OnDragMove({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO);
 
     /**
      * @tc.steps: step3. construct a frameNode and set its DragEvent and GeometryNode
@@ -519,12 +518,12 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
      *                      preTargetFrameNode_ will be assigned to null
      *                      DragWindow.MoveTo() will be called
      */
-    dragDropManager->OnDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
     auto preTargetNode = dragDropManager->preTargetFrameNode_;
     ASSERT_TRUE(preTargetNode);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
         .Times(1);
-    dragDropManager->OnDragMove(GLOBAL_X, GLOBAL_Y, EXTRA_INFO_LEAVE);
+    dragDropManager->OnDragMove({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO_LEAVE);
     EXPECT_EQ(leaveExtraInfo, ConvertExtraInfoToJson(EXTRA_INFO_LEAVE));
     preTargetNode = dragDropManager->preTargetFrameNode_;
     EXPECT_FALSE(preTargetNode);
@@ -533,7 +532,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
      * @tc.steps: step5. call AddDragFrameNode
      *                   after that, dragFrameNodes_ is not empty
      */
-    dragDropManager->AddDragFrameNode(frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step6. call OnDragMove
@@ -542,12 +541,12 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
      *                      moveExtraInfo will be assigned to EXTRA_INFO_MOVE
      *                      DragWindow.MoveTo() will be called
      */
-    dragDropManager->OnDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
     preTargetNode = dragDropManager->preTargetFrameNode_;
     EXPECT_TRUE(preTargetNode);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
         .Times(1);
-    dragDropManager->OnDragMove(GLOBAL_X, GLOBAL_Y, EXTRA_INFO_MOVE);
+    dragDropManager->OnDragMove({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO_MOVE);
     EXPECT_EQ(moveExtraInfo, ConvertExtraInfoToJson(EXTRA_INFO_MOVE));
 
     /**
@@ -561,7 +560,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
      *                      DragWindow.MoveTo() will be called
      */
     auto newFrameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->OnDragStart(GLOBAL_X, GLOBAL_Y, newFrameNode);
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, newFrameNode);
     preTargetNode = dragDropManager->preTargetFrameNode_;
     EXPECT_TRUE(preTargetNode);
     // Set newFrameNode's onDragLeave callback
@@ -573,7 +572,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
     eventHubNew->SetOnDragLeave(std::move(onDragLeaveNew));
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
         .Times(1);
-    dragDropManager->OnDragMove(GLOBAL_X, GLOBAL_Y, EXTRA_INFO_ENTER);
+    dragDropManager->OnDragMove({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO_ENTER);
     EXPECT_EQ(enterExtraInfo, ConvertExtraInfoToJson(EXTRA_INFO_ENTER));
     EXPECT_EQ(leaveExtraInfoNew, ConvertExtraInfoToJson(EXTRA_INFO_ENTER));
     preTargetNode = dragDropManager->preTargetFrameNode_;
@@ -595,7 +594,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
     enterExtraInfo = "";
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
         .Times(1);
-    dragDropManager->OnDragMove(GLOBAL_X, GLOBAL_Y, EXTRA_INFO_ENTER);
+    dragDropManager->OnDragMove({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO_ENTER);
     EXPECT_EQ(enterExtraInfo, ConvertExtraInfoToJson(EXTRA_INFO_ENTER));
     preTargetNode = dragDropManager->preTargetFrameNode_;
     ASSERT_TRUE(preTargetNode);
@@ -681,7 +680,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
      * @tc.steps: step5. call AddGridDragFrameNode
      *                   after that, gridDragFrameNodes_ is not empty
      */
-    dragDropManager->AddGridDragFrameNode(frameNode);
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step6. call OnItemDragMove
@@ -827,7 +826,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
      *                   after that, listDragFrameNodes_ is not empty
      *                   need adding grid maybe a bug
      */
-    dragDropManager->AddGridDragFrameNode(frameNode);
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step6. call OnItemDragMove
@@ -927,9 +926,9 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
      *                   case: dragFrameNodes_ is empty
      * @tc.expected: step3. preTargetFrameNode_ is null and draggedFrameNode_ is not null
      */
-    dragDropManager->OnDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
     dragDropManager->extraInfo_ = EXTRA_INFO;
-    dragDropManager->OnDragEnd(GLOBAL_X, GLOBAL_Y, EXTRA_INFO);
+    dragDropManager->OnDragEnd({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO);
     auto preTargetFrameNode = dragDropManager->preTargetFrameNode_;
     auto draggedFrameNode = dragDropManager->draggedFrameNode_;
     EXPECT_FALSE(preTargetFrameNode);
@@ -939,15 +938,15 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
      * @tc.steps: step4. call AddDragFrameNode
      *                   after that, dragFrameNodes_ is not empty
      */
-    dragDropManager->AddDragFrameNode(frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step5. call OnDragEnd
      *                   case: eventHub dose not have onDrop_
      * @tc.expected: step5. preTargetFrameNode_ is null and draggedFrameNode_ is not null
      */
-    dragDropManager->OnDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
-    dragDropManager->OnDragEnd(GLOBAL_X, GLOBAL_Y, EXTRA_INFO);
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    dragDropManager->OnDragEnd({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO);
     preTargetFrameNode = dragDropManager->preTargetFrameNode_;
     draggedFrameNode = dragDropManager->draggedFrameNode_;
     EXPECT_FALSE(preTargetFrameNode);
@@ -963,8 +962,8 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
         extraInfoDrop = extraParams;
     };
     eventHub->SetOnDrop(std::move(onDrop));
-    dragDropManager->OnDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
-    dragDropManager->OnDragEnd(GLOBAL_X, GLOBAL_Y, EXTRA_INFO);
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    dragDropManager->OnDragEnd({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO);
     preTargetFrameNode = dragDropManager->preTargetFrameNode_;
     draggedFrameNode = dragDropManager->draggedFrameNode_;
     EXPECT_FALSE(preTargetFrameNode);
@@ -978,8 +977,8 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
      *                      preTargetFrameNode_ and draggedFrameNode_ will be assigned to nullptr
      */
     auto frameNodeNew = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->OnDragStart(GLOBAL_X, GLOBAL_Y, frameNodeNew);
-    dragDropManager->OnDragEnd(GLOBAL_X, GLOBAL_Y, EXTRA_INFO);
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNodeNew);
+    dragDropManager->OnDragEnd({ GLOBAL_X, GLOBAL_Y }, EXTRA_INFO);
     EXPECT_EQ(extraInfoDrop, ConvertExtraInfoToJson(EXTRA_INFO));
     preTargetFrameNode = dragDropManager->preTargetFrameNode_;
     draggedFrameNode = dragDropManager->draggedFrameNode_;
@@ -1042,7 +1041,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest012, TestSize.Level1)
      * @tc.steps: step4. call AddDragFrameNode
      *                   after that, gridDragFrameNodes_ is not empty
      */
-    dragDropManager->AddGridDragFrameNode(frameNode);
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step5. call OnItemDragEnd
@@ -1129,7 +1128,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
      * @tc.steps: step4. call AddDragFrameNode
      *                   after that, listDragFrameNodes_ is not empty
      */
-    dragDropManager->AddListDragFrameNode(frameNode);
+    dragDropManager->AddListDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps: step5. call OnItemDragEnd
@@ -1171,14 +1170,17 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest014, TestSize.Level1)
      * @tc.steps: step2. call FindDragFrameNodeByPosition with frameNodes contains nullptr
      * @tc.expected: step2.
      */
-    auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    dragDropManager->AddDragFrameNode(frameNodeNull);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
-    auto frameNodeGeoNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeGeoNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId,
+        AceType::MakeRefPtr<Pattern>());
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull);
+    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     EXPECT_EQ(static_cast<int32_t>(dragDropManager->dragFrameNodes_.size()), 2);
-    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
     EXPECT_FALSE(targetFrameNode);
 
     /**

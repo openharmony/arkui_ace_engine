@@ -626,6 +626,47 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const std::string& title, const s
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .content = dialogAttr.message,
+        .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
+        .maskRect = dialogAttr.maskRect,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
+void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .content = dialogAttr.message,
+        .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
+        .onStatusChanged = std::move(onStatusChanged),
+        .maskRect = dialogAttr.maskRect,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
@@ -651,7 +692,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenu(const std::string& title, con
     ShowActionMenuInner(dialogProperties, button, std::move(callback));
 }
 
-void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate()
+void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate(bool isSynchronous)
 {
     auto containerId = Container::CurrentId();
     if (containerId < 0) {

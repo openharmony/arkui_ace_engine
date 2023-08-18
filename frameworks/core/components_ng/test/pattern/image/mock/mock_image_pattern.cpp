@@ -53,4 +53,5 @@ void ImagePattern::OnVisibleChange(bool isVisible) {}
 
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void ImagePattern::DumpInfo() {}
+void ImagePattern::OnLanguageConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG

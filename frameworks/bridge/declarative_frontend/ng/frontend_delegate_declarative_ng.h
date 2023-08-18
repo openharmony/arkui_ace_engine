@@ -86,7 +86,7 @@ public:
     void InitializeAccessibilityCallback();
 
     void OnSurfaceChanged();
-    void OnMediaQueryUpdate() override;
+    void OnMediaQueryUpdate(bool isSynchronous = false) override;
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
     void FireExternalEvent(const std::string& eventId, const std::string& componentId, uint32_t nodeId, bool isDestroy);
@@ -134,6 +134,11 @@ public:
         const std::set<std::string>& callbacks) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks,
+        std::function<void(bool)>&& onStatusChanged) override;
+    void ShowDialog(const PromptDialogAttr &dialogAttr, const std::vector<ButtonInfo> &buttons,
+        std::function<void(int32_t, int32_t)> &&callback, const std::set<std::string> &callbacks) override;
+    void ShowDialog(const PromptDialogAttr &dialogAttr, const std::vector<ButtonInfo> &buttons,
+        std::function<void(int32_t, int32_t)> &&callback, const std::set<std::string> &callbacks,
         std::function<void(bool)>&& onStatusChanged) override;
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) override;

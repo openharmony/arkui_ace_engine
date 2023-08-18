@@ -79,11 +79,6 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
     LOGD("pinch recognizer receives axis start event, begin to detect pinch event");
-    if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed()) {
-        LOGD("pinch recognizer exit cause of event's pinchAxisScale is zero and key-ctrl is not being pressed.");
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
@@ -99,6 +94,10 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch up event");
+    if (currentFingers_ < fingers_) {
+        LOGW("PinchGesture current finger number is less than requiried finger number.");
+        return;
+    }
 
     if (isPinchEnd_) {
         return;
@@ -136,6 +135,10 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
+    if (currentFingers_ < fingers_) {
+        LOGW("PinchGesture current finger number is less than requiried finger number.");
+        return;
+    }
 
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;

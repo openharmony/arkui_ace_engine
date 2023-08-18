@@ -18,6 +18,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
+#include "core/components_ng/pattern/video/video_full_screen_node.h"
+#include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 
 namespace OHOS::Ace::NG {
 std::string VideoAccessibilityProperty::GetText() const
@@ -36,6 +38,15 @@ AccessibilityValue VideoAccessibilityProperty::GetAccessibilityValue() const
     CHECK_NULL_RETURN_NOLOG(frameNode, result);
     auto pattern = frameNode->GetPattern<VideoPattern>();
     CHECK_NULL_RETURN_NOLOG(pattern, result);
+    if (pattern->IsFullScreen()) {
+        auto fullScreenNode = AceType::DynamicCast<VideoFullScreenNode>(pattern->GetFullScreenNode());
+        CHECK_NULL_RETURN(fullScreenNode, result);
+        auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
+        CHECK_NULL_RETURN(fullScreenNode, result);
+        result.max = fullScreenPattern->GetDuration();
+        result.current = fullScreenPattern->GetCurrentPos();
+        return result;
+    }
     result.max = pattern->GetDuration();
     result.current = pattern->GetCurrentPos();
     return result;

@@ -18,7 +18,6 @@
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "root_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 // RootPattern is the base class for root render node.
@@ -46,7 +45,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RootLayoutAlgorithm>();
+        return MakeRefPtr<BoxLayoutAlgorithm>();
     }
 
     void OnAttachToFrameNode() override

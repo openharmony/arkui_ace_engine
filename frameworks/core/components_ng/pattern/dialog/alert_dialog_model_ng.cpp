@@ -15,10 +15,10 @@
 
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 void AlertDialogModelNG::SetParseButtonObj(
@@ -37,23 +37,32 @@ void AlertDialogModelNG::SetOnCancel(std::function<void()>&& eventFunc, DialogPr
 void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
 {
     auto container = Container::Current();
-    auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
-    if (container->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
-        container = AceEngine::Get().GetContainer(currentId);
-    }
-    ContainerScope scope(currentId);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
 
-    auto dialog = overlayManager->ShowDialog(arg, nullptr, false);
-    CHECK_NULL_VOID(dialog);
-    auto hub = dialog->GetEventHub<NG::DialogEventHub>();
-    hub->SetOnCancel(std::move(arg.onCancel));
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    executor->PostTask(
+        [currentId = Container::CurrentId(), arg]() mutable {
+            auto container = AceEngine::Get().GetContainer(currentId);
+            CHECK_NULL_VOID(container);
+            if (container->IsSubContainer()) {
+                currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+                container = AceEngine::Get().GetContainer(currentId);
+            }
+            ContainerScope scope(currentId);
+
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(context);
+            auto overlayManager = context->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+
+            auto dialog = overlayManager->ShowDialog(arg, nullptr, false);
+            CHECK_NULL_VOID(dialog);
+            auto hub = dialog->GetEventHub<NG::DialogEventHub>();
+            hub->SetOnCancel(arg.onCancel);
+        },
+        TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace::NG

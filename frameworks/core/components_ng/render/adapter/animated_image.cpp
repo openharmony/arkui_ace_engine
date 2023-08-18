@@ -24,7 +24,11 @@
 
 #include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -32,10 +36,12 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t STANDARD_FRAME_DURATION = 100;
 constexpr int32_t FORM_REPEAT_COUNT = 1;
+constexpr float RESIZE_THRESHOLD = 0.7f;
 } // namespace
 
 #ifndef USE_ROSEN_DRAWING
-RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<SkiaImageData>& data, const SizeF& size, const std::string& url)
+RefPtr<CanvasImage> AnimatedImage::Create(
+    const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url)
 {
     CHECK_NULL_RETURN(data, nullptr);
     auto skData = data->GetSkData();
@@ -50,7 +56,8 @@ RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<SkiaImageData>& data, con
     return MakeRefPtr<AnimatedSkImage>(std::move(codec), url);
 }
 #else
-RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<RosenImageData>& data, const SizeF& size, const std::string& url)
+RefPtr<CanvasImage> AnimatedImage::Create(
+    const RefPtr<DrawingImageData>& data, const ResizeParam& size, const std::string& url)
 {
     CHECK_NULL_RETURN(data, nullptr);
     auto rsData = data->GetRSData();
@@ -59,7 +66,7 @@ RefPtr<CanvasImage> AnimatedImage::Create(const RefPtr<RosenImageData>& data, co
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, nullptr);
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        auto src = ImageSource::Create(rsData->GetData(), rsData->GetSize());
+        auto src = ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize());
         CHECK_NULL_RETURN(src, nullptr);
         return MakeRefPtr<AnimatedPixmap>(codec, src, size, url);
     }
@@ -83,7 +90,12 @@ AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string 
         totalDuration += info[i].fDuration;
     }
     animator_->SetDuration(totalDuration);
-    animator_->SetIteration(codec->getRepetitionCount());
+    // repetition is 0 => play only once
+    auto iteration = codec->getRepetitionCount() + 1;
+    if (iteration == 0) {
+        iteration = ANIMATION_REPEAT_INFINITE;
+    }
+    animator_->SetIteration(iteration);
     if (pipelineContext->IsFormRender() && animator_->GetIteration() != 0) {
         animator_->SetIteration(FORM_REPEAT_COUNT);
     }
@@ -103,6 +115,12 @@ AnimatedImage::AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string 
 
     LOGD("animated image setup: duration = %{public}d", totalDuration);
     animator_->Play();
+}
+
+AnimatedImage::~AnimatedImage()
+{
+    // animator has to destruct on UI thread
+    ImageUtils::PostToUI([animator = animator_]() mutable { animator.Reset(); });
 }
 
 void AnimatedImage::ControlAnimation(bool play)
@@ -256,7 +274,7 @@ RefPtr<CanvasImage> AnimatedSkImage::GetCachedFrameImpl(const std::string& key)
 #else
 RefPtr<CanvasImage> AnimatedRSImage::GetCachedFrameImpl(const std::string& key)
 {
-    return RosenImage::QueryFromCache(key);
+    return DrawingImage::QueryFromCache(key);
 }
 #endif
 
@@ -270,13 +288,24 @@ void AnimatedSkImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
 void AnimatedRSImage::UseCachedFrame(RefPtr<CanvasImage>&& image)
 {
     std::scoped_lock<std::mutex> lock(frameMtx_);
-    currentFrame_ = DynamicCast<RosenImage>(image)->GetImage();
+    currentFrame_ = DynamicCast<DrawingImage>(image)->GetImage();
 }
 #endif
 
 // ----------------------------------------------------------
 // AnimatedPixmap implementation
 // ----------------------------------------------------------
+AnimatedPixmap::AnimatedPixmap(
+    const std::unique_ptr<SkCodec>& codec, const RefPtr<ImageSource>& src, const ResizeParam& size, std::string url)
+    : AnimatedImage(codec, std::move(url)), size_(size), src_(src)
+{
+    // resizing to a size >= 0.7 [~= sqrt(2) / 2] intrinsic size takes 2x longer to decode while memory usage is 1/2.
+    // 0.7 is the balance point.
+    auto intrSize = src_->GetImageSize();
+    if (intrSize.first * RESIZE_THRESHOLD >= size_.width || intrSize.second * RESIZE_THRESHOLD >= size_.height) {
+        size_.forceResize = true;
+    }
+}
 
 RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
 {
@@ -286,7 +315,13 @@ RefPtr<PixelMap> AnimatedPixmap::GetPixelMap() const
 
 void AnimatedPixmap::DecodeImpl(uint32_t idx)
 {
-    auto frame = src_->CreatePixelMap(idx, width_, height_);
+    RefPtr<PixelMap> frame;
+    if (size_.forceResize) {
+        frame = src_->CreatePixelMap(idx, { size_.width, size_.height });
+    } else {
+        // decode to intrinsic size
+        frame = src_->CreatePixelMap(idx, { -1, -1 });
+    }
     std::scoped_lock<std::mutex> lock(frameMtx_);
     currentFrame_ = frame;
 }

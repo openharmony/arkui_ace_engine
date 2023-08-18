@@ -38,7 +38,6 @@ public:
         lanes_ = listItemGroupPaintInfo.lanes;
         spaceWidth_ = listItemGroupPaintInfo.spaceWidth;
         laneGutter_ = listItemGroupPaintInfo.laneGutter;
-        childCrossSize_ = listItemGroupPaintInfo.childCrossSize;
     }
     ~ListItemGroupPaintMethod() override = default;
 
@@ -52,7 +51,6 @@ private:
     int32_t lanes_ = 1;
     float spaceWidth_ = 0.0f;
     float laneGutter_ = 0.0f;
-    float childCrossSize_ = 0.0f;
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
 };
 } // namespace OHOS::Ace::NG

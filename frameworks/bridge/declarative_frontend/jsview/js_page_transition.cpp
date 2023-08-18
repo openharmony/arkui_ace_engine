@@ -238,13 +238,17 @@ PageTransitionOption JSPageTransition::ParseTransitionOption(const std::unique_p
         }
 
         auto curveArgs = transitionArgs->GetValue("curve");
+        RefPtr<Curve> curve;
         if (curveArgs->IsString()) {
-            option.curve = CreateCurve(curveArgs->GetString());
+            curve = CreateCurve(curveArgs->GetString(), false);
         } else if (curveArgs->IsObject()) {
             auto curveString = curveArgs->GetValue("__curveString");
             if (curveString) {
-                option.curve = CreateCurve(curveString->GetString());
+                curve = CreateCurve(curveString->GetString(), false);
             }
+        }
+        if (curve) {
+            option.curve = curve;
         }
     }
     return option;

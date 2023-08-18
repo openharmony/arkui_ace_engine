@@ -18,9 +18,10 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,8 +44,8 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32
     auto contentNode = GetContentNode();
     if (!contentNode) {
         auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG,
-            nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, nodeId,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         SetContentNode(contentNode);
         auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -81,7 +82,33 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
     if (shallowBuilder && !shallowBuilder->IsExecuteDeepRenderDone()) {
         shallowBuilder->ExecuteDeepRender();
+        GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        AceType::DynamicCast<FrameNode>(contentNode_)
+            ->GetLayoutProperty()
+            ->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 }
 
+void NavDestinationGroupNode::UpdateTitleFontSize(bool showBackButton)
+{
+    // custom title
+    if (GetPrevTitleIsCustomValue(false)) {
+        return;
+    }
+    auto titleNode = AceType::DynamicCast<FrameNode>(title_);
+    CHECK_NULL_VOID(titleNode);
+    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    if (showBackButton) {
+        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
+        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
+    } else {
+        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
+    }
+    titleNode->MarkModifyDone();
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
 } // namespace OHOS::Ace::NG

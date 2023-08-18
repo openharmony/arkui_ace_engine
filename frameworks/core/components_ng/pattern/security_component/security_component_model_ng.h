@@ -50,7 +50,6 @@ public:
     static void SetBackgroundPadding(const std::optional<Dimension>& padding);
     static void SetTextIconSpace(const Dimension& value);
     static void SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value);
-    static void SetlayoutOrder(const SecSecurityComponentLayoutOrder& value);
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {

@@ -41,7 +41,7 @@ public:
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
     void SetCachedCount(int32_t value) override;
-    void SetIsRTL(bool rightToLeft) override;
+    void SetIsRTL(TextDirection direction) override;
     void SetLayoutDirection(FlexDirection value) override;
     void SetMaxCount(int32_t value) override;
     void SetMinCount(int32_t value) override;
@@ -61,6 +61,13 @@ public:
     void SetOnItemDragMove(ItemDragMoveFunc&& value) override;
     void SetOnItemDragLeave(ItemDragLeaveFunc&& value) override;
     void SetOnItemDrop(ItemDropFunc&& value) override;
+    void SetOnScroll(OnScrollEvent&& onScroll) override;
+    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
+    void SetOnScrollStart(OnScrollStartEvent&& onScrollStart) override;
+    void SetOnScrollStop(OnScrollStopEvent&& onScrollStop) override;
+    void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex) override;
+    void SetOnReachStart(OnReachEvent&& onReachStart) override;
+    void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
 

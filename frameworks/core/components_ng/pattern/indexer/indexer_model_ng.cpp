@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 
 #include "base/geometry/dimension.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
@@ -31,17 +32,17 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
-
-    frameNode->Clean();
     int32_t indexerSize = arrayValue.size();
-    for (int32_t index = 0; index < indexerSize; index++) {
-        auto indexerChildNode = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_VOID(indexerChildNode);
-        auto textLayoutProperty = indexerChildNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateContent(arrayValue[index]);
-        frameNode->AddChild(indexerChildNode);
+    auto children = frameNode->GetChildren();
+    auto lastChildCount = static_cast<int32_t>(children.size());
+    if (indexerSize != lastChildCount) {
+        frameNode->Clean();
+        for (int32_t index = 0; index < indexerSize; index++) {
+            auto indexerChildNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_VOID(indexerChildNode);
+            frameNode->AddChild(indexerChildNode);
+        }
     }
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ArrayValue, arrayValue);
@@ -57,7 +58,7 @@ void IndexerModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
     if (selectedColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SelectedColor, selectedColor.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, SelectedColor, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, SelectedColor, PROPERTY_UPDATE_NORMAL);
     }
 }
 
@@ -66,7 +67,7 @@ void IndexerModelNG::SetColor(const std::optional<Color>& color)
     if (color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Color, color.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, Color, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, Color, PROPERTY_UPDATE_NORMAL);
     }
 }
 
@@ -75,7 +76,7 @@ void IndexerModelNG::SetPopupColor(const std::optional<Color>& popupColor)
     if (popupColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupColor, popupColor.value());
     } else {
-        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupColor, PROPERTY_UPDATE_MEASURE);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupColor, PROPERTY_UPDATE_NORMAL);
     }
 }
 
@@ -185,14 +186,22 @@ void IndexerModelNG::SetSelected(int32_t selected)
     }
 }
 
-void IndexerModelNG::SetPopupPositionX(const Dimension& popupPositionX)
+void IndexerModelNG::SetPopupPositionX(const std::optional<Dimension>& popupPositionXOpt)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionX);
+    if (popupPositionXOpt.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionXOpt.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionX, PROPERTY_UPDATE_NORMAL);
+    }
 }
 
-void IndexerModelNG::SetPopupPositionY(const Dimension& popupPositionY)
+void IndexerModelNG::SetPopupPositionY(const std::optional<Dimension>& popupPositionYOpt)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionY);
+    if (popupPositionYOpt.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionYOpt.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupPositionY, PROPERTY_UPDATE_NORMAL);
+    }
 }
 
 void IndexerModelNG::SetPopupItemBackground(const std::optional<Color>& popupItemBackground)

@@ -18,6 +18,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
+#include "base/thread/frame_trace_adapter.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
@@ -89,7 +90,10 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     }
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect, touchRestrict);
+        frameNode->CheckSecurityComponentStatus(rect);
+    }
+    if (!needAppend) {
+        NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, touchRestrict, hitTestResult, touchPoint.id);
@@ -121,10 +125,12 @@ void EventManager::TouchTest(
     const NG::PointF point { event.x, event.y };
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect, touchRestrict);
+        frameNode->CheckSecurityComponentStatus(rect);
     }
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_, event.id);
+    TouchTestResult hitTestResult;
+    frameNode->TouchTest(point, point, touchRestrict, hitTestResult, event.id);
+    axisTouchTestResults_[event.id] = std::move(hitTestResult);
 }
 
 void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<TextOverlayManager>& textOverlayManager)
@@ -163,6 +169,18 @@ void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
     CHECK_NULL_VOID_NOLOG(selectOverlayManager);
+    if (touchPoint.type == TouchType::DOWN &&
+        touchTestResults_.find(touchPoint.id) != touchTestResults_.end()) {
+        std::vector<std::string> touchTestIds;
+        const auto& resultList = touchTestResults_[touchPoint.id];
+        for (const auto& result : resultList) {
+            auto eventTarget = result->GetEventTarget();
+            if (eventTarget.has_value()) {
+                touchTestIds.emplace_back(eventTarget.value().id);
+            }
+        }
+        selectOverlayManager->SetOnTouchTestResults(touchTestIds);
+    }
     selectOverlayManager->HandleGlobalEvent(touchPoint, rootOffset);
 }
 
@@ -213,7 +231,9 @@ void EventManager::TouchTest(
     // collect
     const Point point { event.x, event.y, event.sourceType };
     // For root node, the parent local point is the same as global point.
-    renderNode->TouchTest(point, point, touchRestrict, axisTouchTestResult_);
+    TouchTestResult hitTestResult;
+    renderNode->TouchTest(point, point, touchRestrict, hitTestResult);
+    axisTouchTestResults_[event.id] = std::move(hitTestResult);
 }
 
 void EventManager::FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents)
@@ -298,6 +318,10 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
+        FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
+        if (ft != nullptr) {
+            ft->SetFrameTraceLimit();
+        }
         refereeNG_->CleanGestureScope(point.id);
         referee_->CleanGestureScope(point.id);
         touchTestResults_.erase(point.id);
@@ -310,17 +334,22 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
 {
     ContainerScope scope(instanceId_);
 
+    const auto curResultIter = axisTouchTestResults_.find(event.id);
+    if (curResultIter == axisTouchTestResults_.end()) {
+        LOGI("the %{public}d axis test result does not exist!", event.id);
+        return false;
+    }
     if (event.action == AxisAction::BEGIN) {
         // first collect gesture into gesture referee.
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
-                refereeNG_->AddGestureToScope(event.id, axisTouchTestResult_);
+                refereeNG_->AddGestureToScope(event.id, curResultIter->second);
             }
         }
     }
 
     ACE_FUNCTION_TRACE();
-    for (const auto& entry : axisTouchTestResult_) {
+    for (const auto& entry : curResultIter->second) {
         if (!entry->HandleEvent(event)) {
             break;
         }
@@ -331,7 +360,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
                 refereeNG_->CleanGestureScope(event.id);
             }
         }
-        axisTouchTestResult_.clear();
+        axisTouchTestResults_.erase(event.id);
     }
     return true;
 }
@@ -546,7 +575,7 @@ void EventManager::MouseTest(
     TouchTestResult testResult;
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect, touchRestrict);
+        frameNode->CheckSecurityComponentStatus(rect);
     }
     frameNode->TouchTest(point, point, touchRestrict, testResult, event.GetId());
     if (testResult.empty()) {
@@ -592,11 +621,14 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     LOGD("DispatchMouseEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
         event.action == MouseAction::MOVE || event.action == MouseAction::WINDOW_ENTER ||
-        event.action == MouseAction::WINDOW_LEAVE || event.action == MouseAction::PULL_MOVE ||
-        event.action == MouseAction::PULL_UP) {
+        event.action == MouseAction::WINDOW_LEAVE) {
         MouseTestResult handledResults;
         handledResults.clear();
-        if (event.button == MouseButton::LEFT_BUTTON) {
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, false);
+        if ((event.button == MouseButton::LEFT_BUTTON && !container->IsScenceBoardWindow()) ||
+            (event.button == MouseButton::LEFT_BUTTON && container->IsScenceBoardWindow() &&
+            event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);
@@ -608,7 +640,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
             if (event.action == MouseAction::PRESS) {
                 pressMouseTestResults_ = currMouseTestResults_;
             } else if (event.action == MouseAction::RELEASE) {
-                pressMouseTestResults_.clear();
+                DoMouseActionRelease();
             }
         }
         for (const auto& mouseTarget : currMouseTestResults_) {
@@ -621,6 +653,11 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         }
     }
     return false;
+}
+
+void EventManager::DoMouseActionRelease()
+{
+    pressMouseTestResults_.clear();
 }
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
@@ -1161,6 +1198,7 @@ void EventManager::ClearResults()
 {
     touchTestResults_.clear();
     mouseTestResults_.clear();
+    axisTouchTestResults_.clear();
     keyboardShortcutNode_.clear();
 }
 

@@ -54,12 +54,21 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::vector<DialogButtonDirection> DIALOG_BUTTONS_DIRECTION = { DialogButtonDirection::AUTO,
+    DialogButtonDirection::HORIZONTAL, DialogButtonDirection::VERTICAL };
 } // namespace
 
-void ParseButtonObj(
-    const JSCallbackInfo& args, DialogProperties& properties, JSRef<JSObject> obj, const std::string& property)
+void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
 {
-    auto jsVal = obj->GetProperty(property.c_str());
+    if (styleValue >= static_cast<int32_t>(DialogButtonStyle::DEFAULT) &&
+        styleValue <= static_cast<int32_t>(DialogButtonStyle::HIGHTLIGHT)) {
+        buttonInfo.dlgButtonStyle = static_cast<DialogButtonStyle>(styleValue);
+    }
+}
+
+void ParseButtonObj(
+    const JSCallbackInfo& args, DialogProperties& properties, JSRef<JSVal> jsVal, const std::string& property)
+{
     if (!jsVal->IsObject()) {
         return;
     }
@@ -69,6 +78,25 @@ void ParseButtonObj(
     ButtonInfo buttonInfo;
     if (JSAlertDialog::ParseJsString(value, buttonValue)) {
         buttonInfo.text = buttonValue;
+    }
+
+    // Parse enabled
+    auto enabledValue = objInner->GetProperty("enabled");
+    if (enabledValue->IsBoolean()) {
+        buttonInfo.enabled = enabledValue->ToBoolean();
+    }
+
+    // Parse defaultFocus
+    auto defaultFocusValue = objInner->GetProperty("defaultFocus");
+    if (defaultFocusValue->IsBoolean()) {
+        buttonInfo.defaultFocus = defaultFocusValue->ToBoolean();
+    }
+
+    // Parse style
+    auto style = objInner->GetProperty("style");
+    if (style->IsNumber()) {
+        auto styleValue = style->ToNumber<int32_t>();
+        SetParseStyle(buttonInfo, styleValue);
     }
 
     auto fontColorValue = objInner->GetProperty("fontColor");
@@ -100,6 +128,27 @@ void ParseButtonObj(
     }
 }
 
+void ParseButtonArray(
+    const JSCallbackInfo& args, DialogProperties& properties, JSRef<JSObject> obj, const std::string& property)
+{
+    auto jsVal = obj->GetProperty(property.c_str());
+    if (!jsVal->IsArray()) {
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(jsVal);
+    size_t length = array->Length();
+    if (length <= 0) {
+        return;
+    }
+    for (size_t i = 0; i < length; i++) {
+        JSRef<JSVal> buttonItem = array->GetValueAt(i);
+        if (!buttonItem->IsObject()) {
+            break;
+        }
+        ParseButtonObj(args, properties, buttonItem, property + std::to_string(i));
+    }
+}
+
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegate();
@@ -118,6 +167,13 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         std::string title;
         if (ParseJsString(titleValue, title)) {
             properties.title = title;
+        }
+
+        // Parse subtitle.
+        auto subtitleValue = obj->GetProperty("subtitle");
+        std::string subtitle;
+        if (ParseJsString(subtitleValue, subtitle)) {
+            properties.subtitle = subtitle;
         }
 
         // Parses message.
@@ -153,11 +209,26 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
 
         if (obj->GetProperty("confirm")->IsObject()) {
             // Parse confirm.
-            ParseButtonObj(args, properties, obj, "confirm");
+            auto objInner = obj->GetProperty("confirm");
+            ParseButtonObj(args, properties, objInner, "confirm");
+        } else if (obj->GetProperty("buttons")->IsArray()) {
+            // Parse buttons array.
+            ParseButtonArray(args, properties, obj, "buttons");
         } else {
             // Parse primaryButton and secondaryButton.
-            ParseButtonObj(args, properties, obj, "primaryButton");
-            ParseButtonObj(args, properties, obj, "secondaryButton");
+            auto objInner = obj->GetProperty("primaryButton");
+            ParseButtonObj(args, properties, objInner, "primaryButton");
+            objInner = obj->GetProperty("secondaryButton");
+            ParseButtonObj(args, properties, objInner, "secondaryButton");
+        }
+
+        // Parse buttons direction.
+        auto directionValue = obj->GetProperty("buttonDirection");
+        if (directionValue->IsNumber()) {
+            auto buttonDirection = directionValue->ToNumber<int32_t>();
+            if (buttonDirection >= 0 && buttonDirection <= static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
+                properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
+            }
         }
 
         // Parse alignment
@@ -180,6 +251,13 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             auto dyValue = offsetObj->GetProperty("dy");
             ParseJsDimensionVp(dyValue, dy);
             properties.offset = DimensionOffset(dx, dy);
+        }
+
+        // Parse maskRect.
+        auto maskRectValue = obj->GetProperty("maskRect");
+        DimensionRect maskRect;
+        if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+            properties.maskRect = maskRect;
         }
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }

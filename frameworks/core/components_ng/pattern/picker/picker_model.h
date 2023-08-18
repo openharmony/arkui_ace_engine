@@ -35,6 +35,9 @@ struct PickerDialogInfo {
     bool isStartDate;
     bool isEndDate;
     bool isSelectedDate;
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
+    std::optional<DimensionRect> maskRect;
 };
 class DatePickerModel {
 public:
@@ -48,6 +51,7 @@ public:
     virtual void SetSelectedDate(const PickerDate& value) = 0;
     virtual void SetShowLunar(bool lunar) = 0;
     virtual void SetOnChange(DateChangeEvent&& onChange) = 0;
+    virtual void SetOnDateChange(DateChangeEvent&& onChange) = 0;
     virtual void SetSelectedTime(const PickerTime& selectedTime) = 0;
     virtual void SetHour24(bool value) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
@@ -68,7 +72,8 @@ public:
 
     virtual void SetDatePickerDialogShow(PickerDialogInfo& pickerDialog, NG::DatePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, DatePickerType pickerType) = 0;
+        std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onDateAccept,
+        std::function<void(const std::string&)>&& onDateChange, DatePickerType pickerType) = 0;
 
 private:
     static std::unique_ptr<DatePickerDialogModel> datePickerDialogInstance_;

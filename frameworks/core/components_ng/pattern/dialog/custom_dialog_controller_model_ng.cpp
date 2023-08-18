@@ -15,9 +15,11 @@
 
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 
+#include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/core/components_ng/base/view_stack_processor.h"
+#include "base/thread/task_executor.h"
+#include "core/common/container_scope.h"
+
 namespace OHOS::Ace::NG {
 void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProperties,
     std::vector<WeakPtr<AceType>>& dialogs, bool& pending, bool& isShown, std::function<void()>&& cancelTask,
@@ -39,24 +41,28 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
-    buildFunc();
-    auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    CHECK_NULL_VOID(customNode);
-
     dialogProperties.onStatusChanged = [&isShown](bool isShownStatus) {
         if (!isShownStatus) {
             isShown = isShownStatus;
         }
     };
 
-    WeakPtr<NG::FrameNode> dialog;
-    if (dialogProperties.isShowInSubWindow) {
-        dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, customNode);
-    } else {
-        dialog = overlayManager->ShowDialog(dialogProperties, customNode, false);
-    }
-    dialogs.emplace_back(dialog);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    auto task = [currentId, dialogProperties, &dialogs, func = std::move(buildFunc),
+                    weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() mutable {
+        ContainerScope scope(currentId);
+        WeakPtr<NG::FrameNode> dialog;
+        if (dialogProperties.isShowInSubWindow) {
+            dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
+        } else {
+            auto overlayManager = weakOverlayManager.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            dialog = overlayManager->ShowDialog(dialogProperties, std::move(func), false);
+        }
+        dialogs.emplace_back(dialog);
+    };
+    executor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
 void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogProperties,

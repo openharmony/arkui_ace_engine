@@ -207,6 +207,9 @@ public:
 
     void FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDragEnter");
+        }
         if (onDragEnter_) {
             onDragEnter_(info, extraParams);
         }
@@ -219,6 +222,9 @@ public:
 
     void FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDragLeave");
+        }
         if (onDragLeave_) {
             onDragLeave_(info, extraParams);
         }
@@ -231,9 +237,17 @@ public:
 
     void FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDragMove");
+        }
         if (onDragMove_) {
             onDragMove_(info, extraParams);
         }
+    }
+
+    bool HasOnDragMove() const
+    {
+        return static_cast<bool>(onDragMove_);
     }
 
     void SetOnDrop(OnDragFunc&& onDrop)
@@ -256,8 +270,21 @@ public:
         return static_cast<bool>(onDragEnd_);
     }
 
+    virtual bool HasOnItemDragMove()
+    {
+        return false;
+    }
+
+    virtual bool HasOnItemDrop()
+    {
+        return false;
+    }
+    
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("DragDropManager fire onDrop");
+        }
         if (onDrop_) {
             onDrop_(info, extraParams);
         }
@@ -305,6 +332,8 @@ public:
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     void MarkModifyDone();
+
+    void SetCurrentUIState(UIState state, bool flag);
 
     void UpdateCurrentUIState(UIState state)
     {

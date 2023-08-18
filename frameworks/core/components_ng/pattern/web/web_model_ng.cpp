@@ -311,6 +311,15 @@ void WebModelNG::SetOnContextMenuShow(std::function<bool(const BaseEventInfo* in
     webEventHub->SetOnContextMenuShowEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnContextMenuHideEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetJsEnabled(bool isJsEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -490,6 +499,15 @@ void WebModelNG::SetPermissionRequestEventId(std::function<void(const BaseEventI
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPermissionRequestEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetScreenCaptureRequestEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnScreenCaptureRequestEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetBackgroundColor(Color backgroundColor)
@@ -792,7 +810,7 @@ void WebModelNG::AddDragFrameNodeToManager()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddDragFrameNode(frameNode);
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 }
 
 void WebModelNG::SetAudioResumeInterval(int32_t resumeInterval)
@@ -806,5 +824,14 @@ void WebModelNG::SetAudioExclusive(bool audioExclusive)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateAudioExclusive(audioExclusive);
+}
+
+void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnOverScrollEvent(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::NG

@@ -61,6 +61,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
         CHECK_NULL_VOID(tabsLayoutProperty);
         tabsLayoutProperty->UpdateIndex(index);
+        tabBarPattern->SetIsAnimating(false);
         auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(tabBarLayoutProperty);
         if (!tabBarPattern->IsMaskAnimationByCreate()) {
@@ -73,9 +74,11 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateTextColor(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE) {
+            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
+                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
                 if (!tabBarPattern->GetChangeByClick()) {
                     tabBarPattern->PlayTabBarTranslateAnimation(index);
+                    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
                 } else {
                     tabBarPattern->SetChangeByClick(false);
                 }
@@ -210,7 +213,7 @@ void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
     }
     auto jsonIsOn = info->GetValue("Index");
     swiperLayoutProperty->UpdateIndex(jsonIsOn->GetInt());
-    
+
     swiperPattern->OnRestoreInfo(restoreInfo);
     tabBarPattern->OnRestoreInfo(restoreInfo);
 }

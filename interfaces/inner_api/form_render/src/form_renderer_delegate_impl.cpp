@@ -19,10 +19,8 @@
 
 namespace OHOS {
 namespace Ace {
-int32_t FormRendererDelegateImpl::OnSurfaceCreate(
-    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-    const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
-    const AAFwk::Want& want)
+int32_t FormRendererDelegateImpl::OnSurfaceCreate(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+    const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want)
 {
     HILOG_DEBUG("%{public}s called.", __func__);
     if (!surfaceNode) {
@@ -78,6 +76,17 @@ int32_t FormRendererDelegateImpl::OnSurfaceChange(float width, float height)
     return ERR_OK;
 }
 
+int32_t FormRendererDelegateImpl::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos)
+{
+    HILOG_DEBUG("%{public}s called.", __func__);
+    if (!formLinkInfoUpdateHandler_) {
+        HILOG_ERROR("formLinkInfoUpdateHandler_ is null");
+        return ERR_INVALID_DATA;
+    }
+    formLinkInfoUpdateHandler_(formLinkInfos);
+    return ERR_OK;
+}
+
 void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
     std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&,
         const AAFwk::Want&)>&& listener)
@@ -85,8 +94,7 @@ void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
     surfaceCreateEventHandler_ = std::move(listener);
 }
 
-void FormRendererDelegateImpl::SetActionEventHandler(
-    std::function<void(const std::string&)>&& listener)
+void FormRendererDelegateImpl::SetActionEventHandler(std::function<void(const std::string&)>&& listener)
 {
     actionEventHandler_ = std::move(listener);
 }
@@ -100,6 +108,12 @@ void FormRendererDelegateImpl::SetErrorEventHandler(
 void FormRendererDelegateImpl::SetSurfaceChangeEventHandler(std::function<void(float width, float height)>&& listener)
 {
     surfaceChangeEventHandler_ = std::move(listener);
+}
+
+void FormRendererDelegateImpl::SetFormLinkInfoUpdateHandler(
+    std::function<void(const std::vector<std::string>&)>&& listener)
+{
+    formLinkInfoUpdateHandler_ = std::move(listener);
 }
 } // namespace Ace
 } // namespace OHOS

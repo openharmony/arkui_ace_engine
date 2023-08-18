@@ -42,6 +42,7 @@ const char THEME_PATTERN_COUNTER[] = "counter_pattern";
 const char THEME_PATTERN_DIVIDER[] = "divider_pattern";
 const char THEME_PATTERN_FOCUS_ANIMATION[] = "focus_animation_pattern";
 const char THEME_PATTERN_GRID[] = "grid_pattern";
+const char THEME_PATTERN_HYPERLINK[] = "hyperlink_pattern";
 const char THEME_PATTERN_ICON[] = "icon_pattern";
 const char THEME_PATTERN_IMAGE[] = "image_pattern";
 const char THEME_PATTERN_LIST[] = "list_pattern";
@@ -63,6 +64,7 @@ const char THEME_PATTERN_SELECT[] = "select_pattern";
 const char THEME_PATTERN_SLIDER[] = "slider_pattern";
 const char THEME_PATTERN_TEXT[] = "text_pattern";
 const char THEME_PATTERN_TEXTFIELD[] = "textfield_pattern";
+const char THEME_PATTERN_RICH_EDITOR[] = "rich_editor_pattern";
 const char THEME_PATTERN_TEXT_OVERLAY[] = "text_overlay_pattern";
 const char THEME_PATTERN_VIDEO[] = "video_pattern";
 const char THEME_PATTERN_INDEXER[] = "indexer_pattern";
@@ -71,6 +73,7 @@ const char THEME_PATTERN_ADVANCED_PATTERN[] = "advanced_pattern";
 const char THEME_PATTERN_SECURITY_COMPONENT[] = "security_component_pattern";
 const char THEME_PATTERN_FORM[] = "form_pattern";
 const char THEME_PATTERN_SIDE_BAR[] = "side_bar_pattern";
+const char THEME_PATTERN_PATTERN_LOCK[] = "pattern_lock_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
@@ -218,4 +221,10 @@ const char INLINE_TEXT_COLOR[] = "inline_text_color";
 const char INLINE_RADIUS_SIZE[] = "inline_radius_size";
 const char INLINE_BG_COLOR[] = "inline_bg_color";
 const char INLINE_BORDER_COLOR[] = "inline_border_color";
+
+// linear split attributes
+const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";
+
+// stepper attributes
+const char STEPPER_FOCUS_COLOR[] = "stepper_focus_color";
 } // namespace OHOS::Ace

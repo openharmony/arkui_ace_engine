@@ -52,13 +52,23 @@ public:
         layoutAlgorithm->SetSideBarStatus(sideBarStatus_);
         layoutAlgorithm->SetNeedInitRealSideBarWidth(needInitRealSideBarWidth_);
         layoutAlgorithm->SetRealSideBarWidth(realSideBarWidth_);
+        layoutAlgorithm->SetPreSideBarWidth(preSidebarWidth_);
+        layoutAlgorithm->SetRealSideBarHeight(realSideBarHeight_);
         layoutAlgorithm->SetRealDividerWidth(realDividerWidth_);
         layoutAlgorithm->SetControlButtonClick(isControlButtonClick_);
         auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
         if (layoutProperty) {
-            layoutAlgorithm->SetSideBarContainerType(
-                layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED));
+            layoutAlgorithm->SetSideBarContainerType(type_);
         }
+        layoutAlgorithm->SetMinSideBarWidth(minSideBarWidth_);
+        layoutAlgorithm->SetMaxSideBarWidth(maxSideBarWidth_);
+        layoutAlgorithm->SetMinContentWidth(minContentWidth_);
+        layoutAlgorithm->SetTypeUpdateWidth(typeUpdateWidth_);
+        layoutAlgorithm->SetControlImageWidth(controlImageWidth_);
+        layoutAlgorithm->SetControlImageHeight(controlImageHeight_);
+        auto host = GetHost();
+        auto sideBarContainerPattern = host->GetPattern<SideBarContainerPattern>();
+        layoutAlgorithm->SetPattern(AceType::WeakClaim(AceType::RawPtr(sideBarContainerPattern)));
         return layoutAlgorithm;
     }
 
@@ -103,10 +113,27 @@ public:
         return { false, true, ScopeType::OTHERS };
     }
 
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
     void InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void InitControlButtonMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void UpdateSideBarPosition(float value);
+    void SetMinSideBarWidth(float minSideBarWidth)
+    {
+        minSideBarWidth_ = minSideBarWidth;
+    }
+    void SetMaxSideBarWidth(float maxSideBarWidth)
+    {
+        maxSideBarWidth_ = maxSideBarWidth;
+    }
+    void SetMinContentWidth(float minContentWidth)
+    {
+        minContentWidth_ = minContentWidth;
+    }
+    void SetTypeUpdateWidth(float typeUpdateWidth)
+    {
+        typeUpdateWidth_ = typeUpdateWidth;
+    }
+    void GetControlImageSize(Dimension& width, Dimension& height);
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -116,7 +143,6 @@ private:
     void DoAnimation();
     void DoSideBarAnimation();
     void CreateAnimation();
-    void InitSideBar();
     void FireChangeEvent(bool isShow);
     void UpdateControlButtonIcon();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -124,19 +150,21 @@ private:
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void HandlePanEventEnd();
-    void UpdateResponseRegion(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
     void OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     void OnUpdateShowControlButton(
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
     void OnUpdateShowDivider(
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
+    void OnUpdateSideBarAndContent(const RefPtr<FrameNode>& host);
     void OnHover(bool isHover);
-    void OnControlButtonHover(bool isHover);
     void AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
-    void DoControlButtonHoverAnimation(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-        int32_t duration, const RefPtr<Curve>& curve);
-    void HandleMouseEvent(const MouseInfo& info);
     SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
+    RefPtr<FrameNode> GetSideBarNode(const RefPtr<FrameNode>& host) const;
+    RefPtr<FrameNode> GetContentNode(const RefPtr<FrameNode>& host) const;
+    RefPtr<FrameNode> GetControlImageNode() const;
+    RefPtr<FrameNode> GetDividerNode() const;
+    std::optional<float> DimensionConvertToPx(const Dimension& value) const;
+    Dimension ConvertPxToPercent(float value) const;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
@@ -148,20 +176,29 @@ private:
     RefPtr<PanEvent> dragEvent_;
 
     float currentOffset_ = 0.0f;
-    float realSideBarWidth_ = 0.0f;
     float realDividerWidth_ = 0.0f;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
     bool showSideBar_ = true;
     bool needInitRealSideBarWidth_ = true;
     RectF dragRect_;
-    float preSidebarWidth_ = 0.0f;
     bool hasControlButton_ = false;
     SideBarAnimationDirection animDir_ = SideBarAnimationDirection::LTR;
-    bool isControlButtonHover_ = false;
     bool isControlButtonClick_ = false;
+    bool hasInit_ = false;
 
+    Dimension realSideBarWidth_ = -1.0_vp;
+    Dimension preSidebarWidth_;
+    Dimension userSetSidebarWidth_;
     Dimension adjustMaxSideBarWidth_;
     Dimension adjustMinSideBarWidth_;
+    SideBarContainerType type_ = SideBarContainerType::EMBED;
+    float minContentWidth_ = -1.0f;
+    float minSideBarWidth_ = -1.0f;
+    float maxSideBarWidth_ = -1.0f;
+    float typeUpdateWidth_ = 0.0f;
+    float realSideBarHeight_ = 0.0f;
+    Dimension controlImageWidth_;
+    Dimension controlImageHeight_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
 };

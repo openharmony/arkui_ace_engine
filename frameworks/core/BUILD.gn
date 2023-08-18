@@ -80,6 +80,7 @@ template("ace_core_source_set") {
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
       "common/font_manager.cpp",
+      "common/frontend.cpp",
       "common/platform_bridge.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
@@ -426,13 +427,20 @@ template("ace_core_source_set") {
         "common/rosen/rosen_convert_helper.cpp",
       ]
       if (is_ohos) {
-        external_deps += [ "graphic_standard:libtexgine" ]
+        external_deps += [ "graphic_2d:libtexgine" ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
-        external_deps += [ "graphic_standard:librender_service_client" ]
+        if (ace_use_rosen_drawing) {
+          include_dirs += [
+            "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+            "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
+          ]
+          external_deps += [ "graphic_2d:2d_graphics" ]
+        }
+        external_deps += [ "graphic_2d:librender_service_client" ]
       }
     }
 
@@ -633,6 +641,7 @@ template("ace_core_ng_source_set") {
       "common/focus_animation_manager.cpp",
       "common/font_loader.cpp",
       "common/font_manager.cpp",
+      "common/frontend.cpp",
       "common/platform_bridge.cpp",
       "common/sharedata/share_data.cpp",
       "common/storage/storage_proxy.cpp",
@@ -777,8 +786,9 @@ template("ace_core_ng_source_set") {
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_thread_model.cpp",
     ]
+    include_dirs = []
     if (is_cross_platform_build) {
-      include_dirs = [
+      include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
       ]
@@ -797,6 +807,19 @@ template("ace_core_ng_source_set") {
     external_deps = []
     if (ace_use_new_skia) {
       configs += [ "$ace_flutter_engine_root:flutter_config" ]
+
+      if (is_cross_platform_build) {
+        sources += [ "components/common/painter/rosen_svg_painter.cpp" ]
+
+        sources -= [
+          "components/common/painter/flutter_decoration_painter.cpp",
+          "components/common/painter/flutter_svg_painter.cpp",
+          "components/font/flutter_font_collection.cpp",
+        ]
+
+        deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
+      }
+
       deps += [
         "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
         "$skia_root_new:skia_$platform",
@@ -864,14 +887,23 @@ template("ace_core_ng_source_set") {
         "animation/native_curve_helper.cpp",
         "common/rosen/rosen_convert_helper.cpp",
       ]
+      include_dirs += [
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+      ]
       if (is_ohos) {
-        external_deps += [ "graphic_standard:libtexgine" ]
+        external_deps += [ "graphic_2d:libtexgine" ]
         defines += [ "TEXGINE_SUPPORT_FOR_OHOS" ]
       }
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
-        external_deps += [ "graphic_standard:librender_service_client" ]
+        external_deps += [ "graphic_2d:librender_service_client" ]
+        if (ace_use_rosen_drawing) {
+          external_deps += [ "graphic_2d:2d_graphics" ]
+        }
       }
     }
     cflags_cc = []

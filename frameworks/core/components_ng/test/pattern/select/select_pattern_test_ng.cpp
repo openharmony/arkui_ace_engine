@@ -20,11 +20,16 @@
 
 #define protected public
 #define private public
+#include "core/components/common/layout/constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
+#include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
@@ -35,16 +40,22 @@
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t OFFSETX = 10;
 const int32_t OFFSETY = 20;
+constexpr int32_t SELECT_ERROR = -1;
+constexpr int32_t CURRENT_INDEX = 10;
+const std::string EMPTY_TEXT = "";
+const std::string SELECT_TEXT = "select";
 const std::string OPTION_TEXT = "aaa";
 const std::string OPTION_TEXT_2 = "BBB";
 const std::string OPTION_TEXT_3 = "CCC";
 const std::string INTERNAL_SOURCE = "$r('app.media.icon')";
 const std::string FILE_SOURCE = "/common/icon.png";
+const std::string DEFAULT_STR("2.0");
 const std::string TEXT_VALUE = "test";
 const CalcLength MARGIN_LENGTH = CalcLength("8vp");
 const CalcSize TEXT_IDEAL_SIZE = CalcSize(CalcLength("50vp"), std::nullopt);
@@ -71,6 +82,12 @@ class SelectPropertyTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
+    void InitSelectTestNg();
+    RefPtr<FrameNode> frameNode_;
+    RefPtr<SelectPattern> selectPattern_;
+    RefPtr<SelectAccessibilityProperty> selectAccessibilityProperty_;
 
 protected:
     static RefPtr<FrameNode> CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test);
@@ -88,6 +105,29 @@ void SelectPropertyTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
+
+void SelectPropertyTestNg::SetUp() {}
+
+void SelectPropertyTestNg::TearDown()
+{
+    frameNode_ = nullptr;
+    selectPattern_ = nullptr;
+    selectAccessibilityProperty_ = nullptr;
+}
+
+void SelectPropertyTestNg::InitSelectTestNg()
+{
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+
+    selectPattern_ = frameNode_->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern_, nullptr);
+
+    selectAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<SelectAccessibilityProperty>();
+    ASSERT_NE(selectAccessibilityProperty_, nullptr);
+}
+
 RefPtr<FrameNode> SelectPropertyTestNg::CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test)
 {
     SelectModelNG selectModelInstance;
@@ -178,7 +218,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest003, TestSize.Level1)
     textProps->UpdateMargin(margin);
     textProps->UpdateUserDefinedIdealSize(TEXT_IDEAL_SIZE);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(text, geometryNode, text->GetLayoutProperty());
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(text, geometryNode, text->GetLayoutProperty());
 
     LayoutConstraintF constraint;
     constraint.maxSize = FULL_SCREEN_SIZE;
@@ -204,9 +244,13 @@ HWTEST_F(SelectPropertyTestNg, SelectSetMenuAlign001, TestSize.Level1)
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
     selectModelInstance.Create(params);
     MenuAlign menuAlign;
+    /**
+     * @tc.cases: case1. verify the SetMenuAlign function.
+     */
     menuAlign.alignType = MenuAlignType::END;
     menuAlign.offset = DimensionOffset(Dimension(OFFSETX, DimensionUnit::VP), Dimension(OFFSETY, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(select->GetChildren().empty());
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto selectPattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(selectPattern, nullptr);
@@ -332,7 +376,7 @@ HWTEST_F(SelectPropertyTestNg, UpdateSelectedProps001, TestSize.Level1)
     selectPattern->SetSelected(0);
     EXPECT_EQ(selectPattern->GetSelected(), 0);
     selectPattern->SetSelected(4);
-    EXPECT_EQ(selectPattern->GetSelected(), 0);
+    EXPECT_EQ(selectPattern->GetSelected(), -1);
 }
 /**
  * @tc.name: UpdateSelectedProps002
@@ -464,7 +508,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest005, TestSize.Level1)
      * @tc.expected: the function exits normally
      */
     auto layoutProperty = frameNode->GetLayoutProperty();
-    LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, layoutProperty);
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
     auto layoutAlgorithm = AceType::MakeRefPtr<SelectLayoutAlgorithm>();
     layoutAlgorithm->Measure(layoutWrapper);
     auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
@@ -508,5 +552,374 @@ HWTEST_F(SelectPropertyTestNg, SelectDistributedTest001, TestSize.Level1)
     restoreInfo_ = "invalid_json_string";
     selectPattern->OnRestoreInfo(restoreInfo_);
     EXPECT_EQ(selectPattern->GetSelected(), 2);
+}
+
+/**
+ * @tc.name: SelectAccessibilityPropertyGetCurrentIndex001
+ * @tc.desc: Test GetCurrentIndex of select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetCurrentIndex001, TestSize.Level1)
+{
+    InitSelectTestNg();
+
+    EXPECT_EQ(selectAccessibilityProperty_->GetCurrentIndex(), SELECT_ERROR);
+
+    selectPattern_->selected_ = CURRENT_INDEX;
+    EXPECT_EQ(selectAccessibilityProperty_->GetCurrentIndex(), CURRENT_INDEX);
+}
+
+/**
+ * @tc.name: SelectAccessibilityPropertyGetBeginIndex001
+ * @tc.desc: Test GetBeginIndex of select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetBeginIndex001, TestSize.Level1)
+{
+    InitSelectTestNg();
+
+    EXPECT_EQ(selectAccessibilityProperty_->GetBeginIndex(), SELECT_ERROR);
+
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+
+    selectPattern_->options_.push_back(option);
+    EXPECT_EQ(selectAccessibilityProperty_->GetBeginIndex(), 0);
+}
+
+/**
+ * @tc.name: SelectAccessibilityPropertyGetEndIndex001
+ * @tc.desc: Test GetEndIndex of select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetEndIndex001, TestSize.Level1)
+{
+    InitSelectTestNg();
+
+    EXPECT_EQ(selectAccessibilityProperty_->GetEndIndex(), SELECT_ERROR);
+
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+
+    selectPattern_->options_.push_back(option);
+    selectPattern_->options_.push_back(option);
+    EXPECT_EQ(selectAccessibilityProperty_->GetEndIndex(), 1);
+}
+
+/**
+ * @tc.name: SelectAccessibilityPropertyGetText001
+ * @tc.desc: Test GetText of select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetText001, TestSize.Level1)
+{
+    InitSelectTestNg();
+
+    EXPECT_EQ(selectAccessibilityProperty_->GetText(), EMPTY_TEXT);
+
+    selectPattern_->text_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(selectPattern_->text_, nullptr);
+
+    selectPattern_->SetValue(SELECT_TEXT);
+    EXPECT_EQ(selectAccessibilityProperty_->GetText(), SELECT_TEXT);
+}
+
+/**
+ * @tc.name: SelectAccessibilityPropertyGetCollectionItemCounts001
+ * @tc.desc: Test GetCollectionItemCounts of select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectAccessibilityPropertyGetCollectionItemCounts001, TestSize.Level1)
+{
+    InitSelectTestNg();
+
+    EXPECT_EQ(selectAccessibilityProperty_->GetCollectionItemCounts(), SELECT_ERROR);
+
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+
+    for (int i = 0; i < CURRENT_INDEX; i++) {
+        selectPattern_->options_.push_back(option);
+    }
+    EXPECT_EQ(selectAccessibilityProperty_->GetCollectionItemCounts(), CURRENT_INDEX);
+}
+
+/**
+ * @tc.name: SelectSetSpaceTest001
+ * @tc.desc: setSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectSetSpaceTest001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    auto select = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    ASSERT_NE(select, nullptr);
+
+    auto row = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(row, nullptr);
+
+    auto text = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(text, nullptr);
+
+    auto spinner = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(spinner, nullptr);
+
+    text->MountToParent(row);
+    spinner->MountToParent(row);
+    row->MountToParent(select);
+    ViewStackProcessor::GetInstance()->Push(select);
+
+    selectModelInstance.SetSpace(Dimension(20.00, DimensionUnit::VP));
+    ASSERT_FALSE(select->GetChildren().empty());
+    row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
+    ASSERT_NE(row, nullptr);
+    auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+    ASSERT_NE(rowProps, nullptr);
+    ASSERT_TRUE(rowProps->GetSpace()->Value() == 20);
+}
+
+/**
+ * @tc.name: SelectSetArrowPositionTest001
+ * @tc.desc: Test SetArrowPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    auto select = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    ASSERT_NE(select, nullptr);
+
+    auto row = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(row, nullptr);
+
+    auto text = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(text, nullptr);
+
+    auto spinner = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(spinner, nullptr);
+
+    text->MountToParent(row);
+    spinner->MountToParent(row);
+    row->MountToParent(select);
+    ViewStackProcessor::GetInstance()->Push(select);
+
+    selectModelInstance.SetArrowPosition(ArrowPosition::END);
+    ASSERT_FALSE(select->GetChildren().empty());
+    row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
+    ASSERT_NE(row, nullptr);
+    auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+    ASSERT_STREQ(V2::ConvertFlexDirectionToStirng(rowProps->GetFlexDirection().value()).c_str(), "FlexDirection.Row");
+
+    selectModelInstance.SetArrowPosition(ArrowPosition::START);
+    ASSERT_FALSE(select->GetChildren().empty());
+    row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
+    ASSERT_NE(row, nullptr);
+    rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+    ASSERT_STREQ(
+        V2::ConvertFlexDirectionToStirng(rowProps->GetFlexDirection().value()).c_str(), "FlexDirection.RowReverse");
+}
+
+/**
+ * @tc.name: SelectSetArrowPositionTest002
+ * @tc.desc: Test SetArrowPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    selectModelInstance.SetArrowPosition(ArrowPosition::END);
+    selectModelInstance.SetSpace(Dimension(20.00, DimensionUnit::VP));
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(select->GetChildren().empty());
+}
+
+/**
+ * @tc.name: CreateMenu001
+ * @tc.desc: Test create menu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, CreateMenu001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->GetMenuNode(), nullptr);
+
+    // Create again
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    selectModelInstance.Create(params);
+    select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->GetMenuNode(), nullptr);
+}
+
+/**
+ * @tc.name: SelectModel001
+ * @tc.desc: Test Select Model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectModel001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    selectModelInstance.Create(params);
+    selectModelInstance.SetSelected(0);
+    selectModelInstance.SetValue("select");
+    selectModelInstance.SetFontSize(Dimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetFontWeight(FontWeight::NORMAL);
+    selectModelInstance.SetItalicFontStyle(Ace::FontStyle::NORMAL);
+    selectModelInstance.SetFontColor(Color::BLACK);
+    selectModelInstance.SetSelectedOptionBgColor(Color::BLACK);
+    selectModelInstance.SetSelectedOptionFontSize(Dimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetSelectedOptionFontWeight(FontWeight::NORMAL);
+    selectModelInstance.SetSelectedOptionItalicFontStyle(Ace::FontStyle::NORMAL);
+    selectModelInstance.SetSelectedOptionFontColor(Color::BLACK);
+    selectModelInstance.SetOptionBgColor(Color::BLACK);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->GetMenuNode(), nullptr);
+}
+
+/**
+ * @tc.name: SelectModel002
+ * @tc.desc: Test Select Model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectModel002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    SelectEvent eventOnSelect = [](int32_t intValue, const std::string& isSelect) {};
+    CalcDimension width = 20.0_vp;
+    CalcDimension height = 20.0_vp;
+    CalcDimension top = 20.0_vp;
+    CalcDimension bottom = 20.0_vp;
+    CalcDimension left = 20.0_vp;
+    CalcDimension right = 20.0_vp;
+
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    selectModelInstance.SetOptionFontSize(Dimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetOptionFontWeight(FontWeight::NORMAL);
+    selectModelInstance.SetOptionItalicFontStyle(Ace::FontStyle::NORMAL);
+    selectModelInstance.SetOptionFontColor(Color::BLACK);
+    selectModelInstance.SetOnSelect(std::move(eventOnSelect));
+    selectModelInstance.SetWidth(width);
+    selectModelInstance.SetHeight(height);
+    selectModelInstance.SetSize(width, height);
+    selectModelInstance.SetPaddings(top, bottom, left, right);
+    selectModelInstance.SetPadding(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingLeft(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingTop(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingRight(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingBottom(CalcDimension(20.00, DimensionUnit::VP));
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->GetMenuNode(), nullptr);
+}
+
+/**
+ * @tc.name: SelectModel003
+ * @tc.desc: Test Select Model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectModel003, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    SelectEvent eventOnSelect = [](int32_t intValue, const std::string& isSelect) {};
+    CalcDimension width = -20.0_vp;
+    CalcDimension height = -20.0_vp;
+    CalcDimension top = -20.0_vp;
+    CalcDimension bottom = -20.0_vp;
+    CalcDimension left = -20.0_vp;
+    CalcDimension right = -20.0_vp;
+
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    selectModelInstance.SetWidth(width);
+    selectModelInstance.SetHeight(height);
+    selectModelInstance.SetSize(width, height);
+    selectModelInstance.SetPaddings(top, bottom, left, right);
+    selectModelInstance.SetPadding(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingLeft(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingTop(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingRight(CalcDimension(20.00, DimensionUnit::VP));
+    selectModelInstance.SetPaddingBottom(CalcDimension(20.00, DimensionUnit::VP));
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->GetMenuNode(), nullptr);
+}
+
+/**
+ * @tc.name: SelectModel004
+ * @tc.desc: Test Select Model
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPropertyTestNg, SelectModel004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectModelInstance.
+     */
+    SelectModelNG selectModelInstance;
+    SelectEvent eventOnSelect = [](int32_t intValue, const std::string& isSelect) {};
+
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. initialize paddings.
+     * @tc.steps: the values of select which is setted successfully.
+     */
+    CalcDimension calcDimension(DEFAULT_STR);
+    CalcDimension width = -20.0_vp;
+    CalcDimension height = -20.0_vp;
+    selectModelInstance.SetSize(width, height);
+    selectModelInstance.SetPaddingLeft(CalcDimension(DEFAULT_STR));
+    selectModelInstance.SetPaddingTop(CalcDimension(DEFAULT_STR));
+    selectModelInstance.SetPaddingRight(CalcDimension(DEFAULT_STR));
+    selectModelInstance.SetPaddingBottom(CalcDimension(DEFAULT_STR));
+    selectModelInstance.SetPaddings(calcDimension, calcDimension, calcDimension, calcDimension);
+    selectModelInstance.SetPadding(calcDimension);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menu = pattern->GetMenuNode();
+    ASSERT_NE(menu, nullptr);
+    EXPECT_EQ(width.Value(), 0.0);
+    EXPECT_EQ(height.Value(), 0.0);
 }
 } // namespace OHOS::Ace::NG

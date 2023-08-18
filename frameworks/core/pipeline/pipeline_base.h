@@ -19,12 +19,12 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <shared_mutex>
 #include <stack>
 #include <string>
 #include <unordered_map>
 #include <utility>
-#include <optional>
 
 #include "base/geometry/dimension.h"
 #include "base/resource/asset_manager.h"
@@ -295,6 +295,12 @@ public:
         actionEventHandler_ = std::move(listener);
     }
 
+    using FormLinkInfoUpdateHandler = std::function<void(const std::vector<std::string>&)>;
+    void SetFormLinkInfoUpdateHandler(FormLinkInfoUpdateHandler&& listener)
+    {
+        formLinkInfoUpdateHandler_ = std::move(listener);
+    }
+
     using StatusBarEventHandler = std::function<void(const Color& color)>;
     void SetStatusBarEventHandler(StatusBarEventHandler&& listener)
     {
@@ -560,7 +566,7 @@ public:
         return dipScale_;
     }
 
-    // Get the widnow design scale used to covert lpx to logic px.
+    // Get the window design scale used to covert lpx to logic px.
     double GetLogicScale() const
     {
         return designWidthScale_;
@@ -587,9 +593,14 @@ public:
         focusWindowId_ = windowId;
     }
 
-    uint32_t GetFocusWindowId()
+    uint32_t GetFocusWindowId() const
     {
         return focusWindowId_.value_or(windowId_);
+    }
+
+    bool IsFocusWindowIdSetted() const
+    {
+        return focusWindowId_.has_value();
     }
 
     float GetViewScale() const
@@ -647,6 +658,8 @@ public:
     {
         return windowManager_;
     }
+
+    bool HasFloatTitle() const;
 
     bool IsRebuildFinished() const
     {
@@ -718,7 +731,7 @@ public:
         configChangedCallback_.push_back(std::move(listener));
     }
 
-    void NotifyConfigurationChange()
+    virtual void NotifyConfigurationChange(const OnConfigurationChange& configurationChange)
     {
         for (const auto& callback : configChangedCallback_) {
             if (callback) {
@@ -844,15 +857,8 @@ public:
 
     void RemoveSubWindowVsyncCallback(int32_t subWindowId);
 
-    void SetIsLayoutFullScreen(bool isLayoutFullScreen)
-    {
-        isLayoutFullScreen_ = isLayoutFullScreen;
-    }
-
-    bool GetIsLayoutFullScreen() const
-    {
-        return isLayoutFullScreen_;
-    }
+    virtual void SetIsLayoutFullScreen(bool isLayoutFullScreen) {}
+    virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
 
     void SetIsAppWindow(bool isAppWindow)
     {
@@ -862,16 +868,6 @@ public:
     bool GetIsAppWindow() const
     {
         return isAppWindow_;
-    }
-
-    void SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
-    {
-        ignoreViewSafeArea_ = ignoreViewSafeArea;
-    }
-
-    bool GetIgnoreViewSafeArea() const
-    {
-        return ignoreViewSafeArea_;
     }
 
     void SetEnableImplicitAnimation(bool enableImplicitAnimation)
@@ -897,7 +893,19 @@ public:
         return lastTouchTime_;
     }
 
+    void AddFormLinkInfo(int32_t id, const std::string& info)
+    {
+        LOGI("AddFormLinkInfo is %{public}s, id is %{public}d", info.c_str(), id);
+        formLinkInfoMap_[id] = info;
+    }
+
+    virtual bool IsLayouting() const
+    {
+        return false;
+    }
+
 protected:
+    virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
     {
         if (isForegroundCalled_ && nextFrameLayoutCallback_) {
@@ -921,7 +929,8 @@ protected:
 
     void UpdateRootSizeAndScale(int32_t width, int32_t height);
 
-    void SetIsReloading(bool isReloading) {
+    void SetIsReloading(bool isReloading)
+    {
         isReloading_ = isReloading;
     }
 
@@ -933,9 +942,7 @@ protected:
     bool isFormRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
-    bool isLayoutFullScreen_ = false;
     bool isAppWindow_ = true;
-    bool ignoreViewSafeArea_ = false;
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
 
@@ -987,6 +994,7 @@ protected:
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
     ActionEventHandler actionEventHandler_;
+    FormLinkInfoUpdateHandler formLinkInfoUpdateHandler_;
     RefPtr<PlatformResRegister> platformResRegister_;
 
     WeakPtr<PipelineBase> parentPipeline_;
@@ -1004,9 +1012,11 @@ protected:
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
     uint64_t lastTouchTime_ = 0;
+    std::map<int32_t, std::string> formLinkInfoMap_;
 
 private:
     void DumpFrontend() const;
+    double ModifyKeyboardHeight(double keyboardHeight) const;
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
     MenuEventHandler menuEventHandler_;

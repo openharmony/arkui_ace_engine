@@ -1465,6 +1465,47 @@ void FrontendDelegateDeclarative::ShowDialog(const std::string& title, const std
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .content = dialogAttr.message,
+        .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
+        .maskRect = dialogAttr.maskRect,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
+void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
+    const std::vector<ButtonInfo>& buttons, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged)
+{
+    DialogProperties dialogProperties = {
+        .title = dialogAttr.title,
+        .content = dialogAttr.message,
+        .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
+        .onStatusChanged = std::move(onStatusChanged),
+        .maskRect = dialogAttr.maskRect,
+    };
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    ShowDialogInner(dialogProperties, std::move(callback), callbacks);
+}
+
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
     const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
@@ -1793,10 +1834,10 @@ void FrontendDelegateDeclarative::OnSurfaceChanged()
         mediaQueryInfo_->SetIsInit(false);
     }
     mediaQueryInfo_->EnsureListenerIdValid();
-    OnMediaQueryUpdate();
+    OnMediaQueryUpdate(true);
 }
 
-void FrontendDelegateDeclarative::OnMediaQueryUpdate()
+void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
 {
     auto containerId = Container::CurrentId();
     if (containerId < 0) {
@@ -1830,10 +1871,7 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
         delegate->mediaQueryInfo_->ResetListenerId();
     };
     auto container = Container::Current();
-    if (!container) {
-        return;
-    }
-    if (container->IsUseStageModel()) {
+    if (container && container->IsUseStageModel() && isSynchronous) {
         callback();
         return;
     }
@@ -1842,7 +1880,6 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate()
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
 {
-    LOGI("FrontendDelegateDeclarative::OnLayoutCompleted");
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), componentId] {
             auto delegate = weak.Upgrade();
@@ -1856,7 +1893,6 @@ void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& component
 
 void FrontendDelegateDeclarative::OnDrawCompleted(const std::string& componentId)
 {
-    LOGI("FrontendDelegateDeclarative::OnDrawCompleted");
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), componentId] {
             auto delegate = weak.Upgrade();

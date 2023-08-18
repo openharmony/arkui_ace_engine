@@ -61,7 +61,7 @@ build_component("text_overlay_for_web") {
       "//third_party/openGLES:libGLES",
     ]
 
-    external_deps += [ "graphic_standard:surface" ]
+    external_deps += [ "graphic_2d:surface" ]
   }
 
   rosen_sources = [ "rosen_render_text_overlay.cpp" ]

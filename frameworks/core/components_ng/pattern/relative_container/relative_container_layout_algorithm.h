@@ -37,6 +37,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void DetermineTopologicalOrder(LayoutWrapper* layoutWrapper);
     void CollectNodesById(LayoutWrapper* layoutWrapper);
     void GetDependencyRelationship();
     bool PreTopologicalLoopDetection();

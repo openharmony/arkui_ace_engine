@@ -16,6 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 
+#include <cstdint>
+#include <functional>
+#include <memory>
+
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -25,44 +29,64 @@
 
 namespace OHOS::AAFwk {
 class Want;
-}
+class WantParams;
+} // namespace OHOS::AAFwk
+
+namespace OHOS::Ace {
+class ModalUIExtensionProxy;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class UIExtensionProxy;
 class UIExtensionPattern : public WindowPattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, WindowPattern);
 
 public:
     explicit UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
+    explicit UIExtensionPattern(const AAFwk::Want& want);
     ~UIExtensionPattern() override;
 
     void OnWindowShow() override;
     void OnWindowHide() override;
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+    FocusPattern GetFocusPattern() const override;
+    void OnVisibleChange(bool visible) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     bool HasStartingPage() override
     {
         return false;
     }
 
-    void SetOnReleaseCallback(std::function<void(int32_t)>&& callback);
-    void SetOnResultCallback(std::function<void(int32_t, const AAFwk::Want&)>&& callback);
+    int32_t GetSessionId();
+
+    void SetModalOnRemoteReadyCallback(
+        const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
+    void SetOnRemoteReadyCallback(const std::function<void(const RefPtr<UIExtensionProxy>&)>&& callback);
+    void SetOnReleaseCallback(const std::function<void(int32_t)>&& callback);
+    void SetOnResultCallback(const std::function<void(int32_t, const AAFwk::Want&)>&& callback);
+    void SetOnReceiveCallback(const std::function<void(const AAFwk::WantParams&)>&& callback);
+    void SetOnErrorCallback(
+        const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
 
     void OnConnect() override;
     void OnDisconnect() override;
-
-    void OnResult(int32_t code, const AAFwk::Want& want);
+    void OnExtensionDied() override;
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
     void RequestExtensionSessionDestruction();
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
-
-    FocusPattern GetFocusPattern() const override;
-
 private:
     enum ReleaseCode {
         DESTROY_NORMAL = 0,
         CONNECT_BROKEN,
+    };
+
+    struct ErrorMsg {
+        int32_t code = 0;
+        std::string name;
+        std::string message;
     };
 
     void OnModifyDone() override;
@@ -81,11 +105,23 @@ private:
     void UnregisterAbilityResultListener();
     void OnConnectInner();
 
+    void RegisterVisibleAreaChange();
+    void UpdateTextFieldManager(const Offset& offset, float height);
+    bool IsCurrentFocus() const;
+
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
-    std::function<void(int32_t)> onReleaseCallback_;
-    std::function<void(int32_t, const AAFwk::Want&)> OnResultCallback_;
 
+    std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;
+    std::function<void(const RefPtr<UIExtensionProxy>&)> onRemoteReadyCallback_;
+    std::function<void(int32_t)> onReleaseCallback_;
+    std::function<void(int32_t, const AAFwk::Want&)> onResultCallback_;
+    std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
+    std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
+
+    bool isBackground_ = false;
+    bool isDestruction_ = false;
+    ErrorMsg lastError_;
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
 } // namespace OHOS::Ace::NG

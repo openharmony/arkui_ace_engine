@@ -35,6 +35,7 @@ public:
     {
         return false;
     }
+    virtual void SetFrameTraceLimit() {}
 };
 }
 #endif

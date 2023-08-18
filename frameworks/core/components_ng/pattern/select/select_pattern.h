@@ -178,6 +178,7 @@ public:
     std::string GetValue();
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -283,7 +284,8 @@ private:
     bool isHover_ = false;
     bool isSelected_ = false;
     MenuAlign menuAlign_;
-
+    std::string selectValue_;
+    bool isColorConfigurationUpdate_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
 

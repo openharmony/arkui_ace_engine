@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WindowSceneModel {
 public:
-    static void Create(uint64_t persistentId);
+    static void Create(int32_t persistentId);
 };
 } // namespace OHOS::Ace::NG
 

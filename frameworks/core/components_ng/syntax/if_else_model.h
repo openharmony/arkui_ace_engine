@@ -32,6 +32,7 @@ public:
     virtual void Pop() = 0;
     virtual void SetBranchId(int32_t value) = 0;
     virtual int32_t GetBranchId() = 0;
+    virtual bool CanRetake(const std::string& id) = 0;
 
 private:
      static std::unique_ptr<IfElseModel> instance;

@@ -15,38 +15,50 @@
 
 #include "adapter/preview/entrance/clipboard/clipboard_impl.h"
 
+#include "util/ClipboardHelper.h"
+
+#include "frameworks/base/utils/utils.h"
+
 namespace OHOS::Ace::Platform {
+
+void ClipboardImpl::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) {}
+void ClipboardImpl::AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) {}
+void ClipboardImpl::AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) {}
+void ClipboardImpl::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption) {}
+void ClipboardImpl::GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+    const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+    const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode)
+{}
+
+RefPtr<PasteDataMix> ClipboardImpl::CreatePasteDataMix()
+{
+    return AceType::MakeRefPtr<PasteDataMix>();
+}
 
 void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {
-    if (!taskExecutor_ || !callbackSetClipboardData_) {
-        LOGE("Failed to set the data to clipboard.");
-        return;
-    }
-    taskExecutor_->PostTask(
-        [callbackSetClipboardData = callbackSetClipboardData_, data] { callbackSetClipboardData(data); },
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostTask([data] { ClipboardHelper::SetClipboardData(data); },
         TaskExecutor::TaskType::UI);
 }
 
 void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
-    if (!taskExecutor_ || !callbackGetClipboardData_ || !callback) {
+    if (!taskExecutor_ || !callback) {
         LOGE("Failed to get the data from clipboard.");
         return;
     }
-    taskExecutor_->PostTask(
-        [callbackGetClipboardData = callbackGetClipboardData_, callback] { callback(callbackGetClipboardData()); },
+    taskExecutor_->PostTask([callback] { callback(ClipboardHelper::GetClipboardData()); },
         TaskExecutor::TaskType::UI);
 }
 
 void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 {
-    if (!taskExecutor_ || !callbackGetClipboardData_ || !callback) {
+    if (!taskExecutor_ || !callback) {
         LOGE("Failed to know if data exists from clipboard.");
         return;
     }
-    taskExecutor_->PostTask([callbackGetClipboardData = callbackGetClipboardData_,
-                                callback] { callback(!callbackGetClipboardData().empty()); },
+    taskExecutor_->PostTask([callback] { callback(!ClipboardHelper::GetClipboardData().empty()); },
         TaskExecutor::TaskType::UI);
 }
 
@@ -73,16 +85,6 @@ void ClipboardImpl::GetPixelMapData(const std::function<void(const RefPtr<PixelM
 }
 
 void ClipboardImpl::Clear() {}
-
-void ClipboardImpl::RegisterCallbackSetClipboardData(CallbackSetClipboardData callback)
-{
-    callbackSetClipboardData_ = callback;
-}
-
-void ClipboardImpl::RegisterCallbackGetClipboardData(CallbackGetClipboardData callback)
-{
-    callbackGetClipboardData_ = callback;
-}
 
 void ClipboardImpl::RegisterCallbackSetClipboardPixmapData(CallbackSetClipboardPixmapData callback)
 {

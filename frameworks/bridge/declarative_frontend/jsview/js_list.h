@@ -43,7 +43,7 @@ public:
 
     static void SetDivider(const JSCallbackInfo& args);
     static void SetDirection(int32_t direction);
-    static void SetScrollBar(int32_t scrollBar);
+    static void SetScrollBar(const JSCallbackInfo& info);
     static void SetEdgeEffect(int32_t edgeEffect);
     static void SetEditMode(bool editMode);
     static void SetCachedCount(const JSCallbackInfo& info);
@@ -53,8 +53,10 @@ public:
     static void SetListItemAlign(int32_t itemAlignment);
     static void SetLanes(const JSCallbackInfo& info);
     static void SetSticky(int32_t sticky);
+    static void SetContentStartOffset(float startOffset);
+    static void SetContentEndOffset(float endOffset);
     static void SetNestedScroll(const JSCallbackInfo& args);
-    static void SetScrollEnabled(bool scrollEnabled);
+    static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetScrollSnapAlign(int32_t scrollSnapAlign);
     static void SetFriction(const JSCallbackInfo& info);
 

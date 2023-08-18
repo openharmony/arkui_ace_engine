@@ -62,13 +62,17 @@ private:
     std::vector<Dimension> colorStops_;
 };
 
-class GradientStyleModifier : public Rosen::RSBackgroundStyleModifier {
+class [[deprecated]] GradientStyleModifier : public Rosen::RSBackgroundStyleModifier {
 public:
     GradientStyleModifier() = default;
     ~GradientStyleModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override;
+#ifndef USE_ROSEN_DRAWING
+    void PaintGradient(SkCanvas& canvas, const SizeF& frameSize) const;
+#else
     void PaintGradient(RSCanvas& canvas, const SizeF& frameSize) const;
+#endif
 
     Gradient GetGradient() const;
     void SetGradient(const Gradient& gradient);

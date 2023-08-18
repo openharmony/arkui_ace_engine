@@ -222,6 +222,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   // helper function to persist a property
   // does everything except writing prop to disk
   private persistProp1<T>(propName: string, defaultValue: T): boolean {
+    stateMgmtConsole.debug(`PersistentStorage: persistProp1 ${propName} ${defaultValue}`);
     if (defaultValue == null || defaultValue == undefined) {
       stateMgmtConsole.error(`PersistentStorage: persistProp for ${propName} called with 'null' or 'undefined' default value!`);
       return false;
@@ -239,7 +240,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
     } else {
       let newValue: T = PersistentStorage.storage_.get(propName);
       let returnValue: T;
-      if (!newValue) {
+      if (newValue == undefined || newValue == null) {
         stateMgmtConsole.debug(`PersistentStorage: no entry for ${propName}, will initialize with default value`);
         returnValue = defaultValue;
       }

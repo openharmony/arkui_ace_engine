@@ -41,6 +41,16 @@ void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
     GTEST_LOG_(INFO) << "ShowOrHiddenMenu has called";
 }
 
+bool SelectOverlayPattern::IsMenuShow()
+{
+    return true;
+}
+
+bool SelectOverlayPattern::IsHandleShow()
+{
+    return true;
+}
+
 void SelectOverlayPattern::OnAttachToFrameNode() {}
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* frameNode) {}
@@ -52,10 +62,7 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return firstHandleDrag_ && secondHandleDrag_ && false;
 }
 
-CanvasDrawFunction SelectOverlayPaintMethod::GetContentDrawFunction(PaintWrapper* /* paintWrapper */)
-{
-    return nullptr;
-};
-
 void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper) {}
+
+void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper) {}
 } // namespace OHOS::Ace::NG

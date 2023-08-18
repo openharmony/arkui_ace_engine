@@ -78,6 +78,9 @@ std::string AccessibilityProperty::GetAccessibilityText(bool isParentGroup)
     std::string text = "";
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
+    if (GetAccessibilityLevel() != "yes") {
+        return text;
+    }
     if (accessibilityText_.has_value()) {
         text = accessibilityText_.value();
     } else {

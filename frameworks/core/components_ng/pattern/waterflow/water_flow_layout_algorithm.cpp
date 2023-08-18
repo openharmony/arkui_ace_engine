@@ -76,13 +76,24 @@ void WaterFlowLayoutAlgorithm::InitialItemsCrossSize(
 
     auto crossSize = frameSize.CrossSize(axis_);
     std::vector<double> crossLens;
+    std::pair<std::vector<double>, bool> cross;
     if (axis_ == Axis::VERTICAL) {
-        crossLens = ParseTemplateArgs(PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
+        cross = ParseTemplateArgs(PreParseArgs(columnsTemplate), crossSize, crossGap_, childrenCount);
     } else {
-        crossLens = ParseTemplateArgs(PreParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
+        cross = ParseTemplateArgs(PreParseArgs(rowsTemplate), crossSize, crossGap_, childrenCount);
     }
+    crossLens = cross.first;
     if (crossLens.empty()) {
         crossLens.push_back(crossSize);
+    }
+    if (cross.second) {
+        crossGap_ = 0;
+    }
+
+    // cross count changed by auto-fill and cross size change
+    if (!layoutInfo_.waterFlowItems_.empty() && crossLens.size() != layoutInfo_.waterFlowItems_.size()) {
+        layoutInfo_.Reset();
+        LOGI("cross count changed");
     }
 
     int32_t index = 0;
@@ -105,8 +116,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto matchChildren = GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>());
     if (!matchChildren) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
-        MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     }
+    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
         layoutInfo_.Reset();
@@ -279,7 +290,7 @@ FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
 
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (layoutInfo_.currentOffset_ > 0) {
+    if (layoutInfo_.currentOffset_ >= 0) {
         layoutInfo_.currentOffset_ = 0;
         layoutInfo_.itemStart_ = true;
     } else {
@@ -298,10 +309,16 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         itemWrapper->Measure(CreateChildConstraint(position.crossIndex, layoutProperty, itemWrapper));
         auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
         auto itemHeight = GetMainAxisSize(itemSize, axis_);
-        if (layoutInfo_.waterFlowItems_[position.crossIndex].find(currentIndex) ==
-            layoutInfo_.waterFlowItems_[position.crossIndex].end()) {
+        auto item = layoutInfo_.waterFlowItems_[position.crossIndex].find(currentIndex);
+        if (item == layoutInfo_.waterFlowItems_[position.crossIndex].end()) {
             layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex] =
                 std::make_pair(position.startMainPos, itemHeight);
+        } else {
+            if (item->second.second != itemHeight) {
+                item->second.second = itemHeight;
+                layoutInfo_.ClearCacheAfterIndex(currentIndex);
+                LOGI("item size changed");
+            }
         }
         if (layoutInfo_.jumpIndex_ == currentIndex) {
             layoutInfo_.currentOffset_ = -(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex].first);

@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t MAX_ROTATION_FINGERS = 5;
+constexpr int32_t DEFAULT_ROTATION_FINGERS = 2;
 
 } // namespace
 
@@ -47,8 +48,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     LOGD("rotation recognizer receives touch down event, begin to detect rotation event");
     if (fingers_ > MAX_ROTATION_FINGERS) {
         LOGW("the finger is larger than the max fingers");
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
+        fingers_ = DEFAULT_ROTATION_FINGERS;
     }
 
     touchPoints_[event.id] = event;
@@ -62,6 +62,10 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 {
     LOGD("rotation recognizer receives touch up event");
+    if (currentFingers_ < fingers_) {
+        LOGW("RotationGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -78,11 +82,15 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch move event");
+    if (currentFingers_ < fingers_) {
+        LOGW("RotationGesture current finger number is less than requiried finger number.");
+        return;
+    }
     touchPoints_[event.id] = event;
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
-    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
         currentAngle_ = ComputeAngle();
     }
     time_ = event.time;

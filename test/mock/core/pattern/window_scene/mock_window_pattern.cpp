@@ -16,26 +16,15 @@
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
 namespace OHOS::Ace::NG {
-WindowPattern::WindowPattern() = default;
-
 void WindowPattern::RegisterLifecycleListener() {}
 
 void WindowPattern::UnregisterLifecycleListener() {}
 
 void WindowPattern::InitContent() {}
 
-void WindowPattern::OnConnect() {}
-
 void WindowPattern::CreateStartingNode() {}
 
-void WindowPattern::CreateSnapshotNode() {}
-
-void WindowPattern::BufferAvailableCallback() {}
-
-bool WindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    return true;
-}
+void WindowPattern::CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot) {}
 
 void WindowPattern::OnAttachToFrameNode() {}
 
@@ -48,4 +37,6 @@ void WindowPattern::DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEv
 void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive) {}
 
 void WindowPattern::OnModifyDone() {}
+
+void WindowPattern::TransferFocusState(bool focusState) {}
 } // namespace OHOS::Ace::NG

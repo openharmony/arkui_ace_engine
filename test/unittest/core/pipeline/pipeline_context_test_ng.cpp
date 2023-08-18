@@ -60,6 +60,8 @@
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -85,6 +87,7 @@ constexpr double DEFAULT_DOUBLE0 = 0.0;
 constexpr double DEFAULT_DOUBLE1 = 1.0;
 constexpr double DEFAULT_DOUBLE2 = 2.0;
 constexpr double DEFAULT_DOUBLE4 = 4.0;
+constexpr int32_t CLOSE_BUTTON_INDEX = 5;
 const std::string TEST_TAG("test");
 const std::string ACCESS_TAG("-accessibility");
 } // namespace
@@ -291,10 +294,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg003, TestSize.Level1)
      * @tc.steps2: Add dirty layout and render nodes to taskScheduler_ to test functions
      *             FlushLayoutTask and FlushRenderTask of the UITaskScheduler.
      */
-    context_->taskScheduler_.AddDirtyLayoutNode(frameNode_);
-    context_->taskScheduler_.dirtyLayoutNodes_[frameNode_->GetPageId()].emplace(nullptr);
-    context_->taskScheduler_.AddDirtyRenderNode(frameNode_);
-    context_->taskScheduler_.dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
+    context_->taskScheduler_->AddDirtyLayoutNode(frameNode_);
+    context_->taskScheduler_->AddDirtyRenderNode(frameNode_);
+    context_->taskScheduler_->dirtyRenderNodes_[frameNode_->GetPageId()].emplace(nullptr);
 
     /**
      * @tc.steps3: Call the function FlushVsync with isEtsCard=true.
@@ -1453,7 +1455,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
      * @tc.expected: the return is same as expectation.
      */
     context_->textFieldManager_ = nullptr;
-    // the first arg is rootHeigth_, the second arg is the parameter of founction,
+    // the first arg is rootHeight_, the second arg is the parameter of function,
     // the third arg is the expectation returns
     std::vector<std::vector<int>> params = { { 200, 400, -300 }, { -200, 100, -100 }, { -200, -300, -100 } };
     for (int turn = 0; turn < params.size(); turn++) {
@@ -1471,7 +1473,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
     ASSERT_NE(context_->rootNode_, nullptr);
     // the first arg is manager->height_, the second arg is manager->position_.deltaY_
     // the third arg is rootHeight_, the forth arg is context_->rootNode_->geometryNode_->frame_.rect_.y_
-    // the fifth arg is the parameter of founction, the sixth arg is the expectation returns
+    // the fifth arg is the parameter of function, the sixth arg is the expectation returns
     params = { { 10, 100, 300, 0, 50, 0 }, { 10, 100, 300, 100, 100, 100 }, { 30, 100, 300, 100, 50, 100 },
         { 50, 290, 400, 100, 200, -145 }, { -1000, 290, 400, 100, 200, 100 } };
     for (int turn = 0; turn < params.size(); turn++) {
@@ -1716,20 +1718,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg033, TestSize.Level1)
     frameNode_3->layoutProperty_ = AceType::MakeRefPtr<ImageLayoutProperty>();
     auto rt = context_->GetNavDestinationBackButtonNode();
     EXPECT_EQ(rt, nullptr);
-    /**
-     * @tc.steps3: set propVisibility_ equals GONE and call GetNavDestinationBackButtonNode.
-     * @tc.expected: rt is nullptr.
-     */
-    frameNode_3->layoutProperty_->propVisibility_ = VisibleType::GONE;
-    rt = context_->GetNavDestinationBackButtonNode();
-    EXPECT_EQ(rt, nullptr);
-    /**
-     * @tc.steps4: set propVisibility_ equals VISIBLE and call GetNavDestinationBackButtonNode.
-     * @tc.expected: rt is not nullptr.
-     */
-    frameNode_3->layoutProperty_->propVisibility_ = VisibleType::VISIBLE;
-    rt = context_->GetNavDestinationBackButtonNode();
-    EXPECT_NE(rt, nullptr);
 }
 
 /**
@@ -2010,38 +1998,37 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg001, TestSize.Level1)
      * @tc.expected: frame info not record.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode);
-    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
     taskScheduler.AddDirtyLayoutNode(frameNode2);
-    taskScheduler.FlushLayoutTask(false);
-    EXPECT_EQ(frameInfo.layoutInfos_.size(), 0);
-
-    /**
-     * @tc.steps6: add layoutNode again and set isLayoutDirtyMarked_ true  and recall FlushLayoutTask with false .
-     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 1.
-     */
-    taskScheduler.AddDirtyLayoutNode(frameNode2);
-    frameNode2->isLayoutDirtyMarked_ = true;
     taskScheduler.FlushLayoutTask(false);
     EXPECT_EQ(frameInfo.layoutInfos_.size(), 1);
 
     /**
-     * @tc.steps7: add layoutNode again and call FlushLayoutTask with true .
+     * @tc.steps6: add layoutNode again and set isLayoutDirtyMarked_ true  and recall FlushLayoutTask with false .
      * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 2.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     frameNode2->isLayoutDirtyMarked_ = true;
-    taskScheduler.FlushLayoutTask(true);
+    taskScheduler.FlushLayoutTask(false);
     EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
 
     /**
+     * @tc.steps7: add layoutNode again and call FlushLayoutTask with true .
+     * @tc.expected: frame info record true frameInfo.layoutInfos_.size is 3.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    frameNode2->isLayoutDirtyMarked_ = true;
+    taskScheduler.FlushLayoutTask(true);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 3);
+
+    /**
      * @tc.steps8: finish FinishRecordFrameInfo and do step7.
-     * @tc.expected: frame info stop record frameInfo.layoutInfos_.size is 2.
+     * @tc.expected: frame info stop record frameInfo.layoutInfos_.size is 3.
      */
     taskScheduler.FinishRecordFrameInfo();
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     frameNode2->isLayoutDirtyMarked_ = true;
     taskScheduler.FlushLayoutTask(true);
-    EXPECT_EQ(frameInfo.layoutInfos_.size(), 2);
+    EXPECT_EQ(frameInfo.layoutInfos_.size(), 3);
 }
 
 /**
@@ -2134,7 +2121,6 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg004, TestSize.Level1)
      * @tc.expected: NeedAdditionalLayout return false.
      */
     taskScheduler.AddDirtyLayoutNode(frameNode);
-    taskScheduler.dirtyLayoutNodes_[1].emplace(nullptr);
     taskScheduler.AddDirtyLayoutNode(frameNode2);
     EXPECT_FALSE(taskScheduler.NeedAdditionalLayout());
 
@@ -2143,7 +2129,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg004, TestSize.Level1)
      * @tc.expected: NeedAdditionalLayout return true.
      */
     auto frameNode3 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 3, nullptr);
-    auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode3);
+    auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>("test", frameNode3);
     geometryTransition->hasOutAnim_ = true;
     geometryTransition->inNode_ = frameNode2;
     geometryTransition->outNode_ = frameNode3;
@@ -2214,5 +2200,47 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg005, TestSize.Level1)
     taskScheduler.FinishRecordFrameInfo();
     taskScheduler.FlushRenderTask(true);
     EXPECT_EQ(frameInfo.renderInfos_.size(), 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg043
+ * @tc.desc: Test SetCloseButtonStatus function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg043, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize root node and containerModal node.
+     * @tc.expected: root node and containerModal node are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    ASSERT_NE(context_->window_, nullptr);
+    context_->SetupRootElement();
+    ASSERT_NE(context_->GetRootElement(), nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(context_->GetRootElement()->GetChildren().front());
+    ASSERT_NE(containerNode, nullptr);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    ASSERT_NE(containerPattern, nullptr);
+    auto columNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().front());
+    CHECK_NULL_VOID(columNode);
+    auto titleNode = AceType::DynamicCast<FrameNode>(columNode->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    auto closeButton = AceType::DynamicCast<FrameNode>(titleNode->GetChildAtIndex(CLOSE_BUTTON_INDEX));
+    CHECK_NULL_VOID(closeButton);
+    auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEvent);
+    /**
+     * @tc.steps2: call SetCloseButtonStatus with params true.
+     * @tc.expected: CloseButton IsEnabled return true.
+     */
+    context_->SetCloseButtonStatus(true);
+    EXPECT_EQ(buttonEvent->IsEnabled(), true);
+    /**
+     * @tc.steps3: call SetCloseButtonStatus with params false.
+     * @tc.expected: CloseButton IsEnabled return false.
+     */
+    context_->SetCloseButtonStatus(false);
+    EXPECT_EQ(buttonEvent->IsEnabled(), false);
 }
 } // namespace OHOS::Ace::NG

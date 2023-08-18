@@ -46,4 +46,20 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
 void ScrollablePattern::ScrollTo(float position) {}
 
 void ScrollablePattern::StopAnimate() {}
+
+void ScrollablePattern::OnAttachToFrameNode() {}
+
+void ScrollablePattern::InitMouseEvent() {}
+
+void ScrollablePattern::UninitMouseEvent() {}
+
+void ScrollablePattern::DrawSelectedZone(const RectF& selectedZone) {}
+
+void ScrollablePattern::ClearSelectedZone() {}
+
+void ScrollablePattern::MarkSelectedItems() {}
+
+void ScrollablePattern::ClearInvisibleItemsSelectedStatus() {}
+
+void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selectedZone) {}
 } // namespace OHOS::Ace::NG

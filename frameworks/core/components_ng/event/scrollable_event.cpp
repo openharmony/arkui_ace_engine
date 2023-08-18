@@ -27,36 +27,6 @@ ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEv
     : gestureEventHub_(gestureEventHub)
 {}
 
-void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& /*touchRestrict*/,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
-{
-    for (const auto& [axis, event] : scrollableEvents_) {
-        if (!event || !event->GetEnable()) {
-            continue;
-        }
-        const auto& scrollable = event->GetScrollable();
-        scrollable->SetGetEventTargetImpl(getEventTargetImpl);
-        scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        scrollable->OnCollectTouchTarget(result);
-    }
-}
-
-void ScrollableActuator::InitializeScrollable(RefPtr<ScrollableEvent> event)
-{
-    auto gestureEventHub = gestureEventHub_.Upgrade();
-    auto host = gestureEventHub ? gestureEventHub->GetFrameNode() : nullptr;
-    CHECK_NULL_VOID(host);
-    auto scrollable = MakeRefPtr<Scrollable>(event->GetScrollPositionCallback(), event->GetAxis());
-    scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->SetOnScrollBegin(event->GetScrollBeginCallback());
-    scrollable->SetOnScrollFrameBegin(event->GetScrollFrameBeginCallback());
-    scrollable->SetScrollEndCallback(event->GetScrollEndCallback());
-    scrollable->Initialize(host->GetContext());
-    scrollable->SetMouseLeftButtonScroll(event->GetMouseLeftButtonScroll());
-    scrollable->SetUnstaticFriction(event->GetFriction());
-    event->SetScrollable(scrollable);
-}
-
 void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect)
 {
     CHECK_NULL_VOID_NOLOG(effect);
@@ -79,4 +49,30 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
     return false;
 }
 
+void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint)
+{
+    for (const auto& [axis, event] : scrollableEvents_) {
+        if (!event || !event->GetEnable()) {
+            continue;
+        }
+        if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
+            event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+        } else if (event->GetScrollable()) {
+            const auto& scrollable = event->GetScrollable();
+            scrollable->SetGetEventTargetImpl(getEventTargetImpl);
+            scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            scrollable->OnCollectTouchTarget(result);
+        }
+        if (event->IsHitTestBlock()) {
+            if (!clickRecognizer_) {
+                clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+            }
+            clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+            result.emplace_front(clickRecognizer_);
+            break;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

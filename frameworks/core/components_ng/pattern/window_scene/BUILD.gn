@@ -43,7 +43,9 @@ build_component_ng("window_scene") {
     configs = [ ":window_scene_config" ]
 
     external_deps = [
-      "graphic_standard:librender_service_client",
+      "c_utils:utils",
+      "graphic_2d:librender_service_client",
+      "hilog:libhilog",
       "input:libmmi-client",
       "ipc:ipc_single",
       "window_manager:libwm",

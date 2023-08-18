@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
@@ -150,6 +151,19 @@ void ViewAbstract::SetMinHeight(const CalcLength& height)
     layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::ResetMinSize(bool resetWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMinSize(resetWidth);
+}
+
 void ViewAbstract::SetMaxWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -176,6 +190,19 @@ void ViewAbstract::SetMaxHeight(const CalcLength& height)
     layoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::ResetMaxSize(bool resetWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ResetCalcMaxSize(resetWidth);
+}
+
 void ViewAbstract::SetAspectRatio(float ratio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -183,6 +210,24 @@ void ViewAbstract::SetAspectRatio(float ratio)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio);
+}
+
+void ViewAbstract::ResetAspectRatio()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, AspectRatio);
+}
+
+void ViewAbstract::SetBackgroundAlign(const Alignment& align)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundAlign, align);
 }
 
 void ViewAbstract::SetBackgroundColor(const Color& color)
@@ -194,14 +239,13 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
 }
 
-void ViewAbstract::SetBackgroundImage(const std::string& src)
+void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
         return;
     }
-    ImageSourceInfo imageSourceInfo(src);
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, imageSourceInfo);
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
 void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
@@ -241,10 +285,33 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
         target->UpdateBackBlurStyle(bgBlurStyle);
         if (target->GetBackBlurRadius().has_value()) {
             target->UpdateBackBlurRadius(Dimension());
         }
+    }
+}
+
+void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateBackgroundEffect(effectOption);
     }
 }
 
@@ -777,7 +844,7 @@ void ViewAbstract::AddDragFrameNodeToManager()
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 void ViewAbstract::SetDraggable(bool draggable)
@@ -884,9 +951,14 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
 }
 
-void ViewAbstract::SetGeometryTransition(const std::string& id)
+void ViewAbstract::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, GeometryTransition, id);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+    }
 }
 
 void ViewAbstract::SetOpacity(double opacity)
@@ -967,7 +1039,7 @@ void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformTranslate, value);
 }
 
-void ViewAbstract::SetRotate(const NG::Vector4F& value)
+void ViewAbstract::SetRotate(const NG::Vector5F& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
@@ -1078,6 +1150,7 @@ void ViewAbstract::BindPopup(
             LOGI("Popup now show in subwindow.");
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
             if (popupPattern) {
+                popupPattern->SetContainerId(Container::CurrentId());
                 popupPattern->StartEnteringAnimation(nullptr);
             }
         } else {
@@ -1146,7 +1219,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
     if (isContextMenu) {
-        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
+        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
     BindMenu(menuNode, targetNode->GetId(), offset);
@@ -1181,6 +1254,9 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
         target->UpdateBackBlurRadius(radius);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
@@ -1195,6 +1271,16 @@ void ViewAbstract::SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(LinearGradientBlur, blurPara);
+}
+
+void ViewAbstract::SetDynamicLightUp(float rate, float lightUpDegree)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpRate, rate);
+    ACE_UPDATE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree);
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius)

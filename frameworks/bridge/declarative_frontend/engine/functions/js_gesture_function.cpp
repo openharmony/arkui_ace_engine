@@ -57,12 +57,15 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     }
     gestureInfoObj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
 
+    gestureInfoObj->SetProperty<double>("velocityX", SystemProperties::Px2Vp(info.GetVelocity().GetVelocityX()));
+    gestureInfoObj->SetProperty<double>("velocityY", SystemProperties::Px2Vp(info.GetVelocity().GetVelocityY()));
+    gestureInfoObj->SetProperty<double>("velocity", SystemProperties::Px2Vp(info.GetVelocity().GetVelocityValue()));
+
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info.GetFingerList();
-    uint32_t idx = 0;
     for (const FingerInfo& info : fingerList) {
         JSRef<JSObject> element = CreateFingerInfo(info);
-        fingerArr->SetValueAt(idx++, element);
+        fingerArr->SetValueAt(info.fingerId_, element);
     }
     gestureInfoObj->SetPropertyObject("fingerList", fingerArr);
 

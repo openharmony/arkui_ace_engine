@@ -16,8 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 
+#include "common/rs_vector4.h"
+#include "key_event.h"
+#include "pointer_event.h"
 #include "session/host/include/session.h"
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -25,59 +29,63 @@ class WindowPattern : public Pattern {
     DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
 public:
-    WindowPattern();
+    WindowPattern() = default;
     ~WindowPattern() override = default;
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    std::vector<Rosen::Rect> GetHotAreas();
+
+protected:
+    void OnModifyDone() override;
+    void OnAttachToFrameNode() override;
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     void DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DisPatchFocusActiveEvent(bool isFocusActive);
-    void TransferFocusWindowId(uint32_t focusWindowId);
-protected:
-    void OnAttachToFrameNode() override;
-
-    void InitContent();
+    void TransferFocusState(bool focusState);
 
     virtual bool HasStartingPage() = 0;
+    bool IsMainWindow() const;
 
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
 
-    virtual void OnConnect();
+    void InitContent();
+    void CreateStartingNode();
+    void CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot = nullptr);
+
+    virtual void OnActivation() {}
+    virtual void OnConnect() {}
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
-
-    int32_t instanceId_ = -1;
+    virtual void OnExtensionDied() {}
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<FrameNode> snapshotNode_;
 
     sptr<Rosen::Session> session_;
+    int32_t instanceId_ = Container::CurrentId();
+    std::function<void()> callback_;
+    std::function<void(const Rosen::Vector4f&)> sizeChangedCallback_;
 
 private:
-    void OnModifyDone() override;
-    void CreateStartingNode();
-    void CreateSnapshotNode();
-    bool CreatePersistentNode();
-
-    void BufferAvailableCallback();
-    void PrintPointerEvent(const std::shared_ptr<MMI::PointerEvent>& event);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
     bool IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void AdapterRotation(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void SetWindowSceneConsumed(int32_t action);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
 
     friend class LifecycleListener;
+    friend class WindowEventProcess;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowPattern);
 };

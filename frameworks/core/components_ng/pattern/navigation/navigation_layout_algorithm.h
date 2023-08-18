@@ -76,17 +76,56 @@ public:
         return navBarOffset_;
     }
 
+    static bool IsAutoHeight(const RefPtr<LayoutProperty>& layoutProperty);
+
 private:
-    NavigationMode usrNavigationMode_ = NavigationMode::AUTO;
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     ACE_DISALLOW_COPY_AND_MOVE(NavigationLayoutAlgorithm);
     void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize);
+
+    void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& contentSize_);
+
+    void RangeCalculation(
+        const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
+
+    void GetRange(const RefPtr<NavigationGroupNode>& hostNode);
+
+    void UpdateNavigationMode(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+
+    void SizeCalculation(LayoutWrapper* layoutWrapper,
+        const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+
+    void SizeCalculationSplit(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+    void CheckSizeInSplit(const float frameWidth, const float userSetNavBarWidth, const float minNavBarWidth,
+        const float minContentWidth);
+
+    void SizeCalculationStack(const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+
+    void SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size);
+
+    bool ifNeedInit_ = true;
+    OffsetF navBarOffset_;
+
+    bool userSetNavBarRangeFlag_ = false;
+    bool userSetMinContentFlag_ = false;
+    bool userSetNavBarWidthFlag_ = false;
+    Dimension minNavBarWidthValue_ = 0.0_vp;
+    Dimension maxNavBarWidthValue_ = 0.0_vp;
+    Dimension minContentWidthValue_ = 0.0_vp;
+
     float realNavBarWidth_ = 0.0f;
     float realDividerWidth_ = 0.0f;
     float realNavBarHeight_ = 0.0f;
-    bool ifNeedInit_ = true;
-    OffsetF navBarOffset_;
+    float realContentWidth_ = 0.0f;
+    float realContentHeight_ = 0.0f;
+
+    SizeF navBarSize_ = SizeF(0.0f, 0.0f);
+    SizeF contentSize_ = SizeF(0.0f, 0.0f);
+    SizeF dividerSize_ = SizeF(0.0f, 0.0f);
 };
 
 } // namespace OHOS::Ace::NG

@@ -151,6 +151,9 @@ std::string Dimension::ToString() const
     static const int32_t percentIndex = 3;
     static const int32_t percentUnit = 100;
     static std::array<std::string, unitsNum> units = { "px", "vp", "fp", "%", "lpx", "auto" };
+    if (unit_ == DimensionUnit::NONE) {
+        return StringUtils::DoubleToString(value_).append("none");
+    }
     if (units[static_cast<int>(unit_)] == units[percentIndex]) {
         return StringUtils::DoubleToString(value_ * percentUnit).append(units[static_cast<int>(unit_)]);
     }

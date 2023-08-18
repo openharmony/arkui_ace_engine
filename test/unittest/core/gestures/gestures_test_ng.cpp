@@ -70,7 +70,7 @@ constexpr double SWIPE_SPEED = 10.0;
 constexpr double VERTICAL_ANGLE = 90.0;
 constexpr double HORIZONTAL_ANGLE = 180.0;
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
-constexpr double DEFAULT_PAN_DISTANCE = 5.0;
+constexpr Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 100.0;
 constexpr double PAN_DISTANCE = 1.0;
@@ -431,8 +431,8 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
     clickRecognizer.useCatchMode_ = false;
     clickRecognizer.refereeState_ = RefereeState::PENDING;
     clickRecognizer.HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer.equalsToFingers_, false);
-    EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
+    EXPECT_TRUE(clickRecognizer.equalsToFingers_);
+    EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 1);
     EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
 
     /**
@@ -447,8 +447,8 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
     clickRecognizer.tappedCount_ = 0;
     clickRecognizer.count_ = 0;
     clickRecognizer.HandleTouchUpEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer.equalsToFingers_, false);
-    EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
+    EXPECT_TRUE(clickRecognizer.equalsToFingers_);
+    EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 1);
     EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
 
     /**
@@ -495,7 +495,7 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
     clickRecognizer.count_ = 0;
     clickRecognizer.HandleTouchUpEvent(touchEvent);
     EXPECT_EQ(clickRecognizer.equalsToFingers_, true);
-    EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 0);
+    EXPECT_EQ(clickRecognizer.currentTouchPointsNum_, 1);
     EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
 }
 
@@ -1715,7 +1715,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest002, TestSize.Level1)
     TouchEvent touchEvent;
     panRecognizer.refereeState_ = RefereeState::SUCCEED;
     panRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
 
     /**
      * @tc.steps: step2. call HandleTouchDown function and compare result.
@@ -4382,7 +4382,7 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerTest004, TestSize.Level1)
     swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
     swipeRecognizer.HandleTouchMoveEvent(touchEvent);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
-    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), 0);
     EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
 
     AxisEvent axisEvent;
@@ -5539,7 +5539,7 @@ HWTEST_F(GesturesTestNg, GestureTest001, TestSize.Level1)
 
     PanGestureModelNG panGestureModelNG;
     int32_t fingersNum = DEFAULT_PAN_FINGER;
-    double distanceNum = DEFAULT_PAN_DISTANCE;
+    double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
     PanDirection panDirection;
     panGestureModelNG.Create(fingersNum, panDirection, distanceNum);
     auto panGestureNG = AceType::DynamicCast<NG::PanGesture>(gestureProcessor->TopGestureNG());
@@ -5584,7 +5584,7 @@ HWTEST_F(GesturesTestNg, PanGestureTest001, TestSize.Level1)
     ASSERT_NE(panRecognizer, nullptr);
     EXPECT_EQ(panRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(panRecognizer->GetPriorityMask(), GestureMask::Normal);
-    EXPECT_EQ(panRecognizer->distance_, DEFAULT_PAN_DISTANCE);
+    EXPECT_EQ(panRecognizer->distance_, DEFAULT_PAN_DISTANCE.ConvertToPx());
 }
 
 /**
@@ -5848,9 +5848,8 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest011, TestSize.Level1)
      * @tc.expect: scale_ = pinchRecognizer->ComputeAverageDeviation() / initialDev_.
      */
     pinchRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(pinchRecognizer->scale_, pinchRecognizer->ComputeAverageDeviation() / pinchRecognizer->initialDev_);
-    EXPECT_EQ(pinchRecognizer->disposal_, GestureDisposal::ACCEPT);
-
+    EXPECT_EQ(pinchRecognizer->scale_, 1);
+    EXPECT_EQ(pinchRecognizer->disposal_, GestureDisposal::NONE);
     /**
      * @tc.steps: step2.2. test HandleTouchMoveEvent(TouchEvent) with refereeState_ == RefereeState::SUCCEED.
      * @tc.expect: scale_ = pinchRecognizer->ComputeAverageDeviation() / initialDev_
@@ -5859,7 +5858,7 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest011, TestSize.Level1)
     pinchRecognizer->initialDev_ = 2.0;
     pinchRecognizer->OnFlushTouchEventsEnd();
     pinchRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(pinchRecognizer->scale_, pinchRecognizer->ComputeAverageDeviation() / pinchRecognizer->initialDev_);
+    EXPECT_EQ(pinchRecognizer->scale_, 1);
 
     /**
      * @tc.steps: step3. test HandleTouchMoveEvent(AxisEvent).

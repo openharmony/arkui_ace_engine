@@ -28,7 +28,7 @@ public:
     RefPtr<ScrollControllerBase> CreateScrollController() override;
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
     void SetListDirection(Axis axis) override;
-    void SetScrollBar(DisplayMode scrollBar) override;
+    void SetScrollBar(Ace::DisplayMode scrollBar) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
@@ -45,6 +45,8 @@ public:
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
     void SetSticky(V2::StickyStyle stickyStyle) override;
+    void SetContentStartOffset(float startOffset) override;
+    void SetContentEndOffset(float endOffset) override;
     void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;

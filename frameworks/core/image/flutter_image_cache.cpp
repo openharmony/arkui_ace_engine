@@ -16,7 +16,11 @@
 #include "core/image/flutter_image_cache.h"
 
 #include "include/core/SkGraphics.h"
+#ifdef USE_ROSEN_DRAWING
+#include "drawing/engine_adapter/skia_adapter/skia_data.h"
 
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/components_ng/image_provider/image_object.h"
 
 namespace OHOS::Ace {
@@ -28,7 +32,7 @@ RefPtr<ImageCache> ImageCache::Create()
 
 void FlutterImageCache::Clear()
 {
-    std::scoped_lock clearLock(imageCacheMutex_, dataCacheListMutex_, imageDataCacheMutex_);
+    std::scoped_lock clearLock(imageCacheMutex_, dataCacheMutex_);
     cacheList_.clear();
     imageCache_.clear();
     dataCacheList_.clear();
@@ -43,8 +47,13 @@ RefPtr<CachedImageData> FlutterImageCache::GetDataFromCacheFile(const std::strin
         return nullptr;
     }
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
+#ifndef USE_ROSEN_DRAWING
     auto data = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
     return data ? AceType::MakeRefPtr<SkiaCachedImageData>(data) : nullptr;
+#else
+    auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
+    return rsData ? AceType::MakeRefPtr<RosenCachedImageData>(rsData) : nullptr;
+#endif
 }
 
 void ImageCache::Purge()

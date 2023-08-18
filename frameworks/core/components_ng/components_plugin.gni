@@ -97,13 +97,17 @@ template("build_component_plugin") {
 
       # using graphcis_2d drawing lib
       include_dirs = [
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
         "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+        "//foundation/graphic/graphic_2d/rosen/modules",
         "//third_party/bounds_checking_function/include",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
       ]
 
       if (ace_use_new_skia) {

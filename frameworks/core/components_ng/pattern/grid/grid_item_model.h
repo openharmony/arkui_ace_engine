@@ -35,6 +35,8 @@ public:
     virtual void SetColumnEnd(int32_t value) = 0;
     virtual void SetForceRebuild(bool value) = 0;
     virtual void SetSelectable(bool value) = 0;
+    virtual void SetSelected(bool selected) = 0;
+    virtual void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
     virtual void SetOnSelect(std::function<void(bool)>&& onSelect) = 0;
 
 private:

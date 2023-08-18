@@ -155,6 +155,17 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
+void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    std::string backgroundPixelMap = "NONE";
+    if (propBackgroundPixelMap.has_value()) {
+        backgroundPixelMap = std::to_string(propBackgroundPixelMap.value()->GetWidth()) + ", " +
+                          std::to_string(propBackgroundPixelMap.value()->GetHeight());
+    }
+    json->Put("backgroundPixelMap", backgroundPixelMap.c_str());
+    json->Put("backgroundAlign", propBackgroundAlign.value().ToString().c_str());
+}
+
 void ForegroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("blur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
@@ -217,8 +228,14 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("y", std::to_string(propTransformRotate->y).c_str());
         jsonValue->Put("z", std::to_string(propTransformRotate->z).c_str());
         jsonValue->Put("angle", std::to_string(propTransformRotate->w).c_str());
+        jsonValue->Put("perspective", std::to_string(propTransformRotate->v).c_str());
         jsonValue->Put("centerX", center.GetX().ToString().c_str());
         jsonValue->Put("centerY", center.GetY().ToString().c_str());
+        if (center.GetZ().has_value()) {
+            jsonValue->Put("centerZ", center.GetZ().value().ToString().c_str());
+        } else {
+            json->Put("centerZ", JsonUtil::Create(true));
+        }
         json->Put("rotate", jsonValue);
     } else {
         json->Put("rotate", JsonUtil::Create(true));

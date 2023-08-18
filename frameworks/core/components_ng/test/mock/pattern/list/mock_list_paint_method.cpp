@@ -26,4 +26,6 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* /* p
 }
 
 void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper) {}
+
+void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper) {}
 } // namespace OHOS::Ace::NG

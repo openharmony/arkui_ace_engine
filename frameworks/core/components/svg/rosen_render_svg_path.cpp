@@ -53,7 +53,7 @@ void RosenRenderSvgPath::Paint(RenderContext& context, const Offset& offset)
     RSAutoCanvasRestore save(*canvas, false);
     PaintMaskLayer(context, offset, offset);
 
-    RSPath out;
+    RSRecordingPath out;
 #endif
     GetPath(out);
     UpdateGradient(fillState_);
@@ -89,7 +89,7 @@ void RosenRenderSvgPath::PaintDirectly(RenderContext& context, const Offset& off
     }
     PaintMaskLayer(context, offset, offset);
 
-    RSPath out;
+    RSRecordingPath out;
 #endif
     GetPath(out);
     UpdateGradient(fillState_);
@@ -115,9 +115,10 @@ Rect RosenRenderSvgPath::GetPaintBounds(const Offset& offset)
     auto& bounds = path.getBounds();
     return Rect(bounds.left(), bounds.top(), bounds.width(), bounds.height());
 #else
-    RSPath path;
-    GetPath(path);
-    auto bounds = path.GetBounds();
+    RSRecordingPath recordingPath;
+    GetPath(recordingPath);
+    auto path = recordingPath.GetCmdList()->Playback();
+    auto bounds = path->GetBounds();
     return Rect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
 #endif
 }
@@ -158,13 +159,13 @@ void RosenRenderSvgPath::GetPath(SkPath& out)
     }
 }
 #else
-void RosenRenderSvgPath::GetPath(RSPath& out)
+void RosenRenderSvgPath::GetPath(RSRecordingPath& out)
 {
     if (paths_.empty()) {
         out.BuildFromSVGString(d_);
     } else {
-        RSPath path;
-        RSPath ending;
+        RSRecordingPath path;
+        RSRecordingPath ending;
         int32_t firstPart = (int)weight_;
         int32_t pathsSize = static_cast<int32_t>(paths_.size());
         bool ret = false;
@@ -185,7 +186,7 @@ void RosenRenderSvgPath::GetPath(RSPath& out)
         }
     }
     if (fillState_.IsEvenodd()) {
-        out.SetFillStyle(RSPathFillType::EVEN_ODD);
+        out.SetFillStyle(RSPathFillType::EVENTODD);
     }
 }
 #endif

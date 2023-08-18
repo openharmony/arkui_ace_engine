@@ -37,4 +37,8 @@ void AceAsyncTraceBegin(int32_t taskId, const char* name)
 void AceAsyncTraceEnd(int32_t taskId, const char* name)
 {
 }
+
+void AceCountTrace(const char *key, int32_t count)
+{
+}
 } // namespace OHOS::Ace

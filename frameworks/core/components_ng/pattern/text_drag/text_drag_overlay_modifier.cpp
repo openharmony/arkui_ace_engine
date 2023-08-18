@@ -14,10 +14,14 @@
  */
 
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
+
 #include <variant>
 
+#include "base/geometry/rect.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -61,6 +65,25 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
         auto rsParagraph = std::get<std::shared_ptr<RSParagraph>>(paragraph);
         rsParagraph->Paint(&canvas, pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY());
     }
+
+    size_t index = 0;
+    auto contentOffset = pattern->GetContentOffset();
+    auto imageChildren = pattern->GetImageChildren();
+    auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
+    for (const auto& child : imageChildren) {
+        auto rect = rectsForPlaceholders.at(index);
+        auto offset = OffsetF(rect.Left(), rect.Top()) - contentOffset;
+        auto imageChild = DynamicCast<ImagePattern>(child->GetPattern());
+        if (imageChild) {
+            RectF imageRect(offset.GetX(), offset.GetY(), rect.Width(), rect.Height());
+            auto canvasImage = imageChild->GetCanvasImage();
+            CHECK_NULL_VOID(canvasImage);
+            auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+            CHECK_NULL_VOID(pixelMapImage);
+            pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
+        }
+        ++index;
+    }
 }
 
 void TextDragOverlayModifier::StartAnimate()
@@ -72,8 +95,8 @@ void TextDragOverlayModifier::StartAnimate()
     option.SetCurve(Curves::EASE_OUT);
     option.SetDelay(0);
     option.SetOnFinishEvent([this]() { isAnimating_ = false; });
-    AnimationUtils::Animate(option, [this]() { SetBackgroundOffset(TEXT_DRAG_OFFSET.ConvertToPx()); },
-        option.GetOnFinishEvent());
+    AnimationUtils::Animate(
+        option, [this]() { SetBackgroundOffset(TEXT_DRAG_OFFSET.ConvertToPx()); }, option.GetOnFinishEvent());
 }
 
 void TextDragOverlayModifier::SetBackgroundOffset(float offset)

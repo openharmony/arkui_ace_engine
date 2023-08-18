@@ -132,8 +132,8 @@ HWTEST_F(PathPatternTestNg, COMMONDS003, TestSize.Level1)
     auto layoutAlgorithm = AceType::DynamicCast<ShapeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     auto layoutProperty = frameNode->GetLayoutProperty();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize = OptionalSize<float> { -1, std::nullopt };
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);

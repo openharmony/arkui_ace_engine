@@ -37,10 +37,7 @@ template("ace_core_components_theme_set") {
     part_name = ace_engine_part
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
-    deps = [
-      ":build_theme_code",
-      "$ace_flutter_engine_root/skia:ace_skia_$platform",
-    ]
+    deps = [ ":build_theme_code" ]
 
     if (ace_use_new_skia) {
       configs += [ "$ace_flutter_engine_root:flutter_config" ]

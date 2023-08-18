@@ -37,9 +37,11 @@ public:
     void SetMinHeight(const CalcDimension& minHeight) override;
     void SetMaxWidth(const CalcDimension& maxWidth) override;
     void SetMaxHeight(const CalcDimension& maxHeight) override;
+    void ResetMinSize(bool resetWidth) override {};
+    void ResetMaxSize(bool resetWidth) override {};
 
     void SetBackgroundColor(const Color& color) override;
-    void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) override;
+    void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override;
     void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) override;
@@ -69,6 +71,7 @@ public:
     void SetLayoutWeight(int32_t value) override;
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;
+    void ResetAspectRatio() override {};
     void SetAlign(const Alignment& alignment) override;
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
     void SetUseAlign(
@@ -84,7 +87,7 @@ public:
     void SetScale(float x, float y, float z) override;
     void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
-    void SetRotate(float x, float y, float z, float angle) override;
+    void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
 
     void SetOpacity(double opacity, bool passThrough = false) override;
@@ -96,7 +99,7 @@ public:
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
     void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
-    void SetGeometryTransition(const std::string& id) override;
+    void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) override;
     void SetMotionPath(const MotionPathOption& option) override;
     void SetRenderGroup(bool isRenderGroup) override {}
     void SetRenderFit(RenderFit renderFit) override {}
@@ -118,6 +121,7 @@ public:
 
     void SetBackdropBlur(const Dimension& radius) override;
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override {};
+    void SetDynamicLightUp(float rate, float lightUpDegree) override {};
     void SetFrontBlur(const Dimension& radius) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetColorBlend(const Color& value) override;
@@ -188,11 +192,12 @@ public:
     void DisableOnFocus() override {};
     void DisableOnBlur() override {};
 
+    void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;
 
-    void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) override;
+    void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam) override;
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear) override {}

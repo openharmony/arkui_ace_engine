@@ -143,7 +143,6 @@ void RenderXComponent::HandleTouchEvent(const TouchEventInfo& info, const TouchT
     touchEventPoint_.type = ConvertNativeXComponentTouchEvent(touchType);
 #ifdef OHOS_STANDARD_SYSTEM
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
-    SetHistoryPoint(info.GetHistory());
 #endif
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 }
@@ -192,28 +191,6 @@ void RenderXComponent::SetTouchPoint(
         ohTouchPoint.timeStamp = 0;
         ohTouchPoint.isPressed = false;
         touchEventPoint_.touchPoints[i++] = ohTouchPoint;
-    }
-}
-
-void RenderXComponent::SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList)
-{
-    uint32_t index = 0;
-    for (auto iterator = touchInfoList.begin(); iterator != touchInfoList.end() && index < OH_MAX_TOUCH_POINTS_NUMBER;
-         iterator++) {
-        OH_NativeXComponent_HistoricalPoint ohHistoricalPoint;
-        const auto& pointTouchInfo = *iterator;
-        const auto& pointScreenOffset = pointTouchInfo.GetGlobalLocation();
-        const auto& pointLocalOffset = pointTouchInfo.GetLocalLocation();
-        ohHistoricalPoint.id = pointTouchInfo.GetFingerId();
-        ohHistoricalPoint.screenX = pointScreenOffset.GetX();
-        ohHistoricalPoint.screenY = pointScreenOffset.GetY();
-        ohHistoricalPoint.x = pointLocalOffset.GetX();
-        ohHistoricalPoint.y = pointLocalOffset.GetY();
-        ohHistoricalPoint.type = ConvertNativeXComponentTouchEvent(pointTouchInfo.GetTouchType());
-        ohHistoricalPoint.size = pointTouchInfo.GetSize();
-        ohHistoricalPoint.force = pointTouchInfo.GetForce();
-        ohHistoricalPoint.timeStamp = pointTouchInfo.GetTimeStamp().time_since_epoch().count();
-        historicalPoints_.emplace_back(std::move(ohHistoricalPoint));
     }
 }
 

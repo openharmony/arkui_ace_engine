@@ -63,6 +63,7 @@ public:
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const override {}
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
+    NativeValue* GetContextValue() override;
 #if defined(PREVIEW)
     void RunNativeEngineLoop() override
     {
@@ -115,11 +116,6 @@ public:
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return nullptr;
-    };
-
-    FrontendType GetType() override
-    {
-        return type_;
     }
 
     // judge frontend is foreground frontend.
@@ -191,11 +187,9 @@ public:
 private:
     void InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
-    FrontendType type_ = FrontendType::DECLARATIVE_JS;
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<Framework::FrontendDelegateDeclarativeNG> delegate_;
     RefPtr<AccessibilityManager> accessibilityManager_;
-    RefPtr<TaskExecutor> taskExecutor_;
 
     std::string pageProfile_;
     bool foregroundFrontend_ = false;

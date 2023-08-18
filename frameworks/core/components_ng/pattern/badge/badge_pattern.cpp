@@ -91,7 +91,9 @@ void BadgePattern::OnModifyDone()
     textLayoutProperty->UpdateTextColor(badgeTextColor.value());
 
     auto badgeFontSize = layoutProperty->GetBadgeFontSize();
-    textLayoutProperty->UpdateFontSize(badgeFontSize.value());
+    if (badgeFontSize.has_value()) {
+        textLayoutProperty->UpdateFontSize(badgeFontSize.value());
+    }
 
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);

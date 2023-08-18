@@ -23,9 +23,15 @@
 #include "include/core/SkImage.h"
 
 #include "base/image/image_source.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 
 namespace OHOS::Ace::NG {
 class AnimatedImage : public virtual CanvasImage {
@@ -33,11 +39,19 @@ class AnimatedImage : public virtual CanvasImage {
 public:
     // initialize animator
     AnimatedImage(const std::unique_ptr<SkCodec>& codec, std::string url);
-    ~AnimatedImage() override = default;
+    ~AnimatedImage() override;
+
+    struct ResizeParam {
+        int32_t width = 0;
+        int32_t height = 0;
+        bool forceResize = false;
+    };
 #ifndef USE_ROSEN_DRAWING
-    static RefPtr<CanvasImage> Create(const RefPtr<SkiaImageData>& data, const SizeF& size, const std::string& url);
+    static RefPtr<CanvasImage> Create(
+        const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url);
 #else
-    static RefPtr<CanvasImage> Create(const RefPtr<RosenImageData>& data, const SizeF& size, const std::string& url);
+    static RefPtr<CanvasImage> Create(
+        const RefPtr<DrawingImageData>& data, const SizeParam& size, const std::string& url);
 #endif
     void ControlAnimation(bool play) override;
     void SetRedrawCallback(std::function<void()>&& callback) override
@@ -86,8 +100,8 @@ public:
 
     sk_sp<SkImage> GetImage() const override;
 #else
-class AnimatedRSImage : public AnimatedImage, public RosenImage {
-    DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, RosenImage)
+class AnimatedRSImage : public AnimatedImage, public DrawingImage {
+    DECLARE_ACE_TYPE(AnimatedRSImage, AnimatedImage, DrawingImage)
 public:
     AnimatedRSImage(std::unique_ptr<SkCodec> codec, std::string url)
         : AnimatedImage(codec, std::move(url)), codec_(std::move(codec))
@@ -127,12 +141,15 @@ private:
 class AnimatedPixmap : public AnimatedImage, public PixelMapImage {
     DECLARE_ACE_TYPE(AnimatedPixmap, AnimatedImage, PixelMapImage)
 public:
-    AnimatedPixmap(
-        const std::unique_ptr<SkCodec>& codec, const RefPtr<ImageSource>& src, const SizeF& size, std::string url)
-        : AnimatedImage(codec, std::move(url)), width_(size.Width()), height_(size.Height()), src_(src)
-    {}
+    AnimatedPixmap(const std::unique_ptr<SkCodec>& codec, const RefPtr<ImageSource>& src, const ResizeParam& size,
+        std::string url);
     ~AnimatedPixmap() override = default;
     RefPtr<PixelMap> GetPixelMap() const override;
+
+    RefPtr<CanvasImage> Clone() override
+    {
+        return Claim(this);
+    }
 
 private:
     void DecodeImpl(uint32_t idx) override;
@@ -143,8 +160,7 @@ private:
 
     RefPtr<PixelMap> currentFrame_;
 
-    int32_t width_;
-    int32_t height_;
+    ResizeParam size_;
     const RefPtr<ImageSource> src_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AnimatedPixmap);

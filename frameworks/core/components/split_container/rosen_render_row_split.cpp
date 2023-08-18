@@ -17,6 +17,8 @@
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/pipeline/base/constants.h"
@@ -39,7 +41,7 @@ void RosenRenderRowSplit::Paint(RenderContext& context, const Offset& offset)
         if (!item->GetVisible()) {
             continue;
         }
-        
+
         if (displayNodes_.find(item) == displayNodes_.end() &&
             disableHideNodes_.find(item) == disableHideNodes_.end()) {
             continue;

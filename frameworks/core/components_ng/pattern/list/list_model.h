@@ -38,7 +38,7 @@ public:
     virtual RefPtr<ScrollControllerBase> CreateScrollController() = 0;
     virtual void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) = 0;
     virtual void SetListDirection(Axis axis) = 0;
-    virtual void SetScrollBar(DisplayMode scrollBar) = 0;
+    virtual void SetScrollBar(Ace::DisplayMode scrollBar) = 0;
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) = 0;
     virtual void SetEditMode(bool editMode) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
@@ -55,6 +55,8 @@ public:
     virtual void SetHasWidth(bool hasWidth) = 0;
     virtual void SetHasHeight(bool hasHeight) = 0;
     virtual void SetSticky(V2::StickyStyle stickyStyle) = 0;
+    virtual void SetContentStartOffset(float startOffset) = 0;
+    virtual void SetContentEndOffset(float endOffset) = 0;
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) = 0;
     virtual void SetScrollEnabled(bool scrollEnabled) = 0;
     virtual void SetFriction(double friction) = 0;

@@ -50,6 +50,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
 #else
     int64_t refreshPeriod = window->GetVSyncPeriod();
 #endif
+    JankFrameReport::SetRefreshPeriod(refreshPeriod);
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();
@@ -64,18 +65,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID_NOLOG(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
-            do {
-                if (refreshPeriod <= 0) {
-                    break;
-                }
-                int64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                    std::chrono::steady_clock::now().time_since_epoch()).count();
-                int64_t duration = now - timeStampNanos;
-                double jank = double(duration) / refreshPeriod;
-                if (jank > 1.0f) {
-                    JankFrameReport::JankFrameRecord(jank);
-                }
-            } while (false);
+            JankFrameReport::JankFrameRecord(timeStampNanos);
+            JankFrameReport::RecordPreviousEnd();
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -113,10 +104,10 @@ void RosenWindow::RequestFrame()
     CHECK_NULL_VOID_NOLOG(!isRequestVsync_);
     LOGD("request next vsync");
     if (rsWindow_) {
+        isRequestVsync_ = true;
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = GetSysTimestamp();
     }
-    isRequestVsync_ = true;
     auto taskExecutor = taskExecutor_.Upgrade();
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(

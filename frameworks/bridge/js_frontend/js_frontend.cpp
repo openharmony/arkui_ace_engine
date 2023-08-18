@@ -255,6 +255,7 @@ bool JsFrontend::Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskE
 {
     LOGI("JsFrontend initialize begin.");
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::JS);
     InitializeFrontendDelegate(taskExecutor);
     auto weakEngine = AceType::WeakClaim(AceType::RawPtr(jsEngine_));

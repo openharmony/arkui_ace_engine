@@ -42,6 +42,8 @@ public:
 
     void UpdateTouchPoint(const TouchEvent& event, bool end = false);
 
+    void UpdateTrackerPoint(double x, double y, const TimeStamp& time, bool end = false);
+
     const TouchEvent& GetFirstTrackPoint() const
     {
         return firstTrackPoint_;
@@ -128,6 +130,7 @@ private:
     Offset offset_;
     bool isFirstPoint_ = true;
     TimeStamp lastTimePoint_;
+    TimeStamp firstPointTime_;
     LeastSquareImpl xAxis_ { 3, 5 };
     LeastSquareImpl yAxis_ { 3, 5 };
     bool isVelocityDone_ = false;

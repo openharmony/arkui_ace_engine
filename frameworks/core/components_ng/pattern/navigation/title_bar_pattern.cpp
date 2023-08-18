@@ -43,6 +43,9 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         CHECK_NULL_VOID(backButtonImageNode);
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
+        if (titleBarLayoutProperty->HasNoPixMap() && titleBarLayoutProperty->HasImageSource()) {
+            backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
+        }
         auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
         CHECK_NULL_VOID(navBarNode);
         auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
@@ -94,10 +97,24 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSize());
         } else {
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
+            titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeMin());
         }
+        titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    } else {
+        titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
+        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetTitleFontSizeBig());
     }
+
+    if (hostNode->GetSubtitle()) {
+        titleLayoutProperty->UpdateMaxLines(1);
+    } else {
+        titleLayoutProperty->UpdateMaxLines(TITLEBAR_MAX_LINES);
+    }
+
     titleNode->MarkModifyDone();
 }
 
@@ -109,6 +126,15 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(subtitleNode);
     auto titleLayoutProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(titleLayoutProperty);
+
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
+        titleLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    }
+
     subtitleNode->MarkModifyDone();
 }
 
@@ -309,7 +335,6 @@ void TitleBarPattern::ProcessTittleDragUpdate(float offset)
     overDragOffset_ = std::clamp(overDragOffset_, 0.0f, static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx()));
     if (Positive(overDragOffset_)) {
         UpdateScaleByDragOverDragOffset(overDragOffset_);
-        return;
     }
 }
 void TitleBarPattern::SetTitleStyleByOffset(float offset)
@@ -437,6 +462,9 @@ void TitleBarPattern::UpdateScaleByDragOverDragOffset(float overDragOffset)
     auto host = GetHost();
     auto navBarNode = AceType::DynamicCast<NavBarNode>(host->GetParent());
     CHECK_NULL_VOID(navBarNode);
+    if (navBarNode->GetPrevTitleIsCustomValue(true)) {
+        return;
+    }
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
@@ -460,7 +488,9 @@ void TitleBarPattern::UpdateScaleByDragOverDragOffset(float overDragOffset)
 
 void TitleBarPattern::TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto renderCtx = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderCtx);
     auto scaleRatio = overDragOffset / static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx());
     VectorF scaleValue = VectorF(scaleRatio * 0.1f + 1.0f, scaleRatio * 0.1f + 1.0f);
     renderCtx->UpdateTransformScale(scaleValue);
@@ -642,6 +672,7 @@ bool TitleBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto titleBarLayoutAlgorithm = DynamicCast<TitleBarLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(titleBarLayoutAlgorithm, false);
+    UpdateTitleModeChange();
 
     initialTitleOffsetY_ = titleBarLayoutAlgorithm->GetInitialTitleOffsetY();
     isInitialTitle_ = titleBarLayoutAlgorithm->IsInitialTitle();
@@ -649,6 +680,26 @@ bool TitleBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     isInitialSubtitle_ = titleBarLayoutAlgorithm->IsInitialSubtitle();
     minTitleHeight_ = titleBarLayoutAlgorithm->GetMinTitleHeight();
     return true;
+}
+
+void TitleBarPattern::UpdateTitleModeChange()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto geometryNode = titleBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    auto titleBarHeight = geometryNode->GetFrameSize().Height();
+    if ((titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) &&
+        !NearZero(maxTitleBarHeight_)) {
+        if (titleBarHeight >= maxTitleBarHeight_) {
+            titleMode_ = NavigationTitleMode::FULL;
+        } else if (NearEqual(titleBarHeight, static_cast<float>(TITLEBAR_HEIGHT_MINI.ConvertToPx()))) {
+            titleMode_ = NavigationTitleMode::MINI;
+        }
+    }
 }
 
 void TitleBarPattern::OnAttachToFrameNode()

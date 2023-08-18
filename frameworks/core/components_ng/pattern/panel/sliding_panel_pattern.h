@@ -112,6 +112,8 @@ private:
     RefPtr<UINode> GetChildNodeByTag(const std::string& tagName) const;
     void AddOrRemoveDragBarNode(const RefPtr<SlidingPanelLayoutProperty>& layoutProperty) const;
     void AddOrRemoveCloseIconNode(const RefPtr<SlidingPanelLayoutProperty>& layoutProperty) const;
+    void ResetLayoutWeight();
+    bool IsNeedResetPanEvent(const RefPtr<GestureEventHub>& gestureHub);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> animator_;
@@ -130,6 +132,7 @@ private:
     Dimension fullHeight_;
     Dimension halfHeight_;
     Dimension miniHeight_;
+    CalcDimension customHeight_;
     float maxWidth_ = 0.0f;
     SizeF maxSize_;
 

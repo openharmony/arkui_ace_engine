@@ -45,7 +45,7 @@ public:
     // Only implemented by ForEachModelNG
     virtual void Create() = 0;
 
-    virtual const std::list<std::string>& GetCurrentIdList(int32_t nodeId) = 0;
+    virtual std::list<std::string> GetCurrentIdList(int32_t nodeId) = 0;
     virtual void SetNewIds(std::list<std::string>&& newIds) = 0;
 
     virtual void CreateNewChildStart(const std::string& id) = 0;

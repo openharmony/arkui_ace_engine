@@ -25,14 +25,31 @@ class MockRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(MockRenderContext, RenderContext)
 public:
     ~MockRenderContext() override = default;
-    
+
     MOCK_METHOD4(SetBounds, void(float, float, float, float));
     MOCK_METHOD0(GetPaintRectWithTransform, RectF());
     MOCK_METHOD1(GetPointWithTransform, void(PointF&));
     MOCK_METHOD2(AddChild, void(const RefPtr<RenderContext>& renderContext, int index));
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
     MOCK_METHOD1(SetVisible, void(bool));
-    MOCK_METHOD1(BlendBgColor, void(const Color&));
+
+    void ResetBlendBgColor() override
+    {
+        blendColor_ = Color::TRANSPARENT;
+    }
+
+    void BlendBgColor(const Color& color) override
+    {
+        blendColor_ = color;
+    }
+
+    std::vector<double> GetTrans() override
+    {
+        return transInfo_;
+    }
+
+    Color blendColor_ = Color::TRANSPARENT;
+    std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

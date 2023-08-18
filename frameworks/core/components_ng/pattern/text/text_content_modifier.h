@@ -30,14 +30,16 @@ class TextContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(TextContentModifier, ContentModifier)
 
 public:
-    TextContentModifier(const std::optional<TextStyle> textStyle);
+    explicit TextContentModifier(const std::optional<TextStyle>& textStyle);
+    ~TextContentModifier() override = default;
 
     void onDraw(DrawingContext& drawingContext) override;
 
+    void SetFontFamilies(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
-    void SetTextShadow(const Shadow& value);
+    void SetTextShadow(const std::vector<Shadow>& value);
     void SetTextDecoration(const TextDecoration& value);
     void SetTextDecorationColor(const Color& value);
     void SetBaselineOffset(const Dimension& value);
@@ -80,6 +82,8 @@ public:
 
     void SetClip(bool clip);
 
+    void SetFontReady(bool value);
+
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
@@ -87,6 +91,8 @@ private:
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultTextShadow(const TextStyle& textStyle);
+    void AddShadow(const Shadow& shadow);
+    void AddDefaultShadow();
     void SetDefaultTextDecoration(const TextStyle& textStyle);
     void SetDefaultBaselineOffset(const TextStyle& textStyle);
 
@@ -108,7 +114,6 @@ private:
 
     void DrawObscuration(DrawingContext& drawingContext);
 
-private:
     std::optional<Dimension> fontSize_;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
 
@@ -118,13 +123,15 @@ private:
     std::optional<Color> textColor_;
     RefPtr<AnimatablePropertyColor> animatableTextColor_;
 
-    std::optional<Shadow> textShadow_;
-    RefPtr<AnimatablePropertyFloat> shadowBlurRadiusFloat_;
-    RefPtr<AnimatablePropertyFloat> shadowOffsetXFloat_;
-    RefPtr<AnimatablePropertyFloat> shadowOffsetYFloat_;
-    RefPtr<AnimatablePropertyColor> shadowColor_;
+    struct ShadowProp {
+        Shadow shadow; // final shadow configuration of the animation
+        RefPtr<AnimatablePropertyFloat> blurRadius;
+        RefPtr<AnimatablePropertyFloat> offsetX;
+        RefPtr<AnimatablePropertyFloat> offsetY;
+        RefPtr<AnimatablePropertyColor> color;
+    };
+    std::vector<ShadowProp> shadows_;
 
-    TextDecoration oldTextDecoration_ = TextDecoration::NONE;
     float oldColorAlpha_ { 0.0f };
     std::optional<TextDecoration> textDecoration_;
     std::optional<Color> textDecorationColor_;
@@ -142,6 +149,8 @@ private:
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyBool> clip_;
+    RefPtr<PropertyString> fontFamilyString_;
+    RefPtr<PropertyBool> fontReady_;
 
     RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;

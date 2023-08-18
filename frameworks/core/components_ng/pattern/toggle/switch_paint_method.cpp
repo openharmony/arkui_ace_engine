@@ -33,6 +33,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
+const Color TMP_INACTIVE_COLOR = Color(0x337F7F7F);
 } // namespace
 
 SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float dragOffsetX)
@@ -71,7 +72,7 @@ void SwitchModifier::InitializeParam()
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     activeColor_ = switchTheme->GetActiveColor();
-    inactiveColor_ = switchTheme->GetInactiveColor();
+    inactiveColor_ = TMP_INACTIVE_COLOR;
     clickEffectColor_ = switchTheme->GetClickEffectColor();
     hoverColor_ = switchTheme->GetHoverColor();
     hoverRadius_ = switchTheme->GetHoverRadius();

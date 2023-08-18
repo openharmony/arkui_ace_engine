@@ -104,11 +104,6 @@ public:
         return nullptr;
     }
 
-    virtual bool NeedOverridePaintRect()
-    {
-        return false;
-    }
-
     virtual std::optional<RectF> GetOverridePaintRect() const
     {
         return std::nullopt;
@@ -366,21 +361,15 @@ public:
     {
         return -1;
     }
-    
+
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
-    virtual bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange)
-    {
-        return true;
-    }
-
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
-
-private:
+    
     WeakPtr<FrameNode> frameNode_;
-
+private:
     ACE_DISALLOW_COPY_AND_MOVE(Pattern);
 };
 } // namespace OHOS::Ace::NG

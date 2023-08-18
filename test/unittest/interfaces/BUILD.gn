@@ -42,15 +42,15 @@ ohos_unittest("ui_content_test") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
-    "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [
     "ability_runtime:abilitykit_native",
+    "image_framework:image",
     "input:libmmi-client",
     "ipc:ipc_single",
-    "multimedia_image_framework:image",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:scene_session",
@@ -88,7 +88,7 @@ ohos_unittest("form_render_test") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
-    "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
@@ -100,7 +100,7 @@ ohos_unittest("form_render_test") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "form_fwk:form_manager",
-    "graphic_standard:surface",
+    "graphic_2d:surface",
     "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
@@ -137,8 +137,10 @@ ohos_unittest("drawable_descriptor_test") {
   ]
 
   external_deps = [
-    "multimedia_image_framework:image",
-    "multimedia_image_framework:image_native",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
     "napi:ace_napi",
     "resource_management:global_resmgr",
   ]

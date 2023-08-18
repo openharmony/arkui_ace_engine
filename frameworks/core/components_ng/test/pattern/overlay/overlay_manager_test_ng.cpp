@@ -528,7 +528,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
-    EXPECT_EQ(sheetNode->GetTag(), "SheetPage");
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
 
     /**
      * @tc.steps: step4. destroy modal page.
@@ -591,6 +591,8 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
      * @tc.expected: remove one popupNode at a time
      */
+    overlayManager->UpdatePopupNode(targetId1, popups[0]);
+    overlayManager->UpdatePopupNode(targetId2, popups[1]);
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
     EXPECT_FALSE(overlayManager->popupMap_.empty());
     overlayManager->ErasePopup(targetId1);
@@ -656,7 +658,7 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
     auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, menuId, AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE));
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     menuNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();

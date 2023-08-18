@@ -43,7 +43,6 @@ struct ImagePaintConfig {
     std::vector<ObscuredReasons> obscuredReasons_;
 };
 
-struct RenderTaskHolder;
 // CanvasImage is interface for drawing image.
 class CanvasImage : public virtual AceType {
     DECLARE_ACE_TYPE(CanvasImage, AceType)
@@ -56,9 +55,6 @@ public:
 
     static RefPtr<CanvasImage> Create(void* rawImage);
     static RefPtr<CanvasImage> Create();
-    // TODO: use [PixelMap] as data source when rs provides interface like
-    // DrawBitmapRect(Media::PixelMap* pixelMap, const Rect& dstRect, const Rect& srcRect, ...)
-    // now we make [SkImage] from [PixelMap] and use [drawImageRect] to draw image
     static RefPtr<CanvasImage> Create(const RefPtr<PixelMap>& pixelMap);
 
     virtual RefPtr<PixelMap> GetPixelMap() const
@@ -91,6 +87,7 @@ public:
     {
         if (!paintConfig_) {
             LOGW("image paint config is null");
+            paintConfig_ = std::make_unique<ImagePaintConfig>();
         }
         return *paintConfig_;
     }

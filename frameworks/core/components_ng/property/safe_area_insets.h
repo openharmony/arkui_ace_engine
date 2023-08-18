@@ -33,6 +33,8 @@ struct SafeAreaInsets {
             return start < end;
         }
 
+        bool IsOverlapped(float pos) const;
+
         Inset Combine(const Inset& other) const;
 
         bool operator==(const Inset& other) const
@@ -52,6 +54,8 @@ struct SafeAreaInsets {
     SafeAreaInsets(Inset left, Inset top, Inset right, Inset bottom)
         : left_(left), top_(top), right_(right), bottom_(bottom)
     {}
+
+    bool IsValid() const;
 
     std::string ToString() const;
 

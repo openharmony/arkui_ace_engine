@@ -34,10 +34,8 @@ public:
      * @param formJsInfo The formJsInfo.
      * @param want The want.
      */
-    int32_t OnSurfaceCreate(
-        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
-        const AAFwk::Want& want) override;
+    int32_t OnSurfaceCreate(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+        const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want) override;
     /**
      * @brief OnActionEvent.
      * @param action The action.
@@ -56,11 +54,14 @@ public:
      */
     int32_t OnSurfaceChange(float width, float height) override;
 
+    int32_t OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) override;
+
     void SetSurfaceCreateEventHandler(std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
             const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>&& listener);
     void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& listener);
     void SetSurfaceChangeEventHandler(std::function<void(float width, float height)>&& listener);
+    void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& listener);
 
 private:
     std::function<void(
@@ -69,7 +70,8 @@ private:
     std::function<void(const std::string&)> actionEventHandler_;
     std::function<void(const std::string&, const std::string&)> errorEventHandler_;
     std::function<void(float width, float height)> surfaceChangeEventHandler_;
+    std::function<void(const std::vector<std::string>&)> formLinkInfoUpdateHandler_;
 };
 } // namespace Ace
 } // namespace OHOS
-#endif  // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_IMPL_H
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_IMPL_H

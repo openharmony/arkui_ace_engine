@@ -51,6 +51,16 @@ struct FlexItemProperty {
         json->Put("displayPriority", propDisplayIndex.value_or(1));
     }
 
+    void ClearAlignValue()
+    {
+        ResetAlignLeft();
+        ResetAlignRight();
+        ResetAlignMiddle();
+        ResetAlignTop();
+        ResetAlignBottom();
+        ResetAlignCenter();
+    }
+
     bool GetTwoHorizontalDirectionAligned() const
     {
         return (HasAlignLeft() && HasAlignRight()) || (HasAlignRight() && HasAlignMiddle()) ||

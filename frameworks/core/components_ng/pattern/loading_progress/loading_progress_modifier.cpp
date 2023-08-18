@@ -70,6 +70,8 @@ constexpr float TWO = 2.0f;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
     : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
+      offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
+      contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE)),
       centerDeviation_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
@@ -79,6 +81,8 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       sizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f)), loadingProgressOwner_(loadingProgressOwner)
 {
     AttachProperty(enableLoading_);
+    AttachProperty(offset_);
+    AttachProperty(contentSize_);
     AttachProperty(date_);
     AttachProperty(color_);
     AttachProperty(centerDeviation_);
@@ -94,7 +98,7 @@ void LoadingProgressModifier::onDraw(DrawingContext& context)
         return;
     }
     float date = date_->Get();
-    auto diameter = std::min(context.width, context.height);
+    auto diameter = std::min(contentSize_->Get().Width(), contentSize_->Get().Height());
     RingParam ringParam;
     ringParam.strokeWidth = LoadingProgressUtill::GetRingStrokeWidth(diameter) * sizeScale_->Get();
     ringParam.radius = LoadingProgressUtill::GetRingRadius(diameter) * sizeScale_->Get();
@@ -138,7 +142,10 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     pen.SetWidth(ringParam.strokeWidth);
     pen.SetAntiAlias(true);
     canvas.AttachPen(pen);
-    canvas.DrawCircle({ context.width * HALF, context.height * HALF + ringParam.movement }, ringParam.radius);
+    canvas.DrawCircle(
+        { offset_->Get().GetX() + contentSize_->Get().Width() * HALF,
+            offset_->Get().GetY() + contentSize_->Get().Height() * HALF + ringParam.movement },
+        ringParam.radius);
     canvas.DetachPen();
     canvas.Restore();
 }
@@ -148,8 +155,8 @@ void LoadingProgressModifier::DrawOrbit(
 {
     auto pointCounts = cometParam.pointCount;
     auto& canvas = context.canvas;
-    float width = context.width;
-    float height = context.height;
+    float width = contentSize_->Get().Width();
+    float height = contentSize_->Get().Height();
     double angle = TOTAL_ANGLE * date / FULL_COUNT;
     RSCamera3D camera;
     camera.Save();
@@ -159,7 +166,7 @@ void LoadingProgressModifier::DrawOrbit(
     RSMatrix matrix;
     camera.ApplyToMatrix(matrix);
     camera.Restore();
-    auto center = RSPoint(width / 2, height / 2);
+    auto center = RSPoint(offset_->Get().GetX() + width / 2, offset_->Get().GetY() + height / 2);
     RSBrush brush;
     brush.SetAntiAlias(true);
     canvas.Save();

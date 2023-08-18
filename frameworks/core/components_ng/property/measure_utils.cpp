@@ -23,8 +23,13 @@
 #include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const static int32_t PLATFORM_VERSION_TEN = 10;
+}
+
 SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty, const SizeF& percentReference)
 {
     auto width = ConvertToPx(size.Width(), scaleProperty, percentReference.Width());
@@ -186,9 +191,9 @@ void AddPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
     size.AddPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size, Axis reserveAxis)
+void MinusPaddingToSize(const PaddingPropertyF& padding, SizeF& size)
 {
-    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom, reserveAxis);
+    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
 void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
@@ -196,9 +201,9 @@ void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
     size.AddPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
-void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size, Axis reserveAxis)
+void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size)
 {
-    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom, reserveAxis);
+    size.MinusPadding(padding.left, padding.right, padding.top, padding.bottom);
 }
 
 float GetMainAxisOffset(const OffsetF& offset, Axis axis)
@@ -311,7 +316,8 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
     return idealSize;
 }
 
-OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType)
+OptionalSizeF CreateIdealSizeByPercentRef(
+    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain)
 {
     OptionalSizeF idealSize;
     do {
@@ -355,7 +361,11 @@ OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstraintF& layoutConstra
             break;
         }
     } while (false);
-    idealSize.Constrain(layoutConstraint.minSize, layoutConstraint.maxSize);
+    if (needToConstrain) {
+        idealSize.Constrain(layoutConstraint.minSize, layoutConstraint.maxSize,
+            PipelineBase::GetCurrentContext() &&
+                PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN);
+    }
     return idealSize;
 }
 

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -73,6 +74,15 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textLayoutProperty);
     auto textGeometryNode = textWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
+    auto badgeFontSize = layoutProperty->GetBadgeFontSize();
+    if (badgeFontSize.has_value()) {
+        textLayoutProperty->UpdateFontSize(badgeFontSize.value());
+    } else {
+        hasFontSize_ = false;
+        auto badgeThemeFontSize = badgeTheme->GetBadgeFontSize();
+        layoutProperty->UpdateBadgeFontSize(badgeThemeFontSize);
+        textLayoutProperty->UpdateFontSize(badgeThemeFontSize);
+    }
 
     std::string textData;
     if (textLayoutProperty->HasContent()) {
@@ -84,16 +94,20 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!textData.empty() || messageCount > 0) {
         if ((textData.size() <= 1 && !textData.empty()) ||
             ((messageCount < 10 && messageCount <= countLimit) && textData.empty())) {
-            badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
+            if (hasFontSize_) {
+                badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
+                badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
+            }
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
-            badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
         } else if (textData.size() > 1 || messageCount > countLimit) {
-            badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
+            if (hasFontSize_) {
+                badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
+                badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
+            }
             badgeWidth = textSize.Width() + badgeTheme->GetNumericalBadgePadding().ConvertToPx() * 2;
-            badgeWidth = std::max(badgeCircleDiameter, badgeWidth);
+            badgeWidth = badgeCircleDiameter > badgeWidth ? badgeCircleDiameter : badgeWidth;
             badgeCircleRadius = badgeCircleDiameter / 2;
-            badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
         }
     }
     if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
@@ -126,14 +140,10 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto parentSize = geometryNode->GetFrameSize();
-    auto width = parentSize.Width();
-    auto height = parentSize.Height();
     auto offset = geometryNode->GetFrameOffset();
 
     auto layoutProperty = DynamicCast<BadgeLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto badgePosition = layoutProperty->GetBadgePosition();
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -167,13 +177,17 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!textData.empty() || messageCount > 0) {
         if ((textData.size() <= 1 && !textData.empty()) ||
             ((messageCount < 10 && messageCount <= countLimit) && textData.empty())) {
-            badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
+            if (hasFontSize_) {
+                badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
+            }
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
         } else if (textData.size() > 1 || messageCount > countLimit) {
-            badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
+            if (hasFontSize_) {
+                badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
+            }
             badgeWidth = textSize.Width() + badgeTheme->GetNumericalBadgePadding().ConvertToPx() * 2;
-            badgeWidth = std::max(badgeCircleDiameter, badgeWidth);
+            badgeWidth = badgeCircleDiameter > badgeWidth ? badgeCircleDiameter : badgeWidth;
             badgeCircleRadius = badgeCircleDiameter / 2;
         }
     }
@@ -191,31 +205,50 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
 
     OffsetF textOffset;
-    if (textData == " ") {
-        if (badgePosition == BadgePosition::RIGHT_TOP) {
-            textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY());
-        } else if (badgePosition == BadgePosition::RIGHT) {
-            textOffset =
-                OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height / 2 - badgeCircleRadius);
+    if (!layoutProperty->GetIsPositionXy().value()) {
+        auto parentSize = geometryNode->GetFrameSize();
+        auto width = parentSize.Width();
+        auto height = parentSize.Height();
+        auto badgePosition = layoutProperty->GetBadgePosition();
+        if (textData == " ") {
+            if (badgePosition == BadgePosition::RIGHT_TOP) {
+                textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY());
+            } else if (badgePosition == BadgePosition::RIGHT) {
+                textOffset = OffsetF(
+                    offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height / 2 - badgeCircleRadius);
+            } else {
+                textOffset = OffsetF(offset.GetX(), offset.GetY() + height / 2 - badgeCircleRadius);
+            }
         } else {
-            textOffset = OffsetF(offset.GetX(), offset.GetY() + height / 2 - badgeCircleRadius);
+            if (badgePosition == BadgePosition::RIGHT_TOP) {
+                textOffset = OffsetF(
+                    width - badgeCircleDiameter + Dimension(2.0_vp).ConvertToPx(), 0 - Dimension(2.0_vp).ConvertToPx());
+                textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
+            } else if (badgePosition == BadgePosition::RIGHT) {
+                textOffset = OffsetF(width - badgeCircleDiameter, height / 2 - badgeCircleRadius);
+                textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
+            } else {
+                textOffset = OffsetF(0, height / 2 - badgeCircleRadius);
+                textOffset = OffsetF(offset.GetX(), offset.GetY() + textOffset.GetY());
+            }
         }
     } else {
-        if (badgePosition == BadgePosition::RIGHT_TOP) {
-            textOffset = OffsetF(
-                width - badgeCircleDiameter + Dimension(2.0_vp).ConvertToPx(), 0 - Dimension(2.0_vp).ConvertToPx());
-            textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
-        } else if (badgePosition == BadgePosition::RIGHT) {
-            textOffset = OffsetF(width - badgeCircleDiameter, height / 2 - badgeCircleRadius);
-            textOffset = OffsetF(offset.GetX() + textOffset.GetX(), offset.GetY() + textOffset.GetY());
-        } else {
-            textOffset = OffsetF(0, height / 2 - badgeCircleRadius);
-            textOffset = OffsetF(offset.GetX(), offset.GetY() + textOffset.GetY());
-        }
+        auto badgePositionX = layoutProperty->GetBadgePositionX();
+        auto badgePositionY = layoutProperty->GetBadgePositionY();
+        textOffset =
+            OffsetF(offset.GetX() + badgePositionX->ConvertToPx(), offset.GetY() + badgePositionY->ConvertToPx());
     }
-
-    textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
+    auto context = PipelineBase::GetCurrentContext();
+    if (context && context->GetMinPlatformVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
+    } else {
+        textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
+    }
     auto textFrameSize = textGeometryNode->GetFrameSize();
+    if (GreatNotEqual(circleSize->ConvertToPx(), 0) && context &&
+        context->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        textFrameSize += SizeF(borderWidth.ConvertToPx() * 2, borderWidth.ConvertToPx() * 2);
+    }
     textGeometryNode->SetFrameSize(textFrameSize);
     textWrapper->Layout();
 

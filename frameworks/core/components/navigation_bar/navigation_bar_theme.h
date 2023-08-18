@@ -19,6 +19,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace {
 
@@ -88,7 +89,36 @@ public:
                 theme->backButtonIconColor_ = pattern->GetAttr<Color>("back_button_icon_color", Color::WHITE);
                 theme->alphaDisabled_ = pattern->GetAttr<double>("button_alpha_disabled", 0.0);
             }
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
+        }
+
+    private:
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<NavigationBarTheme>& theme) const
+        {
+            if (!themeStyle) {
+                return;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_NAVIGATION_BAR, nullptr);
+            if (!pattern) {
+                return;
+            }
+            theme->toolbarBgColor_ = pattern->GetAttr<Color>("toolbar_bg_color", Color(0xfff1f3f5));
+            theme->toolbarBgColorWithOpacity_ = theme->toolbarBgColor_.BlendOpacity(theme->toolbarBgAlpha_);
+            theme->toolbarDividerWidth_ = Dimension(1.0, DimensionUnit::PX);
+            theme->toolbarDividerColor_ = pattern->GetAttr<Color>("toolbar_divider_color", Color(0x33182431));
+            theme->toolbarItemFocusBorderColor_ =
+                pattern->GetAttr<Color>("toolbar_item_focus_color", Color(0xff007dff));
+            theme->toolbarItemBorderRadiusValue_ =
+                pattern->GetAttr<Dimension>("toolbar_item_bg_button_border_radius", 8.0_vp);
+            theme->toolbarItemBorderRadius_.SetRadius(theme->toolbarItemBorderRadiusValue_);
+            theme->toolbarItemFontSize_ = pattern->GetAttr<Dimension>("toolbar_item_font_size", 10.0_vp);
+            theme->toolbarItemFontColor_ = pattern->GetAttr<Color>("toolbar_item_font_color", Color(0x182431));
+            theme->toolbarIconColor_ = pattern->GetAttr<Color>("toolbar_item_icon_color", Color(0x182431));
+            theme->toolbarActiveIconColor_ =
+                pattern->GetAttr<Color>("toolbar_item_active_icon_color", Color(0xff007dff));
+            theme->toolbarActiveTextColor_ =
+                pattern->GetAttr<Color>("toolbar_item_active_text_color", Color(0xff007dff));
         }
     };
 
@@ -213,6 +243,107 @@ public:
         return alphaDisabled_;
     }
 
+    const Color& GetToolBarBgColor() const
+    {
+        return toolbarBgColorWithOpacity_;
+    }
+    const Dimension& GetToolBarDividerWidth() const
+    {
+        return toolbarDividerWidth_;
+    }
+    const Color& GetToolBarDividerColor() const
+    {
+        return toolbarDividerColor_;
+    }
+    const Color& GetToolBarItemFocusColor() const
+    {
+        return toolbarItemFocusBorderColor_;
+    }
+    const Dimension& GetToolBarItemFocusBorderWidth() const
+    {
+        return toolbarItemFocusBorderWidth_;
+    }
+    const NG::BorderRadiusProperty& GetToolBarItemBorderRadius() const
+    {
+        return toolbarItemBorderRadius_;
+    }
+    const Dimension& GetToolBarItemFontSize() const
+    {
+        return toolbarItemFontSize_;
+    }
+    const Dimension& GetToolBarItemMinFontSize() const
+    {
+        return toolbarItemMinFontSize_;
+    }
+    const Color& GetToolBarItemFontColor() const
+    {
+        return toolbarItemFontColor_;
+    }
+    double GetToolbarItemDisabledAlpha() const
+    {
+        return toolbarItemDisabledAlpha_;
+    }
+    const Color& GetToolbarIconColor() const
+    {
+        return toolbarIconColor_;
+    }
+    const Dimension& GetToolbarIconSize() const
+    {
+        return toolbarIconSize_;
+    }
+    const Color& GetToolbarActiveIconColor() const
+    {
+        return toolbarActiveIconColor_;
+    }
+    const Color& GetToolBarItemActiveFontColor() const
+    {
+        return toolbarActiveTextColor_;
+    }
+    uint32_t GetToolbarItemTextMaxLines() const
+    {
+        return toolbarItemTextMaxLines_;
+    }
+    const Dimension& GetToolbarItemSafeInterval() const
+    {
+        return toolbarItemSafeInterval_;
+    }
+    const Dimension& GetToolbarItemHorizontalPadding() const
+    {
+        return toolbarItemHorizontalPadding_;
+    }
+    const Dimension& GetToolbarItemVerticalPadding() const
+    {
+        return toolbarItemVerticalPadding_;
+    }
+    const Dimension& GetToolbarItemTopPadding() const
+    {
+        return toolbarItemTopPadding_;
+    }
+    const Dimension& GetToolbarItemLeftOrRightPadding() const
+    {
+        return toolbarItemLeftOrRightPadding_;
+    }
+    const Dimension& GetToolbarItemHeigth() const
+    {
+        return toolbarItemHeight_;
+    }
+    const Dimension& GetToolbarItemBottomPadding() const
+    {
+        return toolbarItemBottomPadding_;
+    }
+    const Dimension& GetToolbarItemMargin() const
+    {
+        return toolbarItemMargin_;
+    }
+    const Dimension& GetToolbarItemSpecialMargin() const
+    {
+        return toolbarItemSpecialMargin_;
+    }
+    uint32_t GetToolbarRotationLimitGridCount() const
+    {
+        return toolbarLimitGridCount_;
+    }
+
 protected:
     NavigationBarTheme() = default;
 
@@ -245,6 +376,34 @@ private:
     uint32_t mostMenuItemCountInBar_ = 0;
     Color backButtonIconColor_;
     double alphaDisabled_ = 0.0;
+    Color toolbarBgColor_;
+    Color toolbarBgColorWithOpacity_;
+    Dimension toolbarDividerWidth_;
+    Color toolbarDividerColor_;
+    Color toolbarItemFocusBorderColor_;
+    Dimension toolbarItemFocusBorderWidth_ = 2.0_vp;
+    Dimension toolbarItemBorderRadiusValue_;
+    NG::BorderRadiusProperty toolbarItemBorderRadius_;
+    Dimension toolbarItemFontSize_;
+    Dimension toolbarItemMinFontSize_ = 9.0_vp;
+    Color toolbarItemFontColor_;
+    double toolbarItemDisabledAlpha_ = 0.4;
+    double toolbarBgAlpha_ = 0.95;
+    Color toolbarIconColor_;
+    Dimension toolbarIconSize_ = 24.0_vp;
+    Color toolbarActiveIconColor_;
+    Color toolbarActiveTextColor_;
+    uint32_t toolbarItemTextMaxLines_ = 2;
+    Dimension toolbarItemSafeInterval_ = 8.0_vp;
+    Dimension toolbarItemHorizontalPadding_ = 8.0_vp;
+    Dimension toolbarItemVerticalPadding_ = 12.0_vp;
+    Dimension toolbarItemTopPadding_ = 8.0_vp;
+    Dimension toolbarItemLeftOrRightPadding_ = 4.0_vp;
+    Dimension toolbarItemHeight_ = 56.0_vp;
+    Dimension toolbarItemBottomPadding_ = 4.0_vp;
+    Dimension toolbarItemMargin_ = 4.0_vp;
+    Dimension toolbarItemSpecialMargin_ = 0.0_vp;
+    uint32_t toolbarLimitGridCount_ = 8;
 };
 
 } // namespace OHOS::Ace

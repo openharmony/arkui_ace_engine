@@ -37,6 +37,8 @@
 
 #define ACE_FUNCTION_TRACE() ACE_SCOPED_TRACE(__func__)
 
+#define ACE_COUNT_TRACE(count, fmt, ...) AceCountTraceWidthArgs(count, fmt, ##__VA_ARGS__)
+
 namespace OHOS::Ace {
 
 bool ACE_EXPORT AceTraceEnabled();
@@ -49,6 +51,8 @@ bool ACE_EXPORT AceTraceBeginWithArgv(const char* format, va_list args);
 std::string ACE_EXPORT AceAsyncTraceBeginWithArgv(int32_t taskId, const char* format, va_list args);
 void ACE_EXPORT AceTraceEnd();
 void ACE_EXPORT AceAsyncTraceEnd(int32_t taskId, const char* name);
+void ACE_EXPORT AceCountTrace(const char *key, int32_t count);
+void ACE_EXPORT AceCountTraceWidthArgs(int32_t count, const char* format, ...);
 
 class ACE_FORCE_EXPORT AceScopedTrace final {
 public:

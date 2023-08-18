@@ -41,6 +41,12 @@ var TextInputStyle;
   TextInputStyle["Inline"] = "Inline";
 })(TextInputStyle || (TextInputStyle = {}));
 
+var TextContentStyle;
+(function (TextContentStyle) {
+  TextContentStyle["DEFAULT"] = "Default";
+  TextContentStyle["INLINE"] = "Inline";
+})(TextContentStyle || (TextContentStyle = {}));
+
 var TextAlign;
 (function (TextAlign) {
   TextAlign[TextAlign["Start"] = 0] = "Start";
@@ -280,7 +286,13 @@ var PanelType;
   PanelType[PanelType["Minibar"] = 0] = "Minibar";
   PanelType[PanelType["Foldable"] = 1] = "Foldable";
   PanelType[PanelType["Temporary"] = 2] = "Temporary";
+  PanelType[PanelType["CUSTOM"] = 3] = "CUSTOM";
 })(PanelType || (PanelType = {}));
+
+var PanelHeight;
+(function (PanelHeight) {
+  PanelHeight[PanelHeight["WRAP_CONTENT"] = "wrapContent"] = "WRAP_CONTENT";
+})(PanelHeight || (PanelHeight = {}));
 
 var PanelMode;
 (function (PanelMode) {
@@ -597,6 +609,20 @@ var SelectedMode;
   SelectedMode[SelectedMode["BOARD"] = 1] = "BOARD";
 })(SelectedMode || (SelectedMode = {}));
 
+var LayoutMode;
+(function (LayoutMode) {
+  LayoutMode[LayoutMode["AUTO"] = 0] = "AUTO";
+  LayoutMode[LayoutMode["VERTICAL"] = 1] = "VERTICAL";
+  LayoutMode[LayoutMode["HORIZONTAL"] = 2] = "HORIZONTAL";
+})(LayoutMode || (LayoutMode = {}));
+
+var LayoutStyle;
+(function (LayoutStyle) {
+  LayoutStyle[LayoutStyle["ALWAYS_CENTER"] = 0] = "ALWAYS_CENTER";
+  LayoutStyle[LayoutStyle["ALWAYS_AVERAGE_SPLIT"] = 1] = "ALWAYS_AVERAGE_SPLIT";
+  LayoutStyle[LayoutStyle["SPACE_BETWEEN_OR_CENTER"] = 2] = "SPACE_BETWEEN_OR_CENTER";
+})(LayoutStyle || (LayoutStyle = {}));
+
 var SizeType;
 (function (SizeType) {
   SizeType[SizeType["Auto"] = 0] = "Auto";
@@ -677,6 +703,12 @@ var DialogAlignment;
   DialogAlignment[DialogAlignment["BottomStart"] = 8] = "BottomStart";
   DialogAlignment[DialogAlignment["BottomEnd"] = 9] = "BottomEnd";
 })(DialogAlignment || (DialogAlignment = {}));
+
+var DialogButtonStyle;
+(function (DialogButtonStyle) {
+  DialogButtonStyle[DialogButtonStyle["DEFAULT"] = 0] = "DEFAULT";
+  DialogButtonStyle[DialogButtonStyle["HIGHLIGHT"] = 1] = "HIGHLIGHT";
+})(DialogButtonStyle || (DialogButtonStyle = {}));
 
 var EditMode;
 (function (EditMode) {
@@ -1160,6 +1192,10 @@ class SubTabBarStyle {
     this.labelStyle = arg;
     return this;
   }
+  padding(arg) {
+    this.padding = arg;
+    return this;
+  }
 }
 
 
@@ -1190,6 +1226,26 @@ class BottomTabBarStyle {
   }
   static of(icon, text) {
     return new BottomTabBarStyle(icon, text);
+  }
+  padding(arg) {
+    this.padding = arg;
+    return this;
+  }
+  layoutMode(arg) {
+    this.layoutMode = arg;
+    return this;
+  }
+  verticalAlign(arg) {
+    this.verticalAlign = arg;
+    return this;
+  }
+  symmetricExtensible(arg) {
+    this.symmetricExtensible = arg;
+    return this;
+  }
+  labelStyle(arg) {
+    this.labelStyle = arg;
+    return this;
   }
 }
 
@@ -1422,6 +1478,14 @@ class NavPathStack {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
   }
+  pushPathByName(name, param) {
+    this.pathArray.push(new NavPathInfo(name, param));
+    this.changeFlag = this.changeFlag + 1;
+  }
+  pushPath(info) {
+    this.pathArray.push(info);
+    this.changeFlag = this.changeFlag + 1;
+  }
   pop() {
     if (this.pathArray.length === 0) {
       return undefined;
@@ -1431,6 +1495,15 @@ class NavPathStack {
     return pathInfo;
   }
   popTo(name) {
+    let index = this.pathArray.findIndex(element => element.name === name);
+    if (index === -1) {
+      return -1;
+    }
+    this.pathArray.splice(index + 1);
+    this.changeFlag = this.changeFlag + 1;
+    return index;
+  }
+  popToName(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
     if (index === -1) {
       return -1;
@@ -1546,9 +1619,9 @@ var MenuAlignType;
 
 var ToolbarItemStatus;
 (function (ToolbarItemStatus) {
-  ToolbarItemStatus[ToolbarItemStatus["ENABLE_TOOLBAR_ITEM"] = 0] = "ENABLE_TOOLBAR_ITEM";
-  ToolbarItemStatus[ToolbarItemStatus["DISABLE_TOOLBAR_ITEM"] = 1] = "DISABLE_TOOLBAR_ITEM";
-  ToolbarItemStatus[ToolbarItemStatus["ACTIVATE_TOOLBAR_ITEM"] = 2] = "ACTIVATE_TOOLBAR_ITEM";
+  ToolbarItemStatus[ToolbarItemStatus["NORMAL"] = 0] = "NORMAL";
+  ToolbarItemStatus[ToolbarItemStatus["DISABLED"] = 1] = "DISABLED";
+  ToolbarItemStatus[ToolbarItemStatus["ACTIVE"] = 2] = "ACTIVE";
 })(ToolbarItemStatus || (ToolbarItemStatus = {}));
 
 var SecurityComponentLayoutDirection;
@@ -1556,31 +1629,6 @@ var SecurityComponentLayoutDirection;
   SecurityComponentLayoutDirection[SecurityComponentLayoutDirection["HORIZONTAL"] = 0] = "HORIZONTAL";
   SecurityComponentLayoutDirection[SecurityComponentLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
 })(SecurityComponentLayoutDirection || (SecurityComponentLayoutDirection = {}));
-
-var SecurityComponentLayoutOrder;
-(function (SecurityComponentLayoutOrder) {
-  SecurityComponentLayoutOrder[SecurityComponentLayoutOrder["ICON_FIRST"] = 0] = "ICON_FIRST";
-  SecurityComponentLayoutOrder[SecurityComponentLayoutOrder["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
-})(SecurityComponentLayoutOrder || (SecurityComponentLayoutOrder = {}));
-
-var SecLocationButtonLayoutDirection;
-(function (SecLocationButtonLayoutDirection) {
-  SecLocationButtonLayoutDirection[SecLocationButtonLayoutDirection["HORIZONTAL"] = 0] = "HORIZONTAL";
-  SecLocationButtonLayoutDirection[SecLocationButtonLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
-})(SecLocationButtonLayoutDirection || (SecLocationButtonLayoutDirection = {}));
-
-var SecLocationButtonLayoutOrder;
-(function (SecLocationButtonLayoutOrder) {
-  SecLocationButtonLayoutOrder[SecLocationButtonLayoutOrder["ICON_FIRST"] = 0] = "ICON_FIRST";
-  SecLocationButtonLayoutOrder[SecLocationButtonLayoutOrder["TEXT_FIRST"] = 1] = "TEXT_FIRST ";
-})(SecLocationButtonLayoutOrder || (SecLocationButtonLayoutOrder = {}));
-
-var BackgroundButtonType;
-(function (BackgroundButtonType) {
-  BackgroundButtonType[BackgroundButtonType["CAPSULE_BACKGROUND"] = 0] = "CAPSULE_BACKGROUND";
-  BackgroundButtonType[BackgroundButtonType["CIRCLE_BACKGROUND"] = 1] = "CIRCLE_BACKGROUND";
-  BackgroundButtonType[BackgroundButtonType["NORMAL_BACKGROUND"] = 2] = "NORMAL_BACKGROUND";
-})(BackgroundButtonType || (BackgroundButtonType = {}));
 
 var LocationIconStyle;
 (function (LocationIconStyle) {
@@ -1603,13 +1651,13 @@ var LocationDescription;
   LocationDescription[LocationDescription["CURRENT_POSITION"] = 10] = "CURRENT_POSITION";
 })(LocationDescription || (LocationDescription = {}));
 
-var SecLocationButtonOnClickResult;
-(function (SecLocationButtonOnClickResult) {
-  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_SUCCESS"] = 0] =
-    "LOCATION_BUTTON_CLICK_SUCCESS";
-  SecLocationButtonOnClickResult[SecLocationButtonOnClickResult["LOCATION_BUTTON_CLICK_GRANT_FAILED"] = 1] =
-    "LOCATION_BUTTON_CLICK_GRANT_FAILED ";
-})(SecLocationButtonOnClickResult || (SecLocationButtonOnClickResult = {}));
+var LocationButtonOnClickResult;
+(function (LocationButtonOnClickResult) {
+  LocationButtonOnClickResult[LocationButtonOnClickResult["SUCCESS"] = 0] =
+    "SUCCESS";
+  LocationButtonOnClickResult[LocationButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
+    "TEMPORARY_AUTHORIZATION_FAILED ";
+})(LocationButtonOnClickResult || (LocationButtonOnClickResult = {}));
 
 var PasteIconStyle;
 (function (PasteIconStyle) {
@@ -1621,13 +1669,13 @@ var PasteDescription;
   PasteDescription[PasteDescription["PASTE"] = 0] = "PASTE";
 })(PasteDescription || (PasteDescription = {}));
 
-var SecPasteButtonOnClickResult;
-(function (SecPasteButtonOnClickResult) {
-  SecPasteButtonOnClickResult[SecPasteButtonOnClickResult["SUCCESS"] = 0] =
+var PasteButtonOnClickResult;
+(function (PasteButtonOnClickResult) {
+  PasteButtonOnClickResult[PasteButtonOnClickResult["SUCCESS"] = 0] =
     "SUCCESS";
-  SecPasteButtonOnClickResult[SecPasteButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
+  PasteButtonOnClickResult[PasteButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
     "TEMPORARY_AUTHORIZATION_FAILED ";
-})(SecPasteButtonOnClickResult || (SecPasteButtonOnClickResult = {}));
+})(PasteButtonOnClickResult || (PasteButtonOnClickResult = {}));
 
 var SaveIconStyle;
 (function (SaveIconStyle) {
@@ -1638,22 +1686,22 @@ var SaveIconStyle;
 var SaveDescription;
 (function (SaveDescription) {
   SaveDescription[SaveDescription["DOWNLOAD"] = 0] = "DOWNLOAD";
-  SaveDescription[SaveDescription["DOWNLOAD_FILES"] = 1] = "DOWNLOAD_FILES";
+  SaveDescription[SaveDescription["DOWNLOAD_FILE"] = 1] = "DOWNLOAD_FILE";
   SaveDescription[SaveDescription["SAVE"] = 2] = "SAVE";
-  SaveDescription[SaveDescription["SAVE_IMAGES"] = 3] = "SAVE_IMAGES";
-  SaveDescription[SaveDescription["SAVE_FILES"] = 4] = "SAVE_FILES";
+  SaveDescription[SaveDescription["SAVE_IMAGE"] = 3] = "SAVE_IMAGE";
+  SaveDescription[SaveDescription["SAVE_FILE"] = 4] = "SAVE_FILE";
   SaveDescription[SaveDescription["DOWNLOAD_AND_SHARE"] = 5] = "DOWNLOAD_AND_SHARE";
   SaveDescription[SaveDescription["RECEIVE"] = 6] = "RECEIVE";
   SaveDescription[SaveDescription["CONTINUE_TO_RECEIVE"] = 7] = "CONTINUE_TO_RECEIVE";
 })(SaveDescription || (SaveDescription = {}));
 
-var SecSaveButtonOnClickResult;
-(function (SecSaveButtonOnClickResult) {
-  SecSaveButtonOnClickResult[SecSaveButtonOnClickResult["SUCCESS"] = 0] =
+var SaveButtonOnClickResult;
+(function (SaveButtonOnClickResult) {
+  SaveButtonOnClickResult[SaveButtonOnClickResult["SUCCESS"] = 0] =
     "SUCCESS";
-  SecSaveButtonOnClickResult[SecSaveButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
+  SaveButtonOnClickResult[SaveButtonOnClickResult["TEMPORARY_AUTHORIZATION_FAILED"] = 1] =
     "TEMPORARY_AUTHORIZATION_FAILED ";
-})(SecSaveButtonOnClickResult || (SecSaveButtonOnClickResult = {}));
+})(SaveButtonOnClickResult || (SaveButtonOnClickResult = {}));
 
 var ObscuredReasons;
 (function (ObscuredReasons) {
@@ -1672,14 +1720,14 @@ var ListItemGroupStyle;
   ListItemGroupStyle[ListItemGroupStyle["CARD"] = 1] = "CARD";
 })(ListItemGroupStyle || (ListItemGroupStyle = {}));
 
-var DragRet;
-(function (DragRet) {
-  DragRet[DragRet["DRAG_SUCCESS"] = 0] = "DRAG_SUCCESS";
-  DragRet[DragRet["DRAG_FAILED"] = 1] = "DRAG_FAILED";
-  DragRet[DragRet["DRAG_CANCELED"] = 2] = "DRAG_CANCELED";
-  DragRet[DragRet["DROP_ENABLED"] = 3] = "DROP_ENABLED";
-  DragRet[DragRet["DROP_DISABLED"] = 4] = "DROP_DISABLED";
-})(DragRet || (DragRet = {}));
+var DragResult;
+(function (DragResult) {
+  DragResult[DragResult["DRAG_SUCCESSFUL"] = 0] = "DRAG_SUCCESSFUL";
+  DragResult[DragResult["DRAG_FAILED"] = 1] = "DRAG_FAILED";
+  DragResult[DragResult["DRAG_CANCELED"] = 2] = "DRAG_CANCELED";
+  DragResult[DragResult["DROP_ENABLED"] = 3] = "DROP_ENABLED";
+  DragResult[DragResult["DROP_DISABLED"] = 4] = "DROP_DISABLED";
+})(DragResult || (DragResult = {}));
 
 var XComponentType;
 (function (XComponentType) {
@@ -1738,3 +1786,34 @@ var RenderFit;
   RenderFit[RenderFit["RESIZE_COVER_TOP_LEFT"] = 14] = "RESIZE_COVER_TOP_LEFT";
   RenderFit[RenderFit["RESIZE_COVER_BOTTOM_RIGHT"] = 15] = "RESIZE_COVER_BOTTOM_RIGHT";
 })(RenderFit || (RenderFit = {}));
+
+var WebCaptureMode;
+(function (WebCaptureMode) {
+  WebCaptureMode[WebCaptureMode["HOME_SCREEN"] = 0] = "HOME_SCREEN";
+})(WebCaptureMode || (WebCaptureMode = {}));
+
+var CalendarAlign;
+(function (CalendarAlign) {
+  CalendarAlign[CalendarAlign["START"] = 0] = "START";
+  CalendarAlign[CalendarAlign["CENTER"] = 1] = "CENTER";
+  CalendarAlign[CalendarAlign["END"] = 2] = "END";
+})(CalendarAlign || (CalendarAlign = {}));
+
+var DragBehavior;
+(function (DragBehavior) {
+  DragBehavior[DragBehavior["COPY"] = 0] = "COPY";
+  DragBehavior[DragBehavior["MOVE"] = 1] = "MOVE";
+})(DragBehavior || (DragBehavior = {}));
+
+var PatternLockChallengeResult;
+(function (PatternLockChallengeResult) {
+  PatternLockChallengeResult[PatternLockChallengeResult["CORRECT"] = 1] = "CORRECT";
+  PatternLockChallengeResult[PatternLockChallengeResult["WRONG"] = 2] = "WRONG";
+})(PatternLockChallengeResult || (PatternLockChallengeResult = {}));
+
+var DialogButtonDirection;
+(function (DialogButtonDirection) {
+  DialogButtonDirection[DialogButtonDirection["AUTO"] = 0] = "AUTO";
+  DialogButtonDirection[DialogButtonDirection["HORIZONTAL"] = 1] = "HORIZONTAL";
+  DialogButtonDirection[DialogButtonDirection["VERTICAL"] = 2] = "VERTICAL";
+})(DialogButtonDirection || (DialogButtonDirection = {}));

@@ -28,6 +28,7 @@ public:
     void SlowExecute(std::function<void()>&& func) override;
     bool EnableFrameTrace(const std::string&traceTag) override;
     bool IsEnabled() override;
+    void SetFrameTraceLimit() override;
 
 private:
     bool AccessFrameTrace();

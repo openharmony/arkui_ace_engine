@@ -50,6 +50,15 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto rowWidth = textSize.Width() + space + spinnerSize.Width();
     auto rowHeight = std::max(textSize.Height(), spinnerSize.Height());
     rowGeometry->SetFrameSize(SizeF(rowWidth, rowHeight));
+    rowWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight().ConvertToPx());
+    layoutWrapper->GetGeometryNode()->SetContentSize(
+        SizeF(rowWidth, rowHeight > defaultHeight ? rowHeight : defaultHeight));
 
     // Measure same as box, base on the child row.
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);

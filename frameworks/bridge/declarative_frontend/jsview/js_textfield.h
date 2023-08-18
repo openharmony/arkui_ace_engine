@@ -67,7 +67,7 @@ public:
     static void SetOnSubmit(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
-    static void SetOnScroll(const JSCallbackInfo& info);
+    static void SetOnContentScroll(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
@@ -87,6 +87,9 @@ public:
     static void SetShowUnderline(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
+    static bool ParseJsCustomKeyboardBuilder(const JSCallbackInfo& info,
+        int32_t index, std::function<void()>& buildFunc);
+    static void SetCustomKeyboard(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

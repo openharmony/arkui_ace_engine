@@ -31,6 +31,7 @@ const double SHEET_VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 enum SheetMode {
     MEDIUM,
     LARGE,
+    AUTO,
 };
 
 struct SheetStyle {
@@ -38,11 +39,13 @@ struct SheetStyle {
     std::optional<SheetMode> sheetMode;
     std::optional<bool> showDragBar;
     std::optional<Color> backgroundColor;
+    std::optional<Color> maskColor;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
         return !(height != sheetStyle.height || sheetMode != sheetStyle.sheetMode ||
-                 showDragBar != sheetStyle.showDragBar || backgroundColor != sheetStyle.backgroundColor);
+                 showDragBar != sheetStyle.showDragBar || backgroundColor != sheetStyle.backgroundColor ||
+                 maskColor != sheetStyle.maskColor);
     }
 };
 } // namespace OHOS::Ace::NG

@@ -41,6 +41,8 @@ public:
     virtual void SetSticky(V2::StickyMode stickyMode) = 0;
     virtual void SetEditMode(uint32_t editMode) = 0;
     virtual void SetSelectable(bool selectable) = 0;
+    virtual void SetSelected(bool selected) = 0;
+    virtual void SetSelectChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
     virtual void SetSwiperAction(
         std::function<void()>&& startAction, std::function<void()>&& endAction, V2::SwipeEdgeEffect edgeEffect) = 0;
     virtual void SetSelectCallback(OnSelectFunc&& selectCallback) = 0;

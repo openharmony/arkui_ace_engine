@@ -37,6 +37,7 @@ public:
 #ifdef USE_ARK_ENGINE
     static panda::Local<panda::JSValueRef> JSMeasure(panda::JsiRuntimeCallInfo* info);
     static panda::Local<panda::JSValueRef> JSLayout(panda::JsiRuntimeCallInfo* info);
+    static panda::Local<panda::JSValueRef> JSPlaceChildren(panda::JsiRuntimeCallInfo* info);
 
     static void SetMeasureChildren(std::list<RefPtr<NG::LayoutWrapper>> children)
     {

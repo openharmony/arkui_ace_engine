@@ -217,6 +217,10 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
         JSRef<JSVal> size = obj->GetProperty("size");
         if (!size->IsNull()) {
             ParseJsDimensionFp(size, fontSize);
+            if (fontSize.Unit() == DimensionUnit::PERCENT) {
+                // set zero for abnormal value
+                fontSize = CalcDimension();
+            }
         }
 
         auto jsWeight = obj->GetProperty("weight");
@@ -237,6 +241,13 @@ void JSMenuItem::ContentFont(const JSCallbackInfo& info)
                 ParseJsString(jsStyle, style);
                 MenuItemModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
             }
+        }
+
+        auto jsFamily = obj->GetProperty("family");
+        if (!jsFamily->IsNull() && jsFamily->IsString()) {
+            auto familyVal = jsFamily->ToString();
+            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+            MenuItemModel::GetInstance()->SetFontFamily(fontFamilies);
         }
     }
     MenuItemModel::GetInstance()->SetFontSize(fontSize);
@@ -268,6 +279,10 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
         JSRef<JSVal> size = obj->GetProperty("size");
         if (!size->IsNull()) {
             ParseJsDimensionFp(size, fontSize);
+            if (fontSize.Unit() == DimensionUnit::PERCENT) {
+                // set zero for abnormal value
+                fontSize = CalcDimension();
+            }
         }
 
         auto jsWeight = obj->GetProperty("weight");
@@ -288,6 +303,13 @@ void JSMenuItem::LabelFont(const JSCallbackInfo& info)
                 ParseJsString(jsStyle, style);
                 MenuItemModel::GetInstance()->SetLabelFontStyle(ConvertStrToFontStyle(style));
             }
+        }
+
+        auto jsFamily = obj->GetProperty("family");
+        if (!jsFamily->IsNull() && jsFamily->IsString()) {
+            auto familyVal = jsFamily->ToString();
+            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+            MenuItemModel::GetInstance()->SetLabelFontFamily(fontFamilies);
         }
     }
     MenuItemModel::GetInstance()->SetLabelFontSize(fontSize);

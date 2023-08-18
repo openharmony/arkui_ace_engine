@@ -86,9 +86,10 @@ ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
 node_js_path = "//prebuilts/ace-toolkit/nodejs/current/bin/"
 ark_toolchain_path = "//arkcompiler/toolchain"
 window_manager_path = "//foundation/window/window_manager"
-graphic_standard_path = "//foundation/graphic/graphic_2d"
+graphic_2d_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
+crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
 
 # Config toolchain
@@ -174,6 +175,12 @@ if (defined(use_new_skia) && use_new_skia) {
   ace_common_defines += [ "NEW_SKIA" ]
 }
 
+ace_use_rosen_drawing = false
+if (defined(use_rosen_drawing) && use_rosen_drawing) {
+  ace_use_rosen_drawing = true
+  ace_common_defines += [ "USE_ROSEN_DRAWING" ]
+}
+
 if (enable_ng_build) {
   ace_common_defines += [ "NG_BUILD" ]
 }
@@ -191,8 +198,9 @@ if (is_emulator) {
 }
 
 if (defined(global_parts_info)) {
-  if (defined(global_parts_info.resourceschedule_frame_aware_sched) || defined(
-          global_parts_info.hmosresourceschedule_resourceschedule_frame_aware_sched_override)) {
+  if (defined(global_parts_info.resourceschedule_frame_aware_sched) ||
+      defined(
+          global_parts_info.hmosresourceschedule_frame_aware_sched_override)) {
     frame_trace_support = true
   } else {
     frame_trace_support = false

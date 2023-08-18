@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
@@ -52,14 +53,17 @@ template("ace_osal_ohos_source_set") {
     ]
 
     sources = [
+      "ace_checker.cpp",
       "ace_engine_ext.cpp",
       "ace_trace.cpp",
       "anr_thread.cpp",
+      "app_bar_helper_impl.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
       "frame_report.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
+      "modal_ui_extension_impl.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
       "system_properties.cpp",
@@ -86,13 +90,14 @@ template("ace_osal_ohos_source_set") {
       if (defined(global_parts_info) &&
           defined(global_parts_info.resourceschedule_soc_perf)) {
         external_deps += [ "soc_perf:socperf_client" ]
+        defines += [ "SOC_PERF_ENABLE" ]
       }
 
       external_deps += [
         "ability_base:want",
         "ability_runtime:abilitykit_native",
+        "image_framework:image",
         "input:libmmi-client",
-        "multimedia_image_framework:image",
         "napi:ace_napi",
         "resource_management:global_resmgr",
       ]
@@ -119,6 +124,7 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [
+      "file_uri_helper_ohos.cpp",
       "image_source_ohos.cpp",
       "mouse_style_ohos.cpp",
       "page_url_checker_ohos.cpp",
@@ -127,15 +133,28 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "ability_runtime:abilitykit_native",
       "ability_runtime:runtime",
+      "app_file_service:fileuri_native",
+      "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
-      "graphic_standard:librender_service_client",
+      "graphic_2d:librender_service_client",
+      "hichecker:libhichecker",
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
       "hitrace:libhitracechain",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+      "window_manager:scene_session",
     ]
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
     ]
+
+    if (ability_runtime_graphics) {
+      external_deps += [
+        "image_framework:image_native",
+        "window_manager:libdm",
+      ]
+    }
   }
 }
 

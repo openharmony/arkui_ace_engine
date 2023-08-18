@@ -91,7 +91,8 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
         auto castProp = AceType::DynamicCast<srcType>(prop);                             \
         auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get()); \
         castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },       \
-            [rsProp](const propType& value) { rsProp->Set(value); });                    \
+            [rsProp](const propType& value) { rsProp->Set(value); },                     \
+            [rsProp]() -> propType { return rsProp->GetStagingValue(); });               \
         rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                        \
         return rsProp;                                                                   \
     }
@@ -106,7 +107,9 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_PROP(property, PropertyFloat, float);
     CONVERT_PROP(property, PropertyString, std::string);
     CONVERT_PROP(property, PropertyColor, Color);
+    CONVERT_PROP(property, PropertyRectF, RectF);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyOffsetF, OffsetF);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyUint8, uint8_t);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyFloat, float);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyColor, LinearColor);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorColor, GradientArithmetic);

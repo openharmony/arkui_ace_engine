@@ -95,20 +95,23 @@ void RosenRenderSwitch::Paint(RenderContext& context, const Offset& offset)
 
     // paint track rect
     if (!isSwitchDuringAnimation_) {
-#ifdef OHOS_PLATFORM
 #ifndef USE_ROSEN_DRAWING
+#ifdef OHOS_PLATFORM
         auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
         recordingCanvas->SaveAlpha();
         recordingCanvas->MultiplyAlpha(ConfigureOpacity(disabled_));
         PaintTrack(canvas, trackPaint, originX, originY, trackColor);
         recordingCanvas->RestoreAlpha();
 #else
-        auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
-        LOGE("Drawing is not supported");
-        PaintTrack(canvas, trackPen, originX, originY, trackColor);
+        PaintTrack(canvas, trackPaint, originX, originY, trackColor);
 #endif
 #else
-        PaintTrack(canvas, trackPaint, originX, originY, trackColor);
+#ifdef OHOS_PLATFORM
+        LOGE("Drawing is not supported");
+        PaintTrack(canvas, trackPen, originX, originY, trackColor);
+#else
+        PaintTrack(canvas, trackPen, originX, originY, trackColor);
+#endif
 #endif
     } else {
         // current status is during the switch on/off

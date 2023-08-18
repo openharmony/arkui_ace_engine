@@ -67,7 +67,7 @@ ohos_unittest("frame_node_test_ng") {
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/pattern/flex/mock_flex_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
@@ -77,9 +77,14 @@ ohos_unittest("frame_node_test_ng") {
     # self
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/pipeline/base/element_register.cpp",
     "frame_node_test_ng.cpp",
   ]

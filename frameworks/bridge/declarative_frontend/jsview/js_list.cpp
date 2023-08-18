@@ -63,8 +63,12 @@ void JSList::SetDirection(int32_t direction)
     ListModel::GetInstance()->SetListDirection(static_cast<Axis>(direction));
 }
 
-void JSList::SetScrollBar(int32_t scrollBar)
+void JSList::SetScrollBar(const JSCallbackInfo& info)
 {
+    // default value 1 represents scrollBar DisplayMode::AUTO.
+    int32_t scrollBar = 1;
+    ParseJsInteger<int32_t>(info[0], scrollBar);
+    scrollBar = scrollBar < 0 ? 1 : scrollBar;
     ListModel::GetInstance()->SetScrollBar(static_cast<DisplayMode>(scrollBar));
 }
 
@@ -194,8 +198,10 @@ void JSList::SetLanes(const JSCallbackInfo& info)
 
     if (info.Length() >= 2 && !(info[1]->IsNull())) { /* 2: parameter count */
         CalcDimension laneGutter;
-        if (!JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
-            ListModel::GetInstance()->SetLaneGutter(0.0_vp);
+        if (JSViewAbstract::ParseJsDimensionVp(info[1], laneGutter)) {
+            if (laneGutter.IsNegative()) {
+                laneGutter.Reset();
+            }
         }
         ListModel::GetInstance()->SetLaneGutter(laneGutter);
     }
@@ -232,6 +238,16 @@ void JSList::SetLanes(const JSCallbackInfo& info)
 void JSList::SetSticky(int32_t sticky)
 {
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
+}
+
+void JSList::SetContentStartOffset(float startOffset)
+{
+    ListModel::GetInstance()->SetContentStartOffset(startOffset);
+}
+
+void JSList::SetContentEndOffset(float endOffset)
+{
+    ListModel::GetInstance()->SetContentEndOffset(endOffset);
 }
 
 void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
@@ -304,9 +320,9 @@ void JSList::SetNestedScroll(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
-void JSList::SetScrollEnabled(bool scrollEnabled)
+void JSList::SetScrollEnabled(const JSCallbackInfo& args)
 {
-    ListModel::GetInstance()->SetScrollEnabled(scrollEnabled);
+    ListModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
 }
 
 void JSList::ScrollCallback(const JSCallbackInfo& args)
@@ -623,6 +639,8 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
+    JSClass<JSList>::StaticMethod("contentStartOffset", &JSList::SetContentStartOffset);
+    JSClass<JSList>::StaticMethod("contentEndOffset", &JSList::SetContentEndOffset);
     JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);

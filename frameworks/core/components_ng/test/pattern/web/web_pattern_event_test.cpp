@@ -170,8 +170,8 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_004, TestSize.Level1)
     g_webPattern->OnModifyDone();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper;
-    layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(g_frameNode, geometryNode, g_frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper;
+    layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(g_frameNode, geometryNode, g_frameNode->GetLayoutProperty());
     EXPECT_NE(layoutWrapper, nullptr);
     bool result;
     DirtySwapConfig config;
@@ -181,14 +181,14 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_004, TestSize.Level1)
     config.contentSizeChange = true;
     SizeF size(Size::INFINITE_SIZE, Size::INFINITE_SIZE);
     geometryNode->SetContentSize(size);
-    layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(g_frameNode, geometryNode, g_frameNode->GetLayoutProperty());
+    layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(g_frameNode, geometryNode, g_frameNode->GetLayoutProperty());
     EXPECT_NE(layoutWrapper, nullptr);
     result = g_webPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(result);
 
     size.Reset();
     geometryNode->SetContentSize(size);
-    layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(g_frameNode, geometryNode, g_frameNode->GetLayoutProperty());
+    layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(g_frameNode, geometryNode, g_frameNode->GetLayoutProperty());
     EXPECT_NE(layoutWrapper, nullptr);
     result = g_webPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(result);
@@ -197,7 +197,7 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_004, TestSize.Level1)
     size.SetWidth(widthAndHight);
     size.SetHeight(widthAndHight);
     geometryNode->SetContentSize(size);
-    layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(g_frameNode, geometryNode, g_frameNode->GetLayoutProperty());
+    layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(g_frameNode, geometryNode, g_frameNode->GetLayoutProperty());
     EXPECT_NE(layoutWrapper, nullptr);
     g_webPattern->isUrlLoaded_ = false;
     result = g_webPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);

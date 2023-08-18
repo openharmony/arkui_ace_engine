@@ -62,11 +62,7 @@ public:
     void SetImageRenderMode(ImageRenderMode imageRenderMode);
     void SetImageRepeat(ImageRepeat imageRepeat);
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& sourceSize);
-#ifndef USE_ROSEN_DRAWING
     void SetUseSkiaSvg(bool useSkiaSvg);
-#else
-    void SetUseDrawingSvg(bool useDrawingSvg);
-#endif
     void SetPixmap(const RefPtr<PixelMap>& pixmap);
     void SetAutoResize(bool autoResize);
     void SetSyncMode(bool syncMode);
@@ -89,11 +85,7 @@ public:
     ImageRenderMode GetImageRenderMode() const;
     ImageRepeat GetImageRepeat() const;
     const std::pair<Dimension, Dimension>& GetImageSourceSize() const;
-#ifndef USE_ROSEN_DRAWING
     bool GetUseSkiaSvg() const;
-#else
-    bool GetUseDrawingSvg() const;
-#endif
     bool GetAutoResize() const;
     static bool IsSvgSuffix(const std::string& src);
     const RefPtr<PixelMap>& GetPixmap() const;
@@ -228,11 +220,7 @@ private:
     bool fitMaxSize_ = true;
     bool hasObjectPosition_ = false;
     bool matchTextDirection_ = false;
-#ifndef USE_ROSEN_DRAWING
     bool useSkiaSvg_ = true;
-#else
-    bool useDrawingSvg_ = true;
-#endif
     bool autoResize_ = true;
     bool focusable_ = true;
 

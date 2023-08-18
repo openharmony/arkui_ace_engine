@@ -33,9 +33,11 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);
-    if (!CheckInShowArea(*info_)) {
-        LayoutWrapper::RemoveChildInRenderTree(menu);
+    if (!CheckInShowArea(*info_) || (!info_->firstHandle.isShow && !info_->secondHandle.isShow)) {
+        menu->SetActive(false);
         return;
+    } else {
+        menu->SetActive(true);
     }
     auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
     menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
@@ -129,12 +131,13 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
 
     auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
-    auto frameNode = info_->callerFrameNode.Upgrade();
-    CHECK_NULL_RETURN(frameNode, OffsetF());
-    auto viewPortOption = frameNode->GetViewPort();
     RectF viewPort = layoutWrapper->GetGeometryNode()->GetFrameRect() - offset;
-    if (viewPortOption.has_value()) {
-        viewPort = viewPortOption.value();
+    auto frameNode = info_->callerFrameNode.Upgrade();
+    if (frameNode) {
+        auto viewPortOption = frameNode->GetViewPort();
+        if (viewPortOption.has_value()) {
+            viewPort = viewPortOption.value();
+        }
     }
     LOGD("select_overlay viewPort Rect: %{public}s", viewPort.ToString().c_str());
 

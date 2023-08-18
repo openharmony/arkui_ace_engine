@@ -50,11 +50,6 @@ public:
         }
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<StageLayoutAlgorithm>();
-    }
-
     void SetOnRebuildFrameCallback(std::function<void()>&& callback)
     {
         onRebuildFrameCallback_ = std::move(callback);

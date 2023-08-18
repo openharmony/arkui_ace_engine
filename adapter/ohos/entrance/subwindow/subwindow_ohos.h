@@ -64,14 +64,12 @@ public:
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override;
     void HidePopupNG(int32_t targetId) override;
-    void HidePopupNG() override;
     void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;
     void ClearMenuNG() override;
-    RefPtr<NG::FrameNode> ShowDialogNG(
-        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) override;
+    RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc) override;
     void HideSubWindowNG() override;
     bool GetShown() override
     {
@@ -84,6 +82,8 @@ public:
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
+    void ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks) override;
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback) override;
     void CloseDialog(int32_t instanceId) override;
@@ -135,6 +135,10 @@ private:
     void ShowDialogForService(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);
+    void ShowDialogForAbility(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks);
+    void ShowDialogForService(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks);
     void ShowActionMenuForAbility(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,

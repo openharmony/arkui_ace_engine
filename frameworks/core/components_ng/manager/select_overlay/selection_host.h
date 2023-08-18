@@ -27,6 +27,10 @@ class SelectionHost : public virtual AceType {
 
 public:
     virtual bool BetweenSelectedPosition(const Offset& globalOffset) = 0;
+    virtual bool IsTouchTestPointInArea(const Offset& touchOffset, bool isTouchPointHits)
+    {
+        return BetweenSelectedPosition(touchOffset);
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_SELECT_OVERLAY_SELECTION_HOST_H

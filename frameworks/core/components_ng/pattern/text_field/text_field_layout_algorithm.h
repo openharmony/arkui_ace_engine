@@ -93,16 +93,24 @@ public:
         return unitWidth_;
     }
 
+    float GetParagraphWidth() const
+    {
+        return paragraphWidth_;
+    }
+
     static TextDirection GetTextDirection(const std::string& content);
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled);
-    static void UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
+    static void UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty,  const RefPtr<TextFieldTheme>& theme,
+        TextStyle& textStyle, bool isDisabled);
 
 private:
-    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText, bool disableTextAlign);
+    static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
+    void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
+        int32_t nakedCharPosition, bool disableTextAlign);
     void CreateParagraph(const std::vector<TextStyle>& textStyles, const std::vector<std::string>& contents,
         const std::string& content, bool needObscureText, bool disableTextAlign);
     void CreateCounterParagraph(int32_t textLength, int32_t maxLength, const RefPtr<TextFieldTheme>& theme);
@@ -127,6 +135,7 @@ private:
     RectF textRect_;
     RectF imageRect_;
     OffsetF parentGlobalOffset_;
+    float paragraphWidth_ = 0.0f;
 
     float caretOffsetX_ = 0.0f;
     float unitWidth_ = 0.0f;

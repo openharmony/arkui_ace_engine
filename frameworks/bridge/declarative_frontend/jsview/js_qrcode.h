@@ -29,6 +29,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetQRCodeColor(const JSCallbackInfo& info);
     static void SetBackgroundColor(const JSCallbackInfo& info);
+    static void SetContentOpacity(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

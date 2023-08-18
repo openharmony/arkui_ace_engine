@@ -109,8 +109,8 @@ template("js_engine_ark") {
     } else {
       deps += [ "//third_party/jsframework:ark_build" ]
       external_deps += [
-        "multimedia_image_framework:image",
-        "multimedia_image_framework:image_native",
+        "image_framework:image",
+        "image_framework:image_native",
         "napi:ace_napi",
       ]
     }

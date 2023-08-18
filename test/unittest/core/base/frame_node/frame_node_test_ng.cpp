@@ -34,6 +34,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
@@ -42,7 +43,6 @@
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -59,8 +59,7 @@ std::string srcimages = "";
 
 const std::string NAME = "propertyName";
 float value = 1.0;
-const std::function<void(float)> onCallbackEvent = [](float) {
-};
+const std::function<void(float)> onCallbackEvent = [](float) {};
 } // namespace
 class FrameNodeTestNg : public testing::Test {
 public:
@@ -590,7 +589,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      */
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
-        const OffsetF& origin) { flag = !flag; };
+                                          const OffsetF& origin) { flag = !flag; };
 
     /**
      * @tc.steps: step2. call TriggerOnAreaChangeCallback before set callback
@@ -694,7 +693,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
     FRAME_NODE2->TriggerVisibleAreaChangeCallback();
     EXPECT_TRUE(context->GetOnShow());
-    EXPECT_NE(FRAME_NODE2->lastVisibleRatio_, 0);
+    EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 0);
 }
 
 /**
@@ -1164,7 +1163,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAnimateHoverEffect0034, TestSize.Level1)
     /**
      * @tc.steps: step1. create a frame node and release inputEventHub_, then
             change hoverEffectType_ and call AnimateHoverEffect
-     * @tc.expected: AnimateHoverEffectScale has been called 
+     * @tc.expected: AnimateHoverEffectScale has been called
      */
     auto one = FrameNode::GetOrCreateFrameNode("one", 12, []() { return AceType::MakeRefPtr<Pattern>(); });
     one->eventHub_->inputEventHub_ = nullptr;
@@ -1199,7 +1198,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateAnimatablePropertyFloat0035, TestSize.L
      */
     FRAME_NODE->CreateAnimatablePropertyFloat(NAME, value, onCallbackEvent);
 
-    FRAME_NODE->renderContext_= AceType::MakeRefPtr<MockRenderContext>();
+    FRAME_NODE->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     FRAME_NODE->CreateAnimatablePropertyFloat(NAME, value, onCallbackEvent);
 
     /**

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SIDE_BAR_CONTAINER_MODEL_NG_H
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_model.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SideBarContainerModelNG : public SideBarContainerModel {
@@ -54,6 +55,9 @@ private:
     void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode) override;
     void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode) override;
     void MarkNeedInitRealSideBarWidth() override;
+    RefPtr<FrameNode> CreateControlButton(const RefPtr<SideBarTheme>& sideBarTheme);
+    RefPtr<FrameNode> CreateControlImage(const RefPtr<SideBarTheme>& sideBarTheme,
+        const RefPtr<FrameNode>& parentNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SIDE_BAR_CONTAINER_MODEL_H

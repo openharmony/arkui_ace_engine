@@ -17,12 +17,8 @@
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {
-#ifndef USE_ROSEN_DRAWING
 RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream >& svgStream,
     const RefPtr<PipelineBase>& context, std::optional<Color>& color)
-#else
-    // TODO Drawing : SkMemoryStream
-#endif
 {
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, AceType::DynamicCast<PipelineContext>(context), color);
     return svgDom ? AceType::MakeRefPtr<SvgImageObject>(source, Size(), 1, svgDom) : nullptr;

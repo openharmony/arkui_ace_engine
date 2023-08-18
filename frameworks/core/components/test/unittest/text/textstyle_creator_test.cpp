@@ -630,7 +630,6 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator013, TestSize.Level1)
                                  "}"
                                  "}";
 
-    // regexp [0-9A-Fa-f]{3,4},#abc->#aabbcc|maskAlpha
     const std::string jsonText3 = "{                               "
                                  "  \"className\": \"Text\",      "
                                  "  \"textStyle\":                "

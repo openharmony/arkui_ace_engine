@@ -77,7 +77,7 @@ public:
     void TearDown() override;
 
 protected:
-    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> CreateChild(const LayoutConstraintF& childLayoutConstraint);
+    std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> CreateChild(const LayoutConstraintF& childLayoutConstraint);
 };
 void BadgeTestNg::SetUp()
 {
@@ -92,7 +92,7 @@ void BadgeTestNg::TearDown()
     MockPipelineBase::TearDown();
 }
 
-std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BadgeTestNg::CreateChild(
+std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BadgeTestNg::CreateChild(
     const LayoutConstraintF& childLayoutConstraint)
 {
     // add first child to frameNode
@@ -101,8 +101,8 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapper>> BadgeTestNg::CreateChild(
         V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     textGeometryNode->Reset();
-    RefPtr<LayoutWrapper> textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textNode, textGeometryNode, textNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textGeometryNode, textNode->GetLayoutProperty());
     auto textPattern = textNode->GetPattern<TextPattern>();
     textLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     auto textLayoutAlgorithm = textPattern->CreateLayoutAlgorithm();
@@ -241,8 +241,8 @@ HWTEST_F(BadgeTestNg, BadgePatternTest002, TestSize.Level1)
      * @tc.expected: step2. related function is called.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
     ASSERT_NE(badgePattern, nullptr);
     auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());

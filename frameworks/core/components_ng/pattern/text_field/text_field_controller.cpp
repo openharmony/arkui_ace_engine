@@ -52,16 +52,20 @@ Rect TextFieldController::GetTextContentRect()
     } else {
         RectF rect = textFieldPattern->GetTextRect();
         auto y = rect.GetY();
-        if (rect.GetY() == 0) {
-            y = textFieldPattern->GetPaddingTop();
+        if (NearEqual(rect.GetY(), 0)) {
+            y = textFieldPattern->GetPaddingTop() + textFieldPattern->GetBorderTop();
         }
+        textFieldPattern->TextIsEmptyRect(rect);
+        textFieldPattern->TextAreaInputRectUpdate(rect);
+        rect.SetTop(y);
+        textFieldPattern->UpdateRectByAlignment(rect);
         if (textFieldPattern->IsOperation()) {
-            return Rect(rect.GetX(), y, rect.Width(), rect.Height());
+            return Rect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
         }
         if (NearEqual(rect.GetX(), -Infinity<float>())) {
-            return Rect(textFieldPattern->GetPaddingLeft(), y, 0, 0);
+            return Rect(textFieldPattern->GetPaddingLeft(), rect.GetY(), 0, 0);
         }
-        return Rect(rect.GetX(), y, 0, 0);
+        return Rect(rect.GetX(), rect.GetY(), 0, 0);
     }
     return Rect(0, 0, 0, 0);
 }

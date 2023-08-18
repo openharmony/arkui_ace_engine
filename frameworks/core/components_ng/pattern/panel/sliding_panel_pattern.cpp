@@ -56,6 +56,12 @@ void SlidingPanelPattern::OnModifyDone()
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitPanEvent(gestureHub);
+    if (layoutProperty->GetPanelType() == PanelType::CUSTOM) {
+        auto calc = layoutProperty->GetCustomHeight().value();
+        if (!calc.CalcValue().empty() && calc.CalcValue().find("wrapContent") != std::string::npos) {
+            ResetLayoutWeight();
+        }
+    }
     Update();
     AddOrRemoveDragBarNode(layoutProperty);
     AddOrRemoveCloseIconNode(layoutProperty);
@@ -69,7 +75,7 @@ void SlidingPanelPattern::OnModifyDone()
         }
     }
 
-    if (layoutProperty->GetShowCloseIconValue(true)) {
+    if (layoutProperty->GetShowCloseIconValue(false)) {
         auto closeIconNode = GetCloseIconNode();
         CHECK_NULL_VOID(closeIconNode);
         auto closeIconPattern = closeIconNode->GetPattern<CloseIconPattern>();
@@ -106,6 +112,7 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<SlidingPanelLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
+    customHeight_ = layoutAlgorithm->GetCustomHeight();
     InitializeLayoutProps();
     isFirstLayout_ = layoutAlgorithm->GetIsFirstLayout();
     fullHeight_ = layoutAlgorithm->GetFullHeight();
@@ -123,11 +130,17 @@ void SlidingPanelPattern::Update()
         mode_ = layoutProperty->GetPanelMode() == PanelMode::AUTO
                     ? PanelMode::FULL
                     : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
+        if (type_ == PanelType::CUSTOM) {
+            mode_ = PanelMode::CUSTOM;
+        }
         return;
     }
     auto mode = layoutProperty->GetPanelMode() == PanelMode::AUTO
                     ? PanelMode::FULL
                     : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
+    if (type_ == PanelType::CUSTOM) {
+            mode = PanelMode::CUSTOM;
+    }
     if (mode_.value() == mode) {
         if (mode == PanelMode::HALF && type_ == PanelType::MINI_BAR) {
             mode = PanelMode::MINI;
@@ -171,6 +184,8 @@ void SlidingPanelPattern::InitializeLayoutProps()
     defaultBlankHeights_[PanelMode::HALF] = maxSize.Height() - halfHeight;
     defaultBlankHeights_[PanelMode::MINI] = maxSize.Height() - miniHeight;
     defaultBlankHeights_[PanelMode::AUTO] = maxSize.Height();
+    defaultBlankHeights_[PanelMode::CUSTOM] = maxSize.Height() - (customHeight_.ConvertToPx() +
+        DRAG_UP_THRESHOLD.ConvertToPx());
     CheckHeightValidity();
     fullHalfBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
                         (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;
@@ -290,6 +305,11 @@ void SlidingPanelPattern::HeightDynamicUpdate()
                     AnimateTo(defaultBlankHeights_[PanelMode::MINI], PanelMode::MINI);
                 }
                 break;
+            case PanelMode::CUSTOM:
+                if (!NearEqual(currentOffset_, defaultBlankHeights_[PanelMode::CUSTOM])) {
+                    AnimateTo(defaultBlankHeights_[PanelMode::CUSTOM], PanelMode::CUSTOM);
+                }
+                break;
             default:
                 break;
         }
@@ -307,6 +327,7 @@ void SlidingPanelPattern::CheckHeightValidity()
     defaultBlankHeights_[PanelMode::MINI] = std::clamp(defaultBlankHeights_[PanelMode::MINI], minBlank, maxBlank);
     defaultBlankHeights_[PanelMode::HALF] = std::clamp(defaultBlankHeights_[PanelMode::HALF], minBlank, maxBlank);
     defaultBlankHeights_[PanelMode::FULL] = std::clamp(defaultBlankHeights_[PanelMode::FULL], minBlank, maxBlank);
+    defaultBlankHeights_[PanelMode::CUSTOM] = std::clamp(defaultBlankHeights_[PanelMode::CUSTOM], minBlank, maxBlank);
 }
 
 void SlidingPanelPattern::CheckPanelModeAndType()
@@ -324,7 +345,7 @@ void SlidingPanelPattern::CheckPanelModeAndType()
 
 void SlidingPanelPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    if (panEvent_) {
+    if (!IsNeedResetPanEvent(gestureHub)) {
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& startInfo) {
@@ -334,14 +355,12 @@ void SlidingPanelPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub
             pattern->HandleDragStart(startInfo.GetLocalLocation());
         }
     };
-
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleDragUpdate(info);
         }
     };
-
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
@@ -358,18 +377,36 @@ void SlidingPanelPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub
     };
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
-    float distance = DEFAULT_PAN_DISTANCE;
-    auto host = GetHost();
-    if (host) {
-        auto context = host->GetContext();
-        if (context) {
-            distance = static_cast<float>(
-                context->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP))); // convert VP to Px
+    auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
+    auto type = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
+    panEvent_ = type == PanelType::CUSTOM ? MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr,
+     std::move(actionCancelTask)) : MakeRefPtr<PanEvent>(std::move(actionStartTask),
+     std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+}
+
+bool SlidingPanelPattern::IsNeedResetPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
+    auto type = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
+    if (panEvent_) {
+        if (type == PanelType::CUSTOM) {
+            if (panEvent_->GetActionStartEventFunc()) {
+                gestureHub->RemovePanEvent(panEvent_);
+                panEvent_.Reset();
+            } else {
+                return false;
+            }
+        } else {
+            if (panEvent_->GetActionStartEventFunc()) {
+                return false;
+            } else {
+                gestureHub->RemovePanEvent(panEvent_);
+                panEvent_.Reset();
+            }
         }
     }
-    panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+    return true;
 }
 
 void SlidingPanelPattern::HandleDragStart(const Offset& startPoint) // const GestureEvent& info
@@ -788,9 +825,10 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("miniHeight", layoutProperty->GetMiniHeight().value_or(miniHeight_).ToString().c_str());
     json->Put("halfHeight", layoutProperty->GetHalfHeight().value_or(halfHeight_).ToString().c_str());
     json->Put("fullHeight", layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str());
+    json->Put("customHeight", layoutProperty->GetFullHeight().value_or(customHeight_).ToString().c_str());
     json->Put(
         "backgroundMask", layoutProperty->GetBackgroundColor().value_or(Color::TRANSPARENT).ColorToString().c_str());
-    json->Put("showCloseIcon", layoutProperty->GetShowCloseIcon().value_or(false) ? "false" : "true");
+    json->Put("showCloseIcon", layoutProperty->GetShowCloseIcon().value_or(false) ? "true" : "false");
 }
 
 RefPtr<UINode> SlidingPanelPattern::GetChildNodeByTag(const std::string& tagName) const
@@ -868,6 +906,23 @@ void SlidingPanelPattern::AddOrRemoveCloseIconNode(const RefPtr<SlidingPanelLayo
         closeIcon->MarkModifyDone();
     } else if (!isShowCloseIcon && closeIcon) {
         host->RemoveChild(closeIcon);
+    }
+}
+
+void SlidingPanelPattern::ResetLayoutWeight()
+{
+    auto columnNode = GetChildNodeByTag(V2::COLUMN_ETS_TAG);
+    CHECK_NULL_VOID(columnNode);
+    auto child = columnNode->GetChildren();
+    if (!child.empty()) {
+        auto firstNode = columnNode->GetChildren().front();
+        if (firstNode->GetTag() == V2::DRAG_BAR_ETS_TAG) {
+            firstNode = columnNode->GetChildAtIndex(1);
+        }
+        auto contentNode = DynamicCast<FrameNode>(firstNode);
+        auto contentLayoutProperty = contentNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_VOID(contentLayoutProperty);
+        contentLayoutProperty->UpdateLayoutWeight(0.0f);
     }
 }
 } // namespace OHOS::Ace::NG

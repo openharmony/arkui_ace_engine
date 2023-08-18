@@ -34,7 +34,7 @@ public:
     ~RosenTransitionEffect() override = default;
 
     void Attach(const RefPtr<RosenRenderContext>& context, bool activeTransition);
-    void Detach(const RefPtr<RosenRenderContext>& context);
+    void Detach(RosenRenderContext* context);
 
     void UpdateTransitionContext(
         const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize);
@@ -54,7 +54,7 @@ public:
 
 protected:
     virtual void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) {}
-    virtual void OnDetach(const RefPtr<RosenRenderContext>& context) {}
+    virtual void OnDetach(RosenRenderContext* context) {}
     virtual void OnAppear() {}
     virtual void OnDisappear(bool activeTransition) {}
     virtual void OnUpdateTransitionContext(

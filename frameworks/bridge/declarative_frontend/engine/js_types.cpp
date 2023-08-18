@@ -37,13 +37,28 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
         return JSValueRef::Undefined(info->GetVM());
     }
     std::list<TouchLocationInfo> history;
-    auto touches = eventInfo->GetTouches();
     history = eventInfo->GetHistory();
     Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
     auto index = 0;
     Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
     for (auto const &point : history) {
-        objRef->Set(info->GetVM(), index, ToJSValue(point));
+        Local<ObjectRef> touchObject = ObjectRef::New(info->GetVM());
+        const OHOS::Ace::Offset& globalLocation = point.GetGlobalLocation();
+        const OHOS::Ace::Offset& localLocation = point.GetLocalLocation();
+        touchObject->Set(info->GetVM(), ToJSValue("id"), ToJSValue(point.GetFingerId()));
+        touchObject->Set(info->GetVM(), ToJSValue("type"),
+            ToJSValue(static_cast<int32_t>(point.GetTouchType())));
+        touchObject->Set(info->GetVM(), ToJSValue("x"), ToJSValue(localLocation.GetX()));
+        touchObject->Set(info->GetVM(), ToJSValue("y"), ToJSValue(localLocation.GetX()));
+        touchObject->Set(info->GetVM(), ToJSValue("screenX"), ToJSValue(globalLocation.GetX()));
+        touchObject->Set(info->GetVM(), ToJSValue("scrennY"), ToJSValue(globalLocation.GetX()));
+
+        objRef->Set(info->GetVM(), ToJSValue("touchObject"), (touchObject));
+        objRef->Set(info->GetVM(), ToJSValue("size"), ToJSValue(point.GetSize()));
+        objRef->Set(info->GetVM(), ToJSValue("force"), ToJSValue(static_cast<double>(point.GetForce())));
+        objRef->Set(info->GetVM(), ToJSValue("timestamp"),
+            ToJSValue(static_cast<double>(point.GetTimeStamp().time_since_epoch().count())));
+        
         ArrayRef::SetValueAt(info->GetVM(), valueArray, index++, objRef);
     }
 

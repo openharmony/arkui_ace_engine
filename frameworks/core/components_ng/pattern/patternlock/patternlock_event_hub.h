@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,8 +43,21 @@ public:
         }
     }
 
+    void SetOnDotConnected(std::function<void(int32_t)>&& connectedEvent)
+    {
+        connectedEvent_ = std::move(connectedEvent);
+    }
+
+    void UpdateDotConnectedEvent(int32_t code) const
+    {
+        if (connectedEvent_) {
+            connectedEvent_(code);
+        }
+    }
+
 private:
     PatternLockCompleteEvent completeEvent_;
+    std::function<void(int32_t)> connectedEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(PatternLockEventHub);
 };
 

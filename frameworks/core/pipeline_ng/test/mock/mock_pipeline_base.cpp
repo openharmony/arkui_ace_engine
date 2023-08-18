@@ -18,12 +18,14 @@
 #include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NODE_ID = 143;
 } // namespace
 RefPtr<MockPipelineBase> MockPipelineBase::pipeline_;
+uint64_t UITaskScheduler::frameId_ = 0;
 
 void MockPipelineBase::SetUp()
 {
@@ -155,6 +157,10 @@ void PipelineContext::FlushReload() {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
+
+void PipelineContext::SetCloseButtonStatus(bool isEnabled) {}
+
 const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
 {
     if (selectOverlayManager_) {
@@ -212,6 +218,8 @@ bool PipelineContext::OnBackPressed()
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
+void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
@@ -252,6 +260,10 @@ const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
+
+void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
+
+void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange) {}
 
 void PipelineContext::FlushPipelineImmediately() {}
 
@@ -297,29 +309,21 @@ void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
-
-SafeAreaInsets PipelineContext::GetSystemSafeArea() const
-{
-    return {};
-}
-
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
-
-SafeAreaInsets PipelineContext::GetCutoutSafeArea() const
-{
-    return {};
-}
-
-void PipelineContext::AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback) {}
+void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
+void PipelineContext::SetIsLayoutFullScreen(bool value) {};
 
 SafeAreaInsets PipelineContext::GetSafeArea() const
 {
-    return {};
+    // top inset = 1
+    return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
 
 void PipelineContext::AddFontNodeNG(const WeakPtr<NG::UINode>& node) {}
 
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<NG::UINode>& node) {}
+
+void PipelineContext::SetWindowSceneConsumed(bool isConsumed) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -390,6 +394,8 @@ void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, TaskExecutor::TaskT
 
 void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
 
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type) {}
+
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
     return nullptr;
@@ -402,6 +408,10 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 }
 
 void PipelineBase::Destroy() {}
+bool PipelineBase::MaybeRelease()
+{
+    return AceType::MaybeRelease();
+}
 
 void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 

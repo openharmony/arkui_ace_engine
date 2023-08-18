@@ -95,13 +95,25 @@ void BubblePaintMethod::PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper
     paint.SetColor(edge.GetColor().GetValue());
     paint.SetAntiAlias(true);
     if (edge.GetBorderStyle() == BorderStyle::DOTTED) {
+#ifndef USE_ROSEN_DRAWING
         RSPath dotPath;
         dotPath.AddCircle(0.0f, 0.0f, borderWidth / 2.0);
         paint.SetPathEffect(
             RSPathEffect::CreatePathDashEffect(dotPath, borderWidth * 2.0, 0.0, RSPathDashStyle::ROTATE));
+#else
+        RSRecordingPath dotPath;
+        dotPath.AddCircle(0.0f, 0.0f, borderWidth / 2.0);
+        paint.SetPathEffect(
+            RSRecordingPathEffect::CreatePathDashEffect(dotPath, borderWidth * 2.0, 0.0, RSPathDashStyle::ROTATE));
+#endif
     } else if (edge.GetBorderStyle() == BorderStyle::DASHED) {
+#ifndef USE_ROSEN_DRAWING
         const float intervals[] = { borderWidth, borderWidth };
         paint.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, 2, 0.0));
+#else
+        const std::vector<RSScalar> intervals = { borderWidth, borderWidth };
+        paint.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, 0.0));
+#endif
         canvas.AttachPen(paint);
         canvas.DrawPath(path_);
     } else {
@@ -186,12 +198,24 @@ void BubblePaintMethod::UpdateArrowOffset(const std::optional<Dimension>& offset
 void BubblePaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)
 {
     canvas.Save();
+#ifndef USE_ROSEN_DRAWING
     RSPath rsPath = path;
+#else
+    RSRecordingPath rsPath;
+    rsPath.AddPath(path);
+#endif
     rsPath.Offset(shadow.GetOffset().GetX(), shadow.GetOffset().GetY());
     RSColor spotColor = ToRSColor(shadow.GetColor());
     RSPoint3 planeParams = { 0.0f, 0.0f, shadow.GetElevation() };
+#ifndef USE_ROSEN_DRAWING
     RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2 + rsPath.GetBounds().GetRight(),
         rsPath.GetBounds().GetTop() / 2.0 + rsPath.GetBounds().GetBottom() / 2.0, shadow.GetLightHeight() };
+#else
+    auto tmpPath = rsPath.GetCmdList()->Playback();
+    auto bounds = tmpPath->GetBounds();
+    RSPoint3 lightPos = { bounds.GetLeft() / 2.0 + bounds.GetRight() / 2.0,
+        bounds.GetTop() / 2.0 + bounds.GetBottom() / 2.0, shadow.GetLightHeight() };
+#endif
     RSColor ambientColor = RSColor(0, 0, 0, 0);
     canvas.DrawShadow(rsPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor, spotColor,
         RSShadowFlags::TRANSPARENT_OCCLUDER);
@@ -203,7 +227,10 @@ void BubblePaintMethod::PaintDefaultBubble(RSCanvas& canvas)
     auto rect = MakeRRect();
     path_.AddRoundRect(
         rect.GetRect(), border_.TopLeftRadius().GetX().ConvertToPx(), border_.TopRightRadius().GetX().ConvertToPx());
+    canvas.Save();
+    canvas.ClipPath(path_, RSClipOp::DIFFERENCE, true);
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
+    canvas.Restore();
     canvas.DrawRoundRect(rect);
     canvas.ClipRoundRect(rect, RSClipOp::INTERSECT);
 }

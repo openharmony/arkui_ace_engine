@@ -17,9 +17,11 @@
 
 #include <array>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/image/image_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
@@ -128,24 +130,50 @@ void ImagePattern::RegisterVisibleAreaChange()
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 }
 
+RectF ImagePattern::CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode)
+{
+    RectF paintSize;
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, paintSize);
+    ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
+    bool imageRepeatX = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_X;
+    bool imageRepeatY = repeat == ImageRepeat::REPEAT || repeat == ImageRepeat::REPEAT_Y;
+
+    if (loadingCtx_->GetSourceInfo().IsSvg()) {
+        const float invalidValue = -1;
+        paintSize.SetWidth(dstRect_.IsValid() ? dstRect_.Width() : invalidValue);
+        paintSize.SetHeight(dstRect_.IsValid() ? dstRect_.Height() : invalidValue);
+        paintSize.SetLeft(
+            dstRect_.IsValid() ? dstRect_.GetX() + geometryNode->GetContentOffset().GetX() : invalidValue);
+        paintSize.SetTop(dstRect_.IsValid() ? dstRect_.GetY() + geometryNode->GetContentOffset().GetY() : invalidValue);
+    } else {
+        paintSize.SetWidth(imageRepeatX ? geometryNode->GetContentSize().Width() : dstRect_.Width());
+        paintSize.SetHeight(imageRepeatY ? geometryNode->GetContentSize().Height() : dstRect_.Height());
+        paintSize.SetLeft((imageRepeatX ? 0 : dstRect_.GetX()) + geometryNode->GetContentOffset().GetX());
+        paintSize.SetTop((imageRepeatY ? 0 : dstRect_.GetY()) + geometryNode->GetContentOffset().GetY());
+    }
+    return paintSize;
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto imageEventHub = GetEventHub<ImageEventHub>();
-    CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
-        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 1, geometryNode->GetContentSize().Width(),
-        geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
-        geometryNode->GetContentOffset().GetY());
-    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
-    // update src data
+
     image_ = loadingCtx_->MoveCanvasImage();
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
+
+    RectF paintRect = CalcImageContentPaintSize(geometryNode);
+    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 1, paintRect.Width(),
+        paintRect.Height(), paintRect.GetX(), paintRect.GetY());
+    auto eventHub = GetEventHub<ImageEventHub>();
+    if (eventHub) {
+        eventHub->FireCompleteEvent(event);
+    }
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     PrepareAnimation(image_);
@@ -169,15 +197,12 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(geometryNode);
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    LoadImageSuccessEvent loadImageSuccessEvent_(loadingCtx_->GetImageSize().Width(),
-        loadingCtx_->GetImageSize().Height(), geometryNode->GetFrameSize().Width(),
-        geometryNode->GetFrameSize().Height(), 0, geometryNode->GetContentSize().Width(),
-        geometryNode->GetContentSize().Height(), geometryNode->GetContentOffset().GetX(),
-        geometryNode->GetContentOffset().GetY());
-    imageEventHub->FireCompleteEvent(loadImageSuccessEvent_);
-    if (!host->IsActive()) {
-        return;
-    }
+    LoadImageSuccessEvent event(loadingCtx_->GetImageSize().Width(), loadingCtx_->GetImageSize().Height(),
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), 0,
+        geometryNode->GetContentSize().Width(), geometryNode->GetContentSize().Height(),
+        geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
+    imageEventHub->FireCompleteEvent(event);
+
     if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
@@ -222,7 +247,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
     if (altImage_ && altDstRect_ && altSrcRect_) {
         return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_);
     }
-    CreateObscuredImageIfNeed();
+    CreateObscuredImage();
     if (obscuredImage_) {
         return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_);
     }
@@ -237,15 +262,15 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     return image_;
 }
 
-void ImagePattern::CreateObscuredImageIfNeed()
+void ImagePattern::CreateObscuredImage()
 {
-    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto layoutConstraint = imageLayoutProperty->GetLayoutConstraint();
-    CHECK_NULL_VOID(layoutConstraint);
+    auto props = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto layoutConstraint = props->GetLayoutConstraint();
+    CHECK_NULL_VOID_NOLOG(layoutConstraint);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    auto sourceInfo = props->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     auto reasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
         if (!obscuredImage_) {
@@ -263,13 +288,8 @@ void ImagePattern::LoadImageDataIfNeed()
     CHECK_NULL_VOID(imageRenderProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
-    std::optional<Color> svgFillColorOpt = std::nullopt;
-    if (src.IsSvg()) {
-        svgFillColorOpt = src.GetFillColor();
-    }
 
-    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src ||
-        (src.IsSvg() && loadingCtx_->GetSvgFillColor() != svgFillColorOpt)) {
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src) {
         LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
 
         loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
@@ -278,15 +298,9 @@ void ImagePattern::LoadImageDataIfNeed()
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        std::optional<Color> altSvgFillColorOpt = std::nullopt;
-        if (altImageSourceInfo.IsSvg()) {
-            altSvgFillColorOpt = imageRenderProperty->GetSvgFillColor() ? imageRenderProperty->GetSvgFillColor()
-                                                                        : altImageSourceInfo.GetFillColor();
-        }
         LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
         if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
-            (altLoadingCtx_ && altImageSourceInfo.IsSvg() && altSvgFillColorOpt.has_value() &&
-                altLoadingCtx_->GetSvgFillColor() != altSvgFillColorOpt)) {
+            (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
             altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(altImageSourceInfo, std::move(altLoadNotifier));
             altLoadingCtx_->LoadImageData();
         }
@@ -465,7 +479,9 @@ void ImagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(false);
+    auto renderCtx = host->GetRenderContext();
+    renderCtx->SetClipToBounds(false);
+    renderCtx->SetUsingContentRectForRenderFrame(true);
 
     // register image frame node to pipeline context to receive memory level notification and window state change
     // notification
@@ -473,6 +489,16 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    // set draggable for framenode
+    auto theme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    auto draggable = theme->GetDraggable();
+    if (draggable && !host->IsDraggable()) {
+        auto gestureHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    host->SetDraggable(draggable);
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -580,6 +606,27 @@ void ImagePattern::OpenSelectOverlay()
         pattern->HandleCopy();
         pattern->CloseSelectOverlay();
     };
+    info.onHandleMoveDone = [weak = WeakClaim(this), firstRect = info.firstHandle.paintRect,
+                                secondRect = info.secondHandle.paintRect](const RectF&, bool isFirst) {
+        // reset handle position
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern && pattern->selectOverlay_);
+        SelectHandleInfo info;
+        if (isFirst) {
+            info.paintRect = firstRect;
+            pattern->selectOverlay_->UpdateFirstSelectHandleInfo(info);
+        } else {
+            info.paintRect = secondRect;
+            pattern->selectOverlay_->UpdateSecondSelectHandleInfo(info);
+        }
+    };
+    info.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
+        if (closedByGlobalEvent) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CloseSelectOverlay();
+        }
+    };
 
     CloseSelectOverlay();
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -593,16 +640,18 @@ void ImagePattern::OpenSelectOverlay()
 
 void ImagePattern::CloseSelectOverlay()
 {
-    if (selectOverlay_ && !selectOverlay_->IsClosed()) {
+    if (!selectOverlay_) {
+        return;
+    }
+    if (!selectOverlay_->IsClosed()) {
         LOGI("closing select overlay");
         selectOverlay_->Close();
-        selectOverlay_ = nullptr;
-
-        // remove selected mask effect
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkNeedRenderOnly();
     }
+    selectOverlay_ = nullptr;
+    // remove selected mask effect
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
 }
 
 void ImagePattern::HandleCopy()
@@ -681,5 +730,15 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
     }
     event->SetData(unifiedData);
 #endif
+}
+
+void ImagePattern::OnLanguageConfigurationUpdate()
+{
+    CHECK_NULL_VOID_NOLOG(loadingCtx_);
+    auto&& src = loadingCtx_->GetSourceInfo();
+    // Resource image needs to reload when Language changes
+    if (src.GetSrcType() == SrcType::RESOURCE) {
+        loadingCtx_.Reset();
+    }
 }
 } // namespace OHOS::Ace::NG

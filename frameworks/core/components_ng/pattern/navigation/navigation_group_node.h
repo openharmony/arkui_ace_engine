@@ -19,11 +19,14 @@
 #include <cstdint>
 #include <list>
 
+#include "base/memory/referenced.h"
+#include "core/animation/page_transition_common.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
 #include "core/components_ng/property/property.h"
 
@@ -37,7 +40,9 @@ public:
     {}
     ~NavigationGroupNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
-    void AddNavDestinationToNavigation();
+
+    // remain child needs to keep to use pop animation
+    void UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild);
     static RefPtr<NavigationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
@@ -76,16 +81,6 @@ public:
         return dividerNode_;
     }
 
-    bool GetIsOnAnimation() const
-    {
-        return isOnAnimation_;
-    }
-
-    void SetIsOnAnimation(bool isOnAnimation)
-    {
-        isOnAnimation_ = isOnAnimation;
-    }
-
     bool GetIsModeChange() const
     {
         return isModeChange_;
@@ -96,30 +91,22 @@ public:
         isModeChange_ = isModeChange;
     }
 
+    RefPtr<FrameNode> GetNavDestinationNodeToHandleBack();
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
-    void SetBackButtonEvent(
-        const RefPtr<UINode>& navDestinationNode, const RefPtr<NavRouterPattern>& navRouterPattern = nullptr);
-    void BackToNavBar(const RefPtr<UINode>& navDestinationNode);
-    void BackToPreNavDestination(const RefPtr<UINode>& preNavDestinationNode, const RefPtr<UINode>& navDestinationNode,
+    void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<NavRouterPattern>& navRouterPattern = nullptr);
     void AddBackButtonIconToNavDestination(const RefPtr<UINode>& navDestinationNode);
-    void SetBackButtonVisible(const RefPtr<UINode>& navDestinationNode);
-    void SetOnStateChangeFalse(
-        const RefPtr<UINode>& preNavDestination, const RefPtr<UINode>& navDestination, bool isBackButton = false);
+    void SetBackButtonVisible(const RefPtr<UINode>& navDestinationNode, bool isVisible = true);
 
-    void NavTransitionInAnimation(const RefPtr<FrameNode>& transitionOutNode, const RefPtr<FrameNode>& navDestination);
-    void NavTransitionOutAnimation(const RefPtr<FrameNode>& navBarNode, const RefPtr<FrameNode>& navDestination,
-        const RefPtr<FrameNode>& navigationContentNode);
-    void NavTransitionBackToPreAnimation(const RefPtr<FrameNode>& preDestination,
-        const RefPtr<FrameNode>& curNavDestination, const RefPtr<FrameNode>& navigationContentNode);
-    void TitleTransitionInAnimation(
-        const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
-    void TitleTransitionOutAnimation(
-        const RefPtr<FrameNode>& titleBarNode, const RefPtr<FrameNode>& destinationTitleBarNode);
+    void ExitTransitionWithPop(const RefPtr<FrameNode>& node);
+    void ExitTransitionWithPush(const RefPtr<FrameNode>& node, bool isNavBar = false);
+    void EnterTransitionWithPop(const RefPtr<FrameNode>& node, bool isNavBar = false);
+    void EnterTransitionWithPush(const RefPtr<FrameNode>& node, bool isNavBar = false);
     void BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
     void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
-    void TitleOpacityAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
+    void TitleOpacityAnimationOut(const RefPtr<RenderContext>& transitionOutNodeContext);
 
 private:
     RefPtr<UINode> navBarNode_;

@@ -54,7 +54,8 @@ ToggleModel* ToggleModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
+int32_t JSToggle::toggleType_ = 1;
+const static int32_t PLATFORM_VERSION_TEN = 10;
 void JSToggle::JSBind(BindingTarget globalObj)
 {
     JSClass<JSToggle>::Declare("Toggle");
@@ -108,6 +109,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     if (toggleTypeInt < 0 || toggleTypeInt > 2) {
         toggleTypeInt = 1;
     }
+    toggleType_ = toggleTypeInt;
     auto tempIsOn = paramObject->GetProperty("isOn");
     bool isOn = false;
     JSRef<JSVal> changeEventVal;
@@ -138,13 +140,18 @@ void JSToggle::JsWidth(const JSCallbackInfo& info)
 
 void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    auto switchTheme = GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     auto defaultWidth = switchTheme->GetWidth();
     auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding();
     auto width = defaultWidth - horizontalPadding * 2;
+    if (toggleType_ == 0) {
+        auto checkboxTheme = GetTheme<CheckboxTheme>();
+        CHECK_NULL_VOID(checkboxTheme);
+        defaultWidth = checkboxTheme->GetDefaultWidth();
+        horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding();
+        width = defaultWidth - horizontalPadding * 2;
+    }
     CalcDimension value(width);
     ParseJsDimensionVp(jsValue, value);
     if (value.IsNegative()) {
@@ -173,9 +180,16 @@ void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
     auto verticalPadding = switchTheme->GetHotZoneVerticalPadding();
     auto height = defaultHeight - verticalPadding * 2;
     CalcDimension value(height);
-    ParseJsDimensionVp(jsValue, value);
-    if (value.IsNegative()) {
-        value = height;
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            value = height;
+        }
+    } else {
+        ParseJsDimensionVp(jsValue, value);
+        if (value.IsNegative()) {
+            value = height;
+        }
     }
     ToggleModel::GetInstance()->SetHeight(value);
 }
@@ -311,24 +325,32 @@ NG::PaddingProperty JSToggle::GetNewPadding(const JSCallbackInfo& info)
     NG::PaddingProperty padding(
         { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
     if (info[0]->IsObject()) {
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
         CalcDimension leftDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-            padding.left = NG::CalcLength(leftDimen.IsNonNegative() ? leftDimen : CalcDimension());
+            left = leftDimen;
         }
         CalcDimension rightDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-            padding.right = NG::CalcLength(rightDimen.IsNonNegative() ? rightDimen : CalcDimension());
+            right = rightDimen;
         }
         CalcDimension topDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-            padding.top = NG::CalcLength(topDimen.IsNonNegative() ? topDimen : CalcDimension());
+            top = topDimen;
         }
         CalcDimension bottomDimen;
         if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-            padding.bottom = NG::CalcLength(bottomDimen.IsNonNegative() ? bottomDimen : CalcDimension());
+            bottom = bottomDimen;
         }
-        return padding;
+        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
+            padding = GetPadding(top, bottom, left, right);
+            return padding;
+        }
     }
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {
@@ -336,6 +358,27 @@ NG::PaddingProperty JSToggle::GetNewPadding(const JSCallbackInfo& info)
     }
 
     padding.SetEdges(NG::CalcLength(length.IsNonNegative() ? length : CalcDimension()));
+    return padding;
+}
+
+NG::PaddingProperty JSToggle::GetPadding(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
+{
+    NG::PaddingProperty padding(
+        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    if (left.has_value() && left.value().IsNonNegative()) {
+        padding.left = NG::CalcLength(left.value());
+    }
+    if (right.has_value() && right.value().IsNonNegative()) {
+        padding.right = NG::CalcLength(right.value());
+    }
+    if (top.has_value() && top.value().IsNonNegative()) {
+        padding.top = NG::CalcLength(top.value());
+    }
+    if (bottom.has_value() && bottom.value().IsNonNegative()) {
+        padding.bottom = NG::CalcLength(bottom.value());
+    }
     return padding;
 }
 

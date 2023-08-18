@@ -149,7 +149,7 @@ void FontManager::RebuildFontNode()
     for (auto iter = fontNodesNG_.begin(); iter != fontNodesNG_.end();) {
         auto fontNode = iter->Upgrade();
         CHECK_NULL_VOID(fontNode);
-        auto uiNode = DynamicCast<UINode>(fontNode);
+        auto uiNode = DynamicCast<NG::UINode>(fontNode);
         if (uiNode) {
             uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_LAYOUT);
             ++iter;
@@ -206,7 +206,7 @@ void FontManager::NotifyVariationNodes()
     for (const auto& node : variationNodesNG_) {
         auto uiNode = node.Upgrade();
         CHECK_NULL_VOID(uiNode);
-        auto frameNode = DynamicCast<FrameNode>(uiNode);
+        auto frameNode = DynamicCast<NG::FrameNode>(uiNode);
         if (frameNode) {
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
         }

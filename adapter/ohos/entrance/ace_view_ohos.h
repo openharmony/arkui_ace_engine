@@ -23,6 +23,7 @@
 #include "wm/window.h"
 
 #include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
 #include "core/common/flutter/flutter_thread_model.h"
@@ -49,6 +50,9 @@ public:
     static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     static bool DispatchRotationEvent(AceViewOhos* view, float rotationValue);
+    static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    static void DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+
 
     static uint32_t GetBackgroundColor();
 

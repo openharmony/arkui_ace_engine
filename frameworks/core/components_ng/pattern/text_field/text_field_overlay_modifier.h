@@ -21,6 +21,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/property/property.h"
@@ -28,12 +29,11 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-class TextFieldOverlayModifier : public OverlayModifier {
-    DECLARE_ACE_TYPE(TextFieldOverlayModifier, OverlayModifier);
+class TextFieldOverlayModifier : public ScrollBarOverlayModifier {
+    DECLARE_ACE_TYPE(TextFieldOverlayModifier, ScrollBarOverlayModifier);
 
 public:
-    TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollBar>&& scrollBar,
-        WeakPtr<ScrollEdgeEffect>&& edgeEffect);
+    TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect);
     ~TextFieldOverlayModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -53,12 +53,13 @@ public:
     void SetUnderlineWidth(float underlineWidth);
     void SetShowCounter(bool value);
     void SetRedrawFlag(int32_t value);
+    void SetScrollBar(const RefPtr<ScrollBar>& scrollBar);
 
 private:
     void PaintSelection(DrawingContext& context) const;
     void PaintCursor(DrawingContext& context) const;
-    void PaintScrollBar(RSCanvas& canvas);
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
+    void PaintScrollBar(DrawingContext& context);
 
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollBar> scrollBar_;

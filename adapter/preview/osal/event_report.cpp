@@ -57,4 +57,7 @@ void EventReport::JankFrameReport(int64_t startTime, int64_t duration, const std
 
 void EventReport::SendEventInner(const EventInfo& eventInfo) {}
 
+void EventReport::ReportEventComplete(DataBase& data) {}
+
+void EventReport::ReportEventJankFrame(DataBase& data) {}
 } // namespace OHOS::Ace

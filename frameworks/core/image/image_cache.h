@@ -159,7 +159,7 @@ public:
     static void SetCacheFileLimit(size_t cacheFileLimit)
     {
         LOGI("Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
-        cacheFileLimit_ = cacheFileLimit;
+        fileLimit_ = cacheFileLimit;
     }
 
     static void SetClearCacheFileRatio(float clearRatio)
@@ -199,25 +199,20 @@ protected:
 
     bool ProcessImageDataCacheInner(size_t dataSize);
 
+    std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
     mutable std::mutex imageCacheMutex_;
     std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
-
     std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<CachedImage>>>::iterator> imageCache_;
 
-    std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
-
-    mutable std::mutex dataCacheListMutex_;
+    std::mutex dataCacheMutex_;
     std::list<CacheImageDataNode> dataCacheList_;
-
-    std::mutex imageDataCacheMutex_;
     std::unordered_map<std::string, std::list<CacheImageDataNode>::iterator> imageDataCache_;
 
     std::atomic<size_t> dataSizeLimit_ = 0; // by default, image data before decoded cache is 0 MB.;
     std::atomic<size_t> curDataSize_ = 0;
 
-    std::mutex cacheImgObjListMutex_;
-    std::list<CacheNode<RefPtr<ImageObject>>> cacheImgObjList_;
     std::mutex imgObjCacheMutex_;
+    std::list<CacheNode<RefPtr<ImageObject>>> cacheImgObjList_;
     std::unordered_map<std::string, std::list<CacheNode<RefPtr<ImageObject>>>::iterator> imgObjCache_;
     std::atomic<size_t> imgObjCapacity_ = 2000; // imgObj is cached after clear image data.
 
@@ -227,7 +222,7 @@ protected:
     static std::shared_mutex cacheFilePathMutex_;
     static std::string cacheFilePath_;
 
-    static std::atomic<size_t> cacheFileLimit_;
+    static std::atomic<size_t> fileLimit_;
 
     static std::atomic<float> clearCacheFileRatio_;
 

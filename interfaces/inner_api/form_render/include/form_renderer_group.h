@@ -46,6 +46,10 @@ struct FormRequest {
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     bool isDynamic = true;
     bool hasRelease = false;
+    bool operator() (const FormRequest& info) const
+    {
+        return compId == info.compId && formJsInfo.formId == info.formJsInfo.formId;
+    }
 };
 
 /**
@@ -64,6 +68,7 @@ public:
     ~FormRendererGroup();
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void OnUnlock();
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void DeleteForm();
     void DeleteForm(const std::string& compId);
@@ -72,6 +77,7 @@ public:
     bool IsFormRequestsEmpty();
     const std::vector<FormRequest>& GetAllRendererFormRequests() const;
 private:
+    void InnerAddForm(const FormRequest& formRequest);
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     std::shared_ptr<FormRenderer> formRenderer_;

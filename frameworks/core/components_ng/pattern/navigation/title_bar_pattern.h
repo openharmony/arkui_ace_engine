@@ -128,8 +128,16 @@ public:
     
     bool IsTitleDraggedDown()
     {
+        if (NearZero(tempTitleBarHeight_)) {
+            return true;
+        }
         return GreatNotEqual(tempTitleBarHeight_, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) ?
             true : false;
+    }
+
+    NavigationTitleMode GetNavigationTitleMode() const
+    {
+        return titleMode_;
     }
 
 private:
@@ -165,6 +173,7 @@ private:
     float GetSubTitleOffsetY();
     void UpdateTitleFontSize(const Dimension& tempTitleFontSize);
     void UpdateSubTitleOpacity(const double &value);
+    void UpdateTitleModeChange();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<SpringMotion> springMotion_;
@@ -198,6 +207,8 @@ private:
     float initialSubtitleOffsetY_ = 0.0f;
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
+
+    NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 };
 
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@ group("property_unittest") {
   testonly = true
   deps = [
     "accessibility:accessibility_property_test_ng",
+    "border_property:border_property_test_ng",
     "calc_length:calc_length_test_ng",
     "gradient:gradient_property_test_ng",
     "grid_property:grid_property_test_ng",

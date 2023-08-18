@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#include "bridge/declarative_frontend/jsview/js_richeditor.h"
+
 #include <string>
 
-#include "bridge/declarative_frontend/jsview/js_richeditor.h"
+#include "bridge/declarative_frontend/jsview/js_textfield.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
@@ -26,6 +28,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
+#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -256,6 +259,21 @@ void JSRichEditor::SetOnDeleteComplete(const JSCallbackInfo& args)
     RichEditorModel::GetInstance()->SetOnDeleteComplete(callback);
 }
 
+void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
+{
+    if (args.Length() > 0 && (args[0]->IsUndefined() || args[0]->IsNull())) {
+        RichEditorModel::GetInstance()->SetCustomKeyboard(nullptr);
+        return;
+    }
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    std::function<void()> buildFunc;
+    if (JSTextField::ParseJsCustomKeyboardBuilder(args, 0, buildFunc)) {
+        RichEditorModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+    }
+}
+
 JSRef<JSVal> JSRichEditor::CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue)
 {
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
@@ -276,7 +294,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     spanRange->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textSpanResult.GetSpanRangeEnd())));
     offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan())));
     offsetInSpan->SetValueAt(
-        0, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength())));
+        1, JSRef<JSVal>::Make(ToJSValue(textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength())));
     spanPositionObj->SetPropertyObject("spanRange", spanRange);
     spanPositionObj->SetProperty<int32_t>("spanIndex", textSpanResult.GetSpanIndex());
     decorationObj->SetProperty<TextDecoration>("type", textSpanResult.GetTextDecoration());
@@ -312,7 +330,7 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
         spanRange->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeStart())));
         spanRange->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(it.GetSpanRangeEnd())));
         offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan())));
-        offsetInSpan->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan() + it.GetEraseLength())));
+        offsetInSpan->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(it.OffsetInSpan() + it.GetEraseLength())));
         spanPositionObj->SetPropertyObject("spanRange", spanRange);
         spanPositionObj->SetProperty<int32_t>("spanIndex", it.GetSpanIndex());
         spanResultObj->SetPropertyObject("spanPosition", spanPositionObj);
@@ -380,6 +398,16 @@ void JSRichEditor::CreateImageStyleObj(
     }
 }
 
+void JSRichEditor::JsFocusable(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsBoolean()) {
+        LOGW("The info is wrong, it is supposed to be an boolean");
+        return;
+    }
+    JSInteractableView::SetFocusable(info[0]->ToBoolean());
+    JSInteractableView::SetFocusNode(false);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -390,6 +418,14 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onIMEInputComplete", &JSRichEditor::SetOnIMEInputComplete);
     JSClass<JSRichEditor>::StaticMethod("aboutToDelete", &JSRichEditor::SetAboutToDelete);
     JSClass<JSRichEditor>::StaticMethod("onDeleteComplete", &JSRichEditor::SetOnDeleteComplete);
+    JSClass<JSRichEditor>::StaticMethod("customKeyboard", &JSRichEditor::SetCustomKeyboard);
+    JSClass<JSRichEditor>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSRichEditor>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSRichEditor>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSRichEditor>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
+    JSClass<JSRichEditor>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSRichEditor>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSRichEditor>::StaticMethod("focusable", &JSRichEditor::JsFocusable);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -402,17 +438,13 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
         JSRef<JSArray> size = JSRef<JSArray>::Cast(sizeObj);
         JSRef<JSVal> width = size->GetValueAt(0);
         CalcDimension imageSpanWidth;
-        if (!width->IsNull() && (JSContainerBase::ParseJsDimensionVp(width, imageSpanWidth) ||
-                                    JSContainerBase::ParseJsDimensionFp(width, imageSpanWidth) ||
-                                    JSContainerBase::ParseJsDimensionPx(width, imageSpanWidth))) {
+        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVp(width, imageSpanWidth)) {
             imageSize.width = imageSpanWidth;
             updateSpanStyle_.updateImageWidth = imageSpanWidth;
         }
         JSRef<JSVal> height = size->GetValueAt(1);
         CalcDimension imageSpanHeight;
-        if (!height->IsNull() && (JSContainerBase::ParseJsDimensionVp(height, imageSpanHeight) ||
-                                     JSContainerBase::ParseJsDimensionFp(height, imageSpanHeight) ||
-                                     JSContainerBase::ParseJsDimensionPx(height, imageSpanHeight))) {
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVp(height, imageSpanHeight)) {
             imageSize.height = imageSpanHeight;
             updateSpanStyle_.updateImageHeight = imageSpanHeight;
         }
@@ -457,13 +489,16 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject)
         style.SetFontSize(size);
     }
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
-    if (!fontStyle->IsNull()) {
+    if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
         updateSpanStyle_.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
         style.SetFontStyle(static_cast<FontStyle>(fontStyle->ToNumber<int32_t>()));
     }
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
     std::string weight;
-    if (!fontWeight->IsNull() && JSContainerBase::ParseJsString(fontWeight, weight)) {
+    if (!fontWeight->IsNull() && (fontWeight->IsNumber() || JSContainerBase::ParseJsString(fontWeight, weight))) {
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        }
         updateSpanStyle_.updateFontWeight = ConvertStrToFontWeight(weight);
         style.SetFontWeight(ConvertStrToFontWeight(weight));
     }
@@ -497,19 +532,30 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
         return;
     }
     ImageSpanOptions options;
-    std::string image;
-    std::string bundleName;
-    std::string moduleName;
-    if (!args[0]->IsNull()) {
-        if (!JSContainerBase::ParseJsMedia(args[0], image)) {
-#if defined(PIXEL_MAP_SUPPORTED)
-            options.imagePixelMap = CreatePixelMapFromNapiValue(args[0]);
-#endif
-        } else {
-            JSImage::GetJsMediaBundleInfo(args[0], bundleName, moduleName);
-            options.image = image;
-            options.bundleName = bundleName;
-            options.moduleName = moduleName;
+    if (!args[0]->IsEmpty() && args[0]->ToString() != "") {
+        options = CreateJsImageOptions(args);
+    } else {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+        return;
+    }
+    if (options.image.has_value()) {
+        std::string assetSrc = options.image.value();
+        SrcType srcType = ImageSourceInfo::ResolveURIType(assetSrc);
+        if (assetSrc[0] == '/') {
+            assetSrc = assetSrc.substr(1); // get the asset src without '/'.
+        } else if (assetSrc[0] == '.' && assetSrc.size() > 2 && assetSrc[1] == '/') {
+            assetSrc = assetSrc.substr(2); // get the asset src without './'.
+        }
+        if (srcType == SrcType::ASSET) {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto assetManager = pipelineContext->GetAssetManager();
+            CHECK_NULL_VOID(assetManager);
+            auto assetData = assetManager->GetAsset(assetSrc);
+            if (!assetData) {
+                args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+                return;
+            }
         }
     }
     if (args.Length() > 1 && args[1]->IsObject()) {
@@ -535,6 +581,54 @@ void JSRichEditorController::AddImageSpan(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
 
+ImageSpanOptions JSRichEditorController::CreateJsImageOptions(const JSCallbackInfo& args)
+{
+    ImageSpanOptions options;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, options);
+    bool isCard = context->IsFormRender();
+    std::string image;
+    std::string bundleName;
+    std::string moduleName;
+    bool srcValid = JSContainerBase::ParseJsMedia(args[0], image);
+    if (isCard && args[0]->IsString()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(image);
+        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            image.clear();
+        }
+    }
+    JSImage::GetJsMediaBundleInfo(args[0], bundleName, moduleName);
+    options.image = image;
+    options.bundleName = bundleName;
+    options.moduleName = moduleName;
+    if (!srcValid) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (!isCard) {
+            if (IsDrawable(args[0])) {
+                options.imagePixelMap = GetDrawablePixmap(args[0]);
+            } else {
+                options.imagePixelMap = CreatePixelMapFromNapiValue(args[0]);
+            }
+        }
+#endif
+    }
+    return options;
+}
+
+bool JSRichEditorController::IsDrawable(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (jsObj->IsUndefined()) {
+        return false;
+    }
+    JSRef<JSVal> func = jsObj->GetProperty("getPixelMap");
+    return (!func->IsNull() && func->IsFunction());
+}
+
 void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
 {
     if (args.Length() < 1) {
@@ -542,8 +636,11 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     }
     TextSpanOptions options;
     std::string spanValue;
-    if (!args[0]->IsNull() && JSContainerBase::ParseJsString(args[0], spanValue)) {
+    if (!args[0]->IsEmpty() && args[0]->ToString() != "" && JSContainerBase::ParseJsString(args[0], spanValue)) {
         options.value = spanValue;
+    } else {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
+        return;
     }
     if (args.Length() > 1 && args[1]->IsObject()) {
         JSRef<JSObject> spanObject = JSRef<JSObject>::Cast(args[1]);
@@ -584,25 +681,21 @@ JSRef<JSVal> JSRichEditorController::CreateCreateJSSpansInfo(const RichEditorSel
 
 void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
 {
-    if (!args[0]->IsObject()) {
-        LOGI("info[0] not is Object");
-        return;
-    }
-
     int32_t end = -1;
     int32_t start = -1;
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    JSRef<JSVal> startVal = obj->GetProperty("start");
-    JSRef<JSVal> endVal = obj->GetProperty("end");
+    if (args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        JSRef<JSVal> startVal = obj->GetProperty("start");
+        JSRef<JSVal> endVal = obj->GetProperty("end");
 
-    if (!startVal->IsNull() && startVal->IsNumber()) {
-        start = startVal->ToNumber<int32_t>();
+        if (!startVal->IsNull() && startVal->IsNumber()) {
+            start = startVal->ToNumber<int32_t>();
+        }
+
+        if (!endVal->IsNull() && endVal->IsNumber()) {
+            end = endVal->ToNumber<int32_t>();
+        }
     }
-
-    if (!endVal->IsNull() && endVal->IsNumber()) {
-        end = endVal->ToNumber<int32_t>();
-    }
-
     if (controllerWeak_.Upgrade()) {
         RichEditorSelection value = controllerWeak_.Upgrade()->GetSpansInfo(start, end);
         args.SetReturnValue(CreateCreateJSSpansInfo(value));
@@ -684,8 +777,8 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
 
-    int32_t start = 0;
-    int32_t end = 0;
+    int32_t start = -1;
+    int32_t end = -1;
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
     JSContainerBase::ParseJsInt32(jsObject->GetProperty("start"), start);

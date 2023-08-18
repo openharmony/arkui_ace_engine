@@ -30,19 +30,24 @@ inline constexpr JankFrameFlag JANK_RUNNING_ANIMATOR = 1 << 1;
 
 class ACE_FORCE_EXPORT JankFrameReport {
 public:
-    static void JankFrameRecord(double jank);
+    static void JankFrameRecord(int64_t timeStampNanos);
     static void SetFrameJankFlag(JankFrameFlag flag);
     static void ClearFrameJankFlag(JankFrameFlag flag);
     static void StartRecord(const std::string& pageUrl);
     static void FlushRecord();
+    static void RecordPreviousEnd();
+    static void SetRefreshPeriod(int64_t refreshPeriod);
 
 private:
     static void ClearFrameJankRecord();
     static void ResetFrameJankClock();
 
     static std::vector<uint16_t> frameJankRecord_;
+    static int32_t jankFrameCount_;
     static JankFrameFlag recordStatus_;
     static int64_t startTime_;
+    static int64_t prevEndTimeStamp_;
+    static int64_t refreshPeriod_;
     static std::string pageUrl_;
     static bool needReport_;
 };

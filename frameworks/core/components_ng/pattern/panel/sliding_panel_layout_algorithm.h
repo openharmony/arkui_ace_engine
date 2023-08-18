@@ -74,6 +74,11 @@ public:
         return miniHeight_;
     }
 
+    CalcDimension GetCustomHeight()
+    {
+        return customHeight_;
+    }
+
     void SetInvisibleFlag(bool invisibleFlag)
     {
         invisibleFlag_ = invisibleFlag;
@@ -88,12 +93,14 @@ private:
     RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
     void MeasureCloseIcon(
         const RefPtr<LayoutWrapper>& closeIconWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
+    float GetMaxWidthByScreenSizeType(const SizeF& maxSize, const SizeF& idealSize) const;
 
     float currentOffset_ = 0.0f;
     bool isFirstLayout_ = true;
     Dimension fullHeight_;
     Dimension halfHeight_;
     Dimension miniHeight_;
+    CalcDimension customHeight_;
     bool invisibleFlag_ = false;
     float maxWidth_ = 0.0f;
     SizeF idealSize_;

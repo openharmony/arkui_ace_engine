@@ -17,10 +17,11 @@
 
 #include <regex>
 
+#include "base/log/ace_checker.h"
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 
@@ -95,11 +96,12 @@ std::pair<int32_t, int32_t> EngineHelper::StringToPair(const std::string& match)
 
 std::pair<int32_t, int32_t> EngineHelper::GetPositionOnJsCode()
 {
-    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+    if (!AceChecker::IsPerformanceCheckEnabled()) {
         return { 0, 0 };
     }
     auto jsEngine = GetCurrentEngine();
     std::string stack;
+    CHECK_NULL_RETURN(jsEngine, std::make_pair(0, 0));
     jsEngine->GetStackTrace(stack);
     std::regex reg("\\d+:\\d+");
     std::smatch match;

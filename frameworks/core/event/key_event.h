@@ -473,20 +473,6 @@ enum class KeyIntention : int32_t {
 
 constexpr int32_t ASCII_START_UPPER_CASE_LETTER = 65;
 constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
-const std::map<KeyCode, std::string> VISIBILITY_CODE = { { KeyCode::KEY_0, "0)" }, { KeyCode::KEY_1, "1!" },
-    { KeyCode::KEY_2, "2@" }, { KeyCode::KEY_3, "3#" }, { KeyCode::KEY_4, "4$" }, { KeyCode::KEY_5, "5%" },
-    { KeyCode::KEY_6, "6^" }, { KeyCode::KEY_7, "7&" }, { KeyCode::KEY_8, "8*" }, { KeyCode::KEY_9, "9(" },
-    { KeyCode::KEY_COMMA, ",<" }, { KeyCode::KEY_PERIOD, ".>" }, { KeyCode::KEY_GRAVE, "`~" },
-    { KeyCode::KEY_MINUS, "-_" }, { KeyCode::KEY_EQUALS, "=+" }, { KeyCode::KEY_LEFT_BRACKET, "[{" },
-    { KeyCode::KEY_RIGHT_BRACKET, "]}" }, { KeyCode::KEY_BACKSLASH, "\\|" }, { KeyCode::KEY_SEMICOLON, ";:" },
-    { KeyCode::KEY_APOSTROPHE, "\'\"" }, { KeyCode::KEY_SLASH, "/?" }, { KeyCode::KEY_AT, "@" },
-    { KeyCode::KEY_PLUS, "+=" }, { KeyCode::KEY_NUMPAD_DIVIDE, "/" }, { KeyCode::KEY_NUMPAD_MULTIPLY, "*" },
-    { KeyCode::KEY_NUMPAD_SUBTRACT, "-" }, { KeyCode::KEY_NUMPAD_ADD, "+" }, { KeyCode::KEY_NUMPAD_DOT, "." },
-    { KeyCode::KEY_NUMPAD_COMMA, "," }, { KeyCode::KEY_NUMPAD_EQUALS, "=" }, { KeyCode::KEY_TAB, "\t" },
-    { KeyCode::KEY_SPACE, " " }, { KeyCode::KEY_ESCAPE, "ESC" }, { KeyCode::KEY_F1, "F1" }, { KeyCode::KEY_F2, "F2" },
-    { KeyCode::KEY_F3, "F3" }, { KeyCode::KEY_F4, "F4" }, { KeyCode::KEY_F5, "F5" }, { KeyCode::KEY_F6, "F6" },
-    { KeyCode::KEY_F7, "F7" }, { KeyCode::KEY_F8, "F8" }, { KeyCode::KEY_F9, "F9" }, { KeyCode::KEY_F10, "F10" },
-    { KeyCode::KEY_F11, "F11" }, { KeyCode::KEY_F12, "F12" } };
 
 ACE_FORCE_EXPORT const char* KeyToString(int32_t code);
 
@@ -566,7 +552,8 @@ struct KeyEvent final {
         }
         if (IsLetterKey()) {
             int32_t codeValue = static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_A);
-            if (IsShiftWith(code)) {
+            auto shiftWithLetter = IsShiftWith(code);
+            if ((shiftWithLetter || enableCapsLock) && !(shiftWithLetter && enableCapsLock)) {
                 return std::string(1, static_cast<char>(codeValue + ASCII_START_UPPER_CASE_LETTER));
             }
             return std::string(1, static_cast<char>(codeValue + ASCII_START_LOWER_CASE_LETTER));
@@ -574,21 +561,7 @@ struct KeyEvent final {
         return "";
     }
 
-    std::string ConvertInputCodeToString() const
-    {
-        if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
-            return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_NUMPAD_0));
-        }
-        if (IsLetterKey()) {
-            int32_t codeValue = static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_A);
-            return std::string(1, static_cast<char>(codeValue + ASCII_START_UPPER_CASE_LETTER));
-        }
-        auto iter = VISIBILITY_CODE.find(code);
-        if (iter != VISIBILITY_CODE.end()) {
-            return iter->second;
-        }
-        return "";
-    }
+    std::string ConvertInputCodeToString() const;
 
     KeyCode code { KeyCode::KEY_UNKNOWN };
     const char* key = "";
@@ -603,6 +576,7 @@ struct KeyEvent final {
     int64_t deviceId = 0;
     SourceType sourceType { SourceType::NONE };
     KeyIntention keyIntention { KeyIntention::INTENTION_UNKNOWN };
+    bool enableCapsLock = false;
     std::shared_ptr<MMI::KeyEvent> rawKeyEvent;
 };
 
@@ -617,6 +591,7 @@ public:
         keyType_ = event.action;
         keySource_ = event.sourceType;
         keyIntention_ = event.keyIntention;
+        metaKey_ = event.metaKey;
         SetDeviceId(event.deviceId);
         SetTimeStamp(event.timeStamp);
     };
@@ -647,6 +622,10 @@ public:
         return keyIntention_;
     }
 
+    void SetMetaKey(int32_t metaKey)
+    {
+        metaKey_ = metaKey;
+    }
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
     const char* keyText_ = "";

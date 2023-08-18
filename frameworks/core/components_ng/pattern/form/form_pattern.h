@@ -61,8 +61,7 @@ public:
 
     const RefPtr<SubContainer>& GetSubContainer() const;
 
-    void DispatchPointerEvent(
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
 
     void OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
 
@@ -81,11 +80,23 @@ public:
         isUnTrust_ = isUnTrust;
     }
 
+    void SetIsDynamic(bool isDynamic)
+    {
+        isDynamic_ = isDynamic;
+    }
+
+    void SetFormLinkInfos(const std::vector<std::string>& infos)
+    {
+        formLinkInfos_.clear();
+        formLinkInfos_ = infos;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnVisibleChange(bool isVisible) override;
+    void OnModifyDone() override;
 
     void InitFormManagerDelegate();
     void CreateCardContainer();
@@ -110,6 +121,7 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void HideImageNode();
+    void HandleStaticFormEvent(const PointF& touchPoint);
 
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
@@ -122,9 +134,11 @@ private:
     bool isVisible_ = true;
     bool isUnTrust_ = false;
     bool isDynamic_ = true;
+    bool isSnapshot_ = false;
     RefPtr<PixelMap> pixelMap_ = nullptr;
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
+    std::vector<std::string> formLinkInfos_;
 };
 
 } // namespace NG

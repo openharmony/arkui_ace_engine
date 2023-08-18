@@ -19,11 +19,13 @@
 #include <optional>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -180,7 +182,7 @@ public:
 
     int32_t GetCurrentShownIndex() const
     {
-        return currentIndex_;
+        return GetLoopIndex(currentIndex_);
     }
 
     RefPtr<SwiperController> GetSwiperController() const
@@ -200,14 +202,27 @@ public:
 
     int32_t GetCurrentIndex()
     {
-        currentIndex_ = currentIndex_ < 0 || currentIndex_ > (TotalCount() - 1) ? 0 : currentIndex_;
-        currentIndex_ = IsLoop() ? currentIndex_ : std::clamp(currentIndex_, 0, TotalCount() - GetDisplayCount());
-        return currentIndex_;
+        return GetLoopIndex(currentIndex_);
     }
 
     float GetTurnPageRate() const
     {
         return turnPageRate_;
+    }
+
+    void SetTurnPageRate(float turnPageRate)
+    {
+        turnPageRate_ = turnPageRate;
+    }
+
+    float GetTouchBottomRate() const
+    {
+        return touchBottomRate_;
+    }
+
+    void SetTouchBottomRate(float touchBottomRate)
+    {
+        touchBottomRate_ = touchBottomRate;
     }
 
     RefPtr<Animator> GetController()
@@ -405,10 +420,12 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
     void OnTouchTestHit(SourceType hitTestType) override;
-
+    void SwipeToWithoutAnimation(int32_t index);
+    void SwipeToWithoutAnimationAutoPlay();
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* node) override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -449,12 +466,12 @@ private:
     void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f);
     void StopPropertyTranslateAnimation();
     void UpdateOffsetAfterPropertyAnimation(float offset);
-    void OnPropertyTranslateAnimationFinish(int32_t nextIndex, const OffsetF& offset);
+    void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     RefPtr<Curve> GetCurveIncludeMotion(float velocity = 0.0f) const;
     void PlayIndicatorTranslateAnimation(float translate);
 
     // Implement of swiper controller
-    void SwipeToWithoutAnimation(int32_t index);
+
     void FinishAnimation();
     void StopTranslateAnimation();
     void StopSpringAnimation();
@@ -491,6 +508,7 @@ private:
     bool IsShowIndicator() const;
     float GetTranslateLength() const;
     std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
+    std::pair<int32_t, SwiperItemInfo> GetLastItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
@@ -500,13 +518,12 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool forceStop = false);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
     WeakPtr<FocusHub> PreviousFocus(const RefPtr<FocusHub>& curFocusNode);
     WeakPtr<FocusHub> NextFocus(const RefPtr<FocusHub>& curFocusNode);
-    int32_t ComputeLoadCount(int32_t cacheCount);
     void SetAccessibilityAction();
     bool NeedStartAutoPlay() const;
     void CheckAndSetArrowHoverState(const PointF& mousePoint);
@@ -514,13 +531,25 @@ private:
     float GetCustomPropertyOffset() const;
     float GetCurrentFirstIndexStartPos() const;
     void UpdateAnimationProperty(float velocity);
-    void TriggerAnimationEndOnTouchDown();
+    void TriggerAnimationEndOnForceStop();
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
-    bool IsChildrenSizeLessThanSwiper();
+    bool IsVisibleChildrenSizeLessThanSwiper();
+    void BeforeCreateLayoutWrapper() override;
 
     void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyLoadIsLoop() const;
+    int32_t ComputeNextIndexByVelocity(float velocity) const;
+    void UpdateCurrentIndex(int32_t index);
+    void OnSpringAnimationStart(float velocity);
+    void OnSpringAndFadeAnimationFinish();
+    void OnFadeAnimationStart();
+    int32_t TotalDisPlayCount() const;
+    void StopAndResetSpringAnimation();
+    void OnLoopChange();
+    void StopSpringAnimationAndFlushImmediately();
+    void UpdateItemRenderGroup(bool itemRenderGroup);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -539,18 +568,20 @@ private:
     RefPtr<Animator> indicatorController_;
 
     RefPtr<SwiperController> swiperController_;
+    RefPtr<InputEvent> mouseEvent_;
 
     bool isLastIndicatorFocused_ = false;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
-    int32_t currentIndex_ = -1;
-    int32_t oldIndex_ = -1;
+    int32_t currentIndex_ = 0;
+    int32_t oldIndex_ = 0;
 
     PanDirection panDirection_;
 
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    float touchBottomRate_ = 1.0f;
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
@@ -567,6 +598,7 @@ private:
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
     bool isTouchDown_ = false;
+    std::optional<bool> preLoop_;
 
     Axis direction_ = Axis::HORIZONTAL;
 
@@ -599,9 +631,14 @@ private:
     std::optional<float> velocity_;
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
-
+    bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool usePropertyAnimation_ = false;
+    int32_t propertyAnimationIndex_ = -1;
+    bool isUserFinish_ = true;
+    bool isVoluntarilyClear_ = false;
+
     std::optional<int32_t> surfaceChangedCallbackId_;
+    SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;
 };
 } // namespace OHOS::Ace::NG
 

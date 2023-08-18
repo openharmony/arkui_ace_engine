@@ -34,11 +34,6 @@ void TextModelNG::Create(const std::string& content)
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_LEFT);
-    CHECK_NULL_VOID(frameNode);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    textPattern->InitSurfaceChangedCallback();
 }
 
 void TextModelNG::SetFont(const Font& value)
@@ -76,7 +71,7 @@ void TextModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
-void TextModelNG::SetTextShadow(const Shadow& value)
+void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value);
 }

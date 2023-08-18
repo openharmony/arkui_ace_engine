@@ -17,6 +17,9 @@
 
 #include <securec.h>
 
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "adapter/ohos/entrance/ace_container.h"
+#endif
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
@@ -183,15 +186,6 @@ bool SecurityComponentHandler::CheckColorBlend(const RefPtr<FrameNode>& node,
     return false;
 }
 
-bool SecurityComponentHandler::CheckClipEdge(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
-{
-    if (renderContext->GetClipEdge().has_value()) {
-        LOGW("Parent %{public}s set clip edge, security component is invalid", node->GetTag().c_str());
-        return true;
-    }
-    return false;
-}
-
 bool SecurityComponentHandler::CheckClipMask(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
     if (renderContext->GetClipMask().has_value()) {
@@ -255,10 +249,9 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
         CheckGrayScale(node, renderContext) || CheckSaturate(node, renderContext) ||
         CheckContrast(node, renderContext) || CheckInvert(node, renderContext) ||
         CheckSepia(node, renderContext) || CheckHueRotate(node, renderContext) ||
-        CheckColorBlend(node, renderContext) || CheckClipEdge(node, renderContext) ||
-        CheckClipMask(node, renderContext) || CheckForegroundColor(node, renderContext) ||
-        CheckSphericalEffect(node, renderContext) || CheckLightUpEffect(node, renderContext) ||
-        CheckPixelStretchEffect(node, renderContext)) {
+        CheckColorBlend(node, renderContext) || CheckClipMask(node, renderContext) ||
+        CheckForegroundColor(node, renderContext) || CheckSphericalEffect(node, renderContext)||
+        CheckLightUpEffect(node, renderContext) || CheckPixelStretchEffect(node, renderContext)) {
         return true;
     }
     return false;
@@ -266,6 +259,10 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
 
 bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
 {
+    RefPtr<RenderContext> renderContext = node->GetRenderContext();
+    auto frameRect = renderContext->GetPaintRectWithTransform();
+    frameRect.SetOffset(node->GetOffsetRelativeToWindow());
+    auto visibleRect = frameRect;
     auto parent = node->GetParent();
     while (parent != nullptr) {
         auto parentNode = AceType::DynamicCast<FrameNode>(parent);
@@ -275,9 +272,42 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
         if (CheckRenderEffect(parentNode)) {
             return true;
         }
+        RefPtr<RenderContext> parentRenderContext = parentNode->GetRenderContext();
+        if (!parentRenderContext->GetClipEdge().value_or(false)) {
+            parent = parent->GetParent();
+            continue;
+        }
+        GetVisibleRect(parentNode, visibleRect);
+        double currentVisibleRatio = CalculateCurrentVisibleRatio(visibleRect, frameRect);
+        if (!NearEqual(currentVisibleRatio, 1)) {
+            LOGW("security component is not completely displayed.");
+            LOGW("visibleWidth: %{public}f, visibleHeight: %{public}f, frameWidth: %{public}f, frameHeight: %{public}f",
+                visibleRect.Width(), visibleRect.Height(), frameRect.Width(), frameRect.Height());
+            return true;
+        }
         parent = parent->GetParent();
     }
     return false;
+}
+
+void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect)
+{
+    auto parentFrame = AceType::DynamicCast<FrameNode>(node);
+    if (!parentFrame) {
+        LOGW("Parent %{public}s get frame failed", node->GetTag().c_str());
+        return;
+    }
+    RectF parentRect = parentFrame->GetRenderContext()->GetPaintRectWithTransform();
+    parentRect.SetOffset(parentFrame->GetOffsetRelativeToWindow());
+    visibleRect = visibleRect.Constrain(parentRect);
+}
+
+double SecurityComponentHandler::CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect)
+{
+    if (!visibleRect.IsValid() || !renderRect.IsValid()) {
+        return 0.0;
+    }
+    return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
 }
 
 bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
@@ -357,7 +387,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
     std::string type = node->GetTag();
-    if (type == V2::SEC_LOCATION_BUTTON_ETS_TAG) {
+    if (type == V2::LOCATION_BUTTON_ETS_TAG) {
         LocationButton buttonInfo;
         buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
         buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
@@ -369,7 +399,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();
-    } else if (type == V2::SEC_PASTE_BUTTON_ETS_TAG) {
+    } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
         PasteButton buttonInfo;
         buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
         buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
@@ -381,7 +411,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();
-    } else if (type == V2::SEC_SAVE_BUTTON_ETS_TAG) {
+    } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
         SaveButton buttonInfo;
         buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
         buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
@@ -449,7 +479,9 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t scId
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
     }
-    return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, secEvent);
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    CHECK_NULL_RETURN(container, -1);
+    return SecCompKit::ReportSecurityComponentClickEvent(scId, componentInfo, secEvent, container->GetToken());
 }
 #else
 int32_t SecurityComponentHandler::RegisterSecurityComponent(RefPtr<FrameNode>& node, int32_t& scId)

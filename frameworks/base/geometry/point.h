@@ -29,6 +29,10 @@ public:
     ~Point() = default;
     Point(double x, double y) : x_(x), y_(y) {}
     Point(double x, double y, SourceType sourceType) : x_(x), y_(y), sourceType_(sourceType) {}
+    Point(double x, double y, double screenX, double screenY) : x_(x), y_(y), screenX_(screenX), screenY_(screenY) {}
+    Point(double x, double y, double screenX, double screenY, SourceType sourceType)
+        : x_(x), y_(y), screenX_(screenX), screenY_(screenY), sourceType_(sourceType)
+    {}
 
     double GetX() const
     {
@@ -48,6 +52,26 @@ public:
     void SetY(double y)
     {
         y_ = y;
+    }
+
+    double GetScreenX() const
+    {
+        return screenX_;
+    }
+
+    double GetScreenY() const
+    {
+        return screenY_;
+    }
+
+    void SetScreenX(double x)
+    {
+        screenX_ = x;
+    }
+
+    void SetScreenY(double y)
+    {
+        screenY_ = y;
     }
 
     void SetSourceType(SourceType sourceType)
@@ -96,6 +120,8 @@ public:
 private:
     double x_ = 0.0;
     double y_ = 0.0;
+    double screenX_ = 0.0;
+    double screenY_ = 0.0;
     SourceType sourceType_ = SourceType::NONE;
 };
 

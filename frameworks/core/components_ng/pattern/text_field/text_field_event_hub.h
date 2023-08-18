@@ -78,6 +78,9 @@ public:
 
     void FireOnChange(const std::string& value)
     {
+        if (lastValue_.has_value() && lastValue_.value() == value) {
+            return;
+        }
         if (onValueChangeEvent_) {
             LOGI("On change event %{private}s", value.c_str());
             onValueChangeEvent_(value);
@@ -86,6 +89,7 @@ public:
             LOGI("On change %{private}s", value.c_str());
             onChange_(value);
         }
+        lastValue_ = value;
     }
 
     void SetOnSelectionChange(std::function<void(int32_t, int32_t)>&& func)
@@ -216,8 +220,10 @@ public:
             onScrollChangeEvent_(offsetX, offsetY);
         }
     }
-    
+
 private:
+    std::optional<std::string> lastValue_;
+
     OnScrollEvent onScrollEvent_;
     OnScrollBeginEvent onScrollBeginEvent_;
     OnScrollFrameBeginEvent onScrollFrameBeginEvent_;

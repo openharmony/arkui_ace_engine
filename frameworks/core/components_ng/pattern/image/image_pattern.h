@@ -40,6 +40,11 @@ public:
     ImagePattern() = default;
     ~ImagePattern() override = default;
 
+    std::optional<RenderContext::ContextParam> GetContextParam() const override
+    {
+        return RenderContext::ContextParam { RenderContext::ContextType::CANVAS };
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -70,7 +75,12 @@ public:
         return { FocusType::NODE, false };
     }
 
-    void CreateObscuredImageIfNeed();
+    const RefPtr<CanvasImage>& GetCanvasImage()
+    {
+        return image_;
+    }
+
+    void CreateObscuredImage();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
@@ -118,7 +128,7 @@ private:
 
     void OnModifyDone() override;
 
-    void PaintImage(RenderContext* renderContext, const OffsetF& offset);
+    void OnLanguageConfigurationUpdate() override;
 
     void OnImageDataReady();
     void OnImageLoadFail();
@@ -141,6 +151,8 @@ private:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    RectF CalcImageContentPaintSize(const RefPtr<GeometryNode>& geometryNode);
+
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();
     LoadFailNotifyTask CreateLoadFailCallback();
@@ -150,8 +162,6 @@ private:
     LoadFailNotifyTask CreateLoadFailCallbackForAlt();
 
     CopyOptions copyOption_ = CopyOptions::None;
-    bool syncLoad_ = false;
-    bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
@@ -171,6 +181,9 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
+
+    bool syncLoad_ = false;
+    bool isShow_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

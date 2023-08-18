@@ -24,13 +24,20 @@ ohos_shared_library("drawabledescriptor") {
   ]
 
   external_deps = [
-    "graphic_standard:2d_graphics",
-    "graphic_standard:librender_service_client",
+    "graphic_2d:librender_service_client",
     "hilog:libhilog",
-    "multimedia_image_framework:image",
-    "multimedia_image_framework:image_native",
     "napi:ace_napi",
   ]
+
+  if (current_os == "ohos") {
+    external_deps += [
+      "graphic_2d:2d_graphics",
+      "image_framework:image",
+      "image_framework:image_native",
+    ]
+  } else {
+    defines = [ "PREVIEW" ]
+  }
 
   relative_install_dir = "module/arkui"
   subsystem_name = ace_engine_subsystem

@@ -20,13 +20,11 @@
 #include "core/image/image_provider.h"
 #include "core/pipeline/pipeline_context.h"
 
-#ifndef USE_ROSEN_DRAWING
 #ifdef NEW_SKIA
 #include "modules/svg/include/SkSVGDOM.h"
 #else
 #include "experimental/svg/model/SkSVGDOM.h"
 #endif
-#endif // USE_ROSEN_DRAWING
 
 namespace OHOS::Rosen {
     class RSMask;

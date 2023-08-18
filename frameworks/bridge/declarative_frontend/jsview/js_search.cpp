@@ -78,7 +78,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onSubmit", &JSSearch::OnSubmit, opt);
     JSClass<JSSearch>::StaticMethod("onChange", &JSSearch::OnChange, opt);
     JSClass<JSSearch>::StaticMethod("onTextSelectionChange", &JSSearch::SetOnTextSelectionChange);
-    JSClass<JSSearch>::StaticMethod("onScroll", &JSSearch::SetOnScroll);
+    JSClass<JSSearch>::StaticMethod("onContentScroll", &JSSearch::SetOnScroll);
     JSClass<JSSearch>::StaticMethod("border", &JSSearch::JsBorder);
     JSClass<JSSearch>::StaticMethod("borderWidth", &JSSearch::JsBorderWidth);
     JSClass<JSSearch>::StaticMethod("borderColor", &JSSearch::JsBorderColor);
@@ -100,6 +100,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
     JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
+    JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -198,7 +199,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         CalcDimension fontSize;
         auto fontSizeProp = param->GetProperty("fontSize");
         if (!fontSizeProp->IsUndefined() && !fontSizeProp->IsNull() && ParseJsDimensionFp(fontSizeProp, fontSize)) {
-            if (LessNotEqual(fontSize.Value(), 0.0)) {
+            if (LessNotEqual(fontSize.Value(), 0.0) || fontSize.Unit() == DimensionUnit::PERCENT) {
                 fontSize = theme->GetFontSize();
             }
         } else {
@@ -227,21 +228,13 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
         CalcDimension size;
         auto sizeProp = param->GetProperty("size");
         if (!sizeProp->IsUndefined() && !sizeProp->IsNull() && ParseJsDimensionVp(sizeProp, size)) {
-            if (LessNotEqual(size.Value(), 0.0)) {
+            if (LessNotEqual(size.Value(), 0.0) || size.Unit() == DimensionUnit::PERCENT) {
                 size = theme->GetIconHeight();
             }
         } else {
             size = theme->GetIconHeight();
         }
         SearchModel::GetInstance()->SetSearchIconSize(size);
-
-        // set icon color
-        Color colorVal;
-        auto colorProp = param->GetProperty("color");
-        if (colorProp->IsUndefined() || colorProp->IsNull() || !ParseJsColor(colorProp, colorVal)) {
-            colorVal = theme->GetSearchIconColor();
-        }
-        SearchModel::GetInstance()->SetSearchIconColor(colorVal);
 
         // set icon src
         std::string src;
@@ -250,6 +243,13 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
             src = "";
         }
         SearchModel::GetInstance()->SetSearchSrcPath(src);
+
+        // set icon color
+        Color colorVal;
+        auto colorProp = param->GetProperty("color");
+        if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal)) {
+            SearchModel::GetInstance()->SetSearchIconColor(colorVal);
+        }
     }
 }
 
@@ -312,21 +312,13 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     auto iconSizeProp = iconParam->GetProperty("size");
     auto theme = GetTheme<SearchTheme>();
     if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVp(iconSizeProp, iconSize)) {
-        if (LessNotEqual(iconSize.Value(), 0.0)) {
+        if (LessOrEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
             iconSize = theme->GetIconHeight();
         }
     } else {
         iconSize = theme->GetIconHeight();
     }
     SearchModel::GetInstance()->SetCancelIconSize(iconSize);
-
-    // set icon color
-    Color iconColor;
-    auto iconColorProp = iconParam->GetProperty("color");
-    if (iconColorProp->IsUndefined() || iconColorProp->IsNull() || !ParseJsColor(iconColorProp, iconColor)) {
-        iconColor = theme->GetSearchIconColor();
-    }
-    SearchModel::GetInstance()->SetCancelIconColor(iconColor);
 
     // set icon src
     std::string iconSrc;
@@ -335,6 +327,13 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
         iconSrc = "";
     }
     SearchModel::GetInstance()->SetRightIconSrcPath(iconSrc);
+
+    // set icon color
+    Color iconColor;
+    auto iconColorProp = iconParam->GetProperty("color");
+    if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
+        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+    }
 }
 
 void JSSearch::SetTextColor(const JSCallbackInfo& info)
@@ -653,6 +652,21 @@ void JSSearch::SetSelectionMenuHidden(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->SetSelectionMenuHidden(info[0]->ToBoolean());
+}
+
+void JSSearch::SetCustomKeyboard(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && (info[0]->IsUndefined() || info[0]->IsNull())) {
+        SearchModel::GetInstance()->SetCustomKeyboard(nullptr);
+        return;
+    }
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+    std::function<void()> buildFunc;
+    if (JSTextField::ParseJsCustomKeyboardBuilder(info, 0, buildFunc)) {
+        SearchModel::GetInstance()->SetCustomKeyboard(std::move(buildFunc));
+    }
 }
 
 void JSSearchController::JSBind(BindingTarget globalObj)

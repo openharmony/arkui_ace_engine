@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-TextPattern::~TextPattern() = default;
-
 void TextPattern::OnDetachFromFrameNode(FrameNode* node) {}
 
 void TextPattern::HandleLongPress(GestureEvent& info) {}
@@ -29,6 +27,8 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) 
 void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) {}
 
 void TextPattern::HandleOnSelectAll() {}
+
+void TextPattern::HandleOnCopy() {}
 
 void TextPattern::OnModifyDone() {}
 
@@ -73,4 +73,5 @@ void TextPattern::OnColorConfigurationUpdate() {}
 
 void TextPattern::InitSurfaceChangedCallback() {}
 void TextPattern::OnAttachToFrameNode() {}
+void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {};
 } // namespace OHOS::Ace::NG

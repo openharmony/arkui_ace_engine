@@ -19,14 +19,28 @@
 #include <memory>
 #include <string>
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
+
+namespace OHOS::Ace {
+struct ModalUIExtensionCallbacks;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT UIExtensionModelNG : public UIExtensionModel {
 public:
+    static RefPtr<FrameNode> Create(const std::string& bundleName, const std::string& abilityName,
+        const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease,
+        std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
+    static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
+
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap) override;
+    void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;
+    void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive) override;
+    void SetOnError(
+        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_NG_H

@@ -36,6 +36,7 @@ public:
 
 private:
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
+    bool hasFontSize_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(BadgeLayoutAlgorithm);
 };

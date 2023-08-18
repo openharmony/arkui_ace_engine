@@ -381,7 +381,7 @@ HWTEST_F(TitleBarTestNg, GetOrCreateTitleBarNode001, TestSize.Level1)
 HWTEST_F(TitleBarTestNg, TitleBarAccessibilityPropertyGetText001, TestSize.Level1)
 {
     InitTitleBarTestNg();
-    EXPECT_EQ(titleBarAccessibilityProperty_->GetText(), EMPTY_TEXT);
+    EXPECT_EQ(titleBarAccessibilityProperty_->GetText(), "");
     auto titleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(titleNode, nullptr);

@@ -34,10 +34,10 @@ public:
 protected:
     int32_t OnGetTotalCount() override
     {
-        return static_cast<int32_t>(generatedItem_.size());
+        return static_cast<int32_t>(cachedItems_.size());
     }
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
-        int32_t index, const std::unordered_map<std::string, RefPtr<NG::UINode>>& /* cachedItems */) override
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override
     {
         return { std::to_string(index),
             AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<NG::Pattern>()) };

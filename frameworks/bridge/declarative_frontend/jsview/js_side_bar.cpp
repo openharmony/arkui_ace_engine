@@ -24,8 +24,8 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/side_bar_container_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/side_bar_container_model_impl.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<SideBarContainerModel> SideBarContainerModel::instance_ = nullptr;
@@ -55,11 +55,13 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
+constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
-constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
-constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
+static Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
+static Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
@@ -74,6 +76,10 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
     CalcDimension value;
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
+        DEFAULT_MIN_SIDE_BAR_WIDTH = 240.0_vp;
+    }
 
     auto isValid = pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN
                        ? JSViewAbstract::ParseJsDimensionVpNG(info[0], value)
@@ -242,7 +248,7 @@ void JSSideBar::SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JS
     std::string iconPath;
     auto isStrType = ParseJsMedia(icon, iconPath);
     RefPtr<PixelMap> pixMap = nullptr;
-#if defined (PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED)
     if (!isStrType) {
         pixMap = CreatePixelMapFromNapiValue(icon);
     }
@@ -250,16 +256,13 @@ void JSSideBar::SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JS
     if (isStrType || pixMap != nullptr) {
         switch (iconType) {
             case SideBarControlButtonType::SHOWN:
-                SideBarContainerModel::GetInstance()->SetControlButtonShowIconInfo(
-                    iconPath, !isStrType, pixMap);
+                SideBarContainerModel::GetInstance()->SetControlButtonShowIconInfo(iconPath, !isStrType, pixMap);
                 break;
             case SideBarControlButtonType::HIDDEN:
-                SideBarContainerModel::GetInstance()->SetControlButtonHiddenIconInfo(
-                    iconPath, !isStrType, pixMap);
+                SideBarContainerModel::GetInstance()->SetControlButtonHiddenIconInfo(iconPath, !isStrType, pixMap);
                 break;
             case SideBarControlButtonType::SWITCHING:
-                SideBarContainerModel::GetInstance()->SetControlButtonSwitchingIconInfo(
-                    iconPath, !isStrType, pixMap);
+                SideBarContainerModel::GetInstance()->SetControlButtonSwitchingIconInfo(iconPath, !isStrType, pixMap);
                 break;
             default:
                 break;
@@ -276,38 +279,15 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
 
     if (!info[0]->IsNull() && info[0]->IsObject()) {
         JSRef<JSObject> value = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> width = value->GetProperty("width");
-        JSRef<JSVal> height = value->GetProperty("height");
-        JSRef<JSVal> left = value->GetProperty("left");
-        JSRef<JSVal> top = value->GetProperty("top");
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+            ParseControlButtonOG(value);
+        } else {
+            ParseControlButtonNG(value);
+        }
+
         JSRef<JSVal> icons = value->GetProperty("icons");
-
-        if (!width->IsNull() && width->IsNumber()) {
-            auto controlButtonWidth = CalcDimension(width->ToNumber<double>(), DimensionUnit::VP);
-            if (LessNotEqual(controlButtonWidth.Value(), 0.0)) {
-                controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
-            }
-            SideBarContainerModel::GetInstance()->SetControlButtonWidth(controlButtonWidth);
-        }
-
-        if (!height->IsNull() && height->IsNumber()) {
-            auto controlButtonHeight = CalcDimension(height->ToNumber<double>(), DimensionUnit::VP);
-            if (LessNotEqual(controlButtonHeight.Value(), 0.0)) {
-                controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
-            }
-            SideBarContainerModel::GetInstance()->SetControlButtonHeight(controlButtonHeight);
-        }
-
-        if (!left->IsNull() && left->IsNumber()) {
-            SideBarContainerModel::GetInstance()->SetControlButtonLeft(Dimension(left->ToNumber<double>(),
-                DimensionUnit::VP));
-        }
-
-        if (!top->IsNull() && top->IsNumber()) {
-            SideBarContainerModel::GetInstance()->SetControlButtonTop(Dimension(top->ToNumber<double>(),
-                DimensionUnit::VP));
-        }
-
         if (!icons->IsNull() && icons->IsObject()) {
             JSRef<JSObject> iconsVal = JSRef<JSObject>::Cast(icons);
             JSRef<JSVal> showIcon = iconsVal->GetProperty("shown");
@@ -389,6 +369,73 @@ void JSSideBar::JsAutoHide(bool autoHide)
 void JSSideBar::Pop()
 {
     SideBarContainerModel::GetInstance()->Pop();
+}
+
+
+void JSSideBar::ParseControlButtonOG(JSRef<JSObject> value)
+{
+    JSRef<JSVal> width = value->GetProperty("width");
+    JSRef<JSVal> height = value->GetProperty("height");
+    JSRef<JSVal> left = value->GetProperty("left");
+    JSRef<JSVal> top = value->GetProperty("top");
+
+    if (!width->IsNull() && width->IsNumber()) {
+        auto controlButtonWidth = CalcDimension(width->ToNumber<double>(), DimensionUnit::VP);
+        if (LessNotEqual(controlButtonWidth.Value(), 0.0)) {
+            controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
+        }
+        SideBarContainerModel::GetInstance()->SetControlButtonWidth(controlButtonWidth);
+    }
+
+    if (!height->IsNull() && height->IsNumber()) {
+        auto controlButtonHeight = CalcDimension(height->ToNumber<double>(), DimensionUnit::VP);
+        if (LessNotEqual(controlButtonHeight.Value(), 0.0)) {
+            controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
+        }
+        SideBarContainerModel::GetInstance()->SetControlButtonHeight(controlButtonHeight);
+    }
+
+    if (!left->IsNull() && left->IsNumber()) {
+        SideBarContainerModel::GetInstance()->SetControlButtonLeft(
+            Dimension(left->ToNumber<double>(), DimensionUnit::VP));
+    }
+
+    if (!top->IsNull() && top->IsNumber()) {
+        SideBarContainerModel::GetInstance()->SetControlButtonTop(
+            Dimension(top->ToNumber<double>(), DimensionUnit::VP));
+    }
+}
+
+void JSSideBar::ParseControlButtonNG(JSRef<JSObject> value)
+{
+    JSRef<JSVal> width = value->GetProperty("width");
+    JSRef<JSVal> height = value->GetProperty("height");
+    JSRef<JSVal> left = value->GetProperty("left");
+    JSRef<JSVal> top = value->GetProperty("top");
+
+    auto controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
+    if (width->IsNumber() && GreatOrEqual(width->ToNumber<double>(), 0.0)) {
+        controlButtonWidth = CalcDimension(width->ToNumber<double>(), DimensionUnit::VP);
+    }
+    SideBarContainerModel::GetInstance()->SetControlButtonWidth(controlButtonWidth);
+
+    auto controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
+    if (height->IsNumber() && GreatOrEqual(height->ToNumber<double>(), 0.0)) {
+        controlButtonHeight = CalcDimension(height->ToNumber<double>(), DimensionUnit::VP);
+    }
+    SideBarContainerModel::GetInstance()->SetControlButtonHeight(controlButtonHeight);
+
+    auto controlButtonLeft = DEFAULT_CONTROL_BUTTON_LEFT;
+    if (left->IsNumber() && GreatOrEqual(left->ToNumber<double>(), 0.0)) {
+        controlButtonLeft = CalcDimension(left->ToNumber<double>(), DimensionUnit::VP);
+    }
+    SideBarContainerModel::GetInstance()->SetControlButtonLeft(controlButtonLeft);
+
+    auto controlButtonTop = DEFAULT_CONTROL_BUTTON_TOP;
+    if (top->IsNumber() && GreatOrEqual(top->ToNumber<double>(), 0.0)) {
+        controlButtonTop = CalcDimension(top->ToNumber<double>(), DimensionUnit::VP);
+    }
+    SideBarContainerModel::GetInstance()->SetControlButtonTop(controlButtonTop);
 }
 
 } // namespace OHOS::Ace::Framework

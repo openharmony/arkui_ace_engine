@@ -41,7 +41,6 @@ public:
 
 private:
     JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info);
-    JSRef<JSObject> CreateHistoricalPoint(const TouchLocationInfo& touchInfo, TouchEventInfo& info);
     JSRef<JSObject> CreateJSEventInfo(TouchEventInfo& info);
 };
 

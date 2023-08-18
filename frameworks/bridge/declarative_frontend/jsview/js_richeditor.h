@@ -34,9 +34,11 @@ public:
     static void SetOnIMEInputComplete(const JSCallbackInfo& args);
     static void SetAboutToDelete(const JSCallbackInfo& args);
     static void SetOnDeleteComplete(const JSCallbackInfo& args);
+    static void SetCustomKeyboard(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJsAboutToIMEInputObj(const NG::RichEditorInsertValue& insertValue);
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
+    static void JsFocusable(const JSCallbackInfo& info);
 
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
@@ -74,6 +76,8 @@ public:
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject);
+    ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
+    bool IsDrawable(const JSRef<JSVal>& jsValue);
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);
     void UpdateSpanStyle(const JSCallbackInfo& info);

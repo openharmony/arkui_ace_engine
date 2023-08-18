@@ -66,18 +66,38 @@ public:
         isLoading_ = false;
     }
 
+    bool GetVisible() const
+    {
+        return isVisible_;
+    }
+
     void SetEnableLoading(bool enable)
     {
-        if (enableLoading_) {
-            enableLoading_->Set(enable);
-        }
+        CHECK_NULL_VOID(enableLoading_);
+        enableLoading_->Set(enable);
+    }
+
+    void SetContentOffset(const OffsetF& offset)
+    {
+        CHECK_NULL_VOID(offset_);
+        offset_->Set(offset);
+    }
+
+    void SetContentSize(const SizeF& contentSize)
+    {
+        CHECK_NULL_VOID(contentSize_);
+        contentSize_->Set(contentSize);
     }
 private:
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
     float GetCurentCometAngle(float baseAngle, uint32_t index, uint32_t totalNumber);
 
     uint32_t GetCometNumber();
+    // no Animatable
     RefPtr<PropertyBool> enableLoading_;
+    RefPtr<PropertyOffsetF> offset_;
+    RefPtr<PropertySizeF> contentSize_;
+    // Animatable
     RefPtr<AnimatablePropertyFloat> date_;
     RefPtr<AnimatablePropertyColor> color_;
     RefPtr<AnimatablePropertyFloat> centerDeviation_;

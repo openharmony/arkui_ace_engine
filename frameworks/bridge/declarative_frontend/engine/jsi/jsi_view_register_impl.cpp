@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
 #include "bridge/declarative_frontend/jsview/js_canvas.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_path.h"
@@ -51,7 +52,6 @@
 #include "bridge/declarative_frontend/jsview/js_counter.h"
 #include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
-#include "bridge/declarative_frontend/jsview/js_distributed.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
 #include "bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
@@ -79,6 +79,7 @@
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
 #include "bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
+#include "bridge/declarative_frontend/jsview/js_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_marquee.h"
 #include "bridge/declarative_frontend/jsview/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/js_menu.h"
@@ -92,6 +93,7 @@
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "bridge/declarative_frontend/jsview/js_pan_handler.h"
+#include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
 #include "bridge/declarative_frontend/jsview/js_path2d.h"
 #include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
@@ -111,13 +113,11 @@
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
+#include "bridge/declarative_frontend/jsview/js_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
-#include "bridge/declarative_frontend/jsview/js_sec_location_button.h"
-#include "bridge/declarative_frontend/jsview/js_sec_paste_button.h"
-#include "bridge/declarative_frontend/jsview/js_sec_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
@@ -141,7 +141,6 @@
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
 #include "bridge/declarative_frontend/jsview/js_touch_handler.h"
-#include "bridge/declarative_frontend/jsview/js_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_measure_layout.h"
@@ -211,9 +210,10 @@
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
+#include "bridge/declarative_frontend/jsview/js_ui_extension.h"
+#include "bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
+#include "bridge/declarative_frontend/jsview/window_scene/js_screen.h"
+#include "bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -398,6 +398,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "Counter", JSCounter::JSBind },
+    { "CalendarPicker", JSCalendarPicker::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -470,6 +471,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
     { "Counter", JSCounter::JSBind },
+    { "CalendarPicker", JSCalendarPicker::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -497,6 +499,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Toggle", JSToggle::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
+    { "CalendarPickerDialog", JSCalendarPickerDialog::JSBind },
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
     { "Path", JSPath::JSBind },
@@ -524,12 +527,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
     { "FormLink", JSFormLink::JSBind },
-#ifdef WINDOW_SCENE_SUPPORTED
-    { "UIExtensionComponent", JSUIExtension::JSBind },
-#endif
-    { "SecLocationButton", JSSecLocationButton::JSBind },
-    { "SecPasteButton", JSSecPasteButton::JSBind },
-    { "SecSaveButton", JSSecSaveButton::JSBind },
+    { "LocationButton", JSLocationButton::JSBind },
+    { "PasteButton", JSPasteButton::JSBind },
+    { "SaveButton", JSSaveButton::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },
 #endif
@@ -636,7 +636,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Video", JSVideo::JSBind },
     { "VideoController", JSVideoController::JSBind },
     { "PluginComponent", JSPlugin::JSBind },
-
+    { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     { "Model", JSSceneView::JSBind },
@@ -644,6 +644,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #if defined(WINDOW_SCENE_SUPPORTED)
     { "RootScene", JSRootScene::JSBind },
     { "Screen", JSScreen::JSBind },
+    { "UIExtensionComponent", JSUIExtension::JSBind },
+    { "UIExtensionProxy", JSUIExtensionProxy::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
 #endif
     { "RichEditor", JSRichEditor::JSBind },
@@ -810,7 +812,6 @@ void JsBindFormViews(
         JSViewStackProcessor::JSBind(globalObj);
         JSTouchHandler::JSBind(globalObj);
         JSPersistent::JSBind(globalObj);
-        JSDistributed::JSBind(globalObj);
         JSScroller::JSBind(globalObj);
 
         JSProfiler::JSBind(globalObj);
@@ -848,7 +849,6 @@ void JsBindViews(BindingTarget globalObj)
     JSCustomDialogController::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
-    JSDistributed::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
 
     JSProfiler::JSBind(globalObj);

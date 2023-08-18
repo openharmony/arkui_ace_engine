@@ -41,6 +41,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 
@@ -66,14 +67,17 @@ public:
     virtual void SetMinHeight(const CalcDimension& minHeight) = 0;
     virtual void SetMaxWidth(const CalcDimension& maxWidth) = 0;
     virtual void SetMaxHeight(const CalcDimension& maxHeight) = 0;
+    virtual void ResetMinSize(bool resetWidth) = 0;
+    virtual void ResetMaxSize(bool resetWidth) = 0;
 
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
-    virtual void SetBackgroundImage(const std::string& src, RefPtr<ThemeConstants> themeConstant) = 0;
+    virtual void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
+    virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
     virtual void SetSphericalEffect(double radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
@@ -107,6 +111,7 @@ public:
     virtual void SetLayoutWeight(int32_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
+    virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
     virtual void SetUseAlign(
@@ -124,7 +129,7 @@ public:
     virtual void SetScale(float x, float y, float z) = 0;
     virtual void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
-    virtual void SetRotate(float x, float y, float z, float angle) = 0;
+    virtual void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
 
     // display props
@@ -137,7 +142,7 @@ public:
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
-    virtual void SetGeometryTransition(const std::string& id) = 0;
+    virtual void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
     virtual void SetRenderFit(RenderFit renderFit) = 0;
@@ -164,6 +169,8 @@ public:
     virtual void SetBackdropBlur(const Dimension& radius) = 0;
     virtual void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) = 0;
     
+    virtual void SetDynamicLightUp(float rate, float lightUpDegree) = 0;
+
     virtual void SetFrontBlur(const Dimension& radius) = 0;
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
@@ -240,12 +247,15 @@ public:
     // obscured
     virtual void SetObscured(const std::vector<ObscuredReasons>& reasons) = 0;
 
+    // background
+    virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
+
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(
-        ResponseType type, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
+        ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear) = 0;

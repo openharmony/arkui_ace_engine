@@ -16,13 +16,14 @@
 #define FRAMEWORKS_CORE_COMMON_TEST_UNITTEST_CLIPBOARD_MOCK_CLIP_BOARD_H
 
 #include "gtest/gtest.h"
-#include "core/common/clipboard/clipboard_proxy.h"
-#include "core/common/clipboard/clipboard_interface.h"
-#include "core/common/clipboard/clipboard.h"
+
 #include "base/utils/utils.h"
+#include "core/common/clipboard/clipboard.h"
+#include "core/common/clipboard/clipboard_interface.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 
 namespace OHOS::Ace {
-    const std::string TEST = "test";
+const std::string TEST = "test";
 
 class MockClipboardImpl : public Clipboard {
 public:
@@ -31,7 +32,7 @@ public:
 
     void SetData(
         const std::string& data, CopyOptions copyOption = CopyOptions::InApp, bool isDragData = false) override {};
-    void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false)  override
+    void GetData(const std::function<void(const std::string&)>& callback, bool syncMode = false) override
     {
         callback(TEST);
     }
@@ -39,10 +40,23 @@ public:
     void GetPixelMapData(
         const std::function<void(const RefPtr<PixelMap>&)>& callback, bool syncMode = false) override {};
     void HasData(const std::function<void(bool hasData)>& callback) override {};
+    void AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) override {};
+    void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) override {};
+    void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) override {};
+    void SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption = CopyOptions::Distributed) override {};
+    void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+        const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+        const std::function<void(const std::string&, bool isLastRecord)>& urlCallback,
+        bool syncMode = false) override {};
+
+    RefPtr<PasteDataMix> CreatePasteDataMix()
+    {
+        return AceType::MakeRefPtr<PasteDataMix>();
+    }
     void Clear() override {};
 };
 
-    MockClipboardImpl::MockClipboardImpl(const RefPtr<TaskExecutor>& taskExecutor) : Clipboard(taskExecutor) {}
+MockClipboardImpl::MockClipboardImpl(const RefPtr<TaskExecutor>& taskExecutor) : Clipboard(taskExecutor) {}
 
 class MockClipboardProxyImpl final : public ClipboardInterface {
 public:

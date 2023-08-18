@@ -14,9 +14,10 @@
  */
 
 #include "base/log/jank_frame_report.h"
+#include "base/perfmonitor/perf_monitor.h"
 
 namespace OHOS::Ace {
-void JankFrameReport::JankFrameRecord(double jank) {}
+void JankFrameReport::JankFrameRecord(int64_t timeStampNanos) {}
 
 void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag) {}
 
@@ -25,4 +26,33 @@ void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag) {}
 void JankFrameReport::StartRecord(const std::string& pageUrl) {}
 
 void JankFrameReport::FlushRecord() {}
+
+void RecordPreviousEnd() {}
+
+void SetRefreshPeriod(int64_t refreshPeriod) {}
+
+PerfMonitor* PerfMonitor::GetPerfMonitor()
+{
+    return nullptr;
+}
+
+void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note) {}
+
+void PerfMonitor::End(const std::string& sceneId, bool isJsApi) {}
+
+void PerfMonitor::SetPageUrl(const std::string& pageUrl) {}
+
+void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank) {}
+
+void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time) {}
+
+int64_t PerfMonitor::GetInputTime(PerfActionType type)
+{
+    return 0;
+}
+
+std::string PerfMonitor::GetPageUrl()
+{
+    return "";
+}
 } // namespace OHOS::Ace

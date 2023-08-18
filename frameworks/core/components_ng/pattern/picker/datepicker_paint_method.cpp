@@ -45,11 +45,7 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor,
                enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
         DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
-        auto datePickerPattern = DynamicCast<DatePickerPattern>(pattern.Upgrade());
         auto height = dividerSpacing;
-        if (datePickerPattern->GetResizeFlag()) {
-            height = datePickerPattern->GetResizePickerItemHeight();
-        }
         double upperLine = (frameRect.Height() - height) / 2.0;
         double downLine = (frameRect.Height() + height) / 2.0;
 
@@ -79,7 +75,7 @@ void DatePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
 
     // Paint gradient rect over the picker content.
     RSBrush topBrush;
-    RSRect rect(0.0f, frameRect.Right(), 0.0f, frameRect.Bottom());
+    RSRect rect(0.0f, 0.0f, frameRect.Right() - frameRect.Left(), frameRect.Bottom() - frameRect.Top());
     RSPoint topStartPoint;
     topStartPoint.SetX(0.0f);
     topStartPoint.SetY(0.0f);

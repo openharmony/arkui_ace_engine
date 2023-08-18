@@ -38,9 +38,8 @@
                 "relational_store",
                 "hisysevent",
                 "napi",
-                "unittest",
-                "resmgr",
                 "hiview",
+                "hichecker",
                 "window_manager",
                 "c_utils",
                 "eventhandler",
@@ -52,7 +51,7 @@
                 "kv_store",
                 "udmf",
                 "os_account",
-                "graphic_standard",
+                "graphic_2d",
                 "safwk",
                 "common_event_service",
                 "data_share",
@@ -60,16 +59,19 @@
                 "i18n",
                 "hicollie",
                 "init",
-                "multimedia_image_framework",
-                "camera_framework",
+                "image_framework",
                 "player_framework",
                 "access_token",
-                "hilog_native",
                 "input",
-                "power_manager",
                 "webview",
                 "imf",
-                "device_status"
+                "device_status",
+                "soc_perf",
+                "security_component",
+                "camera_framework",
+                "previewer",
+                "media_library",
+                "app_file_service"
             ],
             "third_party": [
                 "json",
@@ -79,19 +81,19 @@
                 "libpng",
                 "parse5",
                 "qrcodegen",
-                "css_what",
-                "weex_loader",
+                "css-what",
+                "weex-loader",
                 "skia",
                 "zlib",
                 "bounds_checking_function",
                 "curl",
-                "cjson",
+                "cJSON",
                 "jsframework",
                 "opencl-headers",
                 "libuv",
                 "egl",
                 "opengles",
-                "thirdparty_googletest"
+                "googletest"
             ]
         },
         "build": {
@@ -114,7 +116,8 @@
                         "header_files": [
                             "ui_content.h",
                             "viewport_config.h",
-                            "serializeable_object.h"
+                            "serializeable_object.h",
+                            "modal_ui_extension_callbacks.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent"
@@ -136,11 +139,20 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor:drawable_descriptor"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_files": [
+                            "adapter/preview/entrance/ace_ability.h",
+                            "adapter/preview/entrance/ace_run_args.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/build:libace"
                 }
             ],
             "test": [
                 "//foundation/arkui/ace_engine/test/unittest:unittest",
-                "//foundation/arkui/ace_engine/frameworks/bridge/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/components_ng/test:unittest",
                 "//foundation/arkui/ace_engine/test/fuzztest:fuzztest"
             ]

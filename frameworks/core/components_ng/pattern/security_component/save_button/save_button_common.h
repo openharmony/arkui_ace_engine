@@ -30,10 +30,10 @@ enum class SaveButtonIconStyle : int32_t {
 enum class SaveButtonSaveDescription : int32_t {
     TEXT_NULL = -1,
     DOWNLOAD = 0,
-    DOWNLOAD_FILES,
+    DOWNLOAD_FILE,
     SAVE,
-    SAVE_IMAGES,
-    SAVE_FILES,
+    SAVE_IMAGE,
+    SAVE_FILE,
     DOWNLOAD_AND_SHARE,
     RECEIVE,
     CONTINUE_TO_RECEIVE,

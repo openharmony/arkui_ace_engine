@@ -23,15 +23,17 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/click_event.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT SelectOverlayPattern : public Pattern {
-    DECLARE_ACE_TYPE(SelectOverlayPattern, Pattern);
+class ACE_EXPORT SelectOverlayPattern : public PopupBasePattern {
+    DECLARE_ACE_TYPE(SelectOverlayPattern, PopupBasePattern);
 
 public:
     explicit SelectOverlayPattern(std::shared_ptr<SelectOverlayInfo> info) : info_(std::move(info)) {}
@@ -57,8 +59,18 @@ public:
         if (!selectOverlayModifier_) {
             selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
         }
-        return MakeRefPtr<SelectOverlayPaintMethod>(
-            selectOverlayModifier_, *info_, defaultMenuEndOffset_, hasExtensionMenu_);
+        if (!selectOverlayContentModifier_) {
+            selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>();
+        }
+
+        if (paintMethodCreated_) {
+            return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
+                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_);
+        } else {
+            paintMethodCreated_ = true;
+            return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
+                defaultMenuEndOffset_, hasExtensionMenu_, hasShowAnimation_, false, isHiddenHandle_);
+        }
     }
 
     const std::shared_ptr<SelectOverlayInfo>& GetSelectOverlayInfo() const
@@ -93,6 +105,11 @@ public:
         return selectOverlayModifier_;
     }
 
+    const RefPtr<SelectOverlayContentModifier>& GetContentModifier()
+    {
+        return selectOverlayContentModifier_;
+    }
+
     const OffsetF& GetDefaultMenuEndOffset()
     {
         return defaultMenuEndOffset_;
@@ -119,6 +136,14 @@ public:
     {
         closedByGlobalTouchEvent_ = closedByGlobalTouch;
     }
+	
+    bool IsMenuShow();
+    bool IsHandleShow();
+
+    void SetHasShowAnimation(bool animation)
+    {
+        hasShowAnimation_ = animation;
+    }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -135,6 +160,9 @@ private:
     void HandlePanCancel();
 
     void CheckHandleReverse();
+    void StartHiddenHandleTask();
+    void StopHiddenHandleTask();
+    void HiddenHandle();
 
     std::shared_ptr<SelectOverlayInfo> info_;
     RefPtr<PanEvent> panEvent_;
@@ -149,6 +177,7 @@ private:
     // Used to record the original menu display status when the handle is moved.
     bool orignMenuIsShow_ = false;
     bool hasExtensionMenu_ = false;
+    bool hasShowAnimation_ = false;
 
     int32_t greatThanMaxWidthIndex_ = -1;
     float menuWidth_ = 0.0f;
@@ -159,7 +188,13 @@ private:
 
     RefPtr<SelectOverlayModifier> selectOverlayModifier_;
 
+    RefPtr<SelectOverlayContentModifier> selectOverlayContentModifier_;
+
+    bool paintMethodCreated_ = false;
+
     bool closedByGlobalTouchEvent_ = false;
+    CancelableCallback<void()> hiddenHandleTask_;
+    bool isHiddenHandle_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

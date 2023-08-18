@@ -16,6 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PAPAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PAPAGRAPH_H
 
+#ifdef USE_ROSEN_DRAWING
+#include "include/core/SkCanvas.h"
+#endif
+
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -68,6 +72,7 @@ public:
     virtual bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) = 0;
     virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) = 0;
     virtual void SetIndents(const std::vector<float>& indents) = 0;
+    virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
 
     // interfaces for painting
     virtual void Paint(const RSCanvas& canvas, float x, float y) = 0;

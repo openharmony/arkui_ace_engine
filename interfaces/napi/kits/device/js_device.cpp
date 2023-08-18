@@ -66,7 +66,7 @@ static napi_value JSGetInfo(napi_env env, napi_callback_info info)
     napi_value successFunc;
     napi_value failFunc;
     napi_value cmpFunc;
-    std::unique_ptr<CallbackContext> asyncContext = std::make_unique<CallbackContext>();
+    auto asyncContext = new CallbackContext();
     asyncContext->env = env;
     napi_get_named_property(env, argv[0], "success", &successFunc);
     napi_typeof(env, successFunc, &valueType);
@@ -87,54 +87,67 @@ static napi_value JSGetInfo(napi_env env, napi_callback_info info)
     if (asyncContext->sucCallbackRef == nullptr && asyncContext->failCallbackRef == nullptr &&
         asyncContext->cmpCallbackRef == nullptr) {
         LOGE("all callback is null");
+        delete asyncContext;
         return nullptr;
     }
 
-    auto getInfoRet = OHOS::Ace::Framework::PluginBridge::GetDeviceInfo();
-    napi_value globalValue;
-    napi_get_global(env, &globalValue);
-    napi_value jsonValue;
-    napi_get_named_property(env, globalValue, "JSON", &jsonValue);
-    napi_value parseValue;
-    napi_get_named_property(env, jsonValue, "parse", &parseValue);
-    napi_value infoRet;
-    napi_create_string_utf8(env, getInfoRet.first.c_str(), NAPI_AUTO_LENGTH, &infoRet);
-    napi_value funcArgv[1] = { infoRet };
-    napi_value returnValue;
-    napi_call_function(env, jsonValue, parseValue, 1, funcArgv, &returnValue);
-    valueType = napi_undefined;
-    napi_typeof(env, returnValue, &valueType);
-    if (valueType != napi_object) {
-        LOGE("parse result fail");
-        return nullptr;
-    }
-    asyncContext->infoList = returnValue;
-    asyncContext->status = getInfoRet.second;
+    napi_value resource = nullptr;
+    napi_create_string_utf8(env, "JSGetInfo", NAPI_AUTO_LENGTH, &resource);
+    napi_create_async_work(
+        env, nullptr, resource, [](napi_env env, void* data) {},
+        [](napi_env env, napi_status status, void* data) {
+            CallbackContext* asyncContext = (CallbackContext*)data;
+            auto getInfoRet = OHOS::Ace::Framework::PluginBridge::GetDeviceInfo();
+            napi_value globalValue;
+            napi_get_global(env, &globalValue);
+            napi_value jsonValue;
+            napi_get_named_property(env, globalValue, "JSON", &jsonValue);
+            napi_value parseValue;
+            napi_get_named_property(env, jsonValue, "parse", &parseValue);
+            napi_value info;
+            napi_create_string_utf8(env, getInfoRet.first.c_str(), NAPI_AUTO_LENGTH, &info);
+            napi_value funcArgv[1] = { info };
+            napi_value returnValue;
+            napi_call_function(env, jsonValue, parseValue, 1, funcArgv, &returnValue);
+            napi_valuetype valueType = napi_undefined;
+            napi_typeof(env, returnValue, &valueType);
+            if (valueType != napi_object) {
+                LOGE("parse result fail");
+                delete asyncContext;
+                return;
+            }
+            asyncContext->infoList = returnValue;
+            asyncContext->status = getInfoRet.second;
 
-    napi_value result[2] = { 0 };
-    result[0] = asyncContext->infoList;
-    napi_value code;
-    if (asyncContext->status && asyncContext->sucCallbackRef) {
-        napi_create_int32(env, 0, &code);
-        result[1] = code;
-        napi_value callback = nullptr;
-        napi_get_reference_value(env, asyncContext->sucCallbackRef, &callback);
-        napi_value ret;
-        napi_call_function(env, nullptr, callback, 2, result, &ret);
-    } else if (!asyncContext->status && asyncContext->failCallbackRef) {
-        napi_create_int32(env, 200, &code);
-        result[1] = code;
-        napi_value callback = nullptr;
-        napi_get_reference_value(env, asyncContext->failCallbackRef, &callback);
-        napi_value ret;
-        napi_call_function(env, nullptr, callback, 2, result, &ret);
-    }
-    if (asyncContext->cmpCallbackRef) {
-        napi_value callback = nullptr;
-        napi_get_reference_value(env, asyncContext->cmpCallbackRef, &callback);
-        napi_value ret;
-        napi_call_function(env, nullptr, callback, 0, nullptr, &ret);
-    }
+            napi_value result[2] = { 0 };
+            result[0] = asyncContext->infoList;
+            napi_value code;
+            if (asyncContext->status && asyncContext->sucCallbackRef) {
+                napi_create_int32(env, 0, &code);
+                result[1] = code;
+                napi_value callback = nullptr;
+                napi_get_reference_value(env, asyncContext->sucCallbackRef, &callback);
+                napi_value ret;
+                napi_call_function(env, nullptr, callback, 2, result, &ret);
+            } else if (!asyncContext->status && asyncContext->failCallbackRef) {
+                napi_create_int32(env, 200, &code);
+                result[1] = code;
+                napi_value callback = nullptr;
+                napi_get_reference_value(env, asyncContext->failCallbackRef, &callback);
+                napi_value ret;
+                napi_call_function(env, nullptr, callback, 2, result, &ret);
+            }
+            if (asyncContext->cmpCallbackRef) {
+                napi_value callback = nullptr;
+                napi_get_reference_value(env, asyncContext->cmpCallbackRef, &callback);
+                napi_value ret;
+                napi_call_function(env, nullptr, callback, 0, nullptr, &ret);
+            }
+            napi_delete_async_work(env, asyncContext->work);
+            delete asyncContext;
+        },
+        (void*)asyncContext, &asyncContext->work);
+    napi_queue_async_work(env, asyncContext->work);
 
     return nullptr;
 }

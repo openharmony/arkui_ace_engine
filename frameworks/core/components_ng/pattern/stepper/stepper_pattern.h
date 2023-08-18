@@ -88,7 +88,21 @@ public:
         return index_;
     }
 
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        return ScopeFocusAlgorithm(true, true, ScopeType::OTHERS,
+            [wp = WeakClaim(this)](
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                auto stepper = wp.Upgrade();
+                if (stepper) {
+                    nextFocusNode = stepper->GetFocusNode(step, currFocusNode);
+                }
+            });
+    }
+
     void OnModifyDone() override;
+
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -117,17 +131,19 @@ private:
     void ButtonTouchDownAnimation(RefPtr<FrameNode> buttonNode);
     void ButtonTouchUpAnimation(RefPtr<FrameNode> buttonNode);
     void SetAccessibilityAction();
+    void ButtonSkipColorConfigurationUpdate(RefPtr<FrameNode> buttonNode);
+    WeakPtr<FocusHub> GetFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
-    RefPtr<ClickEvent> leftClickEvent_;
-    RefPtr<ClickEvent> rightClickEvent_;
     RefPtr<InputEvent> buttonOnHoverListenr_;
     RefPtr<TouchEventImpl> buttonTouchListenr_;
     bool leftIsHover_ = false;
     bool rightIsHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(StepperPattern);
+    bool isRightLabelDisable_ = false;
+    RefPtr<FocusHub> leftFocusHub_ = nullptr;
 };
 
 } // namespace OHOS::Ace::NG

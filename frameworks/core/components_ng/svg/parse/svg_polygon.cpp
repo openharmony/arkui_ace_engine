@@ -61,7 +61,7 @@ SkPath SvgPolygon::AsPath(const Size& viewPort) const
         return SkPath();
     }
     path.addPoly(&skPoints[0], skPoints.size(), isClose_);
-    if (declaration->GetClipState().IsEvenodd()) {
+    if (declaration->GetFillState().IsEvenodd()) {
 #ifndef NEW_SKIA
         path.setFillType(SkPath::FillType::kEvenOdd_FillType);
 #else
@@ -86,7 +86,7 @@ RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
     }
     path.AddPoly(rsPoints, rsPoints.size(), isClose_);
     if (declaration->GetClipState().IsEvenodd()) {
-        path.SetFillStyle(RSPathFillType::EVEN_ODD);
+        path.SetFillStyle(RSPathFillType::EVENTODD);
     }
     return path;
 }

@@ -98,7 +98,7 @@ RSPath SvgPath::AsPath(const Size& viewPort) const
     if (!component_->GetD().empty()) {
         out.BuildFromSVGString(component_->GetD());
         if (component_->GetDeclaration()->GetClipState().IsEvenodd()) {
-            out.SetFillStyle(RSPathFillType::EVEN_ODD);
+            out.SetFillStyle(RSPathFillType::EVENTODD);
         }
     }
     return out;

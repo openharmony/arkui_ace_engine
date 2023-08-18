@@ -19,7 +19,11 @@
 
 #include "test/mock/base/mock_pixel_map.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
+#else
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#endif
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_provider.h"
@@ -281,5 +285,27 @@ HWTEST_F(ImageProviderTestNg, RoundUp001, TestSize.Level1)
 
     ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(0, 0), nullptr);
     EXPECT_EQ(ctx->RoundUp(LENGTH_128), -1);
+}
+
+/**
+ * @tc.name: TargetSize001
+ * @tc.desc: Test calculating targetSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, TargetSize001, TestSize.Level1)
+{
+    auto ctx =
+        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr), true);
+    ctx->dstSize_ = SizeF(200, 200);
+    ctx->imageObj_ = AceType::MakeRefPtr<NG::StaticImageObject>(ImageSourceInfo(SRC_JPG), SizeF(1000, 1000), nullptr);
+    ctx->imageFit_ = ImageFit::NONE;
+    ctx->sourceSizePtr_ = std::make_unique<SizeF>(50, 50);
+    ctx->OnMakeCanvasImage();
+    // canvasKey contains targetSize info
+    EXPECT_EQ(ctx->dstRect_.GetSize(), SizeF(50, 50));
+
+    ctx->imageFit_ = ImageFit::SCALE_DOWN;
+    ctx->OnMakeCanvasImage();
+    EXPECT_EQ(ctx->dstRect_.GetSize(), SizeF(50, 50));
 }
 } // namespace OHOS::Ace::NG

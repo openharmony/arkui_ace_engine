@@ -23,6 +23,7 @@
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
 #include "core/event/touch_event.h"
+#include "frameworks/base/geometry/ng/point_t.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,6 +33,12 @@ class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(NGGestureRecognizer, TouchEventTarget)
 
 public:
+    static std::unordered_map<int, TransformConfig>& GetGlobalTransCfg();
+
+    static std::unordered_map<int, AncestorNodeInfo>& GetGlobalTransIds();
+
+    static void ResetGlobalTransCfg();
+
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
     void BeginReferee(int32_t touchId, bool needUpdateChild = false)
     {
@@ -199,6 +206,8 @@ public:
         recognizerTarget_ = recognizerTarget;
     }
 
+    void SetTransInfo(int id);
+    void Transform(PointF& windowPointF, PointF& originPointF);
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -241,7 +250,9 @@ protected:
     SourceType deviceType_ = SourceType::NONE;
     // size of recognizer target.
     std::optional<EventTarget> recognizerTarget_ = std::nullopt;
+    int32_t transId_ = 0;
 
+    int32_t currentFingers_ = 0;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
 };

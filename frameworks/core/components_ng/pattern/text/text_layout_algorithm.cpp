@@ -61,6 +61,10 @@ void TextLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    if (!contentConstraint.maxSize.IsPositive()) {
+        return std::nullopt;
+    }
+
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto pipeline = frameNode->GetContext();
@@ -71,19 +75,16 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto contentModifier = pattern->GetContentModifier();
 
-    if (!contentConstraint.maxSize.IsPositive()) {
-        return std::nullopt;
-    }
-
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    
+    // Register callback for fonts.
+    FontRegisterCallback(frameNode, textStyle);
+
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
     }
-
-    // Register callback for fonts.
-    FontRegisterCallback(frameNode, textStyle);
 
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
@@ -105,9 +106,14 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     baselineOffset_ = static_cast<float>(baselineOffset);
 
-    float heightFinal =
-        std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-
+    auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset));
+    if (contentConstraint.selfIdealSize.Height().has_value()) {
+        heightFinal = std::min(
+            static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.selfIdealSize.Height().value());
+    } else {
+        heightFinal =
+            std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
+    }
     return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
 
@@ -136,18 +142,36 @@ bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,
 
 void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  const TextStyle& textStyle)
 {
-    auto callback = [weakNode = AceType::WeakClaim(AceType::RawPtr(frameNode))] {
+    auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
         auto frameNode = weakNode.Upgrade();
-        if (frameNode) {
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto pattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+        if (modifier) {
+            modifier->SetFontReady(true);
         }
     };
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
+        bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
-            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (customFont) {
+                isCustomFont = true;
+            }
+        }
+        if (isCustomFont) {
+            auto pattern = frameNode->GetPattern<TextPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+            if (modifier) {
+                modifier->SetIsCustomFont(true);
+                modifier->SetFontReady(false);
+            }
         }
         fontManager->AddVariationNodeNG(frameNode);
     }
@@ -288,7 +312,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             placeHolderIndex.emplace_back(child->placeHolderIndex);
         }
     }
-    if (spanItemChildren_.empty() || placeHolderIndex.size() == 0) {
+    if (spanItemChildren_.empty() || placeHolderIndex.empty()) {
         return;
     }
 
@@ -322,6 +346,16 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
         ++index;
     }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitSpanImageLayout(placeHolderIndex, rectsForPlaceholders, contentOffset);
+#endif
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,
@@ -570,6 +604,10 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
 void TextLayoutAlgorithm::SetPropertyToModifier(
     const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier)
 {
+    auto fontFamily = layoutProperty->GetFontFamily();
+    if (fontFamily.has_value()) {
+        modifier->SetFontFamilies(fontFamily.value());
+    }
     auto fontSize = layoutProperty->GetFontSize();
     if (fontSize.has_value()) {
         modifier->SetFontSize(fontSize.value());
@@ -693,7 +731,7 @@ void TextLayoutAlgorithm::ApplyIndents(const TextStyle& textStyle, double width)
 bool TextLayoutAlgorithm::IncludeImageSpan(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
-    return (layoutWrapper->GetAllChildrenWithBuild().size() > 0);
+    return (!layoutWrapper->GetAllChildrenWithBuild().empty());
 }
 
 void TextLayoutAlgorithm::GetSpanAndImageSpanList(
@@ -709,10 +747,9 @@ void TextLayoutAlgorithm::GetSpanAndImageSpanList(
         auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(child);
         if (imageSpanItem) {
             int32_t index = child->placeHolderIndex;
-            if (index > static_cast<int32_t>(rectsForPlaceholders.size())) {
-                continue;
+            if (index >= 0 && index < static_cast<int32_t>(rectsForPlaceholders.size())) {
+                imageSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
             }
-            imageSpanList.emplace(index, std::make_pair(rectsForPlaceholders.at(index), imageSpanItem));
         } else {
             spanList.emplace_back(child);
         }

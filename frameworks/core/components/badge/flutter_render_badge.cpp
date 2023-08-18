@@ -57,7 +57,6 @@ void FlutterRenderBadge::DrawCircleBadge(flutter::Canvas& canvas, const Offset& 
     flutter::RRect rRect;
     flutter::PaintData paintData;
     auto circleSize = badge_->GetBadgeCircleSize();
-    auto badgePosition = badge_->GetBadgePosition();
     badgeCircleDiameter_ = badge_->IsBadgeCircleSizeDefined() ? (circleSize.IsValid() ? NormalizeToPx(circleSize) : 0)
                                                               : NormalizeToPx(CIRCLE_BADGE_SIZE);
     badgeCircleRadius_ = badgeCircleDiameter_ / 2;
@@ -65,22 +64,58 @@ void FlutterRenderBadge::DrawCircleBadge(flutter::Canvas& canvas, const Offset& 
     double boundaryStartY = 0.0;
     rRect.sk_rrect.setRectXY(
         SkRect::MakeIWH(badgeCircleDiameter_, badgeCircleDiameter_), badgeCircleRadius_, badgeCircleRadius_);
-    if (badgePosition == BadgePosition::RIGHT_TOP) {
-        rRect.sk_rrect.offset(offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY());
-        boundaryStartX = offset.GetX() + width_ - badgeCircleDiameter_;
-        boundaryStartY = offset.GetY();
-    } else if (badgePosition == BadgePosition::RIGHT) {
-        rRect.sk_rrect.offset(
-            offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY() + height_ / 2 - badgeCircleRadius_);
-        boundaryStartX = offset.GetX() + width_ - badgeCircleDiameter_;
-        boundaryStartY = offset.GetY() + height_ / 2 - badgeCircleRadius_;
+    if (!badge_->IsPositionXy()) {
+        auto badgePosition = badge_->GetBadgePosition();
+        if (badgePosition == BadgePosition::RIGHT_TOP) {
+            rRect.sk_rrect.offset(offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY());
+            boundaryStartX = offset.GetX() + width_ - badgeCircleDiameter_;
+            boundaryStartY = offset.GetY();
+        } else if (badgePosition == BadgePosition::RIGHT) {
+            rRect.sk_rrect.offset(
+                offset.GetX() + width_ - badgeCircleDiameter_, offset.GetY() + height_ / 2 - badgeCircleRadius_);
+            boundaryStartX = offset.GetX() + width_ - badgeCircleDiameter_;
+            boundaryStartY = offset.GetY() + height_ / 2 - badgeCircleRadius_;
+        } else {
+            rRect.sk_rrect.offset(offset.GetX(), offset.GetY() + height_ / 2 - badgeCircleRadius_);
+            boundaryStartX = offset.GetX();
+            boundaryStartY = offset.GetY() + height_ / 2 - badgeCircleRadius_;
+        }
     } else {
-        rRect.sk_rrect.offset(offset.GetX(), offset.GetY() + height_ / 2 - badgeCircleRadius_);
-        boundaryStartX = offset.GetX();
-        boundaryStartY = offset.GetY() + height_ / 2 - badgeCircleRadius_;
+        auto badgePositionX = badge_->GetBadgePositionX();
+        auto badgePositionY = badge_->GetBadgePositionY();
+        boundaryStartX = offset.GetX() + badgePositionX.ConvertToPx();
+        boundaryStartY = offset.GetY() + badgePositionY.ConvertToPx();
+        rRect.sk_rrect.offset(boundaryStartX, boundaryStartY);
     }
     canvas.drawRRect(rRect, paint, paintData);
     RenderBadgeBoundary(canvas.canvas(), boundaryStartX, boundaryStartY, badgeCircleDiameter_, badgeCircleDiameter_);
+}
+
+void FlutterRenderBadge::SetBoundaryForNumericalBadge(
+    double& boundaryStartX, double& boundaryStartY, const Offset& offset)
+{
+    if (!badge_->IsPositionXy()) {
+        auto badgePosition = badge_->GetBadgePosition();
+        if (badgePosition == BadgePosition::RIGHT_TOP) {
+            textInitialOffset_ = Offset(
+                width_ - badgeCircleDiameter_ + NormalizeToPx(2.0_vp), 0 - NormalizeToPx(2.0_vp));
+            boundaryStartX = offset.GetX() + textInitialOffset_.GetX();
+            boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
+        } else if (badgePosition == BadgePosition::RIGHT) {
+            textInitialOffset_ = Offset(width_ - badgeCircleDiameter_, height_ / 2 - badgeCircleRadius_);
+            boundaryStartX = offset.GetX() + textInitialOffset_.GetX();
+            boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
+        } else {
+            textInitialOffset_ = Offset(0, height_ / 2 - badgeCircleRadius_);
+            boundaryStartX = offset.GetX();
+            boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
+        }
+    } else {
+        auto badgePositionX = badge_->GetBadgePositionX();
+        auto badgePositionY = badge_->GetBadgePositionY();
+        boundaryStartX = offset.GetX() + badgePositionX.ConvertToPx();
+        boundaryStartY = offset.GetY() + badgePositionY.ConvertToPx();
+    }
 }
 
 void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offset& offset)
@@ -113,26 +148,11 @@ void FlutterRenderBadge::DrawNumericalBadge(flutter::Canvas& canvas, const Offse
             badgeCircleRadius_ = badgeCircleDiameter_ / 2;
         }
     }
-    auto badgePosition = badge_->GetBadgePosition();
     double boundaryStartX = 0.0;
     double boundaryStartY = 0.0;
     rRect.sk_rrect.setRectXY(SkRect::MakeIWH(badgeWidth_, badgeHeight_), badgeCircleRadius_, badgeCircleRadius_);
-    if (badgePosition == BadgePosition::RIGHT_TOP) {
-        textInitialOffset_ = Offset(width_ - badgeCircleDiameter_ + NormalizeToPx(2.0_vp), 0 - NormalizeToPx(2.0_vp));
-        rRect.sk_rrect.offset(offset.GetX() + textInitialOffset_.GetX(), offset.GetY() + textInitialOffset_.GetY());
-        boundaryStartX = offset.GetX() + textInitialOffset_.GetX();
-        boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
-    } else if (badgePosition == BadgePosition::RIGHT) {
-        textInitialOffset_ = Offset(width_ - badgeCircleDiameter_, height_ / 2 - badgeCircleRadius_);
-        rRect.sk_rrect.offset(offset.GetX() + textInitialOffset_.GetX(), offset.GetY() + textInitialOffset_.GetY());
-        boundaryStartX = offset.GetX() + textInitialOffset_.GetX();
-        boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
-    } else {
-        textInitialOffset_ = Offset(0, height_ / 2 - badgeCircleRadius_);
-        rRect.sk_rrect.offset(offset.GetX(), offset.GetY() + textInitialOffset_.GetY());
-        boundaryStartX = offset.GetX();
-        boundaryStartY = offset.GetY() + textInitialOffset_.GetY();
-    }
+    SetBoundaryForNumericalBadge(boundaryStartX, boundaryStartY, offset);
+    rRect.sk_rrect.offset(boundaryStartX, boundaryStartY);
     canvas.drawRRect(rRect, paint, paintData);
     RenderBadgeBoundary(canvas.canvas(), boundaryStartX, boundaryStartY, badgeWidth_, badgeHeight_);
 }

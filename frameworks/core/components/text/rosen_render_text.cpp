@@ -139,7 +139,7 @@ void RosenRenderText::Paint(RenderContext& context, const Offset& offset)
 #ifndef USE_ROSEN_DRAWING
     paragraph_->Paint(canvas, newX, newY);
 #else
-    paragraph_->Paint(canvas->GetCanvasData()->ExportSkCanvas(), newX, newY);
+    // Drawing is not supported
 #endif
 }
 

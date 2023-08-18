@@ -223,7 +223,7 @@ constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;
 constexpr double DEFAULT_PINCH_DISTANCE = 3.0;
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr int32_t DEFAULT_MAX_PAN_FINGERS = 10;
-constexpr double DEFAULT_PAN_DISTANCE = 5.0;
+constexpr Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 100.0;
 constexpr int32_t DEFAULT_ROTATION_FINGER = 2;
@@ -324,7 +324,7 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
 {
     LOGD("JSPanGesture Create");
     int32_t fingersNum = DEFAULT_PAN_FINGER;
-    double distanceNum = DEFAULT_PAN_DISTANCE;
+    double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
     PanDirection panDirection;
     if (args.Length() <= 0 || !args[0]->IsObject()) {
         PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceNum);
@@ -350,7 +350,9 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     }
     if (distance->IsNumber()) {
         double distanceNumber = distance->ToNumber<double>();
-        distanceNum = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : distanceNumber;
+        Dimension dimension =
+            LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : Dimension(distanceNumber, DimensionUnit::VP);
+        distanceNum = dimension.ConvertToPx();
     }
     if (directionNum->IsNumber()) {
         uint32_t directNum = directionNum->ToNumber<uint32_t>();
@@ -538,9 +540,11 @@ void JSPanGestureOption::SetDistance(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && args[0]->IsNumber()) {
         auto distance = args[0]->ToNumber<double>();
-        panGestureOption_->SetDistance(distance);
+        Dimension dimension =
+            LessNotEqual(distance, 0.0) ? DEFAULT_PAN_DISTANCE : Dimension(distance, DimensionUnit::VP);
+        panGestureOption_->SetDistance(dimension.ConvertToPx());
     } else {
-        panGestureOption_->SetDistance(DEFAULT_PAN_DISTANCE);
+        panGestureOption_->SetDistance(DEFAULT_PAN_DISTANCE.ConvertToPx());
     }
 }
 
@@ -563,7 +567,7 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
     RefPtr<PanGestureOption> option = AceType::MakeRefPtr<PanGestureOption>();
 
     int32_t fingersNum = DEFAULT_PAN_FINGER;
-    double distanceNum = DEFAULT_PAN_DISTANCE;
+    double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
     PanDirection panDirection;
 
     if (args.Length() > 0 && args[0]->IsObject()) {
@@ -578,7 +582,9 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
         }
         if (distance->IsNumber()) {
             double distanceNumber = distance->ToNumber<double>();
-            distanceNum = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : distanceNumber;
+            Dimension dimension =
+                LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : Dimension(distanceNumber, DimensionUnit::VP);
+            distanceNum = dimension.ConvertToPx();
         }
         if (directionNum->IsNumber()) {
             uint32_t directNum = directionNum->ToNumber<uint32_t>();

@@ -17,9 +17,12 @@
 
 #include <fstream>
 #include <functional>
+#include <mutex>
 
 #include "ability_context.h"
 #include "ability_info.h"
+#include "pointer_event.h"
+#include "scene_board_judgement.h"
 #include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
@@ -126,6 +129,15 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     useStageModel_ = true;
 }
 
+AceContainer::~AceContainer()
+{
+    LOG_DESTROY();
+    if (IsFormRender() && taskExecutor_) {
+        taskExecutor_->Destory();
+        taskExecutor_.Reset();
+    }
+}
+
 void AceContainer::InitializeTask()
 {
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
@@ -150,11 +162,11 @@ void AceContainer::Initialize()
 
 void AceContainer::Destroy()
 {
+    LOGI("AceContainer::Destroy begin");
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
-        RefPtr<PipelineBase> context;
-        context.Swap(pipelineContext_);
+        RefPtr<PipelineBase>& context = pipelineContext_;
         if (GetSettings().usePlatformAsUIThread) {
             context->Destroy();
         } else {
@@ -167,9 +179,7 @@ void AceContainer::Destroy()
         }
 
         // 2. Destroy Frontend on JS thread.
-        RefPtr<Frontend> frontend;
-        LOGI("Frontend Swap");
-        frontend_.Swap(frontend);
+        RefPtr<Frontend>& frontend = frontend_;
         if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
             frontend->UpdateState(Frontend::State::ON_DESTROY);
             frontend->Destroy();
@@ -180,6 +190,7 @@ void AceContainer::Destroy()
     }
     resRegister_.Reset();
     assetManager_.Reset();
+    LOGI("AceContainer::Destroy end");
 }
 
 void AceContainer::DestroyView()
@@ -623,13 +634,14 @@ void AceContainer::InitializeCallback()
             }
         };
         auto container = Container::Current();
-        if (!container) {
-            return;
-        }
-        if (container->IsUseStageModel() && type == WindowSizeChangeReason::ROTATION) {
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if ((container->IsUseStageModel() && type == WindowSizeChangeReason::ROTATION) ||
+            taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
         } else {
-            context->GetTaskExecutor()->PostTask(callback, TaskExecutor::TaskType::UI);
+            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI);
         }
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
@@ -980,7 +992,9 @@ void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* co
             auto sp = frontend.Upgrade();
             CHECK_NULL_VOID_NOLOG(sp);
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(sp);
+            CHECK_NULL_VOID(declarativeFrontend);
             auto jsEngine = declarativeFrontend->GetJsEngine();
+            CHECK_NULL_VOID(jsEngine);
             if (context) {
                 jsEngine->SetContext(id, context);
             }
@@ -1349,6 +1363,8 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY); });
     windowManager->SetWindowGetModeCallBack(
         [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+    windowManager->SetWindowGetTypeCallBack(
+        [window = uiWindow_]() -> WindowType { return static_cast<WindowType>(window->GetType()); });
     windowManager->SetWindowSetMaximizeModeCallBack(
         [window = uiWindow_](MaximizeMode mode) {
             window->SetGlobalMaximizeMode(static_cast<Rosen::MaximizeMode>(mode));
@@ -1435,21 +1451,13 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
     NotifyConfigurationChange(!deviceAccess.empty(), configurationChange);
 }
 
-void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const OnConfigurationChange&
-    configurationChange)
+void AceContainer::NotifyConfigurationChange(
+    bool needReloadTransition, const OnConfigurationChange& configurationChange)
 {
-    auto weak = WeakClaim(this);
-    auto container = weak.Upgrade();
-    CHECK_NULL_VOID(container);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    RefPtr<NG::FrameNode> rootNode = context->GetRootElement();
-    rootNode->UpdateConfigurationUpdate(configurationChange);
-
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition]() {
+        [instanceId = instanceId_, weak = WeakClaim(this), needReloadTransition, configurationChange]() {
             ContainerScope scope(instanceId);
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -1461,13 +1469,13 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const On
             auto taskExecutor = container->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask(
-                [instanceId, weak, needReloadTransition]() {
+                [instanceId, weak, needReloadTransition, configurationChange]() {
                     ContainerScope scope(instanceId);
                     auto container = weak.Upgrade();
                     CHECK_NULL_VOID(container);
                     auto pipeline = container->GetPipelineContext();
                     CHECK_NULL_VOID(pipeline);
-                    pipeline->NotifyConfigurationChange();
+                    pipeline->NotifyConfigurationChange(configurationChange);
                     pipeline->FlushReload();
                     if (needReloadTransition) {
                         // reload transition animation
@@ -1551,6 +1559,18 @@ void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExe
         GetNamesOfSharedImage(picNameArray);
         UpdateSharedImage(picNameArray, byteLenArray, fileDescriptorArray);
     }
+}
+
+void AceContainer::ReloadForm()
+{
+    // Reload theme and resource
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    pipelineContext_->SetThemeManager(themeManager);
+    themeManager->InitResource(resourceInfo_);
+    themeManager->SetColorScheme(colorScheme_);
+    themeManager->LoadCustomTheme(assetManager_);
+    themeManager->LoadResourceThemes();
 }
 
 void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
@@ -1641,7 +1661,75 @@ void AceContainer::GetImageDataFromAshmem(
     }
 }
 
+bool AceContainer::IsScenceBoardWindow()
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+}
+
+bool AceContainer::IsSceneBoardEnabled()
+{
+    return Rosen::SceneBoardJudgement::IsSceneBoardEnabled();
+}
 // ArkTsCard end
+
+void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    currentPointerEvent_ = currentEvent;
+    auto callbacksIter = stopDragCallbackMap_.begin();
+    while (callbacksIter != stopDragCallbackMap_.end()) {
+        auto pointerId = callbacksIter->first;
+        MMI::PointerEvent::PointerItem pointerItem;
+        if (!currentEvent->GetPointerItem(pointerId, pointerItem)) {
+            for (const auto& callback : callbacksIter->second) {
+                if (callback) {
+                    callback();
+                }
+            }
+            callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
+        } else {
+            if (!pointerItem.IsPressed()) {
+                for (const auto& callback : callbacksIter->second) {
+                    if (callback) {
+                        callback();
+                    }
+                }
+                callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
+            } else {
+                ++callbacksIter;
+            }
+        }
+    }
+}
+
+bool AceContainer::GetCurPointerEventInfo(
+    int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType, StopDragCallback&& stopDragCallback)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    CHECK_NULL_RETURN(currentPointerEvent_, false);
+    MMI::PointerEvent::PointerItem pointerItem;
+    if (!currentPointerEvent_->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed()) {
+        return false;
+    }
+    sourceType = currentPointerEvent_->GetSourceType();
+    globalX = pointerItem.GetDisplayX();
+    globalY = pointerItem.GetDisplayY();
+    RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
+    return true;
+}
+
+void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback)
+{
+    auto iter = stopDragCallbackMap_.find(pointerId);
+    if (iter != stopDragCallbackMap_.end()) {
+        iter->second.emplace_back(std::move(stopDragCallback));
+    } else {
+        std::list<StopDragCallback> list;
+        list.emplace_back(std::move(stopDragCallback));
+        stopDragCallbackMap_.emplace(pointerId, list);
+    }
+}
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {

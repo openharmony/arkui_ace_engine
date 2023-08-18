@@ -70,8 +70,31 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
 
     auto position = obj->GetProperty("position");
     if (!position->IsNull() && position->IsNumber()) {
+        badgeParameters.isPositionXy = false;
         badgeParameters.badgePosition = position->ToNumber<int32_t>();
+    } else if (!position->IsNull() && position->IsObject()) {
+        badgeParameters.isPositionXy = true;
+        auto postionValue = JSRef<JSObject>::Cast(position);
+        JSRef<JSVal> xVal = postionValue->GetProperty("x");
+        JSRef<JSVal> yVal = postionValue->GetProperty("y");
+        CalcDimension dimenX;
+        CalcDimension dimenY;
+        bool xResult = ParseJsDimensionVp(xVal, dimenX);
+        bool yResult = ParseJsDimensionVp(yVal, dimenY);
+        if (!(xResult || yResult)) {
+            auto badgeTheme = GetTheme<BadgeTheme>();
+            if (!badgeTheme) {
+                LOGW("Get badge theme error");
+                return BadgeParameters();
+            }
+            badgeParameters.badgePositionX = badgeTheme->GetBadgePositionX();
+            badgeParameters.badgePositionY = badgeTheme->GetBadgePositionY();
+        } else {
+            badgeParameters.badgePositionX = dimenX;
+            badgeParameters.badgePositionY = dimenY;
+        }
     }
+
     auto style = obj->GetProperty("style");
     if (!style->IsNull() && style->IsObject()) {
         auto value = JSRef<JSObject>::Cast(style);
@@ -182,8 +205,10 @@ void JSBadge::SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badg
     badge->SetBadgeColor(badgeTheme->GetBadgeColor());
     badge->SetMessageCount(badgeTheme->GetMessageCount());
     badge->SetBadgePosition(badgeTheme->GetBadgePosition());
+    badge->SetBadgePositionX(badgeTheme->GetBadgePositionX());
+    badge->SetBadgePositionY(badgeTheme->GetBadgePositionY());
+    badge->SetIsPositionXy(badgeTheme->GetIsPositionXy());
     badge->SetBadgeTextColor(badgeTheme->GetBadgeTextColor());
-    badge->SetBadgeFontSize(badgeTheme->GetBadgeFontSize());
     badge->SetBadgeCircleSize(badgeTheme->GetBadgeCircleSize());
 }
 
@@ -195,11 +220,7 @@ void JSBadge::SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<O
         badge->SetMessageCount(value);
     }
 
-    auto position = obj->GetProperty("position");
-    if (!position->IsNull() && position->IsNumber()) {
-        auto value = position->ToNumber<int32_t>();
-        badge->SetBadgePosition(static_cast<BadgePosition>(value));
-    }
+    SetPosition(obj, badge);
 
     auto maxCount = obj->GetProperty("maxCount");
     if (!maxCount->IsNull() && maxCount->IsNumber()) {
@@ -242,6 +263,29 @@ void JSBadge::SetCustomizedTheme(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<O
     if (!value->IsNull() && value->IsString()) {
         auto label = value->ToString();
         badge->SetBadgeLabel(label);
+    }
+}
+
+void JSBadge::SetPosition(const JSRef<JSObject>& obj, OHOS::Ace::RefPtr<OHOS::Ace::BadgeComponent>& badge)
+{
+    auto position = obj->GetProperty("position");
+    if (!position->IsNull() && position->IsNumber()) {
+        badge->SetIsPositionXy(false);
+        auto value = position->ToNumber<int32_t>();
+        badge->SetBadgePosition(static_cast<BadgePosition>(value));
+    } else if (!position->IsNull() && position->IsObject()) {
+        badge->SetIsPositionXy(true);
+        auto postionValue = JSRef<JSObject>::Cast(position);
+        JSRef<JSVal> xVal = postionValue->GetProperty("x");
+        JSRef<JSVal> yVal = postionValue->GetProperty("y");
+        CalcDimension dimenX;
+        CalcDimension dimenY;
+        bool xResult = ParseJsDimensionVp(xVal, dimenX);
+        bool yResult = ParseJsDimensionVp(yVal, dimenY);
+        if (xResult && yResult) {
+            badge->SetBadgePositionX(dimenX);
+            badge->SetBadgePositionY(dimenY);
+        }
     }
 }
 } // namespace OHOS::Ace::Framework

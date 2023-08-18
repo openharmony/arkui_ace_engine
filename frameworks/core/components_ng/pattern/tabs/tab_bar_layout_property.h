@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +48,9 @@ public:
         value->propIndicator_ = CloneIndicator();
         value->propSelectedMask_ = CloneSelectedMask();
         value->propUnselectedMask_ = CloneUnselectedMask();
+        value->propScrollableBarModeOptions_ = CloneScrollableBarModeOptions();
+        value->propBarGridAlign_ = CloneBarGridAlign();
+        value->propBarAdaptiveHeight_ = CloneBarAdaptiveHeight();
         return value;
     }
 
@@ -58,6 +62,9 @@ public:
         ResetIndicator();
         ResetSelectedMask();
         ResetUnselectedMask();
+        ResetScrollableBarModeOptions();
+        ResetBarGridAlign();
+        ResetBarAdaptiveHeight();
     }
 
     RectF GetIndicatorRect(int32_t index);
@@ -86,6 +93,10 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedMask, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UnselectedMask, int32_t, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollableBarModeOptions, ScrollableBarModeOptions, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarGridAlign, BarGridColumnOptions, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarAdaptiveHeight, bool, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

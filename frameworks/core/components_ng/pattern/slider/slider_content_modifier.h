@@ -67,6 +67,7 @@ public:
         auto sliderTheme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(sliderTheme);
         blockOuterEdgeColor_ = sliderTheme->GetBlockOuterEdgeColor();
+        blockShadowColor_ = sliderTheme->GetBlockShadowColor();
     }
 
     void UpdateData(const Parameters& parameters);
@@ -227,6 +228,11 @@ public:
         LOGD("SliderContentModifier SetVisible %d", isVisible_);
     }
 
+    bool GetVisible() const
+    {
+        return isVisible_;
+    }
+
     void UpdateContentDirtyRect(const SizeF& frameSize);
 private:
     void InitializeShapeProperty();
@@ -238,6 +244,10 @@ private:
     void DrawBlockShapeEllipse(DrawingContext& context, RefPtr<Ellipse>& ellipse);
     void DrawBlockShapePath(DrawingContext& context, RefPtr<Path>& path);
     void DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect);
+    void SetShapeRectRadius(RSRoundRect& roundRect, float borderWidth);
+    void SetBlockClip(DrawingContext& context);
+    void StopSelectAnimation(const PointF& end);
+    void StopCircleCenterAnimation(const PointF& center);
 
 private:
     std::function<void()> updateImageFunc_;
@@ -288,6 +298,8 @@ private:
         RSPath path;
     } markerPenAndPath;
 
+    OffsetF targetSelectEnd_;
+    PointF targetCenter_;
     bool isVisible_ = true;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
@@ -295,6 +307,7 @@ private:
     bool needAnimate_ = false; // Translate Animation on-off
     float hotCircleShadowWidth_ = 0.0f;
     Color blockOuterEdgeColor_;
+    Color blockShadowColor_;
     RefPtr<BasicShape> shape_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderContentModifier);
 };

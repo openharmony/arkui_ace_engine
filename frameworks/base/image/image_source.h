@@ -29,8 +29,11 @@ public:
     static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size);
 
     virtual std::string GetProperty(const std::string& key) = 0;
-    virtual RefPtr<PixelMap> CreatePixelMap(int32_t width, int32_t height) = 0;
-    virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, int32_t width, int32_t height) = 0;
+
+    using Size = std::pair<int32_t, int32_t>;
+    virtual RefPtr<PixelMap> CreatePixelMap(const Size& size) = 0;
+    virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size) = 0;
+    virtual Size GetImageSize() = 0;
 };
 } // namespace OHOS::Ace
 

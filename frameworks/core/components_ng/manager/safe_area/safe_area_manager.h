@@ -31,18 +31,11 @@ public:
     ~SafeAreaManager() override = default;
 
     bool UpdateSystemSafeArea(const SafeAreaInsets& safeArea);
-
-    SafeAreaInsets GetSystemSafeArea() const
-    {
-        return systemSafeArea_;
-    }
-
+    SafeAreaInsets GetSystemSafeArea() const;
     bool UpdateCutoutSafeArea(const SafeAreaInsets& safeArea);
+    SafeAreaInsets GetCutoutSafeArea() const;
 
-    SafeAreaInsets GetCutoutSafeArea() const
-    {
-        return cutoutSafeArea_;
-    }
+    SafeAreaInsets GetSafeArea() const;
 
     bool UpdateKeyboardSafeArea(float keyboardHeight);
 
@@ -55,30 +48,12 @@ public:
     {
         keyboardOffset_ = offset;
     }
-
     float GetKeyboardOffset() const
     {
         return keyboardOffset_;
     }
 
     SafeAreaInsets GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const;
-
-    // Add during Layout traversal
-    void AddWrapper(const WeakPtr<LayoutWrapper>& wrapper)
-    {
-        wrappersToAdjust_.emplace_back(wrapper);
-    }
-
-    // Reset after ExpandSafeArea and AvoidKeyboard
-    void ResetWrappers()
-    {
-        wrappersToAdjust_.clear();
-    }
-
-    const std::vector<WeakPtr<LayoutWrapper>>& GetWrappers() const
-    {
-        return wrappersToAdjust_;
-    }
 
     const std::set<WeakPtr<FrameNode>>& GetGeoRestoreNodes() const
     {
@@ -95,14 +70,32 @@ public:
         geoRestoreNodes_.erase(node);
     }
 
+    RefPtr<InterpolatingSpring> GetSafeAreaCurve() const
+    {
+        return safeAreaCurve_;
+    }
+
+    bool SetIsFullScreen(bool value);
+    bool SetIgnoreSafeArea(bool value);
+
 private:
+    // app window is full screen 
+    bool isFullScreen_ = false;
+    bool ignoreSafeArea_ = false;
+
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
     // bottom direction only
     SafeAreaInsets::Inset keyboardInset_;
     std::set<WeakPtr<FrameNode>> geoRestoreNodes_;
-    std::vector<WeakPtr<LayoutWrapper>> wrappersToAdjust_;
+    // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
+    static constexpr float SAFE_AREA_VELOCITY = 0.0f;
+    static constexpr float SAFE_AREA_MASS = 1.0f;
+    static constexpr float SAFE_AREA_STIFFNESS = 228.0f;
+    static constexpr float SAFE_AREA_DAMPING = 30.0f;
+    RefPtr<InterpolatingSpring> safeAreaCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(
+        SAFE_AREA_VELOCITY, SAFE_AREA_MASS, SAFE_AREA_STIFFNESS, SAFE_AREA_DAMPING);
 
     ACE_DISALLOW_COPY_AND_MOVE(SafeAreaManager);
 };

@@ -61,7 +61,6 @@ void SlidingPanelModelNG::Create(bool isShow)
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, true);                   // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, PanelMode::HALF);         // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
-    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, ShowCloseIcon, false);               // default value
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
@@ -124,6 +123,11 @@ void SlidingPanelModelNG::SetPanelMode(PanelMode mode)
 void SlidingPanelModelNG::SetHasDragBar(bool hasDragBar)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, hasDragBar);
+}
+
+void SlidingPanelModelNG::SetCustomHeight(const CalcDimension& customHeight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, customHeight);
 }
 
 void SlidingPanelModelNG::SetMiniHeight(const Dimension& miniHeight)

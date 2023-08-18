@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_SVG_DOM_H
 
 #include <memory>
+
 #include "src/xml/SkDOM.h"
 #include "src/xml/SkXMLParser.h"
 #include "src/xml/SkXMLWriter.h"
@@ -48,14 +49,10 @@ public:
     void SetFillColor(const std::optional<Color>& color) override;
 
     void DrawImage(
-        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) override;
+        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) override;
 
     SizeF GetContainerSize() const override;
     void SetContainerSize(const SizeF& containerSize) override {}
-    const std::optional<Color>& GetFillColor() override
-    {
-        return fillColor_;
-    }
 
 protected:
     void FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& layout);

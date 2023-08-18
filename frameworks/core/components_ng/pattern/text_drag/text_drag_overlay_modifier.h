@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -34,6 +35,7 @@ public:
     void SetBackgroundOffset(float offset);
 
 private:
+
     WeakPtr<Pattern> pattern_;
     bool isAnimating_ = false;
     RefPtr<AnimatablePropertyFloat> backgroundOffset_;

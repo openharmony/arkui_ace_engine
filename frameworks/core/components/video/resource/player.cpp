@@ -353,12 +353,23 @@ void Player::Stop()
     }
 
     CallResRegisterMethod(stopMethod_, PARAM_NONE, [weak = WeakClaim(this)](std::string& result) {
-        LOGI("callback play OnCompletion.");
+        LOGI("callback play OnStop.");
         auto player = weak.Upgrade();
         if (player) {
-            player->OnCompletion(result);
+            player->OnStop();
         }
     });
+}
+
+void Player::OnStop()
+{
+    isPlaying_ = false;
+    currentPos_ = 0;
+    SetTickActive(isPlaying_);
+
+    for (const auto& listener : onPlayStatusListener_) {
+        listener(isPlaying_);
+    }
 }
 
 void Player::UnregisterEvent()

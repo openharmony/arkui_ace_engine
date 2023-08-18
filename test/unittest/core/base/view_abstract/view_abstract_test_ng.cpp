@@ -15,18 +15,19 @@
 #include "gtest/gtest.h"
 #define protected public
 #define private public
+#include "test/mock/core/common/mock_container.h"
+
+#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
 using namespace testing;
@@ -72,6 +73,7 @@ const std::string VALUE_CX = "CX";
 ViewAbstractModelNG viewAbstractModelNG;
 auto callback = []() { srcimages = "test"; };
 int32_t flag = 0;
+const ImageSourceInfo imageSourceInfo = ImageSourceInfo("common/images/mmm.jpg", "abstract", "abstract");
 
 void CallShowHideFunc()
 {
@@ -171,7 +173,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
      */
     ViewAbstract::SetAspectRatio(RATIO);
     ViewAbstract::SetBackgroundColor(BLUE);
-    ViewAbstract::SetBackgroundImage(srcimages);
+    ViewAbstract::SetBackgroundImage(imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetLayoutWeight(TEN);
@@ -210,7 +212,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest004, TestSize.Level1)
 
     ViewAbstract::SetAspectRatio(RATIO);
     ViewAbstract::SetBackgroundColor(BLUE);
-    ViewAbstract::SetBackgroundImage(srcimages);
+    ViewAbstract::SetBackgroundImage(imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetLayoutWeight(TEN);
@@ -664,7 +666,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest015, TestSize.Level1)
     ViewAbstract::SetFrontBlur(RADIUS);
     ViewAbstract::SetInspectorId(srcimages);
 
-    Vector4F scale(1.0f, 1.0f, 2.0f, 2.0f);
+    Vector5F scale(1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
     ViewAbstract::SetRotate(scale);
     ShadowStyle style { 1 };
     Shadow shadow { RATIO, OFFSET, BLUE, style };
@@ -704,7 +706,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest016, TestSize.Level1)
     ViewAbstract::SetInspectorId(srcimages);
     ViewAbstract::SetDebugLine(srcimages);
 
-    Vector4F scale(1.0f, 1.0f, 2.0f, 2.0f);
+    Vector5F scale(1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
     ViewAbstract::SetRotate(scale);
     ShadowStyle style { 1 };
     Shadow shadow { RATIO, OFFSET, BLUE, style };
@@ -1070,7 +1072,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     ViewAbstract::BindPopup(param, targetNode, customNode);
     auto popupNode = overlayManager->GetPopupInfo(targetNode->GetId()).popupNode;
     ASSERT_NE(popupNode, nullptr);
-    popupNode->GetPattern<BubblePattern>()->transitionStatus_ = BubblePattern::TransitionStatus::ENTERING;
+    popupNode->GetPattern<BubblePattern>()->transitionStatus_ = TransitionStatus::ENTERING;
     ViewAbstract::BindPopup(param, targetNode, customNode);
     param->SetIsShow(false);
     ViewAbstract::BindPopup(param, targetNode, customNode);
@@ -1220,7 +1222,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest029, TestSize.Level1)
     ViewAbstract::SetMaxHeight(NG::CalcLength(MIN_HEIGHT));
     ViewAbstract::SetAspectRatio(RATIO);
     ViewAbstract::SetBackgroundColor(BLUE);
-    ViewAbstract::SetBackgroundImage(srcimages);
+    ViewAbstract::SetBackgroundImage(imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
 
@@ -1452,7 +1454,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest035, TestSize.Level1)
     viewAbstractModelNG.SetPivot(WIDTH, HEIGHT, ZERO);
     NG::TranslateOptions values;
     ViewAbstract::SetTranslate(std::move(values));
-    Vector4F scales(1.0f, 1.0f, 2.0f, 2.0f);
+    Vector5F scales(1.0f, 1.0f, 2.0f, 2.0f, 0.0f);
     ViewAbstract::SetRotate(scales);
     Matrix4 matrix;
     ViewAbstract::SetTransformMatrix(std::move(matrix));
@@ -1648,7 +1650,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     EXPECT_TRUE(MockPipelineBase::GetCurrent()->GetOverlayManager()->onShowMenuCallback_);
     params.push_back(OptionParam());
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
-    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, std::move(buildFunc), menuParam);
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam);
     CallShowHideFunc();
     EXPECT_EQ(flag, 0);
     /**
@@ -1658,7 +1660,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     menuParam.onAppear = flagFunc;
     menuParam.onDisappear = flagFunc;
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
-    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, std::move(buildFunc), menuParam);
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam);
     CallShowHideFunc();
     EXPECT_EQ(flag, 4);
     /**
@@ -1683,5 +1685,306 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     mouseInfo.SetAction(MouseAction::RELEASE);
     inputHub->showMenu_->onMouseCallback_(mouseInfo);
     EXPECT_TRUE(mouseInfo.IsStopPropagation());
+}
+
+/**
+ * @tc.name: ViewAbstractDisableClickTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableClickTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetOnClick(std::move(tapEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto gestureHub = node->GetOrCreateGestureEventHub();
+    auto& callback = gestureHub->clickEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnClick();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    GestureEventFunc tapEventFunc2;
+    ViewAbstract::SetOnClick(std::move(tapEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableTouchTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableTouchTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    TouchEventFunc touchEventFunc;
+    ViewAbstract::SetOnTouch(std::move(touchEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto gestureHub = node->GetOrCreateGestureEventHub();
+    auto& callback = gestureHub->touchEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnTouch();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    TouchEventFunc touchEventFunc2;
+    ViewAbstract::SetOnTouch(std::move(touchEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableMouseTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableMouseTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnMouseEventFunc onMouseEventFunc;
+    ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetOrCreateInputEventHub();
+    auto& callback = eventHub->mouseEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnMouse();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnMouseEventFunc onMouseEventFunc2;
+    ViewAbstract::SetOnMouse(std::move(onMouseEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableHoverTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableHoverTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnHoverFunc onHoverEventFunc;
+    ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto eventHub = node->GetOrCreateInputEventHub();
+    auto& callback = eventHub->hoverEventActuator_->userCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnHover();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnHoverFunc onHoverEventFunc2;
+    ViewAbstract::SetOnHover(std::move(onHoverEventFunc2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableKeyTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableKeyTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnKeyCallbackFunc onKeyCallback = [](KeyEventInfo& info) {};
+    ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto focusHub = node->GetOrCreateFocusHub();
+    auto& callback = focusHub->focusCallbackEvents_->onKeyEventCallback_;
+    EXPECT_TRUE(callback);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnKeyEvent();
+    EXPECT_FALSE(callback);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnKeyCallbackFunc onKeyCallback2 = [](KeyEventInfo& info) {};
+    ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback2));
+    EXPECT_TRUE(callback);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableFocusTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableFocusTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnFocusFunc onFocusCallback = []() {};
+    ViewAbstract::SetOnFocus(std::move(onFocusCallback));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto focusHub = node->GetOrCreateFocusHub();
+    auto& callback = focusHub->focusCallbackEvents_->onFocusCallback_;
+    EXPECT_NE(callback, nullptr);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnFocus();
+    EXPECT_EQ(callback, nullptr);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnFocusFunc onFocusCallback2 = []() {};
+    ViewAbstract::SetOnFocus(std::move(onFocusCallback2));
+    EXPECT_NE(callback, nullptr);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
+}
+
+/**
+ * @tc.name: ViewAbstractDisableBlurTest
+ * @tc.desc: Test the operation of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractDisableBlurTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create framenode and check callback;
+     * @tc.expected: callback is not null.
+     */
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
+    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
+    OnBlurFunc onBlurCallback = []() {};
+    ViewAbstract::SetOnFocus(std::move(onBlurCallback));
+
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    EXPECT_EQ(strcmp(topFrameNodeOne->GetTag().c_str(), TAG_CHILD), 0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::DynamicCast<NG::FrameNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto focusHub = node->GetOrCreateFocusHub();
+    auto& callback = focusHub->focusCallbackEvents_->onBlurCallback_;
+    EXPECT_TRUE(callback);
+
+    /**
+     * @tc.steps: step2. Disable callback.
+     * @tc.expected: callback is null.
+     */
+    ViewAbstract::DisableOnBlur();
+    EXPECT_FALSE(callback);
+
+    /**
+     * @tc.steps: step3. Add callback again.
+     * @tc.expected: callback is not null.
+     */
+    OnBlurFunc onBlurCallback2 = []() {};
+    ViewAbstract::SetOnBlur(std::move(onBlurCallback2));
+    EXPECT_TRUE(callback);
+    ViewStackProcessor::GetInstance()->instance = nullptr;
 }
 } // namespace OHOS::Ace::NG

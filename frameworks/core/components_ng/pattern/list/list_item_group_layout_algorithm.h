@@ -70,11 +70,6 @@ public:
         return laneGutter_;
     }
 
-    float GetChildCrossSize() const
-    {
-        return childCrossSize_;
-    }
-
     int32_t GetLanesFloor(int32_t index) const
     {
         if (lanes_ <= 1) {
@@ -193,7 +188,6 @@ private:
     Axis axis_ = Axis::VERTICAL;
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;
-    float childCrossSize_ = 0.0f;
     std::optional<float> minLaneLength_;
     std::optional<float> maxLaneLength_;
     V2::ListItemAlign itemAlign_ = V2::ListItemAlign::START;

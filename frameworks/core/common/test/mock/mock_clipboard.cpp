@@ -67,4 +67,18 @@ void MockClipBoard::GetData(const std::function<void(const std::string&)>& callb
     }
     GTEST_LOG_(INFO) << "GetData has called";
 }
+
+void MockClipBoard::AddPixelMapRecord(const RefPtr<PasteDataMix>& pasteData, const RefPtr<PixelMap>& pixmap) {}
+void MockClipBoard::AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) {}
+void MockClipBoard::AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) {}
+void MockClipBoard::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption) {}
+void MockClipBoard::GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
+    const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
+    const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode)
+{}
+
+RefPtr<PasteDataMix> MockClipBoard::CreatePasteDataMix()
+{
+    return AceType::MakeRefPtr<PasteDataMix>();
+}
 } // namespace OHOS::Ace

@@ -40,7 +40,24 @@ ohos_unittest("CardFrontendTest") {
     "$ace_root/frameworks/bridge/js_frontend/engine/jsi:js_engine_bridge_ark_ohos",
     "//third_party/googletest:gmock_main",
   ]
-  sources += [ "$ace_root/test/mock/core/common/mock_udmf.cpp" ]
+
+  external_deps = [
+    "ability_base:configuration",
+    "ability_runtime:abilitykit_native",
+    "c_utils:utils",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "napi:ace_napi",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
+  ]
+
+  sources += [
+    "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
+  ]
 
   part_name = ace_engine_part
 }

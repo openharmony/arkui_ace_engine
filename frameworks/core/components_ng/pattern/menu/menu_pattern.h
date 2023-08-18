@@ -31,7 +31,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
-
+constexpr uint32_t MAX_SEARCH_DEPTH = 5;
 namespace OHOS::Ace::NG {
 enum class MenuType {
     // ----- Menu Containers ------
@@ -139,6 +139,11 @@ public:
         return targetId_;
     }
 
+    const std::string& GetTargetTag() const
+    {
+        return targetTag_;
+    }
+
     void SetIsSelectMenu(bool isSelectMenu)
     {
         isSelectMenu_ = isSelectMenu;
@@ -172,7 +177,7 @@ public:
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
-    void HideMenu() const;
+    void HideMenu(bool isMenuOnTouch = false) const;
 
     void MountOption(const RefPtr<FrameNode>& option);
 
@@ -193,9 +198,15 @@ public:
 
     // acquire first menu node in wrapper node by submenu node
     RefPtr<MenuPattern> GetMainMenuPattern() const;
+    uint32_t GetInnerMenuCount() const;
+    void OnColorConfigurationUpdate() override;
+
+    RefPtr<FrameNode> GetMenuWrapper() const;
+    RefPtr<FrameNode> GetFirstInnerMenu() const;
 
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
+    void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
     {
@@ -208,20 +219,16 @@ private:
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void UpdateMenuHotArea();
-    void UpdateMenuClip(const RefPtr<LayoutWrapper>& dirty);
 
-    uint32_t GetInnerMenuCount() const;
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
+    void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event) const;
 
     void DisableTabInMenu();
-
-    RefPtr<FrameNode> GetMenuWrapper() const;
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;

@@ -226,6 +226,7 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
 
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
         SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+        SwiperModel::GetInstance()->ResetDisplayCount();
     } else if (info[0]->IsNumber()) {
         SwiperModel::GetInstance()->SetDisplayCount(info[0]->ToNumber<int32_t>());
     }
@@ -329,9 +330,24 @@ void JSSwiper::SetInterval(const JSCallbackInfo& info)
     SwiperModel::GetInstance()->SetAutoPlayInterval(interval);
 }
 
-void JSSwiper::SetLoop(bool loop)
+void JSSwiper::SetLoop(const JSCallbackInfo& info)
 {
-    SwiperModel::GetInstance()->SetLoop(loop);
+    if (info.Length() < 1) {
+        return;
+    }
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        SwiperModel::GetInstance()->SetLoop(info[0]->ToBoolean());
+        return;
+    }
+
+    if (info[0]->IsBoolean()) {
+        SwiperModel::GetInstance()->SetLoop(info[0]->ToBoolean());
+    } else {
+        SwiperModel::GetInstance()->SetLoop(true);
+    }
 }
 
 void JSSwiper::SetVertical(bool isVertical)
@@ -412,7 +428,7 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     bool parseOk = false;
     SwiperParameters swiperParameters;
     CalcDimension dimPosition;
-    parseOk = ParseJsDimensionPx(leftValue, dimPosition);
+    parseOk = ParseJsDimensionVp(leftValue, dimPosition);
     if (parseOk) {
         if (dimPosition.ConvertToPx() < 0.0f) {
             dimPosition = 0.0_vp;
@@ -421,25 +437,26 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
         dimPosition = 0.0_vp;
     }
     swiperParameters.dimLeft = dimPosition;
-    parseOk = ParseJsDimensionPx(topValue, dimPosition);
+    parseOk = ParseJsDimensionVp(topValue, dimPosition);
     swiperParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionPx(rightValue, dimPosition);
+    parseOk = ParseJsDimensionVp(rightValue, dimPosition);
     swiperParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
+    parseOk = ParseJsDimensionVp(bottomValue, dimPosition);
     swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionPx(itemWidthValue, dimPosition);
-    SetIsIndicatorCustomSize(dimPosition, parseOk);
+    parseOk = ParseJsDimensionVp(itemWidthValue, dimPosition);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionPx(itemHeightValue, dimPosition);
-    SetIsIndicatorCustomSize(dimPosition, parseOk);
+    parseOk = ParseJsDimensionVp(itemHeightValue, dimPosition);
     swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionPx(selectedItemWidthValue, dimPosition);
-    SetIsIndicatorCustomSize(dimPosition, parseOk);
-    swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionPx(selectedItemHeightValue, dimPosition);
-    SetIsIndicatorCustomSize(dimPosition, parseOk);
-    swiperParameters.selectedItemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    bool parseSeleItemWOk = ParseJsDimensionVp(selectedItemWidthValue, dimPosition);
+    swiperParameters.selectedItemWidth = parseSeleItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    bool parseSeleItemHOk = ParseJsDimensionVp(selectedItemHeightValue, dimPosition);
+    swiperParameters.selectedItemHeight = parseSeleItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    if (parseSeleItemWOk == false && parseSeleItemHOk == false) {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
+    } else {
+        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
+    }
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
@@ -491,14 +508,18 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     parseOk = JSViewAbstract::ParseJsColor(selectedFontColorValue, fontColor);
     digitalParameters.selectedFontColor =
         parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
-    GetFontContent(digitFontValue, false, digitalParameters);
-    GetFontContent(selectedDigitFontValue, true, digitalParameters);
+    if (!digitFontValue->IsNull() && digitFontValue->IsObject()) {
+        GetFontContent(digitFontValue, false, digitalParameters);
+    }
+    if (!selectedDigitFontValue->IsNull() && selectedDigitFontValue->IsObject()) {
+        GetFontContent(selectedDigitFontValue, true, digitalParameters);
+    }
     return digitalParameters;
 }
 
 bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters)
 {
-    auto isShowBackgroundValue = obj->GetProperty("isShowBackground");
+    auto isShowBackgroundValue = obj->GetProperty("showBackground");
     auto isSidebarMiddleValue = obj->GetProperty("isSidebarMiddle");
     auto backgroundSizeValue = obj->GetProperty("backgroundSize");
     auto backgroundColorValue = obj->GetProperty("backgroundColor");
@@ -668,15 +689,15 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_VOID(swiperIndicatorTheme);
         CalcDimension dimPosition;
-        bool parseOk = ParseJsDimensionPx(leftValue, dimPosition);
+        bool parseOk = ParseJsDimensionVp(leftValue, dimPosition);
         swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
-        parseOk = ParseJsDimensionPx(topValue, dimPosition);
+        parseOk = ParseJsDimensionVp(topValue, dimPosition);
         swiperParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
-        parseOk = ParseJsDimensionPx(rightValue, dimPosition);
+        parseOk = ParseJsDimensionVp(rightValue, dimPosition);
         swiperParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
-        parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
+        parseOk = ParseJsDimensionVp(bottomValue, dimPosition);
         swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
-        parseOk = ParseJsDimensionPx(sizeValue, dimPosition);
+        parseOk = ParseJsDimensionVp(sizeValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
         SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
         swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
@@ -757,8 +778,17 @@ void JSSwiper::SetDisplayMode(int32_t index)
     SwiperModel::GetInstance()->SetDisplayMode(DISPLAY_MODE[index]);
 }
 
-void JSSwiper::SetCachedCount(int32_t cachedCount)
+void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    int32_t cachedCount = 1;
+    if (info[0]->IsNumber()) {
+        cachedCount = info[0]->ToNumber<int32_t>();
+    }
     SwiperModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
@@ -787,11 +817,11 @@ void JSSwiper::SetCurve(const JSCallbackInfo& info)
             };
         }
         auto jsCurveString = object->GetProperty("__curveString");
-        if (jsCurveString->IsString() && customCallBack) {
+        if (jsCurveString->IsString()) {
             auto aniTimFunc = jsCurveString->ToString();
-            if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
+            if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM && customCallBack) {
                 curve = CreateCurve(customCallBack);
-            } else {
+            } else if (aniTimFunc != DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
                 curve = CreateCurve(aniTimFunc);
             }
         }
@@ -1034,6 +1064,7 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
         auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Swiper.finishAnimation");
+            LOGI("Swiper finish callback execute.");
             func->Execute();
         };
 

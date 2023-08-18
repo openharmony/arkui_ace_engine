@@ -54,6 +54,8 @@ constexpr Dimension listPaddingHeight = 48.0_vp;
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto customSize = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
@@ -66,7 +68,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
+    auto inset = pipeline->GetSafeArea();
+    auto maxSize = layoutConstraint->maxSize;
+    maxSize.MinusPadding(0, 0, inset.top_.Length(), 0);
+    childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
     // constraint child size unless developer is using customStyle
     if (!customSize) {
         ComputeInnerLayoutParam(childLayoutConstraint);
@@ -79,7 +84,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // childSize_ and childOffset_ is used in Layout.
     child->Measure(childLayoutConstraint);
 
-    if (layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
+    if (!layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetCustomNode()) {
         AnalysisHeightOfChild(layoutWrapper);
     }
 }
@@ -136,12 +141,16 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
 void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& scroll)
 {
     auto text = scroll->GetAllChildrenWithBuild().front();
+    CHECK_NULL_VOID(text);
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(text->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(textLayoutAlgorithm);
-    auto lineCount = textLayoutAlgorithm->GetLineCount();
-    if (lineCount == 1 && layoutWrapper->GetHostNode()->GetPattern<DialogPattern>()->GetTitle().empty()) {
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
         scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     } else {
         scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);
@@ -311,13 +320,12 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     auto dialogOffsetY =
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
-    if (SetAlignmentSwitch(layoutConstraint->maxSize, childSize, topLeftPoint)) {
-        return topLeftPoint + dialogOffset;
+    if (!SetAlignmentSwitch(layoutConstraint->maxSize, childSize, topLeftPoint)) {
+        topLeftPoint = OffsetF(layoutConstraint->maxSize.Width() - childSize.Width(),
+                           layoutConstraint->maxSize.Height() - childSize.Height()) /
+                       2.0;
     }
-    topLeftPoint = OffsetF(layoutConstraint->maxSize.Width() - childSize.Width(),
-                       layoutConstraint->maxSize.Height() - childSize.Height()) /
-                   2.0;
-    return topLeftPoint + dialogOffset;
+    return AdjustChildPosition(topLeftPoint, dialogOffset, childSize);
 }
 
 bool DialogLayoutAlgorithm::SetAlignmentSwitch(
@@ -362,6 +370,18 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(
         }
         return true;
     }
+
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+            topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+            return true;
+        }
+        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+            topLeftPoint = OffsetF((maxSize.Width() - childSize.Width()) / 2.0,
+                maxSize.Height() - childSize.Height() - GetPaddingBottom());
+            return true;
+        }
+    }
     return false;
 }
 
@@ -370,4 +390,33 @@ void DialogLayoutAlgorithm::UpdateTouchRegion()
     // TODO: update touch region is not completed.
 }
 
+double DialogLayoutAlgorithm::GetPaddingBottom() const
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, 0);
+    auto bottom = dialogTheme->GetDefaultPaddingBottomFixed();
+    return pipelineContext->NormalizeToPx(bottom);
+}
+
+OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
+    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize) const
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
+    auto systemInset = pipelineContext->GetSafeArea();
+    if (topLeftPoint.GetY() < systemInset.top_.end) {
+        topLeftPoint.SetY(systemInset.top_.end);
+    }
+    auto childOffset = topLeftPoint + dialogOffset;
+
+    auto manager = pipelineContext->GetSafeAreaManager();
+    auto keyboardInsert = manager->GetKeyboardInset();
+    auto childBottom = childOffset.GetY() + childSize.Height();
+    if (keyboardInsert.Length() > 0 && childBottom > keyboardInsert.start) {
+        childOffset.SetY(childOffset.GetY() - (childBottom - keyboardInsert.start));
+    }
+    return childOffset;
+}
 } // namespace OHOS::Ace::NG

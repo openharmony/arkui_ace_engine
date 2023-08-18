@@ -88,6 +88,8 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto measureType = layoutWrapper->GetLayoutProperty()->GetMeasureType();
     OptionalSizeF frameSize;
+    auto version10OrLarger =
+        PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9;
     do {
         // Use idea size first if it is valid.
         frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
@@ -98,7 +100,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         if (measureType == MeasureType::MATCH_PARENT) {
             frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
             if (frameSize.IsValid()) {
-                frameSize.Constrain(minSize, maxSize);
+                frameSize.Constrain(minSize, maxSize, version10OrLarger);
                 break;
             }
         }
@@ -115,6 +117,9 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
             float maxWidth = 0.0f;
             float maxHeight = 0.0f;
             for (const auto& child : childList) {
+                if (!child) {
+                    continue;
+                }
                 auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
                 if (maxWidth < childSize.Width()) {
                     maxWidth = childSize.Width();
@@ -128,11 +133,11 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
             frameSize.UpdateIllegalSizeWithCheck(childFrame);
         }
         if (layoutConstraint->selfIdealSize.Width()) {
-            frameSize.ConstrainFloat(minSize, maxSize, false);
+            frameSize.ConstrainFloat(minSize, maxSize, false, version10OrLarger);
         } else if (layoutConstraint->selfIdealSize.Height()) {
-            frameSize.ConstrainFloat(minSize, maxSize, true);
+            frameSize.ConstrainFloat(minSize, maxSize, true, version10OrLarger);
         } else {
-            frameSize.Constrain(minSize, maxSize);
+            frameSize.Constrain(minSize, maxSize, version10OrLarger);
         }
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);

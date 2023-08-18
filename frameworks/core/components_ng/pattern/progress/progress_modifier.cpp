@@ -44,6 +44,8 @@ constexpr int32_t DEFAULT_SCALE_COUNT = 100;
 constexpr double DEFAULT_CAPSULE_BORDER_WIDTH = 0.0;
 constexpr float FLOAT_ZERO_FIVE = 0.5f;
 constexpr float FLOAT_TWO_ZERO = 2.0f;
+constexpr float SPRING_MOTION_RESPONSE = 0.314f;
+constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr Dimension SWEEP_WIDTH = 80.0_vp;
 constexpr float RING_SHADOW_OFFSET_X = 5.0f;
 constexpr float RING_SHADOW_OFFSET_Y = 5.0f;
@@ -64,6 +66,7 @@ ProgressModifier::ProgressModifier()
       sweepingDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingHeadDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingTailDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
+      strokeRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(FLOAT_TWO_ZERO / INT32_TWO)),
       offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       maxValue_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_MAX_VALUE)),
@@ -76,7 +79,8 @@ ProgressModifier::ProgressModifier()
       linearSweepEffect_(AceType::MakeRefPtr<PropertyBool>(false)),
       paintShadow_(AceType::MakeRefPtr<PropertyBool>(false)),
       progressStatus_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressStatus::PROGRESSING))),
-      isItalic_(AceType::MakeRefPtr<PropertyBool>(false))
+      isItalic_(AceType::MakeRefPtr<PropertyBool>(false)),
+      smoothEffect_(AceType::MakeRefPtr<PropertyBool>(true))
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -91,6 +95,7 @@ ProgressModifier::ProgressModifier()
     AttachProperty(sweepEffect_);
     AttachProperty(trailingHeadDate_);
     AttachProperty(trailingTailDate_);
+    AttachProperty(strokeRadius_);
 
     AttachProperty(ringProgressColors_);
     AttachProperty(sweepingDate_);
@@ -99,6 +104,7 @@ ProgressModifier::ProgressModifier()
     AttachProperty(ringSweepEffect_);
     AttachProperty(linearSweepEffect_);
     AttachProperty(isItalic_);
+    AttachProperty(smoothEffect_);
 }
 
 void ProgressModifier::onDraw(DrawingContext& context)
@@ -247,6 +253,12 @@ void ProgressModifier::SetVisible(bool isVisible)
             StopSweepingAnimation();
         }
     }
+}
+
+void ProgressModifier::SetSmoothEffect(bool value)
+{
+    CHECK_NULL_VOID(smoothEffect_);
+    smoothEffect_->Set(value);
 }
 
 void ProgressModifier::StartRingLoadingAnimation()
@@ -553,7 +565,19 @@ void ProgressModifier::SetValue(float value)
     }
 
     CHECK_NULL_VOID(value_);
-    value_->Set(value);
+    AnimationOption option = AnimationOption();
+    if (smoothEffect_->Get()) {
+        if (isVisible_) {
+            auto motion =
+                AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
+            option.SetCurve(motion);
+        } else {
+            option.SetDuration(0);
+        }
+        AnimationUtils::Animate(option, [&]() { value_->Set(value); });
+    } else {
+        value_->Set(value);
+    }
     ProcessSweepingAnimation(ProgressType(progressType_->Get()), value);
 }
 
@@ -629,7 +653,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
-    double radius = strokeWidth_->Get() / INT32_TWO;
+    double radius = strokeRadius_->Get();
     if (contentSize.Width() >= contentSize.Height()) {
         double barLength = contentSize.Width() - radius * INT32_TWO;
         CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
@@ -831,6 +855,22 @@ void ProgressModifier::PaintRingProgressOrShadow(
     std::vector<float> pos;
     auto gradient = SortGradientColorsByOffset(ringProgressColors_->Get().GetGradient());
     auto gradientColors = gradient.GetColors();
+    // Fault protection processing, if gradientColors is empty, set to default colors.
+    if (gradientColors.empty()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(theme);
+        GradientColor endColor;
+        GradientColor beginColor;
+        endColor.SetLinearColor(LinearColor(theme->GetRingProgressEndSideColor()));
+        endColor.SetDimension(0.0);
+        beginColor.SetLinearColor(LinearColor(theme->GetRingProgressBeginSideColor()));
+        beginColor.SetDimension(1.0);
+        gradientColors.emplace_back(endColor);
+        gradientColors.emplace_back(beginColor);
+    }
+
     for (size_t i = 0; i < gradientColors.size(); i++) {
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
@@ -1389,5 +1429,10 @@ bool ProgressModifier::PostTask(const TaskExecutor::Task& task)
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
+void ProgressModifier::SetStrokeRadius(float strokeRaidus)
+{
+    strokeRadius_->Set(strokeRaidus);
 }
 } // namespace OHOS::Ace::NG

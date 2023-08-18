@@ -48,6 +48,16 @@ void ListModelNG::SetInitialIndex(int32_t initialIndex)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex);
 }
 
+void ListModelNG::SetContentStartOffset(float startOffset)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ContentStartOffset, startOffset);
+}
+
+void ListModelNG::SetContentEndOffset(float endOffset)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ContentEndOffset, endOffset);
+}
+
 RefPtr<ScrollControllerBase> ListModelNG::CreateScrollController()
 {
     return AceType::MakeRefPtr<NG::ListPositionController>();
@@ -344,6 +354,6 @@ void ListModelNG::AddDragFrameNodeToManager() const
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddListDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 } // namespace OHOS::Ace::NG

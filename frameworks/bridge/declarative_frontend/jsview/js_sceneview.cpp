@@ -27,6 +27,7 @@
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/cone.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/cube.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/geometry/sphere.h"
+#include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/shader_input_buffer.h"
 
 namespace OHOS::Ace {
 
@@ -115,7 +116,7 @@ void JSSceneView::Create(const JSCallbackInfo& info)
     ModelView::GetInstance()->Create(srcPath);
 }
 
-void JSSceneView::JSCamera(const JSCallbackInfo& info)
+void JSSceneView::JsCamera(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
@@ -219,7 +220,7 @@ void JSSceneView::JSCamera(const JSCallbackInfo& info)
     }
 }
 
-void JSSceneView::JSSetTransparent(const JSCallbackInfo& info)
+void JSSceneView::JsSetTransparent(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
@@ -232,13 +233,13 @@ void JSSceneView::JSSetTransparent(const JSCallbackInfo& info)
     }
 
     bool value = info[0]->ToBoolean();
-    LOGD("JSSceneView::JSSetTransparentBackground(%s)", value ? "true" : "false");
+    LOGD("JSSceneView::JsSetTransparentBackground(%s)", value ? "true" : "false");
     ModelView::GetInstance()->SetTransparent(value);
 }
 
-void JSSceneView::JSSetBackground(const JSCallbackInfo& info)
+void JSSceneView::JsSetBackground(const JSCallbackInfo& info)
 {
-    LOGD("JSSceneView::JSSetBackground()");
+    LOGD("JSSceneView::JsSetBackground()");
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -247,7 +248,7 @@ void JSSceneView::JSSetBackground(const JSCallbackInfo& info)
     std::string srcPath;
     auto parseOk = ParseJsMedia(info[0], srcPath);
     if (!parseOk) {
-        LOGE("JSSceneView::JSSetBackground() arg parsing failed.");
+        LOGE("JSSceneView::JsSetBackground() arg parsing failed.");
         return;
     }
 
@@ -255,7 +256,7 @@ void JSSceneView::JSSetBackground(const JSCallbackInfo& info)
     ModelView::GetInstance()->SetBackground(srcPath);
 }
 
-void JSSceneView::JSLight(const JSCallbackInfo& info)
+void JSSceneView::JsLight(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
@@ -336,7 +337,7 @@ void JSSceneView::JSLight(const JSCallbackInfo& info)
         type, color, AnimatableFloat(intensity, animOption), shadow, position, rotation));
 }
 
-void JSSceneView::JSAddCube(const JSCallbackInfo& info)
+void JSSceneView::JsAddCube(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
@@ -370,7 +371,7 @@ void JSSceneView::JSAddCube(const JSCallbackInfo& info)
         AceType::MakeRefPtr<OHOS::Render3D::SVCube>(name.c_str(), width, height, depth, position));
 }
 
-void JSSceneView::JSAddSphere(const JSCallbackInfo& info)
+void JSSceneView::JsAddSphere(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
@@ -404,7 +405,7 @@ void JSSceneView::JSAddSphere(const JSCallbackInfo& info)
         AceType::MakeRefPtr<OHOS::Render3D::SVSphere>(name.c_str(), radius, rings, sectors, position));
 }
 
-void JSSceneView::JSAddCone(const JSCallbackInfo& info)
+void JSSceneView::JsAddCone(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() <= 0 || !info[0]->IsObject()) {
@@ -438,7 +439,7 @@ void JSSceneView::JSAddCone(const JSCallbackInfo& info)
         AceType::MakeRefPtr<OHOS::Render3D::SVCone>(name.c_str(), radius, length, sectors, position));
 }
 
-void JSSceneView::JSGLTFAnimation(const JSCallbackInfo& info)
+void JSSceneView::JsGLTFAnimation(const JSCallbackInfo& info)
 {
     // Parse the info object.
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -464,34 +465,28 @@ void JSSceneView::JSGLTFAnimation(const JSCallbackInfo& info)
         name, static_cast<OHOS::Render3D::AnimationState>(state), repeatCount, speed, duration, reverse));
 }
 
-void JSSceneView::JSAddCustomRender(const JSCallbackInfo& info)
+void JSSceneView::JsAddCustomRender(const JSCallbackInfo& info)
 {
-    if (info.Length() < 3) {
-        LOGE("addCustomRender() invocation error - Three arguments required");
+    if (info.Length() != 2) {
+        LOGE("customRender() invocation error - two arguments required");
         return;
     }
 
-    if (info[0]->IsNull() || !info[0]->IsString()) {
-        LOGE("addCustomRender() invocation error - URI must be a String");
+    if (info[1]->IsNull() || !info[1]->IsBoolean()) {
+        LOGE("customRender() invocation error - Needs frame callback flag. Must be a Boolean");
         return;
     }
 
-    if (info[1]->IsNull() || !info[1]->IsString()) {
-        LOGE("addCustomRender() invocation error - native Type name must be a String");
-        return;
-    }
-
-    if (info[2]->IsNull() || !info[2]->IsBoolean()) {
-        LOGE("addCustomRender() invocation error - Needs frame callback flag. Must be a Boolean");
+    std::string uri;
+    auto parseOk = ParseJsMedia(info[0], uri);
+    if (!parseOk) {
+        LOGE("JSSceneView::JsAddCustomRender() arg parsing failed.");
         return;
     }
 
     RefPtr<OHOS::Render3D::SVCustomRenderDescriptor> desc =
-        AceType::MakeRefPtr<OHOS::Render3D::SVCustomRenderDescriptor>(
-            info[0]->ToString(), info[1]->ToString(), info[2]->ToBoolean());
-
-    LOGD("JSSceneView::JSaddCustomRender(%s, %s, %s)", desc->GetUri().c_str(),
-        desc->GetNativeTypeName().c_str(), (desc->NeedsFrameCallback() ? "true" : "false"));
+        AceType::MakeRefPtr<OHOS::Render3D::SVCustomRenderDescriptor>(uri, "", info[1]->ToBoolean());
+    LOGE("JsAddCustomRender(%s, %s)", desc->GetUri().c_str(), (desc->NeedsFrameCallback() ? "true" : "false"));
     ModelView::GetInstance()->AddCustomRender(desc);
 }
 
@@ -531,6 +526,72 @@ void JSSceneView::JsHeight(const JSCallbackInfo& info)
     ModelView::GetInstance()->SetHeight(value);
 }
 
+void JSSceneView::JsShader(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        LOGE("The arg is wrong, it is supposed to have 1 argument");
+        return;
+    }
+
+    std::string shaderPath;
+    auto parseOk = ParseJsMedia(info[0], shaderPath);
+    if (!parseOk) {
+        LOGE("JSSceneView::JsShader() arg parsing failed.");
+        return;
+    }
+
+    LOGD("shaderPath after ParseJsMedia(): %s", shaderPath.c_str());
+    ModelView::GetInstance()->SetShader(shaderPath);
+}
+
+void JSSceneView::JsShaderImageTexture(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        LOGE("The arg is wrong, it is supposed to have 1 argument");
+        return;
+    }
+
+    std::string texturePath;
+    auto parseOk = ParseJsMedia(info[0], texturePath);
+    if (!parseOk) {
+        LOGE("JSSceneView::JsShaderImageTexture() arg parsing failed.");
+        return;
+    }
+
+    LOGD("texturePath after ParseJsMedia(): %s", texturePath.c_str());
+    ModelView::GetInstance()->AddShaderImageTexture(texturePath);
+}
+
+void JSSceneView::JsShaderInputBuffer(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsArray()) {
+        LOGE("JsShaderInputBuffer() Invalid args.");
+        return;
+    }
+
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
+    int32_t length = static_cast<int32_t>(array->Length());
+    if (length <= 0) {
+        LOGE("JsShaderInputBuffer() Buffer is empty.");
+        return;
+    }
+
+    std::vector<float> shaderBuffer;
+    for (int32_t i = 0; i < length; i++) {
+        JSRef<JSVal> jsValue = array->GetValueAt(i);
+        if (jsValue->IsNumber()) {
+            shaderBuffer.emplace_back(jsValue->ToNumber<float>());
+        } else {
+            LOGE("JsShaderInputBuffer() Invalid data.");
+            return;
+        }
+    }
+
+    RefPtr<OHOS::Render3D::ShaderInputBuffer> buffer =
+        AceType::MakeRefPtr<OHOS::Render3D::ShaderInputBuffer>(shaderBuffer);
+    ModelView::GetInstance()->AddShaderInputBuffer(buffer);
+}
+
 void JSSceneView::JSBind(BindingTarget globalObj)
 {
     LOGD("JSSceneView::JSBind()");
@@ -538,18 +599,21 @@ void JSSceneView::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSceneView>::StaticMethod("create", &JSSceneView::Create, opt);
     JSClass<JSSceneView>::StaticMethod("onClick", &JSSceneView::JsOnClick);
-    JSClass<JSSceneView>::StaticMethod("setHandleCameraMove", &JSSceneView::JsSetHandleCameraMove);
-    JSClass<JSSceneView>::StaticMethod("camera", &JSSceneView::JSCamera);
-    JSClass<JSSceneView>::StaticMethod("transparent", &JSSceneView::JSSetTransparent);
-    JSClass<JSSceneView>::StaticMethod("background", &JSSceneView::JSSetBackground);
-    JSClass<JSSceneView>::StaticMethod("light", &JSSceneView::JSLight);
-    JSClass<JSSceneView>::StaticMethod("addCube", &JSSceneView::JSAddCube);
-    JSClass<JSSceneView>::StaticMethod("addSphere", &JSSceneView::JSAddSphere);
-    JSClass<JSSceneView>::StaticMethod("addCone", &JSSceneView::JSAddCone);
-    JSClass<JSSceneView>::StaticMethod("glTFAnimation", &JSSceneView::JSGLTFAnimation);
-    JSClass<JSSceneView>::StaticMethod("addCustomRender", &JSSceneView::JSAddCustomRender);
+    JSClass<JSSceneView>::StaticMethod("gestureAccess", &JSSceneView::JsSetHandleCameraMove);
+    JSClass<JSSceneView>::StaticMethod("camera", &JSSceneView::JsCamera);
+    JSClass<JSSceneView>::StaticMethod("transparent", &JSSceneView::JsSetTransparent);
+    JSClass<JSSceneView>::StaticMethod("background", &JSSceneView::JsSetBackground);
+    JSClass<JSSceneView>::StaticMethod("light", &JSSceneView::JsLight);
+    JSClass<JSSceneView>::StaticMethod("cube", &JSSceneView::JsAddCube);
+    JSClass<JSSceneView>::StaticMethod("sphere", &JSSceneView::JsAddSphere);
+    JSClass<JSSceneView>::StaticMethod("cone", &JSSceneView::JsAddCone);
+    JSClass<JSSceneView>::StaticMethod("glTFAnimation", &JSSceneView::JsGLTFAnimation);
+    JSClass<JSSceneView>::StaticMethod("customRender", &JSSceneView::JsAddCustomRender);
     JSClass<JSSceneView>::StaticMethod("width", &JSSceneView::JsWidth);
     JSClass<JSSceneView>::StaticMethod("height", &JSSceneView::JsHeight);
+    JSClass<JSSceneView>::StaticMethod("shader", &JSSceneView::JsShader);
+    JSClass<JSSceneView>::StaticMethod("shaderImageTexture", &JSSceneView::JsShaderImageTexture);
+    JSClass<JSSceneView>::StaticMethod("shaderInputBuffer", &JSSceneView::JsShaderInputBuffer);
     JSClass<JSSceneView>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

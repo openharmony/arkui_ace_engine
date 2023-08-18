@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/common/container.h"
@@ -145,9 +146,17 @@ void PagePattern::OnShow()
     // Do not invoke onPageShow unless the initialRender function has been executed.
     CHECK_NULL_VOID_NOLOG(isRenderDone_);
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
-    CHECK_NULL_VOID_NOLOG(Container::IsForeground());
+    auto container = Container::Current();
+    if (!container || !container->WindowIsShow()) {
+        LOGW("no need to trigger onPageShow callback when not in the foreground");
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetJSViewActive(true);
     isOnShow_ = true;
     JankFrameReport::StartRecord(pageInfo_->GetPageUrl());
+    PerfMonitor::GetPerfMonitor()->SetPageUrl(pageInfo_->GetPageUrl());
     if (onPageShow_) {
         onPageShow_();
     }
@@ -157,6 +166,9 @@ void PagePattern::OnHide()
 {
     CHECK_NULL_VOID_NOLOG(isOnShow_);
     JankFrameReport::FlushRecord();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->SetJSViewActive(false);
     isOnShow_ = false;
     if (onPageHide_) {
         onPageHide_();
@@ -255,4 +267,20 @@ void PagePattern::StopPageTransition()
     FirePageTransitionFinish();
 }
 
+void PagePattern::BeforeCreateLayoutWrapper()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    // SafeArea already applied to AppBar
+    if (pipeline->GetInstallationFree()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto safeArea = pipeline->GetSafeArea();
+    auto props = host->GetLayoutProperty();
+    if (safeArea.IsValid() || props->GetSafeAreaInsets()) {
+        props->UpdateSafeAreaInsets(safeArea);
+    }
+}
 } // namespace OHOS::Ace::NG

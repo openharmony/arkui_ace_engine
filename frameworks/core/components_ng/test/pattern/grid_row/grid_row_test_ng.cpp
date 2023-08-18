@@ -15,6 +15,9 @@
 
 #include <optional>
 
+#define private public
+#define protected public
+
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
@@ -47,11 +50,11 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
 
-    static RefPtr<LayoutWrapper> CreateLayoutWrapperAndLayout(bool needLayout);
+    static RefPtr<LayoutWrapperNode> CreateLayoutWrapperAndLayout(bool needLayout);
     static void TestGridColWidth(uint8_t span, uint8_t expectWidth);
     static testing::AssertionResult TestGridColGeometry(
         uint8_t offset, uint8_t span, uint8_t expectOffsetX, uint8_t expectLines);
-    static OffsetF GetColOffset(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
+    static OffsetF GetColOffset(RefPtr<LayoutWrapperNode>& layoutWrapper, int32_t index);
 
     static RefPtr<FrameNode> rowNode_;
     static std::vector<RefPtr<FrameNode>> colNodes_;
@@ -102,6 +105,11 @@ void GridRowTestNg::SetUp()
     colLayoutBack->UpdateSpan(V2::GridContainerSize(1));
     colLayoutBack->UpdateOffset(V2::GridContainerSize(0));
     colLayoutBack->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(DEFAULT_HEIGHT)));
+
+    MockPipelineBase::GetCurrent()->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    MockPipelineBase::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
+    MockPipelineBase::GetCurrent()->windowManager_->SetWindowGetModeCallBack(
+        []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
 }
 
 void GridRowTestNg::TearDown() {}
@@ -110,7 +118,7 @@ RefPtr<FrameNode> GridRowTestNg::rowNode_;
 std::vector<RefPtr<FrameNode>> GridRowTestNg::colNodes_;
 const int32_t GridRowTestNg::colNum_;
 
-RefPtr<LayoutWrapper> GridRowTestNg::CreateLayoutWrapperAndLayout(bool needLayout = false)
+RefPtr<LayoutWrapperNode> GridRowTestNg::CreateLayoutWrapperAndLayout(bool needLayout = false)
 {
     auto layoutWrapper = rowNode_->CreateLayoutWrapper();
     LayoutConstraintF constraint;
@@ -166,7 +174,7 @@ testing::AssertionResult GridRowTestNg::TestGridColGeometry(
         " But expect offset: " << expectOffset.ToString();
 }
 
-OffsetF GridRowTestNg::GetColOffset(RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
+OffsetF GridRowTestNg::GetColOffset(RefPtr<LayoutWrapperNode>& layoutWrapper, int32_t index)
 {
     return layoutWrapper->GetOrCreateChildByIndex(index)->GetGeometryNode()->GetFrameOffset();
 }

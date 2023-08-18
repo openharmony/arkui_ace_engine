@@ -41,6 +41,7 @@ public:
     void SetTabBarMode(TabBarMode tabBarMode) override;
     void SetTabBarWidth(const Dimension& tabBarWidth) override;
     void SetTabBarHeight(const Dimension& tabBarHeight) override;
+    void SetBarAdaptiveHeight(bool barAdaptiveHeight) override;
     void SetIsVertical(bool isVertical) override;
     void SetScrollable(bool scrollable) override;
     void SetAnimationDuration(float duration) override;
@@ -52,6 +53,8 @@ public:
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) override;
     void SetBarBackgroundColor(const Color& backgroundColor) override;
     void SetClipEdge(bool clipEdge) override;
+    void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) override;
+    void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 

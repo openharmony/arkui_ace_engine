@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
+constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 240.0_vp;
 
 class ACE_EXPORT NavigationLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(NavigationLayoutProperty, LayoutProperty);
@@ -48,7 +48,6 @@ public:
         copy->propMinContentWidth_ = CloneMinContentWidth();
         copy->propNavBarPosition_ = CloneNavBarPosition();
         copy->propHideNavBar_ = CloneHideNavBar();
-        copy->propDestinationChange_ = CloneDestinationChange();
         copy->propNoPixMap_ = CloneNoPixMap();
         copy->propImageSource_ = CloneImageSource();
         copy->propPixelMap_ = ClonePixelMap();
@@ -66,7 +65,6 @@ public:
         ResetMinContentWidth();
         ResetNavBarPosition();
         ResetHideNavBar();
-        ResetDestinationChange();
         ResetNoPixMap();
         ResetImageSource();
         ResetPixelMap();
@@ -75,20 +73,21 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         LayoutProperty::ToJsonValue(json);
-        std::string navBarWidthRange = GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH).ToString() + ", "
-            + GetMaxNavBarWidthValue(DEFAULT_MAX_NAV_BAR_WIDTH).ToString();
+        std::string navBarWidthRange = GetMinNavBarWidthValue(DEFAULT_MIN_NAV_BAR_WIDTH).ToString() + ", " +
+                                       GetMaxNavBarWidthValue(DEFAULT_MAX_NAV_BAR_WIDTH).ToString();
         json->Put("navBarWidth", GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).ToString().c_str());
         json->Put("navBarWidthRange", navBarWidthRange.c_str());
         json->Put("minContentWidth", GetMinContentWidthValue(DEFAULT_MIN_CONTENT_WIDTH).ToString().c_str());
-        json->Put("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) ==
-            NavBarPosition::START ? "NavBarPosition.Start" : "NavBarPosition.End");
+        json->Put("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) == NavBarPosition::START
+                                        ? "NavBarPosition.Start"
+                                        : "NavBarPosition.End");
         static const std::array<std::string, 3> NAVIGATION_MODE_TO_STRING = {
             "NavigationMode.STACK",
             "NavigationMode.SPLIT",
             "NavigationMode.AUTO",
         };
         json->Put("mode",
-            NAVIGATION_MODE_TO_STRING.at(static_cast<int32_t>(GetNavigationMode().value_or(NavigationMode::AUTO)))
+            NAVIGATION_MODE_TO_STRING.at(static_cast<int32_t>(GetUsrNavigationMode().value_or(NavigationMode::AUTO)))
                 .c_str());
         json->Put("hideNavBar", GetHideNavBarValue(false));
         if (HasImageSource()) {
@@ -104,7 +103,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinContentWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarPosition, NavBarPosition, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideNavBar, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DestinationChange, bool, PROPERTY_UPDATE_MEASURE);
     // back button icon
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NoPixMap, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);

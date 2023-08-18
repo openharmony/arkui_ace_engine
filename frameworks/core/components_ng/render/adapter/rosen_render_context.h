@@ -35,15 +35,16 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
+#include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
+class BackgroundModifier;
 class BorderImageModifier;
 class DebugBoundaryModifier;
 class MouseSelectModifier;
-class MoonProgressModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
@@ -134,6 +135,7 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
+    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
     void ResetBackBlurStyle() override;
@@ -189,6 +191,9 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
+    // get position property
+    RectF GetPropertyOfPosition() override;
+
     // append translate value and return origin value.
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;
@@ -223,6 +228,10 @@ public:
         return needDebugBoundary_;
     }
 
+    void OnBackgroundAlignUpdate(const Alignment& align) override;
+    void OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& value) override;
+    void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
+
     void OnBackgroundColorUpdate(const Color& value) override;
 
     void MarkContentChanged(bool isChanged) override;
@@ -230,14 +239,23 @@ public:
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
     RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    std::vector<double> transInfo_;
+    std::vector<double> GetTrans() override;
+#ifndef USE_ROSEN_DRAWING
     bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
+#else
+    bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
+#endif
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
 
     void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
-    void SetOverrideContentRect(const std::optional<RectF>& rect) override;
+    void SetUsingContentRectForRenderFrame(bool value) override;
+    void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
+
+    void AddFRCSceneInfo(const std::string& scene, float speed) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -263,7 +281,7 @@ private:
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;
-    void OnTransformRotateUpdate(const Vector4F& value) override;
+    void OnTransformRotateUpdate(const Vector5F& value) override;
 
     void OnOffsetUpdate(const OffsetT<Dimension>& value) override;
     void OnAnchorUpdate(const OffsetT<Dimension>& value) override;
@@ -287,6 +305,8 @@ private:
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
     void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) override;
+    void OnDynamicLightUpRateUpdate(const float rate) override;
+    void OnDynamicLightUpDegreeUpdate(const float degree) override;
 
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
@@ -311,7 +331,7 @@ private:
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
-    void SetPivot(float xPivot, float yPivot);
+    void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
 
     RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
@@ -327,15 +347,17 @@ private:
     void PaintGraphics();
     void PaintOverlayText();
     void PaintBorderImage();
+#ifndef USE_ROSEN_DRAWING
     void PaintSkBgImage();
+#else
+    void PaintRSBgImage();
+#endif
     void PaintPixmapBgImage();
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
-    void CombinePaddingAndOffset(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
-        const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
 
@@ -373,6 +395,8 @@ private:
     void PaintDebugBoundary();
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
+    void SetContentRectToFrame(RectF rect);
+
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
@@ -389,25 +413,25 @@ private:
     bool hasDefaultTransition_ = false;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
+    int sandBoxCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
     RefPtr<RosenTransitionEffect> transitionEffect_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
+    std::shared_ptr<BackgroundModifier> backgroundModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
-    std::shared_ptr<MoonProgressModifier> moonProgressModifier_;
+    RefPtr<MoonProgressModifier> moonProgressModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
-    std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
     // translate modifiers for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
-    std::shared_ptr<Rosen::RSTranslateZModifier> translateZ_;
 
     // graphics modifiers
     struct GraphicModifiers {
@@ -426,7 +450,7 @@ private:
     VectorF currentScale_ = VectorF(1.0f, 1.0f);
     bool isTouchUpFinished_ = true;
 
-    std::optional<RectF> overrideContentRect_;
+    bool useContentRectForRSFrame_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

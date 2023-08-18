@@ -181,18 +181,26 @@ public:
         return currentIndex_;
     }
 
+    void SetIsNeedResetPrevMarginAndNextMargin()
+    {
+        isNeedResetPrevMarginAndNextMargin_ = false;
+    }
+
+    bool GetIsNeedResetPrevMarginAndNextMargin() const
+    {
+        return isNeedResetPrevMarginAndNextMargin_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void SetInactive(
         LayoutWrapper* layoutWrapper, float startMainPos, float endMainPos, std::optional<int32_t> targetIndex);
 
     void PlaceDigitChild(const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty);
-    double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
     void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
     void ArrowLayout(
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper, const PaddingPropertyF padding) const;
-    void OffScreenLayoutDirection();
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
     float nextMargin_ = 0.0f;
@@ -220,8 +228,8 @@ private:
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> currentTargetIndex_;
     int32_t currentIndex_ = 0;
-    bool forwardFeature_ = false;
-    bool backwardFeature_ = false;
+    bool targetIsSameWithStartFlag_ = false;
+    bool isNeedResetPrevMarginAndNextMargin_ = false;
 };
 
 } // namespace OHOS::Ace::NG

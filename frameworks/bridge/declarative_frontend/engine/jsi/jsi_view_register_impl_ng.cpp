@@ -35,6 +35,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_image_data.h"
@@ -282,10 +283,12 @@ void JSBindLibs(const std::string moduleName, const std::string exportModuleName
     }
     std::vector<std::shared_ptr<JsValue>> argv = { runtime->NewString(moduleName) };
     std::shared_ptr<JsValue> napiObj = requireNapiFunc->Call(runtime, global, argv, argv.size());
-    if (isController && napiObj) {
-        global->SetProperty(runtime, exportModuleName, napiObj->GetProperty(runtime, exportModuleName));
-    } else {
-        global->SetProperty(runtime, exportModuleName, napiObj);
+    if (napiObj && !napiObj->IsUndefined(runtime)) {
+        if (isController) {
+            global->SetProperty(runtime, exportModuleName, napiObj->GetProperty(runtime, exportModuleName));
+        } else {
+            global->SetProperty(runtime, exportModuleName, napiObj);
+        }
     }
 }
 #endif
@@ -320,13 +323,11 @@ void JsBindViews(BindingTarget globalObj)
     JSNavigator::JSBind(globalObj);
     JSToggle::JSBind(globalObj);
     JSCounter::JSBind(globalObj);
+    JSCalendarPicker::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
-#endif
-#ifdef WINDOW_SCENE_SUPPORTED
-    JSUIExtension::JSBind(globalObj);
 #endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponent::JSBind(globalObj);
@@ -355,6 +356,8 @@ void JsBindViews(BindingTarget globalObj)
     JSWindowScene::JSBind(globalObj);
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);
+    JSUIExtension::JSBind(globalObj);
+    JSUIExtensionProxy::JSBind(globalObj);
 #endif
     JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);

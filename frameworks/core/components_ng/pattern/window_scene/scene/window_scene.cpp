@@ -15,27 +15,82 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
+#include "session_manager/include/scene_session_manager.h"
 #include "ui/rs_surface_node.h"
 
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t COLOR_BLACK = 0xff000000;
-constexpr uint32_t COLOR_WHITE = 0xffffffff;
+const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
+    { "default",            Rosen::RSAnimationTimingCurve::DEFAULT            },
+    { "linear",             Rosen::RSAnimationTimingCurve::LINEAR             },
+    { "ease",               Rosen::RSAnimationTimingCurve::EASE               },
+    { "easeIn",             Rosen::RSAnimationTimingCurve::EASE_IN            },
+    { "easeOut",            Rosen::RSAnimationTimingCurve::EASE_OUT           },
+    { "easeInOut",          Rosen::RSAnimationTimingCurve::EASE_IN_OUT        },
+    { "spring",             Rosen::RSAnimationTimingCurve::SPRING             },
+    { "interactiveSpring",  Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
+};
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 {
     session_ = session;
+    sizeChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->OnBoundsSizeChanged(bounds);
+    };
+    CHECK_NULL_VOID_NOLOG(IsMainWindow());
     RegisterLifecycleListener();
+    callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
+        LOGI("RSSurfaceNode buffer available callback");
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        session->SetBufferAvailable(true);
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->BufferAvailableCallback();
+        Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
+    };
 }
 
 WindowScene::~WindowScene()
 {
+    CHECK_NULL_VOID_NOLOG(IsMainWindow());
+    CHECK_NULL_VOID_NOLOG(session_);
+    session_->SetShowRecent(false);
     UnregisterLifecycleListener();
+}
+
+void WindowScene::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(session_);
+    session_->SetUINodeId(host->GetAccessibilityId());
+
+    if (!IsMainWindow()) {
+        auto surfaceNode = session_->GetSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        context->SetRSNode(surfaceNode);
+        surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
+        return;
+    }
+
+    auto surfaceNode = session_->GetLeashWinSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    context->SetRSNode(surfaceNode);
+    surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
+
+    WindowPattern::OnAttachToFrameNode();
 }
 
 void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
@@ -46,8 +101,7 @@ void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
         return;
     }
 
-    LOGI("session %{public}" PRIu64 " changes to %{public}" PRIu64,
-        session_->GetPersistentId(), session->GetPersistentId());
+    LOGI("session %{public}d changes to %{public}d", session_->GetPersistentId(), session->GetPersistentId());
     session_ = session;
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
@@ -58,45 +112,184 @@ void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
     context->SetRSNode(surfaceNode);
 }
 
-void WindowScene::OnForeground()
+void WindowScene::OnBoundsSizeChanged(const Rosen::Vector4f& bounds)
 {
-    CHECK_NULL_VOID(snapshotNode_);
+    Rosen::WSRect windowRect {
+        .posX_ = std::round(bounds.x_),
+        .posY_ = std::round(bounds.y_),
+        .width_ = std::round(bounds.z_),
+        .height_ = std::round(bounds.w_),
+    };
+
+    CHECK_NULL_VOID(session_);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+}
+
+void WindowScene::BufferAvailableCallback()
+{
+    const auto& config =
+        Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
+    if (config.enabled_) {
+        CHECK_NULL_VOID(startingNode_);
+        auto context = AceType::DynamicCast<RosenRenderContext>(startingNode_->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        auto rsNode = context->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
+        rsNode->SetTransitionEffect(effect);
+        Rosen::RSAnimationTimingProtocol protocol;
+        protocol.SetDuration(config.duration_);
+        auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
+            Rosen::RSAnimationTimingCurve::DEFAULT;
+        Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
+            rsNode->NotifyTransition(effect, false);
+        });
+    }
+
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChild(self->startingNode_);
+        self->startingNode_.Reset();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
 
     ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+}
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
+void WindowScene::OnActivation()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
 
-    host->RemoveChild(snapshotNode_);
-    snapshotNode_.Reset();
-    host->AddChild(contentNode_);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (self->destroyed_) {
+            self->destroyed_ = false;
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->RemoveChild(self->startingNode_);
+            host->RemoveChild(self->contentNode_);
+            host->RemoveChild(self->snapshotNode_);
+            self->startingNode_.Reset();
+            self->contentNode_.Reset();
+            self->snapshotNode_.Reset();
+            self->OnAttachToFrameNode();
+        }
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnConnect()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        CHECK_NULL_VOID(self->session_);
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+
+        CHECK_NULL_VOID(self->contentNode_);
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(self->contentNode_->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        context->SetRSNode(surfaceNode);
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        host->AddChild(self->contentNode_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+        surfaceNode->SetBufferAvailableCallback(self->callback_);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnForeground()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        CHECK_NULL_VOID(self->snapshotNode_);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChild(self->snapshotNode_);
+        self->snapshotNode_.Reset();
+        host->AddChild(self->contentNode_);
+        if (!self->session_->GetBufferAvailable() && !self->startingNode_) {
+            self->CreateStartingNode();
+            host->AddChild(self->startingNode_);
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnBackground()
 {
-    ContainerScope scope(instanceId_);
-
-    snapshotNode_ = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->RemoveChild(contentNode_);
-    host->AddChild(snapshotNode_);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
     CHECK_NULL_VOID(session_);
     auto snapshot = session_->GetSnapshot();
-    auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
 
-    CHECK_NULL_VOID(pixelMap);
-    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    snapshotNode_->MarkModifyDone();
+    auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChild(self->contentNode_);
+        self->CreateSnapshotNode(snapshot);
+        host->AddChild(self->snapshotNode_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnDisconnect()
+{
+    CHECK_NULL_VOID(session_);
+    auto snapshot = session_->GetSnapshot();
+
+    auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->destroyed_ = true;
+
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        host->RemoveChild(self->contentNode_);
+        self->contentNode_.Reset();
+        if (!self->snapshotNode_) {
+            self->CreateSnapshotNode(snapshot);
+            host->AddChild(self->snapshotNode_, 0);
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace::NG

@@ -90,9 +90,9 @@ public:
     }
 
     void OnLanguageConfigurationUpdate() override;
+	
+    void OnColorConfigurationUpdate() override;
 
-    bool NeedCallChildrenUpdate(const OnConfigurationChange& configurationChange) override;
-    
     void SetChangeCallback(ColumnChangeCallback&& value);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
@@ -190,6 +190,11 @@ public:
     bool ShowMonthDays() const
     {
         return showMonthDays_;
+    }
+
+    void SetShowTimeFlag(bool value)
+    {
+        showTime_ = value;
     }
 
     const EventMarker& GetDialogAcceptEvent() const
@@ -320,16 +325,7 @@ public:
     void HandleMonthDaysChange(
         const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
 
-    std::string GetSelectedObject(bool isColumnChange, int status = -1) const
-    {
-        auto date = selectedDate_;
-        if (isColumnChange) {
-            date = GetCurrentDate();
-        }
-        // W3C's month is between 0 to 11, need to reduce one.
-        date.SetMonth(date.GetMonth() - 1);
-        return date.ToString(true, status);
-    }
+    std::string GetSelectedObject(bool isColumnChange, int status = -1) const;
 
     const LunarDate& GetSelectDate()
     {
@@ -355,10 +351,6 @@ public:
     void SetStartDate(const PickerDate& value)
     {
         startDateSolar_ = value;
-        if (startDateSolar_.GetYear() <= 0) {
-            LOGW("startDate error");
-            startDateSolar_ = startDefaultDateSolar_;
-        }
         AdjustSolarDate(startDateSolar_, limitStartDate_, limitEndDate_);
         startDateLunar_ = SolarToLunar(startDateSolar_);
     }
@@ -371,10 +363,6 @@ public:
     void SetEndDate(const PickerDate& value)
     {
         endDateSolar_ = value;
-        if (endDateSolar_.GetYear() <= 0) {
-            LOGW("endDate error");
-            endDateSolar_ = endDefaultDateSolar_;
-        }
         AdjustSolarDate(endDateSolar_, limitStartDate_, limitEndDate_);
         endDateLunar_ = SolarToLunar(endDateSolar_);
     }
@@ -548,16 +536,31 @@ public:
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
         CHECK_NULL_RETURN(pickerTheme, FocusPattern());
         auto focusColor = pickerTheme->GetFocusColor();
-
         FocusPaintParam focusPaintParams;
         focusPaintParams.SetPaintColor(focusColor);
         focusPaintParams.SetPaintWidth(FOCUS_PAINT_WIDTH);
-
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
     void ShowTitle(int32_t titleId);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
+    {
+        contentRowNode_ = contentRowNode;
+    }
+    void SetbuttonTitleNode(RefPtr<FrameNode>& buttonTitleNode)
+    {
+        buttonTitleNode_ = buttonTitleNode;
+    }
+
+    void SetPickerTag(bool isPicker)
+    {
+        isPicker_ = isPicker;
+    }
+
+    void SetFocusDisable();
+    void SetFocusEnable();
+    
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -566,18 +569,15 @@ private:
     void InitDisabled();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
-
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-
     PickerDate GetCurrentDateByMonthDaysColumn() const;
     PickerDate GetCurrentDateByYearMonthDayColumn() const;
     void FillSolarYearOptions(const PickerDate& current, RefPtr<FrameNode>& yearColumn);
     void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
     void AdjustSolarStartEndDate();
     void AdjustLunarStartEndDate();
-
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -586,6 +586,7 @@ private:
     std::vector<RefPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
     bool showMonthDays_ = false;
+    bool showTime_ = false;
     Color backgroundColor_ = Color::WHITE;
     std::optional<int32_t> yearId_;
     std::optional<int32_t> monthId_;
@@ -598,14 +599,11 @@ private:
     double resizePickerItemHeight_;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
-
     EventMarker OnDialogAccept_;
     EventMarker OnDialogCancel_;
     EventMarker OnDialogChange_;
-
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
-
     PickerDate startDateSolar_ = PickerDate(1970, 1, 1); // default start date is 1970-1-1 from FA document.
     LunarDate startDateLunar_;
     PickerDate endDateSolar_ = PickerDate(2100, 12, 31); // default end date is 2100-12-31 from FA document.
@@ -616,7 +614,6 @@ private:
     PickerDate endDefaultDateSolar_ = PickerDate(2100, 12, 31); // default end date is 2100-12-31 from FA document.
     const PickerDate limitStartDate_ = PickerDate(1900, 1, 31);
     const PickerDate limitEndDate_ = PickerDate(2100, 12, 31);
-
     static bool inited_;
     static const std::string empty_;
     static std::vector<std::string> years_;       // year from 1900 to 2100,count is 201
@@ -625,7 +622,9 @@ private:
     static std::vector<std::string> lunarMonths_; // lunar month from 1 to 24, count is 24
     static std::vector<std::string> lunarDays_;   // lunar day from 1 to 30, count is 30
     static std::vector<std::string> tagOrder_;    // year month day tag order
-
+    RefPtr<FrameNode> contentRowNode_;
+    RefPtr<FrameNode> buttonTitleNode_;
+    bool isPicker_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };
 } // namespace OHOS::Ace::NG

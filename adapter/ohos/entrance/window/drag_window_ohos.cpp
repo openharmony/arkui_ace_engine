@@ -31,8 +31,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
-#ifdef USE_ROSEN_DRAWING
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #include "core/components_ng/render/drawing.h"
 #endif
 #include "core/pipeline_ng/pipeline_context.h"
@@ -50,11 +52,6 @@ const Dimension Window_EXTERN = 10.0_vp;
 sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap)
 {
     return SkColorSpace::MakeSRGB(); // Media::PixelMap has not support wide gamut yet.
-}
-#else
-std::shared_ptr<RSColorSpace> ColorSpaceToColorSpace(const RefPtr<PixelMap>& pixmap)
-{
-    return RSRecordingColorSpace::CreateSRGB(); // Media::PixelMap has not support wide gamut yet.
 }
 #endif
 
@@ -406,7 +403,7 @@ void DragWindowOhos::DrawImage(void* drawingImage)
     CHECK_NULL_VOID(drawingImage);
     auto* canvasImagePtr = reinterpret_cast<RefPtr<NG::CanvasImage>*>(drawingImage);
     CHECK_NULL_VOID(canvasImagePtr);
-    RefPtr<NG::RosenImage> canvasImage = AceType::DynamicCast<NG::RosenImage>(*canvasImagePtr);
+    RefPtr<NG::DrawingImage> canvasImage = AceType::DynamicCast<NG::DrawingImage>(*canvasImagePtr);
     CHECK_NULL_VOID(canvasImage);
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();
@@ -520,7 +517,7 @@ void DragWindowOhos::DrawText(
     }
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
-    auto drawing = canvasNode->BeginRecording(width_, height_);
+    LOGE("Drawing is not supported");
 #endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
@@ -626,8 +623,6 @@ void DragWindowOhos::DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const Re
     }
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
-
-    auto drawing = canvasNode->BeginRecording(width_, height_);
 #endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();

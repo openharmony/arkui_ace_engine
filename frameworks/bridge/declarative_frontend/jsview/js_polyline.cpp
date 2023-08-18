@@ -58,34 +58,33 @@ void JSPolyline::JSPoints(const JSCallbackInfo& info)
     if (pointsArray->Length() < 2) {
         LOGE("Polyline  have at least 2 points");
         return;
-    } else {
-        for (size_t i = 0; i < pointsArray->Length(); i++) {
-            JSRef<JSVal> val = pointsArray->GetValueAt(i);
-            if (!val->IsArray()) {
-                LOGE("point is not array.");
-                continue;
-            }
-            JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(val);
-            if (pointArray->GetValueAt(0)->IsNumber()) {
-                point.first = Dimension(pointArray->GetValueAt(0)->ToNumber<double>(), DimensionUnit::VP);
-            } else if (pointArray->GetValueAt(0)->IsString()) {
-                point.first = StringUtils::StringToDimension(pointArray->GetValueAt(0)->ToString(), true);
-            } else {
-                LOGE("Polyline point should be Number or String");
-                return;
-            }
-            if (pointArray->GetValueAt(1)->IsNumber()) {
-                point.second = Dimension(pointArray->GetValueAt(1)->ToNumber<double>(), DimensionUnit::VP);
-            } else if (pointArray->GetValueAt(1)->IsString()) {
-                point.second = StringUtils::StringToDimension(pointArray->GetValueAt(1)->ToString(), true);
-            } else {
-                LOGE("Polyline point should be Number or String");
-                return;
-            }
-            points.push_back(point);
-        }
-        PolygonModel::GetInstance()->SetPoints(points);
     }
+    for (size_t i = 0; i < pointsArray->Length(); i++) {
+        JSRef<JSVal> val = pointsArray->GetValueAt(i);
+        if (!val->IsArray()) {
+            LOGE("point is not array.");
+            continue;
+        }
+        JSRef<JSArray> pointArray = JSRef<JSArray>::Cast(val);
+        if (pointArray->GetValueAt(0)->IsNumber()) {
+            point.first = Dimension(pointArray->GetValueAt(0)->ToNumber<double>(), DimensionUnit::VP);
+        } else if (pointArray->GetValueAt(0)->IsString()) {
+            point.first = StringUtils::StringToDimension(pointArray->GetValueAt(0)->ToString(), true);
+        } else {
+            LOGE("Polyline point should be Number or String");
+            return;
+        }
+        if (pointArray->GetValueAt(1)->IsNumber()) {
+            point.second = Dimension(pointArray->GetValueAt(1)->ToNumber<double>(), DimensionUnit::VP);
+        } else if (pointArray->GetValueAt(1)->IsString()) {
+            point.second = StringUtils::StringToDimension(pointArray->GetValueAt(1)->ToString(), true);
+        } else {
+            LOGE("Polyline point should be Number or String");
+            return;
+        }
+        points.push_back(point);
+    }
+    PolygonModel::GetInstance()->SetPoints(points);
 }
 
 } // namespace OHOS::Ace::Framework

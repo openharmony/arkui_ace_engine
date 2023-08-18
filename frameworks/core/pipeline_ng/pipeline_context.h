@@ -137,6 +137,8 @@ public:
 
     void HandleOnAreaChangeEvent();
 
+    void NotifyConfigurationChange(const OnConfigurationChange& configurationChange) override;
+
     void AddVisibleAreaChangeNode(
         const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
@@ -195,19 +197,23 @@ public:
 
     void AddAfterLayoutTask(std::function<void()>&& task);
 
+    void AddAfterRenderTask(std::function<void()>&& task);
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
 
+    void SetWindowSceneConsumed(bool isConsumed);
+    
+    bool IsWindowSceneConsumed();
+
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
-    SafeAreaInsets GetSystemSafeArea() const;
-    SafeAreaInsets GetCutoutSafeArea() const;
-    SafeAreaInsets GetSafeArea() const;
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
     {
         return safeAreaManager_;
     }
+    SafeAreaInsets GetSafeArea() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -275,15 +281,22 @@ public:
         return onShow_;
     }
 
+    void MarkRootFocusNeedUpdate()
+    {
+        isRootFocusNeedUpdate_ = true;
+    }
+
     bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
 
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
+    void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetCloseButtonStatus(bool isEnabled);
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -292,7 +305,12 @@ public:
 
     void FlushUITasks() override
     {
-        taskScheduler_.FlushTask();
+        taskScheduler_->FlushTask();
+    }
+
+    bool IsLayouting() const override
+    {
+        return taskScheduler_->IsLayouting();
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
@@ -366,14 +384,14 @@ public:
     {
         storeNode_.erase(restoreId);
     }
-
-    // ---------------- WindowScene TouchEvent Callback Handler ---------------------
-    void AddWindowSceneTouchEventCallback(int32_t pointId, WindowSceneTouchEventCallback&& callback);
-    void RemoveWindowSceneTouchEventCallback(int32_t pointId);
-    void HandleWindowSceneTouchEvent(const TouchEvent& point);
-    // ------------------------------------------------------------------------------
-
     void SetNeedRenderNode(const RefPtr<FrameNode>& node);
+
+
+    void SetIgnoreViewSafeArea(bool value) override;
+    void SetIsLayoutFullScreen(bool value) override;
+
+    void AddAnimationClosure(std::function<void()>&& animation);
+    void FlushAnimationClosure();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -382,6 +400,7 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
+    void FlushFrameTrace();
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
 
@@ -409,7 +428,10 @@ private:
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
-    void SyncSafeArea();
+    void SyncSafeArea(bool onKeyboard = false);
+
+    // only used for static form.
+    void UpdateFormLinkInfos();
 
     template<typename T>
     struct NodeCompare {
@@ -428,7 +450,7 @@ private:
         }
     };
 
-    UITaskScheduler taskScheduler_;
+    std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
@@ -446,7 +468,6 @@ private:
     std::list<TouchEvent> touchEvents_;
 
     RefPtr<FrameNode> rootNode_;
-    RefPtr<FrameNode> appBarNode_;
 
     std::set<RefPtr<FrameNode>> needRenderNode_;
 
@@ -467,22 +488,26 @@ private:
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
+    WeakPtr<FrameNode> dirtyDefaultFocusNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
     bool isTabJustTriggerOnKeyEvent_ = false;
+    bool isRootFocusNeedUpdate_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;
     bool canUseLongPredictTask_ = false;
+    bool isWindowSceneConsumed_ = false;
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
 
     std::list<FrameInfo> dumpFrameInfos_;
+    std::list<std::function<void()>> animationClosuresList_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

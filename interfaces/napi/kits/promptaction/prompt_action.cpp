@@ -15,24 +15,25 @@
 
 #include "prompt_action.h"
 
+#include <memory>
 #include <string>
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "napi/native_api.h"
-#include "napi/native_engine/native_value.h"
-#include "napi/native_node_api.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "bridge/js_frontend/engine/common/js_engine.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
-const uint32_t SHOW_DIALOG_BUTTON_NUM_MAX = 3;
-const uint32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
+const int32_t SHOW_DIALOG_BUTTON_NUM_MAX = -1;
+const int32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
+    DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
+    DialogAlignment::BOTTOM_END };
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -205,6 +206,9 @@ struct PromptAsyncContext {
     napi_value messageNApi = nullptr;
     napi_value buttonsNApi = nullptr;
     napi_value autoCancel = nullptr;
+    napi_value alignmentApi = nullptr;
+    napi_value offsetApi = nullptr;
+    napi_value maskRectApi = nullptr;
     napi_ref callbackSuccess = nullptr;
     napi_ref callbackCancel = nullptr;
     napi_ref callbackComplete = nullptr;
@@ -224,31 +228,31 @@ struct PromptAsyncContext {
     int32_t instanceId = -1;
 };
 
-void DeleteContextAndThrowError(napi_env env, PromptAsyncContext* context, const std::string& errorMessage)
+void DeleteContextAndThrowError(
+    napi_env env, std::shared_ptr<PromptAsyncContext>& context, const std::string& errorMessage)
 {
     if (!context) {
         // context is null, no need to delete
         return;
     }
-    delete context;
     NapiThrow(env, errorMessage, Framework::ERROR_CODE_PARAM_INVALID);
 }
 
-bool ParseButtons(napi_env env, PromptAsyncContext* context, uint32_t maxButtonNum)
+bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, int32_t maxButtonNum)
 {
     uint32_t buttonsLen = 0;
     napi_value buttonArray = nullptr;
     napi_value textNApi = nullptr;
     napi_value colorNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
-    uint32_t index = 0;
+    int32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
-    uint32_t buttonsLenInt = buttonsLen;
+    int32_t buttonsLenInt = buttonsLen;
     if (buttonsLenInt == 0) {
         DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
         return false;
     }
-    if (buttonsLenInt > maxButtonNum) {
+    if (buttonsLenInt > maxButtonNum && maxButtonNum != -1) {
         buttonsLenInt = maxButtonNum;
         LOGW("Supports 1 - %{public}u buttons", maxButtonNum);
     }
@@ -284,6 +288,96 @@ bool ParseButtons(napi_env env, PromptAsyncContext* context, uint32_t maxButtonN
     return true;
 }
 
+bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType == napi_number) {
+        double value = 0;
+        napi_get_value_double(env, napiValue, &value);
+        result.SetUnit(defaultUnit);
+        result.SetValue(value);
+        return true;
+    } else if (valueType == napi_string) {
+        std::string valueString;
+        if (!GetNapiString(env, napiValue, valueString, valueType)) {
+            return false;
+        }
+        result = StringUtils::StringToCalcDimension(valueString, false, defaultUnit);
+        return true;
+    } else if (valueType == napi_object) {
+        int32_t id = 0;
+        int32_t type = 0;
+        std::vector<std::string> params;
+        std::string parameterStr;
+        if (!ParseResourceParam(env, napiValue, id, type, params)) {
+            LOGE("can not parse resource info from inout params.");
+            return false;
+        }
+        if (!ParseString(id, type, params, parameterStr)) {
+            LOGE("can not get message from resource manager.");
+            return false;
+        }
+        result = StringUtils::StringToDimensionWithUnit(parameterStr);
+        return true;
+    }
+    return false;
+}
+
+void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
+                        std::optional<DialogAlignment>& alignment,
+                        std::optional<DimensionOffset>& offset,
+                        std::optional<DimensionRect>& maskRect)
+{
+    napi_valuetype valueType = napi_undefined;
+    // parse alignment
+    napi_typeof(env, asyncContext->alignmentApi, &valueType);
+    if (valueType == napi_number) {
+        int32_t num;
+        napi_get_value_int32(env, asyncContext->alignmentApi, &num);
+        if (num >= 0 && num < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            alignment = DIALOG_ALIGNMENT[num];
+        }
+    }
+
+    // parse offset
+    napi_typeof(env, asyncContext->offsetApi, &valueType);
+    if (valueType == napi_object) {
+        napi_value dxApi = nullptr;
+        napi_value dyApi = nullptr;
+        napi_get_named_property(env, asyncContext->offsetApi, "dx", &dxApi);
+        napi_get_named_property(env, asyncContext->offsetApi, "dy", &dyApi);
+        CalcDimension dx;
+        CalcDimension dy;
+        ParseNapiDimension(env, dx, dxApi, DimensionUnit::VP);
+        ParseNapiDimension(env, dy, dyApi, DimensionUnit::VP);
+        offset = DimensionOffset { dx, dy };
+    }
+
+    // parse maskRect
+    napi_typeof(env, asyncContext->maskRectApi, &valueType);
+    if (valueType == napi_object) {
+        napi_value xApi = nullptr;
+        napi_value yApi = nullptr;
+        napi_value widthApi = nullptr;
+        napi_value heightApi = nullptr;
+        napi_get_named_property(env, asyncContext->maskRectApi, "x", &xApi);
+        napi_get_named_property(env, asyncContext->maskRectApi, "y", &yApi);
+        napi_get_named_property(env, asyncContext->maskRectApi, "width", &widthApi);
+        napi_get_named_property(env, asyncContext->maskRectApi, "height", &heightApi);
+        CalcDimension x;
+        CalcDimension y;
+        CalcDimension width;
+        CalcDimension height;
+        ParseNapiDimension(env, x, xApi, DimensionUnit::VP);
+        ParseNapiDimension(env, y, yApi, DimensionUnit::VP);
+        ParseNapiDimension(env, width, widthApi, DimensionUnit::VP);
+        ParseNapiDimension(env, height, heightApi, DimensionUnit::VP);
+        DimensionOffset dimensionOffset = { x, y };
+        maskRect = DimensionRect { width, height, dimensionOffset};
+    }
+}
+
 napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
@@ -308,9 +402,14 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto asyncContext = new PromptAsyncContext();
+    auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = Container::CurrentId();
+
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
+    std::optional<DimensionRect> maskRect;
+
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -323,8 +422,12 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "message", &asyncContext->messageNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
             napi_get_named_property(env, argv[0], "autoCancel", &asyncContext->autoCancel);
+            napi_get_named_property(env, argv[0], "alignment", &asyncContext->alignmentApi);
+            napi_get_named_property(env, argv[0], "offset", &asyncContext->offsetApi);
+            napi_get_named_property(env, argv[0], "maskRect", &asyncContext->maskRectApi);
             GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString, valueType);
             GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString, valueType);
+            GetNapiDialogProps(env, asyncContext, alignment, offset, maskRect);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -380,8 +483,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
                 if (!asyncContext->valid) {
                     LOGE("%{public}s, module exported object is invalid.", __func__);
-                    delete asyncContext;
-                    asyncContext = nullptr;
                     return;
                 }
 
@@ -389,8 +490,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_open_handle_scope(asyncContext->env, &scope);
                 if (scope == nullptr) {
                     LOGE("%{public}s, open handle scope failed.", __func__);
-                    delete asyncContext;
-                    asyncContext = nullptr;
                     return;
                 }
 
@@ -430,29 +529,26 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
-                delete asyncContext;
-                asyncContext = nullptr;
             },
             TaskExecutor::TaskType::JS);
     };
 
-    napi_wrap(
-        env, thisVar, (void*)asyncContext,
-        [](napi_env env, void* data, void* hint) {
-            PromptAsyncContext* cbInfo = (PromptAsyncContext*)data;
-            if (cbInfo != nullptr) {
-                LOGE("%{public}s, thisVar JavaScript object is ready for garbage-collection.", __func__);
-                cbInfo->valid = false;
-            }
-        },
-        nullptr, nullptr);
+    PromptDialogAttr promptDialogAttr = {
+        .title = asyncContext->titleString,
+        .message = asyncContext->messageString,
+        .autoCancel = asyncContext->autoCancelBool,
+        .alignment = alignment,
+        .offset = offset,
+        .maskRect = maskRect,
+    };
+
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
-            delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
-                asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+            delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack),
+                                 asyncContext->callbacks);
         } else {
             LOGE("delegate is null");
             // throw internal error
@@ -476,14 +572,14 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             }
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-            asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+        SubwindowManager::GetInstance()->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack),
+                                                    asyncContext->callbacks);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
-        delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
-            asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+            delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack),
+                                 asyncContext->callbacks);
     } else {
         LOGE("delegate is null");
         // throw internal error
@@ -534,8 +630,9 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto* asyncContext = new PromptAsyncContext();
+    auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
+    asyncContext->instanceId = Container::CurrentId();
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -603,8 +700,6 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
                 if (!asyncContext->valid) {
                     LOGE("%{public}s, module exported object is invalid.", __func__);
-                    delete asyncContext;
-                    asyncContext = nullptr;
                     return;
                 }
 
@@ -612,8 +707,6 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_open_handle_scope(asyncContext->env, &scope);
                 if (scope == nullptr) {
                     LOGE("%{public}s, open handle scope failed.", __func__);
-                    delete asyncContext;
-                    asyncContext = nullptr;
                     return;
                 }
 
@@ -653,22 +746,10 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
-                delete asyncContext;
-                asyncContext = nullptr;
             },
             TaskExecutor::TaskType::JS);
     };
 
-    napi_wrap(
-        env, thisVar, (void*)asyncContext,
-        [](napi_env env, void* data, void* hint) {
-            auto* cbInfo = static_cast<PromptAsyncContext*>(data);
-            if (cbInfo != nullptr) {
-                LOGE("%{public}s, thisVar JavaScript object is ready for garbage-collection.", __func__);
-                cbInfo->valid = false;
-            }
-        },
-        nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegate();

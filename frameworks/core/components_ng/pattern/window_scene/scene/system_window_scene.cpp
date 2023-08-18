@@ -23,19 +23,53 @@ namespace OHOS::Ace::NG {
 void SystemWindowScene::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(session_);
-    auto sessionInfo = session_->GetSessionInfo();
-    auto name = sessionInfo.bundleName_;
-    auto pos = name.find_last_of('.');
-    name = (pos == std::string::npos) ? name : name.substr(pos + 1); // skip '.'
-
-    struct Rosen::RSSurfaceNodeConfig rsSurfaceNodeConfig;
-    rsSurfaceNodeConfig.SurfaceNodeName = name;
-    auto surfaceNode = Rosen::RSSurfaceNode::Create(rsSurfaceNodeConfig, Rosen::RSSurfaceNodeType::SELF_DRAWING_NODE);
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    session_->SetUINodeId(host->GetAccessibilityId());
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
+
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    auto touchCallback = [this](TouchEventInfo& info) {
+        const auto pointerEvent = info.GetPointerEvent();
+        CHECK_NULL_VOID(session_);
+        CHECK_NULL_VOID(pointerEvent);
+        session_->TransferPointerEvent(pointerEvent);
+    };
+    gestureHub->SetTouchEvent(std::move(touchCallback));
+
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    auto mouseCallback = [this](MouseInfo& info) {
+        const auto pointerEvent = info.GetPointerEvent();
+        CHECK_NULL_VOID(session_);
+        CHECK_NULL_VOID(pointerEvent);
+        session_->TransferPointerEvent(pointerEvent);
+    };
+    mouseEventHub->SetMouseEvent(std::move(mouseCallback));
+}
+
+bool SystemWindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    CHECK_NULL_RETURN(dirty, false);
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto frameRect = geometryNode->GetFrameRect();
+    Rosen::WSRect windowRect {
+        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
+        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
+        .width_ = std::round(frameRect.Width()),
+        .height_ = std::round(frameRect.Height())
+    };
+
+    CHECK_NULL_RETURN(session_, false);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    return false;
 }
 } // namespace OHOS::Ace::NG

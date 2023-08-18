@@ -127,10 +127,12 @@ void XComponentPattern::OnAttachToFrameNode()
         renderContext->SetClipToFrame(true);
         renderContext->SetClipToBounds(true);
         renderSurface_ = RenderSurface::Create();
-        scopeId_ = Container::CurrentId();
+        instanceId_ = Container::CurrentId();
+        renderSurface_->SetInstanceId(instanceId_);
         if (type_ == XComponentType::SURFACE) {
             renderContextForSurface_ = RenderContext::Create();
-            static RenderContext::ContextParam param = { RenderContext::ContextType::SURFACE, id_ + "Surface" };
+            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
+                id_ + "Surface" };
             renderContextForSurface_->InitContext(false, param);
             renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
             if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -348,26 +350,22 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 
 void XComponentPattern::XComponentSizeInit()
 {
-    ContainerScope scope(scopeId_);
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
-    platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto xcId = pattern->GetId();
-        auto eventHub = host->GetEventHub<XComponentEventHub>();
-        eventHub->FireSurfaceInitEvent(xcId, host->GetId());
-        eventHub->FireLoadEvent(xcId);
-    });
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireSurfaceInitEvent(id_, host->GetId());
+    eventHub->FireLoadEvent(id_);
 }
 
 void XComponentPattern::XComponentSizeChange(float textureWidth, float textureHeight)
 {
-    ContainerScope scope(scopeId_);
+    ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto viewScale = context->GetViewScale();
@@ -530,6 +528,9 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
 #endif
     SetTouchPoint(info.GetTouches(), timeStamp, touchType);
 
+    if (nativeXComponent_ && nativeXComponentImpl_) {
+        nativeXComponentImpl_->SetHistoricalPoint(SetHistoryPoint(info.GetHistory()));
+    }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 }
 
@@ -649,11 +650,35 @@ void XComponentPattern::SetTouchPoint(
     }
 }
 
+std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPoint(
+    const std::list<TouchLocationInfo>& touchInfoList)
+{
+    std::vector<OH_NativeXComponent_HistoricalPoint> historicalPoints;
+    for (auto&& item : touchInfoList) {
+        OH_NativeXComponent_HistoricalPoint point;
+        point.id = item.GetFingerId();
+        point.x = item.GetLocalLocation().GetX();
+        point.y = item.GetLocalLocation().GetY();
+        point.screenX = item.GetScreenLocation().GetX();
+        point.screenY = item.GetScreenLocation().GetY();
+        point.type = static_cast<OH_NativeXComponent_TouchEventType>(item.GetTouchType());
+        point.size = item.GetSize();
+        point.force = item.GetForce();
+        point.timeStamp = item.GetTimeStamp().time_since_epoch().count();
+        point.titlX = item.GetTiltX().value_or(0.0f);
+        point.titlY = item.GetTiltY().value_or(0.0f);
+        point.sourceTool = static_cast<OH_NativeXComponent_TouchEvent_SourceTool>(item.GetSourceTool());
+
+        historicalPoints.push_back(point);
+    }
+    return historicalPoints;
+}
+
 ExternalEvent XComponentPattern::CreateExternalEvent()
 {
-    return [weak = AceType::WeakClaim(this), scopeId = scopeId_](
+    return [weak = AceType::WeakClaim(this), instanceId = instanceId_](
                const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
-        ContainerScope scope(scopeId);
+        ContainerScope scope(instanceId);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());

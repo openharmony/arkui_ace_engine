@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+uint64_t UITaskScheduler::frameId_ = 0;
 
 UITaskScheduler::~UITaskScheduler() = default;
 
@@ -31,7 +32,7 @@ void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    dirtyLayoutNodes_[dirty->GetPageId()].emplace(dirty);
+    dirtyLayoutNodes_.emplace_back(dirty);
 }
 
 void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -44,33 +45,20 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
-static inline bool Cmp(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB)
-{
-    if (!nodeA || !nodeB) {
-        return false;
-    }
-    return nodeA->GetLayoutPriority() > nodeB->GetLayoutPriority();
-}
-
 void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
-    auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
-    std::vector<RefPtr<FrameNode>> orderedNodes;
-    for (auto&& pageNodes : dirtyLayoutNodes) {
-        for (auto&& node : pageNodes.second) {
-            if (!node || node->IsInDestroying()) {
-                continue;
-            }
-            orderedNodes.emplace_back(node);
-        }
+    if (dirtyLayoutNodes_.empty()) {
+        return;
     }
-    std::sort(orderedNodes.begin(), orderedNodes.end(), Cmp);
+    isLayouting_ = true;
+    auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
+    PageDirtySet dirtyLayoutNodesSet(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
 
     // Priority task creation
     int64_t time = 0;
-    for (auto& node : orderedNodes) {
+    for (auto&& node : dirtyLayoutNodesSet) {
         // need to check the node is destroying or not before CreateLayoutTask
         if (!node || node->IsInDestroying()) {
             continue;
@@ -81,14 +69,15 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
                 (*task)();
                 time = GetSysTimestamp() - time;
-                if (frameInfo_ != nullptr) {
-                    frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
-                }
             } else {
                 LOGW("need to use multithread feature");
             }
         }
+        if (frameInfo_ != nullptr) {
+            frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
+        }
     }
+    isLayouting_ = false;
 }
 
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
@@ -130,7 +119,13 @@ bool UITaskScheduler::NeedAdditionalLayout()
 {
     bool ret = false;
     ElementRegister::GetInstance()->ReSyncGeometryTransition();
-    for (auto&& pageNodes : dirtyLayoutNodes_) {
+
+    RootDirtyMap dirtyLayoutNodesMap;
+    for (auto&& dirty : dirtyLayoutNodes_) {
+        dirtyLayoutNodesMap[dirty->GetPageId()].emplace(dirty);
+    }
+
+    for (auto&& pageNodes : dirtyLayoutNodesMap) {
         for (auto&& node : pageNodes.second) {
             if (!node || !node->GetLayoutProperty()) {
                 continue;
@@ -193,6 +188,22 @@ void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)
 void UITaskScheduler::FlushAfterLayoutTask()
 {
     decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void UITaskScheduler::AddAfterRenderTask(std::function<void()>&& task)
+{
+    afterRenderTasks_.emplace_back(std::move(task));
+}
+
+void UITaskScheduler::FlushAfterRenderTask()
+{
+    ACE_SCOPED_TRACE("UITaskScheduler::FlushAfterRenderTask");
+    decltype(afterRenderTasks_) tasks(std::move(afterRenderTasks_));
     for (const auto& task : tasks) {
         if (task) {
             task();

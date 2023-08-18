@@ -23,32 +23,87 @@ WindowEventProcess::WindowEventProcess() {}
 
 WindowEventProcess::~WindowEventProcess() {}
 
-void WindowEventProcess::ProcessWindowEvent(const RefPtr<WindowNode>& windowNode,
-    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, bool isDrag)
+void WindowEventProcess::ProcessWindowMouseEvent(const RefPtr<WindowNode>& windowNode,
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_VOID(windowNode);
     CHECK_NULL_VOID(pointerEvent);
     std::shared_ptr<MMI::PointerEvent> enterEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
-    auto lastWindowNode = lastWeakWindowNode_.Upgrade();
-    if ((!isDrag) && (lastWindowNode == nullptr)) {
-        LOGD("Enter window:%{public}d first", windowNode->GetId());
+    auto lastWindowNode = lastWindowNode_.Upgrade();
+
+    int32_t action = pointerEvent->GetPointerAction();
+    if (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
+        lastWindowNode_ = windowNode;
+        lastPointEvent_ = enterEvent;
+        return;
+    }
+    if (lastWindowNode == nullptr) {
         enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
         DispatchPointerEvent(windowNode, enterEvent);
-    } else if (windowNode->GetId() != lastWindowNode->GetId()) {
+        lastWindowNode_ = windowNode;
+        lastPointEvent_ = enterEvent;
+        return;
+    }
+
+    if (windowNode->GetId() != lastWindowNode->GetId()) {
         LOGD("Window switching, enter window:%{public}d, leave window:%{public}d",
             windowNode->GetId(), lastWindowNode->GetId());
-        int32_t dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW :
-            MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW;
-        lastPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
-        DispatchPointerEvent(lastWindowNode, lastPointEvent_);
+        if (lastPointEvent_ != nullptr) {
+            lastPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
+            lastPointEvent_->SetId(pointerEvent->GetId());
+            DispatchPointerEvent(lastWindowNode, lastPointEvent_);
 
-        dispatchAction = isDrag ? MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW :
-            MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW;
-        enterEvent->SetPointerAction(dispatchAction);
-        DispatchPointerEvent(windowNode, enterEvent);
+            enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
+            DispatchPointerEvent(windowNode, enterEvent);
+        }
     }
-    lastWeakWindowNode_ = windowNode;
+    lastWindowNode_ = windowNode;
     lastPointEvent_ = enterEvent;
+}
+
+void WindowEventProcess::ProcessWindowDragEvent(const RefPtr<WindowNode>& windowNode,
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(windowNode);
+    CHECK_NULL_VOID(pointerEvent);
+    std::shared_ptr<MMI::PointerEvent> event = std::make_shared<MMI::PointerEvent>(*pointerEvent);
+    auto lastWindowNode = lastDragWindowNode_.Upgrade();
+    if ((lastWindowNode != nullptr) && (windowNode->GetId() != lastWindowNode->GetId())) {
+        LOGD("Window switching, pull in window:%{public}d, pull out window:%{public}d",
+            windowNode->GetId(), lastWindowNode->GetId());
+        if (lastDragPointEvent_ != nullptr) {
+            lastDragPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
+            lastDragPointEvent_->SetId(pointerEvent->GetId());
+            DispatchPointerEvent(lastWindowNode, lastDragPointEvent_);
+
+            event->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW);
+            DispatchPointerEvent(windowNode, event);
+            if (event->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+                UpdateWindowMouseRecord(windowNode, event);
+            }
+        }
+    }
+    lastDragWindowNode_ = windowNode;
+    lastDragPointEvent_ = event;
+}
+
+void WindowEventProcess::CleanWindowMouseRecord()
+{
+    lastWindowNode_ = nullptr;
+    lastPointEvent_ = nullptr;
+}
+
+void WindowEventProcess::CleanWindowDragEvent()
+{
+    lastDragWindowNode_ = nullptr;
+    lastDragPointEvent_ = nullptr;
+}
+
+void WindowEventProcess::UpdateWindowMouseRecord(const RefPtr<WindowNode>& windowNode,
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    lastWindowNode_ = windowNode;
+    lastPointEvent_ = pointerEvent;
 }
 
 void WindowEventProcess::DispatchPointerEvent(const RefPtr<WindowNode>& windowNode,

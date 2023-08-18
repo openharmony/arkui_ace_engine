@@ -79,11 +79,11 @@ std::shared_ptr<RSShaderEffect> RosenRenderLinearTrack::BlendSkShader(
     const RSPoint gradientPoints[2] = { { pts.GetX() - scanLeftOffset, pts.GetY() },
         { pts.GetX() + scanRightOffset, pts.GetY() } };
 
-    backgroundShader = RSShaderEffect::CreateColorShader(color);
-    scanShader = RSShaderEffect::CreateLinearGradient(
+    backgroundShader = RSRecordingShaderEffect::CreateColorShader(color);
+    scanShader = RSRecordingShaderEffect::CreateLinearGradient(
         gradientPoints[0], gradientPoints[1], scanColors, scanPos, RSTileMode::DECAL);
     if (useAnimator) {
-        blendShader = RSShaderEffect::CreateBlendShader(
+        blendShader = RSRecordingShaderEffect::CreateBlendShader(
             *backgroundShader, *scanShader, RSBlendMode::SRC_OVER);
     } else {
         blendShader = backgroundShader;
@@ -183,7 +183,7 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
     }
     // Draw selected region
     if (!NearEqual(GetTotalRatio(), 0.0)) {
-        RSPen selectPen;
+        RSBrush selectPen;
         selectPen.SetAntiAlias(true);
         double startRect = 0.0;
         double endRect = 0.0;
@@ -196,9 +196,9 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
                 trackHeight * HALF, trackHeight * HALF);
             selectPen.SetShaderEffect(BlendSkShader(
                 RSPoint(offset.GetX(), startRect), GetSelectColor().GetValue(), playAnimation_));
-            canvas->AttachPen(selectPen);
+            canvas->AttachBrush(selectPen);
             canvas->DrawRoundRect(selectRect);
-            canvas->DetachPen();
+            canvas->DetachBrush();
             return;
         }
         if ((leftToRight_ && !isReverse_) || (!leftToRight_ && isReverse_)) {
@@ -214,9 +214,9 @@ void RosenRenderLinearTrack::Paint(RenderContext& context, const Offset& offset)
         selectPen.SetShaderEffect(
             BlendSkShader(RSPoint(startRect + scanHighLightValue_ * trackLength, offset.GetY()),
                 GetSelectColor().GetValue(), playAnimation_));
-        canvas->AttachPen(selectPen);
+        canvas->AttachBrush(selectPen);
         canvas->DrawRoundRect(selectRect);
-        canvas->DetachPen();
+        canvas->DetachBrush();
     }
 #endif
 }
@@ -300,7 +300,7 @@ void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offs
         pen.SetColor(color.GetValue());
         pen.SetWidth(size);
         pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-        RSPath path;
+        RSRecordingPath path;
         while (LessOrEqual(current, offset.GetY() + trackLength)) {
             double dyOffset;
             if (GetSliderMode() == SliderMode::OUTSET) {
@@ -323,7 +323,7 @@ void RosenRenderLinearTrack::PaintSliderSteps(RenderContext& context, const Offs
         pen.SetColor(color.GetValue());
         pen.SetWidth(size);
         pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-        RSPath path;
+        RSRecordingPath path;
         while (LessOrEqual(current, offset.GetY() + trackLength)) {
             double dxOffset;
             if (GetSliderMode() == SliderMode::OUTSET) {

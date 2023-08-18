@@ -21,8 +21,6 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
-#else
-#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "base/memory/ace_type.h"
@@ -30,6 +28,9 @@
 #include "core/animation/svg_animate.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
 #include "core/components_ng/render/drawing_forward.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/components_ng/svg/svg_context.h"
 
 namespace OHOS::Ace::NG {
@@ -142,7 +143,7 @@ protected:
     void AnimateOnAttribute(const RefPtr<SvgAnimation>& animate, const T& originalValue);
     // animate a transformation attribute
     void AnimateTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
-    void AnimateValueTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
+    void AnimateFromToTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
     void AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
 
     // update svg attribute in animation

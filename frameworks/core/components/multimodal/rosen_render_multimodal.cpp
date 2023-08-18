@@ -92,10 +92,10 @@ void RosenRenderMultimodal::Paint(RenderContext& context, const Offset& offset)
     canvas->DetachBrush();
 #endif
 
+#ifndef USE_ROSEN_DRAWING
     auto leftOffset = paragraph_->GetLongestLine() / 2;
     auto centerX = offset.GetX() + width / 2;
     auto centerY = offset.GetY() + height / 2;
-#ifndef USE_ROSEN_DRAWING
     paragraph_->Paint(canvas, centerX - leftOffset, centerY - paragraph_->GetHeight() / 2);
 #else
     LOGE("Drawing is not supported");

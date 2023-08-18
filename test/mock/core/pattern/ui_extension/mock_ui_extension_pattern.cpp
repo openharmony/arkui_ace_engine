@@ -24,6 +24,8 @@ void UIExtensionPattern::OnConnect() {}
 
 void UIExtensionPattern::OnDisconnect() {}
 
+void UIExtensionPattern::OnExtensionDied() {}
+
 void UIExtensionPattern::OnWindowShow() {}
 
 void UIExtensionPattern::OnWindowHide() {}
@@ -47,4 +49,6 @@ FocusPattern UIExtensionPattern::GetFocusPattern() const
 {
     return { FocusType::NODE, true, FocusStyleType::NONE };
 }
+
+void UIExtensionPattern::OnVisibleChange(bool visible) {}
 } // namespace OHOS::Ace::NG

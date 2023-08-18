@@ -359,10 +359,18 @@ enum class WindowMode : uint32_t {
     WINDOW_MODE_PIP
 };
 
+enum class WindowType : uint32_t {
+    WINDOW_TYPE_UNDEFINED = 0,
+    WINDOW_TYPE_APP_BASE = 1,
+    WINDOW_TYPE_APP_END = 1003,
+    WINDOW_TYPE_FLOAT = 2106,
+};
+
 enum class PanelType {
     MINI_BAR,
     FOLDABLE_BAR,
     TEMP_DISPLAY,
+    CUSTOM,
 };
 
 enum class PanelMode {
@@ -370,6 +378,7 @@ enum class PanelMode {
     HALF,
     FULL,
     AUTO,
+    CUSTOM,
 };
 
 enum class ColorScheme : int32_t {

@@ -22,4 +22,13 @@ bool ScrollBar::NeedPaint() const
 {
     return isScrollable_;
 }
+
+void ScrollBar::OnCollectTouchTarget(
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+{}
+
+bool ScrollBar::InBarTouchRegion(const Point& point) const
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

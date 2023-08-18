@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "macros.h"
+#include "modal_ui_extension_callbacks.h"
 #include "serializeable_object.h"
 #include "viewport_config.h"
 
@@ -80,6 +81,10 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
+
+    // UIExtensionAbility initialize for focusWindow ID
+    virtual void Initialize(
+        OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowID) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -110,9 +115,6 @@ public:
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
 
-    // focus window id
-    virtual void SetFocusWindowId(uint32_t focusWindowId) = 0;
-
     virtual void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 
     // Set UIContent callback for custom window animation
@@ -137,8 +139,9 @@ public:
     virtual void ReloadForm(const std::string& url) {};
     virtual void OnFormSurfaceChange(float width, float height) {}
 
-    virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) = 0;
-    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
+    virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
+    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
+    virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) {};
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
@@ -162,7 +165,23 @@ public:
     virtual NativeValue* GetUIContext()
     {
         return nullptr;
-    };
+    }
+
+    /**
+     * @description: Create a full-window modal UIExtensionComponent.
+     * @param want Indicates the want of UIExtensionAbility.
+     * @param callbacks Indicates the UIExtensionComponent callbacks.
+     * @return The return value is the ID of the session held by the UIExtensionComponent
+     * if creation is not successful, it returns 0 by default.
+     */
+    virtual int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks) = 0;
+
+    /**
+     * @description: Close the full-window modal.
+     * @param sessionId Indicates the sessionId of UIExtensionAbility.
+     * If the sessionId is 0, refuse to close
+     */
+    virtual void CloseModalUIExtension(int32_t sessionId) = 0;
 };
 
 } // namespace OHOS::Ace

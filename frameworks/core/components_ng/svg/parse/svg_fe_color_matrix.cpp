@@ -63,13 +63,19 @@ void SvgFeColorMatrix::OnInitStyle()
     }
 }
 
+#ifndef USE_ROSEN_DRAWING
 void SvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
     ColorInterpolationType& currentColor) const
+#else
+void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
+    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+#endif
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
     CHECK_NULL_VOID_NOLOG(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
 
+#ifndef USE_ROSEN_DRAWING
 #ifdef USE_SYSTEM_SKIA
     auto colorFilter = SkColorFilter::MakeMatrixFilterRowMajor255(matrix_);
 #else
@@ -80,6 +86,14 @@ void SvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const 
     imageFilter = SkColorFilterImageFilter::Make(colorFilter, imageFilter);
 #else
     imageFilter = SkImageFilters::ColorFilter(colorFilter, imageFilter);
+#endif
+#else
+    RSColorMatrix colorMatrix;
+    colorMatrix.SetArray(matrix_);
+    auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix);
+    CHECK_NULL_VOID_NOLOG(colorFilter);
+
+    imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
 #endif
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
 }

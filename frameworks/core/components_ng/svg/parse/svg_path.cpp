@@ -44,7 +44,7 @@ SkPath SvgPath::AsPath(const Size& /* viewPort */) const
     auto pathD = declaration->GetD();
     if (!pathD.empty()) {
         SkParsePath::FromSVGString(pathD.c_str(), &out);
-        if (declaration->GetClipState().IsEvenodd()) {
+        if (declaration->GetFillState().IsEvenodd()) {
 #ifndef NEW_SKIA
             out.setFillType(SkPath::FillType::kEvenOdd_FillType);
 #else
@@ -65,7 +65,7 @@ RSRecordingPath SvgPath::AsPath(const Size& /* viewPort */) const
     if (!pathD.empty()) {
         out.BuildFromSVGString(pathD);
         if (declaration->GetClipState().IsEvenodd()) {
-            out.SetFillStyle(RSPathFillType::EVEN_ODD);
+            out.SetFillStyle(RSPathFillType::EVENTODD);
         }
     }
     return out;

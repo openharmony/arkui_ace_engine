@@ -85,6 +85,7 @@ struct ProgressDate {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableRingScanEffect, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableLinearScanEffect, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableShowText, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(StrokeRadius, Dimension);
 };
 
 struct ProgressStyle {

@@ -49,25 +49,86 @@ public:
     {
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
-    bool GetspringEffect()
+
+    void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
     {
-        return springEffect_;
+        titleBarMenuItems_ = menuItems;
     }
+
+    const std::vector<NG::BarItem>& GetTitleBarMenuItems() const
+    {
+        return titleBarMenuItems_;
+    }
+
+    void SetToolBarMenuItems(const std::vector<NG::BarItem>& menuItems)
+    {
+        toolBarMenuItems_ = menuItems;
+    }
+
+    const std::vector<NG::BarItem>& GetToolBarMenuItems() const
+    {
+        return toolBarMenuItems_;
+    }
+
+    int32_t GetMenuNodeId() const
+    {
+        return menuNodeId_.value();
+    }
+
+    int32_t GetLandscapeMenuNodeId()
+    {
+        if (!landscapeMenuNodeId_.has_value()) {
+            landscapeMenuNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return landscapeMenuNodeId_.value();
+    }
+
+    void SetMenuNodeId(const int32_t menuNodeId)
+    {
+        menuNodeId_ = menuNodeId;
+    }
+
+    void SetLandscapeMenuNodeId(const int32_t landscapeMenuNodeId)
+    {
+        landscapeMenuNodeId_ = landscapeMenuNodeId;
+    }
+
+    bool HasMenuNodeId() const
+    {
+        return menuNodeId_.has_value();
+    }
+
+    bool HasLandscapeMenuNodeId() const
+    {
+        return landscapeMenuNodeId_.has_value();
+    }
+    
+    void OnCoordScrollStart();
+    void OnCoordScrollUpdate(float offset);
+    void OnCoordScrollEnd();
+    bool GetDraggedDown();
+
+protected:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
 private:
+    void RegistOritationListener();
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
-    void InitCoordinationEvent();
-    void OnCoordScrollStart();
-    void OnCoordScrollUpdate(float offset);
-    void OnCoordScrollEnd();
     RefPtr<FrameNode> FindScrollableChild();
     float offset_ = 0.0f;
-    bool springEffect_ = false;
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
+    bool isOritationListenerRegisted_ = false;
+    bool isHideToolbar_ = false;
+    std::vector<NG::BarItem> titleBarMenuItems_;
+    std::vector<NG::BarItem> toolBarMenuItems_;
+    std::optional<int32_t> menuNodeId_;
+    std::optional<int32_t> landscapeMenuNodeId_;
 };
 
 } // namespace OHOS::Ace::NG

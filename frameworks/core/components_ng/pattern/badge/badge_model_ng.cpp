@@ -57,6 +57,21 @@ void BadgeModelNG::Create(BadgeParameters& badgeParameters)
     } else {
         layoutProperty->UpdateBadgePosition(badgeTheme->GetBadgePosition());
     }
+    if (badgeParameters.badgePositionX.has_value()) {
+        layoutProperty->UpdateBadgePositionX(badgeParameters.badgePositionX.value());
+    } else {
+        layoutProperty->UpdateBadgePositionX(badgeTheme->GetBadgePositionX());
+    }
+    if (badgeParameters.badgePositionY.has_value()) {
+        layoutProperty->UpdateBadgePositionY(badgeParameters.badgePositionY.value());
+    } else {
+        layoutProperty->UpdateBadgePositionY(badgeTheme->GetBadgePositionY());
+    }
+    if (badgeParameters.isPositionXy.has_value()) {
+        layoutProperty->UpdateIsPositionXy(badgeParameters.isPositionXy.value());
+    } else {
+        layoutProperty->UpdateIsPositionXy(badgeTheme->GetIsPositionXy());
+    }
     UpdateBadgeStyle(badgeParameters, frameNode);
 }
 
@@ -79,8 +94,6 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
     if (badgeParameters.badgeFontSize.has_value() &&
         GreatOrEqual(badgeParameters.badgeFontSize.value().ConvertToPx(), 0)) {
         layoutProperty->UpdateBadgeFontSize(badgeParameters.badgeFontSize.value());
-    } else {
-        layoutProperty->UpdateBadgeFontSize(badgeTheme->GetBadgeFontSize());
     }
     if (badgeParameters.badgeCircleSize.has_value()) {
         layoutProperty->UpdateBadgeCircleSize(badgeParameters.badgeCircleSize.value());

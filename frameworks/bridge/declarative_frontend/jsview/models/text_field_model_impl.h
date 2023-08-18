@@ -57,7 +57,7 @@ public:
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
     void SetOnChange(std::function<void(const std::string&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
-    void SetOnScroll(std::function<void(float, float)>&& func) override {};
+    void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
@@ -76,6 +76,7 @@ public:
     void SetOnClick(std::function<void(const ClickInfo&)>&& func) override;
     void SetFocusableAndFocusNode() override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override {};
+    void SetCustomKeyboard(const std::function<void ()> &&buildFunc) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

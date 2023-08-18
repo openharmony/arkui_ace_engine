@@ -182,6 +182,7 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
 {
     LOGD("DeclarativeFrontend initialize begin.");
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeFrontendDelegate(taskExecutor);
 
@@ -397,7 +398,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         if (!jsEngine) {
             return;
         }
-        LOGI("DeclarativeFrontend jsEngine layoutInspectorCallback");
         jsEngine->LayoutInspectorCallback(componentId);
     };
 
@@ -407,7 +407,6 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         if (!jsEngine) {
             return;
         }
-        LOGI("DeclarativeFrontend jsEngine drawInspectorCallback");
         jsEngine->DrawInspectorCallback(componentId);
     };
 

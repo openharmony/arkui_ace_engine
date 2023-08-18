@@ -196,7 +196,7 @@ public:
         strokeState_.SetMiterLimit(limit);
     }
 
-    const LineDashParam& GetLineDash() const
+    LineDashParam GetLineDash() const
     {
         return strokeState_.GetLineDash();
     }
@@ -409,14 +409,14 @@ protected:
     virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
 #ifndef USE_ROSEN_DRAWING
-    virtual sk_sp<SkImage> GetImage(const std::string& src) = 0;
+    sk_sp<SkImage> GetImage(const std::string& src);
 #else
-    virtual std::shared_ptr<RSImage> GetImage(const std::string& src) = 0;
+    std::shared_ptr<RSImage> GetImage(const std::string& src);
 #endif
     void DrawSvgImage(PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage);
 #ifndef USE_ROSEN_DRAWING
     virtual SkCanvas* GetRawPtrOfSkCanvas() = 0;
-    virtual void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) = 0;
+    virtual void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint) = 0;
 #else
     virtual RSCanvas* GetRawPtrOfRSCanvas() = 0;
     virtual void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas) = 0;
@@ -479,9 +479,14 @@ protected:
     FailedCallback failedCallback_;
 
     RefPtr<RenderingContext2DModifier> contentModifier_;
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<OHOS::Rosen::RSRecordingCanvas> rsRecordingCanvas_;
+#else
+    std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
+#endif
 
     SizeF lastLayoutSize_;
+    RefPtr<ImageCache> imageCache_;
 };
 } // namespace OHOS::Ace::NG
 
