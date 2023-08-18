@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
@@ -62,11 +63,16 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
-    auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+    if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
+        auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+        result->SetCanOverScroll(CanOverScroll(scrollState_));
+        return result;
 
-    result->SetCanOverScroll(CanOverScroll(scrollState_));
-
-    return result;
+    } else {
+        auto result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+        result->SetCanOverScroll(CanOverScroll(scrollState_));
+        return result;
+    }
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()

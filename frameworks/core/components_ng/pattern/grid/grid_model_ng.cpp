@@ -55,6 +55,11 @@ void GridModelNG::Pop()
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
 
+void GridModelNG::SetLayoutOptions(GridLayoutOptions options)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutOptions, options);
+}
+
 void GridModelNG::SetColumnsTemplate(const std::string& value)
 {
     if (value.empty()) {
