@@ -881,8 +881,8 @@ void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHO
     auto container = Platform::AceContainer::GetContainer((abilityId_));
     CHECK_NULL_VOID_NOLOG(container);
     auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
-    CHECK_NULL_VOID_NOLOG(pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
+    CHECK_NULL_VOID_NOLOG(
+        pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
     LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
          "width:%{public}d, height%{public}d",
         type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,

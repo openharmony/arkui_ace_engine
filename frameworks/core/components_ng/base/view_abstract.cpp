@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/image/image_source_info.h"
@@ -1510,6 +1511,17 @@ void ViewAbstract::SetBorderImage(const RefPtr<BorderImage>& borderImage)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderImage, borderImage);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline && pipeline->GetMinPlatformVersion() >= 11) {
+        BorderWidthProperty borderWidth;
+        borderWidth.leftDimen = borderImage->GetBorderImageEdge(BorderImageDirection::LEFT).GetBorderImageWidth();
+        borderWidth.rightDimen = borderImage->GetBorderImageEdge(BorderImageDirection::RIGHT).GetBorderImageWidth();
+        borderWidth.topDimen = borderImage->GetBorderImageEdge(BorderImageDirection::TOP).GetBorderImageWidth();
+        borderWidth.bottomDimen = borderImage->GetBorderImageEdge(BorderImageDirection::BOTTOM).GetBorderImageWidth();
+
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
+    }
 }
 
 void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
