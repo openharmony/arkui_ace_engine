@@ -313,6 +313,7 @@ protected:
     LayoutConstraintF childLayoutConstraint_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
+    void CheckJumpToIndex();
 
     void CalculateEstimateOffset(ScrollAlign align);
 
