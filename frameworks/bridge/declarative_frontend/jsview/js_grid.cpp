@@ -94,6 +94,10 @@ void SetGridLayoutOptions(const JSCallbackInfo& info)
     auto value = obj->GetProperty("regularSize");
     ParseGridItemSize(value, option.regularSize);
 
+    // only support regularSize(1, 1)
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+
     auto indexes = obj->GetProperty("irregularIndexes");
     if (indexes->IsArray()) {
         JSRef<JSArray> array = JSRef<JSArray>::Cast(indexes);

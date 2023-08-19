@@ -92,23 +92,68 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
     if (options.irregularIndexes.empty()) {
         return std::make_pair(itemIndex % crossCount_, 1);
     }
+
+    auto firstIrregularIndex = *(options.irregularIndexes.begin());
+    if (itemIndex < firstIrregularIndex) {
+        return std::make_pair(itemIndex % crossCount_, 1);
+    }
+
     // without function
-    if (options.irregularIndexes.find(itemIndex) != options.irregularIndexes.end()) {
-        return std::make_pair(0, crossCount_);
-    }
-    int32_t crossStart = -1;
-    auto iter = std::find_if(options.irregularIndexes.begin(), options.irregularIndexes.end(),
-        [itemIndex](int32_t index) { return index > itemIndex; });
-    if (iter == options.irregularIndexes.end()) {
-        crossStart = (itemIndex - (*(options.irregularIndexes.rbegin()) + 1)) % crossCount_;
-    } else {
-        if (iter != options.irregularIndexes.begin()) {
-            crossStart = (itemIndex - (*(--iter) + 1)) % crossCount_;
-        } else {
-            crossStart = itemIndex % crossCount_;
+    if (!options.getSizeByIndex) {
+        if (options.irregularIndexes.find(itemIndex) != options.irregularIndexes.end()) {
+            return std::make_pair(0, crossCount_);
         }
+        int32_t crossStart = -1;
+        auto iter = std::find_if(options.irregularIndexes.begin(), options.irregularIndexes.end(),
+            [itemIndex](int32_t index) { return index > itemIndex; });
+        if (iter == options.irregularIndexes.end()) {
+            crossStart = (itemIndex - (*(options.irregularIndexes.rbegin()) + 1)) % crossCount_;
+        } else {
+            if (iter != options.irregularIndexes.begin()) {
+                crossStart = (itemIndex - (*(--iter) + 1)) % crossCount_;
+            } else {
+                crossStart = itemIndex % crossCount_;
+            }
+        }
+        return std::make_pair(crossStart, 1);
     }
-    return std::make_pair(crossStart, 1);
+
+    return GetCrossStartAndSpanWithUserFunction(itemIndex, options, firstIrregularIndex);
+}
+
+std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartAndSpanWithUserFunction(
+    int32_t itemIndex, const GridLayoutOptions& options, int32_t firstIrregularIndex)
+{
+    auto sum = firstIrregularIndex;
+    auto lastIndex = firstIrregularIndex;
+    for (auto index : options.irregularIndexes) {
+        if (index >= itemIndex) {
+            break;
+        }
+
+        auto crossSpan = options.getSizeByIndex(index).GetCorssSize(gridLayoutInfo_.axis_);
+        if (crossSpan > crossCount_) {
+            sum -= 1;
+            continue;
+        }
+        auto irregularStart = (sum + index - lastIndex) % crossCount_;
+        // put it into next line
+        if (irregularStart + crossSpan > crossCount_) {
+            sum += (crossCount_ - irregularStart);
+        }
+        sum += (index - lastIndex - 1);
+        sum += crossSpan;
+        lastIndex = index;
+    }
+    sum += (itemIndex - lastIndex);
+    auto crossStart = sum % crossCount_;
+    auto crossSpan = options.irregularIndexes.find(itemIndex) == options.irregularIndexes.end()
+                         ? 1
+                         : options.getSizeByIndex(itemIndex).GetCorssSize(gridLayoutInfo_.axis_);
+    if (crossStart + crossSpan > crossCount_) {
+        crossStart = 0;
+    }
+    return std::make_pair(crossStart, crossSpan);
 }
 
 void GridScrollWithOptionsLayoutAlgorithm::SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper)

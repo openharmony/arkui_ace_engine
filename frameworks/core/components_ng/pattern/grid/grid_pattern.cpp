@@ -67,7 +67,6 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
         result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
         return result;
-
     } else {
         auto result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
         result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
@@ -325,8 +324,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (!isConfigScrollable_ || !scrollable_) {
         return true;
     }
-    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
+
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     // check edgeEffect is not springEffect
     if (!HandleEdgeEffect(offset, source, GetContentSize())) {
         if (IsOutOfBoundary()) {
@@ -336,9 +336,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     SetScrollSource(source);
 
-    CHECK_NULL_RETURN(host, false);
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
+    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
     if (gridLayoutInfo_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
             auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
@@ -373,7 +373,10 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return true;
     }
-    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    // maybe no measure after last update
+    if (LessNotEqual(std::abs(gridLayoutInfo_.currentOffset_), gridLayoutInfo_.lastMainSize_)) {
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    }
     gridLayoutInfo_.currentOffset_ += offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
