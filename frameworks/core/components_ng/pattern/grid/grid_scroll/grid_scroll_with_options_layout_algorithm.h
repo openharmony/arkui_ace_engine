@@ -24,7 +24,7 @@ class ACE_EXPORT GridScrollWithOptionsLayoutAlgorithm : public GridScrollLayoutA
 
 public:
     GridScrollWithOptionsLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, uint32_t crossCount, uint32_t mainCount)
-        : GridScrollLayoutAlgorithm(std::move(gridLayoutInfo), crossCount, mainCount) {};
+        : GridScrollLayoutAlgorithm(gridLayoutInfo, crossCount, mainCount) {};
     ~GridScrollWithOptionsLayoutAlgorithm() override = default;
 
 private:
@@ -39,6 +39,10 @@ private:
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, LayoutWrapper* layoutWrapper, int32_t itemIndex) override;
 
     std::pair<int32_t, int32_t> GetCrossStartAndSpan(LayoutWrapper* layoutWrapper, int32_t itemIndex);
+
+    std::pair<int32_t, int32_t> GetCrossStartAndSpanWithUserFunction(
+        int32_t itemIndex, const GridLayoutOptions& options, int32_t firstIrregularIndex);
+
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollWithOptionsLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,10 @@ struct GridItemSize {
     {
         return (rows == itemSize.rows) && (columns == itemSize.columns);
     }
+    int32_t GetCorssSize(Axis axis)
+    {
+        return axis == Axis::VERTICAL ? columns : rows;
+    }
 };
 
 using GetSizeByIndex = std::function<GridItemSize(int32_t)>;
