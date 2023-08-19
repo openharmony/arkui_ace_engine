@@ -55,7 +55,7 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
-    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->GetStagingValue();
+    contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
     contentProperty.normalToHoverPointDilateRatio = normalToHoverPointDilateRatio_->Get();
@@ -63,7 +63,7 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.longPointDilateRatio = longPointDilateRatio_->Get();
     contentProperty.indicatorPadding = indicatorPadding_->Get();
     contentProperty.indicatorMargin = indicatorMargin_->Get();
-    contentProperty.itemHalfSizes = itemHalfSizes_->GetStagingValue();
+    contentProperty.itemHalfSizes = itemHalfSizes_->Get();
     PaintBackground(context, contentProperty);
     PaintContent(context, contentProperty);
 }
