@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/grid/grid_layout_options.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_v2/grid/grid_position_controller.h"
 #include "core/event/ace_events.h"
@@ -39,6 +40,7 @@ public:
     virtual void Create(
         const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollBarProxy) = 0;
     virtual void Pop() = 0;
+    virtual void SetLayoutOptions(GridLayoutOptions options) = 0;
     virtual void SetColumnsTemplate(const std::string& value) = 0;
     virtual void SetRowsTemplate(const std::string& value) = 0;
     virtual void SetColumnsGap(const Dimension& value) = 0;

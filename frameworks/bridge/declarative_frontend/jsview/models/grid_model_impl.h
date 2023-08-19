@@ -26,6 +26,7 @@ public:
     void Create(
         const RefPtr<ScrollControllerBase>& positionController, const RefPtr<ScrollProxy>& scrollBarProxy) override;
     void Pop() override;
+    void SetLayoutOptions(GridLayoutOptions options) override {};
     void SetColumnsTemplate(const std::string& value) override;
     void SetRowsTemplate(const std::string& value) override;
     void SetColumnsGap(const Dimension& value) override;
