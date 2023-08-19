@@ -354,9 +354,6 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
     bool isFirstSetPos = false;
-    if (!childrenDragPos_.empty() && childrenDragPos_.size() != visibleChildCount_ + 1U) {
-        childrenDragPos_.clear();
-    }
     if (childrenDragPos_.empty()) {
         childrenDragPos_ = std::vector<float>(visibleChildCount_ + 1, 0.0f);
         isFirstSetPos = true;
@@ -381,7 +378,6 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
                 childOffsetCross += endMargin;
             }
         }
-
         ColumnSplitChildConstrain(layoutWrapper, item, index);
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
         childOffsetCross += item->GetGeometryNode()->GetMarginFrameSize().Height();
@@ -394,8 +390,7 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
             splitRects_.emplace_back(childOffsetMain, childOffsetCross - DEFAULT_SPLIT_HEIGHT, parentWidth,
                                      DEFAULT_SPLIT_HEIGHT * SPLIT_HEIGHT_RATE);
         }
-        childOffsetCross += static_cast<float>(DEFAULT_SPLIT_HEIGHT);
-        childOffsetCross += endMargin;
+        childOffsetCross += static_cast<float>(DEFAULT_SPLIT_HEIGHT) + endMargin;
         index++;
         item->Layout();
     }
