@@ -19,6 +19,7 @@
 #include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
 #include "core/components/declaration/image/image_animator_declaration.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image_animator/image_animator_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -33,6 +34,15 @@ public:
     {
         animator_ = nullptr;
     }
+
+    struct CacheImageStruct {
+        CacheImageStruct() = default;
+        CacheImageStruct(const RefPtr<FrameNode>& imageNode) : imageNode(imageNode) {}
+        virtual ~CacheImageStruct() = default;
+        RefPtr<FrameNode> imageNode;
+        int32_t index = 0;
+        bool isLoaded = false;
+    };
 
     void OnModifyDone() override;
 
@@ -133,9 +143,18 @@ private:
     std::string ImagesToString() const;
     void AdaptSelfSize();
     void SetShowingIndex(int32_t index);
+    void UpdateShowingImageInfo(const RefPtr<FrameNode>& imageFrameNode, int32_t index);
+    void UpdateCacheImageInfo(CacheImageStruct& cacheImage, int32_t index);
+    std::list<CacheImageStruct>::iterator FindCacheImageNode(const std::string& src);
+    int32_t GetNextIndex(int32_t preIndex);
+    void GenerateCachedImages();
+    void AddImageLoadSuccessEvent(const RefPtr<FrameNode>& imageFrameNode);
+    static bool IsShowingSrc(const RefPtr<FrameNode>& imageFrameNode, const std::string& src);
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
 
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
+    std::list<CacheImageStruct> cacheImages_;
     Animator::Status status_ = Animator::Status::IDLE;
     int32_t durationTotal_ = 0;
     int32_t nowImageIndex_ = 0;
@@ -145,6 +164,7 @@ private:
 
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
+    bool isLayouted_ = false;
 };
 
 } // namespace OHOS::Ace::NG
