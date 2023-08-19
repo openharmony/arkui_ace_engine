@@ -15,10 +15,8 @@
 
 #include "core/components/text_span/rosen_render_text_span.h"
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
-#endif
 
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/rosen_render_calendar.h"
@@ -26,13 +24,8 @@
 
 namespace OHOS::Ace {
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderTextSpan::UpdateText(txt::ParagraphBuilder& builder,
     std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions, std::string& textValue)
-#else
-void RosenRenderTextSpan::UpdateText(Rosen::TypographyCreate& builder,
-    std::map<int32_t, std::map<GestureType, EventMarker>>& touchRegions, std::string& textValue)
-#endif
 {
     if (!spanComponent_) {
         return;
@@ -44,22 +37,14 @@ void RosenRenderTextSpan::UpdateText(Rosen::TypographyCreate& builder,
     }
     if (spanComponent_->HasNewStyle()) {
         LOGD("test span has new style");
-#ifndef USE_GRAPHIC_TEXT_GINE
         txt::TextStyle style;
-#else
-        Rosen::TextStyle style;
-#endif
         Constants::ConvertTxtStyle(spanStyle_, context_, style);
         builder.PushStyle(style);
     }
     UpdateTouchRegions(touchRegions);
     auto displayText = spanComponent_->GetSpanData();
     StringUtils::TransformStrCase(displayText, (int32_t)spanStyle_.GetTextCase());
-#ifndef USE_GRAPHIC_TEXT_GINE
     builder.AddText(StringUtils::Str8ToStr16(displayText));
-#else
-    builder.AppendText(StringUtils::Str8ToStr16(displayText));
-#endif
     textValue.append(displayText);
     for (const auto& child : GetChildren()) {
         auto rosenRenderTextSpan = AceType::DynamicCast<RosenRenderTextSpan>(child);
@@ -68,11 +53,7 @@ void RosenRenderTextSpan::UpdateText(Rosen::TypographyCreate& builder,
         }
     }
     if (spanComponent_->HasNewStyle()) {
-#ifndef USE_GRAPHIC_TEXT_GINE
         builder.Pop();
-#else
-        builder.PopStyle();
-#endif
     }
 }
 
@@ -120,4 +101,5 @@ void RosenRenderTextSpan::UpdateTouchRegions(std::map<int32_t, std::map<GestureT
         touchRegions.try_emplace(int32_t(touchRegions.rbegin()->first + spanData.length()), markersMap);
     }
 }
+
 } // namespace OHOS::Ace

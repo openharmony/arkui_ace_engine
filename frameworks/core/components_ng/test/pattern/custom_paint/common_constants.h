@@ -22,11 +22,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/common/layout/constants.h"
-#ifndef USE_GRAPHIC_TEXT_GINE
 #include "include/core/SkPath.h"
-#else
-#include "third_party/skia/include/core/SkPath.h"
-#endif
 
 namespace OHOS::Ace::NG {
 extern const float IDEAL_WIDTH;

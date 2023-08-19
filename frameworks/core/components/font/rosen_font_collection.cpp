@@ -15,13 +15,8 @@
 
 #include "core/components/font/rosen_font_collection.h"
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/src/minikin/FontFamily.h"
 #include "txt/src/minikin/FontLanguageListCache.h"
-#else
-#include "core/components_ng/render/adapter/txt_font_collection.h"
-#include "rosen_text/font_collection.h"
-#endif
 #include "include/core/SkTypeface.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
@@ -36,7 +31,6 @@ namespace OHOS::Ace {
 
 RosenFontCollection RosenFontCollection::instance;
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
 {
     std::call_once(fontFlag_, [this]() {
@@ -57,21 +51,10 @@ sk_sp<txt::DynamicFontManager> RosenFontCollection::GetDynamicFontManager()
 {
     return dynamicFontManager_;
 }
-#else
-std::shared_ptr<Rosen::FontCollection> RosenFontCollection::GetFontCollection()
-{
-    std::call_once(fontFlag_, [this]() {
-        auto fontCollection = AceType::DynamicCast<NG::TxtFontCollection>(NG::FontCollection::Current());
-        fontCollection_ = fontCollection->GetRawFontCollection();
-    });
-    return fontCollection_;
-}
-#endif
 
 void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName)
 {
     std::call_once(fontFlag_, [this]() {
-#ifndef USE_GRAPHIC_TEXT_GINE
         auto rosenCollection = RSFontCollection::GetInstance(false);
         auto collectionTxtBase = rosenCollection->GetFontCollection();
         auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
@@ -79,10 +62,6 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
             fontCollection_ = collectionTxt->GetFontCollection();
             dynamicFontManager_ = collectionTxt->GetDynamicFontManager();
         }
-#else
-        auto fontCollection = AceType::DynamicCast<NG::TxtFontCollection>(NG::FontCollection::Current());
-        fontCollection_ = fontCollection->GetRawFontCollection();
-#endif
     });
 
     auto it = std::find(families_.begin(), families_.end(), familyName);
@@ -93,7 +72,6 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
     families_.emplace_back(familyName);
 
     if (fontCollection_) {
-#ifndef USE_GRAPHIC_TEXT_GINE
         std::unique_ptr<SkStreamAsset> font_stream = std::make_unique<SkMemoryStream>(fontData, length, true);
         sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(std::move(font_stream));
         txt::TypefaceFontAssetProvider& font_provider = dynamicFontManager_->font_provider();
@@ -103,9 +81,6 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
             font_provider.RegisterTypeface(typeface, familyName);
         }
         fontCollection_->ClearFontFamilyCache();
-#else
-        fontCollection_->LoadFont(familyName, fontData, length);
-#endif
     }
 }
 
@@ -120,22 +95,18 @@ void RosenFontCollection::VaryFontCollectionWithFontWeightScale(float fontWeight
         return;
     }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     if (fontCollection_) {
         fontCollection_->VaryFontCollectionWithFontWeightScale(fontWeightScale);
     }
-#endif
 }
 
 void RosenFontCollection::LoadSystemFont()
 {
     ACE_FUNCTION_TRACE();
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     if (fontCollection_) {
         fontCollection_->LoadSystemFont();
     }
-#endif
 }
 
 void RosenFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
@@ -147,11 +118,9 @@ void RosenFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
     }
     isZawgyiMyanmar_ = isZawgyiMyanmar;
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     if (fontCollection_) {
         fontCollection_->SetIsZawgyiMyanmar(isZawgyiMyanmar);
     }
-#endif
 
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         if (container) {

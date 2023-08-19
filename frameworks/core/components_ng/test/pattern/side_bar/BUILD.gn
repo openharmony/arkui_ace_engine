@@ -169,8 +169,4 @@ ohos_unittest("side_bar_pattern_test_ng") {
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-
-  if (enable_graphic_text_gine) {
-    deps += [ "//third_party/skia:skia_ohos" ]
-  }
 }

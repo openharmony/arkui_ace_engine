@@ -47,7 +47,6 @@ template("ace_unittest") {
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//third_party/googletest:gmock",
   ]
 

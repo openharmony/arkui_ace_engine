@@ -16,13 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CALENDAR_FLUTTER_RENDER_CALENDAR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CALENDAR_FLUTTER_RENDER_CALENDAR_H
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 #include "include/core/SkColor.h"
 #include "third_party/txt/src/txt/text_style.h"
-#else
-#include "rosen_text/text_style.h"
-#include "third_party/skia/include/core/SkColor.h"
-#endif
 
 #include "core/components/calendar/render_calendar.h"
 #include "core/pipeline/layers/clip_layer.h"
@@ -50,35 +45,22 @@ private:
     void DrawWeek(ScopedCanvas& canvas, const Offset& offset) const;
     void DrawBlurArea(ScopedCanvas& canvas, const Offset& offset, double x, double y) const;
     void DrawTouchedArea(RenderContext& context, Offset offset) const;
-#ifndef USE_GRAPHIC_TEXT_GINE
     void PaintDay(
         ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const;
     void PaintLunarDay(
         ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, const txt::TextStyle& textStyle) const;
     void SetNonFocusStyle(const CalendarDay& day, txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
-    void InitTextStyle(txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
-    void InitWorkStateStyle(
-        const CalendarDay& day, const Offset& offset, txt::TextStyle& workStateStyle, Rect& boxRect) const;
-    void SetWorkStateStyle(
-        const CalendarDay& day, SkColor workColor, SkColor offColor, txt::TextStyle& workStateStyle) const;
-#else
-    void PaintDay(
-        ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, Rosen::TextStyle& textStyle) const;
-    void PaintLunarDay(
-        ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, const Rosen::TextStyle& textStyle) const;
-    void SetNonFocusStyle(const CalendarDay& day, Rosen::TextStyle& dateTextStyle, Rosen::TextStyle& lunarTextStyle);
-    void InitTextStyle(Rosen::TextStyle& dateTextStyle, Rosen::TextStyle& lunarTextStyle);
-    void InitWorkStateStyle(
-        const CalendarDay& day, const Offset& offset, Rosen::TextStyle& workStateStyle, Rect& boxRect) const;
-    void SetWorkStateStyle(
-        const CalendarDay& day, SkColor workColor, SkColor offColor, Rosen::TextStyle& workStateStyle) const;
-#endif
     void DrawCardCalendar(ScopedCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day,
         int32_t dateNumber);
     void DrawTvCalendar(ScopedCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day,
         int32_t dateNumber);
+    void InitTextStyle(txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle);
     void PaintUnderscore(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day);
     void PaintScheduleMarker(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day);
+    void InitWorkStateStyle(
+        const CalendarDay& day, const Offset& offset, txt::TextStyle& workStateStyle, Rect& boxRect) const;
+    void SetWorkStateStyle(
+        const CalendarDay& day, SkColor workColor, SkColor offColor, txt::TextStyle& workStateStyle) const;
     void SetCalendarTheme();
     bool IsOffDay(const CalendarDay& day) const;
     void AddContentLayer();

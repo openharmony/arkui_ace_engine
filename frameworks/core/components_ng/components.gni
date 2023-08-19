@@ -92,19 +92,18 @@ template("build_component_ng") {
         cflags_cc += invoker.cflags_cc
       }
 
-      # using graphic_2d drawing lib
+      # using graphcis_2d drawing lib
       include_dirs = [
         "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/",
         "//third_party/bounds_checking_function/include",
       ]
-      if (enable_graphic_text_gine) {
-        include_dirs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
-      }
+
       if (ace_use_new_skia) {
         configs += [ "$ace_flutter_engine_root:flutter_config" ]
         deps += [
@@ -146,10 +145,6 @@ template("build_component_ng") {
           "//third_party/openGLES:libGLES",
         ]
         external_deps += [ "graphic_2d:2d_graphics" ]
-        external_deps += [
-          "graphic_2d:2d_graphics",
-          "graphic_2d:rosen_text",
-        ]
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
       }

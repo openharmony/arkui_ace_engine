@@ -140,7 +140,7 @@ bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,
     return result;
 }
 
-void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode, const TextStyle& textStyle)
+void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  const TextStyle& textStyle)
 {
     auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
         auto frameNode = weakNode.Upgrade();

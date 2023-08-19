@@ -18,13 +18,8 @@
 #include <cmath>
 
 #include "securec.h"
-#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
-#else
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography_style.h"
-#endif
 
 #include "include/core/SkBlendMode.h"
 #include "include/core/SkCanvas.h"
@@ -518,19 +513,13 @@ double FlutterRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
 double FlutterRenderCustomPaint::MeasureText(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
-#else
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-#endif
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return 0.0;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
@@ -538,15 +527,6 @@ double FlutterRenderCustomPaint::MeasureText(const std::string& text, const Pain
     builder->PushStyle(txtStyle);
     builder->AddText(StringUtils::Str8ToStr16(text));
     auto paragraph = builder->Build();
-#else
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
-    ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-#endif
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetMaxIntrinsicWidth();
 }
@@ -554,19 +534,13 @@ double FlutterRenderCustomPaint::MeasureText(const std::string& text, const Pain
 double FlutterRenderCustomPaint::MeasureTextHeight(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
-#else
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-#endif
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return 0.0;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
@@ -574,15 +548,6 @@ double FlutterRenderCustomPaint::MeasureTextHeight(const std::string& text, cons
     builder->PushStyle(txtStyle);
     builder->AddText(StringUtils::Str8ToStr16(text));
     auto paragraph = builder->Build();
-#else
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
-    ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-#endif
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetHeight();
 }
@@ -590,39 +555,20 @@ double FlutterRenderCustomPaint::MeasureTextHeight(const std::string& text, cons
 TextMetrics FlutterRenderCustomPaint::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
-#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
-#else
-    Rosen::TypographyStyle style;
-    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
-#endif
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
-#else
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
-#endif
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
     txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
-#else
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-#endif
     builder->PushStyle(txtStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(text));
     auto paragraph = builder->Build();
-#else
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-#endif
     paragraph->Layout(Size::INFINITE_SIZE);
 
     auto textAlign = state.GetTextAlign();
@@ -664,11 +610,7 @@ void FlutterRenderCustomPaint::PaintText(const Offset& offset, double x, double 
     paragraph_->Paint(skCanvas_.get(), dx, dy);
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 double FlutterRenderCustomPaint::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
-#else
-double FlutterRenderCustomPaint::GetAlignOffset(TextAlign align, std::unique_ptr<Rosen::Typography>& paragraph)
-#endif
 {
     double x = 0.0;
     switch (align) {
@@ -694,11 +636,7 @@ double FlutterRenderCustomPaint::GetAlignOffset(TextAlign align, std::unique_ptr
     return x;
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 double FlutterRenderCustomPaint::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
-#else
-double FlutterRenderCustomPaint::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<Rosen::Typography>& paragraph)
-#endif
 {
     double y = 0.0;
     switch (baseline) {
@@ -1275,121 +1213,67 @@ bool FlutterRenderCustomPaint::UpdateParagraph(
     const Offset& offset, const std::string& text, bool isStroke, bool hasShadow)
 {
     using namespace Constants;
-#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
-#else
-    Rosen::TypographyStyle style;
-#endif
     if (isStroke) {
-#ifndef USE_GRAPHIC_TEXT_GINE
         style.text_align = ConvertTxtTextAlign(strokeState_.GetTextAlign());
-#else
-        style.textAlign = ConvertTxtTextAlign(strokeState_.GetTextAlign());
-#endif
     } else {
-#ifndef USE_GRAPHIC_TEXT_GINE
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
-#else
-        style.textAlign = ConvertTxtTextAlign(fillState_.GetTextAlign());
-#endif
     }
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return false;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
-#else
-    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
-    Rosen::TextStyle txtStyle;
-#endif
     if (!isStroke && hasShadow) {
-#ifndef USE_GRAPHIC_TEXT_GINE
         txt::TextShadow txtShadow;
         txtShadow.color = shadow_.GetColor().GetValue();
         txtShadow.offset.fX = shadow_.GetOffset().GetX();
         txtShadow.offset.fY = shadow_.GetOffset().GetY();
         txtShadow.blur_radius = shadow_.GetBlurRadius();
         txtStyle.text_shadows.emplace_back(txtShadow);
-#else
-        Rosen::TextShadow txtShadow;
-        txtShadow.color = shadow_.GetColor().GetValue();
-        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
-        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
-        txtShadow.blurRadius = shadow_.GetBlurRadius();
-        txtStyle.shadows.emplace_back(txtShadow);
-#endif
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateTextStyleForeground(offset, isStroke, txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(text));
     paragraph_ = builder->Build();
-#else
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    paragraph_ = builder->CreateTypography();
-#endif
     return true;
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 void FlutterRenderCustomPaint::UpdateTextStyleForeground(
     const Offset& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
-#else
-void FlutterRenderCustomPaint::UpdateTextStyleForeground(
-    const Offset& offset, bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow)
-#endif
 {
     using namespace Constants;
     if (!isStroke) {
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
-#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
-#else
-        txtStyle.fontSize = fillState_.GetTextStyle().GetFontSize().Value();
-#endif
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid()) {
             SkPaint paint;
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(offset, paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
-#ifndef USE_GRAPHIC_TEXT_GINE
             txtStyle.has_foreground = true;
-#endif
         }
         if (globalState_.HasGlobalAlpha()) {
-#ifndef USE_GRAPHIC_TEXT_GINE
             if (txtStyle.has_foreground) {
                 txtStyle.foreground.setColor(fillState_.GetColor().GetValue());
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
-#else
-            if (txtStyle.foreground.has_value()) {
-                txtStyle.foreground->setColor(fillState_.GetColor().GetValue());
-                txtStyle.foreground->setAlphaf(globalState_.GetAlpha()); // set alpha after color
-#endif
             } else {
                 SkPaint paint;
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground = paint;
-#ifndef USE_GRAPHIC_TEXT_GINE
                 txtStyle.has_foreground = true;
-#endif
             }
         }
     } else {
         // use foreground to draw stroke
         SkPaint paint = GetStrokePaint();
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
-#else
-        txtStyle.fontSize = strokeState_.GetTextStyle().GetFontSize().Value();
-#endif
         if (strokeState_.GetGradient().IsValid()) {
             UpdatePaintShader(offset, paint, strokeState_.GetGradient());
         }
@@ -1399,9 +1283,7 @@ void FlutterRenderCustomPaint::UpdateTextStyleForeground(
                 FlutterDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
         }
         txtStyle.foreground = paint;
-#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.has_foreground = true;
-#endif
     }
 }
 

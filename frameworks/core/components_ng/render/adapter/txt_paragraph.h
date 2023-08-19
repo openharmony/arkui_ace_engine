@@ -16,13 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/font_collection.h"
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
-#else
-#include "core/components_ng/render/drawing.h"
-#endif
 
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/render/paragraph.h"
@@ -34,15 +30,9 @@ class TxtParagraph : public Paragraph {
     DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph)
 
 public:
-#ifndef USE_GRAPHIC_TEXT_GINE
     TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<txt::FontCollection> fontCollection)
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
-#else
-    TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
-        : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
-    {}
-#endif
     ~TxtParagraph() override = default;
 
     // whether the paragraph has been build
@@ -79,9 +69,7 @@ public:
     bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) override;
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) override;
     void SetIndents(const std::vector<float>& indents) override;
-#ifndef USE_GRAPHIC_TEXT_GINE
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
-#endif
 
 private:
     void CreateBuilder();
@@ -91,15 +79,9 @@ private:
     }
 
     ParagraphStyle paraStyle_;
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::ParagraphBuilder> builder_;
     std::shared_ptr<txt::FontCollection> fontCollection_;
-#else
-    std::unique_ptr<RSParagraph> paragraph_;
-    std::unique_ptr<RSParagraphBuilder> builder_;
-    std::shared_ptr<RSFontCollection> fontCollection_;
-#endif
     std::u16string text_;
     int32_t placeHolderIndex_ = -1;
 

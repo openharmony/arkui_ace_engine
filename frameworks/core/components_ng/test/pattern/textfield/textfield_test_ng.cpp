@@ -1558,17 +1558,10 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> textBoxes;
     RSTypographyProperties::TextBox textBox;
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
-#else
-    std::vector<RSTypographyProperties::TextRect> textBoxs;
-    RSTypographyProperties::TextRect textBox;
-    textBoxs.emplace_back(textBox);
-    pattern->textBoxes_ = textBoxs;
-#endif
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
@@ -2792,54 +2785,28 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextSelectionRectOffsetX, TestSize.Level1
     textFieldPattern->contentRect_.SetLeft(0.0f);
     textFieldPattern->contentRect_.SetWidth(100.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
-#ifndef USE_GRAPHIC_TEXT_GINE
     RSTypographyProperties::TextBox textBox;
-#else
-    RSTypographyProperties::TextRect textBox;
-#endif
     textFieldPattern->textBoxes_.emplace_back(textBox);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(50.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(50.0f);
-#endif
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(-20.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(-10.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(-20.0f);
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(-10.0f);
-#endif
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
-#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(0.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(0.0f);
-#endif
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(100.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(200.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(100.0f);
-    textFieldPattern->textBoxes_.begin()->rect.SetRight(200.0f);
-#endif
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
-#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(300.0f);
-#else
-    textFieldPattern->textBoxes_.begin()->rect.SetLeft(300.0f);
-#endif
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
@@ -3537,13 +3504,8 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> textBoxes;
     RSTypographyProperties::TextBox textBox;
-#else
-    std::vector<RSTypographyProperties::TextRect> textBoxes;
-    RSTypographyProperties::TextRect textBox;
-#endif
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
     EdgeEffect edgeEffect;
@@ -4602,15 +4564,9 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
     EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 4);
     EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 8);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> textBoxes;
     RSTypographyProperties::TextBox firstTextBox;
     RSTypographyProperties::TextBox secondTextBox;
-#else
-    std::vector<RSTypographyProperties::TextRect> textBoxes;
-    RSTypographyProperties::TextRect firstTextBox;
-    RSTypographyProperties::TextRect secondTextBox;
-#endif
     textBoxes.emplace_back(firstTextBox);
     textBoxes.emplace_back(secondTextBox);
     pattern->textBoxes_ = textBoxes;

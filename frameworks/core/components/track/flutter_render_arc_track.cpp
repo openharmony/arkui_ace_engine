@@ -16,15 +16,9 @@
 #include "core/components/track/flutter_render_arc_track.h"
 
 #include "flutter/lib/ui/painting/path.h"
-#ifndef USE_GRAPHIC_TEXT_GINE
 #include "include/core/SkClipOp.h"
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
-#else
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography.h"
-#include "third_party/skia/include/core/SkClipOp.h"
-#endif
 
 #include "core/components/font/flutter_font_collection.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
@@ -82,43 +76,20 @@ void SetTextStyle(const ScopedCanvas& canvas, const RenderRingInfo& trackInfo, c
     }
     double pathStartVertexX = trackInfo.center.GetX();
     double pathStartVertexY = trackInfo.center.GetY() - trackInfo.radius + (trackInfo.thickness / 2);
-#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     txt::TextStyle txtStyle;
     txtStyle.font_size = 80;
     txtStyle.font_weight = txt::FontWeight::w400;
-#else
-    Rosen::TypographyStyle style;
-    Rosen::TextStyle txtStyle;
-    txtStyle.fontSize = 80;
-    txtStyle.fontWeight = Rosen::FontWeight::W400;
-#endif
     txtStyle.color = markedColor.GetValue();
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder;
     style.max_lines = 1;
     builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
-#else
-    std::unique_ptr<Rosen::TypographyCreate> builder;
-    style.maxLines = 1;
-    builder = Rosen::TypographyCreate::Create(style, fontCollection);
-#endif
     builder->PushStyle(txtStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(markedText));
     auto paragraph = builder->Build();
-#else
-    builder->AppendText(StringUtils::Str8ToStr16(markedText));
-    auto paragraph = builder->CreateTypography();
-#endif
     paragraph->Layout(dataRegion.Width());
-#ifndef USE_GRAPHIC_TEXT_GINE
     paragraph->Paint(
         canvas->canvas(), pathStartVertexX - txtStyle.font_size, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
-#else
-    paragraph->Paint(
-        canvas->canvas(), pathStartVertexX - txtStyle.fontSize, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
-#endif
 }
 
 void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo, const std::string markedText,

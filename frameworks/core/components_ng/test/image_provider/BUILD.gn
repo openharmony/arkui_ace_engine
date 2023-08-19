@@ -134,7 +134,6 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$cjson_root:cjson_static",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//third_party/googletest:gmock_main",
   ]
 

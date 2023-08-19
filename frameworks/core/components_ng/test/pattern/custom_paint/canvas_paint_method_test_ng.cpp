@@ -357,11 +357,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg006, TestSize.Level1)
     EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
-#else
-    std::unique_ptr<Rosen::Typography> paragraph(std::move(mockParagraph));
-#endif
 
     /**
      * @tc.steps2: Test functions GetAlignOffset.
@@ -391,11 +387,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg007, TestSize.Level1)
     EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
-#else
-    std::unique_ptr<Rosen::Typography> paragraph(std::move(mockParagraph));
-#endif
 
     /**
      * @tc.steps2: Test functions GetBaselineOffset.

@@ -2038,11 +2038,7 @@ void CustomPaintPaintMethod::Translate(double x, double y)
 #endif
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
-#else
-double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<OHOS::Rosen::Typography>& paragraph)
-#endif
 {
     double x = 0.0;
     TextDirection textDirection = fillState_.GetOffTextDirection();
@@ -2069,28 +2065,14 @@ double CustomPaintPaintMethod::GetAlignOffset(TextAlign align, std::unique_ptr<O
     return x;
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 txt::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(txt::TextAlign align, txt::TextDirection direction) const
-#else
-OHOS::Rosen::TextAlign CustomPaintPaintMethod::GetEffectiveAlign(
-    OHOS::Rosen::TextAlign align, OHOS::Rosen::TextDirection direction) const
-#endif
 {
-#ifndef USE_GRAPHIC_TEXT_GINE
     if (align == txt::TextAlign::start) {
         return (direction == txt::TextDirection::ltr) ? txt::TextAlign::left
                                                       : txt::TextAlign::right;
     } else if (align == txt::TextAlign::end) {
         return (direction == txt::TextDirection::ltr) ? txt::TextAlign::right
                                                       : txt::TextAlign::left;
-#else
-    if (align == OHOS::Rosen::TextAlign::START) {
-        return (direction == OHOS::Rosen::TextDirection::LTR) ? OHOS::Rosen::TextAlign::LEFT
-                                                      : OHOS::Rosen::TextAlign::RIGHT;
-    } else if (align == OHOS::Rosen::TextAlign::END) {
-        return (direction == OHOS::Rosen::TextDirection::LTR) ? OHOS::Rosen::TextAlign::RIGHT
-                                                      : OHOS::Rosen::TextAlign::LEFT;
-#endif
     } else {
         return align;
     }

@@ -2934,13 +2934,8 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     auto boxes = pattern->GetTextBoxes();
     EXPECT_EQ(boxes.size(), 1);
-#ifndef USE_GRAPHIC_TEXT_GINE
     EXPECT_EQ(boxes[0].rect_.GetLeft(), 0);
     EXPECT_EQ(boxes[0].rect_.GetRight(), 20);
-#else
-    EXPECT_EQ(boxes[0].rect.GetLeft(), 0);
-    EXPECT_EQ(boxes[0].rect.GetRight(), 20);
-#endif
 
     auto height = pattern->GetLineHeight();
     EXPECT_EQ(height, 20);

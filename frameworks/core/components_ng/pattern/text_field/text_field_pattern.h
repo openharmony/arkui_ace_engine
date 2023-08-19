@@ -54,9 +54,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
-#ifdef USE_GRAPHIC_TEXT_GINE
-#include "rosen_text/typography.h"
-#endif
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -514,11 +511,7 @@ public:
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override
-#else
-    std::vector<RSTextRect> GetTextBoxes() override
-#endif
     {
         return textBoxes_;
     }
@@ -786,17 +779,10 @@ public:
         Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
                         Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
         for (const auto& textBoxes : textBoxes_) {
-#ifndef USE_GRAPHIC_TEXT_GINE
             bool isInRange = LessOrEqual(textBoxes.rect_.GetLeft(), offset.GetX()) &&
                              LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
                              LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
                              LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
-#else
-            bool isInRange = LessOrEqual(textBoxes.rect.GetLeft(), offset.GetX()) &&
-                             LessOrEqual(offset.GetX(), textBoxes.rect.GetRight()) &&
-                             LessOrEqual(textBoxes.rect.GetTop(), offset.GetY()) &&
-                             LessOrEqual(offset.GetY(), textBoxes.rect.GetBottom());
-#endif
             if (isInRange) {
                 return true;
             }
@@ -1085,18 +1071,13 @@ private:
 
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool LastTouchIsInSelectRegion(const std::vector<RSTypographyProperties::TextBox>& boxes);
 
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     bool FilterWithAscii(const std::string& valueToUpdate, std::string& result);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result, bool isInsertValue = false);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    bool LastTouchIsInSelectRegion(const std::vector<RSTypographyProperties::TextBox>& boxes);
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
-#else
-    bool LastTouchIsInSelectRegion(const std::vector<RSTextRect>& boxes);
-    void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTextRect>& textBoxes);
-#endif
     bool CursorInContentRegion();
     float FitCursorInSafeArea();
     bool OffsetInContentRegion(const Offset& offset);
@@ -1131,9 +1112,7 @@ private:
 
     bool ResetObscureTickCountDown();
     bool IsInPasswordMode() const;
-#ifndef USE_GRAPHIC_TEXT_GINE
     void GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end);
-#endif
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
 
@@ -1251,11 +1230,7 @@ private:
     TextEditingValueNG textEditingValue_;
     TextSelector textSelector_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
-#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> textBoxes_;
-#else
-    std::vector<RSTextRect> textBoxes_;
-#endif
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);

@@ -17,13 +17,8 @@
 
 #include <cmath>
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
-#else
-#include "rosen_text/typography_create.h"
-#include "rosen_text/typography.h"
-#endif
 #include "unicode/uchar.h"
 
 #include "base/geometry/dimension.h"
@@ -363,14 +358,9 @@ bool FlutterRenderText::UpdateParagraphAndLayout(double paragraphMaxWidth)
 uint32_t FlutterRenderText::GetTextLines()
 {
     uint32_t textLines = 0;
-#ifndef USE_GRAPHIC_TEXT_GINE
     auto paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     if (paragraphTxt != nullptr) {
         textLines = paragraphTxt->GetLineCount();
-#else
-    if (paragraph_ != nullptr) {
-        textLines = paragraph_->GetLineCount();
-#endif
     }
     return textLines;
 }
@@ -380,11 +370,7 @@ int32_t FlutterRenderText::GetTouchPosition(const Offset& offset)
     if (!paragraph_) {
         return 0;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     return static_cast<int32_t>(paragraph_->GetGlyphPositionAtCoordinate(offset.GetX(), offset.GetY()).position);
-#else
-    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(offset.GetX(), offset.GetY()).index);
-#endif
 }
 
 Size FlutterRenderText::GetSize()
@@ -443,16 +429,10 @@ void FlutterRenderText::ApplyIndents(double width)
         indents.push_back(0.0);
         indents.push_back(-indent);
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     if (paragraphTxt != nullptr) {
         paragraphTxt->SetIndents(indents);
     }
-#else
-    if (paragraph_ != nullptr) {
-        paragraph_->SetIndents(indents);
-    }
-#endif
 }
 
 bool FlutterRenderText::UpdateParagraph()
@@ -463,11 +443,7 @@ bool FlutterRenderText::UpdateParagraph()
 
     using namespace Constants;
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
-#else
-    Rosen::TypographyStyle style;
-#endif
     if (alignment_.has_value()) {
         textStyle_.SetTextAlign(alignment_.value());
     }
@@ -488,58 +464,32 @@ bool FlutterRenderText::UpdateParagraph()
         }
     }
     std::string displayData = ApplyWhiteSpace();
-#ifndef USE_GRAPHIC_TEXT_GINE
     style.text_direction = ConvertTxtTextDirection(defaultTextDirection_);
     style.text_align = ConvertTxtTextAlign(textAlign);
     style.max_lines = textStyle_.GetMaxLines();
-#else
-    style.textDirection = ConvertTxtTextDirection(defaultTextDirection_);
-    style.textAlign = ConvertTxtTextAlign(textAlign);
-    style.maxLines = textStyle_.GetMaxLines();
-#endif
     style.locale = Localization::GetInstance()->GetFontLocale();
     if (textStyle_.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         if (!IsCompatibleVersion() && textStyle_.GetMaxLines() == UINT32_MAX && !text_->GetAutoMaxLines()) {
-#ifndef USE_GRAPHIC_TEXT_GINE
             style.max_lines = 1;
-#else
-            style.maxLines = 1;
-#endif
         }
         style.ellipsis = ELLIPSIS;
         auto context = GetContext().Upgrade();
         if (context && context->UseLiteStyle()) {
-#ifndef USE_GRAPHIC_TEXT_GINE
             style.max_lines = 1;
-#else
-            style.maxLines = 1;
-#endif
         }
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     style.word_break_type = static_cast<minikin::WordBreakType>(textStyle_.GetWordBreak());
 
     std::unique_ptr<txt::ParagraphBuilder> builder;
-#else
-    style.wordBreakType = static_cast<Rosen::WordBreakType>(textStyle_.GetWordBreak());
-#endif
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return false;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
-#else
-    auto builder = Rosen::TypographyCreate::Create(style, fontCollection);
-#endif
     std::string textValue = "";
 
-#ifndef USE_GRAPHIC_TEXT_GINE
     txt::TextStyle txtStyle;
-#else
-    Rosen::TextStyle txtStyle;
-#endif
     ConvertTxtStyle(textStyle_, context_, txtStyle);
     builder->PushStyle(txtStyle);
     const auto& children = GetChildren();
@@ -553,17 +503,10 @@ bool FlutterRenderText::UpdateParagraph()
         }
     } else {
         StringUtils::TransformStrCase(displayData, (int32_t)textStyle_.GetTextCase());
-#ifndef USE_GRAPHIC_TEXT_GINE
         builder->AddText(StringUtils::Str8ToStr16(displayData));
-#else
-        builder->AppendText(StringUtils::Str8ToStr16(displayData));
-#endif
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     paragraph_ = builder->Build();
-#else
-    paragraph_ = builder->CreateTypography();
-#endif
+
     ApplyIndents(GetLayoutParam().GetMaxSize().Width());
     return true;
 }
@@ -576,34 +519,20 @@ double FlutterRenderText::GetTextWidth()
     if (!IsCompatibleVersion()) {
         return paragraph_->GetMaxIntrinsicWidth();
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     if (paragraphTxt != nullptr && paragraphTxt->GetLineCount() == 1) {
         return std::max(paragraph_->GetLongestLine(), paragraph_->GetMaxIntrinsicWidth());
     }
     return paragraph_->GetLongestLine();
-#else
-    if (paragraph_ != nullptr && paragraph_->GetLineCount() == 1) {
-        return std::max(paragraph_->GetActualWidth(), paragraph_->GetMaxIntrinsicWidth());
-    }
-    return paragraph_->GetActualWidth();
-#endif
 }
 
 bool FlutterRenderText::DidExceedMaxLines(double paragraphMaxWidth)
 {
-#ifndef USE_GRAPHIC_TEXT_GINE
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
     if (paragraphTxt != nullptr) {
         bool didExceedMaxLines = paragraphTxt->DidExceedMaxLines() ||
                                  (textStyle_.GetAdaptHeight() &&
                                      GreatNotEqual(paragraph_->GetHeight(), GetLayoutParam().GetMaxSize().Height()));
-#else
-    if (paragraph_ != nullptr) {
-        bool didExceedMaxLines = paragraph_->DidExceedMaxLines() ||
-                                 (textStyle_.GetAdaptHeight() &&
-                                     GreatNotEqual(paragraph_->GetHeight(), GetLayoutParam().GetMaxSize().Height()));
-#endif
         if (textStyle_.GetMaxLines() == 1) {
             return didExceedMaxLines || GreatNotEqual(GetTextWidth(), paragraphMaxWidth);
         }

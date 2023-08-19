@@ -33,10 +33,6 @@ template("napi_font_static") {
 
     sources = [ "js_font.cpp" ]
 
-    if (enable_graphic_text_gine) {
-      defines += [ "USE_GRAPHIC_TEXT_GINE" ]
-    }
-
     deps = []
     external_deps = []
     if (platform != "" && is_cross_platform_build) {

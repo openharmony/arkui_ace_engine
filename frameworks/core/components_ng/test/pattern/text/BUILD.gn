@@ -17,12 +17,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("text_test_ng") {
   module_out_path = pattern_test_output_path
 
-  if (enable_graphic_text_gine) {
-    defines = [ "USE_GRAPHIC_TEXT_GINE" ]
-  } else {
-    include_dirs =
-        [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include" ]
-  }
+  include_dirs =
+      [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include" ]
 
   sources = [
     "$ace_root/adapter/preview/osal/ressched_report.cpp",
@@ -174,7 +170,6 @@ ohos_unittest("text_test_ng") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//third_party/googletest:gmock_main",
   ]
 
