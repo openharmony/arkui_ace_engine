@@ -203,7 +203,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     DrivenRender(dirty);
 
-    SetScrollState(SCROLL_FROM_NONE);
+    SetScrollSource(SCROLL_FROM_NONE);
     isInitialized_ = true;
     MarkSelectedItems();
     return true;
@@ -292,7 +292,7 @@ void ListPattern::ProcessEvent(
     CHECK_NULL_VOID(pipeline);
     auto onScroll = listEventHub->GetOnScroll();
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && scrollStop_ && !GetScrollAbort()) {
-        auto source = GetScrollState();
+        auto source = GetScrollSource();
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
         if (onScroll) {
@@ -308,7 +308,7 @@ void ListPattern::ProcessEvent(
             }
         }
     } else if (onScroll && !NearZero(finalOffset)) {
-        auto source = GetScrollState();
+        auto source = GetScrollSource();
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
         if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN &&
@@ -345,7 +345,7 @@ void ListPattern::ProcessEvent(
         float endOffset = endMainPos_ - contentMainSize_;
         bool scrollUpToEnd = (Positive(prevEndOffset) || !isInitialized_) && NonPositive(endOffset);
         bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
-        if (scrollUpToEnd || (scrollDownToEnd && GetScrollState() != SCROLL_FROM_NONE)) {
+        if (scrollUpToEnd || (scrollDownToEnd && GetScrollSource() != SCROLL_FROM_NONE)) {
             onReachEnd();
         }
     }
@@ -354,9 +354,14 @@ void ListPattern::ProcessEvent(
         auto onScrollStop = listEventHub->GetOnScrollStop();
         if (!GetScrollAbort()) {
             if (onScrollStop) {
-                scrollState_ = SCROLL_FROM_NONE;
+                SetScrollSource(SCROLL_FROM_NONE);
                 onScrollStop();
             }
+            auto scrollBar = GetScrollBar();
+            if (scrollBar) {
+                scrollBar->ScheduleDisapplearDelayTask();
+            }
+            StartScrollBarAnimatorByProxy();
         }
         if (!GetScrollAbort()) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
@@ -466,11 +471,11 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
     listLayoutAlgorithm->SetContentStartOffset(contentStartOffset_);
     listLayoutAlgorithm->SetContentEndOffset(contentEndOffset_);
-    if (IsOutOfBoundary(false) && scrollState_ != SCROLL_FROM_AXIS) {
+    if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(scrollState_));
+    listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     if (chainAnimation_) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
     }
@@ -657,7 +662,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return false;
     }
-    SetScrollState(source);
+    SetScrollSource(source);
     currentDelta_ = currentDelta_ - offset;
     MarkDirtyNodeSelf();
     if (!IsOutOfBoundary() || !scrollable_) {
@@ -684,7 +689,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
     }
 
-    if (scrollState_ == SCROLL_FROM_UPDATE) {
+    if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
         auto friction = CalculateFriction(std::abs(overScroll) / contentMainSize_);
         currentDelta_ = currentDelta_ * friction;
@@ -757,6 +762,7 @@ void ListPattern::FireOnScrollStart()
     if (scrollBar) {
         scrollBar->PlayScrollBarStartAnimation();
     }
+    StopScrollBarAnimatorByProxy();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ListEventHub>();
@@ -1201,6 +1207,7 @@ void ListPattern::ScrollTo(float position)
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     LOGI("ScrollToIndex:%{public}d, align:%{public}d.", index, align);
+    SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1228,6 +1235,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollAlign align)
 {
     LOGI("ScrollToIndex:%{public}d, %{public}d, align:%{public}d.", index, indexInGroup, align);
+    SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         currentDelta_ = 0;

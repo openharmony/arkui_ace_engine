@@ -171,16 +171,6 @@ public:
 
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
 
-    void SetScrollState(int32_t source)
-    {
-        source_ = source;
-    }
-
-    int32_t GetScrollState() const
-    {
-        return source_;
-    }
-
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsOutOfBoundary() const;
@@ -313,7 +303,6 @@ private:
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
     bool scrollStop_ = false;
-    int32_t source_ = SCROLL_FROM_NONE;
 
     // scrollSnap
     std::vector<float> snapOffsets_;
