@@ -110,7 +110,6 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
-
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -227,7 +226,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 void MenuView::UpdateMenuPaintProperty(
     const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& type)
 {
-    if (!(type == MenuType::CONTEXT_MENU)) {
+    if (!(type == MenuType::CONTEXT_MENU) && !(type == MenuType::RICH_EDIT_SELECT_MENU)) {
         return;
     }
     auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();

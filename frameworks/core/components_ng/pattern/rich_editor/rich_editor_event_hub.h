@@ -109,12 +109,12 @@ public:
     void SetImageFit(ImageFit objectFit);
     ImageFit GetObjectFit() const;
 
-    void SetFontStyle(FontStyle fontStyle)
+    void SetFontStyle(OHOS::Ace::FontStyle fontStyle)
     {
         fontStyle_ = fontStyle;
     }
 
-    FontStyle GetFontStyle() const
+    OHOS::Ace::FontStyle GetFontStyle() const
     {
         return fontStyle_;
     }
@@ -129,7 +129,7 @@ private:
     std::string value_;
     std::string fontColor_;
     double fontSize_ = 0.0;
-    FontStyle fontStyle_;
+    OHOS::Ace::FontStyle fontStyle_;
     int32_t fontWeigth_ = 0;
     std::string fontFamily_;
     TextDecoration textDecoration_;

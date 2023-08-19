@@ -137,6 +137,7 @@ public:
     void DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info);
     void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
     void ClearContent(const RefPtr<UINode>& child);
+    void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -191,6 +192,10 @@ public:
             CloseCustomKeyboard();
         }
         customKeyboardBulder_ = keyboardBuilder;
+    }
+    void BindSelectionMenu()
+    {
+        isBindSelectionMenu_ = true;
     }
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
@@ -314,6 +319,7 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
+    bool isBindSelectionMenu_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

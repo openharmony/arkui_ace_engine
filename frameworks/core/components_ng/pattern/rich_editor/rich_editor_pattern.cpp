@@ -899,7 +899,7 @@ void RichEditorPattern::HandleBlurEvent()
 {
     StopTwinkling();
     CloseKeyboard(true);
-    if (textSelector_.IsValid()) {
+    if (textSelector_.IsValid() && !isBindSelectionMenu_) {
         CloseSelectOverlay();
         ResetSelection();
     }
@@ -2203,6 +2203,10 @@ RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end, 
 
 void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
 {
+    if (isBindSelectionMenu_) {
+        return;
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle](bool hasData) {
@@ -2555,6 +2559,12 @@ void RichEditorPattern::OnAreaChangedInner()
             CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
         CreateHandles();
     }
+}
+
+void RichEditorPattern::CloseSelectionMenu() {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    SubwindowManager::GetInstance()->HideMenuNG(host->GetId());
 }
 
 void RichEditorPattern::CloseSelectOverlay()

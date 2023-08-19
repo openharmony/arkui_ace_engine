@@ -85,6 +85,15 @@ public:
         return menuPattern->IsContextMenu();
     }
 
+    bool IsRichEditorSelectMenu() const
+    {
+        auto menu = GetMenu();
+        CHECK_NULL_RETURN(menu, false);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, false);
+        return menuPattern->IsRichEditorSelectMenu();
+    }
+
     bool IsSelectMenu() const
     {
         auto menu = GetMenu();

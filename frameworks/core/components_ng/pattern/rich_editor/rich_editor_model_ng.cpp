@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
@@ -112,6 +113,23 @@ void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func)
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     if (pattern) {
         pattern->SetCustomKeyboard(std::move(func));
+    }
+}
+
+void RichEditorModelNG::SetCopyOption(CopyOptions& copyOptions)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOptions);
+}
+
+void RichEditorModelNG::BindSelectionMenu(
+    RichEditorType& editorType, ResponseType& type, std::function<void()>& buildFunc, MenuParam& menuParam)
+{
+    ViewAbstractModel::GetInstance()->BindContextMenu(type, buildFunc, menuParam, MenuType::RICH_EDIT_SELECT_MENU);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    if (pattern) {
+        pattern->BindSelectionMenu();
     }
 }
 } // namespace OHOS::Ace::NG

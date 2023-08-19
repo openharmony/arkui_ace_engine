@@ -989,6 +989,13 @@ var CopyOptions;
   CopyOptions[CopyOptions["CrossDevice"] = 3] = "CrossDevice";
 })(CopyOptions || (CopyOptions = {}));
 
+var RichEditorSpanType;
+(function (RichEditorSpanType) {
+  RichEditorSpanType[RichEditorSpanType["TEXT"] = 0] = "TEXT";
+  RichEditorSpanType[RichEditorSpanType["IMAGE"] = 1] = "IMAGE";
+  RichEditorSpanType[RichEditorSpanType["MIXED"] = 2] = "MIXED";
+})(RichEditorSpanType || (RichEditorSpanType = {}));
+
 var ListItemAlign;
 (function (ListItemAlign) {
   ListItemAlign[ListItemAlign["Start"] = 0] = "Start";

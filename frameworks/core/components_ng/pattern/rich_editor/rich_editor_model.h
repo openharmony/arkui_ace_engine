@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 
@@ -119,6 +120,7 @@ public:
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
     virtual RichEditorSelection GetSpansInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
+    virtual void CloseSelectionMenu() = 0;
 };
 
 class ACE_EXPORT RichEditorModel {
@@ -134,6 +136,9 @@ public:
     virtual void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) = 0;
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
     virtual void SetCustomKeyboard(std::function<void()>&& func) = 0;
+    virtual void SetCopyOption(CopyOptions& copyOptions) = 0;
+    virtual void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
+        std::function<void()>& buildFunc, NG::MenuParam& menuParam) = 0;
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;
