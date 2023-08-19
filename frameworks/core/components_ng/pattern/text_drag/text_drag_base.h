@@ -28,8 +28,8 @@ using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>
 
 // inherited by TextPattern and TextFieldPattern
 // Text Drag polymorphism
-class TextDragBase : public virtual SelectionHost {
-    DECLARE_ACE_TYPE(TextDragBase, SelectionHost);
+class TextDragBase : public virtual AceType {
+    DECLARE_ACE_TYPE(TextDragBase, AceType);
 
 public:
     TextDragBase() = default;

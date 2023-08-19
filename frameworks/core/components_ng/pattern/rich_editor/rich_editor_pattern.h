@@ -294,6 +294,7 @@ private:
     bool isRichEditorInit_ = false;
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
+    bool blockPress_ = false;
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
     OffsetF rightClickOffset_;

@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
@@ -76,8 +77,6 @@ constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
-
-enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
 
 enum class DragStatus { DRAGGING, ON_DROP, NONE };
 
@@ -141,8 +140,9 @@ struct PreInlineState {
 class TextFieldPattern : public ScrollablePattern,
                          public TextDragBase,
                          public ValueChangeObserver,
-                         public TextInputClient {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient);
+                         public TextInputClient,
+                         public TextBase {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase);
 
 public:
     TextFieldPattern();
@@ -474,7 +474,7 @@ public:
         return selectionMode_;
     }
 
-    bool InSelectMode() const
+    bool IsSelected() const override
     {
         return selectionMode_ != SelectionMode::NONE && !textSelector_.StartEqualToDest();
     }
@@ -774,7 +774,7 @@ public:
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override
     {
-        if (!InSelectMode()) {
+        if (!IsSelected()) {
             return false;
         }
         Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
@@ -900,16 +900,11 @@ public:
 
     void UpdateSelectMenuInfo(bool hasData)
     {
-        selectMenuInfo_.showCopy = !GetEditingValue().text.empty() && AllowCopy() && InSelectMode();
-        selectMenuInfo_.showCut = selectMenuInfo_.showCopy && !GetEditingValue().text.empty() && InSelectMode();
+        selectMenuInfo_.showCopy = !GetEditingValue().text.empty() && AllowCopy() && IsSelected();
+        selectMenuInfo_.showCut = selectMenuInfo_.showCopy && !GetEditingValue().text.empty() && IsSelected();
         selectMenuInfo_.showCopyAll = !GetEditingValue().text.empty() && !IsSelectAll();
         selectMenuInfo_.showPaste = hasData;
         selectMenuInfo_.menuIsShow = !GetEditingValue().text.empty() || hasData;
-    }
-
-    bool IsSelected() const
-    {
-        return HasFocus();
     }
 
     bool IsSearchParentNode() const;
@@ -1174,7 +1169,6 @@ private:
     bool cursorVisible_ = false;
     bool focusEventInitialized_ = false;
     bool isMousePressed_ = false;
-    MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
@@ -1229,7 +1223,6 @@ private:
     RefPtr<TextFieldController> textFieldController_;
     RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
-    TextSelector textSelector_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     std::vector<RSTypographyProperties::TextBox> textBoxes_;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
