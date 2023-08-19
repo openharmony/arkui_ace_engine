@@ -275,6 +275,25 @@ public:
         return false;
     }
 
+    void SetScrollSource(int32_t scrollSource)
+    {
+        if (scrollSource == SCROLL_FROM_JUMP) {
+            if (scrollBar_ && overlayModifier_) {
+                overlayModifier_->SetOpacity(UINT8_MAX);
+                scrollBar_->ScheduleDisapplearDelayTask();
+            }
+            StopScrollBarAnimatorByProxy();
+            StartScrollBarAnimatorByProxy();
+        }
+        
+        scrollSource_ = scrollSource;
+    }
+
+    int32_t GetScrollSource() const
+    {
+        return scrollSource_;
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -357,6 +376,7 @@ private:
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<ScrollableCoordinationEvent> coordinationEvent_;
+    int32_t scrollSource_ = SCROLL_FROM_NONE;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
