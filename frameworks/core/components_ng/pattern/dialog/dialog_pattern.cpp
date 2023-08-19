@@ -592,8 +592,8 @@ RefPtr<FrameNode> DialogPattern::CreateDivider(
 
     // add divider margin
     MarginProperty margin = {
-        .left = CalcLength(space / 2),
-        .right = CalcLength(space / 2),
+        .left = CalcLength((space - dividerWidth) / 2),
+        .right = CalcLength((space - dividerWidth) / 2),
     };
     dividerProps->UpdateMargin(margin);
     return dividerNode;
