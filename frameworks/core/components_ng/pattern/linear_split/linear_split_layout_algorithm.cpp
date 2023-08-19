@@ -41,6 +41,7 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     const auto& minSize = layoutConstraint->minSize;
     const auto& maxSize = layoutConstraint->maxSize;
+    visibleChildCount_ = GetVisibleChildCount(layoutWrapper);
     OptionalSizeF realSize;
     do {
         // Use idea size first if it is valid.
@@ -54,7 +55,7 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     } while (false);
 
-    if (!childrenDragPos_.empty() && childrenDragPos_.size() != layoutWrapper->GetTotalChildCount() + 1U) {
+    if (!childrenDragPos_.empty() && childrenDragPos_.size() != visibleChildCount_ + 1U) {
         childrenDragPos_.clear();
     }
 
@@ -158,11 +159,13 @@ std::pair<SizeF, SizeF> LinearSplitLayoutAlgorithm::MeasureChildren(LayoutWrappe
     float childMaxWidth = 0.0f;
     float childMaxHeight = 0.0f;
     const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
-    int32_t childCount = layoutWrapper->GetTotalChildCount();
 
     // measure normal node.
     int32_t index = 0;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (child->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+            continue;
+        }
         child->Measure(GetChildConstrain(layoutWrapper, childConstraint, index));
         float childWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
         float childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
@@ -175,9 +178,10 @@ std::pair<SizeF, SizeF> LinearSplitLayoutAlgorithm::MeasureChildren(LayoutWrappe
 
     const auto splitHeightFloat = static_cast<float>(DEFAULT_SPLIT_HEIGHT);
     if (splitType_ == SplitType::ROW_SPLIT) {
-        allocatedSize += splitHeightFloat * std::max(0.f, static_cast<float>(childCount - 1));
+        allocatedSize += splitHeightFloat * std::max(0.f, static_cast<float>(visibleChildCount_ - 1));
     } else {
-        crossSize += (startMargin + splitHeightFloat + endMargin) * std::max(0.f, static_cast<float>(childCount - 1));
+        crossSize += (startMargin + splitHeightFloat + endMargin) *
+                     std::max(0.f, static_cast<float>(visibleChildCount_ - 1));
     }
 
     SizeF childTotalSize = { allocatedSize, crossSize };
@@ -224,20 +228,19 @@ LayoutConstraintF LinearSplitLayoutAlgorithm::GetChildConstrain(LayoutWrapper* l
     LayoutConstraintF childConstrain, int32_t index)
 {
     const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
-    int32_t childCount = layoutWrapper->GetTotalChildCount();
     auto constrain = childConstrain;
-    if (!childrenDragPos_.empty() && (index < childCount)) {
+    if (!childrenDragPos_.empty() && (index < visibleChildCount_)) {
         float childMaxSize =
                 childrenDragPos_[index + 1] - childrenDragPos_[index] - static_cast<float>(DEFAULT_SPLIT_HEIGHT);
         if (splitType_ == SplitType::ROW_SPLIT) {
-            if (index == childCount - 1) {
+            if (index == visibleChildCount_ - 1) {
                 childMaxSize += static_cast<float>(DEFAULT_SPLIT_HEIGHT);
             }
             constrain.selfIdealSize.SetWidth(childMaxSize);
         } else {
             if (index == 0) {
                 childMaxSize -= startMargin;
-            } else if (index == childCount - 1) {
+            } else if (index == visibleChildCount_ - 1) {
                 childMaxSize = childMaxSize - endMargin + static_cast<float>(DEFAULT_SPLIT_HEIGHT);
             } else {
                 childMaxSize -= startMargin + endMargin;
@@ -257,21 +260,24 @@ void LinearSplitLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     float childTotalWidth = 0.0f;
     float childTotalHeight = 0.0f;
-    int32_t childCount = layoutWrapper->GetTotalChildCount();
+    visibleChildCount_ = GetVisibleChildCount(layoutWrapper);
 
-    childrenConstrains_ = std::vector<float>(childCount, 0.0f);
+    childrenConstrains_ = std::vector<float>(visibleChildCount_, 0.0f);
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+            continue;
+        }
         childTotalWidth += item->GetGeometryNode()->GetMarginFrameSize().Width();
         childTotalHeight += item->GetGeometryNode()->GetMarginFrameSize().Height();
     }
 
     const auto splitHeightFloat = static_cast<float>(DEFAULT_SPLIT_HEIGHT);
     if (splitType_ == SplitType::ROW_SPLIT) {
-        childTotalWidth += splitHeightFloat * std::max(0.f, static_cast<float>(childCount - 1));
+        childTotalWidth += splitHeightFloat * std::max(0.f, static_cast<float>(visibleChildCount_ - 1));
     } else {
         const auto [startMargin, endMargin] = GetDividerMargin(layoutWrapper);
-        childTotalHeight +=
-                (startMargin + splitHeightFloat + endMargin) * std::max(0.f, static_cast<float>(childCount - 1));
+        childTotalHeight += (startMargin + splitHeightFloat + endMargin) *
+                            std::max(0.f, static_cast<float>(visibleChildCount_ - 1));
     }
 
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
@@ -296,12 +302,15 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(LayoutWrapper* layoutWrapper, fl
     int32_t index = 0;
     bool isFirstSetPos = false;
     if (childrenDragPos_.empty()) {
-        childrenDragPos_ = std::vector<float>(layoutWrapper->GetTotalChildCount() + 1, 0.0f);
+        childrenDragPos_ = std::vector<float>(visibleChildCount_ + 1, 0.0f);
         isFirstSetPos = true;
     }
 
     splitLength_ = parentHeight;
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+            continue;
+        }
         if (padding.top.has_value()) {
             childOffsetCross = padding.top.value();
         }
@@ -321,7 +330,7 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(LayoutWrapper* layoutWrapper, fl
         }
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
         childOffsetMain += item->GetGeometryNode()->GetMarginFrameSize().Width();
-        if (index < layoutWrapper->GetTotalChildCount() - 1) {
+        if (index < visibleChildCount_ - 1) {
             if (!isFirstSetPos) {
                 childOffsetMain = childrenDragPos_[index + 1] - static_cast<float>(DEFAULT_SPLIT_HEIGHT);
             }
@@ -345,16 +354,19 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto parentWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.Width();
     bool isFirstSetPos = false;
-    if (!childrenDragPos_.empty() && childrenDragPos_.size() != layoutWrapper->GetTotalChildCount() + 1U) {
+    if (!childrenDragPos_.empty() && childrenDragPos_.size() != visibleChildCount_ + 1U) {
         childrenDragPos_.clear();
     }
     if (childrenDragPos_.empty()) {
-        childrenDragPos_ = std::vector<float>(layoutWrapper->GetTotalChildCount() + 1, 0.0f);
+        childrenDragPos_ = std::vector<float>(visibleChildCount_ + 1, 0.0f);
         isFirstSetPos = true;
     }
     splitLength_ = parentWidth;
     int32_t index = 0;
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+            continue;
+        }
         if (padding.left.has_value()) {
             childOffsetMain = padding.left.value();
         }
@@ -373,7 +385,7 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(LayoutWrapper* layoutWrapper,
         ColumnSplitChildConstrain(layoutWrapper, item, index);
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
         childOffsetCross += item->GetGeometryNode()->GetMarginFrameSize().Height();
-        if (index < layoutWrapper->GetTotalChildCount() - 1) {
+        if (index < visibleChildCount_ - 1) {
             childOffsetCross += startMargin;
             if (!isFirstSetPos) {
                 childOffsetCross = childrenDragPos_[index + 1] - static_cast<float>(DEFAULT_SPLIT_HEIGHT);
@@ -409,7 +421,7 @@ void LinearSplitLayoutAlgorithm::ColumnSplitChildConstrain(LayoutWrapper* layout
     }
     if (index == 0) {
         childrenConstrains_[index] += startMargin;
-    } else if (index == layoutWrapper->GetTotalChildCount()) {
+    } else if (index == visibleChildCount_) {
         childrenConstrains_[index] += endMargin;
     } else {
         childrenConstrains_[index] += startMargin + endMargin;
@@ -439,6 +451,17 @@ float LinearSplitLayoutAlgorithm::GetLinearSplitChildMinSize(LayoutWrapper* layo
     CHECK_NULL_RETURN(theme, DEFAULT_MIN_CHILD_SIZE);
     auto size = static_cast<float>(theme->GetLinearSplitChildMinSize());
     return size;
+}
+
+int32_t LinearSplitLayoutAlgorithm::GetVisibleChildCount(LayoutWrapper* layoutWrapper)
+{
+    int32_t visibleChildCount = 0;
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (child->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::GONE) {
+            visibleChildCount++;
+        }
+    }
+    return visibleChildCount;
 }
 
 void LinearSplitLayoutAlgorithm::LayoutBeforeAPI10(LayoutWrapper* layoutWrapper)
