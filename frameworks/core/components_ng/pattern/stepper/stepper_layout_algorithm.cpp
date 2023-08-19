@@ -21,6 +21,7 @@
 #include "core/components/stepper/stepper_theme.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -34,7 +35,7 @@ void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    const auto idealSize =
+    auto idealSize =
         CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         LOGW("Size is infinity.");
@@ -42,6 +43,10 @@ void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     geometryNode->SetFrameSize(idealSize);
+
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, idealSize);
+
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
 
@@ -61,11 +66,15 @@ void StepperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, LayoutC
     auto index = hostNode->GetChildIndexById(hostNode->GetSwiperId());
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(swiperWrapper);
-    auto swiperHeight = swiperLayoutConstraint.parentIdealSize.Height().value() -
+    auto swiperWidth = swiperLayoutConstraint.parentIdealSize.Width().value_or(0.0);
+    auto swiperHeight = swiperLayoutConstraint.parentIdealSize.Height().value_or(0.0) -
                         static_cast<float>(stepperTheme->GetControlHeight().ConvertToPx());
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(swiperWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(swiperWidth), CalcLength(swiperHeight)));
     swiperLayoutConstraint.maxSize.SetHeight(swiperHeight);
     swiperLayoutConstraint.selfIdealSize.SetHeight(swiperHeight);
-    swiperLayoutConstraint.selfIdealSize.SetWidth(swiperLayoutConstraint.parentIdealSize.Width());
+    swiperLayoutConstraint.selfIdealSize.SetWidth(swiperWidth);
     swiperWrapper->Measure(swiperLayoutConstraint);
 }
 void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint)
@@ -171,6 +180,10 @@ void StepperLayoutAlgorithm::LayoutSwiper(LayoutWrapper* layoutWrapper)
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(swiperWrapper);
     OffsetF swiperOffset = { 0.0f, 0.0f };
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    swiperOffset += OffsetF(padding.left.value_or(0.0), padding.top.value_or(0.0));
     swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);
     swiperWrapper->Layout();
 }
@@ -194,6 +207,10 @@ void StepperLayoutAlgorithm::LayoutLeftButton(LayoutWrapper* layoutWrapper)
     auto margin = static_cast<float>(stepperTheme->GetControlMargin().ConvertToPx());
     auto buttonWidthOffset = padding + margin;
     OffsetF buttonOffset = { buttonWidthOffset, buttonHeightOffset };
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& stepperPadding = layoutProperty->CreatePaddingAndBorder();
+    buttonOffset += OffsetF(stepperPadding.left.value_or(0.0), -stepperPadding.bottom.value_or(0.0));
     auto geometryNode = leftButtonWrapper->GetGeometryNode();
     geometryNode->SetMarginFrameOffset(buttonOffset);
     leftButtonWrapper->Layout();
@@ -220,6 +237,10 @@ void StepperLayoutAlgorithm::LayoutRightButton(LayoutWrapper* layoutWrapper)
     auto buttonHeightOffset = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - controlHeight;
     buttonHeightOffset += (controlHeight - buttonHeight) / 2;
     OffsetF buttonOffset = { buttonWidthOffset, buttonHeightOffset };
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& stepperPadding = layoutProperty->CreatePaddingAndBorder();
+    buttonOffset -= OffsetF(stepperPadding.right.value_or(0.0), stepperPadding.bottom.value_or(0.0));
     rightButtonWrapper->GetGeometryNode()->SetMarginFrameOffset(buttonOffset);
     rightButtonWrapper->Layout();
 }
