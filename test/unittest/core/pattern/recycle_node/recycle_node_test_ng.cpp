@@ -37,7 +37,7 @@ HWTEST_F(RecycleNodeTestNG, RecycleNodeTestNg001, TestSize.Level1)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto recycleNode = RecycleDummyNode::CreateRecycleDummyNode(nodeId);
-    EXPECT_EQ(AceType::RawPtr(ElementRegister::GetInstance()->GetNodeById(nodeId)), AceType::RawPtr(recycleNode));
+    EXPECT_EQ(ElementRegister::GetInstance()->GetNodeById(nodeId), recycleNode);
 }
 
 /**

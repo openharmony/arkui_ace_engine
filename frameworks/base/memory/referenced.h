@@ -112,6 +112,9 @@ private:
     friend class RefPtr;
     template<class T>
     friend class WeakPtr;
+    // Forbid getting raw pointer from rvalue 'RefPtr'.
+    template<class T>
+    static T* RawPtr(const RefPtr<T>&& ptr) = delete;
 
     RefCounter* refCounter_ { nullptr };
 
@@ -320,6 +323,7 @@ public:
     // Construct instance by 'RefPtr' that inherited from type 'T' or 'T' itself.
     template<class O>
     ACE_REMOVE(explicit) WeakPtr(const RefPtr<O>& other) : WeakPtr(other.rawPtr_) {}
+    ACE_REMOVE(explicit) WeakPtr(const RefPtr<T>& other) : WeakPtr(other.rawPtr_) {}
 
     ~WeakPtr()
     {

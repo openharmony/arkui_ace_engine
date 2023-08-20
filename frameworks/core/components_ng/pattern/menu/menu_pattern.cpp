@@ -458,7 +458,7 @@ void MenuPattern::MountOption(const RefPtr<FrameNode>& option)
     CHECK_NULL_VOID(column);
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetMenu(WeakClaim(RawPtr(GetHost())));
+    pattern->SetMenu(GetHost());
     AddOptionNode(option);
     option->MountToParent(column);
 }

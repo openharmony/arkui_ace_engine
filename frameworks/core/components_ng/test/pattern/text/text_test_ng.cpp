@@ -3564,7 +3564,7 @@ HWTEST_F(TextTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: Related function is called.
      */
     RectF rect(0.0f, 0.0f, 0.0f, 0.0f);
-    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_))),
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_),
         GetPaintRectWithTransform())
         .WillRepeatedly(Return(rect));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));

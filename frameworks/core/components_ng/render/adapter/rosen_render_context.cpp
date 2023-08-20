@@ -1315,7 +1315,7 @@ void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixe
 
 void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)
 {
-    NG::ComponentSnapshot::JsCallback callback = [weak = WeakClaim(RawPtr(GetHost())),
+    NG::ComponentSnapshot::JsCallback callback = [weak = WeakPtr(GetHost()),
                                                      containerId = Container::CurrentId()](
                                                      std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode) {
         CHECK_NULL_VOID(pixmap);
