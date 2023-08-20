@@ -536,4 +536,7 @@ const char SAVE_BUTTON_ETS_TAG[] = "SaveButton";
 
 // Keyboard
 const char KEYBOARD_ETS_TAG[] = "Keyboard";
+// Particle
+const char PARTICLE_COMPONENT_TAG[] = "ParticleComponent";
+const char PARTICLE_ETS_TAG[] = "Particle";
 } // namespace OHOS::Ace::V2
