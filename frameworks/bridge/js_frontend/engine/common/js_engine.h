@@ -240,7 +240,7 @@ public:
 
     virtual RefPtr<GroupJsBridge> GetGroupJsBridge() = 0;
 
-    virtual ACE_EXPORT FrontendDelegate* GetFrontend()
+    virtual ACE_EXPORT RefPtr<FrontendDelegate> GetFrontend()
     {
         return nullptr;
     }

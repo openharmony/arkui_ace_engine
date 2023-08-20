@@ -256,7 +256,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         SetScrollBarOverlayModifier(scrollBarOverlayModifier);
     }
     paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier);
-    paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
+    paint->SetScrollBar(GetScrollBar());
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
