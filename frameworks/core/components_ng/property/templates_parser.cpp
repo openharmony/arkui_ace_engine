@@ -236,7 +236,7 @@ std::pair<std::vector<double>, bool> ParseArgsWithAutoFill(
             }
         }
     }
-    if ((countNonRepeat - 1) * gap > size)
+    if (countNonRepeat + countRepeat > 0 && (countNonRepeat + countRepeat - 1) * gap > size)
         gap = 0.0;
     double sizeNonRepeatGap = GreatNotEqual(countNonRepeat, 0) ? (countNonRepeat - 1) * gap : 0;
     double sizeLeft = size - sizeNonRepeatGap - sizeNonRepeat;
