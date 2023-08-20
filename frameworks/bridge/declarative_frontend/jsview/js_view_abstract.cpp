@@ -25,13 +25,16 @@
 #include <utility>
 #include <vector>
 
+#include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
+#include "base/geometry/shape.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
@@ -58,6 +61,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
+#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
@@ -182,6 +186,15 @@ void ParseJsScale(std::unique_ptr<JsonValue>& argsPtrItem, float& scaleX, float&
     double xVal = 1.0;
     double yVal = 1.0;
     double zVal = 1.0;
+    if (!argsPtrItem->IsObject() && !argsPtrItem->IsNumber() && !argsPtrItem->IsString()) {
+        scaleX = static_cast<float>(xVal);
+        scaleY = static_cast<float>(yVal);
+        scaleZ = static_cast<float>(zVal);
+        CalcDimension length;
+        centerX = length;
+        centerY = length;
+        return;
+    }
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), xVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), yVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), zVal);
@@ -990,6 +1003,13 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsScale", info, checkList)) {
+        auto scaleX = 1.0f;
+        auto scaleY = 1.0f;
+        auto scaleZ = 1.0f;
+        CalcDimension centerX = 0.5_pct;
+        CalcDimension centerY = 0.5_pct;
+        ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
+        ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY, 0.0_vp);
         return;
     }
 
@@ -1057,6 +1077,12 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     }
 
     double opacity = 0.0;
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::NUMBER,
+        JSCallbackInfoType::STRING };
+    if (!CheckJSCallbackInfo("Opacity", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetOpacity(1.0f);
+        return;
+    }
     if (!ParseJsDouble(info[0], opacity)) {
         return;
     }
@@ -1075,6 +1101,10 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsTranslate", info, checkList)) {
+        auto translateX = CalcDimension(0.0);
+        auto translateY = CalcDimension(0.0);
+        auto translateZ = CalcDimension(0.0);
+        ViewAbstractModel::GetInstance()->SetTranslate(translateX, translateY, translateZ);
         return;
     }
 
@@ -1134,6 +1164,10 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
     LOGD("JsRotate");
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsRotate", info, checkList)) {
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+        ViewAbstractModel::GetInstance()->SetRotate(
+            rotate.xDirection, rotate.yDirection, rotate.zDirection, 0.0f, rotate.perspective);
+        ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
         return;
     }
 
@@ -1196,6 +1230,14 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
     LOGD("JsTransform");
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsTransform", info, checkList)) {
+        const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+        std::vector<float> matrix(matrix4Len);
+        const int32_t initPosition = 5;
+        for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+            double value = 1.0;
+            matrix[i] = static_cast<float>(value);
+        }
+        ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
         return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -1492,6 +1534,8 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsConstraintSize", info, checkList)) {
+        ViewAbstractModel::GetInstance()->ResetMaxSize(true);
+        ViewAbstractModel::GetInstance()->ResetMinSize(true);
         return;
     }
 
@@ -2479,6 +2523,17 @@ void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
 {
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
+        JSCallbackInfoType::NUMBER };
+    if (!CheckJSCallbackInfo("MarginOrPadding", info, checkList)) {
+        auto resetDimension = CalcDimension(0.0);
+        if (isMargin) {
+            ViewAbstractModel::GetInstance()->SetMargin(resetDimension);
+        } else {
+            ViewAbstractModel::GetInstance()->SetPadding(resetDimension);
+        }
+        return;
+    }
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -2529,6 +2584,11 @@ void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorder", info, checkList)) {
         LOGE("args is not a object. %s", info[0]->ToString().c_str());
+        CalcDimension borderWidth;
+        ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
@@ -2660,6 +2720,9 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsBorderImage", info, checkList)) {
         LOGE("args is not a object. %{public}s", info[0]->ToString().c_str());
+        RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+        uint8_t imageBorderBitsets = 0;
+        ViewAbstractModel::GetInstance()->SetBorderImage(borderImage, imageBorderBitsets);
         return;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
@@ -3053,6 +3116,13 @@ void JSViewAbstract::JsBlur(const JSCallbackInfo& info)
     }
 
     double blur = 0.0;
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
+        JSCallbackInfoType::NUMBER };
+    if (!CheckJSCallbackInfo("Blur", info, checkList)) {
+        SetBlur(blur);
+        info.SetReturnValue(info.This());
+        return;
+    }
     if (!ParseJsDouble(info[0], blur)) {
         return;
     }
@@ -3089,6 +3159,13 @@ void JSViewAbstract::JsBackdropBlur(const JSCallbackInfo& info)
     }
 
     double blur = 0.0;
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
+        JSCallbackInfoType::NUMBER };
+    if (!CheckJSCallbackInfo("BackdropBlur", info, checkList)) {
+        SetBackdropBlur(blur);
+        info.SetReturnValue(info.This());
+        return;
+    }
     if (!ParseJsDouble(info[0], blur)) {
         return;
     }
@@ -4401,6 +4478,13 @@ void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("LinearGradient", info, checkList)) {
+        NG::Gradient newGradient;
+        newGradient.CreateGradientWithType(NG::GradientType::LINEAR);
+        ViewAbstractModel::GetInstance()->SetLinearGradient(newGradient);
+        return;
+    }
     if (!info[0]->IsObject()) {
         LOGE("arg is not a object.");
         return;
@@ -4474,6 +4558,9 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsRadialGradient", info, checkList)) {
+        NG::Gradient newGradient;
+        newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
+        ViewAbstractModel::GetInstance()->SetSweepGradient(newGradient);
         return;
     }
 
@@ -4530,6 +4617,9 @@ void JSViewAbstract::JsSweepGradient(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsSweepGradient", info, checkList)) {
+        NG::Gradient newGradient;
+        newGradient.CreateGradientWithType(NG::GradientType::SWEEP);
+        ViewAbstractModel::GetInstance()->SetSweepGradient(newGradient);
         return;
     }
 
@@ -4767,6 +4857,14 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 {
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::BOOLEAN };
+    if (!CheckJSCallbackInfo("Clip", info, checkList)) {
+        auto shape = AceType::MakeRefPtr<BasicShape>();
+        shape->SetColor(Color::TRANSPARENT);
+        ViewAbstractModel::GetInstance()->SetClipShape(shape);
+        ViewAbstractModel::GetInstance()->SetClipEdge(false);
+        return;
+    }
     if (info[0]->IsObject()) {
         JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (clipShape == nullptr) {
@@ -4786,6 +4884,12 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
     }
 
     if (!info[0]->IsObject()) {
+        auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+        progressMask->SetColor(Color::TRANSPARENT);
+        ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+        auto shape = AceType::MakeRefPtr<BasicShape>();
+        shape->SetColor(Color::TRANSPARENT);
+        ViewAbstractModel::GetInstance()->SetMask(shape);
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
@@ -6115,6 +6219,11 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
 
 void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
 {
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
+    if (!CheckJSCallbackInfo("HoverEffect", info, checkList)) {
+        ViewAbstractModel::GetInstance()->SetHoverEffect(HoverEffectType::AUTO);
+        return;
+    }
     if (!info[0]->IsNumber()) {
         LOGE("info[0] is not a number");
         return;
@@ -6405,6 +6514,11 @@ bool JSViewAbstract::CheckLength(
 
 void JSViewAbstract::JsObscured(const JSCallbackInfo& info)
 {
+    if (info[0]->IsUndefined()) {
+        std::vector<ObscuredReasons> reasons(0);
+        ViewAbstractModel::GetInstance()->SetObscured(reasons);
+        return;
+    }
     if (!info[0]->IsArray()) {
         return;
     }
