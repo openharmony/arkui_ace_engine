@@ -601,10 +601,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.customNode) {
         g_getPixelMapSucc = false;
-        auto callback = [pipeline, info, gestureEventHubPtr = AceType::Claim(this), frameNode, dragDropInfo, event](
-                            std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg) {
-            CHECK_NULL_VOID(gestureEventHubPtr);
-            CHECK_NULL_VOID(frameNode);
+        auto callback = [pipeline, info, gestureEventHubPtr = AceType::Claim(this), frameNode, dragDropInfo,
+                            event](std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg) {
             if (pixelMap == nullptr) {
                 LOGW("%{public}s: failed to get pixelmap, return nullptr", __func__);
                 g_getPixelMapSucc = false;
@@ -612,7 +610,15 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
                 g_getPixelMapSucc = true;
             }
-            gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+            auto taskScheduler = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(taskScheduler);
+            taskScheduler->PostTask(
+                [pipeline, info, gestureEventHubPtr, frameNode, dragDropInfo, event]() {
+                    CHECK_NULL_VOID_NOLOG(gestureEventHubPtr);
+                    CHECK_NULL_VOID(frameNode);
+                    gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
+                },
+                TaskExecutor::TaskType::UI);
         };
         auto customNode = AceType::DynamicCast<FrameNode>(dragDropInfo.customNode);
         NG::ComponentSnapshot::Create(customNode, std::move(callback), CREATE_PIXELMAP_TIME);
@@ -623,7 +629,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 }
 
 void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context,
-    const RefPtr<FrameNode> frameNode, const DragDropInfo& dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
+    const RefPtr<FrameNode> frameNode, const DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
@@ -636,6 +642,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropProxy_ = nullptr;
     }
 #ifdef ENABLE_DRAG_FRAMEWORK
+    CHECK_NULL_VOID(dragEvent);
     auto eventRet = dragEvent->GetResult();
     if (eventRet == DragRet::DRAG_FAIL || eventRet == DragRet::DRAG_CANCEL) {
         LOGI("HandleOnDragStart: User Set DRAG_FAIL or DRAG_CANCEL");
@@ -644,6 +651,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     std::string udKey;
     int32_t recordsSize = 1;
     auto unifiedData = dragEvent->GetData();
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetDragRecordSize() >= 0) {
