@@ -632,6 +632,8 @@ void OverlayManager::HideCustomPopups()
             if (isTypeWithOption) {
                 continue;
             }
+            popupInfo.markNeedUpdate = true;
+            popupInfo.popupId = -1;
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
@@ -661,6 +663,8 @@ void OverlayManager::HideAllPopups()
             CHECK_NULL_VOID(popupNode);
             auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
             CHECK_NULL_VOID(layoutProp);
+            popupInfo.markNeedUpdate = true;
+            popupInfo.popupId = -1;
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
