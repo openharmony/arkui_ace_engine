@@ -380,7 +380,7 @@ txt::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textD
 #else
 Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle)
 {
-    Rosen::TextDecorationStyle convertValue = Rosen::TextDecorationStyle::kSolid;
+    Rosen::TextDecorationStyle convertValue = Rosen::TextDecorationStyle::SOLID;
     switch (textDecorationStyle) {
         case TextDecorationStyle::SOLID:
             convertValue = Rosen::TextDecorationStyle::SOLID;
