@@ -1132,8 +1132,9 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
     pattern->SetPredictLayoutParam(param);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->AddPredictTask([frameNode](int64_t deadline, bool canUseLongPredictTask) {
+    context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
         ACE_SCOPED_TRACE("List predict");
+        auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<ListPattern>();
         CHECK_NULL_VOID(pattern);
