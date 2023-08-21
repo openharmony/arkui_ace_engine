@@ -186,6 +186,20 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     return nullptr;
 }
 
+int32_t LazyForEachNode::GetIndexByUINode(const RefPtr<UINode>& uiNode) const
+{
+    if (!builder_) {
+        return -1;
+    }
+    auto items = builder_->GetAllChildren();
+    for (auto& [index, item] : items) {
+        if (item.second == uiNode) {
+            return index;
+        }
+    }
+    return -1;
+}
+
 void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 {
     if (!builder_) {

@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -266,12 +267,24 @@ float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float 
     return ListLayoutAlgorithm::CalculateLaneCrossOffset(crossSize / lanes_, childCrossSize / lanes_);
 }
 
+int32_t ListLanesLayoutAlgorithm::GetLazyForEachIndex(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, -1);
+    auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(host->GetParent());
+    CHECK_NULL_RETURN_NOLOG(lazyForEach, -1);
+    return lazyForEach->GetIndexByUINode(host);
+}
+
 int32_t ListLanesLayoutAlgorithm::FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index)
 {
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, false);
     CHECK_NULL_RETURN_NOLOG(wrapper, index);
     if (wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
         return index;
+    }
+    auto lazyIndex = GetLazyForEachIndex(wrapper->GetHostNode());
+    if (lazyIndex > 0) {
+        index -= lazyIndex;
     }
     for (int32_t idx = index; idx > startIndex; idx--) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(idx - 1, false);
