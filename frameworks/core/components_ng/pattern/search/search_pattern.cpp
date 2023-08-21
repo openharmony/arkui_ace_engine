@@ -951,9 +951,7 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) c
     searchIconJson->Put("size", Dimension(searchIconSize, DimensionUnit::PX).ToString().c_str());
 
     // icon color
-    auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    auto searchIconColor = imageRenderProperty->GetSvgFillColor().value_or(Color());
+    auto searchIconColor = imageLayoutProperty->GetImageSourceInfo()->GetFillColor().value_or(Color());
     searchIconJson->Put("color", searchIconColor.ColorToString().c_str());
 
     // icon path
