@@ -42,7 +42,7 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W500,
     FontWeight::W400,
 };
-constexpr Dimension ERROR_TEXT_UNDERLINE_MARGIN = 4.0_vp;
+constexpr Dimension ERROR_TEXT_UNDERLINE_MARGIN = 8.0_vp;
 constexpr Dimension ERROR_TEXT_CAPSULE_MARGIN = 8.0_vp;
 constexpr Dimension COUNTER_TEXT_AREA_MARGIN = 8.0_vp;
 
@@ -86,6 +86,8 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     if (layoutProperty->GetShowUnderlineValue(false) && showErrorState_->Get()) {
         errorMargin = ERROR_TEXT_UNDERLINE_MARGIN.ConvertToPx();
     } else if (textFieldPattern->NeedShowPasswordIcon() && showErrorState_->Get()) {
+        errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
+    } else if (showErrorState_->Get()) {
         errorMargin = ERROR_TEXT_CAPSULE_MARGIN.ConvertToPx();
     } else {
         errorMargin = 0;

@@ -94,8 +94,6 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
     if (badgeParameters.badgeFontSize.has_value() &&
         GreatOrEqual(badgeParameters.badgeFontSize.value().ConvertToPx(), 0)) {
         layoutProperty->UpdateBadgeFontSize(badgeParameters.badgeFontSize.value());
-    } else {
-        layoutProperty->UpdateBadgeFontSize(badgeTheme->GetBadgeFontSize());
     }
     if (badgeParameters.badgeCircleSize.has_value()) {
         layoutProperty->UpdateBadgeCircleSize(badgeParameters.badgeCircleSize.value());

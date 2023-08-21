@@ -63,4 +63,9 @@ std::pair<SizeF, int32_t> SkiaImageData::Parse() const
 {
     return { SizeF(1, 1), frameCount };
 }
+
+const void* SkiaImageData::GetDataWrapper() const
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

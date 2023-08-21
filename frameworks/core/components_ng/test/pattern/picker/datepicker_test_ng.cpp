@@ -69,6 +69,7 @@ const double TIME_PLUS_LARGE = 10 * 1000.0;
 const SizeF TEST_FRAME_SIZE1 { 20, 50 };
 const SizeF TEST_FRAME_SIZE2 { 0, 0 };
 const std::string SELECTED_DATE_STRING = "{\"year\":2000,\"month\":5,\"day\":6,\"hour\":1,\"minute\":1,\"status\":-1}";
+constexpr double COLUMN_VELOCITY = 2000.0;
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -77,6 +78,10 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
+    void CreateDatePickerColumnNode();
+
+    RefPtr<FrameNode> columnNode_;
+    RefPtr<DatePickerColumnPattern> columnPattern_;
 };
 
 class TestNode : public UINode {
@@ -119,6 +124,22 @@ void DatePickerTestNg::SetUp()
 void DatePickerTestNg::TearDown()
 {
     MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
+}
+
+void DatePickerTestNg::CreateDatePickerColumnNode()
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    columnNode_ = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(columnNode_, nullptr);
+    columnNode_->MarkModifyDone();
+    columnPattern_ = columnNode_->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->OnAttachToFrameNode();
 }
 
 /**
@@ -2408,7 +2429,7 @@ HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest001, TestSize.Level1)
     toss->SetStart(YOFFSET_START1);
     toss->SetEnd(YOFFSET_END1);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
-    EXPECT_TRUE(toss->Play());
+    EXPECT_FALSE(toss->Play());
 
     columnPattern->SetShowCount(0);
     auto options = columnPattern->GetOptions();
@@ -2439,12 +2460,12 @@ HWTEST_F(DatePickerTestNg, TossAnimationControllerTest001, TestSize.Level1)
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
     /**
      * @tc.steps: step2. call Play function.
-     * @tc.expected: The return value is true.
+     * @tc.expected: The return value is false.
      */
     auto ret = toss->Play();
     EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     auto column = AceType::MakeRefPtr<DatePickerColumnPattern>();
     toss->SetColumn(column);
 }
@@ -2465,19 +2486,19 @@ HWTEST_F(DatePickerTestNg, TossAnimationControllerTest002, TestSize.Level1)
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
     /**
      * @tc.steps: step2. call Play function.
-     * @tc.expected: The return value is true.
+     * @tc.expected: The return value is false.
      */
     auto ret = toss->Play();
     EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     toss->SetStart(YOFFSET_START2);
     toss->SetEnd(YOFFSET_END2);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
     ret = toss->Play();
     EXPECT_EQ(toss->yStart_, YOFFSET_START2);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END2);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     auto column = AceType::MakeRefPtr<DatePickerColumnPattern>();
     toss->SetColumn(column);
 }
@@ -2534,6 +2555,41 @@ HWTEST_F(DatePickerTestNg, TossAnimationControllerTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TossAnimationControllerTest006
+ * @tc.desc: Test TossAnimationController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, TossAnimationControllerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DatePickerColumn.
+     */
+    CreateDatePickerColumnNode();
+
+    /**
+     * @tc.steps: step2. Set velocity and toss offset .
+     */
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->SetMainVelocity(COLUMN_VELOCITY);
+    auto toss = columnPattern_->GetToss();
+    ASSERT_NE(toss, nullptr);
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_END1);
+    toss->timeEnd_ = toss->timeStart_ + TIME_PLUS;
+
+    /**
+     * @tc.step: step3. call toss::Play and check yStart_ and yEnd_.
+     * @tc.expected: yStart_ and yEnd_ same as setting, return value is true.
+     */
+    auto ret = toss->Play();
+    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
+    EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
+    EXPECT_TRUE(ret);
+    toss->StopTossAnimation();
+    EXPECT_FALSE(columnPattern_->GetTossStatus());
+}
+
+/**
  * @tc.name: DatePickerDialogViewShow011
  * @tc.desc: Test GetSelectedObject.
  * @tc.type: FUNC
@@ -2575,5 +2631,40 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewShow011, TestSize.Level1)
     pickerPattern->SetShowMonthDaysFlag(true);
     auto selectedDate = pickerPattern->GetSelectedObject(true);
     EXPECT_EQ(selectedDate, SELECTED_DATE_STRING);
+}
+
+/**
+ * @tc.name: DatePickerEventActionsTest002
+ * @tc.desc: Test OnAroundButtonClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DatePickerColumnNode.
+     */
+    CreateDatePickerColumnNode();
+
+    /**
+     * @tc.steps: step2. Call OnAroundButtonClick .
+     */
+    ASSERT_NE(columnNode_, nullptr);
+    auto childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(1));
+    ASSERT_NE(childNode, nullptr);
+    auto param = AceType::MakeRefPtr<DatePickerEventParam>();
+    param->instance_ = childNode;
+    param->itemIndex_ = 1;
+    param->itemTotalCounts_ = static_cast<int32_t>(columnNode_->GetChildren().size());
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->OnAroundButtonClick(param);
+
+    /**
+     * @tc.step: step3. call IsRunning.
+     * @tc.expected: Check animator isRunning value.
+     */
+    auto controller = columnPattern_->fromController_;
+    ASSERT_NE(controller, nullptr);
+    auto isRunning = controller->IsRunning();
+    EXPECT_TRUE(isRunning);
 }
 } // namespace OHOS::Ace::NG

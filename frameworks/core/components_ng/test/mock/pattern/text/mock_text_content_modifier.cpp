@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 
 namespace OHOS::Ace::NG {
-TextContentModifier::TextContentModifier(const std::optional<TextStyle> textStyle) {}
+TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle) {}
 
 void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle) {}
 
@@ -69,7 +69,7 @@ void TextContentModifier::SetFontWeight(const FontWeight& value) {}
 
 void TextContentModifier::SetTextColor(const Color& value) {}
 
-void TextContentModifier::SetTextShadow(const Shadow& value) {}
+void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value) {}
 
 void TextContentModifier::SetTextDecoration(const TextDecoration& type) {}
 

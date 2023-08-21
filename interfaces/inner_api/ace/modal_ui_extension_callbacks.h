@@ -21,6 +21,8 @@
 #include <memory>
 #include <string>
 
+#include "modal_ui_extension_proxy.h"
+
 namespace OHOS::AAFwk {
 class Want;
 class WantParams;
@@ -32,6 +34,7 @@ struct ModalUIExtensionCallbacks {
     std::function<void(int32_t, const AAFwk::Want&)> onResult;
     std::function<void(const AAFwk::WantParams&)> onReceive;
     std::function<void(int32_t, const std::string&, const std::string&)> onError;
+    std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onRemoteReady;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MODAL_CONFIG_H

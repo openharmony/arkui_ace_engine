@@ -35,55 +35,13 @@ struct CachedImage {
     uint32_t uniqueId = 0;
 };
 
-#ifndef USE_ROSEN_DRAWING
-struct SkiaCachedImageData : public CachedImageData {
-    DECLARE_ACE_TYPE(SkiaCachedImageData, CachedImageData);
-
-public:
-    explicit SkiaCachedImageData(const sk_sp<SkData>& data) : imageData(data) {}
-    ~SkiaCachedImageData() override = default;
-#else
-struct RosenCachedImageData : public CachedImageData {
-    DECLARE_ACE_TYPE(RosenCachedImageData, CachedImageData);
-
-public:
-    explicit RosenCachedImageData(const std::shared_ptr<RSData>& data) : imageData(data) {}
-    ~RosenCachedImageData() override = default;
-#endif
-
-    size_t GetSize() override
-    {
-#ifndef USE_ROSEN_DRAWING
-        return imageData ? imageData->size() : 0;
-#else
-        return imageData ? imageData->GetSize() : 0;
-#endif
-    }
-
-    const uint8_t* GetData() override
-    {
-#ifndef USE_ROSEN_DRAWING
-        return imageData ? imageData->bytes() : nullptr;
-#else
-        return imageData ? static_cast<const uint8_t*>(imageData->GetData()) : nullptr;
-#endif
-    }
-
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkData> imageData;
-#else
-    std::shared_ptr<RSData> imageData;
-#endif
-};
-
 class FlutterImageCache : public ImageCache {
     DECLARE_ACE_TYPE(FlutterImageCache, ImageCache);
 
 public:
     FlutterImageCache() = default;
     ~FlutterImageCache() override = default;
-    void Clear() override;
-    RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) override;
+    RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& filePath) override;
 };
 
 } // namespace OHOS::Ace

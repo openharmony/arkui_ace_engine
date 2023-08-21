@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/event/touch_event.h"
@@ -79,6 +80,7 @@ void StateStyleManager::FireStateFunc()
         LOGE("fail to find custom node to fire update func of %{public}d", nodeId);
         return;
     }
+    ScopedViewStackProcessor processor;
     customNode->FireNodeUpdateFunc(nodeId);
 }
 

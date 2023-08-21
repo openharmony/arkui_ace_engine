@@ -52,10 +52,16 @@ void GaugeModelNG::SetEndAngle(float endAngle)
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, EndAngle, endAngle);
 }
 
+void GaugeModelNG::SetColors(const std::vector<Color>& colors, const std::vector<float>& values)
+{
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Colors, colors);
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Values, values);
+}
+
 void GaugeModelNG::SetGradientColors(
     const std::vector<ColorStopArray>& colors, const std::vector<float>& values, const GaugeType& type)
 {
-    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Colors, colors);
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, GradientColors, colors);
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Values, values);
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, GaugeType, type);
 }

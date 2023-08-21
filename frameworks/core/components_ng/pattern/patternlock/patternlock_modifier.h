@@ -73,7 +73,6 @@ public:
     void SetHoverColor(const Color& hoverColor);
     void SetWrongColor(const Color& wrongColor);
     void SetCorrectColor(const Color& correctColor);
-    void SetPressColor(const Color& pressColor);
     void SetPathStrokeWidth(float pathStrokeWidth);
     void SetIsMoveEventValid(bool isMoveEventValid);
     void SetIsHover(bool isHover);
@@ -86,7 +85,6 @@ public:
     void SetBackgroundCircleRadiusScale(float scale);
     void SetLightRingRadiusStartScale(float scale);
     void SetLightRingRadiusEndScale(float scale);
-    void SetPressRadiusScale(float scale);
     void SetHoverRadiusScale(float scale);
     void StartConnectedCircleAnimate(int32_t x, int32_t y);
     void StartConnectedLineAnimate(int32_t x, int32_t y);
@@ -100,8 +98,8 @@ private:
     void CheckIsHoverAndPaint(RSCanvas& canvas, float offsetX, float offsetY, float radius, int32_t index);
     void PaintCircle(RSCanvas& canvas, float offsetX, float offsetY, float radius, const RSColor& circleColor);
     void PaintLightRing(RSCanvas& canvas, float offsetX, float offsetY, float radius, float alphaF);
-    void PaintConnectedLineTail(RSCanvas& canvas, const OffsetF& offset);
-    void PaintCanceledLineTail(RSCanvas& canvas, const OffsetF& offset);
+    void AddConnectedLineToPath(RSPath& path, const OffsetF& offset);
+    void AddCanceledLineToPath(RSPath& path, const OffsetF& offset);
     void SetConnectedLineTailPoint(int32_t x, int32_t y);
     void SetCanceledLineTailPoint();
     OffsetF GetConnectedLineTailPoint() const;
@@ -123,6 +121,7 @@ private:
     void CreateProperties();
     void AttachProperties();
     void StartChallengeResultAnimate();
+    void SetCircleClip(RSCanvas& canvas);
 
     RefPtr<PropertyColor> regularColor_;
     RefPtr<PropertyColor> selectedColor_;
@@ -131,7 +130,6 @@ private:
     RefPtr<PropertyColor> wrongColor_;
     RefPtr<PropertyColor> correctColor_;
     RefPtr<AnimatablePropertyColor> pathColor_;
-    RefPtr<PropertyColor> pressColor_;
     RefPtr<AnimatablePropertyOffsetF> connectedLineTailPoint_;
     RefPtr<AnimatablePropertyOffsetF> canceledLineTailPoint_;
     RefPtr<AnimatablePropertyColor> pointAnimateColor_;
@@ -154,7 +152,6 @@ private:
     float scaleBackgroundCircleRadius_ = 1.0f;
     float scaleLightRingRadiusStart_ = 1.0f;
     float scaleLightRingRadiusEnd_ = 1.0f;
-    float pressRadiusScale_ = 1.0f;
     float hoverRadiusScale_ = 1.0f;
     bool isTouchDown_ = false;
     bool needCanceledLine_ = false;

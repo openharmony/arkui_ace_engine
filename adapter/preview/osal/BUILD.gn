@@ -66,6 +66,7 @@ ohos_source_set("preview_osal_source") {
       "event_report.cpp",
       "exception_handler.cpp",
       "fetch_manager.cpp",
+      "file_uri_helper_preview.cpp",
       "frame_report.cpp",
       "image_source_preview.cpp",
       "modal_ui_extension_impl.cpp",

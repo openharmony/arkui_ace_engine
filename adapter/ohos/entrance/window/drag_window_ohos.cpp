@@ -15,7 +15,11 @@
 
 #include "drag_window_ohos.h"
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_txt.h"
+#else
+#include "rosen_text/typography.h"
+#endif
 
 #ifdef NEW_SKIA
 #include "include/core/SkCanvas.h"
@@ -427,8 +431,13 @@ void DragWindowOhos::DrawImage(void* drawingImage)
 }
 #endif
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void DragWindowOhos::DrawText(
     std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText)
+#else
+void DragWindowOhos::DrawText(
+    std::shared_ptr<Rosen::Typography> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText)
+#endif
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(paragraph);

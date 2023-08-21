@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CHILDREN_SIZE = 5;
+constexpr int32_t DOUBLE = 2;
 } // namespace
 void CalendarPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -47,6 +48,7 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
     auto topMargin = theme->GetEntryDateTopBottomMargin();
+    topMargin += theme->GetEntryBorderWidth() * DOUBLE;
     auto leftMargin = theme->GetEntryDateLeftRightMargin();
     float widthTotal = 0.0f;
     float height = 0.0f;

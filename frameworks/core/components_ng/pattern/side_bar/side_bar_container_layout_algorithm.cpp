@@ -67,6 +67,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AdjustMinAndMaxSideBarWidth(layoutWrapper);
 
     auto parentWidth = idealSize.Width();
+    realSideBarWidth_ = ConvertToPx(realSideBarWidthDimension_, constraint->scaleProperty, parentWidth).value_or(-1.0f);
     if (needInitRealSideBarWidth_) {
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
@@ -125,6 +126,14 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
         auto contentLayoutWrapper = children.front();
         MeasureSideBarContent(layoutProperty, contentLayoutWrapper, parentWidth);
+    }
+
+    if (realSideBarWidthDimension_.Unit() == DimensionUnit::PERCENT) {
+        realSideBarWidthDimension_ = NearZero(parentWidth)
+                                         ? Dimension(0.0, DimensionUnit::PERCENT)
+                                         : Dimension(realSideBarWidth_ / parentWidth, DimensionUnit::PERCENT);
+    } else {
+        realSideBarWidthDimension_ = Dimension(realSideBarWidth_, DimensionUnit::PX);
     }
 }
 
@@ -215,6 +224,10 @@ void SideBarContainerLayoutAlgorithm::GetAllPropertyValue(
     auto maxSideBarWidth = layoutProperty->GetMaxSideBarWidth().value_or(-1.0_vp);
 
     realSideBarWidth_ = ConvertToPx(realSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
+    if (preSideBarWidth_.IsValid()) {
+        realSideBarWidth_ = ConvertToPx(preSideBarWidth_, scaleProperty, parentWidth).value_or(-1.0f);
+    }
+
     minSideBarWidth_ = ConvertToPx(minSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
     minContentWidth_ = ConvertToPx(minContentWidth, scaleProperty, parentWidth).value_or(-1.0f);
     maxSideBarWidth_ = ConvertToPx(maxSideBarWidth, scaleProperty, parentWidth).value_or(-1.0f);
@@ -525,7 +538,7 @@ void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
+        LOGE("SideBarContainerLayoutAlgorithm::Layout, children is less than 3.");
         return;
     }
 

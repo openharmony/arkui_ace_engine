@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_SVG_IMAGE_OBJECT_H
 
 #include "core/components_ng/image_provider/image_object.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 
 namespace OHOS::Ace::NG {
 

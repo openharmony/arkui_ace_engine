@@ -690,6 +690,7 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
                 CHECK_NULL_VOID(titleBarNode);
                 titleBarNode->RemoveChild(navBarNode->GetSubtitle());
                 titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                titleBarNode->SetSubtitle(nullptr);
                 navBarNode->SetSubtitle(nullptr);
             }
             titleProperty->UpdateMaxLines(2); // 2:title's maxLine.
@@ -730,8 +731,6 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
         textLayoutProperty->UpdateMaxLines(1); // 1:title's maxLine.
     }
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
-    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     navBarNode->SetTitle(titleNode);
     navBarNode->UpdatePrevTitleIsCustom(false);
 }
@@ -847,7 +846,6 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
 
         auto eventHub = backButtonNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
-        eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -937,9 +935,6 @@ void NavigationModelNG::SetSubtitle(const std::string& subtitle)
     textLayoutProperty->UpdateTextColor(theme->GetSubTitleColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
     textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-    textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSize());
-    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navBarNode->SetSubtitle(subtitleNode);
 }
@@ -1241,6 +1236,12 @@ void NavigationModelNG::SetNavBarPosition(NG::NavBarPosition mode)
 void NavigationModelNG::SetNavBarWidth(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SetUserSetNavBarWidthFlag(true);
 }
 
 void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)

@@ -184,8 +184,7 @@ void SlidingPanelPattern::InitializeLayoutProps()
     defaultBlankHeights_[PanelMode::HALF] = maxSize.Height() - halfHeight;
     defaultBlankHeights_[PanelMode::MINI] = maxSize.Height() - miniHeight;
     defaultBlankHeights_[PanelMode::AUTO] = maxSize.Height();
-    defaultBlankHeights_[PanelMode::CUSTOM] = maxSize.Height() - (customHeight_.ConvertToPx() +
-        DRAG_UP_THRESHOLD.ConvertToPx());
+    defaultBlankHeights_[PanelMode::CUSTOM] = maxSize.Height() - customHeight_.ConvertToPx();
     CheckHeightValidity();
     fullHalfBoundary_ = defaultBlankHeights_[PanelMode::FULL] +
                         (defaultBlankHeights_[PanelMode::HALF] - defaultBlankHeights_[PanelMode::FULL]) / 2.0;

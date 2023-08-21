@@ -54,6 +54,7 @@ ToggleModel* ToggleModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+int32_t JSToggle::toggleType_ = 1;
 const static int32_t PLATFORM_VERSION_TEN = 10;
 void JSToggle::JSBind(BindingTarget globalObj)
 {
@@ -108,6 +109,7 @@ void JSToggle::Create(const JSCallbackInfo& info)
     if (toggleTypeInt < 0 || toggleTypeInt > 2) {
         toggleTypeInt = 1;
     }
+    toggleType_ = toggleTypeInt;
     auto tempIsOn = paramObject->GetProperty("isOn");
     bool isOn = false;
     JSRef<JSVal> changeEventVal;
@@ -138,13 +140,18 @@ void JSToggle::JsWidth(const JSCallbackInfo& info)
 
 void JSToggle::JsWidth(const JSRef<JSVal>& jsValue)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    auto switchTheme = GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
     auto defaultWidth = switchTheme->GetWidth();
     auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding();
     auto width = defaultWidth - horizontalPadding * 2;
+    if (toggleType_ == 0) {
+        auto checkboxTheme = GetTheme<CheckboxTheme>();
+        CHECK_NULL_VOID(checkboxTheme);
+        defaultWidth = checkboxTheme->GetDefaultWidth();
+        horizontalPadding = checkboxTheme->GetHotZoneHorizontalPadding();
+        width = defaultWidth - horizontalPadding * 2;
+    }
     CalcDimension value(width);
     ParseJsDimensionVp(jsValue, value);
     if (value.IsNegative()) {

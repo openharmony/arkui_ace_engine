@@ -68,7 +68,7 @@ public:
 #else
     static std::shared_ptr<RSData> QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo);
 #endif
-    static void CacheImageDataToImageCache(const std::string& key, const RefPtr<CachedImageData>& imageData);
+    static void CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& data);
     static RefPtr<NG::ImageData> LoadImageDataFromFileCache(const std::string& key, const std::string& suffix);
 };
 

@@ -616,6 +616,17 @@ void LayoutProperty::UpdateAspectRatio(float ratio)
     }
 }
 
+void LayoutProperty::ResetAspectRatio()
+{
+    if (!magicItemProperty_) {
+        return;
+    }
+    if (magicItemProperty_->HasAspectRatio()) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    }
+    magicItemProperty_->ResetAspectRatio();
+}
+
 void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition)
 {
     auto host = GetHost();

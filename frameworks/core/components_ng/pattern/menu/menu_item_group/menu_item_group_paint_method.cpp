@@ -57,7 +57,8 @@ void MenuItemGroupPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* pain
                        static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
     auto verInterval = static_cast<float>(selectTheme->GetDividerPaddingVertical().ConvertToPx());
     if (!isHeader) {
-        verInterval = groupSize.Height() - verInterval;
+        verInterval =
+            groupSize.Height() - verInterval - static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx());
     }
     RSPath path;
     // draw divider above content, length = content width

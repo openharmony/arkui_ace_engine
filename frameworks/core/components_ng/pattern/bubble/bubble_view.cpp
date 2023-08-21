@@ -358,13 +358,11 @@ RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int
     auto primaryButton = BubbleView::CreateButton(primaryButtonProp, popupId, targetId, param);
     if (primaryButton) {
         primaryButton->MountToParent(rowNode);
-        primaryButton->MarkModifyDone();
     }
     auto secondaryButtonProp = param->GetSecondaryButtonProperties();
     auto secondaryButton = BubbleView::CreateButton(secondaryButtonProp, popupId, targetId, param);
     if (secondaryButton) {
         secondaryButton->MountToParent(rowNode);
-        secondaryButton->MarkModifyDone();
     }
     auto popupTheme = GetPopupTheme();
     auto littlePadding = popupTheme->GetLittlePadding();
@@ -422,7 +420,6 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     if (renderContext) {
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     }
-    buttonNode->MarkModifyDone();
 
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);

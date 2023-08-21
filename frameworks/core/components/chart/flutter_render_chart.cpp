@@ -15,12 +15,21 @@
 
 #include "core/components/chart/flutter_render_chart.h"
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "include/core/SkColor.h"
 #include "include/effects/Sk1DPathEffect.h"
 #include "include/effects/SkGradientShader.h"
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
 #include "txt/paragraph_txt.h"
+#else
+#include "rosen_text/typography.h"
+#include "rosen_text/typography_create.h"
+#include "rosen_text/typography_style.h"
+#include "third_party/skia/include/core/SkColor.h"
+#include "third_party/skia/include/effects/Sk1DPathEffect.h"
+#include "third_party/skia/include/effects/SkGradientShader.h"
+#endif
 
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/flutter_render_calendar.h"
@@ -156,6 +165,7 @@ void FlutterRenderChart::PaintText(const ScopedCanvas& canvas, const Rect& paint
         LOGW("PaintText: fontCollection is null");
         return;
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     txt::TextStyle txtStyle;
     txtStyle.font_size = chartData.GetTextSize();
@@ -164,15 +174,32 @@ void FlutterRenderChart::PaintText(const ScopedCanvas& canvas, const Rect& paint
     std::unique_ptr<txt::ParagraphBuilder> builder;
     double paragraphSize = paintRegion.Width() / chartData.GetData().size();
     style.max_lines = 1;
+#else
+    Rosen::TypographyStyle style;
+    Rosen::TextStyle txtStyle;
+    txtStyle.fontSize = chartData.GetTextSize();
+    txtStyle.fontFamilies = chartData.GetFontFamily();
+    txtStyle.fontWeight = Rosen::FontWeight::W400;
+    std::unique_ptr<Rosen::TypographyCreate> builder;
+    double paragraphSize = paintRegion.Width() / chartData.GetData().size();
+    style.maxLines = 1;
+#endif
     for (const auto& point : chartData.GetData()) {
         const TextInfo& text = point.GetTextInfo();
         const PointInfo& pointInfo = point.GetPointInfo();
         Offset pointPosition = ConvertDataToPosition(paintRegion, pointInfo);
         txtStyle.color = text.GetColor().GetValue();
+#ifndef USE_GRAPHIC_TEXT_GINE
         builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
         builder->PushStyle(txtStyle);
         builder->AddText(StringUtils::Str8ToStr16(text.GetTextValue()));
         auto paragraph = builder->Build();
+#else
+        builder = Rosen::TypographyCreate::Create(style, fontCollection);
+        builder->PushStyle(txtStyle);
+        builder->AppendText(StringUtils::Str8ToStr16(text.GetTextValue()));
+        auto paragraph = builder->CreateTypography();
+#endif
         paragraph->Layout(paragraphSize);
         Size textSize = Size(paragraph->GetMinIntrinsicWidth(), paragraph->GetHeight());
         if (text.GetPlacement() == Placement::TOP) {

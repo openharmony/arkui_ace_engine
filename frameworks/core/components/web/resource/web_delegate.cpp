@@ -2507,6 +2507,10 @@ void WebDelegate::InitWebViewWithSurface()
             auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>(Container::CurrentId());
             releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
             delegate->nweb_->PutReleaseSurfaceCallback(releaseSurfaceListenerImpl);
+            auto upgradeContext = context.Upgrade();
+            CHECK_NULL_VOID(upgradeContext);
+            auto window_id = upgradeContext->GetWindowId();
+            delegate->nweb_->SetWindowId(window_id);
         },
         TaskExecutor::TaskType::PLATFORM);
 }

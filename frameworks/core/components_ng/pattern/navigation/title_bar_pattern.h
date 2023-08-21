@@ -128,6 +128,9 @@ public:
     
     bool IsTitleDraggedDown()
     {
+        if (NearZero(tempTitleBarHeight_)) {
+            return true;
+        }
         return GreatNotEqual(tempTitleBarHeight_, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) ?
             true : false;
     }

@@ -86,6 +86,7 @@ const double TIME_PLUS = 1 * 100.0;
 const double TIME_PLUS_LARGE = 10 * 1000.0;
 constexpr double DISTANCE = 20.0;
 const OffsetF CHILD_OFFSET(0.0f, 10.0f);
+const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 5.0f };
 } // namespace
 
 class TextPickerTestNg : public testing::Test {
@@ -3028,7 +3029,7 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest002, TestSize.Level1)
     textPickerLayoutAlgorithm.Layout(&layoutWrapper);
     auto childGeometryNode = subLayoutWrapper->GetGeometryNode();
     childGeometryNode->SetMarginFrameOffset(CHILD_OFFSET);
-    EXPECT_EQ(childGeometryNode->GetMarginFrameOffset(),  OffsetF(0.0f, 10.0f));
+    EXPECT_EQ(childGeometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 10.0f));
 }
 
 /**
@@ -3097,7 +3098,54 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest004, TestSize.Level1)
     textPickerLayoutAlgorithm.Layout(&layoutWrapper);
     auto childGeometryNode = subLayoutWrapper->GetGeometryNode();
     childGeometryNode->SetMarginFrameOffset(CHILD_OFFSET);
-    EXPECT_EQ(childGeometryNode->GetMarginFrameOffset(),  OffsetF(0.0f, 10.0f));
+    EXPECT_EQ(childGeometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 10.0f));
+}
+
+/**
+ * @tc.name: TextPickerAlgorithmTest005
+ * @tc.desc: Test Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest005, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateDefaultPickerItemHeight(Dimension(10));
+    SizeF value(400.0f, 300.0f);
+    pickerProperty->UpdateMarginSelfIdealSize(value);
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subLayoutWrapper, nullptr);
+    RefPtr<LayoutWrapperNode> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subTwoLayoutWrapper, nullptr);
+    layoutWrapper.AppendChild(std::move(subLayoutWrapper));
+    layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
+    EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 2);
+
+    /**
+     * @tc.cases: case. cover branch dialogTheme pass non null check .
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .Times(::testing::AtLeast(6))
+        .WillOnce(Return(pickerTheme))
+        .WillOnce(Return(dialogTheme))
+        .WillRepeatedly(Return(pickerTheme));
+
+    TextPickerLayoutAlgorithm textPickerLayoutAlgorithm;
+    textPickerLayoutAlgorithm.Measure(&layoutWrapper);
 }
 
 /**
@@ -3192,14 +3240,15 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
     KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventUp);
     auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_EQ(propertyChangeFlag, 97);
+
     /**
      * @tc.cases: case1. down KeyEvent.
      */
     KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventDown);
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+    EXPECT_EQ(propertyChangeFlag, 97);
 }
 
 /**
@@ -5099,5 +5148,68 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest012, TestSize.Level1)
     for (uint32_t i = 0; i < counts; i++) {
         EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.emplace_back(i), i);
     }
+}
+
+/**
+ * @tc.name: ChangeTextStyle001
+ * @tc.desc: Test TextPickerLayoutAlgorithm::ChangeTextStyle().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, ChangeTextStyle001, TestSize.Level1)
+{
+    ViewStackProcessor::GetInstance()->ClearStack();
+    auto pickerTheme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(pickerTheme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateDefaultPickerItemHeight(Dimension(10));
+    SizeF size(100.0f, 100.0f);
+    pickerProperty->UpdateMarginSelfIdealSize(size);
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+
+    auto columnSubNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
+    ASSERT_NE(columnSubNode, nullptr);
+
+    /**
+     * @tc.steps: creat a layoutwrapper and SetLayoutAlgorithm for it.
+     */
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+
+    auto node = layoutWrapper.GetHostNode();
+    ASSERT_NE(node, nullptr);
+    auto layoutProperty_ = node->GetLayoutProperty()->Clone();
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    /**
+     * @tc.steps: set layoutWrapper->layoutProperty_ is not null.
+     */
+    RefPtr<LayoutWrapperNode> subLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnSubNode, columnSubNode->GetGeometryNode(), layoutProperty_);
+    EXPECT_NE(subLayoutWrapper, nullptr);
+
+    auto layoutAlgorithmWrapper = subLayoutWrapper->GetLayoutAlgorithm();
+    layoutWrapper.AppendChild(subLayoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 1);
+
+    /**
+     * @tc.steps: set layoutWrapper->layoutAlgorithm_ is not null.
+     */
+    auto pattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    subLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    uint32_t index = 1;
+    uint32_t showOptionCount = 2;
+    TextPickerLayoutAlgorithm textPickerLayoutAlgorithm;
+    textPickerLayoutAlgorithm.ChangeTextStyle(index, showOptionCount, size, subLayoutWrapper, &layoutWrapper);
+    auto frameSize = subLayoutWrapper->GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(frameSize, TEST_TEXT_FRAME_SIZE);
 }
 } // namespace OHOS::Ace::NG

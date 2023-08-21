@@ -735,7 +735,7 @@ SkPath SkiaDecorationPainter::SkiaCreateSkPath(const RefPtr<BasicShape>& basicSh
 {
     OffsetF position;
     SkPath skPath;
-    if (basicShape == nullptr) {
+    if (basicShape == nullptr || basicShape->GetBasicShapeType() == BasicShapeType::NONE) {
         skPath.addRect(SkRect::MakeXYWH(0.0, 0.0, size.Width(), size.Height()));
         return skPath;
     }

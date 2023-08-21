@@ -24,9 +24,19 @@
 
 namespace OHOS::Ace::NG {
 
+#ifdef USE_GRAPHIC_TEXT_GINE
+RefPtr<TxtFontCollection> TxtFontCollection::instance;
+#endif
+
 RefPtr<FontCollection> TxtFontCollection::GetInstance()
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     static RefPtr<TxtFontCollection> instance = AceType::MakeRefPtr<TxtFontCollection>();
+#else
+    if (instance == nullptr) {
+        instance = AceType::MakeRefPtr<TxtFontCollection>();
+    }
+#endif
     return instance;
 }
 
@@ -37,6 +47,7 @@ RefPtr<FontCollection> FontCollection::Current()
 
 TxtFontCollection::TxtFontCollection()
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto rosenCollection = RSFontCollection::GetInstance(false);
     auto collectionTxtBase = rosenCollection->GetFontCollection();
     auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
@@ -51,10 +62,27 @@ TxtFontCollection::TxtFontCollection()
         collection_->MatchFallbackFont(0x4e2d, emptyLocale);
         collection_->GetMinikinFontCollectionForFamilies({ "sans-serif" }, emptyLocale);
     }
+#else
+    collection_ = Rosen::FontCollection::Create();
+    /* texgine not support
+    dynamicFontManager_ = RosenFontCollection::GetInstance().GetDynamicFontManager();
+    if (collection_) {
+        std::string emptyLocale;
+        // 0x4e2d is unicode for '中'.
+        collection_->MatchFallbackFont(0x4e2d, emptyLocale);
+        collection_->GetMinikinFontCollectionForFamilies({ "sans-serif" }, emptyLocale);
+    }
+    */
+#endif
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 TxtFontCollection::TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection)
     : collection_(fontCollection)
 {}
-
+#else
+TxtFontCollection::TxtFontCollection(const std::shared_ptr<Rosen::FontCollection>& fontCollection)
+    : collection_(fontCollection)
+{}
+#endif
 } // namespace OHOS::Ace::NG

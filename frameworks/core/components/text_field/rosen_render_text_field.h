@@ -19,10 +19,21 @@
 #include <memory>
 #include <string>
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_txt.h"
+#else
+#include "rosen_text/font_collection.h"
+#include "rosen_text/typography.h"
+#include "rosen_text/typography_style.h"
+#endif
 #ifndef USE_ROSEN_DRAWING
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
+#else
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkCanvas.h"
+#endif
 #else
 #include "core/components_ng/render/drawing.h"
 #endif
@@ -30,11 +41,19 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/text_field/render_text_field.h"
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 namespace txt {
 class FontCollection;
 class ParagraphStyle;
 class TextStyle;
 } // namespace txt
+#else
+namespace OHOS::Rosen {
+class FontCollection;
+struct TypographyStyle;
+struct TextStyle;
+} // namespace OHOS::Rosen
+#endif
 namespace OHOS::Ace {
 
 class Component;
@@ -79,8 +98,13 @@ protected:
     double GetLongestLine() override;
 
 private:
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphStyle> CreateParagraphStyle(bool isErrorText = false);
     std::unique_ptr<txt::TextStyle> CreateTextStyle(const TextStyle& style, bool isPlaceholder = false);
+#else
+    std::unique_ptr<Rosen::TypographyStyle> CreateParagraphStyle(bool isErrorText = false);
+    std::unique_ptr<Rosen::TextStyle> CreateTextStyle(const TextStyle& style, bool isPlaceholder = false);
+#endif
 
     double PreferredLineHeight() override;
     void UpdateCaretProto();
@@ -92,8 +116,13 @@ private:
     Offset MakeEmptyOffset() const;
     Size Measure() override;
     double GetRealTextWidth() override;
+#ifndef USE_GRAPHIC_TEXT_GINE
     double MeasureParagraph(
         const std::unique_ptr<txt::ParagraphStyle>& paragraphStyle, std::unique_ptr<txt::TextStyle>& txtStyle);
+#else
+    double MeasureParagraph(
+        const std::unique_ptr<Rosen::TypographyStyle>& paragraphStyle, std::unique_ptr<Rosen::TextStyle>& txtStyle);
+#endif
     Size ComputeLayoutSize(const Size& size, double decorationHeight);
 
     Rect GetInnerRect(const Decoration& decoration, const Rect& outer, double dipScale) const;
@@ -102,14 +131,23 @@ private:
     void ComputeOffsetAfterLayout();
     // Compute the offset to align text and icon to vertical center.
     Offset ComputeVerticalOffsetForCenter(double outerHeight, double innerHeight) const;
+#ifndef USE_GRAPHIC_TEXT_GINE
     void SetShaderIfNeeded(std::unique_ptr<txt::ParagraphStyle> paragraphStyle,
         std::unique_ptr<txt::TextStyle> txtStyle, double textAreaWidth);
+#else
+    void SetShaderIfNeeded(std::unique_ptr<Rosen::TypographyStyle> paragraphStyle,
+        std::unique_ptr<Rosen::TextStyle> txtStyle, double textAreaWidth);
+#endif
 #ifndef USE_ROSEN_DRAWING
     sk_sp<SkShader> MakeGradientShader(double shadeWidth) const;
 #else
     std::shared_ptr<RSShaderEffect> MakeGradientShader(double shadeWidth) const;
 #endif
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::shared_ptr<txt::FontCollection> GetFontCollection();
+#else
+    std::shared_ptr<Rosen::FontCollection> GetFontCollection();
+#endif
     void ResetParagraphIfNeeded();
     void ComputeExtendHeight(double decorationHeight);
     double GetBoundaryOfParagraph(bool isLeftBoundary) const;
@@ -148,12 +186,23 @@ private:
     void PaintFocus(const Offset& offset, const Size& widthHeight, RenderContext& context);
     void PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas);
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph_;
     std::unique_ptr<txt::Paragraph> errorParagraph_;
     std::unique_ptr<txt::Paragraph> countParagraph_;
     std::unique_ptr<txt::Paragraph> placeholderParagraph_;
+#else
+    std::unique_ptr<Rosen::Typography> paragraph_;
+    std::unique_ptr<Rosen::Typography> errorParagraph_;
+    std::unique_ptr<Rosen::Typography> countParagraph_;
+    std::unique_ptr<Rosen::Typography> placeholderParagraph_;
+#endif
     // Used to estimate size.
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> template_;
+#else
+    std::unique_ptr<Rosen::Typography> template_;
+#endif
 
     Rect startCaretRect_;
     Size lastLayoutSize_;

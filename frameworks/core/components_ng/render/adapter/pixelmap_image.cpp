@@ -19,6 +19,7 @@
 
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 
@@ -157,7 +158,7 @@ void PixelMapImage::Cache(const std::string& key)
     CHECK_NULL_VOID(pipeline);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_VOID(cache);
-    cache->CacheImageData(key, MakeRefPtr<PixmapCachedData>(GetPixelMap()));
+    cache->CacheImageData(key, MakeRefPtr<PixmapData>(GetPixelMap()));
 }
 
 RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
@@ -166,9 +167,9 @@ RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
-    auto data = DynamicCast<PixmapCachedData>(cache->GetCacheImageData(key));
+    auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(key));
     CHECK_NULL_RETURN_NOLOG(data, nullptr);
     LOGD("pixelMap cache found %{public}s", key.c_str());
-    return MakeRefPtr<PixelMapImage>(data->pixmap_);
+    return MakeRefPtr<PixelMapImage>(data->GetPixmap());
 }
 } // namespace OHOS::Ace::NG

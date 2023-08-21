@@ -25,7 +25,6 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
-#include "core/components_v2/grid/grid_event.h"
 
 namespace OHOS::Ace {
 
@@ -60,8 +59,75 @@ const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::A
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDirection::COLUMN,
     FlexDirection::ROW_REVERSE, FlexDirection::COLUMN_REVERSE };
+const size_t GRID_ITEM_SIZE_RESULT_LENGTH = 2;
 
 } // namespace
+
+void ParseGridItemSize(const JSRef<JSVal>& value, GridItemSize& gridItemSize)
+{
+    if (value->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
+        auto length = array->Length();
+        if (length != GRID_ITEM_SIZE_RESULT_LENGTH) {
+            LOGE("info is invalid");
+            return;
+        }
+        JSRef<JSVal> rows = array->GetValueAt(0);
+        if (rows->IsNumber()) {
+            gridItemSize.rows = rows->ToNumber<int32_t>();
+        }
+        JSRef<JSVal> columns = array->GetValueAt(1);
+        if (columns->IsNumber()) {
+            gridItemSize.columns = columns->ToNumber<int32_t>();
+        }
+        LOGI("regularSize type: rows:%{public}d, columns:%{public}d", gridItemSize.rows, gridItemSize.columns);
+    }
+}
+
+void SetGridLayoutOptions(const JSCallbackInfo& info)
+{
+    if (!(info.Length() > 1 && info[1]->IsObject())) {
+        return;
+    }
+    GridLayoutOptions option;
+    auto obj = JSRef<JSObject>::Cast(info[1]);
+    auto value = obj->GetProperty("regularSize");
+    ParseGridItemSize(value, option.regularSize);
+
+    // only support regularSize(1, 1)
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+
+    auto indexes = obj->GetProperty("irregularIndexes");
+    if (indexes->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(indexes);
+        auto length = array->Length();
+        for (size_t i = 0; i < length; i++) {
+            JSRef<JSVal> index = array->GetValueAt(i);
+            if (index->IsNumber()) {
+                option.irregularIndexes.emplace(index->ToNumber<int32_t>());
+                LOGI("irregularIndexes emplace_back:%{public}d", index->ToNumber<int32_t>());
+            }
+        }
+    }
+    auto getSizeByIndex = obj->GetProperty("onGetIrregularSizeByIndex");
+    if (getSizeByIndex->IsFunction()) {
+        auto onGetIrregularSizeByIndex = [execCtx = info.GetExecutionContext(),
+                                             func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+                                                 JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
+            GridItemSize gridItemSize;
+            JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+            auto result = func->ExecuteJS(1, &itemIndex);
+            if (!result->IsArray()) {
+                return gridItemSize;
+            }
+            ParseGridItemSize(result, gridItemSize);
+            return gridItemSize;
+        };
+        option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    }
+    GridModel::GetInstance()->SetLayoutOptions(option);
+}
 
 void JSGrid::Create(const JSCallbackInfo& info)
 {
@@ -82,9 +148,11 @@ void JSGrid::Create(const JSCallbackInfo& info)
         }
     }
     GridModel::GetInstance()->Create(positionController, scrollBarProxy);
+
+    SetGridLayoutOptions(info);
 }
 
-void JSGrid::PopGrid(const JSCallbackInfo& /*info*/)
+void JSGrid::PopGrid(const JSCallbackInfo& /* info */)
 {
     GridModel::GetInstance()->Pop();
 }
@@ -95,9 +163,6 @@ void JSGrid::UseProxy(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
 #else
     auto parentGrid = ViewStackProcessor::GetInstance()->GetTopGrid();
-    if (parentGrid == nullptr) {
-        LOGE("no parent Grid");
-    }
 
     // return true if code path for GridElement and its children will rely on
     // ElementProxy. Only in this case shallow render functionality can be used

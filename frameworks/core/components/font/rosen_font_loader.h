@@ -17,6 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_ROSEN_FONT_LOADER_H
 
 #include "core/common/font_loader.h"
+#ifdef USE_GRAPHIC_TEXT_GINE
+#include "core/common/rosen/rosen_asset_manager.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -36,6 +39,11 @@ private:
     void LoadFromNetwork(const RefPtr<PipelineBase>& context);
     void LoadFromResource(const RefPtr<PipelineBase>& context);
     void LoadFromAsset(const RefPtr<PipelineBase>& context);
+#ifdef USE_GRAPHIC_TEXT_GINE
+    void LoadFromFile(const RefPtr<PipelineBase>& context);
+    RefPtr<Asset> GetAssetFromFile(const std::string& fileName) const;
+    std::string RemovePathHead(const std::string& uri);
+#endif
     void NotifyCallbacks();
 };
 

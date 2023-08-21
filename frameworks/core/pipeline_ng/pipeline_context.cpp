@@ -1096,12 +1096,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if (scalePoint.type == TouchType::MOVE) {
         touchEvents_.emplace_back(point);
         auto container = Container::Current();
-        if (container && !container->IsScenceBoardWindow()) {
-            hasIdleTasks_ = true;
-            RequestFrame();
+        if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
+            FlushTouchEvents();
             return;
         } else {
-            FlushTouchEvents();
+            hasIdleTasks_ = true;
+            RequestFrame();
             return;
         }
     }
@@ -2013,5 +2013,27 @@ void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node)
     if (fontManager_) {
         fontManager_->RemoveFontNodeNG(node);
     }
+}
+
+void PipelineContext::SetWindowSceneConsumed(bool isConsumed)
+{
+    isWindowSceneConsumed_ = isConsumed;
+}
+
+bool PipelineContext::IsWindowSceneConsumed()
+{
+    return isWindowSceneConsumed_;
+}
+
+void PipelineContext::SetCloseButtonStatus(bool isEnabled)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetCloseButtonStatus(isEnabled);
 }
 } // namespace OHOS::Ace::NG

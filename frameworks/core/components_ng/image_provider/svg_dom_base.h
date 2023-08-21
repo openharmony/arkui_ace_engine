@@ -52,9 +52,8 @@ public:
     virtual void SetAnimationCallback(std::function<void()>&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr) {}
     virtual void ControlAnimation(bool play) {}
 
-    // param [color] deprecated
     virtual void DrawImage(
-        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) = 0;
+        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) = 0;
 
     void ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
     {

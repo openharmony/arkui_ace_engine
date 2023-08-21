@@ -76,12 +76,15 @@ constexpr float TEXT_RECT_HEIGHT_LARGE = 20.0f;
 constexpr float TEXT_RECT_WIDTH = 5.0f;
 constexpr float TEXT_RECT_Y = 5.0f;
 constexpr float TEXT_RECT_Y_LARGE = 50.0f;
+constexpr float DEVICE_WIDTH = 480.f;
+constexpr float DEVICE_HEIGHT = 800.f;
 const std::string EMPTY_TEXT_VALUE;
 const std::string TEXT_EDITING_VALUE("textEditingValue");
 const std::string PLACEHOLDER("DEFAULT PLACEHOLDER");
 const std::string PLACE_HOLDER_TEXT("Placeholdertext");
 const std::string TEXT_CONTENT("Textvalue");
 const std::string DEFAULT_PASSWORD = "******";
+constexpr int32_t SELECT_OVERLAY_ID = 143;
 } // namespace
 class TextFieldPatternTestNg : public testing::Test {
 public:
@@ -601,6 +604,11 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
     textFieldPattern->cursorVisible_ = true;
     textFieldPattern->isMousePressed_ = true;
     textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    textFieldPattern->isMousePressed_ = false;
+    textFieldPattern->isFocusedBeforeClick_ = true;
     EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
 
     /**
@@ -1369,6 +1377,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.L
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateMaxLines(5);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
     // Is TextArea, textRect_.Height() < contentRect_.Height()
     pattern->textRect_.SetHeight(TEXT_RECT_HEIGHT);
     pattern->textRect_.SetWidth(TEXT_RECT_WIDTH);
@@ -1400,6 +1409,37 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.L
     pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
     EXPECT_EQ(pattern->caretRect_.GetY(), oldCaretRectY);
     EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->textRect_.GetX(), pattern->currentOffset_));
+
+    // Scroll down, secondHandleOffset Y > contentRect Y
+    pattern->isSingleHandle_ = false;
+    pattern->contentRect_.SetTop(12.0f);
+    pattern->contentRect_.SetLeft(24.0f);
+    pattern->contentRect_.SetWidth(500.0f);
+    pattern->contentRect_.SetHeight(400.0f);
+    pattern->textRect_.SetTop(-300.0f);
+    pattern->textRect_.SetHeight(800.0f);
+    pattern->textSelector_.firstHandleOffset_.SetX(300.0f);
+    pattern->textSelector_.firstHandleOffset_.SetY(300.0f);
+    pattern->textSelector_.secondHandleOffset_.SetX(400.0f);
+    pattern->textSelector_.secondHandleOffset_.SetY(300.0f);
+    pattern->parentGlobalOffset_ = OffsetF(60.0f, 8.0f);
+    pattern->OnTextAreaScroll(1.0f);
+    EXPECT_EQ(pattern->textSelector_.secondHandleOffset_.GetY(), 301.0f);
+
+    // Scroll up, secondHandleOffset Y + secondHandle Height > contentRect Y + contentRect Height
+    pattern->textRect_.SetTop(-130.0f);
+    pattern->textSelector_.firstHandleOffset_.SetX(400.0f);
+    pattern->textSelector_.firstHandleOffset_.SetY(500.0f);
+    pattern->textSelector_.secondHandleOffset_.SetX(500.0f);
+    pattern->textSelector_.secondHandleOffset_.SetY(500.0f);
+    pattern->OnTextAreaScroll(-20.0f);
+    EXPECT_EQ(pattern->textSelector_.secondHandleOffset_.GetY(), 480.0f);
+
+    // Select overlay is not on.
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
+    pattern->textRect_.SetTop(30.0f);
+    pattern->OnTextAreaScroll(-20.0f);
+    EXPECT_EQ(pattern->textRect_.GetY(), 10.0f);
 }
 
 /**
@@ -1520,10 +1560,17 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> textBoxes;
     RSTypographyProperties::TextBox textBox;
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
+#else
+    std::vector<RSTypographyProperties::TextRect> textBoxs;
+    RSTypographyProperties::TextRect textBox;
+    textBoxs.emplace_back(textBox);
+    pattern->textBoxes_ = textBoxs;
+#endif
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollEdgeEffect);
@@ -2747,28 +2794,54 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextSelectionRectOffsetX, TestSize.Level1
     textFieldPattern->contentRect_.SetLeft(0.0f);
     textFieldPattern->contentRect_.SetWidth(100.0f);
     textFieldPattern->textRect_.SetLeft(0.0f);
+#ifndef USE_GRAPHIC_TEXT_GINE
     RSTypographyProperties::TextBox textBox;
+#else
+    RSTypographyProperties::TextRect textBox;
+#endif
     textFieldPattern->textBoxes_.emplace_back(textBox);
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(50.0f);
+#else
+    textFieldPattern->textBoxes_.begin()->rect.SetRight(50.0f);
+#endif
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(-20.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(-10.0f);
+#else
+    textFieldPattern->textBoxes_.begin()->rect.SetLeft(-20.0f);
+    textFieldPattern->textBoxes_.begin()->rect.SetRight(-10.0f);
+#endif
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
+#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(0.0f);
+#else
+    textFieldPattern->textBoxes_.begin()->rect.SetLeft(0.0f);
+#endif
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(100.0f);
     textFieldPattern->textBoxes_.begin()->rect_.SetRight(200.0f);
+#else
+    textFieldPattern->textBoxes_.begin()->rect.SetLeft(100.0f);
+    textFieldPattern->textBoxes_.begin()->rect.SetRight(200.0f);
+#endif
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
+#ifndef USE_GRAPHIC_TEXT_GINE
     textFieldPattern->textBoxes_.begin()->rect_.SetLeft(300.0f);
+#else
+    textFieldPattern->textBoxes_.begin()->rect.SetLeft(300.0f);
+#endif
     textFieldPattern->textRect_.SetLeft(0.0f);
     textFieldPattern->AdjustTextSelectionRectOffsetX();
     EXPECT_EQ(textFieldPattern->textRect_.GetX(), 0.0f);
@@ -3018,7 +3091,6 @@ HWTEST_F(TextFieldPatternTestNg, onDraw004, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     textFieldOverlayModifier.onDraw(context);
 }
 
@@ -3467,8 +3539,13 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection004, TestSize.Level1)
     pattern->selectionMode_ = SelectionMode::SELECT;
     pattern->textSelector_.baseOffset = 1;
     pattern->textSelector_.destinationOffset = 0;
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> textBoxes;
     RSTypographyProperties::TextBox textBox;
+#else
+    std::vector<RSTypographyProperties::TextRect> textBoxes;
+    RSTypographyProperties::TextRect textBox;
+#endif
     textBoxes.emplace_back(textBox);
     pattern->textBoxes_ = textBoxes;
     EdgeEffect edgeEffect;
@@ -3983,13 +4060,20 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelNGProcessDefaultPadding, TestSize
     PaddingProperty paddingProperty;
 
     layoutProperty->UpdateShowUnderline(true);
-    textFieldModelNG.ProcessDefaultPadding(paddingProperty);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->ApplyUnderlineStates();
     Dimension vertical { 12.0, DimensionUnit::PX };
     Dimension horizontal { 0.0, DimensionUnit::PX };
-    EXPECT_EQ(paddingProperty.top.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
-    EXPECT_EQ(paddingProperty.bottom.value().GetDimension().ConvertToPx(), vertical.ConvertToPx());
-    EXPECT_EQ(paddingProperty.left.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
-    EXPECT_EQ(paddingProperty.right.value().GetDimension().ConvertToPx(), horizontal.ConvertToPx());
+    const std::unique_ptr<PaddingProperty>& property = layoutProperty->GetPaddingProperty();
+    ASSERT_TRUE(property->top.has_value());
+    EXPECT_EQ(property->top.value().GetDimension().Value(), horizontal.ConvertToPx());
+    ASSERT_TRUE(property->bottom.has_value());
+    EXPECT_EQ(property->bottom.value().GetDimension().Value(), horizontal.ConvertToPx());
+    ASSERT_TRUE(property->left.has_value());
+    EXPECT_EQ(property->left.value().GetDimension().Value(), vertical.ConvertToPx());
+    ASSERT_TRUE(property->right.has_value());
+    EXPECT_EQ(property->right.value().GetDimension().Value(), vertical.ConvertToPx());
 
     /**
      * @tc.steps: step3. let ShowUnderLine be false.
@@ -4078,6 +4162,21 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     textFieldPattern->clipboard_ = clipboard;
     EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    textFieldPattern->inlineFocusState_ = true;
+    textFieldPattern->inlineSelectAllFlag_ = true;
+    textFieldPattern->updateSelectionAfterObscure_ = true;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    dirtySwapConfig.frameSizeChange = true;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    textFieldPattern->inlineFocusState_ = false;
+    dirtySwapConfig.skipMeasure = false;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    layoutWrapper->skipMeasureContent_ = false;
+    dirtySwapConfig.frameSizeChange = false;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    dirtySwapConfig.skipMeasure = true;
+    EXPECT_FALSE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    layoutWrapper->skipMeasureContent_ = true;
 }
 
 /**
@@ -4505,9 +4604,15 @@ HWTEST_F(TextFieldPatternTestNg, UpdateSelectionOffset, TestSize.Level2)
     EXPECT_EQ(pattern->GetTextSelector().selectionBaseOffset.GetX(), 4);
     EXPECT_EQ(pattern->GetTextSelector().selectionDestinationOffset.GetX(), 8);
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> textBoxes;
     RSTypographyProperties::TextBox firstTextBox;
     RSTypographyProperties::TextBox secondTextBox;
+#else
+    std::vector<RSTypographyProperties::TextRect> textBoxes;
+    RSTypographyProperties::TextRect firstTextBox;
+    RSTypographyProperties::TextRect secondTextBox;
+#endif
     textBoxes.emplace_back(firstTextBox);
     textBoxes.emplace_back(secondTextBox);
     pattern->textBoxes_ = textBoxes;
@@ -5720,6 +5825,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     auto context = PipelineContext::GetCurrentContext();
     context->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
     pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->imeAttached_ = true;
 
     KeyEvent event;
     EXPECT_FALSE(pattern->OnKeyEvent(event));
@@ -5797,6 +5903,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     EXPECT_TRUE(pattern->OnKeyEvent(event));
     event.code = KeyCode::KEY_FORWARD_DEL;
     EXPECT_TRUE(pattern->OnKeyEvent(event));
+    pattern->imeAttached_ = false;
 }
 
 /**
@@ -5850,6 +5957,7 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextInputScroll001, TestSize.
     layoutProperty->UpdateMaxLines(2);
     pattern->OnTextInputScroll(0.0f);
     layoutProperty->UpdateMaxLines(1);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
     pattern->textRect_.x_ = 10.0f;
     pattern->textRect_.width_ = 200.0f;
     pattern->contentRect_.x_ = 20.0f;
@@ -5861,6 +5969,28 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextInputScroll001, TestSize.
     pattern->OnTextInputScroll(0.0f);
     EXPECT_EQ(pattern->caretRect_.GetX(), -90.0f);
     EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->currentOffset_, pattern->textRect_.GetY()));
+
+    // first handle and second handle are in contentRect's region.
+    pattern->isSingleHandle_ = false;
+    pattern->contentRect_.SetTop(20.0f);
+    pattern->contentRect_.SetLeft(24.0f);
+    pattern->contentRect_.SetWidth(500.0f);
+    pattern->contentRect_.SetHeight(30.0f);
+    pattern->textRect_.SetLeft(-50.0f);
+    pattern->textRect_.SetWidth(800.0f);
+    pattern->textSelector_.firstHandleOffset_.SetX(260.0f);
+    pattern->textSelector_.firstHandleOffset_.SetY(40.0f);
+    pattern->textSelector_.secondHandleOffset_.SetX(300.0f);
+    pattern->textSelector_.secondHandleOffset_.SetY(40.0f);
+    pattern->parentGlobalOffset_ = OffsetF(60.0f, 8.0f);
+    pattern->OnTextInputScroll(-1.0f);
+    EXPECT_EQ(pattern->textSelector_.firstHandleOffset_.GetX(), 259.0f);
+
+    // select overlay is not on.
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
+    pattern->textRect_.SetLeft(-50.0f);
+    pattern->OnTextInputScroll(-1.0f);
+    EXPECT_EQ(pattern->textRect_.GetX(), -51.0f);
 }
 
 /**
@@ -5906,5 +6036,284 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     dy = pattern->AdjustTextAreaOffsetY();
     EXPECT_EQ(dy, 0.0f);
     EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
+    int32_t charPosition[3] = {-1, 0, 2};
+    auto content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[1], true);;
+    for (int i=0; i<3; i++) {
+        content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], true);
+        content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], false);
+        content = pattern->CreateDisplayText(EMPTY_TEXT_VALUE, charPosition[i], true);
+        content = pattern->CreateDisplayText(EMPTY_TEXT_VALUE, charPosition[i], false);
+    }
+}
+
+/**
+ * @tc.name: GetTextOrPlaceHolderFontSize
+ * @tc.desc: test GetTextOrPlaceHolderFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetTextOrPlaceHolderFontSize, TestSize.Level2)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto size = textFieldPattern->GetTextOrPlaceHolderFontSize();
+    EXPECT_EQ(size, 0.0f);
+    const Dimension fontSize = Dimension(5.0);
+    layoutProperty->UpdateFontSize(fontSize);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+    size = textFieldPattern->GetTextOrPlaceHolderFontSize();
+    EXPECT_EQ(size, 5.0f);
+}
+
+/**
+ * @tc.name: UpdateSelectorByPosition
+ * @tc.desc: Verify that the UpdateSelectorByPosition interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateSelectorByPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldPattern.
+     */
+    auto frameNode = CreatTextFieldNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    /*
+     * @tc.steps: step2. call UpdateSelectorByPosition function.
+     * @tc.expected: The UpdateSelectorByPosition function will exit without exception.
+     */
+    pattern->textSelector_.baseOffset = 0;
+    pattern->textSelector_.destinationOffset = 5;
+    pattern->UpdateSelectorByPosition(10);
+    EXPECT_EQ(pattern->textSelector_.GetStart(), 10);
+    EXPECT_EQ(pattern->textSelector_.GetEnd(), 11);
+}
+
+/**
+ * @tc.name: OnScrollEndCallback001
+ * @tc.desc: test textfield OnScrollEndCallback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnScrollEndCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+
+    /**
+     * @tc.steps: step2. Call the OnScrollEndCallback.
+     * @tc.expected: the OnScrollEndCallback function called success without expection.
+     */
+    bool originalIsMenuShow[2] = { true, false };
+    for (int i = 0; i < 2; i++) {
+        pattern->originalIsMenuShow_ = originalIsMenuShow[i];
+        EXPECT_EQ(pattern->originalIsMenuShow_, originalIsMenuShow[i]);
+        pattern->OnScrollEndCallback();
+        EXPECT_NE(pattern->GetSelectOverlay(), nullptr);
+    }
+}
+
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test textfield OnHandleMove001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnHandleMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Call the OnHandleMove.
+     * @tc.expected: caretUpdateType_ is HANDLE_MOVE.
+     */
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+    pattern->UpdateEditingValue(TEXT_VALUE, 0);
+    pattern->OnHandleMove(RectF(110.0f, 110.0f, 10.0f, 10.0f), false);
+    EXPECT_EQ(pattern->caretUpdateType_, CaretUpdateType::HANDLE_MOVE);
+}
+
+/**
+ * @tc.name: OnHandleMoveDone001
+ * @tc.desc: test textfield OnHandleMoveDone001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnHandleMoveDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Call the OnHandleMoveDone.
+     * @tc.expected: caretUpdateType_ is HANDLE_MOVE_DONE.
+     */
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(SELECT_OVERLAY_ID);
+    pattern->isSingleHandle_ = true;
+    pattern->OnHandleMoveDone(RectF(0.0f, 0.0f, 10.0f, 10.0f), false);
+    pattern->isSingleHandle_ = false;
+    pattern->OnHandleMoveDone(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
+    EXPECT_EQ(pattern->caretUpdateType_, CaretUpdateType::HANDLE_MOVE_DONE);
+}
+
+/**
+ * @tc.name: TextFieldPatternSaveInlineState001
+ * @tc.desc: test SaveInlineState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternSaveInlineState001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    ASSERT_NE(textFieldTheme, nullptr);
+
+    textFieldPattern->SaveInlineStates();
+    EXPECT_FALSE(textFieldPattern->GetTextInputFlag());
+    auto textColor = layoutProperty->GetTextColorValue(textFieldTheme->GetTextColor());
+    EXPECT_EQ(textFieldPattern->inlineState_.textColor, textColor);
+}
+
+/**
+ * @tc.name: TextFieldPatternApplyInlineState001
+ * @tc.desc: test ApplyInlineState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternApplyInlineState001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    ASSERT_NE(textFieldTheme, nullptr);
+    textFieldPattern->ApplyInlineStates(true);
+    auto textColor = layoutProperty->GetTextColorValue(textFieldTheme->GetTextColor());
+    EXPECT_EQ(textColor, textFieldTheme->GetInlineTextColor());
+}
+
+/**
+ * @tc.name: TextFieldPatternSaveInlineState002
+ * @tc.desc: test SaveInlineState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternSaveInlineState002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    ASSERT_NE(textFieldTheme, nullptr);
+
+    textFieldPattern->SaveInlineStates();
+    EXPECT_FALSE(textFieldPattern->GetTextInputFlag());
+    auto bgColor = renderContext->GetBackgroundColor().value_or(textFieldTheme->GetBgColor());
+    EXPECT_EQ(textFieldPattern->inlineState_.bgColor, bgColor);
+}
+
+/**
+ * @tc.name: TextFieldPatternRestorePreInlineStates001
+ * @tc.desc: test RestorePreInlineStates
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternRestorePreInlineStates001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    textFieldPattern->RestorePreInlineStates();
+    textFieldPattern->inlineState_.textColor = Color::RED;
+    textFieldPattern->inlineState_.bgColor = Color::WHITE;
+    layoutProperty->UpdateTextColor(textFieldPattern->inlineState_.textColor);
+    renderContext->UpdateBackgroundColor(textFieldPattern->inlineState_.bgColor);
+    textFieldPattern->RestorePreInlineStates();
+    auto borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
+    ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
+    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 2.0);
+    EXPECT_EQ(layoutProperty->GetTextColor(), textFieldPattern->inlineState_.textColor);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), textFieldPattern->inlineState_.bgColor);
+
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(DEVICE_WIDTH), CalcLength(DEVICE_HEIGHT)));
+    auto idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_EQ(idealSize->Width().value(), CalcLength(DEVICE_WIDTH));
+    EXPECT_EQ(idealSize->Height().value(), CalcLength(DEVICE_HEIGHT));
+}
+
+/**
+ * @tc.name: TextFieldPatternApplyInlineState002
+ * @tc.desc: test ApplyInlineState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternApplyInlineState002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    ASSERT_NE(textFieldTheme, nullptr);
+    textFieldPattern->ApplyInlineStates(true);
+    renderContext->UpdateBackgroundColor(textFieldTheme->GetInlineBgColor());
+    EXPECT_EQ(renderContext->GetBackgroundColor(), textFieldTheme->GetInlineBgColor());
 }
 } // namespace OHOS::Ace::NG

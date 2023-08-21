@@ -272,13 +272,18 @@ OffsetF ImagePainter::CalculateBgImagePosition(const SizeF& boxPaintSize_, const
     if (bgImgPosition.GetSizeTypeX() == BackgroundImagePositionType::PX) {
         offset.SetX(bgImgPosition.GetSizeValueX());
     } else {
-        offset.SetX(
-            bgImgPosition.GetSizeValueX() * (boxPaintSize_.Width() - imageRenderSize_.Width()) / PERCENT_TRANSLATE);
+        offset.SetX(bgImgPosition.GetSizeValueX() * boxPaintSize_.Width());
     }
 
     if (bgImgPosition.GetSizeTypeY() == BackgroundImagePositionType::PX) {
         offset.SetY(bgImgPosition.GetSizeValueY());
     } else {
+        offset.SetY(bgImgPosition.GetSizeValueY() * boxPaintSize_.Height());
+    }
+
+    if (bgImgPosition.IsAlign()) {
+        offset.SetX(
+            bgImgPosition.GetSizeValueX() * (boxPaintSize_.Width() - imageRenderSize_.Width()) / PERCENT_TRANSLATE);
         offset.SetY(
             bgImgPosition.GetSizeValueY() * (boxPaintSize_.Height() - imageRenderSize_.Height()) / PERCENT_TRANSLATE);
     }

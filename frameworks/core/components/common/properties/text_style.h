@@ -438,7 +438,7 @@ public:
         return textShadows_;
     }
 
-    void SetTextShadows(std::vector<Shadow>&& textShadows)
+    void SetTextShadows(const std::vector<Shadow>& textShadows)
     {
         textShadows_ = textShadows;
     }

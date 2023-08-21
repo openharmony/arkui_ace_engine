@@ -16,6 +16,7 @@ import("$ace_root/frameworks/core/components_ng/components.gni")
 
 build_component_ng("ui_extension_pattern_ng") {
   sources = [
+    "modal_ui_extension_proxy_impl.cpp",
     "ui_extension_model_ng.cpp",
     "ui_extension_pattern.cpp",
     "ui_extension_proxy.cpp",

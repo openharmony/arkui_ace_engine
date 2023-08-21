@@ -43,7 +43,7 @@ public:
     static RefPtr<SkiaSvgDom> CreateSkiaSvgDom(SkStream& svgStream, const std::optional<Color>& svgFillColor);
 
     void DrawImage(
-        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color) override;
+        RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) override;
 
     const sk_sp<SkSVGDOM>& GetSkiaSvgDom() const;
 

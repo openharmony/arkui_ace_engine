@@ -15,8 +15,13 @@
 
 #include "core/components/calendar/flutter_render_calendar.h"
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph.h"
 #include "txt/paragraph_builder.h"
+#else
+#include "rosen_text/typography.h"
+#include "rosen_text/typography_create.h"
+#endif
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
@@ -37,22 +42,42 @@ constexpr double WEEKEND_TRANSPARENT = 0x7D;
 constexpr double SCHEDULE_MARKER_TRANSPARENT = 0x4B;
 constexpr Dimension CARD_CALENDAR_TITLE_HEIGHT = 68.0_vp;
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 std::unique_ptr<txt::Paragraph> GetTextParagraph(const std::string& text, const txt::TextStyle& textStyle)
+#else
+std::unique_ptr<Rosen::Typography> GetTextParagraph(const std::string& text, const Rosen::TextStyle& textStyle)
+#endif
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
+#else
+    Rosen::TypographyStyle style;
+#endif
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return nullptr;
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     builder->PushStyle(textStyle);
     builder->AddText(StringUtils::Str8ToStr16(text));
     return builder->Build();
+#else
+    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
+    builder->PushStyle(textStyle);
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    return builder->CreateTypography();
+#endif
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void DrawCalendarText(
     ScopedCanvas& canvas, const std::string& text, const txt::TextStyle& textStyle, const Rect& boxRect, Rect& textRect)
+#else
+void DrawCalendarText(ScopedCanvas& canvas, const std::string& text, const Rosen::TextStyle& textStyle,
+    const Rect& boxRect, Rect& textRect)
+#endif
 {
     // The lunar calendar description is truncated by more than three characters.
     std::string newText { text };
@@ -78,8 +103,13 @@ void DrawCalendarText(
     textRect.SetRect(offset.GetX() + textPaintOffsetX, offset.GetY() + textPaintOffsetY, textWidth, textHeight);
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void DrawCalendarText(
     ScopedCanvas& canvas, const std::string& text, const txt::TextStyle& textStyle, const Rect& boxRect)
+#else
+void DrawCalendarText(
+    ScopedCanvas& canvas, const std::string& text, const Rosen::TextStyle& textStyle, const Rect& boxRect)
+#endif
 {
     Rect textRect;
     DrawCalendarText(canvas, text, textStyle, boxRect, textRect);
@@ -280,12 +310,21 @@ void FlutterRenderCalendar::DrawFocusedArea(
 void FlutterRenderCalendar::DrawWeek(ScopedCanvas& canvas, const Offset& offset) const
 {
     uint32_t totalWeek = weekNumbers_.size();
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::TextStyle weekTextStyle;
     weekTextStyle.color = weekColor_;
     weekTextStyle.font_size = weekFontSize_;
     if (cardCalendar_) {
         weekTextStyle.font_weight = static_cast<txt::FontWeight>(FontWeight::W500);
     }
+#else
+    Rosen::TextStyle weekTextStyle;
+    weekTextStyle.color = weekColor_;
+    weekTextStyle.fontSize = weekFontSize_;
+    if (cardCalendar_) {
+        weekTextStyle.fontWeight = static_cast<Rosen::FontWeight>(FontWeight::W500);
+    }
+#endif
     weekTextStyle.locale = Localization::GetInstance()->GetFontLocale();
     static const int32_t daysOfWeek = 7;
     auto startDayOfWeek = dataAdapter_->GetStartDayOfWeek();
@@ -323,13 +362,22 @@ void FlutterRenderCalendar::DrawBlurArea(ScopedCanvas& canvas, const Offset& off
     canvas->drawCircle(bgCircleStart.GetX(), bgCircleStart.GetY(), focusedAreaRadius_, paint, paintData);
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void FlutterRenderCalendar::PaintDay(
     ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const
+#else
+void FlutterRenderCalendar::PaintDay(
+    ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, Rosen::TextStyle& textStyle) const
+#endif
 {
     // paint day
     Rect boxRect { offset.GetX(), offset.GetY(), dayWidth_, gregorianCalendarHeight_ };
     Rect textRect;
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::TextStyle workStateStyle;
+#else
+    Rosen::TextStyle workStateStyle;
+#endif
     if (!day.dayMark.empty() && showHoliday_ && type_ == CalendarType::SIMPLE) {
         if (day.dayMark == "work") {
             textStyle.color = SkColor(calendarTheme_.simpleWorkTextColor.GetValue());
@@ -342,7 +390,11 @@ void FlutterRenderCalendar::PaintDay(
         auto workStateOffset = offset + Offset(0, NormalizeToPx(calendarTheme_.workStateOffset));
         boxRect.SetOffset(workStateOffset);
         workStateStyle.color = Color::WHITE.GetValue();
+#ifndef USE_GRAPHIC_TEXT_GINE
         workStateStyle.font_size = dayFontSize_;
+#else
+        workStateStyle.fontSize = dayFontSize_;
+#endif
         DrawCalendarText(canvas, day.dayMarkValue, workStateStyle, boxRect, textRect);
         return;
     }
@@ -358,26 +410,46 @@ void FlutterRenderCalendar::PaintDay(
         if (cardCalendar_) {
             InitWorkStateStyle(day, offset, workStateStyle, boxRect);
         } else {
+#ifndef USE_GRAPHIC_TEXT_GINE
             workStateStyle.font_weight = static_cast<txt::FontWeight>(workStateFontWeight_);
+#else
+            workStateStyle.fontWeight = static_cast<Rosen::FontWeight>(workStateFontWeight_);
+#endif
             workStateStyle.locale = Localization::GetInstance()->GetFontLocale();
             boxRect = { textRect.GetOffset().GetX() + textRect.Width() - workStateHorizontalMovingDistance_,
                 textRect.GetOffset().GetY() + textRect.Height() - workStateVerticalMovingDistance_, workStateWidth_,
                 workStateWidth_ };
             if (day.month.month == currentMonth_.month) {
                 if (day.dayMark == "work") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = workDayMarkSize_;
+#else
+                    workStateStyle.fontSize = workDayMarkSize_;
+#endif
                     workStateStyle.color = workDayMarkColor_;
                 } else if (day.dayMark == "off") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = offDayMarkSize_;
+#else
+                    workStateStyle.fontSize = offDayMarkSize_;
+#endif
                     workStateStyle.color = offDayMarkColor_;
                 }
             } else {
                 if (day.dayMark == "work") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = workDayMarkSize_;
+#else
+                    workStateStyle.fontSize = workDayMarkSize_;
+#endif
                     workStateStyle.color = isV2Component_ ? SkColorSetA(workDayMarkColor_, WEEKEND_TRANSPARENT)
                                                           : nonCurrentMonthWorkDayMarkColor_;
                 } else if (day.dayMark == "off") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = offDayMarkSize_;
+#else
+                    workStateStyle.fontSize = offDayMarkSize_;
+#endif
                     workStateStyle.color = isV2Component_ ? SkColorSetA(offDayMarkColor_, WEEKEND_TRANSPARENT)
                                                           : nonCurrentMonthOffDayMarkColor_;
                 }
@@ -393,8 +465,13 @@ void FlutterRenderCalendar::PaintDay(
     }
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void FlutterRenderCalendar::PaintLunarDay(
     ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, const txt::TextStyle& textStyle) const
+#else
+void FlutterRenderCalendar::PaintLunarDay(
+    ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day, const Rosen::TextStyle& textStyle) const
+#endif
 {
     Rect boxRect;
     cardCalendar_ || isV2Component_
@@ -403,11 +480,21 @@ void FlutterRenderCalendar::PaintLunarDay(
     DrawCalendarText(canvas, day.lunarDay, textStyle, boxRect);
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void FlutterRenderCalendar::SetNonFocusStyle(
     const CalendarDay& day, txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle)
+#else
+void FlutterRenderCalendar::SetNonFocusStyle(
+    const CalendarDay& day, Rosen::TextStyle& dateTextStyle, Rosen::TextStyle& lunarTextStyle)
+#endif
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     SkColor dateTextColor;
     SkColor lunarTextColor;
+#else
+    Rosen::TextStyle dateTextStyle;
+    Rosen::TextStyle lunarTextStyle;
+#endif
     if (day.month.month != currentMonth_.month) {
         dateTextColor = nonCurrentMonthDayColor_;
         lunarTextColor =
@@ -461,8 +548,13 @@ void FlutterRenderCalendar::DrawTouchedArea(RenderContext& context, Offset offse
 void FlutterRenderCalendar::DrawCardCalendar(
     ScopedCanvas& canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day, int32_t dateNumber)
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::TextStyle dateTextStyle;
     txt::TextStyle lunarTextStyle;
+#else
+    Rosen::TextStyle dateTextStyle;
+    Rosen::TextStyle lunarTextStyle;
+#endif
     InitTextStyle(dateTextStyle, lunarTextStyle);
     SetNonFocusStyle(day, dateTextStyle, lunarTextStyle);
     dateTextStyle.locale = Localization::GetInstance()->GetFontLocale();
@@ -583,6 +675,7 @@ void FlutterRenderCalendar::DrawTvCalendar(
     }
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void FlutterRenderCalendar::InitTextStyle(txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle)
 {
     dateTextStyle.font_size = dayFontSize_;
@@ -591,6 +684,16 @@ void FlutterRenderCalendar::InitTextStyle(txt::TextStyle& dateTextStyle, txt::Te
     lunarTextStyle.font_size = lunarDayFontSize_;
     lunarTextStyle.font_weight = static_cast<txt::FontWeight>(lunarDayFontWeight_);
 }
+#else
+void FlutterRenderCalendar::InitTextStyle(Rosen::TextStyle& dateTextStyle, Rosen::TextStyle& lunarTextStyle)
+
+{
+    dateTextStyle.fontSize = dayFontSize_;
+    dateTextStyle.fontWeight = static_cast<Rosen::FontWeight>(dayFontWeight_);
+    lunarTextStyle.fontSize = lunarDayFontSize_;
+    lunarTextStyle.fontWeight = static_cast<Rosen::FontWeight>(lunarDayFontWeight_);
+}
+#endif
 
 void FlutterRenderCalendar::PaintUnderscore(ScopedCanvas& canvas, const Offset& offset, const CalendarDay& day)
 {
@@ -641,10 +744,17 @@ void FlutterRenderCalendar::PaintScheduleMarker(ScopedCanvas& canvas, const Offs
     }
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void FlutterRenderCalendar::InitWorkStateStyle(
     const CalendarDay& day, const Offset& offset, txt::TextStyle& workStateStyle, Rect& boxRect) const
 {
     workStateStyle.font_weight = static_cast<txt::FontWeight>(FontWeight::W500);
+#else
+void FlutterRenderCalendar::InitWorkStateStyle(
+    const CalendarDay& day, const Offset& offset, Rosen::TextStyle& workStateStyle, Rect& boxRect) const
+{
+    workStateStyle.fontWeight = static_cast<Rosen::FontWeight>(FontWeight::W500);
+#endif
     workStateStyle.locale = Localization::GetInstance()->GetFontLocale();
     static const Dimension workStateWidth = 8.0_vp;
     static const int32_t twoDigitMaker = 10;
@@ -661,7 +771,11 @@ void FlutterRenderCalendar::InitWorkStateStyle(
             NormalizeToPx(workStateWidth) };
     }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     workStateStyle.font_size = NormalizeToPx(workStateWidth);
+#else
+    workStateStyle.fontSize = NormalizeToPx(workStateWidth);
+#endif
 
     if (day.month.month != currentMonth_.month) {
         auto offColor = SkColorSetA(markLunarColor_, WEEKEND_TRANSPARENT);
@@ -678,8 +792,13 @@ void FlutterRenderCalendar::InitWorkStateStyle(
     }
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void FlutterRenderCalendar::SetWorkStateStyle(
     const CalendarDay& day, SkColor workColor, SkColor offColor, txt::TextStyle& workStateStyle) const
+#else
+void FlutterRenderCalendar::SetWorkStateStyle(
+    const CalendarDay& day, SkColor workColor, SkColor offColor, Rosen::TextStyle& workStateStyle) const
+#endif
 {
     if (day.dayMark == "work") {
         workStateStyle.color = workColor;

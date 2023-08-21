@@ -271,9 +271,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
     LOGD("menu position_ = %{public}s, targetSize = %{public}s", position_.ToString().c_str(),
         targetSize.ToString().c_str());
-
     InitializePadding(layoutWrapper);
-
     auto constraint = props->GetLayoutConstraint();
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, props->GetMeasureType(MeasureType::MATCH_PARENT), true);
@@ -343,7 +341,7 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    if (menuPattern->IsContextMenu()) {
+    if (menuPattern->IsContextMenu() || menuPattern->IsRichEditorSelectMenu()) {
         // no need to modify for context menu, because context menu wrapper is full screen.
         return;
     }
@@ -370,7 +368,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu());
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern->IsRichEditorSelectMenu());
     }
     Initialize(layoutWrapper);
 
@@ -519,7 +517,8 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
         }
     }
 
-    bool needArrow = menuPattern->IsContextMenu() && !targetTag_.empty() && arrowInMenu_;
+    bool needArrow = (menuPattern->IsContextMenu() || menuPattern->IsRichEditorSelectMenu()) && !targetTag_.empty()
+        && arrowInMenu_;
     if (needArrow) {
         if (!menuProp->GetMenuPlacement().has_value()) {
             menuProp->UpdateMenuPlacement(Placement::TOP);
@@ -670,24 +669,6 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     } else {
         columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
     }
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto menuWidth = theme->GetMenuWidth().ConvertToPxWithSize(wrapperSize_.Width());
-    if (LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth)) {
-        if (LessNotEqual(menuWidth, wrapperSize_.Width())) {
-            theme->SetMenuWidth(Dimension(menuWidth, DimensionUnit::PX));
-            constraint.maxSize.SetWidth(menuWidth);
-            constraint.minSize.SetWidth(MIN_MENU_WIDTH.ConvertToPx());
-            return;
-        } else {
-            theme->SetMenuWidth(DEFAULT_MENU_WIDTH);
-        }
-
-    }
-
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
     // set max width
@@ -712,6 +693,12 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
         minWidth = constraint.maxSize.Width();
     }
     constraint.minSize.SetWidth(minWidth);
+    if (menuLayoutProperty->GetMenuWidth().has_value()) {
+        auto menuWidth = menuLayoutProperty->GetMenuWidthValue().ConvertToPxWithSize(wrapperSize_.Width());
+        if (LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth) && LessNotEqual(menuWidth, wrapperSize_.Width())) {
+            constraint.minSize.SetWidth(MIN_MENU_WIDTH.ConvertToPx());
+        }
+    }
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
@@ -890,7 +877,8 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
-void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu)
+void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
+    bool isRichEditorSelectMenu)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
@@ -901,7 +889,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     CHECK_NULL_VOID(pipelineContext);
 
     targetOffset_ = targetNode->GetPaintRectOffset();
-    if (isContextMenu) {
+    if (isContextMenu || isRichEditorSelectMenu) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
         float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());

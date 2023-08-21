@@ -69,6 +69,7 @@ ohos_unittest("shared_overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/event/mock_focus_hub.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/event/mock_gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/event/mock_input_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_gesture_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_box_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_layout_wrapper.cpp",

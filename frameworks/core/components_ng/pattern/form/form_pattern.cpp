@@ -71,6 +71,7 @@ void FormPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->UpdateRenderGroup(true);
     // Init the render context for RSSurfaceNode from FRS.
     externalRenderContext_ = RenderContext::Create();
     // for external RSNode, name is meaningless.
@@ -349,6 +350,17 @@ void FormPattern::OnRebuildFrame()
 void FormPattern::OnVisibleChange(bool isVisible)
 {
     isVisible_ = isVisible;
+}
+
+void FormPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    // FormComponent do not response to user's onClick callback.
+    gestureEventHub->ClearUserOnClick();
 }
 
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

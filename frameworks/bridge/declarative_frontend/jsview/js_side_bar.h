@@ -47,6 +47,8 @@ public:
     static void Pop();
 private:
     static void SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JSVal> icon);
+    static void ParseControlButtonOG(JSRef<JSObject> value);
+    static void ParseControlButtonNG(JSRef<JSObject> value);
 };
 
 } // namespace OHOS::Ace::Framework

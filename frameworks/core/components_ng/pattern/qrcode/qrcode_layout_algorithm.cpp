@@ -29,7 +29,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension DEFAULT_SIZE = 240.0_vp;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
+constexpr int32_t PLATFORM_VERSION_11 = 11;
 } // namespace
 
 std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
@@ -41,7 +41,7 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_11) {
         auto topPadding = 0.0f;
         auto bottomPadding = 0.0f;
         auto leftPadding = 0.0f;

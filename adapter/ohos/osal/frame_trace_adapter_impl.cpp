@@ -15,6 +15,7 @@
 
 #include "frame_trace_adapter_impl.h"
 #include <unistd.h>
+#include "base/log/log_wrapper.h"
 #include "frame_trace.h"
 #include "parameters.h"
 
@@ -76,6 +77,10 @@ bool FrameTraceAdapterImpl::IsEnabled()
 
 void FrameTraceAdapterImpl::SetFrameTraceLimit()
 {
-    OHOS::system::SetParameter(INTERVAL_LIMIT, "true");
+    bool limitEnabled = OHOS::system::GetBoolParameter(INTERVAL_LIMIT, false);
+    if (!limitEnabled) {
+        LOGI("Set FrameTraceLimit");
+        OHOS::system::SetParameter(INTERVAL_LIMIT, "true");
+    }
 }
 }

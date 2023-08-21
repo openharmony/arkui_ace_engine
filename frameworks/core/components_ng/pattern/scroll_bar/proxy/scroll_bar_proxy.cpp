@@ -107,6 +107,26 @@ void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBa
     }
 }
 
+void ScrollBarProxy::NotifyScrollStart() const
+{
+    for (const auto& node : scrollableNodes_) {
+        if (node.scrollStartCallback == nullptr) {
+            continue;
+        }
+        node.scrollStartCallback(0, SCROLL_FROM_BAR);
+    }
+}
+
+void ScrollBarProxy::NotifyScrollStop() const
+{
+    for (const auto& node : scrollableNodes_) {
+        if (node.scrollEndCallback == nullptr) {
+            continue;
+        }
+        node.scrollEndCallback();
+    }
+}
+
 void ScrollBarProxy::NotifyScrollBar(const WeakPtr<Pattern>& weakScrollableNode) const
 {
     auto scrollable = weakScrollableNode.Upgrade();

@@ -26,7 +26,7 @@ public:
     void SetValue(float value) override;
     void SetStartAngle(float startAngle) override;
     void SetEndAngle(float endAngle) override;
-    void SetColors(const std::vector<Color>& colors, const std::vector<float>& values) override {}
+    void SetColors(const std::vector<Color>& colors, const std::vector<float>& values) override;
     void SetGradientColors(
         const std::vector<ColorStopArray>& colors, const std::vector<float>& values, const GaugeType& type) override;
     void SetStrokeWidth(const Dimension& strokeWidth) override;

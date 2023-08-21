@@ -168,7 +168,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         LOGW("PanGesture current finger number is less than requiried finger number.");
         return;
     }
-    ResSchedReport::GetInstance().ResSchedDataReport("click");
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     velocityTracker_.UpdateTouchPoint(event, true);
@@ -185,6 +184,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED) {
         if (static_cast<int32_t>(touchPoints_.size()) == 1) {
+            ResSchedReport::GetInstance().ResSchedDataReport("click");
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
         }
@@ -215,7 +215,14 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
-    delta_ = (event.GetOffset() - touchPoints_[event.id].GetOffset()) / touchPoints_.size();
+    PointF originPoint(event.GetOffset().GetX(), event.GetOffset().GetY());
+    PointF originTouchPoint(touchPoints_[event.id].GetOffset().GetX(), touchPoints_[event.id].GetOffset().GetY());
+    PointF windowPoint = originPoint;
+    PointF windowTouchPoint = originTouchPoint;
+    Transform(windowPoint, originPoint);
+    Transform(windowTouchPoint, originTouchPoint);
+    delta_ =
+        (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
     mainDelta_ = GetMainAxisDelta();
     velocityTracker_.UpdateTouchPoint(event);
     averageDistance_ += delta_;

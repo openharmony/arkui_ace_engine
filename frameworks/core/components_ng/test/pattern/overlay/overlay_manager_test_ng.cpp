@@ -581,18 +581,29 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
     overlayManager->UpdatePopupNode(targetId2, popups[1]);
     EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
     /**
-     * @tc.steps: step3. call HidePopup when childCount is 2
+     * @tc.steps: step3. call HideCustomPopups when childCount is 2
      * @tc.expected: popupMap's data is updated successfully
      */
-    overlayManager->HideAllPopups();
+    overlayManager->HideCustomPopups();
     EXPECT_FALSE(overlayManager->popupMap_.empty());
+    EXPECT_EQ(rootNode->GetChildren().size(), 2);
     /**
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
-     * @tc.expected: remove successfully
+     * @tc.expected: remove one popupNode at a time
      */
     overlayManager->UpdatePopupNode(targetId1, popups[0]);
     overlayManager->UpdatePopupNode(targetId2, popups[1]);
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
+    EXPECT_FALSE(overlayManager->popupMap_.empty());
+    overlayManager->ErasePopup(targetId1);
+    overlayManager->ErasePopup(targetId2);
+    EXPECT_TRUE(overlayManager->popupMap_.empty());
+    /**
+     * @tc.steps: step5. call HideCustomPopups when popupMap_ is empty
+     * @tc.expected: function exits normally
+     */
+    overlayManager->HideCustomPopups();
+    EXPECT_TRUE(overlayManager->popupMap_.empty());
 }
 /**
  * @tc.name: PopupTest003
@@ -718,7 +729,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
     overlayManager->UpdatePopupNode(targetId, popupInfo);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
-
+    EXPECT_EQ(rootNode->GetChildren().size(), 0);
     /**
      * @tc.steps: step3. update ShowInSubwindow and call HideAllPopups again.
      * @tc.expected: popupMap's data is updated successfully
@@ -1150,5 +1161,49 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
+}
+/**
+ * @tc.name: PopupTest005
+ * @tc.desc: Test OverlayManager::HideCustomPopups when useCustom is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, PopupTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and popupInfo.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    PopupInfo popupInfo;
+    popupInfo.popupId = popupId;
+    popupInfo.popupNode = popupNode;
+    popupInfo.target = targetNode;
+    popupInfo.markNeedUpdate = true;
+    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(layoutProp, nullptr);
+    layoutProp->UpdateUseCustom(true);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call HideCustomPopups when ShowInSubwindow is false.
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->HideCustomPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
+    EXPECT_EQ(rootNode->GetChildren().size(), 0);
+    /**
+     * @tc.steps: step3. update ShowInSubwindow and call HideCustomPopups again.
+     * @tc.expected: popupMap's data is updated successfully
+     */
+    layoutProp->UpdateShowInSubWindow(true);
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->HideCustomPopups();
+    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
 }
 } // namespace OHOS::Ace::NG

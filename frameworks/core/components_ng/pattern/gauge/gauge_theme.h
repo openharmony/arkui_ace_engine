@@ -21,6 +21,10 @@
 namespace OHOS::Ace::NG {
 inline constexpr float DEFAULT_START_DEGREE = 0.0f;
 inline constexpr float DEFAULT_END_DEGREE = 360.0f;
+inline constexpr float EDGE = 15.0f;
+inline constexpr float HEIGHT_OFFSET = 5.0f;
+inline constexpr float INDICATOR_STROKE_WIDTH = 5.0f;
+inline constexpr int8_t UNSELECT_ALPHA = 125;
 inline constexpr float DEFAULT_MIN_VALUE = 0.0f;
 inline constexpr float DEFAULT_MAX_VALUE = 100.0f;
 inline constexpr float MONOCHROME_CIRCULAR_BACKGROUND_COLOR_OPACITY = 0.2f;
@@ -42,5 +46,6 @@ inline constexpr float LIMIT_VALUE_MAX_X = 0.532f;
 inline constexpr Dimension INDICATOR_DISTANCE_TO_TOP = 8.0_vp;
 inline constexpr Dimension LIMIT_VALUE_MAX_FONTSIZE = 48.0_vp;
 inline constexpr Dimension LIMIT_VALUE_MIN_FONTSIZE = 10.0_vp;
+inline constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GAUGE_GAUGE_THEME_H

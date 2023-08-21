@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -43,4 +44,24 @@ void AtomicServicePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
 }
+
+void AtomicServicePattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto rowChild = host->GetFirstChild();
+    CHECK_NULL_VOID_NOLOG(rowChild);
+    auto labelChild = DynamicCast<FrameNode>(rowChild->GetChildAtIndex(1));
+    CHECK_NULL_VOID_NOLOG(labelChild);
+    auto textLayoutProperty = labelChild->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID_NOLOG(textLayoutProperty);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_VOID_NOLOG(themeManager);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_VOID_NOLOG(themeConstants);
+    textLayoutProperty->UpdateContent(themeConstants->GetString(pipelineContext->GetAppLabelId()));
+}
+
 } // namespace OHOS::Ace::NG

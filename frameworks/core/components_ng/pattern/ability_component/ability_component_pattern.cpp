@@ -45,7 +45,7 @@ AbilityComponentPattern::AbilityComponentPattern(const std::string& bundleName, 
 void AbilityComponentPattern::OnModifyDone()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardEnabled()) {
         Pattern::OnModifyDone();
         auto host = GetHost();
         CHECK_NULL_VOID(host);

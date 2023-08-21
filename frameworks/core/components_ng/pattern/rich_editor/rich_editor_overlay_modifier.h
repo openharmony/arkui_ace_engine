@@ -30,6 +30,7 @@ public:
     void SetCaretWidth(float width);
     void SetCaretVisible(bool value);
     float GetCareHeight() const;
+    OffsetF GetCareOffset() const;
     void onDraw(DrawingContext& drawingContext) override;
 
 private:

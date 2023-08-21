@@ -39,6 +39,7 @@ constexpr int32_t FONT_INFO_INDEX_SYMBOLIC = 9;
 constexpr int32_t FONT_INFO_INDEX_MAX = 10;
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 static bool ParseFamilyName(napi_env env, napi_value familyNameNApi, std::string& familyName, napi_valuetype valueType)
 {
     napi_typeof(env, familyNameNApi, &valueType);
@@ -99,6 +100,35 @@ static bool ParseFamilySrc(napi_env env, napi_value familySrcNApi, std::string& 
     }
     return true;
 }
+#else
+static bool ParseFamilyNameOrSrc(
+    napi_env env, napi_value familyNameOrSrcNApi, std::string& familyNameOrSrc, napi_valuetype valueType)
+{
+    napi_typeof(env, familyNameOrSrcNApi, &valueType);
+    if (valueType == napi_string) {
+        size_t nameLen = 0;
+        napi_get_value_string_utf8(env, familyNameOrSrcNApi, nullptr, 0, &nameLen);
+        std::unique_ptr<char[]> name = std::make_unique<char[]>(nameLen + 1);
+        napi_get_value_string_utf8(env, familyNameOrSrcNApi, name.get(), nameLen + 1, &nameLen);
+        familyNameOrSrc = name.get();
+    } else if (valueType == napi_object) {
+        int32_t id = 0;
+        int32_t type = 0;
+        std::vector<std::string> params;
+        if (!ParseResourceParam(env, familyNameOrSrcNApi, id, type, params)) {
+            LOGE("can not parse resource info from input params.");
+            return false;
+        }
+        if (!ParseString(id, type, params, familyNameOrSrc)) {
+            LOGE("can not get family name or src from resource manager.");
+            return false;
+        }
+    } else {
+        return false;
+    }
+    return true;
+}
+#endif
 
 static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
 {
@@ -121,12 +151,18 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
     } else {
         return nullptr;
     }
-    
+#ifndef USE_GRAPHIC_TEXT_GINE
     if (!ParseFamilyName(env, familyNameNApi, familyName, valueType)) {
+#else
+    if (!ParseFamilyNameOrSrc(env, familyNameNApi, familyName, valueType)) {
+#endif
         return nullptr;
     }
-
+#ifndef USE_GRAPHIC_TEXT_GINE
     if (!ParseFamilySrc(env, familySrcNApi, familySrc, valueType)) {
+#else
+    if (!ParseFamilyNameOrSrc(env, familySrcNApi, familySrc, valueType)) {
+#endif
         return nullptr;
     }
 

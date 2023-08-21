@@ -591,6 +591,7 @@ public:
         keyType_ = event.action;
         keySource_ = event.sourceType;
         keyIntention_ = event.keyIntention;
+        metaKey_ = event.metaKey;
         SetDeviceId(event.deviceId);
         SetTimeStamp(event.timeStamp);
     };
@@ -621,6 +622,10 @@ public:
         return keyIntention_;
     }
 
+    void SetMetaKey(int32_t metaKey)
+    {
+        metaKey_ = metaKey;
+    }
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
     const char* keyText_ = "";

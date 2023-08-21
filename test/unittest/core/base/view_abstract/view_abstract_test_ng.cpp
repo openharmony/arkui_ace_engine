@@ -15,18 +15,19 @@
 #include "gtest/gtest.h"
 #define protected public
 #define private public
+#include "test/mock/core/common/mock_container.h"
+
+#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
-#include "test/mock/core/common/mock_container.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
 using namespace testing;
@@ -72,6 +73,7 @@ const std::string VALUE_CX = "CX";
 ViewAbstractModelNG viewAbstractModelNG;
 auto callback = []() { srcimages = "test"; };
 int32_t flag = 0;
+const ImageSourceInfo imageSourceInfo = ImageSourceInfo("common/images/mmm.jpg", "abstract", "abstract");
 
 void CallShowHideFunc()
 {
@@ -171,7 +173,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
      */
     ViewAbstract::SetAspectRatio(RATIO);
     ViewAbstract::SetBackgroundColor(BLUE);
-    ViewAbstract::SetBackgroundImage(srcimages);
+    ViewAbstract::SetBackgroundImage(imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetLayoutWeight(TEN);
@@ -210,7 +212,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest004, TestSize.Level1)
 
     ViewAbstract::SetAspectRatio(RATIO);
     ViewAbstract::SetBackgroundColor(BLUE);
-    ViewAbstract::SetBackgroundImage(srcimages);
+    ViewAbstract::SetBackgroundImage(imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
     ViewAbstract::SetLayoutWeight(TEN);
@@ -1070,7 +1072,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest025, TestSize.Level1)
     ViewAbstract::BindPopup(param, targetNode, customNode);
     auto popupNode = overlayManager->GetPopupInfo(targetNode->GetId()).popupNode;
     ASSERT_NE(popupNode, nullptr);
-    popupNode->GetPattern<BubblePattern>()->transitionStatus_ = BubblePattern::TransitionStatus::ENTERING;
+    popupNode->GetPattern<BubblePattern>()->transitionStatus_ = TransitionStatus::ENTERING;
     ViewAbstract::BindPopup(param, targetNode, customNode);
     param->SetIsShow(false);
     ViewAbstract::BindPopup(param, targetNode, customNode);
@@ -1220,7 +1222,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest029, TestSize.Level1)
     ViewAbstract::SetMaxHeight(NG::CalcLength(MIN_HEIGHT));
     ViewAbstract::SetAspectRatio(RATIO);
     ViewAbstract::SetBackgroundColor(BLUE);
-    ViewAbstract::SetBackgroundImage(srcimages);
+    ViewAbstract::SetBackgroundImage(imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
 

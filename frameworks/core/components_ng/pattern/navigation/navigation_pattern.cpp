@@ -139,6 +139,7 @@ void NavigationPattern::OnModifyDone()
     navBarNode->MarkModifyDone();
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
+    auto preSize = navigationStack_->PreSize();
 
     NavPathList navPathList;
     for (size_t i = 0; i < pathNames.size(); ++i) {
@@ -161,7 +162,8 @@ void NavigationPattern::OnModifyDone()
     navigationStack_->SetNavPathList(navPathList);
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(preTopNavPath.has_value() ? preTopNavPath->second : nullptr);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
-    CheckTopNavPathChange(preTopNavPath, newTopNavPath);
+    auto size = navigationStack_->Size();
+    CheckTopNavPathChange(preTopNavPath, newTopNavPath, preSize > size);
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -183,7 +185,8 @@ void NavigationPattern::OnModifyDone()
 
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath)
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
+    bool isPopPage)
 {
     if (preTopNavPath == newTopNavPath) {
         return;
@@ -195,11 +198,10 @@ void NavigationPattern::CheckTopNavPathChange(
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     // fire onHidden and lostFocus event
-    auto isPopPage = false;
     RefPtr<NavDestinationGroupNode> preTopNavDestination;
     if (preTopNavPath.has_value()) {
         // pre page is not in the current stack
-        isPopPage = navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second) == -1;
+        isPopPage |= navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second) == -1;
         preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preTopNavDestination) {
@@ -224,7 +226,9 @@ void NavigationPattern::CheckTopNavPathChange(
                 if (shallowBuilder) {
                     shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                 }
-                preTopNavDestination->GetContentNode()->Clean();
+                if (preTopNavDestination->GetContentNode()) {
+                    preTopNavDestination->GetContentNode()->Clean();
+                }
                 auto parent = preTopNavDestination->GetParent();
                 if (parent) {
                     parent->RemoveChild(preTopNavDestination);
@@ -292,7 +296,6 @@ void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<NavDestinat
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationNode);
-    auto contentNode = navigationNode->GetContentNode();
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     if (newTopNavDestination && preTopNavDestination) {
@@ -404,7 +407,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     auto pattern = weak.Upgrade();
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
-                    if (hostNode->GetContentNode()->GetChildren().size() == 1 &&
+                    if (pattern->navigationStack_->Size() == 1 &&
                         pattern->GetNavigationMode() == NavigationMode::SPLIT) {
                         // set backButton gone for the first level page in SPLIT mode
                         hostNode->SetBackButtonVisible(curTopNavDestination, false);

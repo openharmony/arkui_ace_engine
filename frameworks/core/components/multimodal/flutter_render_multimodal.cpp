@@ -17,8 +17,13 @@
 
 #include <cstdint>
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
+#else
+#include "rosen_text/typography_create.h"
+#include "rosen_text/typography_style.h"
+#endif
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
@@ -67,16 +72,26 @@ void FlutterRenderMultimodal::Paint(RenderContext& context, const Offset& offset
 
     UpdateParagraph(offset, subscript_.GetVoiceContent());
     paragraph_->Layout(GetLayoutSize().Width());
+#ifndef USE_GRAPHIC_TEXT_GINE
     if (paragraph_->GetLongestLine() > NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP))) {
         width = height + (paragraph_->GetLongestLine() - NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP)));
     }
+#else
+    if (paragraph_->GetActualWidth() > NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP))) {
+        width = height + (paragraph_->GetActualWidth() - NormalizeToPx(Dimension(LIMIT_WIDTH, DimensionUnit::VP)));
+    }
+#endif
 
     SkVector radii[] = { { corner, corner }, { 0, 0 }, { corner, corner }, { 0, 0 } };
     SkRRect rrect;
     rrect.setRectRadii(SkRect::MakeXYWH(offset.GetX(), offset.GetY(), width, height), radii);
     skCanvas->drawRRect(rrect, paint);
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto leftOffset = paragraph_->GetLongestLine() / 2;
+#else
+    auto leftOffset = paragraph_->GetActualWidth() / 2;
+#endif
     auto centerX = offset.GetX() + width / 2;
     auto centerY = offset.GetY() + height / 2;
     paragraph_->Paint(skCanvas, centerX - leftOffset, centerY - paragraph_->GetHeight() / 2);
@@ -85,23 +100,41 @@ void FlutterRenderMultimodal::Paint(RenderContext& context, const Offset& offset
 void FlutterRenderMultimodal::UpdateParagraph(const Offset& offset, const std::string& text)
 {
     using namespace Constants;
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.max_lines = 1;
     style.ellipsis = StringUtils::Str8ToStr16(ELLIPSIS);
+#else
+    Rosen::TypographyStyle style;
+    style.maxLines = 1;
+    style.ellipsis= StringUtils::Str8ToStr16(ELLIPSIS);
+#endif
     auto fontCollection = FlutterFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("UpdateParagraph: fontCollection is null");
         return;
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder =
         txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     txtStyle.font_size = NormalizeToPx(Dimension(FONT_SIZE, DimensionUnit::FP));
+#else
+    std::unique_ptr<Rosen::TypographyCreate> builder =
+        Rosen::TypographyCreate::Create(style, fontCollection);
+    Rosen::TextStyle txtStyle;
+    txtStyle.fontSize = NormalizeToPx(Dimension(FONT_SIZE, DimensionUnit::FP));
+#endif
     txtStyle.color = Color::FromARGB(255, 255, 255, 255).GetValue();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     builder->PushStyle(txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(text));
     paragraph_ = builder->Build();
+#else
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    paragraph_ = builder->CreateTypography();
+#endif
 }
 
 } // namespace OHOS::Ace

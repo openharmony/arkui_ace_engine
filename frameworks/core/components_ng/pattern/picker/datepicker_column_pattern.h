@@ -73,6 +73,8 @@ enum class DatePickerOptionIndex {
     COLUMN_INDEX_2,
     COLUMN_INDEX_3,
     COLUMN_INDEX_4,
+    COLUMN_INDEX_5,
+    COLUMN_INDEX_6,
 };
 
 class DatePickerColumnPattern : public LinearLayoutPattern {
@@ -212,6 +214,43 @@ public:
 
     void TossStoped();
 
+    void SetYLast(double value)
+    {
+        yLast_ = value;
+    }
+    double GetOffset()
+    {
+        return offsetCurSet_;
+    }
+    void PlayRestAnimation();
+
+    void TossAnimationStoped();
+
+    std::vector<DatePickerOptionProperty> GetMidShiftDistance()
+    {
+        return optionProperties_;
+    }
+
+    void SetMainVelocity(double mainVelocity)
+    {
+        mainVelocity_ = mainVelocity;
+    }
+
+    double GetMainVelocity() const
+    {
+        return mainVelocity_;
+    }
+
+    void SetTossStatus(bool status)
+    {
+        isTossStatus_ = status;
+    }
+
+    bool GetTossStatus()
+    {
+        return isTossStatus_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -243,6 +282,7 @@ private:
     void HandleDragEnd();
     void CreateAnimation();
     RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
+    RefPtr<CurveAnimation<double>> CreateClickAnimation(double from, double to);
     void HandleCurveStopped();
     void ScrollOption(double delta, bool isJump = false);
     void UpdatePickerTextProperties(uint32_t index, uint32_t showOptionCount,
@@ -276,16 +316,17 @@ private:
     double yOffset_ = 0.0;
     double jumpInterval_;
     uint32_t showCount_ = 0;
-    float gradientHeight_;
-    float dividerHeight_;
-    float dividerSpacingWidth_;
-
+    float gradientHeight_ = 0.0f;
+    float dividerHeight_ = 0.0f;
+    float dividerSpacingWidth_ = 0.0f;
+    double mainVelocity_ = 0.0;
     float dividerSpacing_ = 0.0f;
     FontWeight SelectedWeight_;
     FontWeight CandidateWeight_;
+    double offsetCurSet_ = 0.0;
     Color pressColor_;
     Color hoverColor_;
-
+    bool isTossStatus_ = false;
     double deltaSize_ = 0.0;
     RefPtr<PanEvent> panEvent_;
     bool pressed_ = false;

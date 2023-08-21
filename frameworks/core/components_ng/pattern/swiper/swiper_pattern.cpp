@@ -275,9 +275,8 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
-    } else if (isVoluntarilyClear_) {
-        isVoluntarilyClear_ = false;
     }
+    isVoluntarilyClear_ = false;
     if (jumpIndex_) {
         if ((jumpIndex_.value() < 0 || jumpIndex_.value() >= TotalCount()) && !IsLoop()) {
             jumpIndex_ = 0;
@@ -598,6 +597,13 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             targetPos = iter->second.startPos;
             auto context = PipelineContext::GetCurrentContext();
             if (context) {
+                // displayCount is auto, loop is false, if the content width less than windows size
+                // need offset to keep right aligned
+                bool isNeedOffset = (GetLoopIndex(iter->first) == TotalCount() - 1)
+                    && !layoutProperty->GetDisplayCount().has_value() && !IsLoop()
+                    && LessNotEqual(iter->second.endPos - iter->second.startPos, contentMainSize_);
+                float offset = isNeedOffset ? contentMainSize_ - iter->second.endPos + iter->second.startPos : 0.0;
+                targetPos -= offset;
                 context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f),
                                                 nextIndex = iter->first]() {
                     auto swiper = weak.Upgrade();
@@ -622,7 +628,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     endMainPos_ = swiperLayoutAlgorithm->GetEndPosition();
     startIndex_ = swiperLayoutAlgorithm->GetStartIndex();
     endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
-    autoPlayCurrentIndex_ = swiperLayoutAlgorithm->GetAutoPlayCurrentIndex();
     oldIndex_ = currentIndex_;
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
@@ -2482,10 +2487,10 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
                 return;
             }
             if (!swiper->IsLoop() &&
-                (swiper->GetLoopIndex(swiper->autoPlayCurrentIndex_) + 1) > (childrenSize - displayCount)) {
+                swiper->GetLoopIndex(swiper->currentIndex_ + 1) > (childrenSize - displayCount)) {
                 return;
             }
-            swiper->targetIndex_ = swiper->autoPlayCurrentIndex_ + 1;
+            swiper->targetIndex_ = swiper->currentIndex_ + 1;
             auto host = swiper->GetHost();
             CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

@@ -56,7 +56,7 @@ public:
     }
 
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
-        int32_t index, const std::unordered_map<std::string, RefPtr<NG::UINode>>& cachedItems) override
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override
     {
         std::pair<std::string, RefPtr<NG::UINode>> info;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, info);
@@ -71,7 +71,8 @@ public:
         auto cachedIter = cachedItems.find(key);
         if (cachedIter != cachedItems.end()) {
             info.first = key;
-            info.second = cachedIter->second;
+            info.second = cachedIter->second.second;
+            cachedItems.erase(cachedIter);
             return info;
         }
 

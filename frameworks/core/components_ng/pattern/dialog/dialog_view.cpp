@@ -36,6 +36,12 @@ void ProcessMaskRect(const DialogProperties& param, const RefPtr<FrameNode>& dia
         auto width = param.maskRect->GetWidth();
         auto height = param.maskRect->GetHeight();
         auto offset = param.maskRect->GetOffset();
+        if (width.IsNegative()) {
+            width = 100.0_pct;
+        }
+        if (height.IsNegative()) {
+            height = 100.0_pct;
+        }
         auto rootWidth = PipelineContext::GetCurrentRootWidth();
         auto rootHeight = PipelineContext::GetCurrentRootHeight();
 
@@ -44,9 +50,10 @@ void ProcessMaskRect(const DialogProperties& param, const RefPtr<FrameNode>& dia
                            width.ConvertToPxWithSize(rootWidth),
                            height.ConvertToPxWithSize(rootHeight));
         dialogContext->ClipWithRect(rect);
+        dialogContext->UpdateClipEdge(true);
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         std::vector<DimensionRect> mouseResponseRegion;
-        mouseResponseRegion.push_back(param.maskRect.value());
+        mouseResponseRegion.emplace_back(width, height, offset);
         gestureHub->SetMouseResponseRegion(mouseResponseRegion);
         gestureHub->SetResponseRegion(mouseResponseRegion);
     }
@@ -87,6 +94,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
     dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
     dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
+    dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);

@@ -75,7 +75,7 @@ HWTEST_F(ParseMaskTestNg, ParseTest001, TestSize.Level1)
     // all saved layers need to be restored
     auto skCanvas = rsCanvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     auto layerCount = skCanvas->getSaveCount();
-    svgDom->DrawImage(rsCanvas, ImageFit::FITHEIGHT, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rsCanvas, ImageFit::FITHEIGHT, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
     EXPECT_EQ(skCanvas->getSaveCount(), layerCount);
