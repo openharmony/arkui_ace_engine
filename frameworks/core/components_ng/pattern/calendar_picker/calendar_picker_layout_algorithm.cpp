@@ -21,7 +21,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CHILDREN_SIZE = 5;
-constexpr int32_t DOUBLE = 2;
 } // namespace
 void CalendarPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -47,9 +46,13 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
-    auto topMargin = theme->GetEntryDateTopBottomMargin();
-    topMargin += theme->GetEntryBorderWidth() * DOUBLE;
-    auto leftMargin = theme->GetEntryDateLeftRightMargin();
+
+    auto defaultTopMargin = theme->GetEntryDateTopBottomMargin();
+    auto defaultLeftMargin = theme->GetEntryDateLeftRightMargin();
+    PaddingProperty currentPadding;
+    if (contentLayoutProperty->GetPaddingProperty() != nullptr) {
+        currentPadding = *(contentLayoutProperty->GetPaddingProperty());
+    }
     float widthTotal = 0.0f;
     float height = 0.0f;
     for (int32_t i = 0; i < CHILDREN_SIZE; i++) {
@@ -63,17 +66,16 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
         widthTotal += textGeometryNode->GetFrameSize().Width();
         height = std::max(height, textGeometryNode->GetFrameSize().Height());
     }
-    widthTotal += leftMargin.ConvertToPx() * 2;
-    height += topMargin.ConvertToPx() * 2;
+    widthTotal += currentPadding.left.value_or(CalcLength(defaultLeftMargin)).GetDimension().ConvertToPx();
+    widthTotal += currentPadding.right.value_or(CalcLength(defaultLeftMargin)).GetDimension().ConvertToPx();
+    height += currentPadding.top.value_or(CalcLength(defaultTopMargin)).GetDimension().ConvertToPx();
+    height += currentPadding.bottom.value_or(CalcLength(defaultTopMargin)).GetDimension().ConvertToPx();
 
     auto Idealwidth = constraint->selfIdealSize.Width().value_or(0);
-    auto idealHeight = constraint->selfIdealSize.Height().value_or(0);
     if (widthTotal < Idealwidth - theme->GetEntryButtonWidth().ConvertToPx()) {
         widthTotal = Idealwidth - theme->GetEntryButtonWidth().ConvertToPx();
     }
-    if (height < idealHeight) {
-        height = idealHeight;
-    }
+    height = std::max(height, constraint->selfIdealSize.Height().value_or(0));
 
     auto contentLayoutConstraint = layoutProperty->CreateChildConstraint();
     CalcSize cancelButtonCalcSize((CalcLength(widthTotal)), CalcLength(height));
@@ -81,7 +83,6 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
     contentWrapper->Measure(contentLayoutConstraint);
     contentMeasure_ = SizeF(widthTotal, height);
     contentGeometryNode->SetFrameSize(contentMeasure_);
-    contentGeometryNode->SetContentSize(contentMeasure_);
 }
 
 void CalendarPickerLayoutAlgorithm::CalendarPickerFlexMeasure(LayoutWrapper* layoutWrapper)
@@ -112,10 +113,27 @@ void CalendarPickerLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
 
-    SizeF idealSize(contentMeasure_.Width() + flexMeasure_.Width(), flexMeasure_.Height());
+    BorderWidthProperty currentBorderWidth;
+    if (layoutProperty->GetBorderWidthProperty() != nullptr) {
+        currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
+    } else {
+        currentBorderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
+    }
+
+    auto width = contentMeasure_.Width() + flexMeasure_.Width();
+    width += currentBorderWidth.topDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
+    width += currentBorderWidth.bottomDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
+    auto height = flexMeasure_.Height();
+    height += currentBorderWidth.leftDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
+    height += currentBorderWidth.rightDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
+
+    SizeF idealSize(width, height);
     geometryNode->SetFrameSize(idealSize);
-    geometryNode->SetContentSize(idealSize);
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(idealSize.Width()), CalcLength(idealSize.Height())));
 }
 } // namespace OHOS::Ace::NG

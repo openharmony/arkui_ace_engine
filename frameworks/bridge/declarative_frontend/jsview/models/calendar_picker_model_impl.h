@@ -26,6 +26,7 @@ public:
     void SetTextStyle(const NG::PickerTextStyle& textStyle) override {};
     void SetOnChange(NG::SelectedChangeEvent&& onChange) override {};
     void SetChangeEvent(NG::SelectedChangeEvent&& onChange) override {};
+    void SetPadding(const NG::PaddingProperty& padding) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CALENDAR_PICKER_MODEL_IMPL_H
