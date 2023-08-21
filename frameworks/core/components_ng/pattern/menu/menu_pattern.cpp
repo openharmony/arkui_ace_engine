@@ -144,9 +144,6 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(focusHub);
     RegisterOnKeyEvent(focusHub);
     DisableTabInMenu();
-    if (IsRichEditorSelectMenu()) {
-        return;
-    }
     InitTheme(host);
 }
 
@@ -351,9 +348,6 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 
 void MenuPattern::HideMenu(bool isMenuOnTouch) const
 {
-    if (IsRichEditorSelectMenu()) {
-        return;
-    }
     if (IsContextMenu()) {
         SubwindowManager::GetInstance()->HideMenuNG(targetId_);
         return;

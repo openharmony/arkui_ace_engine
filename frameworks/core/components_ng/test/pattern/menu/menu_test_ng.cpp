@@ -4650,7 +4650,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
     RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>(NODEID, "menu");
     ASSERT_NE(menuLayoutAlgorithm, nullptr);
 
-    menuLayoutAlgorithm->InitTargetSizeAndPosition(nullptr, true, true);
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(nullptr, true);
     menuLayoutAlgorithm->targetNodeId_ = NODEID;
     menuLayoutAlgorithm->targetTag_ = "text";
     auto target = FrameNode::GetOrCreateFrameNode("text", NODEID, []() { return AceType::MakeRefPtr<Pattern>(); });
@@ -4662,7 +4662,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
     auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(target->GetRenderContext());
     ASSERT_NE(mockRenderContext, nullptr);
     EXPECT_CALL(*mockRenderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF(0.0f, 0.0f, 0.0f, 0.0f)));
-    menuLayoutAlgorithm->InitTargetSizeAndPosition(nullptr, true, true);
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(nullptr, true);
 
     /**
      * @tc.steps: step3. layoutWrapper, target node and the geometry node of target is not null, isContextMenu is false
@@ -4682,7 +4682,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
     geometryProperty.rect_ = RectF(0.0f, 0.0f, 0.0f, 0.0f);
     geometryNode->frame_ = geometryProperty;
     target->geometryNode_ = geometryNode;
-    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, false, false);
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, false);
     EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
 
     /**
@@ -4695,7 +4695,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
     MockPipelineBase::GetCurrent()->windowManager_->SetWindowGetModeCallBack(
         []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
 
-    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, true, true);
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, true);
     auto pipelineContext = menuLayoutAlgorithm->GetCurrentPipelineContext();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
@@ -4709,7 +4709,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
      * @tc.steps: step5. layoutWrapper, target and the geometry node of target is not null, isContextMenu is false
      * @tc.expected: targetOffset_ is OffsetF(-5.0f, -38.0f)
      */
-    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, false, false);
+    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, false);
     EXPECT_EQ(menuLayoutAlgorithm->targetOffset_,
         OffsetF(-static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx()),
             -static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx() + CONTAINER_BORDER_WIDTH.ConvertToPx())));

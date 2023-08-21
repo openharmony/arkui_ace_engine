@@ -1721,8 +1721,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     ViewAbstract::BindMenuWithItems(std::move(param), targetNode, OFFSETF, menuParam);
     ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, MenuType::CONTEXT_MENU, OFFSETF, menuParam);
     EXPECT_TRUE(mouseInfo.IsStopPropagation());
-    ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, MenuType::RICH_EDIT_SELECT_MENU, OFFSETF, menuParam);
-    EXPECT_TRUE(mouseInfo.IsStopPropagation());
 }
 
 /**

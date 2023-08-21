@@ -341,7 +341,7 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    if (menuPattern->IsContextMenu() || menuPattern->IsRichEditorSelectMenu()) {
+    if (menuPattern->IsContextMenu()) {
         // no need to modify for context menu, because context menu wrapper is full screen.
         return;
     }
@@ -368,7 +368,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern->IsRichEditorSelectMenu());
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu());
     }
     Initialize(layoutWrapper);
 
@@ -517,7 +517,7 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
         }
     }
 
-    bool needArrow = (menuPattern->IsContextMenu() || menuPattern->IsRichEditorSelectMenu()) && !targetTag_.empty()
+    bool needArrow = menuPattern->IsContextMenu() && !targetTag_.empty()
         && arrowInMenu_;
     if (needArrow) {
         if (!menuProp->GetMenuPlacement().has_value()) {
@@ -877,8 +877,7 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
-void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
-    bool isRichEditorSelectMenu)
+void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
@@ -889,7 +888,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(const LayoutWrapper* layoutW
     CHECK_NULL_VOID(pipelineContext);
 
     targetOffset_ = targetNode->GetPaintRectOffset();
-    if (isContextMenu || isRichEditorSelectMenu) {
+    if (isContextMenu) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
         float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
