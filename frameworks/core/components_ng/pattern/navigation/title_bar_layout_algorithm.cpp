@@ -81,7 +81,7 @@ void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, cons
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize, float menuWidth)
 {
     auto subtitleNode = titleBarNode->GetSubtitle();
-    CHECK_NULL_VOID(subtitleNode);
+    CHECK_NULL_VOID_NOLOG(subtitleNode);
     auto index = titleBarNode->GetChildIndexById(subtitleNode->GetId());
     auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(subtitleWrapper);
@@ -384,7 +384,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight)
 {
     auto subtitleNode = titleBarNode->GetSubtitle();
-    CHECK_NULL_VOID(subtitleNode);
+    CHECK_NULL_VOID_NOLOG(subtitleNode);
     auto index = titleBarNode->GetChildIndexById(subtitleNode->GetId());
     auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(subtitleWrapper);
