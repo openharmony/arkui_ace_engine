@@ -2007,7 +2007,10 @@ void RosenRenderTextField::ResetStatus()
 double RosenRenderTextField::GetLongestLine()
 {
     if (paragraph_) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         return paragraph_->GetLongestLine();
+#else
+        return paragraph_->GetActualWidth();
     }
     return RenderTextField::GetLongestLine();
 }
