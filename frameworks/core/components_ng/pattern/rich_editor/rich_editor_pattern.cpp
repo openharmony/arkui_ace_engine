@@ -1565,6 +1565,11 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
     retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
     eventHub->FireOnIMEInputComplete(retInfo);
+    int32_t spanTextLength = 0;
+    for (auto child = spanItemChildren_.begin(); child != spanItemChildren_.end(); ++child) {
+        spanTextLength += StringUtils::ToWstring((*child)->content).length();
+        (*child)->position = spanTextLength;
+    }
 }
 
 void RichEditorPattern::DeleteBackward(int32_t length)
