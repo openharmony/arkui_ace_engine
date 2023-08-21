@@ -28,6 +28,13 @@ public:
 
     virtual ~DownloadManager() = default;
     virtual bool Download(const std::string& url, std::vector<uint8_t>& dataOut) = 0;
+
+    struct ProxyInfo {
+        std::string host;
+        int32_t port = 0;
+        std::string exclusions;
+    };
+    static bool GetProxy(ProxyInfo& proxy);
 };
 
 } // namespace OHOS::Ace
