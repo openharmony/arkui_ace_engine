@@ -165,8 +165,6 @@ void FormRenderWindow::OnHide()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     Window::OnHide();
-    rsUIDirector_->GoBackground();
-    rsUIDirector_->SendMessages();
 #endif
 }
 

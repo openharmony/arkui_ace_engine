@@ -534,57 +534,34 @@ void FormPattern::InitFormManagerDelegate()
         [weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic) {
             LOGI("Form surface node callback");
             ContainerScope scope(instanceID);
-            CHECK_NULL_VOID(node);
-            node->CreateNodeInRenderThread();
-
-            auto formComponent = weak.Upgrade();
-            CHECK_NULL_VOID(formComponent);
-            auto host = formComponent->GetHost();
+            auto form = weak.Upgrade();
+            CHECK_NULL_VOID(form);
+            auto host = form->GetHost();
             CHECK_NULL_VOID(host);
-            auto size = host->GetGeometryNode()->GetFrameSize();
-
-            auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(formComponent->GetExternalRenderContext());
-            CHECK_NULL_VOID(externalRenderContext);
-            externalRenderContext->SetRSNode(node);
-            externalRenderContext->SetBounds(0, 0, size.Width(), size.Height());
-
-            auto formComponentContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
-            CHECK_NULL_VOID(formComponentContext);
-            formComponentContext->AddChild(externalRenderContext, 0);
-
-            auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
-            layoutProperty->UpdateVisibility(visible);
-            formComponent->isLoaded_ = true;
-
-            formComponent->SetIsUnTrust(false);
-            formComponent->SetIsDynamic(isDynamic);
-            formComponent->HideImageNode();
-            host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-            auto parent = host->GetParent();
-            CHECK_NULL_VOID(parent);
-            parent->MarkNeedSyncRenderTree();
-            parent->RebuildRenderContextTree();
-            host->GetRenderContext()->RequestNextFrame();
-            formComponent->OnLoadEvent();
+            auto uiTaskExecutor =
+                SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostTask([weak, instanceID, node, isDynamic] {
+                ContainerScope scope(instanceID);
+                auto form = weak.Upgrade();
+                CHECK_NULL_VOID(form);
+                form->FireFormSurfaceNodeCallback(node, isDynamic);
+            });
         });
 
     formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height) {
-        auto formComponent = weak.Upgrade();
-        CHECK_NULL_VOID(formComponent);
-        auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(formComponent->GetExternalRenderContext());
-        CHECK_NULL_VOID(externalRenderContext);
-        externalRenderContext->SetBounds(0, 0, width, height);
-        auto host = formComponent->GetHost();
+        ContainerScope scope(instanceID);
+        auto form = weak.Upgrade();
+        CHECK_NULL_VOID(form);
+        auto host = form->GetHost();
         CHECK_NULL_VOID(host);
-        formComponent->SetIsUnTrust(false);
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-        auto parent = host->GetParent();
-        CHECK_NULL_VOID(parent);
-        parent->MarkNeedSyncRenderTree();
-        parent->RebuildRenderContextTree();
-        host->GetRenderContext()->RequestNextFrame();
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak, instanceID, width, height] {
+            ContainerScope scope(instanceID);
+            auto form = weak.Upgrade();
+            CHECK_NULL_VOID(form);
+            form->FireFormSurfaceChangeCallback(width, height);
+        });
     });
 
     formManagerBridge_->AddActionEventHandle([weak = WeakClaim(this), instanceID](const std::string& action) {
@@ -618,6 +595,60 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(formPattern);
             formPattern->SetFormLinkInfos(infos);
         });
+}
+
+void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic)
+{
+    CHECK_NULL_VOID(node);
+    node->CreateNodeInRenderThread();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto size = host->GetGeometryNode()->GetFrameSize();
+
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+    externalRenderContext->SetRSNode(node);
+    externalRenderContext->SetBounds(0, 0, size.Width(), size.Height());
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->AddChild(externalRenderContext, 0);
+
+    auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+    layoutProperty->UpdateVisibility(visible);
+
+    isLoaded_ = true;
+    isUnTrust_ = false;
+    isDynamic_ = isDynamic;
+    HideImageNode();
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
+    renderContext->RequestNextFrame();
+    OnLoadEvent();
+}
+
+void FormPattern::FireFormSurfaceChangeCallback(float width, float height)
+{
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+    externalRenderContext->SetBounds(0, 0, width, height);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    isUnTrust_ = false;
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
+    renderContext->RequestNextFrame();
 }
 
 void FormPattern::CreateCardContainer()
