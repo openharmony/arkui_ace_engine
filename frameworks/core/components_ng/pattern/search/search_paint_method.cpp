@@ -51,18 +51,34 @@ void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper
         auto searchDividerColor = searchTheme->GetSearchDividerColor();
         auto searchSize = paintWrapper->GetGeometryNode()->GetFrameSize();
         float rightOffset = 0.0f;
-        if (paintWrapper->GetGeometryNode()->GetPadding()) {
-            rightOffset = paintWrapper->GetGeometryNode()->GetPadding()->right.value_or(0.0f);
+        float topPadding = 0.0f;
+        float bottomPadding = 0.0f;
+        const auto& padding = paintWrapper->GetGeometryNode()->GetPadding();
+        if (padding) {
+            rightOffset = padding->right.value_or(0.0f);
+            topPadding = padding->top.value_or(0.0f);
+            bottomPadding = padding->bottom.value_or(0.0f);
         }
         // Paint divider.
-        double dividerVerticalOffset = (searchSize.Height() - iconHeight.ConvertToPx()) / 2.0;
-        double dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace -
-                                         searchSpace - searchDividerWidth / 2 - rightOffset;
-        dividerHorizontalOffset = std::max(dividerHorizontalOffset, 0.0);
-        OffsetF dividerOffset = OffsetF(dividerHorizontalOffset, dividerVerticalOffset);
-        float originX = dividerOffset.GetX();
-        float originY = dividerOffset.GetY();
-        RSRect rect(originX, originY, originX + searchDividerWidth, originY + iconHeight.ConvertToPx());
+        float dividerVerticalOffset = (searchSize.Height() - iconHeight.ConvertToPx()) / 2.0;
+        float dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace - searchSpace -
+                                        searchDividerWidth / 2 - rightOffset;
+        dividerHorizontalOffset = std::max(dividerHorizontalOffset, 0.0f);
+        auto dividerHeight =
+            std::min(searchSize.Height() - topPadding - bottomPadding, static_cast<float>(iconHeight.ConvertToPx()));
+        dividerVerticalOffset = topPadding;
+        if (NearEqual(iconHeight.ConvertToPx(), dividerHeight)) {
+            auto dividerInterval = (searchSize.Height() - iconHeight.ConvertToPx()) / 2;
+            if (topPadding <= dividerInterval && bottomPadding <= dividerInterval) {
+                dividerVerticalOffset = dividerInterval;
+            } else if (topPadding <= dividerInterval && bottomPadding > dividerInterval) {
+                dividerVerticalOffset = searchSize.Height() - (bottomPadding + dividerHeight);
+            }
+        }
+        float originX = dividerHorizontalOffset;
+        float originY = dividerVerticalOffset;
+
+        RSRect rect(originX, originY, originX + searchDividerWidth, originY + dividerHeight);
         canvas.Save();
         RSPen pen;
         pen.SetWidth(searchDividerWidth);
