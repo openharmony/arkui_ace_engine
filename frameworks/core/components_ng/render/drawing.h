@@ -143,6 +143,7 @@ using RSWordBreakType = Rosen::WordBreakType;
 using RSTextBaseline = Rosen::TextBaseline;
 using RSTextStyle = Rosen::TextStyle;
 using RSTextDecoration = Rosen::TextDecoration;
+using RSTextDecorationStyle = rosen::TextDecorationStyle;
 using RSFontWeight = Rosen::FontWeight;
 using RSFontStyle = Rosen::FontStyle;
 using RSPathEffect = Rosen::Drawing::PathEffect;
