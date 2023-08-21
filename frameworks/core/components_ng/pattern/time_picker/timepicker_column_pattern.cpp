@@ -127,6 +127,14 @@ void TimePickerColumnPattern::InitMouseAndPressEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto columnEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(columnEventHub);
+    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
+    CHECK_NULL_VOID(touchListener);
+    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(columnGesture);
+    columnGesture->AddTouchEvent(touchListener);
+    CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     CHECK_NULL_VOID(toss);
     RefPtr<FrameNode> middleChild = nullptr;
@@ -154,24 +162,15 @@ void TimePickerColumnPattern::InitMouseAndPressEvent()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->OnTouchDown();
             pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
-            if (toss->GetTossNodeAnimation()) {
-                toss->StopTossAnimation();
-            }
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
             pattern->OnTouchUp();
             pattern->SetLocalDownDistance(0.0f);
-            auto isToss = pattern->GetTossStatus();
-            if (isToss == true) {
-                pattern->PlayRestAnimation();
-                pattern->SetTossStatus(false);
-            }
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
             if (std::abs(info.GetTouches().front().GetLocalLocation().GetDistance() - pattern->GetLocalDownDistance()) >
                 MOVE_DISTANCE) {
                 pattern->OnTouchUp();
-                pattern->SetTossStatus(false);
             }
         }
     };
@@ -195,6 +194,39 @@ void TimePickerColumnPattern::InitMouseAndPressEvent()
             gesture->AddClickEvent(clickListener);
         }
     }
+}
+
+RefPtr<TouchEventImpl> TimePickerColumnPattern::CreateItemTouchEventListener()
+{
+    auto toss = GetToss();
+    CHECK_NULL_RETURN(toss, nullptr);
+    auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto isToss = pattern->GetTossStatus();
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            if (isToss == true) {
+                pattern->touchBreak_ = true;
+                pattern->animationBreak_ = true;
+                pattern->clickBreak_ = true;
+                auto TossEndPosition = toss->GetTossEndPosition();
+                pattern->SetYLast(TossEndPosition);
+                toss->StopTossAnimation();
+            } else {
+                pattern->animationBreak_ = false;
+                pattern->clickBreak_ = false;
+            }
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            pattern->touchBreak_ = false;
+            if (pattern->animationBreak_ == true) {
+                pattern->PlayRestAnimation();
+                pattern->yOffset_ = 0.0;
+            }
+        }
+    };
+    auto listener = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    return listener;
 }
 
 void TimePickerColumnPattern::HandleMouseEvent(bool isHover)
@@ -568,10 +600,10 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
             textLayoutProperty->UpdateFontWeight(DisappearWeight_);
         }
     }
-    Dimension updateSize = LinearFontSize(startFontSize, endFontSize, scale);
+    Dimension updateSize = LinearFontSize(startFontSize, endFontSize, distancePercent_);
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
-    Color updateColor = colorEvaluator->Evaluate(startColor, endColor, scale);
+    Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
         if (index == midIndex) {
@@ -667,6 +699,7 @@ void TimePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 
 void TimePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
+    animationBreak_ = false;
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
@@ -790,14 +823,14 @@ void TimePickerColumnPattern::ScrollOption(double delta, bool isJump)
     TimePickerScrollDirection dir = delta > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
                                                                 : optionProperties_[midIndex].nextDistance;
-    auto distancePercent = delta / shiftDistance;
+    distancePercent_ = delta / shiftDistance;
     auto textThresHold = optionProperties_[midIndex].height / 4; // ux required
     auto textLinearPercent = 0.0;
     if (std::abs(delta) > textThresHold) {
         textLinearPercent = (std::abs(delta) - textThresHold) / (std::abs(shiftDistance) - textThresHold);
     }
     UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), textLinearPercent);
-    CalcAlgorithmOffset(dir, distancePercent);
+    CalcAlgorithmOffset(dir, distancePercent_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -970,6 +1003,9 @@ void TimePickerColumnPattern::SetOptionShiftDistance()
 
 void TimePickerColumnPattern::UpdateToss(double offsetY)
 {
+    if (offsetY == 0.0) {
+        return;
+    }
     UpdateColumnChildPosition(offsetY);
 }
 
@@ -1052,6 +1088,7 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
 void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
+    yLast_ = offsetY;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
     }
@@ -1066,14 +1103,12 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
         ScrollOption(dragDelta, true);
-        yLast_ = offsetY;
         offsetCurSet_ = dragDelta;
         yOffset_ = dragDelta;
         return;
     }
     // update selected option
     ScrollOption(dragDelta);
-    yLast_ = offsetY;
     offsetCurSet_ = dragDelta;
     yOffset_ = dragDelta;
 }
@@ -1194,10 +1229,8 @@ RefPtr<ClickEvent> TimePickerColumnPattern::CreateItemClickEventListener(RefPtr<
 
 void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> param)
 {
-    CHECK_NULL_VOID_NOLOG(GetToss());
-    auto toss = GetToss();
-    if (toss->GetTossNodeAnimation()) {
-        toss->StopTossAnimation();
+    if (clickBreak_) {
+        return;
     }
     int32_t middleIndex = GetShowCount() / 2;
     int32_t step = param->itemIndex_ - middleIndex;
@@ -1224,7 +1257,6 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
 }
 void TimePickerColumnPattern::TossAnimationStoped()
 {
-    yOffset_ = 0.0;
     yLast_ = 0.0;
 }
 
