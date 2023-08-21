@@ -21,7 +21,6 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -2225,6 +2224,21 @@ RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end, 
     return selection;
 }
 
+void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
+{
+    if (!selectionMenuParams_) {
+        return;
+    }
+    bool needCopy = (selectInfo.isUsingMouse && selectionMenuParams_->responseType == ResponseType::RIGHT_CLICK) ||
+                    (!selectInfo.isUsingMouse && selectionMenuParams_->responseType == ResponseType::LONG_PRESS);
+    if (!needCopy) {
+        return;
+    }
+    selectInfo.menuInfo.menuBuilder = selectionMenuParams_->buildFunc;
+    selectInfo.menuCallback.onAppear = selectionMenuParams_->onAppear;
+    selectInfo.menuCallback.onDisappear = selectionMenuParams_->onDisappear;
+}
+
 void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -2235,22 +2249,10 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         if (!pattern->IsUsingMouse()) {
             selectInfo.firstHandle.paintRect = firstHandle;
             selectInfo.secondHandle.paintRect = secondHandle;
-            if (pattern->selectionMenuParams_ != nullptr &&
-                pattern->selectionMenuParams_->responseType == ResponseType::LONG_PRESS) {
-                selectInfo.menuInfo.menuBuilder = pattern->selectionMenuParams_->buildFunc;
-                selectInfo.menuCallback.onAppear = pattern->selectionMenuParams_->onAppear;
-                selectInfo.menuCallback.onDisappear = pattern->selectionMenuParams_->onDisappear;
-            }
         } else {
             selectInfo.isUsingMouse = true;
             selectInfo.rightClickOffset = pattern->GetRightClickOffset();
             pattern->ResetIsMousePressed();
-            if (pattern->selectionMenuParams_ != nullptr &&
-                pattern->selectionMenuParams_->responseType == ResponseType::RIGHT_CLICK) {
-                selectInfo.menuInfo.menuBuilder = pattern->selectionMenuParams_->buildFunc;
-                selectInfo.menuCallback.onAppear = pattern->selectionMenuParams_->onAppear;
-                selectInfo.menuCallback.onDisappear = pattern->selectionMenuParams_->onDisappear;
-            }
         }
         selectInfo.onHandleMove = [weak](const RectF& handleRect, bool isFirst) {
             auto pattern = weak.Upgrade();
@@ -2293,6 +2295,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         };
         selectInfo.callerFrameNode = host;
 
+        pattern->CopySelectionMenuParams(selectInfo);
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
     };
     clipboard_->HasData(hasDataCallback);
@@ -2596,6 +2599,7 @@ void RichEditorPattern::OnAreaChangedInner()
 void RichEditorPattern::CloseSelectionMenu()
 {
     CloseSelectOverlay();
+    ResetSelection();
 }
 
 void RichEditorPattern::CloseSelectOverlay()

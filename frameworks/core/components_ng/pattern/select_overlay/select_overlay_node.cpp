@@ -17,13 +17,13 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <securec.h>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
-#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
@@ -32,8 +32,8 @@
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -462,12 +462,21 @@ void SelectOverlayNode::DispatchGoneToVisibleState(FrameNodeType type, FrameNode
     }
 }
 
-RefPtr<FrameNode> CreateCustomMenu(std::function<void()> buildFunc)
+RefPtr<FrameNode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo>& info)
 {
+    CHECK_NULL_RETURN(info, nullptr);
+    CHECK_NULL_RETURN(info->menuInfo.menuBuilder, nullptr);
     NG::ScopedViewStackProcessor builderViewStackProcessor;
-    buildFunc();
+    info->menuInfo.menuBuilder();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     auto menuNode = MenuView::Create(customNode, -1);
+    auto eventHub = menuNode->GetEventHub<EventHub>();
+    if (eventHub && info->menuCallback.onAppear) {
+        eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));
+    }
+    if (eventHub && info->menuCallback.onDisappear) {
+        eventHub->SetOnDisappear(std::move(info->menuCallback.onDisappear));
+    }
     return menuNode;
 }
 
@@ -773,7 +782,7 @@ void SelectOverlayNode::CreateToolBar()
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
     if (info->menuInfo.menuBuilder) {
-        selectMenu_ = CreateCustomMenu(info->menuInfo.menuBuilder);
+        selectMenu_ = CreateCustomSelectMenu(info);
         selectMenu_->MountToParent(Claim(this));
         selectMenu_->MarkModifyDone();
         return;
@@ -1053,7 +1062,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
 {
     RefPtr<FrameNode> menuWrapper;
     if (info->menuInfo.menuBuilder) {
-        menuWrapper = CreateCustomMenu(info->menuInfo.menuBuilder);
+        menuWrapper = CreateCustomSelectMenu(info);
     } else {
         std::vector<OptionParam> params = GetOptionsParams(info);
         menuWrapper = MenuView::Create(std::move(params), -1);

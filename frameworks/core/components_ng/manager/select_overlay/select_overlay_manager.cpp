@@ -20,7 +20,6 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -48,11 +47,8 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     // mount to parent
     selectOverlayNode->MountToParent(rootNode);
-    if (info.menuCallback.onAppear) {
-        info.menuCallback.onAppear();
-    }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    if (!infoPtr->isUsingMouse && info.menuInfo.menuBuilder == nullptr) {
+    if (!infoPtr->isUsingMouse) {
         auto node = DynamicCast<SelectOverlayNode>(selectOverlayNode);
         CHECK_NULL_RETURN(node, nullptr);
         node->ShowSelectOverlay(animation);
@@ -73,11 +69,6 @@ void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId, bool animatio
     auto current = selectOverlayItem_.Upgrade();
     if (current && (current->GetId() == overlayId)) {
         DestroyHelper(current, animation);
-        auto node = DynamicCast<SelectOverlayNode>(current);
-        if (node && node->GetPattern<SelectOverlayPattern>() &&
-            node->GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo()->menuCallback.onDisappear) {
-            node->GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo()->menuCallback.onDisappear();
-        }
     } else {
         LOGD("current overlay id %{public}d is already destroyed.", overlayId);
     }

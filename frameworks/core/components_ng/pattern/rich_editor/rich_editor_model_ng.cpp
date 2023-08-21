@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
-#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
