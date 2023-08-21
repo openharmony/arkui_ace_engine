@@ -1637,8 +1637,26 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     }
 
     double value = 0.0;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     if (!ParseJsDouble(info[0], value)) {
-        return;
+        // add version protection, undefined use default value
+        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsNull() || info[0]->IsUndefined())) {
+            ViewAbstractModel::GetInstance()->ResetAspectRatio();
+            return;
+        } else {
+            return;
+        }
+    }
+
+    // negative use default value.
+    if (LessOrEqual(value, 0.0)) {
+        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            ViewAbstractModel::GetInstance()->ResetAspectRatio();
+            return;
+        } else {
+            value = 1.0;
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));

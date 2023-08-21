@@ -111,6 +111,7 @@ public:
     virtual void SetLayoutWeight(int32_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
+    virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
     virtual void SetUseAlign(
