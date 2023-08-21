@@ -27,6 +27,7 @@
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -40,8 +41,8 @@
 
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public Pattern, public TextDragBase {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase);
+class TextPattern : public Pattern, public TextDragBase, public TextBase {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
 
 public:
     TextPattern() = default;
@@ -292,7 +293,6 @@ protected:
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    bool IsSelected() const;
     bool IsSelectAll();
     virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     virtual void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
@@ -314,7 +314,6 @@ protected:
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeHolderIndex_;
-    TextSelector textSelector_;
     float baselineOffset_ = 0.0f;
     bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
@@ -352,6 +351,8 @@ private:
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
     bool panEventInitialized_ = false;
+    bool isMousePressed_ = false;
+    bool blockPress_ = false;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     RefPtr<TextContentModifier> textContentModifier_;

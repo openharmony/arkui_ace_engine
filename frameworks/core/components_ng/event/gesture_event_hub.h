@@ -403,16 +403,6 @@ public:
     {
         return isTextDraggable_;
     }
-
-    bool IsTextField() const
-    {
-        return isTextField_;
-    }
-
-    void SetTextField(bool isTextField)
-    {
-        isTextField_ = isTextField;
-    }
 #endif // ENABLE_DRAG_FRAMEWORK
 
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
@@ -511,7 +501,6 @@ private:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;
-    bool isTextField_ = false;
     bool isTextDraggable_ = false;
     std::function<void()> callback_;
 #endif
