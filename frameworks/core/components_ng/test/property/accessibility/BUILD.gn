@@ -36,6 +36,7 @@ ohos_unittest("accessibility_property_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
 
     # components_ng
+    "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
@@ -72,6 +73,8 @@ ohos_unittest("accessibility_property_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
     "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",

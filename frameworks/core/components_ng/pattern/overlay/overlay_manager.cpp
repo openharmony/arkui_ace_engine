@@ -1003,13 +1003,58 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
 }
 
+bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed)
+{
+    if (overlay->IsRemoving()) {
+        return false;
+    }
+    if (FireBackPressEvent()) {
+        return true;
+    }
+    auto hub = overlay->GetEventHub<DialogEventHub>();
+    if (hub) {
+        hub->FireCancelEvent();
+    }
+    CloseDialog(overlay);
+    if (isBackPressed) {
+        SetBackPressEvent(nullptr);
+    }
+    return true;
+}
+
+bool OverlayManager::RemoveBubble(const RefPtr<FrameNode>& overlay)
+{
+    auto bubbleEventHub = overlay->GetEventHub<BubbleEventHub>();
+    CHECK_NULL_RETURN(bubbleEventHub, false);
+    bubbleEventHub->FireChangeEvent(false);
+    auto rootNode = overlay->GetParent();
+    CHECK_NULL_RETURN(rootNode, false);
+    for (const auto& popup : popupMap_) {
+        auto targetId = popup.first;
+        auto popupInfo = popup.second;
+        if (overlay == popupInfo.popupNode) {
+            popupMap_.erase(targetId);
+            rootNode->RemoveChild(overlay);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            return true;
+        }
+    }
+    return false;
+}
+bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
+{
+    auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    menuWrapperPattern->HideMenu();
+    return true;
+}
+
 bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
     DestroyKeyboard();
-    auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
         // stage node is at index 0, remove overlay at last
         auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
@@ -1017,36 +1062,13 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (InstanceOf<DialogPattern>(pattern)) {
-            if (FireBackPressEvent()) {
-                return true;
-            }
-            auto hub = overlay->GetEventHub<DialogEventHub>();
-            if (hub) {
-                hub->FireCancelEvent();
-            }
-            CloseDialog(overlay);
-            if (isBackPressed) {
-                SetBackPressEvent(nullptr);
-            }
-            return true;
-        } else if (AceType::DynamicCast<BubblePattern>(pattern)) {
-            auto popupNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildAtIndex(childrenSize - 1));
-            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-            for (const auto& popup : popupMap_) {
-                auto targetId = popup.first;
-                auto popupInfo = popup.second;
-                if (popupNode == popupInfo.popupNode) {
-                    popupMap_.erase(targetId);
-                    rootNode->RemoveChild(popupNode);
-                    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-                    return true;
-                }
-            }
-            return false;
+            return RemoveDialog(overlay, isBackPressed);
+        }
+        if (InstanceOf<BubblePattern>(pattern)) {
+            return RemoveBubble(overlay);
         }
         if (InstanceOf<MenuWrapperPattern>(pattern)) {
-            DynamicCast<MenuWrapperPattern>(pattern)->HideMenu();
-            return true;
+            return RemoveMenu(overlay);
         }
         if (!modalStack_.empty()) {
             if (isPageRouter) {
@@ -1155,15 +1177,10 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     CHECK_NULL_RETURN(overlay, false);
     // close dialog with animation
     auto pattern = overlay->GetPattern();
-    if (AceType::InstanceOf<DialogPattern>(pattern)) {
-        auto hub = overlay->GetEventHub<DialogEventHub>();
-        if (hub) {
-            hub->FireCancelEvent();
-        }
-        CloseDialog(overlay);
-        return true;
+    if (InstanceOf<DialogPattern>(pattern)) {
+        return RemoveDialog(overlay, false);
     }
-    if (AceType::InstanceOf<BubblePattern>(pattern)) {
+    if (InstanceOf<BubblePattern>(pattern)) {
         overlay->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         for (const auto& popup : popupMap_) {
             auto targetId = popup.first;
@@ -1180,9 +1197,8 @@ bool OverlayManager::RemoveOverlayInSubwindow()
         }
         return false;
     }
-    if (AceType::InstanceOf<MenuWrapperPattern>(pattern)) {
-        HideMenuInSubWindow();
-        return true;
+    if (InstanceOf<MenuWrapperPattern>(pattern)) {
+        return RemoveMenu(overlay);
     }
     rootNode->RemoveChild(overlay);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
