@@ -164,22 +164,6 @@ using InternalTranslateEffect = PropertyTransitionEffectTemplate<Rosen::RSTransl
 template<>
 InternalTranslateEffect::PropertyTransitionEffectTemplate();
 
-// Translate effect that accepts Dimension.
-class RosenTranslateTransitionEffect final : public InternalTranslateEffect {
-public:
-    explicit RosenTranslateTransitionEffect(const TranslateOptions& option) : translateValue_(option) {}
-    ~RosenTranslateTransitionEffect() override = default;
-
-    void SetTranslateEffect(const TranslateOptions& option);
-
-private:
-    void OnUpdateTransitionContext(
-        const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize) override;
-    TranslateOptions translateValue_;
-    DECLARE_ACE_TYPE(RosenTranslateTransitionEffect, InternalTranslateEffect);
-    ACE_DISALLOW_COPY_AND_MOVE(RosenTranslateTransitionEffect);
-};
-
 // Move in and out to (same) screen edge.
 class RosenMoveTransitionEffect final : public InternalTranslateEffect {
 public:
@@ -260,6 +244,26 @@ protected:
 private:
     DECLARE_ACE_TYPE(RosenCompositeTransitionEffect, RosenTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenCompositeTransitionEffect);
+};
+
+using InternalTranslateZEffect = PropertyTransitionEffectTemplate<Rosen::RSTranslateZModifier, float>;
+template<>
+InternalTranslateZEffect::PropertyTransitionEffectTemplate();
+// 3D Translate effect that accepts Dimension.
+class RosenTranslateTransitionEffect final
+    : public RosenCompositeTransitionEffect<InternalTranslateEffect, InternalTranslateZEffect> {
+public:
+    explicit RosenTranslateTransitionEffect(const TranslateOptions& option) : translateValue_(option) {}
+    ~RosenTranslateTransitionEffect() override = default;
+
+    void SetTranslateEffect(const TranslateOptions& option);
+
+private:
+    void OnUpdateTransitionContext(
+        const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize) override;
+    TranslateOptions translateValue_;
+    DECLARE_ACE_TYPE(RosenTranslateTransitionEffect, RosenCompositeTransitionEffect);
+    ACE_DISALLOW_COPY_AND_MOVE(RosenTranslateTransitionEffect);
 };
 
 // 3D rotation composite effect with pivot.

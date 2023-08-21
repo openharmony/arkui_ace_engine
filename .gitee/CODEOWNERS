@@ -65,7 +65,7 @@ frameworks/core/components_ng/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/pattern/hyperlink/  @jinweiliu
 frameworks/core/components_ng/pattern/image/  @zhoutianer
-frameworks/core/components_ng/pattern/image_animator/  @zhoutianer
+frameworks/core/components_ng/pattern/image_animator/  @hehongyang9
 frameworks/core/components_ng/pattern/indexer/  @aryawang
 frameworks/core/components_ng/pattern/linear_layout/  @xiexiyun
 frameworks/core/components_ng/pattern/linear_split/  @xiexiyun

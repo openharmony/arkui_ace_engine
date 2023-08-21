@@ -515,6 +515,8 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
         if (!isReloading_ && !IsLayouting()) {
             FlushUITasks();
+        } else if (IsLayouting()) {
+            LOGW("IsLayouting, prepareCloseImplicitAnimation has tasks not flushed");
         }
     }
     if (!pendingImplicitLayout_.empty()) {
