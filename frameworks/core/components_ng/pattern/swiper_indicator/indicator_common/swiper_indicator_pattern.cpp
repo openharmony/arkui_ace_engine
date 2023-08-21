@@ -654,6 +654,9 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+    if (swiperPattern->IsIndicatorAnimatorRunning()) {
+        return;
+    }
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
