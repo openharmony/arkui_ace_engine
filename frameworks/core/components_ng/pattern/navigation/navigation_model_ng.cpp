@@ -690,6 +690,7 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
                 CHECK_NULL_VOID(titleBarNode);
                 titleBarNode->RemoveChild(navBarNode->GetSubtitle());
                 titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                titleBarNode->SetSubtitle(nullptr);
                 navBarNode->SetSubtitle(nullptr);
             }
             titleProperty->UpdateMaxLines(2); // 2:title's maxLine.
