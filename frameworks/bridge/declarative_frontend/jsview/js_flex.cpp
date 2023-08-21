@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex.h"
 
-#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/flex/flex_model.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -146,8 +145,6 @@ void JSFlex::JsSize(const JSCallbackInfo& info)
 
     if (!info[0]->IsObject()) {
         LOGE("arg is not Object or String.");
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return;
     }
 
