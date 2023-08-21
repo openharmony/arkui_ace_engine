@@ -299,8 +299,8 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         setSelectionFlag_ = false;
     }
     if (inlineSelectAllFlag_) {
-        inlineSelectAllFlag_ = false;
         HandleOnSelectAll(false, true);
+        inlineSelectAllFlag_ = false;
     }
     if (updateSelectionAfterObscure_) {
         GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
@@ -1593,7 +1593,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     CloseSelectOverlay(true);
-    if (isKeyEvent) {
+    if (isKeyEvent || inlineSelectAllFlag_) {
         return;
     }
     std::optional<RectF> firstHandle = textSelector_.firstHandle;
