@@ -910,7 +910,11 @@ double RosenRenderTextField::MeasureParagraph(
             paragraph_->Layout(limitWidth);
         }
         if (IsOverflowX()) {
-            (*paragraphStyle).max_lines = 1;
+#ifndef USE_GRAPHIC_TEXT_GINE
+        (*paragraphStyle).max_lines = 1;
+#else
+        (*paragraphStyle).maxLines = 1;
+#endif           
             paragraph_->Layout(std::numeric_limits<double>::infinity());
         }
     } else {
