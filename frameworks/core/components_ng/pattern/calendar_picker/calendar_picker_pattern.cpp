@@ -884,7 +884,7 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
 
     auto offset = layoutProperty->GetDialogOffset().value_or(DimensionOffset());
 
-    return OffsetF(x + offset.GetX().Value(), y + offset.GetY().Value());
+    return OffsetF(x + offset.GetX().ConvertToPx(), y + offset.GetY().ConvertToPx());
 }
 
 void CalendarPickerPattern::InitDialogProperties(DialogProperties& properties)
