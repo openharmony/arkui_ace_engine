@@ -1404,7 +1404,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (IsNormalInlineState() && !textEditingValue_.GetWideText().empty()) {
+    if (IsNormalInlineState()) {
         if (IsTextArea() && isTextInput_) {
             layoutProperty->UpdateMaxLines(1);
         }
