@@ -914,8 +914,8 @@ double RosenRenderTextField::MeasureParagraph(
         (*paragraphStyle).max_lines = 1;
 #else
         (*paragraphStyle).maxLines = 1;
-#endif           
-            paragraph_->Layout(std::numeric_limits<double>::infinity());
+#endif
+        paragraph_->Layout(std::numeric_limits<double>::infinity());
         }
     } else {
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -2011,6 +2011,7 @@ double RosenRenderTextField::GetLongestLine()
         return paragraph_->GetLongestLine();
 #else
         return paragraph_->GetActualWidth();
+#endif
     }
     return RenderTextField::GetLongestLine();
 }
