@@ -1002,8 +1002,11 @@ void CalendarPickerPattern::FlushTextStyle()
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
 
-        if (layoutProperty->HasColor()) {
+        if (selected_ != CalendarPickerSelectedType::YEAR && selected_ != CalendarPickerSelectedType::MONTH &&
+            selected_ != CalendarPickerSelectedType::DAY && layoutProperty->HasColor()) {
             textLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value());
+        } else {
+            SetSelectedType(selected_);
         }
         if (layoutProperty->HasFontSize()) {
             textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
