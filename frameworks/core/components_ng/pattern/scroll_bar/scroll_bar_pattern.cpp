@@ -125,12 +125,14 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto layoutAlgorithm = DynamicCast<ScrollBarLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
-    auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, false);
-    auto layoutProperty = host->GetLayoutProperty<ScrollBarLayoutProperty>();
-    CHECK_NULL_RETURN_NOLOG(layoutProperty, false);
-    auto visible = Positive(controlDistance_) ? VisibleType::VISIBLE : VisibleType::INVISIBLE;
-    layoutProperty->UpdateVisibility(visible);
+    if (displayMode_ != DisplayMode::OFF) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN_NOLOG(host, false);
+        auto layoutProperty = host->GetLayoutProperty<ScrollBarLayoutProperty>();
+        CHECK_NULL_RETURN_NOLOG(layoutProperty, false);
+        auto visible = Positive(controlDistance_) ? VisibleType::VISIBLE : VisibleType::INVISIBLE;
+        layoutProperty->UpdateVisibility(visible);
+    }
     return false;
 }
 
