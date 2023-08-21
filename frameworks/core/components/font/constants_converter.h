@@ -46,6 +46,7 @@ enum class TextAlign;
 enum class TextBaseline;
 enum class TextDirection;
 enum class PlaceholderVerticalAlignment;
+enum class TextDecorationStyle;
 struct TextStyle;
 struct PlaceholderSpan;
 
@@ -104,6 +105,8 @@ OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
 OHOS::Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 
 OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
+
+OHOS::Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle);
 
 void ConvertTxtStyle(const TextStyle &textStyle,
     const WeakPtr<PipelineBase> &context, OHOS::Rosen::TextStyle &txtStyle);
