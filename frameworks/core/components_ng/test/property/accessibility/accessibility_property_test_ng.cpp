@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+#include <string>
 #include "gtest/gtest.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/text/span_node.h"
 
 #define private public
 #define protected public
@@ -69,6 +72,70 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest001, TestSize.Lev
     props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     actions = props.GetSupportAction();
     EXPECT_EQ(actions.size(), ARRAY_SIZE);
+
+    /**
+     * @tc.steps: step3. supportActions_ = AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
+     * @tc.expected: Make the array length returned by the GetSupportAction function 1
+     */
+    props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+    actions = props.GetSupportAction();
+    EXPECT_EQ(actions.size(), 2);
+
+    /**
+     * @tc.steps: step4. supportActions_ = AceAction::ACTION_SET_TEXT
+     * @tc.expected: Make the array length returned by the GetSupportAction function 1
+     */
+    props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_SET_TEXT);
+    actions = props.GetSupportAction();
+    EXPECT_EQ(actions.size(), ARRAY_SIZE);
+
+    /**
+     * @tc.steps: step5. supportActions_ = AceAction::ACTION_COPY
+     * @tc.expected: Make the array length returned by the GetSupportAction function 1
+     */
+    props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_COPY);
+    actions = props.GetSupportAction();
+    EXPECT_EQ(actions.size(), 2);
+
+    /**
+     * @tc.steps: step6. supportActions_ = AceAction::ACTION_PASTE
+     * @tc.expected: Make the array length returned by the GetSupportAction function 1
+     */
+    props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_PASTE);
+    actions = props.GetSupportAction();
+    EXPECT_EQ(actions.size(), 2);
+
+    /**
+     * @tc.steps: step7. supportActions_ = AceAction::ACTION_CUT
+     * @tc.expected: Make the array length returned by the GetSupportAction function 1
+     */
+    props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_CUT);
+    actions = props.GetSupportAction();
+    EXPECT_EQ(actions.size(), 3);
+
+    /**
+     * @tc.steps: step8. supportActions_ = AceAction::ACTION_SELECT
+     * @tc.expected: Make the array length returned by the GetSupportAction function 1
+     */
+    props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    actions = props.GetSupportAction();
+    EXPECT_EQ(actions.size(), 0);
+
+    /**
+     * @tc.steps: step9. supportActions_ = AceAction::ACTION_SELECT
+     * @tc.expected: Make the array length returned by the GetSupportAction function 1
+     */
+    props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_SET_SELECTION);
+    actions = props.GetSupportAction();
+    EXPECT_EQ(actions.size(), 1);
+
+    /**
+     * @tc.steps: step10. supportActions_ = AceAction::ACTION_CLEAR_SELECTION
+     * @tc.expected: Make the array length returned by the GetSupportAction function 1
+     */
+    props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
+    actions = props.GetSupportAction();
+    EXPECT_EQ(actions.size(), 1);
 }
 
 /**
@@ -229,5 +296,37 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest004, TestSize.Lev
      */
     EXPECT_EQ(buttonAccessibilityProperty1->GetAccessibilityDescription(), "Button1");
     EXPECT_EQ(columnAccessibilityText1, "Button1, Button2, column2");
+
+    columnAccessibilityProperty1->SetAccessibilityLevel("no");
+    columnAccessibilityText1 = columnAccessibilityProperty1->GetAccessibilityText();
+    EXPECT_EQ(columnAccessibilityText1, "");
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest005
+ * @tc.desc: Set show value into supportActions_ and get SupportAction length.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest005, TestSize.Level1)
+{
+    std::string tag = "root";
+
+    auto spanNode = SpanNode::GetOrCreateSpanNode(1);
+    auto columnFrameNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, 0, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto buttonNode1 =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 2, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    spanNode->AddChild(buttonNode1);
+    columnFrameNode1->AddChild(spanNode);
+
+    std::list<RefPtr<FrameNode>> children;
+    
+    auto columnAccessibilityProperty1 = columnFrameNode1->GetAccessibilityProperty<AccessibilityProperty>();
+    columnAccessibilityProperty1->SetAccessibilityGroup(true);
+    columnAccessibilityProperty1->SetAccessibilityLevel("yes");
+    columnAccessibilityProperty1->SetAccessibilityText("column1");
+
+    auto text = columnAccessibilityProperty1->GetAccessibilityText();
+    EXPECT_EQ(text, "column1");
 }
 } // namespace OHOS::Ace::NG
