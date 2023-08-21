@@ -112,7 +112,6 @@ void InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode, bool isMoreBut
 {
     auto eventHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
     if (isMoreButton) {
         auto hoverTask = [weakTargetNode = WeakPtr<FrameNode>(buttonNode)](bool isHover) {

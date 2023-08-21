@@ -846,7 +846,6 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
 
         auto eventHub = backButtonNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
-        eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
