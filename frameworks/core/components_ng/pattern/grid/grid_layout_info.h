@@ -130,6 +130,9 @@ struct GridLayoutInfo {
     // in vertical grid, this map is like: [rowIndex: rowHeight]
     std::map<int32_t, float> lineHeightMap_;
 
+    // Map structure: [index, last cell]
+    std::map<int32_t, int32_t> irregularItemsPosition_;
+
     // rect of grid item dragged in
     RectF currentRect_;
 

@@ -285,6 +285,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         gridLayoutInfo_.lastCrossCount_ = crossCount_;
         gridLayoutInfo_.lineHeightMap_.clear();
         gridLayoutInfo_.gridMatrix_.clear();
+        gridLayoutInfo_.irregularItemsPosition_.clear();
         gridLayoutInfo_.endIndex_ = -1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
@@ -611,6 +612,7 @@ void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
     gridLayoutInfo_.ResetPositionFlags();
     gridLayoutInfo_.gridMatrix_.clear();
     gridLayoutInfo_.lineHeightMap_.clear();
+    gridLayoutInfo_.irregularItemsPosition_.clear();
 }
 
 void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize)

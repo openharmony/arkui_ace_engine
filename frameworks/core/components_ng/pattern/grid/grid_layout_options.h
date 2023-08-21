@@ -24,7 +24,7 @@ struct GridItemSize {
     {
         return (rows == itemSize.rows) && (columns == itemSize.columns);
     }
-    int32_t GetCorssSize(Axis axis)
+    int32_t GetCorssSize(Axis axis) const
     {
         return axis == Axis::VERTICAL ? columns : rows;
     }
