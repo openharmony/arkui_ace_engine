@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -299,8 +300,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNo
     monthPattern->SetCalendarDialogFlag(true);
     auto calendarEventHub = monthPattern->GetEventHub<CalendarEventHub>();
     CHECK_NULL_RETURN(calendarEventHub, nullptr);
-    auto selectedChangeEvent = [calendarNodeId, changeEvent](const std::string& callbackInfo) {
-        OnSelectedChangeEvent(calendarNodeId, callbackInfo, std::move(changeEvent));
+    auto selectedChangeEvent = [calendarNodeId, changeEvent, settingData](const std::string& callbackInfo) {
+        OnSelectedChangeEvent(calendarNodeId, callbackInfo, std::move(changeEvent), settingData);
     };
     calendarEventHub->SetSelectedChangeEvent(std::move(selectedChangeEvent));
 
@@ -515,8 +516,13 @@ void CalendarDialogView::SetCalendarPaintProperties(const CalendarSettingData& s
     ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekHeight, theme->GetCalendarPickerDayWidthOrHeight());
     ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekWidth, theme->GetCalendarPickerDayWidthOrHeight());
     ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, theme->GetCalendarDayFontSize());
-    if (settingData.dayRadius.has_value()) {
+
+    auto defaultDayRadius = theme->GetCalendarDayRadius();
+    if (settingData.dayRadius.has_value() && NonNegative(settingData.dayRadius.value().ConvertToPx()) &&
+        LessOrEqual(settingData.dayRadius.value().ConvertToPx(), defaultDayRadius.ConvertToPx())) {
         ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayRadius, settingData.dayRadius.value());
+    } else {
+        ACE_UPDATE_PAINT_PROPERTY(CalendarPaintProperty, DayRadius, defaultDayRadius);
     }
 }
 
@@ -537,8 +543,8 @@ void CalendarDialogView::InitOnRequestDataEvent(
     eventHub->SetOnRequestDataEvent(std::move(callback));
 }
 
-void CalendarDialogView::OnSelectedChangeEvent(
-    int32_t calendarNodeId, const std::string& callbackInfo, const DialogEvent& onChange)
+void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std::string& callbackInfo,
+    const DialogEvent& onChange, const CalendarSettingData& settingData)
 {
     auto calendarNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, calendarNodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });
@@ -558,5 +564,10 @@ void CalendarDialogView::OnSelectedChangeEvent(
     PickerDate selectedDay(selectedMonth.year, selectedMonth.month, jsonInfo->GetInt("day"));
     calendarPattern->SetSelectedDay(selectedDay);
     calendarNode->MarkModifyDone();
+
+    CHECK_NULL_VOID_NOLOG(settingData.entryNode);
+    auto eventHub = settingData.entryNode->GetEventHub<CalendarPickerEventHub>();
+    CHECK_NULL_VOID_NOLOG(eventHub);
+    eventHub->UpdateOnChangeEvent(callbackInfo);
 }
 } // namespace OHOS::Ace::NG

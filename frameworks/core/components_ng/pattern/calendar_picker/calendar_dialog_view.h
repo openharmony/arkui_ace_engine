@@ -54,8 +54,8 @@ private:
     static void SetCalendarPaintProperties(const CalendarSettingData& settingData);
     static void InitOnRequestDataEvent(
         const RefPtr<FrameNode>& calendarDialogNode, const RefPtr<FrameNode>& calendarNode);
-    static void OnSelectedChangeEvent(
-        int32_t calendarNodeId, const std::string& callbackInfo, const DialogEvent& onChange);
+    static void OnSelectedChangeEvent(int32_t calendarNodeId, const std::string& callbackInfo,
+        const DialogEvent& onChange, const CalendarSettingData& settingData);
 };
 } // namespace OHOS::Ace::NG
 
