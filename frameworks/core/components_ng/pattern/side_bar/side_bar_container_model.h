@@ -50,6 +50,7 @@ public:
     virtual void SetControlButtonWidth(const Dimension& width);
     virtual void SetControlButtonHeight(const Dimension& height);
     virtual void SetControlButtonLeft(const Dimension& left);
+    virtual void ResetControlButtonLeft() {}
     virtual void SetControlButtonTop(const Dimension& top);
     virtual void SetControlButtonShowIconInfo(
         const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
