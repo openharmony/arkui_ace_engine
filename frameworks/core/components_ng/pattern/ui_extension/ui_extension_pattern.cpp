@@ -165,6 +165,7 @@ void UIExtensionPattern::OnExtensionDied()
             auto extensionPattern = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(extensionPattern);
             if (extensionPattern->onReleaseCallback_) {
+                extensionPattern->isDestruction_ = true;
                 extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
             }
         },
