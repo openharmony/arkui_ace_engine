@@ -272,6 +272,7 @@ public:
             auto iter = idleIndexes.find(node.first);
             if (iter != idleIndexes.end() && node.second) {
                 cache.try_emplace(key, std::move(node));
+                cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
                 idleIndexes.erase(iter);
             }
         }
