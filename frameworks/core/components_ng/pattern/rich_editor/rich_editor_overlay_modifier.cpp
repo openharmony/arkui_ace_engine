@@ -67,6 +67,11 @@ float RichEditorOverlayModifier::GetCareHeight() const
     return caretHeight_->Get();
 }
 
+OffsetF RichEditorOverlayModifier::GetCareOffset() const
+{
+    return caretOffset_->Get();
+}
+
 void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
 {
     if (!caretVisible_->Get()) {
