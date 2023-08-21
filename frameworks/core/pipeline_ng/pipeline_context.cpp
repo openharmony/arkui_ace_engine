@@ -1380,8 +1380,8 @@ void PipelineContext::NotifyMemoryLevel(int32_t level)
             iter = nodesToNotifyMemoryLevel_.erase(iter);
         } else {
             node->OnNotifyMemoryLevel(level);
+            ++iter;
         }
-        ++iter;
     }
 }
 void PipelineContext::AddPredictTask(PredictTask&& task)
