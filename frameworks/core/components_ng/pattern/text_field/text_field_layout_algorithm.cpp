@@ -44,8 +44,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
-constexpr float ERROR_TEXT_UNDERLINE_MARGIN = 27.0f;
-constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
 constexpr float INLINE_SAFE_BOUNDARY_VALUE = 2.0f;
 } // namespace
 
@@ -426,19 +424,6 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         imageRect_.SetOffset(imageOffset);
     }
 
-    auto frameBottom = pattern->GetMarginBottom();
-    MarginProperty errorMargin;
-    if (layoutProperty->GetShowUnderlineValue(false) && layoutProperty->GetShowErrorTextValue(false) &&
-        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
-        errorMargin.bottom = CalcLength(ERROR_TEXT_UNDERLINE_MARGIN);
-        frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
-    }
-    if (pattern->NeedShowPasswordIcon() && layoutProperty->GetShowErrorTextValue(false) &&
-        (frameBottom < ERROR_TEXT_CAPSULE_MARGIN)) {
-        errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
-        frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
-    }
     UpdateUnitLayout(layoutWrapper);
 }
 
