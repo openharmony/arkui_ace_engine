@@ -196,16 +196,14 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         auto param = JSRef<JSObject>::Cast(info[1]);
 
         // set button font size, unit FP
-        CalcDimension fontSize;
-        auto fontSizeProp = param->GetProperty("fontSize");
-        if (!fontSizeProp->IsUndefined() && !fontSizeProp->IsNull() && ParseJsDimensionFp(fontSizeProp, fontSize)) {
-            if (LessNotEqual(fontSize.Value(), 0.0)) {
-                fontSize = theme->GetFontSize();
-            }
+        auto fontSize = param->GetProperty("fontSize");
+        CalcDimension size = theme->GetFontSize();
+        if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
+            ParseJsDimensionFp(fontSize, size);
         } else {
-            fontSize = theme->GetFontSize();
+            size = theme->GetFontSize();
         }
-        SearchModel::GetInstance()->SetSearchButtonFontSize(fontSize);
+        SearchModel::GetInstance()->SetSearchButtonFontSize(size);
 
         // set font color
         Color fontColor;
@@ -228,7 +226,7 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
         CalcDimension size;
         auto sizeProp = param->GetProperty("size");
         if (!sizeProp->IsUndefined() && !sizeProp->IsNull() && ParseJsDimensionVp(sizeProp, size)) {
-            if (LessNotEqual(size.Value(), 0.0)) {
+            if (LessNotEqual(size.Value(), 0.0) || size.Unit() == DimensionUnit::PERCENT) {
                 size = theme->GetIconHeight();
             }
         } else {
@@ -312,7 +310,7 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     auto iconSizeProp = iconParam->GetProperty("size");
     auto theme = GetTheme<SearchTheme>();
     if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVp(iconSizeProp, iconSize)) {
-        if (LessNotEqual(iconSize.Value(), 0.0)) {
+        if (LessOrEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
             iconSize = theme->GetIconHeight();
         }
     } else {
@@ -372,8 +370,7 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         // set caret color
         Color caretColor;
         auto caretColorProp = param->GetProperty("color");
-        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() ||
-            !ParseJsColor(caretColorProp, caretColor)) {
+        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
             caretColor = textFieldTheme->GetCursorColor();
         }
         SearchModel::GetInstance()->SetCaretColor(caretColor);
@@ -441,16 +438,13 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     auto param = JSRef<JSObject>::Cast(info[0]);
     Font font;
     auto fontSize = param->GetProperty("size");
-    if (fontSize->IsNull() || fontSize->IsUndefined()) {
-        font.fontSize = Dimension(-1);
+    CalcDimension size = Dimension(-1);
+    if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
+        ParseJsDimensionFp(fontSize, size);
     } else {
-        CalcDimension size;
-        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            font.fontSize = Dimension(-1);
-        } else {
-            font.fontSize = size;
-        }
+        size = Dimension(-1);
     }
+    font.fontSize = size;
 
     auto weight = param->GetProperty("weight");
     if (!weight->IsNull()) {

@@ -998,6 +998,13 @@ var CopyOptions;
   CopyOptions[CopyOptions["CrossDevice"] = 3] = "CrossDevice";
 })(CopyOptions || (CopyOptions = {}));
 
+var RichEditorSpanType;
+(function (RichEditorSpanType) {
+  RichEditorSpanType[RichEditorSpanType["TEXT"] = 0] = "TEXT";
+  RichEditorSpanType[RichEditorSpanType["IMAGE"] = 1] = "IMAGE";
+  RichEditorSpanType[RichEditorSpanType["MIXED"] = 2] = "MIXED";
+})(RichEditorSpanType || (RichEditorSpanType = {}));
+
 var ListItemAlign;
 (function (ListItemAlign) {
   ListItemAlign[ListItemAlign["Start"] = 0] = "Start";
@@ -1487,6 +1494,14 @@ class NavPathStack {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
   }
+  pushPathByName(name, param) {
+    this.pathArray.push(new NavPathInfo(name, param));
+    this.changeFlag = this.changeFlag + 1;
+  }
+  pushPath(info) {
+    this.pathArray.push(info);
+    this.changeFlag = this.changeFlag + 1;
+  }
   pop() {
     if (this.pathArray.length === 0) {
       return undefined;
@@ -1496,6 +1511,15 @@ class NavPathStack {
     return pathInfo;
   }
   popTo(name) {
+    let index = this.pathArray.findIndex(element => element.name === name);
+    if (index === -1) {
+      return -1;
+    }
+    this.pathArray.splice(index + 1);
+    this.changeFlag = this.changeFlag + 1;
+    return index;
+  }
+  popToName(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
     if (index === -1) {
       return -1;
@@ -1712,14 +1736,14 @@ var ListItemGroupStyle;
   ListItemGroupStyle[ListItemGroupStyle["CARD"] = 1] = "CARD";
 })(ListItemGroupStyle || (ListItemGroupStyle = {}));
 
-var DragRet;
-(function (DragRet) {
-  DragRet[DragRet["DRAG_SUCCESS"] = 0] = "DRAG_SUCCESS";
-  DragRet[DragRet["DRAG_FAILED"] = 1] = "DRAG_FAILED";
-  DragRet[DragRet["DRAG_CANCELED"] = 2] = "DRAG_CANCELED";
-  DragRet[DragRet["DROP_ENABLED"] = 3] = "DROP_ENABLED";
-  DragRet[DragRet["DROP_DISABLED"] = 4] = "DROP_DISABLED";
-})(DragRet || (DragRet = {}));
+var DragResult;
+(function (DragResult) {
+  DragResult[DragResult["DRAG_SUCCESSFUL"] = 0] = "DRAG_SUCCESSFUL";
+  DragResult[DragResult["DRAG_FAILED"] = 1] = "DRAG_FAILED";
+  DragResult[DragResult["DRAG_CANCELED"] = 2] = "DRAG_CANCELED";
+  DragResult[DragResult["DROP_ENABLED"] = 3] = "DROP_ENABLED";
+  DragResult[DragResult["DROP_DISABLED"] = 4] = "DROP_DISABLED";
+})(DragResult || (DragResult = {}));
 
 var XComponentType;
 (function (XComponentType) {
@@ -1802,3 +1826,30 @@ var PatternLockChallengeResult;
   PatternLockChallengeResult[PatternLockChallengeResult["CORRECT"] = 1] = "CORRECT";
   PatternLockChallengeResult[PatternLockChallengeResult["WRONG"] = 2] = "WRONG";
 })(PatternLockChallengeResult || (PatternLockChallengeResult = {}));
+
+var DialogButtonDirection;
+(function (DialogButtonDirection) {
+  DialogButtonDirection[DialogButtonDirection["AUTO"] = 0] = "AUTO";
+  DialogButtonDirection[DialogButtonDirection["HORIZONTAL"] = 1] = "HORIZONTAL";
+  DialogButtonDirection[DialogButtonDirection["VERTICAL"] = 2] = "VERTICAL";
+})(DialogButtonDirection || (DialogButtonDirection = {}));
+
+var ParticleType;
+(function (ParticleType) {
+  ParticleType[ParticleType["POINT"] = 0] = "POINT";
+  ParticleType[ParticleType["IMAGE"] = 1] = "IMAGE";
+})(ParticleType || (ParticleType = {}));
+
+var ParticleEmitterShape;
+(function (ParticleEmitterShape) {
+  ParticleEmitterShape[ParticleEmitterShape["RECTANGLE"] = 0] = "RECTANGLE";
+  ParticleEmitterShape[ParticleEmitterShape["CIRCLE"] = 1] = "CIRCLE";
+  ParticleEmitterShape[ParticleEmitterShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(ParticleEmitterShape || (ParticleEmitterShape = {}));
+
+var ParticleUpdater;
+(function (ParticleUpdater) {
+  ParticleUpdater[ParticleUpdater["NONE"] = 0] = "NONE";
+  ParticleUpdater[ParticleUpdater["RANDOM"] = 1] = "RANDOM";
+  ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
+})(ParticleUpdater || (ParticleUpdater = {}));

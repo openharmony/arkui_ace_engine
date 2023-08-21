@@ -54,12 +54,12 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 }
 } // namespace
 
-TextContentModifier::TextContentModifier(const std::optional<TextStyle> textStyle)
+TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle)
 {
-    contentChange_ = AceType::MakeRefPtr<PropertyBool>(false);
+    contentChange_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(contentChange_);
-    contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
-    contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
+    contentOffset_ = MakeRefPtr<PropertyOffsetF>(OffsetF());
+    contentSize_ = MakeRefPtr<PropertySizeF>(SizeF());
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
 
@@ -67,13 +67,13 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle> textStyl
         SetDefaultAnimatablePropertyValue(textStyle.value());
     }
 
-    racePercentFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f);
+    racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
-    clip_ = AceType::MakeRefPtr<PropertyBool>(true);
+    clip_ = MakeRefPtr<PropertyBool>(true);
     AttachProperty(clip_);
-    fontFamilyString_ = AceType::MakeRefPtr<PropertyString>("");
+    fontFamilyString_ = MakeRefPtr<PropertyString>("");
     AttachProperty(fontFamilyString_);
-    fontReady_ = AceType::MakeRefPtr<PropertyBool>(false);
+    fontReady_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(fontReady_);
 }
 
@@ -98,41 +98,60 @@ void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
         }
     }
 
-    fontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
+    fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
 }
 
 void TextContentModifier::SetDefaultFontWeight(const TextStyle& textStyle)
 {
     fontWeightFloat_ =
-        AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(ConvertFontWeight(textStyle.GetFontWeight())));
+        MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(ConvertFontWeight(textStyle.GetFontWeight())));
     AttachProperty(fontWeightFloat_);
 }
 
 void TextContentModifier::SetDefaultTextColor(const TextStyle& textStyle)
 {
-    animatableTextColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(textStyle.GetTextColor()));
+    animatableTextColor_ = MakeRefPtr<AnimatablePropertyColor>(LinearColor(textStyle.GetTextColor()));
     AttachProperty(animatableTextColor_);
 }
 
 void TextContentModifier::SetDefaultTextShadow(const TextStyle& textStyle)
 {
-    auto textShadow = textStyle.GetTextShadows().empty() ? Shadow() : textStyle.GetTextShadows().at(0);
-    shadowBlurRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(textShadow.GetBlurRadius());
-    shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(textShadow.GetOffset().GetX());
-    shadowOffsetYFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(textShadow.GetOffset().GetY());
-    shadowColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(textShadow.GetColor()));
-    AttachProperty(shadowBlurRadiusFloat_);
-    AttachProperty(shadowOffsetXFloat_);
-    AttachProperty(shadowOffsetYFloat_);
-    AttachProperty(shadowColor_);
+    auto&& textShadows = textStyle.GetTextShadows();
+    if (textShadows.empty()) {
+        AddDefaultShadow();
+        return;
+    }
+    shadows_.clear();
+    shadows_.reserve(textShadows.size());
+    for (auto&& textShadow : textShadows) {
+        AddShadow(textShadow);
+    }
 }
+
+void TextContentModifier::AddShadow(const Shadow& shadow)
+{
+    auto shadowBlurRadiusFloat = MakeRefPtr<AnimatablePropertyFloat>(shadow.GetBlurRadius());
+    auto shadowOffsetXFloat = MakeRefPtr<AnimatablePropertyFloat>(shadow.GetOffset().GetX());
+    auto shadowOffsetYFloat = MakeRefPtr<AnimatablePropertyFloat>(shadow.GetOffset().GetY());
+    auto shadowColor = MakeRefPtr<AnimatablePropertyColor>(LinearColor(shadow.GetColor()));
+    shadows_.emplace_back(ShadowProp { .shadow = shadow,
+        .blurRadius = shadowBlurRadiusFloat,
+        .offsetX = shadowOffsetXFloat,
+        .offsetY = shadowOffsetYFloat,
+        .color = shadowColor });
+    AttachProperty(shadowBlurRadiusFloat);
+    AttachProperty(shadowOffsetXFloat);
+    AttachProperty(shadowOffsetYFloat);
+    AttachProperty(shadowColor);
+}
+
 void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 {
     textDecoration_ = textStyle.GetTextDecoration();
     textDecorationStyle_ = textStyle.GetTextDecorationStyle();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
-    textDecorationColorAlpha_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(
+    textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(
         textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha());
     AttachProperty(textDecorationColorAlpha_);
 }
@@ -144,7 +163,7 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
         baselineOffset = pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
     }
 
-    baselineOffsetFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
+    baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
     AttachProperty(baselineOffsetFloat_);
 }
 
@@ -246,11 +265,13 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
     int32_t obscuredLineCount = std::min(maxLineCount, static_cast<int32_t>(textLineWidth.size()));
     float offsetY = (contentSize_->Get().Height() - (obscuredLineCount * fontSize)) / (obscuredLineCount + 1);
     for (auto i = 0; i < obscuredLineCount; i++) {
-        RSRoundRect rSRoundRect(RSRect(contentOffset_->Get().GetX(),
-            contentOffset_->Get().GetY() + std::max(offsetY + ((offsetY + fontSize) * i), 0.0f),
-            contentOffset_->Get().GetX() + std::min(textLineWidth[i], contentSize_->Get().Width()),
-            contentOffset_->Get().GetY() +
-                std::min(offsetY + ((offsetY + fontSize) * i) + fontSize, contentSize_->Get().Height())), radiusXY);
+        RSRoundRect rSRoundRect(
+            RSRect(contentOffset_->Get().GetX(),
+                contentOffset_->Get().GetY() + std::max(offsetY + ((offsetY + fontSize) * i), 0.0f),
+                contentOffset_->Get().GetX() + std::min(textLineWidth[i], contentSize_->Get().Width()),
+                contentOffset_->Get().GetY() +
+                    std::min(offsetY + ((offsetY + fontSize) * i) + fontSize, contentSize_->Get().Height())),
+            radiusXY);
         canvas.DrawRoundRect(rSRoundRect);
     }
 }
@@ -278,15 +299,16 @@ void TextContentModifier::ModifyTextColorInTextStyle(TextStyle& textStyle)
 
 void TextContentModifier::ModifyTextShadowsInTextStyle(TextStyle& textStyle)
 {
-    if (textShadow_.has_value() && shadowBlurRadiusFloat_ && shadowOffsetXFloat_ && shadowOffsetYFloat_ &&
-        shadowColor_) {
-        auto blurRadius = shadowBlurRadiusFloat_->Get();
-        auto offsetX = shadowOffsetXFloat_->Get();
-        auto offsetY = shadowOffsetYFloat_->Get();
-        auto color = shadowColor_->Get();
-        std::vector<Shadow> shadows = { Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue())) };
-        textStyle.SetTextShadows(std::move(shadows));
+    std::vector<Shadow> shadows;
+    shadows.reserve(shadows_.size());
+    for (auto&& shadow : shadows_) {
+        auto blurRadius = shadow.blurRadius->Get();
+        auto offsetX = shadow.offsetX->Get();
+        auto offsetY = shadow.offsetY->Get();
+        auto color = shadow.color->Get();
+        shadows.emplace_back(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()));
     }
+    textStyle.SetTextShadows(shadows);
 }
 
 void TextContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
@@ -353,14 +375,14 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
 
 void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
 {
-    if (textShadow_.has_value() && shadowBlurRadiusFloat_ && shadowOffsetXFloat_ && shadowOffsetYFloat_ &&
-        shadowColor_) {
-        auto blurRadius = shadowBlurRadiusFloat_->Get();
-        auto offsetX = shadowOffsetXFloat_->Get();
-        auto offsetY = shadowOffsetYFloat_->Get();
-        auto color = shadowColor_->Get();
-        if (textShadow_ != Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()))) {
+    for (auto&& shadow : shadows_) {
+        auto blurRadius = shadow.blurRadius->Get();
+        auto offsetX = shadow.offsetX->Get();
+        auto offsetY = shadow.offsetY->Get();
+        auto color = shadow.color->Get();
+        if (shadow.shadow != Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()))) {
             flag |= PROPERTY_UPDATE_MEASURE;
+            return;
         }
     }
 }
@@ -432,17 +454,24 @@ void TextContentModifier::SetTextColor(const Color& value)
     animatableTextColor_->Set(LinearColor(value));
 }
 
-void TextContentModifier::SetTextShadow(const Shadow& value)
+void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
 {
-    textShadow_ = value;
-    CHECK_NULL_VOID(shadowBlurRadiusFloat_);
-    CHECK_NULL_VOID(shadowOffsetXFloat_);
-    CHECK_NULL_VOID(shadowOffsetYFloat_);
-    CHECK_NULL_VOID(shadowColor_);
-    shadowBlurRadiusFloat_->Set(value.GetBlurRadius());
-    shadowOffsetXFloat_->Set(value.GetOffset().GetX());
-    shadowOffsetYFloat_->Set(value.GetOffset().GetY());
-    shadowColor_->Set(LinearColor(value.GetColor()));
+    while (value.size() > shadows_.size()) {
+        AddDefaultShadow();
+    }
+    // else
+    while (value.size() < shadows_.size()) {
+        shadows_.pop_back();
+    }
+
+    for (size_t i = 0; i < shadows_.size(); ++i) {
+        auto&& newShadow = value[i];
+        shadows_[i].shadow = newShadow;
+        shadows_[i].blurRadius->Set(newShadow.GetBlurRadius());
+        shadows_[i].offsetX->Set(newShadow.GetOffset().GetX());
+        shadows_[i].offsetY->Set(newShadow.GetOffset().GetY());
+        shadows_[i].color->Set(LinearColor(newShadow.GetColor()));
+    }
 }
 
 void TextContentModifier::SetTextDecoration(const TextDecoration& type)
@@ -453,7 +482,7 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type)
     }
 
     textDecorationAnimatable_ = (oldTextDecoration == TextDecoration::NONE && type == TextDecoration::UNDERLINE) ||
-        (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE);
+                                (oldTextDecoration == TextDecoration::UNDERLINE && type == TextDecoration::NONE);
 
     textDecoration_ = type;
     CHECK_NULL_VOID(textDecorationColorAlpha_);
@@ -517,7 +546,7 @@ void TextContentModifier::StartTextRace()
     }
 
     AnimationOption option = AnimationOption();
-    RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
+    RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
     option.SetDuration(RACE_DURATION);
     option.SetDelay(0);
     option.SetCurve(curve);
@@ -553,5 +582,20 @@ void TextContentModifier::ContentChange()
 {
     CHECK_NULL_VOID(contentChange_);
     contentChange_->Set(!contentChange_->Get());
+}
+
+void TextContentModifier::AddDefaultShadow()
+{
+    Shadow emptyShadow;
+    auto blurRadius = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetBlurRadius());
+    auto offsetX = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetX());
+    auto offsetY = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetY());
+    auto color = MakeRefPtr<AnimatablePropertyColor>(LinearColor(emptyShadow.GetColor()));
+    shadows_.emplace_back(
+        ShadowProp { .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color });
+    AttachProperty(blurRadius);
+    AttachProperty(offsetX);
+    AttachProperty(offsetY);
+    AttachProperty(color);
 }
 } // namespace OHOS::Ace::NG

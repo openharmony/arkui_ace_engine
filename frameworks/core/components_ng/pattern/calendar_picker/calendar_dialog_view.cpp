@@ -45,8 +45,8 @@ constexpr Dimension DIALOG_WIDTH = 336.0_vp;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
 } // namespace
 RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogProperties,
-    const CalendarSettingData& settingData, std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    const CalendarSettingData& settingData, const std::map<std::string, NG::DialogEvent>& dialogEvent,
+    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<CalendarDialogPattern>());
@@ -63,7 +63,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     CHECK_NULL_RETURN(theme, nullptr);
     PaddingProperty padding;
     padding.top = CalcLength(theme->GetCalendarTitleRowTopPadding());
-    padding.bottom = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
+    padding.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
     layoutProperty->UpdatePadding(padding);
     auto renderContext = contentColumn->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
@@ -215,7 +215,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
 }
 
 RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>& calendarDialogNode,
-    const CalendarSettingData& settingData, std::map<std::string, NG::DialogEvent> dialogEvent)
+    const CalendarSettingData& settingData, const std::map<std::string, NG::DialogEvent>& dialogEvent)
 {
     int32_t calendarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto calendarNode = FrameNode::GetOrCreateFrameNode(
@@ -256,9 +256,10 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     calendarDay.day = static_cast<int32_t>(today.GetDay());
     calendarPattern->SetCalendarDay(calendarDay);
 
-    auto changeEvent = dialogEvent["changeId"];
+    auto changeEvent = dialogEvent.find("changeId");
     for (int32_t i = 0; i < SWIPER_MONTHS_COUNT; i++) {
-        auto monthFrameNode = CreateCalendarMonthNode(calendarNodeId, settingData, changeEvent);
+        auto monthFrameNode = CreateCalendarMonthNode(
+            calendarNodeId, settingData, changeEvent == dialogEvent.end() ? nullptr : changeEvent->second);
         monthFrameNode->MountToParent(swiperNode);
         monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -285,7 +286,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarSwiperNode()
 }
 
 RefPtr<FrameNode> CalendarDialogView::CreateCalendarMonthNode(int32_t calendarNodeId,
-    const CalendarSettingData& settingData, DialogEvent& changeEvent)
+    const CalendarSettingData& settingData, const DialogEvent& changeEvent)
 {
     auto monthFrameNode = FrameNode::GetOrCreateFrameNode(V2::CALENDAR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
@@ -410,7 +411,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateConfirmNode(const RefPtr<FrameNode>&
     return buttonConfirmNode;
 }
 
-RefPtr<FrameNode> CalendarDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent)
+RefPtr<FrameNode> CalendarDialogView::CreateCancelNode(const NG::DialogGestureEvent& cancelEvent)
 {
     auto buttonCancelNode = CreateButtonNode(false);
 
@@ -441,7 +442,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
         theme->GetDialogDividerColor() : Color::TRANSPARENT);
 
     dividerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(theme->GetCalendarActionRowHeight() / 2)));
+        CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(theme->GetEntryArrowWidth())));
 
     dividerNode->MarkModifyDone();
     return dividerNode;
@@ -449,11 +450,9 @@ RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
 
 RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     const RefPtr<FrameNode>& dialogNode, const RefPtr<FrameNode>& dateNode,
-    std::map<std::string, NG::DialogEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    const std::map<std::string, NG::DialogEvent>& dialogEvent,
+    const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
-    auto acceptEvent = dialogEvent["acceptId"];
-    auto cancelEvent = dialogCancelEvent["cancelId"];
     auto contentRow = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(contentRow, nullptr);
@@ -469,10 +468,21 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     margin.top = CalcLength(theme->GetCalendarActionRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
     margin.left = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
     margin.right = CalcLength(theme->GetCalendarActionRowBottomLeftRightPadding());
+    margin.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() + CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
     layoutProps->UpdateMargin(margin);
     layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetCalendarActionRowHeight())));
 
+    auto cancelIter = dialogCancelEvent.find("cancelId");
+    DialogGestureEvent cancelEvent = nullptr;
+    if (cancelIter != dialogCancelEvent.end()) {
+        cancelEvent = cancelIter->second;
+    }
     auto buttonCancelNode = CreateCancelNode(cancelEvent);
+    auto acceptIter = dialogEvent.find("acceptId");
+    DialogEvent acceptEvent = nullptr;
+    if (acceptIter != dialogEvent.end()) {
+        acceptEvent = acceptIter->second;
+    }
     auto buttonConfirmNode = CreateConfirmNode(dateNode, acceptEvent);
 
     buttonCancelNode->MountToParent(contentRow);
@@ -528,7 +538,7 @@ void CalendarDialogView::InitOnRequestDataEvent(
 }
 
 void CalendarDialogView::OnSelectedChangeEvent(
-    int32_t calendarNodeId, const std::string& callbackInfo, const DialogEvent&& onChange)
+    int32_t calendarNodeId, const std::string& callbackInfo, const DialogEvent& onChange)
 {
     auto calendarNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_ETS_TAG, calendarNodeId, []() { return AceType::MakeRefPtr<CalendarPattern>(); });

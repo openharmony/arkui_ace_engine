@@ -134,9 +134,9 @@ void CustomNode::MarkNeedSyncRenderTree(bool needRebuild)
     }
 }
 
-RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index)
+RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild)
 {
     Render();
-    return UINode::GetFrameChildByIndex(index);
+    return UINode::GetFrameChildByIndex(index, needBuild);
 }
 } // namespace OHOS::Ace::NG

@@ -48,6 +48,7 @@ constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension LUNARSWITCH_MARGIN_TO_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+constexpr int32_t BUFFER_NODE_NUMBER = 2;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
 
@@ -495,7 +496,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateDateNode(int32_t dateNodeId,
     datePickerPattern->SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     datePickerPattern->SetShowCount(showCount);
 
     if (showTime) {
@@ -643,7 +644,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     timePickerRowPattern->SetShowCount(showCount);
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();

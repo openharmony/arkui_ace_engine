@@ -17,6 +17,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("calendar_pattern_test_ng") {
   ace_animation = true
   flutter_skia = true
+
   sources = [
     # text
     "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view.cpp",

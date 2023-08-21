@@ -322,6 +322,14 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     tabBarNode->RemoveChild(tabBarItemNode);
     CHECK_NULL_VOID(tabBarNode);
     tabContentNode->ResetTabBarItemId();
+
+    auto tabsNode = FindTabsNode(tabContentNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = tabsNode->GetTabBar();
+    CHECK_NULL_VOID(tabBar);
+    auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBar);
+    CHECK_NULL_VOID(tabBarFrameNode);
+    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,

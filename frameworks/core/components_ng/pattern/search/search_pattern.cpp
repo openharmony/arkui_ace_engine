@@ -172,8 +172,6 @@ void SearchPattern::OnModifyDone()
 
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
-    InitTouchEvent();
-    InitMouseEvent();
     InitTextFieldMouseEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
@@ -531,34 +529,6 @@ void SearchPattern::RequestKeyboard()
     textFieldPattern->SearchRequestKeyboard();
 }
 
-void SearchPattern::InitTouchEvent()
-{
-    if (touchListener_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto searchPattern = weak.Upgrade();
-        CHECK_NULL_VOID(searchPattern);
-        auto touchType = info.GetTouches().front().GetTouchType();
-        auto touchLocalPosition = info.GetTouches().front().GetLocalLocation();
-        auto touchPoint = PointF(touchLocalPosition.GetX(), touchLocalPosition.GetY());
-        RectF cancelRect(searchPattern->cancelButtonOffset_, searchPattern->cancelButtonSize_);
-        RectF searchRect(searchPattern->buttonOffset_, searchPattern->buttonSize_);
-        if (touchType == TouchType::DOWN && !cancelRect.IsInRegion(touchPoint) && !searchRect.IsInRegion(touchPoint)) {
-            searchPattern->OnTouchDown();
-        }
-        if (touchType == TouchType::UP && !cancelRect.IsInRegion(touchPoint) && !searchRect.IsInRegion(touchPoint)) {
-            searchPattern->OnTouchUp();
-        }
-    };
-    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
-}
-
 void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId)
 {
     if (touchEvent) {
@@ -588,35 +558,6 @@ void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int
     gesture->AddTouchEvent(touchEvent);
 }
 
-void SearchPattern::InitMouseEvent()
-{
-    if (mouseEvent_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<SearchEventHub>();
-    auto inputHub = eventHub->GetOrCreateInputEventHub();
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleHoverEvent(isHover);
-        }
-    };
-
-    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleMouseEvent(info);
-        }
-    };
-
-    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
-    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(hoverEvent_);
-    inputHub->AddOnMouseEvent(mouseEvent_);
-}
-
 void SearchPattern::InitTextFieldMouseEvent()
 {
     auto host = GetHost();
@@ -631,7 +572,7 @@ void SearchPattern::InitTextFieldMouseEvent()
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->HandleTextFieldHoverEvent(isHover);
+            pattern->SetMouseStyle(isHover ? MouseFormat::TEXT_CURSOR : MouseFormat::DEFAULT);
         }
     };
     textFieldHoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -649,7 +590,10 @@ void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t
     CHECK_NULL_VOID(buttonFrameNode);
     auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
-
+    auto buttonPattern = buttonFrameNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    auto buttonHoverListener = buttonPattern->GetHoverListener();
+    inputHub->RemoveOnHoverEvent(buttonHoverListener);
     auto mouseTask = [weak = WeakClaim(this), childId](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -658,32 +602,6 @@ void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t
     };
     inputEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(inputEvent);
-}
-
-void SearchPattern::OnTouchDown()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (isHover_) {
-        AnimateTouchAndHover(renderContext, HOVER_OPACITY, TOUCH_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
-    } else {
-        AnimateTouchAndHover(renderContext, 0.0f, TOUCH_OPACITY, TOUCH_DURATION, Curves::FRICTION);
-    }
-}
-
-void SearchPattern::OnTouchUp()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (isHover_) {
-        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, HOVER_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
-    } else {
-        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
-    }
 }
 
 void SearchPattern::OnButtonTouchDown(int32_t childId)
@@ -728,57 +646,6 @@ void SearchPattern::SetMouseStyle(MouseFormat format)
     mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
     if (currentPointerStyle != static_cast<int32_t>(format)) {
         mouseStyle->SetPointerStyle(windowId, format);
-    }
-}
-
-void SearchPattern::HandleHoverEvent(bool isHover)
-{
-    MouseFormat fmt;
-    isHover_ = isHover;
-    if (!isHover) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->AnimateHoverEffectBoard(false);
-        fmt = MouseFormat::DEFAULT;
-    } else {
-        fmt = MouseFormat::TEXT_CURSOR;
-    }
-
-    SetMouseStyle(fmt);
-}
-
-void SearchPattern::HandleMouseEvent(const MouseInfo& info)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    auto buttonSpace = searchTheme->GetSearchButtonSpace().ConvertToPx();
-    const auto& mousePosition = info.GetLocalLocation();
-    PointF mousePoint(mousePosition.GetX(), mousePosition.GetY());
-    RectF cancelRect(cancelButtonOffset_.GetX() - buttonSpace, cancelButtonOffset_.GetY() - buttonSpace,
-        cancelButtonSize_.Width() + 2 * buttonSpace, cancelButtonSize_.Height() + 2 * buttonSpace);
-    RectF searchRect(buttonOffset_.GetX() - buttonSpace, buttonOffset_.GetY() - buttonSpace,
-        buttonSize_.Width() + 2 * buttonSpace, buttonSize_.Height() + 2 * buttonSpace);
-    auto isMouseInCancelButton = cancelRect.IsInRegion(mousePoint);
-    auto isMouseInSearchButton = searchRect.IsInRegion(mousePoint);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (isHover_ && !isMouseInCancelButton && !isMouseInSearchButton) {
-        renderContext->AnimateHoverEffectBoard(true);
-    } else {
-        renderContext->AnimateHoverEffectBoard(false);
-    }
-}
-
-void SearchPattern::HandleTextFieldHoverEvent(bool isHoverOverTextField)
-{
-    if (!isHoverOverTextField && isHover_) {
-        SetMouseStyle(MouseFormat::TEXT_CURSOR);
     }
 }
 

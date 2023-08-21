@@ -35,15 +35,12 @@ namespace OHOS::Ace::NG {
 namespace {
 auto node_1 = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
 WeakPtr<FrameNode> inNode = AceType::WeakClaim(AceType::RawPtr(node_1));
-RefPtr<LayoutWrapper> inNodeLayoutWrapper = inNode.Upgrade()->CreateLayoutWrapper(false, false);
 
 auto node_2 = AceType::MakeRefPtr<FrameNode>("test2", 2, AceType::MakeRefPtr<Pattern>());
 WeakPtr<FrameNode> outNode = AceType::WeakClaim(AceType::RawPtr(node_2));
-RefPtr<LayoutWrapper> outNodeLayoutWrapper = outNode.Upgrade()->CreateLayoutWrapper(false, false);
 
 auto node_3 = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
 WeakPtr<FrameNode> otherNode = AceType::WeakClaim(AceType::RawPtr(node_3));
-RefPtr<LayoutWrapper> otherNodeLayoutWrapper = outNode.Upgrade()->CreateLayoutWrapper(false, false);
 
 } // namespace
 
@@ -80,26 +77,26 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest001, TestSize.Level1)
     GeometryTransition GT("test", inNode);
     GT.inNode_ = inNode;
     GT.outNode_ = outNode;
-    GT.WillLayout(outNodeLayoutWrapper);
-    GT.DidLayout(outNodeLayoutWrapper);
-    outNodeLayoutWrapper->SetRootMeasureNode();
-    inNodeLayoutWrapper->SetRootMeasureNode();
-    GT.WillLayout(outNodeLayoutWrapper);
-    GT.DidLayout(outNodeLayoutWrapper);
+    GT.WillLayout(node_2);
+    GT.DidLayout(node_2);
+    node_2->SetRootMeasureNode();
+    node_1->SetRootMeasureNode();
+    GT.WillLayout(node_2);
+    GT.DidLayout(node_2);
     GT.SyncGeometry(true);
     GT.hasOutAnim_ = true;
-    GT.WillLayout(outNodeLayoutWrapper);
-    outNodeLayoutWrapper->GetLayoutProperty()->UpdateAspectRatio(1.0f);
-    GT.WillLayout(outNodeLayoutWrapper);
+    GT.WillLayout(node_2);
+    node_2->GetLayoutProperty()->UpdateAspectRatio(1.0f);
+    GT.WillLayout(node_2);
     GT.inNode_.Upgrade()->GetGeometryNode()->SetFrameSize(SizeF(1.0f, 1.0f));
-    GT.WillLayout(outNodeLayoutWrapper);
-    GT.DidLayout(outNodeLayoutWrapper);
+    GT.WillLayout(node_2);
+    GT.DidLayout(node_2);
     GT.state_ = GeometryTransition::State::ACTIVE;
     GT.hasInAnim_ = true;
-    GT.WillLayout(inNodeLayoutWrapper);
-    GT.DidLayout(inNodeLayoutWrapper);
+    GT.WillLayout(node_1);
+    GT.DidLayout(node_1);
     GT.state_ = GeometryTransition::State::IDENTITY;
-    GT.DidLayout(inNodeLayoutWrapper);
+    GT.DidLayout(node_1);
     GT.outNode_.Upgrade()->isRemoving_ = true;
     GT.SyncGeometry(true);
     GT.outNode_.Upgrade()->isRemoving_ = false;

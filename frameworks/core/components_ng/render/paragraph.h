@@ -72,6 +72,9 @@ public:
     virtual bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetrics& result) = 0;
     virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& result) = 0;
     virtual void SetIndents(const std::vector<float>& indents) = 0;
+#ifndef USE_GRAPHIC_TEXT_GINE
+    virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
+#endif
 
     // interfaces for painting
     virtual void Paint(const RSCanvas& canvas, float x, float y) = 0;

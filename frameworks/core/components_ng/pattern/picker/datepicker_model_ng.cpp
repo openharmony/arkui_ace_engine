@@ -32,6 +32,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t BUFFER_NODE_NUMBER = 2;
+} // namespace
 void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -50,7 +53,7 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
     auto dayId = datePickerPattern->GetDayId();
 
     CHECK_NULL_VOID(pickerTheme);
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     datePickerPattern->SetShowCount(showCount);
 
     auto yearColumnNode = FrameNode::GetOrCreateFrameNode(

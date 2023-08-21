@@ -55,6 +55,13 @@ enum class DialogAlignment {
     BOTTOM_END,
 };
 
+// Direction of buttons in dialog
+enum class DialogButtonDirection {
+    AUTO = 0,
+    HORIZONTAL,
+    VERTICAL,
+};
+
 class DialogAlignmentUtils {
 public:
     static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment)
@@ -92,6 +99,25 @@ public:
                 Alignment = "DialogAlignment.DEFAULT";
         }
         return Alignment;
+    }
+};
+
+class DialogButtonDirectionUtils {
+public:
+    static std::string ConvertDialogButtonDirectionToString(DialogButtonDirection buttonDirection)
+    {
+        std::string direction = "";
+        switch (buttonDirection) {
+            case DialogButtonDirection::HORIZONTAL:
+                direction = "DialogButtonDirection.HORIZONTAL";
+                break;
+            case DialogButtonDirection::VERTICAL:
+                direction = "DialogButtonDirection.VERTICAL";
+                break;
+            default:
+                direction = "DialogButtonDirection.AUTO";
+        }
+        return direction;
     }
 };
 
@@ -150,6 +176,7 @@ struct DialogProperties {
     std::optional<AnimationOption> openAnimation;
     std::optional<AnimationOption> closeAnimation;
     bool isShowInSubWindow = false;
+    DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
 
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>

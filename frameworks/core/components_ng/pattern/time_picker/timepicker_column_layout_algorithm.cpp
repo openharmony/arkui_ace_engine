@@ -23,9 +23,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const int32_t DIVIDER_SIZE = 2;
-const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const float ITEM_HEIGHT_HALF = 2.0f;
+constexpr int32_t DIVIDER_SIZE = 2;
+constexpr int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
+constexpr float ITEM_HEIGHT_HALF = 2.0f;
+constexpr int32_t BUFFER_NODE_NUMBER = 2;
+constexpr int32_t HIDENODE = 3;
 } // namespace
 void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -35,12 +37,12 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pickerTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
-    uint32_t showCount_ = pickerTheme->GetShowOptionCount();
+    uint32_t showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
         SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
+        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
     }
-    auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - 1) +
+    auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - HIDENODE) +
                                      pickerTheme->GetDividerSpacing().ConvertToPx());
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
@@ -112,7 +114,7 @@ void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                                                     pickerTheme->GetGradientHeight().ConvertToPx() * halfCount -
                                                     pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
     uint32_t i = 0;
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     for (const auto& child : children) {
         if (i >= showCount) {
             break;

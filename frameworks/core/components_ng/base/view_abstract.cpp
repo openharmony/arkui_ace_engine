@@ -30,6 +30,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -210,6 +211,15 @@ void ViewAbstract::SetAspectRatio(float ratio)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, AspectRatio, ratio);
+}
+
+void ViewAbstract::ResetAspectRatio()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, AspectRatio);
 }
 
 void ViewAbstract::SetBackgroundAlign(const Alignment& align)
@@ -1198,18 +1208,18 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
 }
 
 void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-    bool isContextMenu, const NG::OffsetF& offset, const MenuParam& menuParam)
+    MenuType menuType, const NG::OffsetF& offset, const MenuParam& menuParam)
 {
     LOGD("ViewAbstract::BindMenuWithCustomNode");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
+    auto type = menuType;
 #ifdef PREVIEW
     // unable to use the subWindow in the Previewer.
-    isContextMenu = false;
+    type = MenuType::MENU;
 #endif
-    auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
-    if (isContextMenu) {
+    if (type == MenuType::CONTEXT_MENU || type == MenuType::RICH_EDIT_SELECT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }

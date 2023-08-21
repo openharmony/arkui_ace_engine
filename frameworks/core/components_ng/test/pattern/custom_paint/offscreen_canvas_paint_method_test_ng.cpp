@@ -588,7 +588,7 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg011, 
      * @tc.expected: The return value is false and the output string is corrected.
      */
     paintMethod->filterParam_ = "blur(targetParam";
-    EXPECT_FALSE(paintMethod->GetFilterType(filterType, filterParam));
+    EXPECT_TRUE(paintMethod->GetFilterType(filterType, filterParam));
     EXPECT_EQ(filterType, FilterType::BLUR);
     EXPECT_EQ(filterParam, targetParam);
 
@@ -690,7 +690,11 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg016, 
     EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
+#else
+    std::unique_ptr<Rosen::Typography> paragraph(std::move(mockParagraph));
+#endif
 
     /**
      * @tc.steps2: Test functions GetAlignOffset.
@@ -722,7 +726,11 @@ HWTEST_F(OffscreenCanvasPaintMethodTestNg, OffscreenCanvasPaintMethodTestNg017, 
     EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
+#else
+    std::unique_ptr<Rosen::Typography> paragraph(std::move(mockParagraph));
+#endif
 
     /**
      * @tc.steps2: Test functions GetBaselineOffset.

@@ -38,6 +38,7 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -87,6 +88,7 @@ public:
     static void ResetMaxSize(bool resetWidth);
 
     static void SetAspectRatio(float ratio);
+    static void ResetAspectRatio();
     static void SetLayoutWeight(int32_t value);
     static void SetLayoutDirection(TextDirection value);
 
@@ -234,7 +236,7 @@ public:
     static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
         const NG::OffsetF& offset, const MenuParam& menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-        bool isContextMenu, const NG::OffsetF& offset, const MenuParam& menuParam);
+        MenuType menuType, const NG::OffsetF& offset, const MenuParam& menuParam);
     static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);

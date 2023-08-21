@@ -111,6 +111,8 @@ struct SelectOverlayInfo {
     std::function<void(bool)> onClose;
 
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
+
+    bool isHandleLineShow = true;
 };
 
 } // namespace OHOS::Ace::NG

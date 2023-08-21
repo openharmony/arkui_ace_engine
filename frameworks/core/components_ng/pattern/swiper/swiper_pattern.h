@@ -585,7 +585,6 @@ private:
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
-    int32_t autoPlayCurrentIndex_ = 0;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -636,6 +635,7 @@ private:
     bool usePropertyAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
+    bool isVoluntarilyClear_ = false;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;

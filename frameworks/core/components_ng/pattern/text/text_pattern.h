@@ -191,7 +191,11 @@ public:
     }
     float GetLineHeight() const override;
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
+#else
+    std::vector<RSTextRect> GetTextBoxes() override;
+#endif
     OffsetF GetParentGlobalOffset() const override;
 
     RefPtr<FrameNode> MoveDragNode() override
@@ -218,7 +222,7 @@ public:
     // ===========================================================
 
     void InitSurfaceChangedCallback();
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     bool HasSurfaceChangedCallback()
     {
         return surfaceChangedCallbackId_.has_value();
@@ -264,6 +268,14 @@ public:
 
     void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
     void CheckHandles(SelectHandleInfo& handleInfo);
+    bool IsMeasureBoundary() const override
+    {
+        return isMeasureBoundary_;
+    }
+    void SetIsMeasureBoundary(bool isMeasureBoundary)
+    {
+        isMeasureBoundary_ = isMeasureBoundary;
+    }
 
 protected:
     virtual void HandleOnCopy();
@@ -311,6 +323,7 @@ protected:
     std::vector<Rect> rectsForPlaceholders_;
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
+    bool isMeasureBoundary_ = false;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -324,7 +337,11 @@ private:
     void HandlePanEnd(const GestureEvent& info);
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
+#ifndef USE_GRAPHIC_TEXT_GINE
     inline RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
+#else
+    inline RSTextRect ConvertRect(const Rect& rect);
+#endif
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();

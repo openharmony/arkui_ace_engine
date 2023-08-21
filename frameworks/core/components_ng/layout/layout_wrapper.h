@@ -59,6 +59,7 @@ public:
     virtual const RefPtr<LayoutProperty>& GetLayoutProperty() const = 0;
 
     virtual RefPtr<LayoutWrapper> GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree = true) = 0;
+    virtual RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index) = 0;
     virtual const std::list<RefPtr<LayoutWrapper>>& GetAllChildrenWithBuild(bool addToRenderTree = true) = 0;
     virtual void RemoveChildInRenderTree(uint32_t index) = 0;
     virtual void RemoveAllChildInRenderTree() = 0;
@@ -126,6 +127,16 @@ public:
     // restore to the geometry state after last Layout and before SafeArea expansion and keyboard avoidance
     void RestoreGeoState();
 
+    bool SkipSyncGeometryNode() const
+    {
+        return needSkipSyncGeometryNode_;
+    }
+
+    void SetSkipSyncGeometryNode(bool needSkip = true)
+    {
+        needSkipSyncGeometryNode_ = needSkip;
+    }
+
 protected:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
@@ -139,6 +150,7 @@ protected:
     bool isConstraintNotChanged_ = false;
     bool isRootNode_ = false;
     bool isOverlayNode_ = false;
+    bool needSkipSyncGeometryNode_ = false;
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
 

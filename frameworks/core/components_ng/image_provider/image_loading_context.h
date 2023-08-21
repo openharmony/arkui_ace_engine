@@ -121,6 +121,7 @@ private:
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;
     std::function<void()> updateParamsCallback_ = nullptr;
 
+    std::string errorMsg_;
     // to cancel MakeCanvasImage task
     std::string canvasKey_;
 

@@ -137,6 +137,7 @@ public:
     void DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info);
     void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
     void ClearContent(const RefPtr<UINode>& child);
+    void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -182,6 +183,7 @@ public:
 #endif
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
@@ -191,8 +193,13 @@ public:
         }
         customKeyboardBulder_ = keyboardBuilder;
     }
+    void BindSelectionMenu()
+    {
+        isBindSelectionMenu_ = true;
+    }
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
+    bool HasFocus() const;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
@@ -227,7 +234,6 @@ private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
-    bool HasFocus() const;
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
@@ -280,6 +286,9 @@ private:
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool isMouseTryDragging_ = false;
+#endif
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
     bool imeShown_ = false;
@@ -310,6 +319,7 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
+    bool isBindSelectionMenu_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

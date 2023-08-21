@@ -159,6 +159,8 @@ void MenuItemPattern::OnModifyDone()
         UpdateDisabledStyle();
     }
     SetAccessibilityAction();
+
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
@@ -425,6 +427,23 @@ bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
         PlayBgColorAnimation();
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         ShowSubMenu();
+        return true;
+    }
+    return false;
+}
+
+bool CustomMenuItemPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+        focusHub->OnClick(event);
+        CloseMenu();
         return true;
     }
     return false;

@@ -113,9 +113,11 @@ void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text
             SetDefaultTextStyle(textNode, textStr, isButtonVisible);
             frameNode->AddChild(textNode);
         }
+        InitLayoutProperty(frameNode, text, icon, backgroundType);
     }
-
-    InitLayoutProperty(frameNode, text, icon, backgroundType);
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     stack->Push(frameNode);
 }
 

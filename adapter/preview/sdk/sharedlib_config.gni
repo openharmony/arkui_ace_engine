@@ -271,8 +271,8 @@ if (use_mac || use_mingw_win) {
     },
     {
       label = "//third_party/sqlite:sqlite_sdk"
-      subsystem_name = "common"
-      part_name = "common"
+      subsystem_name = "thirdparty"
+      part_name = "sqlite"
     },
     {
       label = "//third_party/openssl:libcrypto_restool"

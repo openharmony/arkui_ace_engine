@@ -1378,9 +1378,12 @@ void JsAccessibilityManager::InitializeCallback()
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
 
     SubscribeToastObserver();
-    SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
-    if (isEnabled) {
-        RegisterInteractionOperation(windowId_);
+
+    if (!pipelineContext->IsFormRender()) {
+        SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
+        if (isEnabled) {
+            RegisterInteractionOperation(windowId_);
+        }
     }
 }
 

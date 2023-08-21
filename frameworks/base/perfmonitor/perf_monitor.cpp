@@ -27,6 +27,7 @@ namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
+constexpr float SINGLE_FRAME_TIME = 16.6;
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -72,8 +73,11 @@ std::string GetSourceTypeName(PerfSourceType sourceType)
         case PERF_JOY_STICK:
             type = "JOYSTICK";
             break;
+        case PERF_KEY_EVENT:
+            type = "KEY_EVENT";
+            break;
         default :
-            type = "UNKNOWN";
+            type = "UNKNOWN_SOURCE";
             break;
     }
     return type;
@@ -88,12 +92,14 @@ void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
     dataRs.inputTime = data.inputTime;
     dataRs.beginVsyncTime = data.beginVsyncTime;
     dataRs.endVsyncTime = data.endVsyncTime;
-    dataRs.versionCode = std::to_string(data.baseInfo.versionCode);
+    dataRs.versionCode = data.baseInfo.versionCode;
     dataRs.versionName = data.baseInfo.versionName;
     dataRs.bundleName = data.baseInfo.bundleName;
     dataRs.processName = data.baseInfo.processName;
     dataRs.abilityName = data.baseInfo.abilityName;
     dataRs.pageUrl = data.baseInfo.pageUrl;
+    dataRs.sourceType = GetSourceTypeName(data.sourceType);
+    dataRs.note = data.baseInfo.note;
 }
 
 void ReportPerfEventToRS(DataBase& data)
@@ -135,10 +141,11 @@ void ReportPerfEventToUI(DataBase data)
     }
 }
 
-void SceneRecord::InitRecord(const std::string& sId, PerfActionType type, const std::string& nt)
+void SceneRecord::InitRecord(const std::string& sId, PerfActionType aType, PerfSourceType sType, const std::string& nt)
 {
     sceneId = sId;
-    actionType = type;
+    actionType = aType;
+    sourceType = sType;
     note = nt;
     beginVsyncTime = GetCurrentRealTimeNs();
 }
@@ -151,7 +158,7 @@ bool SceneRecord::IsTimeOut(int64_t nowTime)
     return false;
 }
 
-void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t durition, int32_t skippedFrames)
+void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skippedFrames)
 {
     if (totalFrames == 0) {
         beginVsyncTime = GetCurrentRealTimeNs();
@@ -159,9 +166,10 @@ void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t durition, int32_t skipp
     } else {
         isFirstFrame = false;
     }
+    skippedFrames = static_cast<int32_t>(duration / SINGLE_FRAME_TIME);
     if (!isFirstFrame && skippedFrames >= 1) {
-        if (durition > maxFrameTime) {
-            maxFrameTime = durition;
+        if (duration > maxFrameTime) {
+            maxFrameTime = duration;
         }
         if (isSuccessive) {
             seqMissFrames = seqMissFrames + skippedFrames;
@@ -172,7 +180,7 @@ void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t durition, int32_t skipp
         if (maxSuccessiveFrames < seqMissFrames) {
             maxSuccessiveFrames = seqMissFrames;
         }
-        totalMissed += (skippedFrames - 1);
+        totalMissed += skippedFrames;
     } else {
         isSuccessive = false;
         seqMissFrames = 0;
@@ -206,7 +214,8 @@ void SceneRecord::Reset()
     isSuccessive = false;
     isFirstFrame = false;
     sceneId = "";
-    actionType = ERROR_TYPE;
+    actionType = UNKNOWN_ACTION;
+    sourceType = UNKNOWN_SOURCE;
     note = "";
 }
 
@@ -225,12 +234,13 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     SceneRecord* record = GetRecord(sceneId);
     if (record != nullptr) {
         record->Reset();
-        record->InitRecord(sceneId, type, note);
+        record->InitRecord(sceneId, type, mSourceType, note);
     } else {
         record = new SceneRecord();
-        record->InitRecord(sceneId, type, note);
+        record->InitRecord(sceneId, type, mSourceType, note);
         mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
     }
+    RecordBaseInfo(record);
 }
 
 void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
@@ -249,30 +259,33 @@ void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
 void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time)
 {
     mSourceType = sourceType;
+    if (time <= 0) {
+        time = GetCurrentRealTimeNs();
+    }
     switch (type) {
         case LAST_DOWN:
-            lastInputDownTime = time;
+            mInputTime[LAST_DOWN] = time;
             break;
         case LAST_UP:
-            lastInputUpTime = time;
+            mInputTime[LAST_UP] = time;
             break;
         case FIRST_MOVE:
-            firstMoveTime = time;
+            mInputTime[FIRST_MOVE] = time;
             break;
         default:
             break;
     }
 }
 
-void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank)
+void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
     mVsyncTime = vsyncTime;
     int32_t skippedFrames = static_cast<int32_t> (jank);
     for (auto it = mRecords.begin(); it != mRecords.end();) {
         if (it->second != nullptr) {
-            (it->second)->RecordFrame(vsyncTime, durition, skippedFrames);
-            if ((it->second)->IsTimeOut(vsyncTime + durition)) {
+            (it->second)->RecordFrame(vsyncTime, duration, skippedFrames);
+            if ((it->second)->IsTimeOut(vsyncTime + duration)) {
                 delete it->second;
                 mRecords.erase(it++);
                 continue;
@@ -332,17 +345,19 @@ int64_t PerfMonitor::GetInputTime(PerfActionType type)
     int64_t inputTime = 0;
     switch (type) {
         case LAST_DOWN:
-            inputTime = lastInputDownTime;
+            inputTime = mInputTime[LAST_DOWN];
             break;
         case LAST_UP:
-            inputTime = lastInputUpTime;
+            inputTime = mInputTime[LAST_UP];
             break;
         case FIRST_MOVE:
-            inputTime = firstMoveTime;
+            inputTime = mInputTime[FIRST_MOVE];
             break;
         default:
-            inputTime = lastInputDownTime;
             break;
+    }
+    if (inputTime <= 0) {
+        inputTime = GetCurrentRealTimeNs();
     }
     return inputTime;
 }
@@ -388,7 +403,7 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needCo
     data.totalMissed = record->totalMissed;
     data.totalFrames = record->totalFrames;
     data.needReportToRS = needCompleteTime;
-    data.sourceType = mSourceType;
+    data.sourceType = record->sourceType;
     data.actionType = record->actionType;
     data.baseInfo = baseInfo;
 }

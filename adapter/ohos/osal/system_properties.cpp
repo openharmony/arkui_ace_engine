@@ -37,6 +37,7 @@ constexpr char PROPERTY_DEVICE_TYPE[] = "const.product.devicetype";
 constexpr char PROPERTY_DEVICE_TYPE_DEFAULT[] = "default";
 constexpr char PROPERTY_DEVICE_TYPE_TV[] = "tv";
 constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
+constexpr char PROPERTY_DEVICE_TYPE_TWOINONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
@@ -316,6 +317,8 @@ void SystemProperties::InitDeviceTypeBySystemProperty()
         deviceType_ = DeviceType::WATCH;
     } else if (deviceProp == PROPERTY_DEVICE_TYPE_TABLET) {
         deviceType_ = DeviceType::TABLET;
+    } else if (deviceProp == PROPERTY_DEVICE_TYPE_TWOINONE) {
+        deviceType_ = DeviceType::TWO_IN_ONE;
     } else {
         deviceType_ = DeviceType::PHONE;
     }

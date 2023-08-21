@@ -36,4 +36,9 @@ void RichEditorModelImpl::SetAboutToDelete(std::function<bool(const NG::RichEdit
 void RichEditorModelImpl::SetOnDeleteComplete(std::function<void()>&& func) {}
 
 void RichEditorModelImpl::SetCustomKeyboard(std::function<void()>&& func) {}
+
+void RichEditorModelImpl::SetCopyOption(CopyOptions& copyOptions) {}
+
+void RichEditorModelImpl::BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
+    std::function<void()>& buildFunc, NG::MenuParam& menuParam) {}
 } // namespace OHOS::Ace::Framework

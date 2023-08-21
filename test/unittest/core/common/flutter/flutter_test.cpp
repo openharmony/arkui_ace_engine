@@ -344,7 +344,7 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest08, TestSize.Level1)
     /**
      * @tc.steps1: Build a flutterTaskExecutor object is null.
      */
-    FlutterTaskExecutor flutterTaskExecutor;
+    auto flutterTaskExecutor = MakeTaskExecutor();
 
     /**
      * @tc.steps2: Create a callBack task.
@@ -360,7 +360,7 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest08, TestSize.Level1)
      * @tc.expected: task gets executed.
      */
     Container::UpdateCurrent(-1);
-    flutterTaskExecutor.OnPostTask(callBack, TaskExecutor::TaskType::BACKGROUND, 2);
+    flutterTaskExecutor->OnPostTask(callBack, TaskExecutor::TaskType::BACKGROUND, 2);
     EXPECT_EQ(backgroudTask, "");
     sleep(2);
     EXPECT_EQ(backgroudTask, BACKGROUNDSYNCTASK);
@@ -369,8 +369,8 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest08, TestSize.Level1)
      * @tc.steps4: call WrapTaskWithTraceId.
      * @tc.expected: The return result is true.
      */
-    flutterTaskExecutor.RemoveTaskObserver();
-    auto result = flutterTaskExecutor.WrapTaskWithTraceId(callBack, 1);
+    flutterTaskExecutor->RemoveTaskObserver();
+    auto result = flutterTaskExecutor->WrapTaskWithTraceId(callBack, 1);
     EXPECT_TRUE(result);
 }
 

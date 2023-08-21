@@ -120,9 +120,20 @@ void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
     int32_t extend = paragraph_->GetHandlePositionForClick(pos);
+#ifndef USE_GRAPHIC_TEXT_GINE
+    int32_t start = 0;
+    int32_t end = 0;
+    if (!paragraph_->GetWordBoundary(extend, start, end)) {
+        start = extend;
+        end = std::min(
+            static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
+    }
+    textSelector_.Update(start, end);
+#else
     int32_t extendEnd =
         std::min(static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
     textSelector_.Update(extend, extendEnd);
+#endif
 }
 
 OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
@@ -136,10 +147,10 @@ OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectL
                           paragraph_->ComputeOffsetForCaretDownstream(position, metrics);
     if (!computeSuccess) {
         LOGW("Get caret offset failed, set it to text tail");
-        return OffsetF(rect.Width(), 0.0f);
+        return { rect.Width(), 0.0f };
     }
     selectLineHeight = metrics.height;
-    return OffsetF(static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY()));
+    return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY()) };
 }
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
@@ -157,8 +168,6 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     float endSelectHeight = 0.0f;
     auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight);
     auto endOffset = CalcCursorOffsetByPosition(textSelector_.destinationOffset, endSelectHeight);
-    float selectLineHeight = std::max(startSelectHeight, endSelectHeight);
-    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), selectLineHeight };
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
 
@@ -167,12 +176,13 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
-    firstHandle.SetSize(handlePaintSize);
+    firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight });
     textSelector_.firstHandle = firstHandle;
 
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleOffset);
-    secondHandle.SetSize(handlePaintSize);
+    secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight });
+    secondHandle.SetHeight(endSelectHeight);
     textSelector_.secondHandle = secondHandle;
 }
 
@@ -736,16 +746,28 @@ float TextPattern::GetLineHeight() const
     return selectedRects.front().Height();
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 RSTypographyProperties::TextBox TextPattern::ConvertRect(const Rect& rect)
+#else
+RSTextRect TextPattern::ConvertRect(const Rect& rect)
+#endif
 {
     return { RSRect(rect.Left(), rect.Top(), rect.Right(), rect.Bottom()), RSTextDirection::LTR };
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 std::vector<RSTypographyProperties::TextBox> TextPattern::GetTextBoxes()
+#else
+std::vector<RSTextRect> TextPattern::GetTextBoxes()
+#endif
 {
     std::vector<Rect> selectedRects;
     paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> res;
+#else
+    std::vector<RSTextRect> res;
+#endif
     res.reserve(selectedRects.size());
     for (auto&& rect : selectedRects) {
         res.emplace_back(ConvertRect(rect));

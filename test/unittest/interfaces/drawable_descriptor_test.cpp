@@ -26,7 +26,11 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-namespace {} // namespace
+namespace {
+constexpr int32_t ID = 1;
+const uint32_t DENSITY = 0;
+const std::string PATH_NAME = "";
+} // namespace
 class DrawableDescriptorTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -122,5 +126,54 @@ HWTEST_F(DrawableDescriptorTest, ImageConverterTest001, TestSize.Level1)
     ASSERT_NE(bitmap, nullptr);
     auto res4 = imageConverter.BitmapToPixelMap(bitmap, opts);
     EXPECT_EQ(res4, nullptr);
+}
+/**
+ * @tc.name: DrawableDescTest003
+ * @tc.desc: test LayeredDrawableDescriptor::GetMask()
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layeredDrawableDescriptor and call GetMask when layeredPixelMap is empty
+     * @tc.expected: return nullptr
+     */
+    std::unique_ptr<uint8_t[]> jsonBuf;
+    size_t len = 0;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceMgr, nullptr);
+    auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr));
+    auto res = layeredDrawableDescriptor.GetMask();
+    EXPECT_EQ(res, nullptr);
+    /**
+     * @tc.steps: step2. call GetStaticMaskClipPath
+     * @tc.expected: return rightly
+     */
+    auto str = layeredDrawableDescriptor.GetStaticMaskClipPath();
+    EXPECT_EQ(str, PATH_NAME);
+}
+
+/**
+ * @tc.name: DrawableDescTest004
+ * @tc.desc: test DrawableDescriptorFactory::Create()
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DrawableDescriptorFactory and call create when RState is not success
+     * @tc.expected: return nullptr
+     */
+    std::unique_ptr<uint8_t[]> jsonBuf;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    ASSERT_NE(resourceMgr, nullptr);
+    Napi::DrawableDescriptorFactory drawableDescriptorFactory;
+    Global::Resource::RState state(Global::Resource::INVALID_FORMAT);
+    Napi::DrawableDescriptor::DrawableType drawableType;
+    auto res = drawableDescriptorFactory.Create(ID, resourceMgr, state, drawableType, DENSITY);
+    EXPECT_EQ(res, nullptr);
+
+    auto res2 = drawableDescriptorFactory.Create(nullptr, resourceMgr, state, drawableType, DENSITY);
+    EXPECT_EQ(res2, nullptr);
 }
 } // namespace OHOS::Ace

@@ -83,7 +83,7 @@ HWTEST_F(ParseClipPathTestNg, ParseTest001, TestSize.Level1)
     EXPECT_NE(svgClipPath, nullptr);
     EXPECT_STREQ(svgClipPath->nodeId_.c_str(), ID.c_str());
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
 }

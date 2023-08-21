@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 
+#include "common/rs_vector4.h"
 #include "key_event.h"
 #include "pointer_event.h"
 #include "session/host/include/session.h"
@@ -51,8 +52,9 @@ protected:
 
     void InitContent();
     void CreateStartingNode();
-    void CreateSnapshotNode(bool usePixelMap = false);
+    void CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot = nullptr);
 
+    virtual void OnActivation() {}
     virtual void OnConnect() {}
     virtual void OnForeground() {}
     virtual void OnBackground() {}
@@ -66,6 +68,7 @@ protected:
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
     std::function<void()> callback_;
+    std::function<void(const Rosen::Vector4f&)> sizeChangedCallback_;
 
 private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -74,6 +77,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     bool IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void AdapterRotation(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void SetWindowSceneConsumed(int32_t action);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;

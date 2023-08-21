@@ -280,14 +280,23 @@ private:
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
 
+    // The focus logic of overlay node (menu and dialog): 
+    // 1. before start show animation: lower level node set unfocusabel and lost focus;
+    // 2. end show animation: overlay node get focus;
+    // 3. before start hide animation: lower level node set focusable;
+    // 4. end hide animation: overlay node lost focus, lower level node get focus.
     void FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow = false);
-    void BlurOverlayNode(bool isInSubWindow = false);
+    void BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bool isInSubWindow = false);
+    void BlurLowerNode(const RefPtr<FrameNode>& currentOverlay);
+    void ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay);
+    void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
+    void SetContainerButtonEnable(bool isEnabled);
 
     void SaveLastModalNode();
     void PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
@@ -295,6 +304,7 @@ private:
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void FireModalPageShow();
     void FireModalPageHide();
+    void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
         bool isModeChangeToAuto = false);
@@ -318,6 +328,7 @@ private:
     WeakPtr<FrameNode> lastModalNode_;
     float sheetHeight_ {0.0};
     WeakPtr<UINode> rootNodeWeak_;
+    int32_t dialogCount_ = 0;
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ {false};
     bool hasFilter_ {false};

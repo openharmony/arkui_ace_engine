@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t MARGIN_HALF = 2;
+const int32_t BUFFER_NODE_NUMBER = 2;
 } // namespace
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
@@ -51,7 +52,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     auto pickerTheme = themeManager->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, nullptr);
 
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     auto timePickerRowPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(timePickerRowPattern, nullptr);
     timePickerRowPattern->SetShowCount(showCount);

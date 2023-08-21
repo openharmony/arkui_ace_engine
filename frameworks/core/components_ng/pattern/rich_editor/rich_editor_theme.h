@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RICH_EDITOR_RICH_EDITOR_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RICH_EDITOR_RICH_EDITOR_THEME_H
 
+#include "base/geometry/dimension.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -57,6 +58,7 @@ public:
             }
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
+            theme->defaultCaretHeight_ = pattern->GetAttr<Dimension>("default_caret_height", 18.5_vp);
         }
     };
 
@@ -67,11 +69,17 @@ public:
         return draggable_;
     }
 
+    const Dimension& GetDefaultCaretHeight() const
+    {
+        return defaultCaretHeight_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
 private:
     bool draggable_ = false;
+    Dimension defaultCaretHeight_ = 18.5_vp;
 };
 } // namespace OHOS::Ace::NG
 

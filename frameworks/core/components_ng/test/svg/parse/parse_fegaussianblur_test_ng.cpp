@@ -71,7 +71,7 @@ HWTEST_F(ParseFeGaussianblurTestNg, ParseTest001, TestSize.Level1)
 {
     auto svgDom = ParseFeGaussianblur(SVG_LABEL);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
@@ -86,7 +86,7 @@ HWTEST_F(ParseFeGaussianblurTestNg, ParseTest002, TestSize.Level1)
 {
     auto svgDom = ParseFeGaussianblur(SVG_LABEL2);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }

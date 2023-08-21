@@ -34,10 +34,6 @@ constexpr int32_t MAX_FINGERS = 10;
 
 void LongPressRecognizer::OnAccepted()
 {
-    FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
-    if (ft != nullptr) {
-        ft->SetFrameTraceLimit();
-    }
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }

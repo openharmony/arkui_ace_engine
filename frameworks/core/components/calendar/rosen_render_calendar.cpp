@@ -16,8 +16,13 @@
 #include "core/components/calendar/rosen_render_calendar.h"
 
 #include "render_service_client/core/ui/rs_node.h"
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
+#else
+#include "rosen_text/typography_create.h"
+#include "rosen_text/typography_style.h"
+#endif
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
@@ -37,23 +42,41 @@ constexpr double WEEKEND_TRANSPARENT = 0x7D;
 constexpr double SCHEDULE_MARKER_TRANSPARENT = 0x4B;
 constexpr Dimension CARD_CALENDAR_TITLE_HEIGHT = 68.0_vp;
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 std::unique_ptr<txt::Paragraph> GetTextParagraph(const std::string& text, const txt::TextStyle& textStyle)
 {
     txt::ParagraphStyle style;
+#else
+std::unique_ptr<Rosen::Typography> GetTextParagraph(const std::string& text, const Rosen::TextStyle& textStyle)
+{
+    Rosen::TypographyStyle style;
+#endif
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
         LOGW("MeasureText: fontCollection is null");
         return nullptr;
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     builder->PushStyle(textStyle);
     builder->AddText(StringUtils::Str8ToStr16(text));
     return builder->Build();
+#else
+    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
+    builder->PushStyle(textStyle);
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    return builder->CreateTypography();
+#endif
 }
 
 #ifndef USE_ROSEN_DRAWING
+#ifndef USE_GRAPHIC_TEXT_GINE
 void DrawCalendarText(
     SkCanvas* canvas, const std::string& text, const txt::TextStyle& textStyle, const Rect& boxRect, Rect& textRect)
+#else
+void DrawCalendarText(
+    SkCanvas* canvas, const std::string& text, const Rosen::TextStyle& textStyle, const Rect& boxRect, Rect& textRect)
+#endif
 #else
 void DrawCalendarText(RSCanvas* canvas,
     const std::string& text, const txt::TextStyle& textStyle, const Rect& boxRect, Rect& textRect)
@@ -88,7 +111,11 @@ void DrawCalendarText(RSCanvas* canvas,
 }
 
 #ifndef USE_ROSEN_DRAWING
+#ifndef USE_GRAPHIC_TEXT_GINE
 void DrawCalendarText(SkCanvas* canvas, const std::string& text, const txt::TextStyle& textStyle, const Rect& boxRect)
+#else
+void DrawCalendarText(SkCanvas* canvas, const std::string& text, const Rosen::TextStyle& textStyle, const Rect& boxRect)
+#endif
 #else
 void DrawCalendarText(RSCanvas* canvas,
     const std::string& text, const txt::TextStyle& textStyle, const Rect& boxRect)
@@ -325,12 +352,21 @@ void RosenRenderCalendar::DrawWeek(RSCanvas* canvas, const Offset& offset) const
 #endif
 {
     uint32_t totalWeek = weekNumbers_.size();
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::TextStyle weekTextStyle;
     weekTextStyle.color = weekColor_;
     weekTextStyle.font_size = weekFontSize_;
     if (cardCalendar_) {
         weekTextStyle.font_weight = static_cast<txt::FontWeight>(FontWeight::W500);
     }
+#else
+    Rosen::TextStyle weekTextStyle;
+    weekTextStyle.color = weekColor_;
+    weekTextStyle.fontSize = weekFontSize_;
+    if (cardCalendar_) {
+        weekTextStyle.fontWeight = static_cast<Rosen::FontWeight>(FontWeight::W500);
+    }
+#endif
     weekTextStyle.locale = Localization::GetInstance()->GetFontLocale();
     static const int32_t daysOfWeek = 7;
     auto startDayOfWeek = dataAdapter_->GetStartDayOfWeek();
@@ -384,8 +420,13 @@ void RosenRenderCalendar::DrawBlurArea(RSCanvas* canvas, const Offset& offset, d
 }
 
 #ifndef USE_ROSEN_DRAWING
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::PaintDay(
     SkCanvas* canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const
+#else
+void RosenRenderCalendar::PaintDay(
+    SkCanvas* canvas, const Offset& offset, const CalendarDay& day, Rosen::TextStyle& textStyle) const
+#endif
 #else
 void RosenRenderCalendar::PaintDay(
     RSCanvas* canvas, const Offset& offset, const CalendarDay& day, txt::TextStyle& textStyle) const
@@ -394,7 +435,11 @@ void RosenRenderCalendar::PaintDay(
     // paint day
     Rect boxRect { offset.GetX(), offset.GetY(), dayWidth_, gregorianCalendarHeight_ };
     Rect textRect;
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::TextStyle workStateStyle;
+#else
+    Rosen::TextStyle workStateStyle;
+#endif
     if (!day.dayMark.empty() && showHoliday_ && type_ == CalendarType::SIMPLE) {
 #ifndef USE_ROSEN_DRAWING
         if (day.dayMark == "work") {
@@ -415,7 +460,11 @@ void RosenRenderCalendar::PaintDay(
         auto workStateOffset = offset + Offset(0, NormalizeToPx(calendarTheme_.workStateOffset));
         boxRect.SetOffset(workStateOffset);
         workStateStyle.color = Color::WHITE.GetValue();
+#ifndef USE_GRAPHIC_TEXT_GINE
         workStateStyle.font_size = dayFontSize_;
+#else
+        workStateStyle.fontSize = dayFontSize_;
+#endif
         DrawCalendarText(canvas, day.dayMarkValue, workStateStyle, boxRect, textRect);
         return;
     }
@@ -431,27 +480,47 @@ void RosenRenderCalendar::PaintDay(
         if (cardCalendar_) {
             InitWorkStateStyle(day, offset, workStateStyle, boxRect);
         } else {
+#ifndef USE_GRAPHIC_TEXT_GINE
             workStateStyle.font_weight = static_cast<txt::FontWeight>(workStateFontWeight_);
+#else
+            workStateStyle.fontWeight = static_cast<Rosen::FontWeight>(workStateFontWeight_);
+#endif
             workStateStyle.locale = Localization::GetInstance()->GetFontLocale();
             boxRect = { textRect.GetOffset().GetX() + textRect.Width() - workStateHorizontalMovingDistance_,
                 textRect.GetOffset().GetY() + textRect.Height() - workStateVerticalMovingDistance_, workStateWidth_,
                 workStateWidth_ };
             if (day.month.month == currentMonth_.month) {
                 if (day.dayMark == "work") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = workDayMarkSize_;
+#else
+                    workStateStyle.fontSize = workDayMarkSize_;
+#endif
                     workStateStyle.color = workDayMarkColor_;
                 } else if (day.dayMark == "off") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = offDayMarkSize_;
+#else
+                    workStateStyle.fontSize = offDayMarkSize_;
+#endif
                     workStateStyle.color = offDayMarkColor_;
                 }
             } else {
 #ifndef USE_ROSEN_DRAWING
                 if (day.dayMark == "work") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = workDayMarkSize_;
+#else
+                    workStateStyle.fontSize = workDayMarkSize_;
+#endif
                     workStateStyle.color = isV2Component_ ? SkColorSetA(workDayMarkColor_, WEEKEND_TRANSPARENT)
                                                           : nonCurrentMonthWorkDayMarkColor_;
                 } else if (day.dayMark == "off") {
+#ifndef USE_GRAPHIC_TEXT_GINE
                     workStateStyle.font_size = offDayMarkSize_;
+#else
+                    workStateStyle.fontSize = offDayMarkSize_;
+#endif
                     workStateStyle.color = isV2Component_ ? SkColorSetA(offDayMarkColor_, WEEKEND_TRANSPARENT)
                                                           : nonCurrentMonthOffDayMarkColor_;
                 }
@@ -483,8 +552,13 @@ void RosenRenderCalendar::PaintDay(
 }
 
 #ifndef USE_ROSEN_DRAWING
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::PaintLunarDay(
     SkCanvas* canvas, const Offset& offset, const CalendarDay& day, const txt::TextStyle& textStyle) const
+#else
+void RosenRenderCalendar::PaintLunarDay(
+    SkCanvas* canvas, const Offset& offset, const CalendarDay& day, const Rosen::TextStyle& textStyle) const
+#endif
 #else
 void RosenRenderCalendar::PaintLunarDay(
     RSCanvas* canvas, const Offset& offset, const CalendarDay& day, const txt::TextStyle& textStyle) const
@@ -497,8 +571,13 @@ void RosenRenderCalendar::PaintLunarDay(
     DrawCalendarText(canvas, day.lunarDay, textStyle, boxRect);
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::SetNonFocusStyle(
     const CalendarDay& day, txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle)
+#else
+void RosenRenderCalendar::SetNonFocusStyle(
+    const CalendarDay& day, Rosen::TextStyle& dateTextStyle, Rosen::TextStyle& lunarTextStyle)
+#endif
 {
 #ifndef USE_ROSEN_DRAWING
     SkColor dateTextColor;
@@ -582,8 +661,13 @@ void RosenRenderCalendar::DrawCardCalendar(
     RSCanvas* canvas, const Offset& offset, const Offset& dayOffset, const CalendarDay& day, int32_t dateNumber)
 #endif
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::TextStyle dateTextStyle;
     txt::TextStyle lunarTextStyle;
+#else
+    Rosen::TextStyle dateTextStyle;
+    Rosen::TextStyle lunarTextStyle;
+#endif
     InitTextStyle(dateTextStyle, lunarTextStyle);
     SetNonFocusStyle(day, dateTextStyle, lunarTextStyle);
     dateTextStyle.locale = Localization::GetInstance()->GetFontLocale();
@@ -657,8 +741,13 @@ void RosenRenderCalendar::DrawTvCalendar(RSCanvas* canvas,
         day.month.month != currentMonth_.month) {
         return;
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::TextStyle dateTextStyle;
     txt::TextStyle lunarTextStyle;
+#else
+    Rosen::TextStyle dateTextStyle;
+    Rosen::TextStyle lunarTextStyle;
+#endif
     InitTextStyle(dateTextStyle, lunarTextStyle);
     dateTextStyle.locale = Localization::GetInstance()->GetFontLocale();
     lunarTextStyle.locale = Localization::GetInstance()->GetFontLocale();
@@ -709,6 +798,7 @@ void RosenRenderCalendar::DrawTvCalendar(RSCanvas* canvas,
     }
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::InitTextStyle(txt::TextStyle& dateTextStyle, txt::TextStyle& lunarTextStyle)
 {
     dateTextStyle.font_size = dayFontSize_;
@@ -717,6 +807,16 @@ void RosenRenderCalendar::InitTextStyle(txt::TextStyle& dateTextStyle, txt::Text
     lunarTextStyle.font_size = lunarDayFontSize_;
     lunarTextStyle.font_weight = static_cast<txt::FontWeight>(lunarDayFontWeight_);
 }
+#else
+void RosenRenderCalendar::InitTextStyle(Rosen::TextStyle& dateTextStyle, Rosen::TextStyle& lunarTextStyle)
+{
+    dateTextStyle.fontSize = dayFontSize_;
+    dateTextStyle.fontWeight = static_cast<Rosen::FontWeight>(dayFontWeight_);
+
+    lunarTextStyle.fontSize = lunarDayFontSize_;
+    lunarTextStyle.fontWeight = static_cast<Rosen::FontWeight>(lunarDayFontWeight_);
+}
+#endif
 
 #ifndef USE_ROSEN_DRAWING
 void RosenRenderCalendar::PaintUnderscore(SkCanvas* canvas, const Offset& offset, const CalendarDay& day)
@@ -824,10 +924,17 @@ void RosenRenderCalendar::PaintScheduleMarker(RSCanvas* canvas, const Offset& of
 }
 #endif
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::InitWorkStateStyle(
     const CalendarDay& day, const Offset& offset, txt::TextStyle& workStateStyle, Rect& boxRect) const
 {
     workStateStyle.font_weight = static_cast<txt::FontWeight>(FontWeight::W500);
+#else
+void RosenRenderCalendar::InitWorkStateStyle(
+    const CalendarDay& day, const Offset& offset, Rosen::TextStyle& workStateStyle, Rect& boxRect) const
+{
+    workStateStyle.fontWeight = static_cast<Rosen::FontWeight>(FontWeight::W500);
+#endif
     workStateStyle.locale = Localization::GetInstance()->GetFontLocale();
     static const Dimension workStateWidth = 8.0_vp;
     static const int32_t twoDigitMaker = 10;
@@ -844,7 +951,11 @@ void RosenRenderCalendar::InitWorkStateStyle(
             NormalizeToPx(workStateWidth) };
     }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     workStateStyle.font_size = NormalizeToPx(workStateWidth);
+#else
+    workStateStyle.fontSize = NormalizeToPx(workStateWidth);
+#endif
 
     if (day.month.month != currentMonth_.month) {
 #ifndef USE_ROSEN_DRAWING
@@ -871,8 +982,13 @@ void RosenRenderCalendar::InitWorkStateStyle(
 }
 
 #ifndef USE_ROSEN_DRAWING
+#ifndef USE_GRAPHIC_TEXT_GINE
 void RosenRenderCalendar::SetWorkStateStyle(
     const CalendarDay& day, SkColor workColor, SkColor offColor, txt::TextStyle& workStateStyle) const
+#else
+void RosenRenderCalendar::SetWorkStateStyle(
+    const CalendarDay& day, SkColor workColor, SkColor offColor, Rosen::TextStyle& workStateStyle) const
+#endif
 #else
 void RosenRenderCalendar::SetWorkStateStyle(const CalendarDay& day, RSColorQuad workColor,
     RSColorQuad offColor, txt::TextStyle& workStateStyle) const

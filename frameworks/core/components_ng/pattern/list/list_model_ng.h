@@ -45,6 +45,8 @@ public:
     void SetHasWidth(bool hasWidth) override {}
     void SetHasHeight(bool hasHeight) override {}
     void SetSticky(V2::StickyStyle stickyStyle) override;
+    void SetContentStartOffset(float startOffset) override;
+    void SetContentEndOffset(float endOffset) override;
     void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;

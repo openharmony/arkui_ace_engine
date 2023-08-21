@@ -30,12 +30,15 @@ RefPtr<ImageCache> ImageCache::Create()
     return nullptr;
 }
 
-RefPtr<CachedImageData> ImageCache::GetCacheImageData(const std::string& key)
+RefPtr<NG::ImageData> ImageCache::GetCacheImageData(const std::string& key)
 {
     return nullptr;
 }
 
-void ImageCache::CacheImageData(const std::string& key, const RefPtr<CachedImageData>& imageData) {}
+void ImageCache::CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData) {}
 
 void ImageCache::Purge() {}
+
+void ImageCache::ClearCacheImage(const std::string& key) {}
+void ImageCache::Clear() {}
 } // namespace OHOS::Ace

@@ -19,6 +19,7 @@
 #include "include/core/SkData.h"
 
 #include "core/components_ng/image_provider/image_data.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,6 +31,8 @@ public:
     size_t GetSize() const override;
     const void* GetData() const override;
     sk_sp<SkData> GetSkData() const;
+    const void* GetDataWrapper() const override;
+
     std::pair<SizeF, int32_t> Parse() const;
     RefPtr<SvgDomBase> MakeSvgDom(const std::optional<Color>& svgFillColor);
 

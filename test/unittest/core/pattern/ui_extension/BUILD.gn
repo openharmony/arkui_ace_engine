@@ -27,6 +27,8 @@ ace_unittest("ui_extension_test_ng") {
   ]
   external_deps = [
     "ability_runtime:abilitykit_native",
+    "c_utils:utils",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",

@@ -31,7 +31,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
-
+constexpr uint32_t MAX_SEARCH_DEPTH = 5;
 namespace OHOS::Ace::NG {
 enum class MenuType {
     // ----- Menu Containers ------
@@ -46,6 +46,7 @@ enum class MenuType {
     // ----- special menu used in other components ------
     NAVIGATION_MENU,               // menu used in a Navigation component
     SELECT_OVERLAY_EXTENSION_MENU, // menu used in SelectOverlay Extension of text component
+    RICH_EDIT_SELECT_MENU,         // menu used in Rich Editor component
 };
 
 class MenuPattern : public Pattern {
@@ -122,6 +123,11 @@ public:
     bool IsSelectOverlayExtensionMenu() const
     {
         return type_ == MenuType::SELECT_OVERLAY_EXTENSION_MENU;
+    }
+
+    bool IsRichEditorSelectMenu() const
+    {
+        return type_ == MenuType::RICH_EDIT_SELECT_MENU;
     }
 
     void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)
@@ -202,6 +208,7 @@ public:
     void OnColorConfigurationUpdate() override;
 
     RefPtr<FrameNode> GetMenuWrapper() const;
+    RefPtr<FrameNode> GetFirstInnerMenu() const;
 
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
@@ -222,6 +229,7 @@ private:
     // If CustomBuilder is declared with <Menu> and <MenuItem>,
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
+    void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event) const;

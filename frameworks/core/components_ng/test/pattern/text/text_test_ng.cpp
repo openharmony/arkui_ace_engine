@@ -18,8 +18,6 @@
 
 #include "gtest/gtest.h"
 
-#include "core/components_ng/base/geometry_node.h"
-
 #define private public
 #define protected public
 
@@ -28,6 +26,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -298,7 +297,7 @@ void TextTestNg::SetContentModifier(TextContentModifier& textContentModifier)
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textContentModifier.SetTextShadow(textShadow);
+    textContentModifier.SetTextShadow({ textShadow });
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
     OffsetF paintOffset;
@@ -310,8 +309,7 @@ void TextTestNg::SetPaintMethodModifier(TextPaintMethod& textPaintMethod)
     textPaintMethod.textContentModifier_->fontSize_ = ADAPT_FONT_SIZE_VALUE;
     textPaintMethod.textContentModifier_->fontWeight_ = FontWeight::LIGHTER;
     textPaintMethod.textContentModifier_->textColor_ = TEXT_COLOR_VALUE;
-    Shadow textShadow;
-    textPaintMethod.textContentModifier_->textShadow_ = textShadow;
+    textPaintMethod.textContentModifier_->AddDefaultShadow();
     textPaintMethod.textContentModifier_->textDecorationColorAlpha_ =
         AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
     textPaintMethod.textContentModifier_->textDecoration_ = TextDecoration::NONE;
@@ -330,7 +328,7 @@ void TextTestNg::UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutP
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textLayoutProperty->UpdateTextShadow(textShadow);
+    textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
@@ -425,6 +423,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator002, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.letterSpacing = std::make_optional(LETTER_SPACING);
+    testProperty.baselineOffsetValue = std::make_optional(BASELINE_OFFSET_VALUE);
     auto frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -1801,7 +1800,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     textLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
     textLayoutProperty->UpdateTextColor(TEXT_COLOR_VALUE);
     Shadow textShadow;
-    textLayoutProperty->UpdateTextShadow(textShadow);
+    textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(BASELINE_OFFSET_VALUE);
@@ -2373,7 +2372,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest002, TestSize.Level1)
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textLayoutProperty->UpdateTextShadow(textShadow);
+    textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
@@ -2532,10 +2531,10 @@ HWTEST_F(TextTestNg, TextModelNgTest001, TestSize.Level1)
     text.Create("text");
     text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     Shadow textShadow;
-    text.SetTextShadow(textShadow);
+    text.SetTextShadow({ textShadow });
     EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
         TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-    EXPECT_EQ(textLayoutProperty->GetTextShadowValue(textShadow), textShadow);
+    EXPECT_EQ(*textLayoutProperty->GetTextShadowValue({ textShadow }).begin(), textShadow);
 }
 
 /**
@@ -2884,8 +2883,13 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     auto boxes = pattern->GetTextBoxes();
     EXPECT_EQ(boxes.size(), 1);
+#ifndef USE_GRAPHIC_TEXT_GINE
     EXPECT_EQ(boxes[0].rect_.GetLeft(), 0);
     EXPECT_EQ(boxes[0].rect_.GetRight(), 20);
+#else
+    EXPECT_EQ(boxes[0].rect.GetLeft(), 0);
+    EXPECT_EQ(boxes[0].rect.GetRight(), 20);
+#endif
 
     auto height = pattern->GetLineHeight();
     EXPECT_EQ(height, 20);

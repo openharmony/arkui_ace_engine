@@ -28,6 +28,8 @@ namespace {
 const int32_t DIVIDER_SIZE = 2;
 const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const float ITEM_HEIGHT_HALF = 2.0f;
+const int32_t BUFFER_NODE_NUMBER = 2;
+const int32_t HIDENODE = 3;
 } // namespace
 void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -39,12 +41,13 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogTheme);
     SizeF frameSize = { -1.0f, -1.0f };
 
-    uint32_t showCount_ = pickerTheme->GetShowOptionCount();
+    uint32_t showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     if (SystemProperties::GetDeviceType() == DeviceType::PHONE &&
         SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE;
+        showCount_ = OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
     }
-    auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - 1) +
+
+    auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - HIDENODE) +
                                      pickerTheme->GetDividerSpacing().ConvertToPx());
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
@@ -143,7 +146,7 @@ void DatePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                                                     pickerTheme->GetGradientHeight().ConvertToPx() * halfCount -
                                                     pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
     uint32_t i = 0;
-    uint32_t showCount = pickerTheme->GetShowOptionCount();
+    uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     for (const auto& child : children) {
         if (i >= showCount) {
             break;

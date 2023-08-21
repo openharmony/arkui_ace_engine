@@ -27,6 +27,8 @@ class Pattern;
 struct ScrollableNodeInfo {
     WeakPtr<Pattern> scrollableNode;
     std::function<bool(double, int32_t source)> onPositionChanged;
+    std::function<bool(double, int32_t source)> scrollStartCallback;
+    std::function<void()> scrollEndCallback;
 
     bool operator==(const ScrollableNodeInfo& info) const
     {
@@ -56,6 +58,15 @@ public:
      */
     void NotifyScrollableNode(float distance, const WeakPtr<ScrollBarPattern>& weakScrollBar) const;
 
+    /*
+     * Notify scrollable node to callback scrollStart, called by scroll bar.
+     */
+    void NotifyScrollStart() const;
+
+    /*
+     * Notify scrollable node to callback scrollStop, called by scroll bar.
+     */
+    void NotifyScrollStop() const;
     /*
      * Notify scroll bar to update state, called by scrollable node.
      * @param distance absolute distance that scrollable node has scrolled.

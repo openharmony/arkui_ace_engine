@@ -115,7 +115,6 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(childNode.first);
         navDestinationPattern->SetNavDestinationNode(uiNode);
-        SetBackButtonVisible(navDestination);
         SetBackButtonEvent(navDestination);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -161,7 +160,9 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             if (shallowBuilder) {
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
             }
-            navDestination->GetContentNode()->Clean();
+            if (navDestination->GetContentNode()) {
+                navDestination->GetContentNode()->Clean();
+            }
             navigationContentNode->RemoveChild(navDestination, true);
             hasChanged = true;
         } else {
@@ -297,11 +298,7 @@ void NavigationGroupNode::SetBackButtonEvent(
         }; // backButton event
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
-    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(onBackButtonEvent));
-    if (!backButtonEventHub->GetGestureEventHub()) {
-        return;
-    }
-    backButtonEventHub->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent);
+    backButtonEventHub->GetOrCreateGestureEventHub()->SetUserOnClick(onBackButtonEvent);
 }
 
 RefPtr<FrameNode> NavigationGroupNode::GetNavDestinationNodeToHandleBack()
@@ -375,7 +372,9 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
                     if (shallowBuilder) {
                         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                     }
-                    node->GetContentNode()->Clean();
+                    if (node->GetContentNode()) {
+                        node->GetContentNode()->Clean();
+                    }
                     auto parent = node->GetParent();
                     CHECK_NULL_VOID(parent);
                     parent->RemoveChild(node);

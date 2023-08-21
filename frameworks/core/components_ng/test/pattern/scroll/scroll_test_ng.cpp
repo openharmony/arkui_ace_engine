@@ -58,7 +58,6 @@ constexpr float CONTENT_CHILD_WIDTH = DEVICE_WIDTH / VIEWPORT_CHILD_NUMBER;
 constexpr float CONTENT_CHILD_HEIGHT = DEVICE_HEIGHT / VIEWPORT_CHILD_NUMBER;
 constexpr float CONTENT_WIDTH = CONTENT_CHILD_WIDTH * CHILD_NUMBER;
 constexpr float CONTENT_HEIGHT = CONTENT_CHILD_HEIGHT * CHILD_NUMBER;
-constexpr double DEFAULT_FRICTION = 0.6;
 } // namespace
 
 class ScrollTestNg : public testing::Test, public TestNG {
@@ -991,6 +990,9 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset001, TestSize.Level1)
     pattern_->currentOffset_ = -1000.f;
     pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), -pattern_->currentOffset_ - (CONTENT_HEIGHT - DEVICE_HEIGHT));
+    pattern_->currentOffset_ = -100.f;
+    pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 0.0f);
 }
 
 /**

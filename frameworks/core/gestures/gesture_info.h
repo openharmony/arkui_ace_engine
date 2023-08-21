@@ -52,6 +52,29 @@ constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 100;
 class GestureRecognizer;
 class PipelineBase;
 
+struct TransformConfig {
+    double scaleX = 1.0;
+    double scaleY = 1.0;
+    double centerX = 0.0;
+    double centerY = 0.0;
+    double offsetX = 0.0;
+    double offsetY = 0.0;
+    double translateX = 0.0;
+    double translateY = 0.0;
+    double degree = 0.0;
+    int id = -1;
+    bool operator==(TransformConfig tc)
+    {
+        return scaleX = tc.scaleX && scaleY == tc.scaleY && centerX == tc.centerX && centerY == tc.centerY &&
+                        offsetX == tc.offsetX && offsetY == tc.offsetY && translateX == tc.translateX &&
+                        translateY == tc.translateY && degree == tc.degree;
+    }
+};
+
+struct AncestorNodeInfo {
+    int parentId = 0;
+};
+
 enum class GesturePriority {
     Begin = -1,
     Low = 0,

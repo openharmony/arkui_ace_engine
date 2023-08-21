@@ -17,6 +17,7 @@
 
 #include "core/animation/spring_curve.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
@@ -81,10 +82,10 @@ int32_t GridEventHub::GetInsertPosition(float x, float y)
     CHECK_NULL_RETURN(pattern, -1);
     auto itemFrameNode = host->FindChildByPosition(x, y);
     if (itemFrameNode) {
-        RefPtr<GridItemPattern> itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
-        CHECK_NULL_RETURN(itemPattern, 0);
-        auto mainIndex = itemPattern->GetMainIndex();
-        auto crossIndex = itemPattern->GetCrossIndex();
+        RefPtr<GridItemLayoutProperty> itemLayoutProperty = itemFrameNode->GetLayoutProperty<GridItemLayoutProperty>();
+        CHECK_NULL_RETURN(itemLayoutProperty, 0);
+        auto mainIndex = itemLayoutProperty->GetMainIndex().value_or(-1);
+        auto crossIndex = itemLayoutProperty->GetCrossIndex().value_or(-1);
         return mainIndex * pattern->GetCrossCount() + crossIndex;
     }
 
@@ -115,10 +116,12 @@ int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_RETURN(gridPattern, 0);
     RefPtr<GridItemPattern> itemPattern = frameNode->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(itemPattern, 0);
+    auto itemProperty = frameNode->GetLayoutProperty<GridItemLayoutProperty>();
+    CHECK_NULL_RETURN(itemProperty, 0);
 
     auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
-    auto mainIndex = itemPattern->GetMainIndex();
-    auto crossIndex = itemPattern->GetCrossIndex();
+    auto mainIndex = itemProperty->GetMainIndex().value_or(-1);
+    auto crossIndex = itemProperty->GetCrossIndex().value_or(-1);
     auto crossIndexIterator = gridLayoutInfo.gridMatrix_.find(mainIndex);
     if (crossIndexIterator != gridLayoutInfo.gridMatrix_.end()) {
         auto crossIndexMap = crossIndexIterator->second;

@@ -169,7 +169,6 @@ void JSText::SetFontWeight(const std::string& value)
 void JSText::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -186,43 +185,35 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
 void JSText::SetTextShadow(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    if (!info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGW("info[0] not is Object or Number");
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsNumber() && !tmpInfo->IsObject() && !tmpInfo->IsArray()) {
         return;
     }
-    int32_t shadowStyle = 0;
-    if (ParseJsInteger<int32_t>(info[0], shadowStyle)) {
-        auto style = static_cast<ShadowStyle>(shadowStyle);
-        Shadow shadow = Shadow::CreateShadow(style);
-        TextModel::GetInstance()->SetTextShadow(shadow);
+    if (!tmpInfo->IsArray()) {
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(info[0], shadow)) {
+            LOGI("Parse shadow object failed.");
+            return;
+        }
+        std::vector<Shadow> shadows { shadow };
+        TextModel::GetInstance()->SetTextShadow(shadows);
         return;
     }
-
-    auto jsObject = JSRef<JSObject>::Cast(info[0]);
-    Shadow shadow;
-    double radius = 0.0;
-    if (ParseJsDouble(jsObject->GetProperty("radius"), radius)) {
-        if (LessNotEqual(radius, 0.0)) {
-            radius = 0.0;
+    JSRef<JSArray> params = JSRef<JSArray>::Cast(tmpInfo);
+    auto shadowLength = params->Length();
+    std::vector<Shadow> shadows(shadowLength);
+    for (size_t i = 0; i < shadowLength; ++i) {
+        auto shadowJsVal = params->GetValueAt(i);
+        Shadow shadow;
+        if (!JSViewAbstract::ParseShadowProps(shadowJsVal, shadow)) {
+            LOGI("Parse shadow object failed.");
+            continue;
         }
-        shadow.SetBlurRadius(radius);
-        CalcDimension offsetX;
-        if (ParseJsDimensionVp(jsObject->GetProperty("offsetX"), offsetX)) {
-            shadow.SetOffsetX(offsetX.Value());
-        }
-        CalcDimension offsetY;
-        if (ParseJsDimensionVp(jsObject->GetProperty("offsetY"), offsetY)) {
-            shadow.SetOffsetY(offsetY.Value());
-        }
-        Color color;
-        if (ParseJsColor(jsObject->GetProperty("color"), color)) {
-            shadow.SetColor(color);
-        }
+        shadows[i] = shadow;
     }
-    TextModel::GetInstance()->SetTextShadow(shadow);
+    TextModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
@@ -239,7 +230,6 @@ void JSText::SetTextOverflow(const JSCallbackInfo& info)
         }
         auto overflow = overflowValue->ToNumber<int32_t>();
         if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
-            LOGI("Text: textOverflow(%{public}d) illegal value", overflow);
             break;
         }
         TextModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
@@ -353,6 +343,18 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
+    }
+    if (info[0]->IsString()) {
+        auto value = info[0]->ToString();
+        if (!value.empty() && value.back() == '%') {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipelineContext);
+            auto theme = pipelineContext->GetTheme<TextTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            CalcDimension defaultValue = theme->GetTextStyle().GetLetterSpacing();
+            TextModel::GetInstance()->SetLetterSpacing(defaultValue);
+            return;
+        }
     }
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {

@@ -23,12 +23,14 @@
 #include "napi/native_node_api.h"
 
 #include "base/log/log.h"
+#include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "bridge/common/utils/utils.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve.h"
 #include "core/animation/curve_animation.h"
+#include "base/thread/frame_trace_adapter.h"
 
 namespace OHOS::Ace::Napi {
 
@@ -255,6 +257,10 @@ static napi_value JSUpdate(napi_env env, napi_callback_info info)
 
 static napi_value JSPlay(napi_env env, napi_callback_info info)
 {
+    FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
+    if (ft != nullptr) {
+        ft->SetFrameTraceLimit();
+    }
     auto animator = GetAnimatorInResult(env, info);
     LOGI("JsAnimator: JSPlay, id:%{public}d", animator ? animator->GetId() : -1);
     if (!animator) {

@@ -778,8 +778,18 @@ void VideoPattern::UpdateControllerBar()
             CHECK_NULL_VOID(textLayoutProperty);
             std::string label = IntTimeToText(currentPos_);
             textLayoutProperty->UpdateContent(label);
+
+            auto durationNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(DURATION_POS));
+            CHECK_NULL_VOID(durationNode);
+            auto durationTextLayoutProperty = durationNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(durationTextLayoutProperty);
+            std::string durationText = IntTimeToText(duration_);
+            durationTextLayoutProperty->UpdateContent(durationText);
+
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             textNode->MarkModifyDone();
+            durationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            durationNode->MarkModifyDone();
             auto controllerLayoutProperty = controller->GetLayoutProperty<LinearLayoutProperty>();
             controllerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             controller->MarkModifyDone();

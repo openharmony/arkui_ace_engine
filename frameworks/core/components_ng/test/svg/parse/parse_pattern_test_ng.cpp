@@ -76,7 +76,7 @@ HWTEST_F(ParsePatternTestNg, ParseTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(patternDeclaration->GetViewBox().GetSize().Width(), VIEWBOX_WIDTH);
     EXPECT_FLOAT_EQ(patternDeclaration->GetViewBox().GetSize().Height(), VIEWBOX_HEIGHT);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
 
@@ -85,7 +85,7 @@ HWTEST_F(ParsePatternTestNg, ParseTest001, TestSize.Level1)
         corner = {0.0f, 0.0f};
     }
     svgDom->SetRadius(radius);
-    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::COVER, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(*svgDom->radius_, radius);
 }
 } // namespace OHOS::Ace::NG

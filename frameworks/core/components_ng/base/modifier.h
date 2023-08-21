@@ -76,10 +76,12 @@ public:
     explicit NormalProperty(const T& value) : value_(value) {}
     ~NormalProperty() override = default;
 
-    void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc)
+    void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc,
+        std::function<T()>&& getStageFunc = nullptr)
     {
-        getFunc_ = getFunc;
-        setFunc_ = setFunc;
+        getFunc_ = std::move(getFunc);
+        setFunc_ =  std::move(setFunc);
+        getStageFunc_ =  std::move(getStageFunc);
     }
 
     T Get()
@@ -100,6 +102,15 @@ public:
         }
     }
 
+    T GetStagingValue() const
+    {
+        if (getStageFunc_) {
+            return getStageFunc_();
+        } else {
+            return value_;
+        }
+    }
+
     void SetUpdateCallback(std::function<void(const T&)>&& callback)
     {
         updateCallback_ = std::move(callback);
@@ -114,6 +125,7 @@ private:
     T value_;
     std::function<T()> getFunc_;
     std::function<void(const T&)> setFunc_;
+    std::function<T()> getStageFunc_;
     std::function<void(const T&)> updateCallback_;
     ACE_DISALLOW_COPY_AND_MOVE(NormalProperty);
 };

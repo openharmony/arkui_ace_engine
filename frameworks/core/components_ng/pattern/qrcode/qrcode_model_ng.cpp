@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_OPACITY = 1.0f;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
+constexpr int32_t PLATFORM_VERSION_11 = 11;
 } // namespace
 
 void QRCodeModelNG::Create(const std::string& value)
@@ -40,7 +40,7 @@ void QRCodeModelNG::Create(const std::string& value)
     RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
     CHECK_NULL_VOID(qrCodeTheme);
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_11) {
         ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Color, qrCodeTheme->GetQrcodeColor());
         ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, qrCodeTheme->GetBackgroundColor());
         ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrCodeTheme->GetBackgroundColor());

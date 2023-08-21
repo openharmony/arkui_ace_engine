@@ -58,10 +58,10 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& image)
     }
 }
 
-void ImageLoadingContext::FailCallback(const std::string& /* errorMsg */)
+void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     if (notifiers_.onLoadFail_) {
-        notifiers_.onLoadFail_(src_);
+        notifiers_.onLoadFail_(src_, errorMsg);
     }
 }
 

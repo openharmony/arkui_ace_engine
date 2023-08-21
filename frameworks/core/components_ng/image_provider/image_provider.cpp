@@ -87,10 +87,10 @@ RefPtr<ImageObject> ImageProvider::QueryThumbnailCache(const ImageSourceInfo& sr
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
-    auto data = DynamicCast<PixmapCachedData>(cache->GetCacheImageData(src.GetKey()));
+    auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(src.GetKey()));
     if (data) {
         LOGD("thumbnail cache found %{public}s", src.GetSrc().c_str());
-        return PixelMapImageObject::Create(src, MakeRefPtr<ImageData>(data->pixmap_));
+        return PixelMapImageObject::Create(src, data);
     }
     return nullptr;
 }
@@ -160,17 +160,21 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
-        std::string errorMessage("Fail to create image loader, Image source type not supported");
+        std::string errorMessage("Failed to create image loader, Image source type not supported");
         FailCallback(src.GetKey(), errorMessage, sync);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
+    if (!data) {
+        FailCallback(src.GetKey(), "Failed to load image data", sync);
+        return;
+    }
 
     // build ImageObject
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(src, data);
     if (!imageObj) {
-        FailCallback(src.GetKey(), "Fail to build image object", sync);
+        FailCallback(src.GetKey(), "Failed to build image object", sync);
         return;
     }
     CacheImageObject(imageObj);
@@ -281,12 +285,10 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     }
 
 #ifndef USE_ROSEN_DRAWING
-    // standard skia image object
     auto skiaImageData = DynamicCast<SkiaImageData>(data);
     CHECK_NULL_RETURN(skiaImageData, nullptr);
     auto [size, frameCount] = skiaImageData->Parse();
 #else
-    // standard drawing image object
     auto rosenImageData = DynamicCast<DrawingImageData>(data);
     CHECK_NULL_RETURN(rosenImageData, nullptr);
     auto [size, frameCount] = rosenImageData->Parse();
@@ -338,7 +340,7 @@ void ImageProvider::MakeCanvasImageHelper(
     if (image) {
         SuccessCallback(image, key, sync);
     } else {
-        FailCallback(key, "Make CanvasImage failed.");
+        FailCallback(key, "Failed to decode image");
     }
 }
 } // namespace OHOS::Ace::NG

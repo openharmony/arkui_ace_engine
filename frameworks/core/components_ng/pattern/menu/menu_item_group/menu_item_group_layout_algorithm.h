@@ -62,7 +62,7 @@ private:
     bool needHeaderPadding_ = false;
     bool needFooterPadding_ = false;
 
-    Dimension groupDividerPadding_;
+    float groupDividerPadding_ = 0.0f;
 
     ItemPositionMap itemPosition_;
 

@@ -476,7 +476,7 @@ private:
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
-        const DragDropInfo& dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+        const DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

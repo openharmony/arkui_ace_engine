@@ -145,8 +145,8 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     if (inputTime <= 0) {
         return;
     }
-    PerfActionType inputType = ERROR_TYPE;
-    PerfSourceType sourceType = UNKNOWN_TYPE;
+    PerfActionType inputType = UNKNOWN_ACTION;
+    PerfSourceType sourceType = UNKNOWN_SOURCE;
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         sourceType = PERF_MOUSE_EVENT;
     } else if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
@@ -170,9 +170,35 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
 }
 
+void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    CHECK_NULL_VOID(keyEvent);
+    int32_t keyCode = keyEvent->GetKeyCode();
+    if (keyCode != MMI::KeyEvent::KEYCODE_VOLUME_DOWN
+        && keyCode != MMI::KeyEvent::KEYCODE_VOLUME_UP
+        && keyCode != MMI::KeyEvent::KEYCODE_POWER) {
+        return;
+    }
+    PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
+    if (pMonitor == nullptr) {
+        return;
+    }
+    PerfActionType inputType = UNKNOWN_ACTION;
+    int32_t action = keyEvent->GetKeyAction();
+    if (action == MMI::KeyEvent::KEY_ACTION_UP) {
+        inputType = LAST_UP;
+    } else if (action == MMI::KeyEvent::KEY_ACTION_DOWN) {
+        inputType = LAST_DOWN;
+    }
+    PerfSourceType sourceType = PERF_KEY_EVENT;
+    int64_t inputTime = (keyEvent->GetKeyItem())->GetDownTime() * US_TO_MS;
+    pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
+}
+
 bool AceViewOhos::DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     CHECK_NULL_RETURN(view, false);
+    DispatchEventToPerf(keyEvent);
     return view->ProcessKeyEvent(keyEvent);
 }
 
