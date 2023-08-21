@@ -2537,7 +2537,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
 bool SwiperPattern::NeedAutoPlay() const
 {
     bool reachEnd = GetLoopIndex(currentIndex_) >= TotalCount() - 1 && !IsLoop();
-    return IsAutoPlay() && !reachEnd && isVisible_;
+    return IsAutoPlay() && !reachEnd && isVisible_ && !isIndicatorLongPress_;
 }
 
 void SwiperPattern::TriggerAnimationEndOnSwipeToLeft()
@@ -3054,10 +3054,5 @@ int32_t SwiperPattern::TotalDisPlayCount() const
         }
     }
     return displayCount;
-}
-
-void SwiperPattern::SwipeToWithoutAnimationAutoPlay()
-{
-    PostTranslateTask(GetInterval());
 }
 } // namespace OHOS::Ace::NG
