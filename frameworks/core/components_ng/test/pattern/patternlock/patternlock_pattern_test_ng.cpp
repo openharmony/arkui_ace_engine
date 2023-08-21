@@ -44,7 +44,6 @@ const Color SELECTED_COLOR = Color::BLUE;
 const Color ACTIVE_COLOR = Color::RED;
 const Color PATH_COLOR = Color::GRAY;
 const Color HOVER_COLOR = Color::GRAY;
-const Color PRESS_COLOR = Color::GRAY;
 constexpr Dimension PATH_STROKE_WIDTH = 34.0_vp;
 constexpr Dimension HOTSPOT_CIRCLE_RADIUS = 48.0_vp;
 constexpr float SIDE_LENGH = 36.0f;
@@ -1220,10 +1219,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest003, TestSize.Level1)
     patternlockModifier3->SetChoosePoint(vecCell3);
     patternlockModifier3->SetPathStrokeWidth(Dimension(10.0).ConvertToPx());
     EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(vecCell3.size() - 2);
+    EXPECT_CALL(canvas, DrawPath(_)).Times(1);
     EXPECT_CALL(canvas, DetachPen()).WillOnce(ReturnRef(canvas));
     EXPECT_CALL(canvas, Save()).Times(1);
     EXPECT_CALL(canvas, Restore()).Times(1);
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(1);
     patternlockModifier3->PaintLockLine(canvas, offset);
     /**
      * @tc.case: case4. isMoveEventValid_ is true.
@@ -1236,10 +1236,11 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest003, TestSize.Level1)
     patternlockModifier4->SetIsMoveEventValid(true);
     patternlockModifier4->sideLength_->Set(SIDE_LENGTH.Value());
     EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(vecCell4.size());
+    EXPECT_CALL(canvas, DrawPath(_)).Times(1);
     EXPECT_CALL(canvas, DetachPen()).WillOnce(ReturnRef(canvas));
     EXPECT_CALL(canvas, Save()).Times(1);
     EXPECT_CALL(canvas, Restore()).Times(1);
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(1);
     patternlockModifier4->PaintLockLine(canvas, offset);
 }
 
@@ -1337,9 +1338,9 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest005, TestSize.Level1)
     EXPECT_NE(patternlockModifier->hoverIndex_->Get(), GetPointIndex(1, 2));
     EXPECT_TRUE(patternlockModifier->challengeResult_.has_value());
     EXPECT_TRUE(patternlockModifier->CheckChoosePointIsLastIndex(1, 2, 1));
-    EXPECT_CALL(canvas, AttachBrush(_)).Times(3).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
-    EXPECT_CALL(canvas, DetachBrush()).Times(3).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachBrush(_)).Times(2).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(2);
+    EXPECT_CALL(canvas, DetachBrush()).Times(2).WillRepeatedly(ReturnRef(canvas));
     patternlockModifier->PaintLockCircle(canvas, offset, 1, 2);
 }
 
@@ -1437,7 +1438,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest008, TestSize.Level1)
 
 /**
  * @tc.name: PatternLockModifierTest009
- * @tc.desc: Test PaintCanceledLineTail and PaintConnectedLineTail function.
+ * @tc.desc: Test PaintLockLine function.
  * @tc.type: FUNC
  */
 HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest009, TestSize.Level1)
@@ -1449,34 +1450,39 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest009, TestSize.Level1)
     std::vector<PatternLockCell> vecCell = { PatternLockCell(0, 0) };
     patternlockModifier->SetChoosePoint(vecCell);
     patternlockModifier->sideLength_->Set(SIDE_LENGTH.Value());
+    patternlockModifier->needCanceledLine_ = true;
+    patternlockModifier->pathStrokeWidth_->Set(PATH_STROKE_WIDTH.Value());
     /**
-     * @tc.steps: step2. call PaintCanceledLineTail func
+     * @tc.steps: step2. Call PaintLockLine func
      * @tc.expected:Related function is called.
      */
-    patternlockModifier->needCanceledLine_ = true;
+
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(1);
-    patternlockModifier->PaintCanceledLineTail(canvas, patternlockModifier->offset_->Get());
+    EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(1);
+    EXPECT_CALL(canvas, DetachPen()).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Save()).Times(1);
+    EXPECT_CALL(canvas, Restore()).Times(1);
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(1);
+    patternlockModifier->PaintLockLine(canvas, patternlockModifier->offset_->Get());
 
     /**
-     * @tc.steps: step3. call PaintConnectedLineTail func
-     * @tc.expected:Related function is not called.
-     */
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(0);
-    patternlockModifier->PaintConnectedLineTail(canvas, patternlockModifier->offset_->Get());
-
-    /**
-     * @tc.steps: step4. add one choosePoint then call PaintConnectedLineTail func
+     * @tc.steps: step3. Add one choosePoint then call PaintLockLine func
      * @tc.expected:Related function is called.
      */
     patternlockModifier->choosePoint_.emplace_back(PatternLockCell(1, 1));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(1);
-    patternlockModifier->PaintConnectedLineTail(canvas, patternlockModifier->offset_->Get());
+    EXPECT_CALL(canvas, AttachPen(_)).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(1);
+    EXPECT_CALL(canvas, DetachPen()).WillOnce(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Save()).Times(1);
+    EXPECT_CALL(canvas, Restore()).Times(1);
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(1);
+    patternlockModifier->PaintLockLine(canvas, patternlockModifier->offset_->Get());
 }
 
 /**
  * @tc.name: PatternLockModifierTest010
- * @tc.desc: Test SetHoverColor, SetPressColor, SetSelectColor and SetChallengeResult function.
+ * @tc.desc: Test SetHoverColor, SetSelectColor and SetChallengeResult function.
  * @tc.type: FUNC
  */
 HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest010, TestSize.Level1)
@@ -1493,21 +1499,14 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockModifierTest010, TestSize.Level1)
     patternlockModifier->SetHoverColor(HOVER_COLOR);
     EXPECT_EQ(patternlockModifier->hoverColor_->Get(), HOVER_COLOR);
     /**
-     * @tc.steps: step3. call SetPressColor func
-     */
-    patternlockModifier->SetPressColor(PRESS_COLOR);
-    EXPECT_EQ(patternlockModifier->pressColor_->Get(), PRESS_COLOR);
-    patternlockModifier->SetPressColor(PRESS_COLOR);
-    EXPECT_EQ(patternlockModifier->pressColor_->Get(), PRESS_COLOR);
-    /**
-     * @tc.steps: step4. call SetSelectColor func
+     * @tc.steps: step3. call SetSelectColor func
      */
     patternlockModifier->SetSelectColor(SELECTED_COLOR);
     EXPECT_EQ(patternlockModifier->selectedColor_->Get(), SELECTED_COLOR);
     patternlockModifier->SetSelectColor(SELECTED_COLOR);
     EXPECT_EQ(patternlockModifier->selectedColor_->Get(), SELECTED_COLOR);
     /**
-     * @tc.steps: step5. call SetChallengeResult func
+     * @tc.steps: step4. call SetChallengeResult func
      */
     std::optional<NG::PatternLockChallengeResult> ngChallengeResult = NG::PatternLockChallengeResult::WRONG;
     patternlockModifier->SetChallengeResult(ngChallengeResult);
