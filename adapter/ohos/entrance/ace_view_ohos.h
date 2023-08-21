@@ -150,11 +150,11 @@ private:
     void NotifySurfaceChanged(int width, int height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr)
     {
+        width_ = width;
+        height_ = height;
         if (viewChangeCallback_) {
             viewChangeCallback_(width, height, type, rsTransaction);
         }
-        width_ = width;
-        height_ = height;
     }
 
     void NotifySurfacePositionChanged(int32_t posX, int32_t posY)
