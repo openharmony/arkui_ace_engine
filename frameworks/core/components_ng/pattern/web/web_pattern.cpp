@@ -1011,11 +1011,9 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
 
     if (GreatOrEqual(drawSize.Width(), Infinity<double>())) {
         drawSize.SetWidth(DEFAULT_WEB_WIDTH);
-        LOGE("SetWidth to 100");
     }
     if (GreatOrEqual(drawSize.Height(), Infinity<double>())) {
         drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
-        LOGE("SetHeight to 80");
     }
 
     drawSize_ = drawSize;
