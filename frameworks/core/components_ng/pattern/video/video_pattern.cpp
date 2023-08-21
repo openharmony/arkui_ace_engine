@@ -311,7 +311,16 @@ void VideoPattern::RegisterMediaPlayerEvent()
         });
     };
 
-    mediaPlayer_->RegisterMediaPlayerEvent(positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent);
+    auto&& startRenderFrameEvent = [videoPattern, uiTaskExecutor]() {
+        uiTaskExecutor.PostSyncTask([&videoPattern] {
+            auto video = videoPattern.Upgrade();
+            CHECK_NULL_VOID_NOLOG(video);
+            video->OnStartRenderFrameCb();
+        });
+    };
+
+    mediaPlayer_->RegisterMediaPlayerEvent(
+        positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
 }
 
 void VideoPattern::PrintPlayerStatus(PlaybackStatus status)
@@ -450,6 +459,19 @@ void VideoPattern::OnResolutionChange() const
     videoLayoutProperty->UpdateVideoSize(videoSize);
     LOGI("OnResolutionChange video size: %{public}s", videoSize.ToString().c_str());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void VideoPattern::OnStartRenderFrameCb() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto video = AceType::DynamicCast<VideoNode>(host);
+    CHECK_NULL_VOID(video);
+    auto image = AceType::DynamicCast<FrameNode>(video->GetPreviewImage());
+    CHECK_NULL_VOID(image);
+    auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    image->MarkModifyDone();
 }
 
 void VideoPattern::OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent)
@@ -1159,16 +1181,6 @@ void VideoPattern::Start()
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto video = AceType::DynamicCast<VideoNode>(host);
-    CHECK_NULL_VOID(video);
-    auto image = AceType::DynamicCast<FrameNode>(video->GetPreviewImage());
-    CHECK_NULL_VOID(image);
-    auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
-    posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    image->MarkModifyDone();
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {

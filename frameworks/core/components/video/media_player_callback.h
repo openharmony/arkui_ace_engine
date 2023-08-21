@@ -124,6 +124,11 @@ public:
                 break;
             case OHOS::Media::INFO_TYPE_MESSAGE:
                 LOGD("OnMessage callback type: %{public}d", extra);
+                if (extra == Media::PlayerMessageType::PLAYER_INFO_VIDEO_RENDERING_START) {
+                    if (startRenderFrameEvent_) {
+                        startRenderFrameEvent_();
+                    }
+                }
                 break;
             default:
                 break;
@@ -176,12 +181,18 @@ public:
         resolutionChangeEvent_ = std::move(resolutionChangeEvent);
     }
 
+    void SetStartRenderFrameEvent(CommonEvent&& startRenderFrameEvent)
+    {
+        startRenderFrameEvent_ = std::move(startRenderFrameEvent);
+    }
+
 private:
     PositionUpdatedEvent positionUpdatedEvent_;
     CommonEvent endOfStreamEvent_;
     StateChangedEvent stateChangedEvent_;
     CommonEvent errorEvent_;
     CommonEvent resolutionChangeEvent_;
+    CommonEvent startRenderFrameEvent_;
     int32_t instanceId_ = -1;
 };
 
