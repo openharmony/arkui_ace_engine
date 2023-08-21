@@ -879,26 +879,28 @@ void DialogPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
-    CHECK_NULL_VOID(col);
-    auto colContext = col->GetContext();
-    CHECK_NULL_VOID(colContext);
-    auto colRenderContext = col->GetRenderContext();
-    CHECK_NULL_VOID(colRenderContext);
-    colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
-    CHECK_NULL_VOID(menuNode_);
+    if (!GetDialogProperties().customStyle) {
+        auto context = host->GetContext();
+        CHECK_NULL_VOID_NOLOG(context);
+        auto dialogTheme = context->GetTheme<DialogTheme>();
+        CHECK_NULL_VOID_NOLOG(dialogTheme);
+        auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
+        CHECK_NULL_VOID_NOLOG(col);
+        auto colContext = col->GetContext();
+        CHECK_NULL_VOID_NOLOG(colContext);
+        auto colRenderContext = col->GetRenderContext();
+        CHECK_NULL_VOID_NOLOG(colRenderContext);
+        colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+    }
+    CHECK_NULL_VOID_NOLOG(menuNode_);
     for (const auto& buttonNode : menuNode_->GetChildren()) {
         if (buttonNode->GetTag() != V2::BUTTON_ETS_TAG) {
             continue;
         }
         auto buttonFrameNode = DynamicCast<FrameNode>(buttonNode);
-        CHECK_NULL_VOID(buttonFrameNode);
+        CHECK_NULL_VOID_NOLOG(buttonFrameNode);
         auto pattern = buttonFrameNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID_NOLOG(pattern);
         pattern->SetSkipColorConfigurationUpdate();
     }
     OnModifyDone();
