@@ -710,6 +710,18 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
                                                                        indicatorlayoutProperty,
                                                                        indicatorWidth, indicatorHeight);
 
+    if (swiperLayoutProperty->GetDirectionValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
+        auto top = indicatorlayoutProperty->GetTop();
+        auto bottom = indicatorlayoutProperty->GetBottom();
+        if ((!top.has_value() || NearZero(top.value().Value())) &&
+            (!bottom.has_value() || NearZero(bottom.value().Value()))) {
+            auto dightPadding =
+                std::abs(swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx() - indicatorHeight) / 2;
+            auto dightVerPadding = swiperIndicatorTheme->GetIndicatorDigitVerticalPadding().ConvertToPx();
+            currentOffset.SetY(currentOffset.GetY() - dightVerPadding + dightPadding);
+        }
+    }
+
     indicatorGeometryNode->SetMarginFrameOffset(currentOffset);
 }
 
