@@ -122,11 +122,17 @@ bool PatternLockPattern::CheckInHotSpot(const OffsetF& offset, int32_t x, int32_
     if (patternLockPaintProperty->HasCircleRadius()) {
         circleRadius_ = patternLockPaintProperty->GetCircleRadiusValue();
     }
-    auto handleCircleRadius = static_cast<float>(circleRadius_.ConvertToPx());
+    auto backgroundRadiusScale = patternLockTheme->GetBackgroundRadiusScale();
+    if (NearZero(backgroundRadiusScale)) {
+        return false;
+    }
+    auto activeCircleRadiusScale = patternLockTheme->GetActiveCircleRadiusScale();
+    auto handleCircleRadius =
+        std::min(static_cast<float>(circleRadius_.ConvertToPx()), sideLength / backgroundRadiusScale / RADIUS_COUNT);
     auto hotSpotCircleRadius = patternLockTheme->GetHotSpotCircleRadius();
-    handleCircleRadius = std::max(
-        handleCircleRadius, std::min(static_cast<float>(hotSpotCircleRadius.ConvertToPx()) / RADIUS_TO_DIAMETER,
-                                     sideLength / RADIUS_COUNT));
+    handleCircleRadius = std::max(handleCircleRadius * activeCircleRadiusScale,
+        std::min(
+            static_cast<float>(hotSpotCircleRadius.ConvertToPx()) / RADIUS_TO_DIAMETER, sideLength / RADIUS_COUNT));
     const int32_t scale = RADIUS_TO_DIAMETER;
     float offsetX = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * x - 1);
     float offsetY = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * y - 1);

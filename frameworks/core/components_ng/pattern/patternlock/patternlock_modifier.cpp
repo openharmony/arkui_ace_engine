@@ -59,6 +59,7 @@ constexpr float CONNECTED_LINE_SPRING_DAMPING = 0.88f;
 constexpr float CANCELED_LINE_SPRING_RESPONSE = 0.22f;
 constexpr float CANCELED_LINE_SPRING_DAMPING = 0.88f;
 constexpr int32_t ANIMATABLE_POINT_COUNT = 2;
+constexpr float DIAMETER_TO_RADIUS = 0.5f;
 } // namespace
 
 PatternLockCell::PatternLockCell(int32_t column, int32_t row)
@@ -234,7 +235,6 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
     auto activeColor = activeColor_->Get();
     auto regularColor = regularColor_->Get();
     auto selectedColor = selectedColor_->Get();
-    auto sideLength = sideLength_->Get();
     auto circleRadius = circleRadius_->Get();
     auto pointAnimateColor = pointAnimateColor_->Get();
     auto pathColor = pathColor_->Get();
@@ -242,9 +242,6 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
     OffsetF cellcenter = GetCircleCenterByXY(offset, x, y);
     float offsetX = cellcenter.GetX();
     float offsetY = cellcenter.GetY();
-    const int32_t radiusCount = RADIUS_TO_DIAMETER * PATTERN_LOCK_COL_COUNT;
-    float handleCircleRadius = std::min(circleRadius, sideLength / scaleActiveCircleRadius_ / radiusCount);
-    circleRadius = std::max(handleCircleRadius, 0.0f);
 
     auto index = (x - 1) * PATTERN_LOCK_COL_COUNT + y - 1;
     if (CheckChoosePoint(x, y)) {
@@ -357,6 +354,13 @@ void PatternLockModifier::SetSideLength(float sideLength)
 void PatternLockModifier::SetCircleRadius(float circleRadius)
 {
     CHECK_NULL_VOID(circleRadius_);
+    auto sideLength = sideLength_->Get();
+    if (NearZero(scaleBackgroundCircleRadius_)) {
+        return;
+    }
+    float handleCircleRadius =
+        std::min(circleRadius, sideLength / scaleBackgroundCircleRadius_ / PATTERN_LOCK_COL_COUNT * DIAMETER_TO_RADIUS);
+    circleRadius = std::max(handleCircleRadius, 0.0f);
     if (!NearEqual(circleRadius_->Get(), circleRadius)) {
         circleRadius_->Set(circleRadius);
         for (const auto& cell : choosePoint_) {
