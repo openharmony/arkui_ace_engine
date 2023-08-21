@@ -900,7 +900,7 @@ void RichEditorPattern::HandleBlurEvent()
 {
     StopTwinkling();
     CloseKeyboard(true);
-    if (textSelector_.IsValid() && !isBindSelectionMenu_) {
+    if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
     }
@@ -2229,12 +2229,23 @@ RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end, 
     return selection;
 }
 
-void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
+void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
 {
-    if (isBindSelectionMenu_) {
+    if (!selectionMenuParams_) {
         return;
     }
+    bool needCopy = (selectInfo.isUsingMouse && selectionMenuParams_->responseType == ResponseType::RIGHT_CLICK) ||
+                    (!selectInfo.isUsingMouse && selectionMenuParams_->responseType == ResponseType::LONG_PRESS);
+    if (!needCopy) {
+        return;
+    }
+    selectInfo.menuInfo.menuBuilder = selectionMenuParams_->buildFunc;
+    selectInfo.menuCallback.onAppear = selectionMenuParams_->onAppear;
+    selectInfo.menuCallback.onDisappear = selectionMenuParams_->onDisappear;
+}
 
+void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
+{
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle](bool hasData) {
@@ -2289,6 +2300,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         };
         selectInfo.callerFrameNode = host;
 
+        pattern->CopySelectionMenuParams(selectInfo);
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
     };
     clipboard_->HasData(hasDataCallback);
@@ -2589,10 +2601,10 @@ void RichEditorPattern::OnAreaChangedInner()
     }
 }
 
-void RichEditorPattern::CloseSelectionMenu() {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    SubwindowManager::GetInstance()->HideMenuNG(host->GetId());
+void RichEditorPattern::CloseSelectionMenu()
+{
+    CloseSelectOverlay();
+    ResetSelection();
 }
 
 void RichEditorPattern::CloseSelectOverlay()
