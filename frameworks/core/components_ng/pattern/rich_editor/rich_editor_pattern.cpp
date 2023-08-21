@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -900,7 +901,7 @@ void RichEditorPattern::HandleBlurEvent()
 {
     StopTwinkling();
     CloseKeyboard(true);
-    if (textSelector_.IsValid() && !isBindSelectionMenu_) {
+    if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
     }
@@ -2226,10 +2227,6 @@ RichEditorSelection RichEditorPattern::GetSpansInfo(int32_t start, int32_t end, 
 
 void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
 {
-    if (isBindSelectionMenu_) {
-        return;
-    }
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle](bool hasData) {
@@ -2238,10 +2235,22 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         if (!pattern->IsUsingMouse()) {
             selectInfo.firstHandle.paintRect = firstHandle;
             selectInfo.secondHandle.paintRect = secondHandle;
+            if (pattern->selectionMenuParams_ != nullptr &&
+                pattern->selectionMenuParams_->responseType == ResponseType::LONG_PRESS) {
+                selectInfo.menuInfo.menuBuilder = pattern->selectionMenuParams_->buildFunc;
+                selectInfo.menuCallback.onAppear = pattern->selectionMenuParams_->onAppear;
+                selectInfo.menuCallback.onDisappear = pattern->selectionMenuParams_->onDisappear;
+            }
         } else {
             selectInfo.isUsingMouse = true;
             selectInfo.rightClickOffset = pattern->GetRightClickOffset();
             pattern->ResetIsMousePressed();
+            if (pattern->selectionMenuParams_ != nullptr &&
+                pattern->selectionMenuParams_->responseType == ResponseType::RIGHT_CLICK) {
+                selectInfo.menuInfo.menuBuilder = pattern->selectionMenuParams_->buildFunc;
+                selectInfo.menuCallback.onAppear = pattern->selectionMenuParams_->onAppear;
+                selectInfo.menuCallback.onDisappear = pattern->selectionMenuParams_->onDisappear;
+            }
         }
         selectInfo.onHandleMove = [weak](const RectF& handleRect, bool isFirst) {
             auto pattern = weak.Upgrade();
@@ -2584,10 +2593,9 @@ void RichEditorPattern::OnAreaChangedInner()
     }
 }
 
-void RichEditorPattern::CloseSelectionMenu() {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    SubwindowManager::GetInstance()->HideMenuNG(host->GetId());
+void RichEditorPattern::CloseSelectionMenu()
+{
+    CloseSelectOverlay();
 }
 
 void RichEditorPattern::CloseSelectOverlay()
