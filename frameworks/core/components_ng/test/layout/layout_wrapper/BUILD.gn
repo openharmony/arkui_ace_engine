@@ -60,6 +60,8 @@ ohos_unittest("layout_wrapper_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/list/list_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
