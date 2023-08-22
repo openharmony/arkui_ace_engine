@@ -383,13 +383,22 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     int32_t endIndex = 0;
     float startPos = 0.0f;
     float endPos = 0.0f;
-    float startItemHeight = 0.0f;
     if (!itemPosition_.empty()) {
         startPos = itemPosition_.begin()->second.startPos;
         endPos = itemPosition_.rbegin()->second.endPos;
-        startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
         startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
+        if (IsScrollSnapAlignCenter(layoutWrapper) && overScrollFeature_) {
+            float itemHeight = 0.0f;
+            if (startIndex == 0) {
+                itemHeight = itemPosition_.begin()->second.endPos - startPos;
+                contentStartOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+            }
+            if (endIndex == totalItemCount_ - 1) {
+                itemHeight = endPos - itemPosition_.rbegin()->second.startPos;
+                contentEndOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+            }
+        }
         OffScreenLayoutDirection();
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
@@ -522,7 +531,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
 {
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
-    float endMainPos = overScrollFeature_ ? std::max(startPos + contentMainSize_, endMainPos_) : endMainPos_;
+    float endMainPos = overScrollFeature_ ?
+        std::max(startPos + contentMainSize_ - contentStartOffset_, endMainPos_) : endMainPos_;
     if (forwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
         endMainPos = Infinity<float>();
     }
@@ -607,7 +617,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
 {
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
-    float startMainPos = overScrollFeature_ ? std::min(endPos - contentMainSize_, startMainPos_) : startMainPos_;
+    float startMainPos = overScrollFeature_ ?
+        std::min(endPos - contentMainSize_ + contentEndOffset_, startMainPos_) : startMainPos_;
     if (backwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
         startMainPos = -Infinity<float>();
     }
@@ -643,8 +654,10 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
                 contentMainSize_ = std::min(contentMainSize_, itemTotalSize);
             }
         }
-        endMainPos_ = currentStartPos + contentMainSize_;
-        startMainPos_ = currentStartPos;
+        if (!IsScrollSnapAlignCenter(layoutWrapper) || jumpIndex_.has_value()) {
+            endMainPos_ = currentStartPos + contentMainSize_;
+            startMainPos_ = currentStartPos;
+        }
     }
 
     if (overScrollFeature_) {
