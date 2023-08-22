@@ -201,6 +201,16 @@ public:
         return missionId_;
     }
 
+    void SetDelayedUpdateOnInactive(bool isDelayedUpdateOnInactive)
+    {
+        delayedUpdateOnInactive_ = isDelayedUpdateOnInactive;
+    }
+
+    bool IsDelayedUpdateOnInactive() const
+    {
+        return delayedUpdateOnInactive_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -224,6 +234,7 @@ protected:
 
     int userId_ = 0;
     bool isAccessibilityEnabled_ = false;
+    bool delayedUpdateOnInactive_ = false;
 
     int32_t apiVersion_ = 0;
     std::string versionName_;
