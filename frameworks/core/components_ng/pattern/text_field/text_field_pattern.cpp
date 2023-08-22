@@ -80,8 +80,6 @@ constexpr Dimension INLINE_BORDER_WIDTH = 2.0_vp;
 constexpr Dimension UNDERLINE_NORMAL_HEIGHT = 48.0_vp;
 constexpr Dimension UNDERLINE_NORMAL_PADDING = 12.0_vp;
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
-constexpr float HOVER_ANIMATION_OPACITY = 0.05f;
-constexpr float PRESS_ANIMATION_OPACITY = 0.1f;
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
@@ -463,10 +461,6 @@ float TextFieldPattern::GetIconRightOffset()
 void TextFieldPattern::CreateSingleHandle(bool animation, bool isMenuShow)
 {
     isSingleHandle_ = true;
-    auto renderContext = GetHost()->GetRenderContext();
-    if (renderContext) {
-        AnimatePressAndHover(renderContext, 0.0f);
-    }
     RectF secondHandle;
     auto secondHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition, isTouchAtLeftOffset_);
     OffsetF secondHandleOffset(secondHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX(),
@@ -1421,7 +1415,6 @@ void TextFieldPattern::HandleBlurEvent()
     selectionMode_ = SelectionMode::NONE;
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
-    ResetBackgroundColor();
     CloseSelectOverlay(true);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -1803,7 +1796,6 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
             auto radius = textFieldTheme->GetBorderRadiusSize();
             renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
         }
-        AnimatePressAndHover(renderContext, PRESS_ANIMATION_OPACITY);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -1817,9 +1809,7 @@ void TextFieldPattern::HandleTouchUp()
     }
     if (enableTouchAndHoverEffect_ && !HasStateStyle(UI_STATE_PRESSED)) {
         auto renderContext = GetHost()->GetRenderContext();
-        if (isOnHover_) {
-            AnimatePressAndHover(renderContext, HOVER_ANIMATION_OPACITY);
-        } else {
+        if (!isOnHover_) {
             auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             if (layoutProperty->GetShowUnderlineValue(false) &&
@@ -1835,29 +1825,8 @@ void TextFieldPattern::HandleTouchUp()
                 auto radius = textFieldTheme->GetBorderRadiusSize();
                 renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
             }
-            AnimatePressAndHover(renderContext, 0.0f);
         }
     }
-}
-
-void TextFieldPattern::ResetBackgroundColor()
-{
-    auto renderContext = GetHost()->GetRenderContext();
-    AnimatePressAndHover(renderContext, 0.0f);
-}
-
-void TextFieldPattern::AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange)
-{
-    AnimationOption option = AnimationOption();
-    if (isHoverChange) {
-        option.SetDuration(HOVER_DURATION);
-        option.SetCurve(Curves::FRICTION);
-    } else {
-        option.SetDuration(PRESS_DURATION);
-        option.SetCurve(Curves::SHARP);
-    }
-    Color endBlendColor = Color::FromRGBO(0, 0, 0, endOpacity);
-    AnimationUtils::Animate(option, [renderContext, endBlendColor]() { renderContext->BlendBgColor(endBlendColor); });
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -2565,10 +2534,6 @@ void TextFieldPattern::ProcessOverlay(bool animation)
         CreateSingleHandle(animation);
         return;
     }
-    auto renderContext = GetHost()->GetRenderContext();
-    if (renderContext) {
-        AnimatePressAndHover(renderContext, 0.0f);
-    }
     selectionMode_ = SelectionMode::SELECT;
     if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         // When the content length is 1, you need to use the TextBox and pressing coordinates to determine whether it is
@@ -3050,7 +3015,6 @@ void TextFieldPattern::OnHover(bool isHover)
                 auto radius = textFieldTheme->GetBorderRadiusSize();
                 renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
             }
-            AnimatePressAndHover(renderContext, HOVER_ANIMATION_OPACITY, true);
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
         }
@@ -3065,7 +3029,6 @@ void TextFieldPattern::OnHover(bool isHover)
                 auto radius = textFieldTheme->GetBorderRadiusSize();
                 renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
             }
-            AnimatePressAndHover(renderContext, 0.0f, true);
         }
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
