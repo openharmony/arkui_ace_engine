@@ -398,14 +398,13 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool indexChanged = (gridLayoutInfo.startIndex_ != gridLayoutInfo_.startIndex_) ||
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
-    float currentOffset = gridLayoutInfo_.currentOffset_;
-    bool reachEnd = gridLayoutInfo_.reachEnd_;
-    bool reachStart = gridLayoutInfo_.reachStart_;
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     currentHeight_ = EstimateHeight();
-    ProcessEvent(indexChanged, currentHeight_ - prevHeight_, currentOffset, offsetEnd, reachEnd, reachStart);
-    prevFinalOffset_ = currentHeight_ - prevHeight_;
+    if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
+        endHeight_ = currentHeight_;
+    }
+    ProcessEvent(indexChanged, currentHeight_ - prevHeight_);
     prevHeight_ = currentHeight_;
     SetScrollSource(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
@@ -444,8 +443,7 @@ void GridPattern::CheckScrollable()
     }
 }
 
-void GridPattern::ProcessEvent(
-    bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd, bool reachEnd, bool reachStart)
+void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -492,86 +490,28 @@ void GridPattern::ProcessEvent(
 
     auto onReachStart = gridEventHub->GetOnReachStart();
     if (onReachStart && gridLayoutInfo_.startIndex_ == 0) {
-        if ((scrollSource == SCROLL_FROM_UPDATE || scrollSource == SCROLL_FROM_ANIMATION_SPRING) &&
-            gridLayoutInfo_.reachStart_ && !reachStart &&
-            (!NearZero(gridLayoutInfo_.currentOffset_) || Negative(finalOffset))) {
+        if (!initialIndex_) {
             onReachStart();
             initialIndex_ = true;
         }
-        if (scrollSource == SCROLL_FROM_ANIMATION &&
-            ((gridLayoutInfo_.reachStart_ && !reachStart) ||
-                (NearZero(gridLayoutInfo_.currentOffset_) && NearZero(currentOffset) &&
-                    Negative(gridLayoutInfo_.prevOffset_)))) {
-            onReachStart();
-            initialIndex_ = true;
+
+        if (!NearZero(finalOffset)) {
+            bool scrollUpToStart = GreatOrEqual(prevHeight_, 0.0) && LessOrEqual(currentHeight_, 0.0);
+            bool scrollDownToStart = LessNotEqual(prevHeight_, 0.0) && GreatOrEqual(currentHeight_, 0.0);
+            if (scrollUpToStart || scrollDownToStart) {
+                onReachStart();
+            }
         }
-        if (scrollSource == SCROLL_FROM_UPDATE && NearZero(gridLayoutInfo_.currentOffset_) && NearZero(currentOffset) &&
-            Negative(gridLayoutInfo_.prevOffset_)) {
-            onReachStart();
-            initialIndex_ = true;
-        }
-        if (scrollSource == SCROLL_FROM_AXIS && !gridLayoutInfo_.reachStart_ && !reachStart &&
-            NearZero(gridLayoutInfo_.currentOffset_) && Negative(finalOffset)) {
-            onReachStart();
-            initialIndex_ = true;
-        }
-        if (scrollSource == SCROLL_FROM_ANIMATION_SPRING && NearZero(gridLayoutInfo_.currentOffset_)) {
-            onReachStart();
-            initialIndex_ = true;
-        }
-        if (scrollSource == SCROLL_FROM_JUMP && Negative(finalOffset) && NearZero(gridLayoutInfo_.currentOffset_) &&
-            (NearZero(gridLayoutInfo_.prevOffset_) || Negative(gridLayoutInfo_.prevOffset_))) {
-            onReachStart();
-            initialIndex_ = true;
-        }
-        if ((scrollSource == SCROLL_FROM_BAR || scrollSource == SCROLL_FROM_BAR_FLING) && gridLayoutInfo_.reachStart_ &&
-            !reachStart && NearZero(gridLayoutInfo_.currentOffset_) && Negative(finalOffset)) {
-            onReachStart();
-            initialIndex_ = true;
-        }
-        if (scrollSource == SCROLL_FROM_ANIMATION_CONTROLLER && NearZero(gridLayoutInfo_.currentOffset_) &&
-            ((!gridLayoutInfo_.reachStart_ && !NearZero(finalOffset)) || gridLayoutInfo_.reachStart_)) {
-            onReachStart();
-            initialIndex_ = true;
-        }
-    }
-    if (onReachStart && !initialIndex_ && gridLayoutInfo_.startIndex_ == 0) {
-        onReachStart();
-        initialIndex_ = true;
     }
 
     auto onReachEnd = gridEventHub->GetOnReachEnd();
     if (onReachEnd && gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
-        if (scrollSource == SCROLL_FROM_UPDATE && Positive(finalOffset) && gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
-            onReachEnd();
-        }
-        if (scrollSource == SCROLL_FROM_ANIMATION && gridLayoutInfo_.reachEnd_ && !reachEnd &&
-            Positive(prevFinalOffset_)) {
-            onReachEnd();
-        }
-        if (scrollSource == SCROLL_FROM_UPDATE && Positive(prevFinalOffset_) && NearZero(finalOffset) &&
-            !gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
-            onReachEnd();
-        }
-        if (scrollSource == SCROLL_FROM_AXIS && gridLayoutInfo_.reachEnd_ && !reachEnd && Positive(finalOffset)) {
-            onReachEnd();
-        }
-        if (scrollSource == SCROLL_FROM_ANIMATION_SPRING && !gridLayoutInfo_.reachEnd_ && !gridLayoutInfo_.offsetEnd_) {
-            onReachEnd();
-        }
-        if (scrollSource == SCROLL_FROM_JUMP && gridLayoutInfo_.offsetEnd_ && gridLayoutInfo_.reachEnd_) {
-            onReachEnd();
-        }
-        if (scrollSource == SCROLL_FROM_ANIMATION_CONTROLLER && gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
-            onReachEnd();
-        }
-        if ((scrollSource == SCROLL_FROM_BAR || scrollSource == SCROLL_FROM_BAR_FLING) && Positive(finalOffset) &&
-            !NearZero(gridLayoutInfo_.currentOffset_) && gridLayoutInfo_.offsetEnd_ && !offsetEnd) {
-            onReachEnd();
-        }
-        if (scrollSource == SCROLL_FROM_NONE && reachEnd && gridLayoutInfo_.reachEnd_ && !gridLayoutInfo_.offsetEnd_ &&
-            !offsetEnd && Positive(prevFinalOffset_)) {
-            onReachEnd();
+        if (!NearZero(finalOffset)) {
+            bool scrollDownToEnd = LessNotEqual(prevHeight_, endHeight_) && GreatOrEqual(currentHeight_, endHeight_);
+            bool scrollUpToEnd = GreatNotEqual(prevHeight_, endHeight_) && LessOrEqual(currentHeight_, endHeight_);
+            if (scrollDownToEnd || scrollUpToEnd) {
+                onReachEnd();
+            }
         }
     }
 
