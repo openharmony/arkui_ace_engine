@@ -984,7 +984,7 @@ void RosenRenderTextField::ComputeExtendHeight(double decorationHeight)
     extendHeight_ = std::min(extendHeight_, GetLayoutParam().GetMaxSize().Height());
 }
 
-double RosenRenderTextField::GetRealTextWidth()
+double RosenRenderTextField::GetRealTextWidth() const
 {
     return realTextWidth_;
 }
