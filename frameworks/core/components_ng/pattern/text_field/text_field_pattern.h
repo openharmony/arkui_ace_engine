@@ -1200,11 +1200,7 @@ private:
     bool focusEventInitialized_ = false;
     bool isMousePressed_ = false;
     bool needCloseOverlay_ = true;
-#if defined(ENABLE_STANDARD_INPUT) || defined(PREVIEW)
     bool textObscured_ = true;
-#else
-    bool textObscured_ = false;
-#endif
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;
