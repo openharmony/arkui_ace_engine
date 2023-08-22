@@ -73,6 +73,7 @@ constexpr bool USE_ANIMATOR = false;
 constexpr float PERCENT = 1.0f;
 constexpr float ROOT_WIDTH = 1000.0f;
 constexpr float ROOT_HEIGHT = 1000.0f;
+constexpr float COLOR_SIZE = 2.0f;
 } // namespace
 
 class DataPanelTestNg : public testing::Test {
@@ -821,13 +822,13 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest001, TestSize.Level1)
     arcData.shadowColor = gradient;
 
     arcData.progress = 0.0f;
-    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData);
+    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData, COLOR_SIZE, arcData.progress);
     arcData.progress = OVER_FULL;
-    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData);
+    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData, COLOR_SIZE, arcData.progress);
     arcData.progress = BELOW_EDGE;
-    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData);
+    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData, COLOR_SIZE, arcData.progress);
     arcData.progress = BELOW_ZERO;
-    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData);
+    dataPanelModifier.PaintRainbowFilterMask(rsCanvas, FACTOR, arcData, COLOR_SIZE, arcData.progress);
 }
 
 /**
