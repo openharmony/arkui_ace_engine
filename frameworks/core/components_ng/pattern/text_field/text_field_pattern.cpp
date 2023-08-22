@@ -3224,7 +3224,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             config.action = GetTextInputActionValue(GetDefaultTextInputAction());
             config.inputFilter = GetInputFilter();
             config.maxLength = GetMaxLength();
-            config.obscureText = textObscured_;
+            if (keyboard_ == TextInputType::VISIBLE_PASSWORD) {
+                config.obscureText = textObscured_;
+            }
             LOGI("Request keyboard configuration: type=%{private}d action=%{private}d obscureText=%{private}d",
                 keyboard_, config.action, textObscured_);
             connection_ = TextInputProxy::GetInstance().Attach(
