@@ -66,15 +66,11 @@ void SheetPresentationPattern::OnModifyDone()
 
 void SheetPresentationPattern::InitPageHeight()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto stageManager = pipeline->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto geometryNode = pageNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    pageHeight_ = geometryNode->GetFrameSize().Height();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    pageHeight_ = overlayManager->GetRootHeight();
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
@@ -86,8 +82,9 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapp
     auto showDragIndicator = layoutProperty->GetSheetStyleValue().showDragBar.value_or(true);
     auto host = GetHost();
     auto sheetDragBar = DynamicCast<FrameNode>(host->GetFirstChild());
-    auto sheetLayoutProperty = sheetDragBar->GetLayoutProperty();
     CHECK_NULL_RETURN(sheetDragBar, false);
+    auto sheetLayoutProperty = sheetDragBar->GetLayoutProperty();
+    CHECK_NULL_RETURN(sheetLayoutProperty, false);
     sheetLayoutProperty->UpdateVisibility(showDragIndicator ? VisibleType::VISIBLE : VisibleType::GONE);
     sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
@@ -179,13 +176,17 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
 void SheetPresentationPattern::InitialLayoutProps()
 {
     const int half = 2;
-    auto largeHeight = pageHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
+    auto host = GetHost();
+    auto sheetGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(sheetGeometryNode);
+    auto sheetHeight = sheetGeometryNode->GetFrameSize().Height();
+    auto largeHeight = sheetHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
-            height_ = pageHeight_ / half;
+            height_ = sheetHeight / half;
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
             height_ = largeHeight;
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
@@ -194,18 +195,18 @@ void SheetPresentationPattern::InitialLayoutProps()
             height_ = geometryNode->GetFrameSize().Height();
         }
     } else {
-        double sheetHeight = 0.0;
+        double height = 0.0;
         if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
-            sheetHeight = sheetStyle.height->ConvertToPxWithSize(pageHeight_);
+            height = sheetStyle.height->ConvertToPxWithSize(sheetHeight);
         } else {
-            sheetHeight = sheetStyle.height->ConvertToPx();
+            height = sheetStyle.height->ConvertToPx();
         }
-        if (sheetHeight > largeHeight) {
+        if (height > largeHeight) {
             height_ = largeHeight;
-        } else if (sheetHeight < 0) {
+        } else if (height < 0) {
             height_ = largeHeight;
         } else {
-            height_ = sheetHeight;
+            height_ = height;
         }
     }
     heightBoundary_ = height_ / half;

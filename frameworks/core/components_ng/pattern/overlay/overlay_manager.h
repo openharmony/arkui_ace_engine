@@ -271,6 +271,7 @@ public:
     void CloseModalUIExtension(int32_t sessionId);
 
     void MarkDirty(PropertyChangeFlag flag);
+    float GetRootHeight() const;
 
 private:
     void PopToast(int32_t targetId);
