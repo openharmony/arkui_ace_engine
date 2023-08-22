@@ -413,7 +413,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
     }
 
     // last grid item is not fully showed
-    if (GreatOrEqual(gridLayoutInfo_.currentOffset_ + lengthOfItemsInViewport, mainSize)) {
+    if (GreatNotEqual(gridLayoutInfo_.currentOffset_ + lengthOfItemsInViewport, mainSize)) {
         return;
     }
 
