@@ -108,7 +108,8 @@ public:
         return nullptr;
     }
 
-    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks) override;
+    int32_t CreateModalUIExtension(const AAFwk::Want& want,
+        const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) override;
     void CloseModalUIExtension(int32_t sessionId) override;
 
 private:

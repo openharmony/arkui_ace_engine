@@ -1787,7 +1787,8 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
         TaskExecutor::TaskType::UI);
 }
 
-int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+int32_t UIContentImpl::CreateModalUIExtension(
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config)
 {
     LOGI("UIExtension create modal page start");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1797,12 +1798,12 @@ int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const Mod
     CHECK_NULL_RETURN_NOLOG(taskExecutor, 0);
     int32_t sessionId = 0;
     taskExecutor->PostSyncTask(
-        [container, &sessionId, want, callbacks = callbacks]() {
+        [container, &sessionId, want, callbacks = callbacks, config = config]() {
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID_NOLOG(pipeline);
             auto overlay = pipeline->GetOverlayManager();
             CHECK_NULL_VOID_NOLOG(overlay);
-            sessionId = overlay->CreateModalUIExtension(want, callbacks);
+            sessionId = overlay->CreateModalUIExtension(want, callbacks, config.isProhibitBack);
         },
         TaskExecutor::TaskType::UI);
     LOGI("UIExtension create modal page end, sessionId=%{public}d", sessionId);

@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "macros.h"
-#include "modal_ui_extension_callbacks.h"
+#include "modal_ui_extension_config.h"
 #include "serializeable_object.h"
 #include "viewport_config.h"
 
@@ -171,10 +171,12 @@ public:
      * @description: Create a full-window modal UIExtensionComponent.
      * @param want Indicates the want of UIExtensionAbility.
      * @param callbacks Indicates the UIExtensionComponent callbacks.
+     * @param config Indicates the Modal page configs.
      * @return The return value is the ID of the session held by the UIExtensionComponent
      * if creation is not successful, it returns 0 by default.
      */
-    virtual int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks) = 0;
+    virtual int32_t CreateModalUIExtension(
+        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) = 0;
 
     /**
      * @description: Close the full-window modal.

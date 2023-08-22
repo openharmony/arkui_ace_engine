@@ -59,7 +59,7 @@ public:
 
     void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);
 
-    int32_t GetTargetId() const
+    int32_t GetTargetId() const override
     {
         return targetId_;
     }

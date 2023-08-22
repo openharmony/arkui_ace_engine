@@ -266,7 +266,8 @@ public:
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
     // ui extension
-    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
+    int32_t CreateModalUIExtension(
+        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack);
     void CloseModalUIExtension(int32_t sessionId);
 
     void MarkDirty(PropertyChangeFlag flag);
@@ -283,7 +284,7 @@ private:
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
 
-    // The focus logic of overlay node (menu and dialog): 
+    // The focus logic of overlay node (menu and dialog):
     // 1. before start show animation: lower level node set unfocusabel and lost focus;
     // 2. end show animation: overlay node get focus;
     // 3. before start hide animation: lower level node set focusable;
@@ -349,6 +350,9 @@ private:
     std::function<bool()> backPressEvent_ = nullptr;
 
     std::set<WeakPtr<UINode>> windowSceneSet_;
+
+    // native modal ui extension
+    bool isProhibitBack_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };
