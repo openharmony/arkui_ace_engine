@@ -2265,6 +2265,9 @@ void TextFieldPattern::OnModifyDone()
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
+    if (barState_.has_value() && barState_.value() != layoutProperty->GetDisplayModeValue(DisplayMode::AUTO)) {
+        lastTextRectY_ = textRect_.GetY();
+    }
     ProcessInnerPadding();
     textRect_.SetLeft(textRect_.GetX() + offsetDifference_.GetX());
     textRect_.SetTop(textRect_.GetY() + offsetDifference_.GetY());
@@ -2306,6 +2309,9 @@ void TextFieldPattern::OnModifyDone()
             AddScrollEvent();
         }
         auto barState = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
+        if (!barState_.has_value()) {
+            barState_ = barState;
+        }
         scrollBarVisible_ = true;
         if (barState == DisplayMode::OFF) {
             scrollBarVisible_ = false;
@@ -5615,7 +5621,7 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     layoutProperty->UpdatePadding(
         { CalcLength(padding), CalcLength(padding), CalcLength(padding), CalcLength(padding) });
     ProcessInnerPadding();
-    textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
+    SetTextRectOffset();
     MarginProperty margin;
     margin.bottom =
         CalcLength(inlineState_.padding.bottom->GetDimension() + inlineState_.margin.bottom->GetDimension());
@@ -5668,8 +5674,6 @@ void TextFieldPattern::RestorePreInlineStates()
     CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
     layoutProperty->UpdateTextColor(inlineState_.textColor);
     layoutProperty->UpdatePadding(inlineState_.padding);
     ProcessInnerPadding();
@@ -5953,6 +5957,18 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
     OffsetF offset(paintRect.GetX() - parentGlobalOffset_.GetX(), paintRect.GetY() - parentGlobalOffset_.GetY());
     return !(!contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + paintRect.Height() - BOX_EPSILON }) ||
              !contentRect_.IsInRegion({ offset.GetX(), offset.GetY() + BOX_EPSILON }));
+}
+
+void TextFieldPattern::SetTextRectOffset()
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (barState_.has_value() && barState_.value() != layoutProperty->GetDisplayModeValue(DisplayMode::AUTO)) {
+        barState_ = layoutProperty->GetDisplayModeValue(DisplayMode::AUTO);
+        textRect_.SetOffset(OffsetF(GetPaddingLeft(), lastTextRectY_));
+    } else {
+        textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
+    }
 }
 
 void TextFieldPattern::FilterExistText()
