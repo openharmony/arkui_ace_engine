@@ -106,7 +106,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     auto yOffsetStr = obj->GetProperty("yOffset");
     if (!std::regex_match(xOffsetStr->ToString(), DIMENSION_REGEX) ||
         !std::regex_match(yOffsetStr->ToString(), DIMENSION_REGEX) || !ConvertFromJSValue(xOffsetStr, xOffset) ||
-        !ConvertFromJSValue(yOffsetStr, yOffset) || xOffset.IsNegative() || yOffset.IsNegative()) {
+        !ConvertFromJSValue(yOffsetStr, yOffset)) {
         LOGW("Failed to parse param 'xOffset' or 'yOffset'");
         return;
     }
