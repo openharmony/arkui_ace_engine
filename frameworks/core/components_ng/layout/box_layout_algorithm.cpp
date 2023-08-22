@@ -120,6 +120,10 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
                 if (!child) {
                     continue;
                 }
+                auto layoutProperty = child->GetLayoutProperty();
+                if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+                    continue;
+                }
                 auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
                 if (maxWidth < childSize.Width()) {
                     maxWidth = childSize.Width();
