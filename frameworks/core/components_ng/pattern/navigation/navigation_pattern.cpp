@@ -185,8 +185,7 @@ void NavigationPattern::OnModifyDone()
 
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
-    bool isPopPage)
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage)
 {
     if (preTopNavPath == newTopNavPath) {
         return;
@@ -414,6 +413,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     } else {
                         hostNode->SetBackButtonVisible(curTopNavDestination, true);
                     }
+                    pattern->UpdateContextRect(curTopNavDestination, hostNode);
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -429,6 +429,36 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     AddDividerHotZoneRect(navigationLayoutAlgorithm);
     ifNeedInit_ = false;
     return false;
+}
+
+void NavigationPattern::UpdateContextRect(
+    const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& hostNode)
+{
+    CHECK_NULL_VOID_NOLOG(curDestination);
+    CHECK_NULL_VOID_NOLOG(hostNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID_NOLOG(hostNode);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
+    auto size = curDestination->GetGeometryNode()->GetFrameSize();
+    curDestination->GetRenderContext()->ClipWithRRect(
+        RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
+    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+    if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
+        auto navBarProperty = navBarNode->GetLayoutProperty();
+        navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
+        curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+        curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+        auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
+        CHECK_NULL_VOID_NOLOG(titleNode);
+        titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+        return;
+    }
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+    navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
 }
 
 bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode)

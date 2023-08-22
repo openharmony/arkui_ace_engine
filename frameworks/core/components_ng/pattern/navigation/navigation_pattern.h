@@ -236,6 +236,9 @@ public:
         userSetNavBarWidthFlag_ = userSetNavBarWidthFlag;
     }
 
+    void UpdateContextRect(const RefPtr<NavDestinationGroupNode>& curDestination,
+        const RefPtr<NavigationGroupNode>& navigation);
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
