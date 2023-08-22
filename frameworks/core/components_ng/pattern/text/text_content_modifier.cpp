@@ -495,7 +495,7 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type)
     }
 }
 
-void TextContentModifier::SetTextDecorationStyle(const TextDecorationStyle& textDecorationStyle)
+void TextContentModifier::SetTextDecorationStyle(const TextDecorationStyle textDecorationStyle)
 {
     textDecorationStyle_ = textDecorationStyle;
 }
