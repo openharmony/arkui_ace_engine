@@ -103,11 +103,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
-    if (jumpIndex_) {
+    if (listLayoutAlgorithm->GetEstimateOffset().has_value()) {
         float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset().value_or(currentOffset_);
         relativeOffset += absoluteOffset - currentOffset_;
         isJump = true;
-        jumpIndex_.reset();
     }
     if (targetIndex_) {
         auto iter = itemPosition_.find(targetIndex_.value());
@@ -453,6 +452,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
+        jumpIndex_.reset();
     }
     if (targetIndex_) {
         listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
