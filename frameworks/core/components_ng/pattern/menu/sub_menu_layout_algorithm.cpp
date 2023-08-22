@@ -16,8 +16,10 @@
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,7 +47,21 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(parentPattern);
         auto topLeftPoint = OffsetF(x, y);
         auto bottomRightPoint = OffsetF(x + size.Width(), y + size.Height());
-        parentPattern->AddHoverRegions(topLeftPoint, bottomRightPoint);
+
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto windowManager = pipelineContext->GetWindowManager();
+        auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                                windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        OffsetF wrapperOffset;
+        if (isContainerModal) {
+            auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
+                              static_cast<float>(CONTENT_PADDING.ConvertToPx());
+            auto newOffsetY = static_cast<float>(CONTAINER_TITLE_HEIGHT.ConvertToPx()) +
+                              static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+            wrapperOffset = OffsetF(newOffsetX, newOffsetY);
+        }
+        parentPattern->AddHoverRegions(topLeftPoint + wrapperOffset, bottomRightPoint + wrapperOffset);
     }
 
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
