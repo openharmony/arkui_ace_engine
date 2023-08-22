@@ -670,10 +670,10 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
     auto targetId = rootNode->GetId();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
-    overlayManager->HideMenu(targetId);
+    overlayManager->HideMenu(menuNode, targetId);
     EXPECT_FALSE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
-    overlayManager->HideMenuInSubWindow(rootNode->GetId());
+    overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
     EXPECT_FALSE(overlayManager->menuMap_.empty());
 
@@ -683,8 +683,8 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
      */
     overlayManager->HideAllMenus();
     overlayManager->DeleteMenu(targetId);
-    overlayManager->HideMenu(targetId);
-    overlayManager->HideMenuInSubWindow(targetId);
+    overlayManager->HideMenu(menuNode, targetId);
+    overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
     EXPECT_TRUE(overlayManager->menuMap_.empty());
 

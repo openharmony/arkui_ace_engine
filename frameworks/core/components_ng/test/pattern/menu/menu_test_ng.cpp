@@ -216,8 +216,6 @@ HWTEST_F(MenuTestNg, MenuWrapperPatternTestNg001, TestSize.Level1)
      * @tc.steps: step2. excute HideMenu
      * @tc.expected: wrapper child size is 3
      */
-    wrapperPattern->AddSubMenuId(subMenuFirst->GetId());
-    wrapperPattern->AddSubMenuId(subMenuSecond->GetId());
     wrapperPattern->HideMenu(mainMenu);
     wrapperPattern->OnModifyDone();
     EXPECT_EQ(wrapperNode->GetChildren().size(), 3);

@@ -30,7 +30,7 @@ public:
     MOCK_METHOD0(GetRect, NG::RectF());
     MOCK_METHOD1(ShowMenu, void(const RefPtr<Component>& newComponent));
     MOCK_METHOD3(ShowMenuNG, void(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset));
-    MOCK_METHOD1(HideMenuNG, void(int32_t targetId));
+    MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
     MOCK_METHOD0(HideMenuNG, void());
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
     MOCK_METHOD2(ShowPopupNG, void(int32_t targetId, const NG::PopupInfo& popupInfo));
