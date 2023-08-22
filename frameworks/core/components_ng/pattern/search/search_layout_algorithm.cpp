@@ -17,6 +17,7 @@
 
 #include <algorithm>
 
+#include "base/utils/utils.h"
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -58,7 +59,26 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(cancelImageWrapper);
     auto cancelImageGeometryNode = cancelImageWrapper->GetGeometryNode();
     CHECK_NULL_VOID(cancelImageGeometryNode);
-
+    auto imageLayoutProperty = cancelImageWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
+    auto searchHeight =
+        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto defaultImageHeight =
+        imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
+    auto imageHeightAdaptPadding =
+        static_cast<float>(searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
+    auto imageHeight = std::min(defaultImageHeight, imageHeightAdaptPadding);
+    CalcSize imageCalcSize;
+    imageCalcSize.SetHeight(CalcLength(imageHeight));
+    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     cancelImageWrapper->Measure(childLayoutConstraint);
     cancelIconSizeMeasure_ = cancelImageGeometryNode->GetFrameSize();
@@ -88,7 +108,13 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
     auto cancelButtonHeight =
         layoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconSizeMeasure_.Height())).ConvertToPx() +
         spaceHeight;
-
+    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto searchHeight =
+        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    cancelButtonHeight =
+        std::min(cancelButtonHeight, searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
     CalcSize cancelButtonCalcSize((CalcLength(cancelButtonHeight)), CalcLength(cancelButtonHeight));
     cancelButtonLayoutProperty->UpdateUserDefinedIdealSize(cancelButtonCalcSize);
 
@@ -125,15 +151,11 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
     auto cancelButtonNode = cancelButtonWrapper->GetHostNode();
     auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    float leftPadding = 0.0f;
-    float rightPadding = 0.0f;
-    if (geometryNode && geometryNode->GetPadding()) {
-        leftPadding = geometryNode->GetPadding()->left.value_or(0.0f);
-        rightPadding = geometryNode->GetPadding()->right.value_or(0.0f);
-    }
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    float leftPadding = padding.left.value_or(0.0f);
+    float rightPadding = padding.right.value_or(0.0f);
     auto textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
-                    searchTheme->GetSearchIconRightSpace().ConvertToPx() - leftPadding - rightPadding;
+                          searchTheme->GetSearchIconRightSpace().ConvertToPx() - leftPadding - rightPadding;
     if (searchButtonEvent->IsEnabled()) {
         textFieldWidth = textFieldWidth - buttonWidth - searchTheme->GetSearchDividerWidth().ConvertToPx() -
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
@@ -142,9 +164,14 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     if (cancelButtonEvent->IsEnabled()) {
         textFieldWidth = textFieldWidth - cancelButtonWidth;
     }
-
+    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
+    auto searchHeight =
+        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto textFieldHeight =
+        std::min(themeHeight, searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
+    childLayoutConstraint.selfIdealSize.SetHeight(textFieldHeight);
     textFieldWrapper->Measure(childLayoutConstraint);
     textFieldSizeMeasure_ = textFieldGeometryNode->GetFrameSize();
 }
@@ -157,6 +184,26 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(imageWrapper);
     auto imageGeometryNode = imageWrapper->GetGeometryNode();
     CHECK_NULL_VOID(imageGeometryNode);
+    auto imageLayoutProperty = imageWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
+    auto searchHeight =
+        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto defaultImageHeight =
+        imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
+    auto imageHeightAdaptPadding =
+        static_cast<float>(searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
+    auto imageHeight = std::min(defaultImageHeight, imageHeightAdaptPadding);
+    CalcSize imageCalcSize;
+    imageCalcSize.SetHeight(CalcLength(imageHeight));
+    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     imageWrapper->Measure(childLayoutConstraint);
@@ -187,6 +234,13 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
         searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
     auto searchButtonHeight = std::max(defaultButtonHeight,
         layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPx() + spaceHeight);
+    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto searchHeight =
+        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    searchButtonHeight =
+        std::min(searchButtonHeight, searchHeight - padding.top.value_or(0.0f) - padding.bottom.value_or(0.0f));
     CalcSize searchButtonCalcSize;
     searchButtonCalcSize.SetHeight(CalcLength(searchButtonHeight));
     buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize);
@@ -233,7 +287,9 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     cancelBtnHight = (!cancelButtonEvent->IsEnabled()) ? 0.0f : cancelBtnHight;
 
     // textfield height
-    auto textfieldHeight = textFieldSizeMeasure_.Height();
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto verticalPadding = padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
+    auto textfieldHeight = textFieldSizeMeasure_.Height() + verticalPadding;
 
     // calculate the highest
     searchHeightAdapt = std::max(searchIconHeight, searchButtonHeight);
@@ -265,8 +321,10 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     // self height
     auto searchHeight =
         (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto verticalPadding = padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
+    searchHeight = std::max(verticalPadding, static_cast<float>(searchHeight));
     auto searchHeightAdapt = searchHeight;
-
     if (!IsFixedHeightMode(layoutWrapper)) {
         searchHeightAdapt = CalcSearchAdaptHeight(layoutWrapper);
         renderContext->SetClipToBounds(false);
@@ -402,6 +460,8 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto searchSize = geometryNode->GetFrameSize();
     auto searchFrameWidth = searchSize.Width();
     auto searchFrameHeight = searchSize.Height();
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    auto searchUserHeight = layoutConstraint->selfIdealSize.Height().value_or(searchTheme->GetHeight().ConvertToPx());
 
     // search icon size
     auto imageWrapper = layoutWrapper->GetOrCreateChildByIndex(IMAGE_INDEX);
@@ -412,13 +472,25 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto iconFrameHeight = searchIconSizeMeasure_.Height();
     auto iconRenderWidth = layoutProperty->GetSearchIconUDSizeValue(Dimension(iconFrameWidth)).ConvertToPx();
 
-    float leftOffset = 0.0f;
-    if (geometryNode->GetPadding()) {
-        leftOffset = geometryNode->GetPadding()->left.value_or(0.0f);
-    }
     // layout search icon
-    float iconHorizontalOffset = leftOffset + searchIconLeftSpace + (iconRenderWidth - iconFrameWidth) / 2.0;
-    float imageVerticalOffset = (searchFrameHeight - iconFrameHeight) / 2.0;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    float topPadding = padding.top.value_or(0.0f);
+    float bottomPadding = padding.bottom.value_or(0.0f);
+    float leftOffset = padding.left.value_or(0.0f);
+    float iconHorizontalOffset = leftOffset + searchIconLeftSpace + (iconRenderWidth - iconFrameWidth) / 2;
+    auto searchIconConstraint = imageWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    auto iconUserHeight =
+        searchIconConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconHeight().ConvertToPx());
+    float imageVerticalOffset = topPadding;
+    if (NearEqual(iconUserHeight, iconFrameHeight)) {
+        auto iconInterval = (searchUserHeight - iconUserHeight) / 2;
+        if (topPadding <= iconInterval && bottomPadding <= iconInterval) {
+            imageVerticalOffset = iconInterval;
+        } else if (topPadding <= iconInterval && bottomPadding > iconInterval) {
+            imageVerticalOffset = searchFrameHeight - (bottomPadding + iconFrameHeight);
+        }
+    }
+    auto centerVerticalOffset = imageVerticalOffset + iconFrameHeight / 2;
     OffsetF imageOffset(iconHorizontalOffset, imageVerticalOffset);
     imageGeometryNode->SetMarginFrameOffset(imageOffset);
     imageWrapper->Layout();
@@ -429,7 +501,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textFieldGeometryNode);
     float textFieldHorizontalOffset = leftOffset + searchIconLeftSpace + iconRenderWidth + searchIconRightSpace;
-    float textFieldVerticalOffset = (searchFrameHeight - textFieldGeometryNode->GetFrameSize().Height()) / 2.0;
+    float textFieldVerticalOffset = centerVerticalOffset - textFieldGeometryNode->GetFrameSize().Height() / 2;
     textFieldGeometryNode->SetMarginFrameOffset(OffsetF(textFieldHorizontalOffset, textFieldVerticalOffset));
     textFieldWrapper->Layout();
 
@@ -451,19 +523,16 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto cancelImageFrameWidth = cancelImageFrameSize.Width();
     auto cancelImageFrameHeight = cancelImageFrameSize.Height();
 
-    float rightOffset = 0.0f;
-    if (geometryNode->GetPadding()) {
-        rightOffset = geometryNode->GetPadding()->right.value_or(0.0f);
-    }
     // layout search button
     auto searchButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     CHECK_NULL_VOID(searchButtonWrapper);
     auto searchButtonGeometryNode = searchButtonWrapper->GetGeometryNode();
     CHECK_NULL_VOID(searchButtonGeometryNode);
     auto searchButtonFrameSize = searchButtonGeometryNode->GetFrameSize();
-    float searchButtonVerticalOffset = (searchFrameHeight - searchButtonFrameSize.Height()) / 2.0;
-    float searchButtonHorizontalOffset = searchFrameWidth - searchButtonFrameSize.Width() -
-                                         searchButtonSpace - rightOffset;
+    float searchButtonVerticalOffset = centerVerticalOffset - searchButtonFrameSize.Height() / 2;
+    float rightOffset = padding.right.value_or(0.0f);
+    float searchButtonHorizontalOffset =
+        searchFrameWidth - searchButtonFrameSize.Width() - searchButtonSpace - rightOffset;
     searchButtonHorizontalOffset = std::max(searchButtonHorizontalOffset, 0.0f);
     OffsetF searchButtonOffset = OffsetF(searchButtonHorizontalOffset, searchButtonVerticalOffset);
     searchButtonGeometryNode->SetMarginFrameOffset(searchButtonOffset);
@@ -471,7 +540,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     // layout cancel button
     float cancelButtonHorizontalOffset = 0;
-    float cancelButtonVerticalOffset = (searchFrameHeight - cancelButtonFrameHeight) / 2;
+    float cancelButtonVerticalOffset = centerVerticalOffset - cancelButtonFrameHeight / 2;
     auto searchButtonNode = searchButtonWrapper->GetHostNode();
     auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
     if (searchButtonEvent->IsEnabled()) {
@@ -485,7 +554,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     cancelButtonWrapper->Layout();
 
     // layout cancel image
-    float cancelImageVerticalOffset = (searchFrameHeight - cancelImageFrameHeight) / 2;
+    float cancelImageVerticalOffset = centerVerticalOffset - cancelImageFrameHeight / 2;
     float cancelButtonImageCenterOffset = (cancelButtonFrameWidth - cancelImageFrameWidth) / 2;
     float cancelImageHorizontalOffset = cancelButtonHorizontalOffset + cancelButtonImageCenterOffset;
     OffsetF cancelImageOffset = OffsetF(cancelImageHorizontalOffset, cancelImageVerticalOffset);
