@@ -38,12 +38,6 @@ public:
         return containerId_;
     }
 
-protected:
-    virtual bool ShouldAvoidKeyboard() const
-    {
-        return true;
-    }
-
 private:
     // record node in which container.
     int32_t containerId_ = -1;

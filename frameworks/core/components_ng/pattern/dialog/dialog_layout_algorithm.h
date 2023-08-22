@@ -63,8 +63,6 @@ private:
 
     double GetPaddingBottom() const;
 
-    OffsetF AdjustChildPosition(OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize) const;
-
     RectF touchRegion_;
     OffsetF topLeftPoint_;
 

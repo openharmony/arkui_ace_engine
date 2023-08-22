@@ -125,10 +125,6 @@ public:
     void OnColorConfigurationUpdate() override;
 
 private:
-    bool ShouldAvoidKeyboard() const override
-    {
-        return false;
-    }
     void OnModifyDone() override;
 
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);

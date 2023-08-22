@@ -54,8 +54,6 @@ constexpr Dimension listPaddingHeight = 48.0_vp;
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto customSize = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
@@ -68,10 +66,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto inset = pipeline->GetSafeArea();
-    auto maxSize = layoutConstraint->maxSize;
-    maxSize.MinusPadding(0, 0, inset.top_.Length(), 0);
-    childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
+    childLayoutConstraint.UpdateMaxSizeWithCheck(layoutConstraint->maxSize);
     // constraint child size unless developer is using customStyle
     if (!customSize) {
         ComputeInnerLayoutParam(childLayoutConstraint);
@@ -320,12 +315,13 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     auto dialogOffsetY =
         ConvertToPx(CalcLength(dialogOffset_.GetY()), layoutConstraint->scaleProperty, selfSize.Height());
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
-    if (!SetAlignmentSwitch(layoutConstraint->maxSize, childSize, topLeftPoint)) {
-        topLeftPoint = OffsetF(layoutConstraint->maxSize.Width() - childSize.Width(),
-                           layoutConstraint->maxSize.Height() - childSize.Height()) /
-                       2.0;
+    if (SetAlignmentSwitch(layoutConstraint->maxSize, childSize, topLeftPoint)) {
+        return topLeftPoint + dialogOffset;
     }
-    return AdjustChildPosition(topLeftPoint, dialogOffset, childSize);
+    topLeftPoint = OffsetF(layoutConstraint->maxSize.Width() - childSize.Width(),
+                       layoutConstraint->maxSize.Height() - childSize.Height()) /
+                   2.0;
+    return topLeftPoint + dialogOffset;
 }
 
 bool DialogLayoutAlgorithm::SetAlignmentSwitch(
@@ -400,23 +396,4 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
     return pipelineContext->NormalizeToPx(bottom);
 }
 
-OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
-    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize) const
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
-    auto systemInset = pipelineContext->GetSafeArea();
-    if (topLeftPoint.GetY() < systemInset.top_.end) {
-        topLeftPoint.SetY(systemInset.top_.end);
-    }
-    auto childOffset = topLeftPoint + dialogOffset;
-
-    auto manager = pipelineContext->GetSafeAreaManager();
-    auto keyboardInsert = manager->GetKeyboardInset();
-    auto childBottom = childOffset.GetY() + childSize.Height();
-    if (keyboardInsert.Length() > 0 && childBottom > keyboardInsert.start) {
-        childOffset.SetY(childOffset.GetY() - (childBottom - keyboardInsert.start));
-    }
-    return childOffset;
-}
 } // namespace OHOS::Ace::NG

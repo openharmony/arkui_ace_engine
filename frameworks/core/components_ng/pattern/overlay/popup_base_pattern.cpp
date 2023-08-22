@@ -27,10 +27,8 @@ void PopupBasePattern::BeforeCreateLayoutWrapper()
     // popup shouldn't avoid status bar
     inset.top_ = { 0, 0 };
 
-    if (ShouldAvoidKeyboard()) {
-        auto manager = pipeline->GetSafeAreaManager();
-        inset.bottom_ = inset.bottom_.Combine(manager->GetKeyboardInset());
-    }
+    auto manager = pipeline->GetSafeAreaManager();
+    inset.bottom_ = inset.bottom_.Combine(manager->GetKeyboardInset());
 
     // not full-screen in floating window mode, calculate real inset
     if (inset.bottom_.IsValid() && pipeline->GetWindowModal() == WindowModal::CONTAINER_MODAL &&
