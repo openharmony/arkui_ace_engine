@@ -130,6 +130,7 @@ template("build_component_ng") {
 
       if (defined(config.model_component_support) &&
           config.model_component_support) {
+        deps += [ "//foundation/graphic/graphic_3d/3d_widget_adapter:widget_adapter_source" ]
         include_dirs += [
           "//foundation/graphic/graphic_3d/3d_widget_adapter/include",
           "//foundation/graphic/graphic_3d/3d_widget_adapter/include/custom",

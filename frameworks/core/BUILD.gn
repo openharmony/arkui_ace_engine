@@ -370,10 +370,7 @@ template("ace_core_source_set") {
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
-      deps += [
-        "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform",
-        "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_model_component_ng_$platform",
-      ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_model_component_ng_$platform" ]
     }
 
     deps += [
