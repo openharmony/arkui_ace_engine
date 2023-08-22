@@ -81,7 +81,8 @@ private:
     FlexAlign GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     float GetStretchCrossAxisLimit() const;
     void MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrapper);
-    void MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties);
+    void MeasureAndCleanMagicNodes(LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties);
+    void UpdateFlexProperties(FlexItemProperties& flexItemProperties, const RefPtr<LayoutWrapper>& layoutWrapper);
     void SecondaryMeasureByProperty(FlexItemProperties& flexItemProperties, LayoutWrapper* layoutWrapper);
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
     void UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& layoutConstraint, float size);
