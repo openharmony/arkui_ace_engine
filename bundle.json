@@ -118,7 +118,7 @@
                             "ui_content.h",
                             "viewport_config.h",
                             "serializeable_object.h",
-                            "modal_ui_extension_callbacks.h"
+                            "modal_ui_extension_config.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent"

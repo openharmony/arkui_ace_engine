@@ -29,12 +29,17 @@ class WantParams;
 } // namespace OHOS::AAFwk
 
 namespace OHOS::Ace {
+struct ModalUIExtensionConfig {
+bool isProhibitBack = false;
+};
+
 struct ModalUIExtensionCallbacks {
     std::function<void(int32_t)> onRelease;
     std::function<void(int32_t, const AAFwk::Want&)> onResult;
     std::function<void(const AAFwk::WantParams&)> onReceive;
     std::function<void(int32_t, const std::string&, const std::string&)> onError;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onRemoteReady;
+    std::function<void()> onDestroy;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MODAL_CONFIG_H

@@ -73,7 +73,8 @@ public:
     MOCK_METHOD1(ReloadForm, void(const std::string& url));
     MOCK_METHOD1(SetIsFocusActive, void(bool isFocusActive));
 
-    MOCK_METHOD2(CreateModalUIExtension, int32_t(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks));
+    MOCK_METHOD3(CreateModalUIExtension, int32_t(const AAFwk::Want& want,
+        const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config));
     MOCK_METHOD1(CloseModalUIExtension, void(int32_t sessionId));
 };
 } // namespace Ace
