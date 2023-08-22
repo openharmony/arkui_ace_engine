@@ -245,6 +245,7 @@ struct OperateItemStruct {
         right: TEXT_SAFE_MARGIN
       })
     }
+    .hitTestBehavior(HitTestMode.Block)
     .fontSize($r('sys.float.ohos_id_text_size_button3'))
     .fontColor($r('sys.color.ohos_id_color_text_primary_activated_transparent'))
     .height(BUTTON_SIZE)
@@ -252,7 +253,6 @@ struct OperateItemStruct {
     .labelStyle({
       maxLines: TEXT_MAX_LINE
     })
-    .onClick(()=>{})
     .onFocus(() => {
       this.parentCanFocus = false
     })
@@ -288,6 +288,7 @@ struct OperateItemStruct {
         .fillColor($r('sys.color.ohos_id_color_primary'))
         .draggable(false)
     }
+    .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -315,7 +316,6 @@ struct OperateItemStruct {
         }
       }
     })
-    .onClick(icon.action == null ? ()=>{} :icon.action)
   }
 
   @Builder
@@ -343,9 +343,9 @@ struct OperateItemStruct {
         .width(OPERATEITEM_ARROW_WIDTH)
         .focusable(true)
         .fillColor($r('sys.color.ohos_id_color_fourth'))
-        .onClick(icon.action)
         .draggable(false)
     }
+    .hitTestBehavior(HitTestMode.Block)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
@@ -372,7 +372,7 @@ struct OperateItemStruct {
         }
       }
     })
-    .onClick(icon.action == null ? ()=>{} :icon.action)
+    .onClick(icon.action)
   }
 
   @Builder
@@ -385,6 +385,7 @@ struct OperateItemStruct {
       .onFocus(() => {
         this.parentCanFocus = false
       })
+      .hitTestBehavior(HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
         if (event.type == TouchType.Down) {
           this.parentCanTouch = false
@@ -417,6 +418,7 @@ struct OperateItemStruct {
       .onFocus(() => {
         this.parentCanFocus = false
       })
+      .hitTestBehavior(HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
         if (event.type == TouchType.Down) {
           this.parentCanTouch = false
@@ -447,6 +449,7 @@ struct OperateItemStruct {
         .onClick(() => {
           this.switchState = !this.switchState
         })
+        .hitTestBehavior(HitTestMode.Block)
     }
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -497,6 +500,7 @@ struct OperateItemStruct {
         right: TEXT_SAFE_MARGIN
       })
     }
+    .hitTestBehavior(HitTestMode.Block)
     .labelStyle({
       maxLines: TEXT_MAX_LINE
     })
@@ -526,7 +530,6 @@ struct OperateItemStruct {
         }
       }
     })
-    .onClick(icon.action == null ? ()=>{} :icon.action)
   }
 
   build() {
@@ -680,12 +683,9 @@ export struct ComposeListItem {
           this.frontColor = TOUCH_DOWN_COLOR
         }
         if (event.type == TouchType.Up) {
+          this.isActive = !this.isActive
           this.frontColor = this.isActive ? ACTIVED_COLOR : Color.Transparent.toString()
         }
-      })
-      .onClick(() => {
-        this.isActive = !this.isActive
-        this.frontColor = this.isActive ? ACTIVED_COLOR : Color.Transparent.toString()
       })
 
       if (this.canFocus) {

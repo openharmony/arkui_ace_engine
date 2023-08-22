@@ -27,7 +27,6 @@ export struct SwipeRefresher {
   build() {
     Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
       if (this.isLoading) {
-
         LoadingProgress()
           .height(LOADINGPROGRESS_SIZE)
           .width(LOADINGPROGRESS_SIZE)
