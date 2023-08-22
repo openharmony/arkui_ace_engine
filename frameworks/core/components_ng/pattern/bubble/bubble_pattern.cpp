@@ -320,16 +320,11 @@ void BubblePattern::PopBubble()
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-    StartExitingAnimation([showInSubWindow, targetId = targetNodeId_, popupInfo,
-                              weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
-        if (showInSubWindow) {
-            SubwindowManager::GetInstance()->HidePopupNG(targetId);
-        } else {
-            auto overlay = weakOverlayManger.Upgrade();
-            CHECK_NULL_VOID(overlay);
-            overlay->UpdatePopupNode(targetId, popupInfo);
-        }
-    });
+    if (showInSubWindow) {
+        SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+    } else {
+        overlayManager->HidePopup(targetNodeId_, popupInfo);
+    }
 }
 
 RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
@@ -431,10 +426,6 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
 
 void BubblePattern::StartExitingAnimation(std::function<void()> finish)
 {
-    if (!IsOnShow()) {
-        return;
-    }
-
     StartOffsetExitingAnimation();
     StartAlphaExitingAnimation(finish);
 }
