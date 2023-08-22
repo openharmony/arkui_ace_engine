@@ -182,7 +182,7 @@ public:
 
     int32_t GetCurrentShownIndex() const
     {
-        return GetLoopIndex(currentIndex_);
+        return IsLoop() ? currentIndex_ : GetLoopIndex(currentIndex_);
     }
 
     RefPtr<SwiperController> GetSwiperController() const
