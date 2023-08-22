@@ -14,12 +14,12 @@
  */
 
 var __decorate = this && this.__decorate || function(e, t, o, i) {
-  var s, r = arguments.length,
-    n = r < 3 ? t : null === i ? i = Object.getOwnPropertyDescriptor(t, o) : i;
-  if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) n = Reflect.decorate(e, t, o, i);
+  var s, n = arguments.length,
+    r = n < 3 ? t : null === i ? i = Object.getOwnPropertyDescriptor(t, o) : i;
+  if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) r = Reflect.decorate(e, t, o, i);
   else
-    for (var c = e.length - 1; c >= 0; c--)(s = e[c]) && (n = (r < 3 ? s(n) : r > 3 ? s(t, o, n) : s(t, o)) || n);
-  return r > 3 && n && Object.defineProperty(t, o, n), n
+    for (var c = e.length - 1; c >= 0; c--)(s = e[c]) && (r = (n < 3 ? s(r) : n > 3 ? s(t, o, r) : s(t, o)) || r);
+  return n > 3 && r && Object.defineProperty(t, o, r), r
 };
 const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
 const MeasureText = requireNapi("measure");
@@ -80,7 +80,7 @@ export class TabTitleBar extends ViewPU {
   set currentIndex(e) {
     this.__currentIndex.set(e)
   }
-  GradientMask(e, t, o, i, s, r = null) {
+  GradientMask(e, t, o, i, s, n = null) {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Column.create();
@@ -89,19 +89,19 @@ export class TabTitleBar extends ViewPU {
       t || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((r, n) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(r);
+    this.observeComponentCreation(((n, r) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(n);
       Canvas.create(e);
       Canvas.width(TabTitleBar.gradientMaskWidth);
       Canvas.height(TabTitleBar.totalHeight);
       Canvas.onReady((() => {
-        var r = e.createLinearGradient(t, o, i, s);
-        r.addColorStop(0, "#ffffffff");
-        r.addColorStop(1, "#00ffffff");
-        e.fillStyle = r;
+        var n = e.createLinearGradient(t, o, i, s);
+        n.addColorStop(0, "#ffffffff");
+        n.addColorStop(1, "#00ffffff");
+        e.fillStyle = n;
         e.fillRect(0, 0, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight)
       }));
-      n || Canvas.pop();
+      r || Canvas.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     Canvas.pop();
@@ -216,7 +216,7 @@ export class TabTitleBar extends ViewPU {
           const e = !0;
           const i = (t, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
-            ListItem.create(r, e);
+            ListItem.create(n, e);
             o || ListItem.pop();
             ViewStackProcessor.StopGetAccessRecording()
           };
@@ -229,7 +229,7 @@ export class TabTitleBar extends ViewPU {
                 index: t,
                 maxIndex: this.tabItems.length - 1,
                 currentIndex: this.currentIndex,
-                onCustomClick: () => this.currentIndex = t,
+                onCustomClick: e => this.currentIndex = e,
                 onImageComplete: e => {
                   this.imageWidths[t] = px2vp(e);
                   this.loadOffsets()
@@ -241,7 +241,7 @@ export class TabTitleBar extends ViewPU {
             }));
             ListItem.pop()
           };
-          const r = (e, s) => {
+          const n = (e, s) => {
             i(e, s);
             this.updateFuncByElmtId.set(e, i);
             this.observeComponentCreation(((e, i) => {
@@ -251,7 +251,7 @@ export class TabTitleBar extends ViewPU {
                 index: t,
                 maxIndex: this.tabItems.length - 1,
                 currentIndex: this.currentIndex,
-                onCustomClick: () => this.currentIndex = t,
+                onCustomClick: e => this.currentIndex = e,
                 onImageComplete: e => {
                   this.imageWidths[t] = px2vp(e);
                   this.loadOffsets()
@@ -296,7 +296,8 @@ export class TabTitleBar extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           t ? ViewPU.create(new CollapsibleMenuSection(this, {
-            menuItems: this.menuItems
+            menuItems: this.menuItems,
+            index: 1 + TabTitleBar.instanceCount++
           }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -323,9 +324,10 @@ export class TabTitleBar extends ViewPU {
       Swiper.height("100%");
       Swiper.curve(Curve.Friction);
       Swiper.onChange((e => {
+        const t = this.tabOffsets[e] + TabTitleBar.correctionOffset;
         this.currentIndex = e;
         this.scroller.scrollTo({
-          xOffset: this.tabOffsets[e] + TabTitleBar.correctionOffset,
+          xOffset: t > 0 ? t : 0,
           yOffset: 0,
           animation: {
             duration: 300,
@@ -352,11 +354,14 @@ export class TabTitleBar extends ViewPU {
 TabTitleBar.totalHeight = 56;
 TabTitleBar.correctionOffset = -40;
 TabTitleBar.gradientMaskWidth = 24;
+TabTitleBar.instanceCount = 0;
 __decorate([], TabTitleBar.prototype, "GradientMask", null);
 class CollapsibleMenuSection extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
     this.menuItems = void 0;
+    this.index = void 0;
+    this.firstFocusableIndex = -1;
     this.__isPopupShown = new ObservedPropertySimplePU(!1, this, "isPopupShown");
     this.__isMoreIconOnFocus = new ObservedPropertySimplePU(!1, this, "isMoreIconOnFocus");
     this.__isMoreIconOnHover = new ObservedPropertySimplePU(!1, this, "isMoreIconOnHover");
@@ -365,6 +370,8 @@ class CollapsibleMenuSection extends ViewPU {
   }
   setInitiallyProvidedValue(e) {
     void 0 !== e.menuItems && (this.menuItems = e.menuItems);
+    void 0 !== e.index && (this.index = e.index);
+    void 0 !== e.firstFocusableIndex && (this.firstFocusableIndex = e.firstFocusableIndex);
     void 0 !== e.isPopupShown && (this.isPopupShown = e.isPopupShown);
     void 0 !== e.isMoreIconOnFocus && (this.isMoreIconOnFocus = e.isMoreIconOnFocus);
     void 0 !== e.isMoreIconOnHover && (this.isMoreIconOnHover = e.isMoreIconOnHover);
@@ -439,6 +446,11 @@ class CollapsibleMenuSection extends ViewPU {
       moduleName: ""
     } : Color.Transparent
   }
+  aboutToAppear() {
+    this.menuItems.forEach(((e, t) => {
+      e.isEnabled && -1 == this.firstFocusableIndex && t > CollapsibleMenuSection.maxCountOfVisibleItems - 2 && (this.firstFocusableIndex = 1e3 * this.index + t + 1)
+    }))
+  }
   initialRender() {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
@@ -461,16 +473,17 @@ class CollapsibleMenuSection extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           ForEach.create();
-          this.forEachUpdateFunction(e, this.menuItems, (e => {
-            const t = e;
-            this.observeComponentCreation(((e, o) => {
+          this.forEachUpdateFunction(e, this.menuItems, ((e, t) => {
+            const o = e;
+            this.observeComponentCreation(((e, i) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
-              o ? ViewPU.create(new ImageMenuItem(this, {
-                item: t
+              i ? ViewPU.create(new ImageMenuItem(this, {
+                item: o,
+                index: 1e3 * this.index + t + 1
               }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
               ViewStackProcessor.StopGetAccessRecording()
             }))
-          }));
+          }), void 0, !0, !1);
           t || ForEach.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -479,16 +492,17 @@ class CollapsibleMenuSection extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           ForEach.create();
-          this.forEachUpdateFunction(e, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (e => {
-            const t = e;
-            this.observeComponentCreation(((e, o) => {
+          this.forEachUpdateFunction(e, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), ((e, t) => {
+            const o = e;
+            this.observeComponentCreation(((e, i) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
-              o ? ViewPU.create(new ImageMenuItem(this, {
-                item: t
+              i ? ViewPU.create(new ImageMenuItem(this, {
+                item: o,
+                index: 1e3 * this.index + t + 1
               }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
               ViewStackProcessor.StopGetAccessRecording()
             }))
-          }));
+          }), void 0, !0, !1);
           t || ForEach.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -554,7 +568,10 @@ class CollapsibleMenuSection extends ViewPU {
             placement: Placement.Bottom,
             popupColor: Color.White,
             enableArrow: !1,
-            onStateChange: e => this.isPopupShown = e.isVisible
+            onStateChange: e => {
+              this.isPopupShown = e.isVisible;
+              e.isVisible || (this.isMoreIconOnClick = !1)
+            }
           });
           t || Row.pop();
           ViewStackProcessor.StopGetAccessRecording()
@@ -586,6 +603,9 @@ class CollapsibleMenuSection extends ViewPU {
         top: CollapsibleMenuSection.focusPadding,
         bottom: CollapsibleMenuSection.focusPadding
       });
+      Column.onAppear((() => {
+        focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+      }));
       t || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -594,10 +614,11 @@ class CollapsibleMenuSection extends ViewPU {
       ForEach.create();
       this.forEachUpdateFunction(e, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), ((e, t) => {
         const o = e;
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, i) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
-          t ? ViewPU.create(new ImageMenuItem(this, {
-            item: o
+          i ? ViewPU.create(new ImageMenuItem(this, {
+            item: o,
+            index: 1e3 * this.index + CollapsibleMenuSection.maxCountOfVisibleItems + t
           }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
           ViewStackProcessor.StopGetAccessRecording()
         }))
@@ -818,7 +839,7 @@ class TabContentItem extends ViewPU {
             e.type === TouchType.Down && (this.isOnClick = !0);
             e.type === TouchType.Up && (this.isOnClick = !1)
           }));
-          Text.onClick((() => this.onCustomClick && this.onCustomClick()));
+          Text.onClick((() => this.onCustomClick && this.onCustomClick(this.index)));
           t || Text.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -853,7 +874,7 @@ class TabContentItem extends ViewPU {
             e.type === TouchType.Down && (this.isOnClick = !0);
             e.type === TouchType.Up && (this.isOnClick = !1)
           }));
-          Row.onClick((() => this.onCustomClick && this.onCustomClick()));
+          Row.onClick((() => this.onCustomClick && this.onCustomClick(this.index)));
           t || Row.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -920,6 +941,7 @@ class ImageMenuItem extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
     this.item = void 0;
+    this.index = void 0;
     this.__isOnFocus = new ObservedPropertySimplePU(!1, this, "isOnFocus");
     this.__isOnHover = new ObservedPropertySimplePU(!1, this, "isOnHover");
     this.__isOnClick = new ObservedPropertySimplePU(!1, this, "isOnClick");
@@ -927,6 +949,7 @@ class ImageMenuItem extends ViewPU {
   }
   setInitiallyProvidedValue(e) {
     void 0 !== e.item && (this.item = e.item);
+    void 0 !== e.index && (this.index = e.index);
     void 0 !== e.isOnFocus && (this.isOnFocus = e.isOnFocus);
     void 0 !== e.isOnHover && (this.isOnHover = e.isOnHover);
     void 0 !== e.isOnClick && (this.isOnClick = e.isOnClick)
@@ -1063,6 +1086,7 @@ class ImageMenuItem extends ViewPU {
       Image.width(ImageMenuItem.imageSize);
       Image.height(ImageMenuItem.imageSize);
       Image.focusable(this.item.isEnabled);
+      Image.key(ImageMenuItem.focusablePrefix + this.index);
       t || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -1077,6 +1101,7 @@ ImageMenuItem.imageHotZoneWidth = 48;
 ImageMenuItem.buttonBorderRadius = 8;
 ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.disabledImageOpacity = .4;
+ImageMenuItem.focusablePrefix = "Id-TabTitleBar-ImageMenuItem-";
 export default {
   TabTitleBar: TabTitleBar
 };

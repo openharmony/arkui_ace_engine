@@ -152,7 +152,8 @@ export class SelectTitleBar extends ViewPU {
               value: PUBLIC_BACK,
               isEnabled: !0,
               action: () => this.backActive = !0
-            }
+            },
+            index: -1
           }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
           ViewStackProcessor.StopGetAccessRecording()
         }))
@@ -373,7 +374,8 @@ export class SelectTitleBar extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           t ? ViewPU.create(new CollapsibleMenuSection(this, {
-            menuItems: this.menuItems
+            menuItems: this.menuItems,
+            index: 1 + SelectTitleBar.instanceCount++
           }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
           ViewStackProcessor.StopGetAccessRecording()
         }))
@@ -395,10 +397,13 @@ SelectTitleBar.leftPaddingWithBack = 12;
 SelectTitleBar.rightPadding = 24;
 SelectTitleBar.badgePadding = 16;
 SelectTitleBar.subtitleLeftPadding = 4;
+SelectTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
     this.menuItems = void 0;
+    this.index = void 0;
+    this.firstFocusableIndex = -1;
     this.__isPopupShown = new ObservedPropertySimplePU(!1, this, "isPopupShown");
     this.__isMoreIconOnFocus = new ObservedPropertySimplePU(!1, this, "isMoreIconOnFocus");
     this.__isMoreIconOnHover = new ObservedPropertySimplePU(!1, this, "isMoreIconOnHover");
@@ -407,6 +412,8 @@ class CollapsibleMenuSection extends ViewPU {
   }
   setInitiallyProvidedValue(e) {
     void 0 !== e.menuItems && (this.menuItems = e.menuItems);
+    void 0 !== e.index && (this.index = e.index);
+    void 0 !== e.firstFocusableIndex && (this.firstFocusableIndex = e.firstFocusableIndex);
     void 0 !== e.isPopupShown && (this.isPopupShown = e.isPopupShown);
     void 0 !== e.isMoreIconOnFocus && (this.isMoreIconOnFocus = e.isMoreIconOnFocus);
     void 0 !== e.isMoreIconOnHover && (this.isMoreIconOnHover = e.isMoreIconOnHover);
@@ -481,6 +488,11 @@ class CollapsibleMenuSection extends ViewPU {
       moduleName: ""
     } : Color.Transparent
   }
+  aboutToAppear() {
+    this.menuItems.forEach(((e, t) => {
+      e.isEnabled && -1 == this.firstFocusableIndex && t > CollapsibleMenuSection.maxCountOfVisibleItems - 2 && (this.firstFocusableIndex = 1e3 * this.index + t + 1)
+    }))
+  }
   initialRender() {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
@@ -512,16 +524,17 @@ class CollapsibleMenuSection extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           ForEach.create();
-          this.forEachUpdateFunction(e, this.menuItems, (e => {
-            const t = e;
-            this.observeComponentCreation(((e, o) => {
+          this.forEachUpdateFunction(e, this.menuItems, ((e, t) => {
+            const o = e;
+            this.observeComponentCreation(((e, i) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
-              o ? ViewPU.create(new ImageMenuItem(this, {
-                item: t
+              i ? ViewPU.create(new ImageMenuItem(this, {
+                item: o,
+                index: 1e3 * this.index + t + 1
               }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
               ViewStackProcessor.StopGetAccessRecording()
             }))
-          }));
+          }), void 0, !0, !1);
           t || ForEach.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -530,16 +543,17 @@ class CollapsibleMenuSection extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           ForEach.create();
-          this.forEachUpdateFunction(e, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (e => {
-            const t = e;
-            this.observeComponentCreation(((e, o) => {
+          this.forEachUpdateFunction(e, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), ((e, t) => {
+            const o = e;
+            this.observeComponentCreation(((e, i) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
-              o ? ViewPU.create(new ImageMenuItem(this, {
-                item: t
+              i ? ViewPU.create(new ImageMenuItem(this, {
+                item: o,
+                index: 1e3 * this.index + t + 1
               }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
               ViewStackProcessor.StopGetAccessRecording()
             }))
-          }));
+          }), void 0, !0, !1);
           t || ForEach.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -605,7 +619,10 @@ class CollapsibleMenuSection extends ViewPU {
             placement: Placement.Bottom,
             popupColor: Color.White,
             enableArrow: !1,
-            onStateChange: e => this.isPopupShown = e.isVisible
+            onStateChange: e => {
+              this.isPopupShown = e.isVisible;
+              e.isVisible || (this.isMoreIconOnClick = !1)
+            }
           });
           t || Row.pop();
           ViewStackProcessor.StopGetAccessRecording()
@@ -637,6 +654,9 @@ class CollapsibleMenuSection extends ViewPU {
         top: CollapsibleMenuSection.focusPadding,
         bottom: CollapsibleMenuSection.focusPadding
       });
+      Column.onAppear((() => {
+        focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+      }));
       t || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -645,10 +665,11 @@ class CollapsibleMenuSection extends ViewPU {
       ForEach.create();
       this.forEachUpdateFunction(e, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), ((e, t) => {
         const o = e;
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, i) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
-          t ? ViewPU.create(new ImageMenuItem(this, {
-            item: o
+          i ? ViewPU.create(new ImageMenuItem(this, {
+            item: o,
+            index: 1e3 * this.index + CollapsibleMenuSection.maxCountOfVisibleItems + t
           }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
           ViewStackProcessor.StopGetAccessRecording()
         }))
@@ -671,6 +692,7 @@ class ImageMenuItem extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
     this.item = void 0;
+    this.index = void 0;
     this.__isOnFocus = new ObservedPropertySimplePU(!1, this, "isOnFocus");
     this.__isOnHover = new ObservedPropertySimplePU(!1, this, "isOnHover");
     this.__isOnClick = new ObservedPropertySimplePU(!1, this, "isOnClick");
@@ -678,6 +700,7 @@ class ImageMenuItem extends ViewPU {
   }
   setInitiallyProvidedValue(e) {
     void 0 !== e.item && (this.item = e.item);
+    void 0 !== e.index && (this.index = e.index);
     void 0 !== e.isOnFocus && (this.isOnFocus = e.isOnFocus);
     void 0 !== e.isOnHover && (this.isOnHover = e.isOnHover);
     void 0 !== e.isOnClick && (this.isOnClick = e.isOnClick)
@@ -814,6 +837,7 @@ class ImageMenuItem extends ViewPU {
       Image.width(ImageMenuItem.imageSize);
       Image.height(ImageMenuItem.imageSize);
       Image.focusable(this.item.isEnabled);
+      Image.key(ImageMenuItem.focusablePrefix + this.index);
       t || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -828,6 +852,7 @@ ImageMenuItem.imageHotZoneWidth = 48;
 ImageMenuItem.buttonBorderRadius = 8;
 ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.disabledImageOpacity = .4;
+ImageMenuItem.focusablePrefix = "Id-SelectTitleBar-ImageMenuItem-";
 export default {
   SelectTitleBar: SelectTitleBar
 };

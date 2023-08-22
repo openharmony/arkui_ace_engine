@@ -56,6 +56,8 @@ export struct TabTitleBar {
   static readonly totalHeight = 56
   static readonly correctionOffset = -40.0
   static readonly gradientMaskWidth = 24
+  private static instanceCount = 0
+
   private menuSectionWidth = 0
   private tabOffsets = Array<number>()
   private imageWidths = Array<number>()
@@ -66,7 +68,8 @@ export struct TabTitleBar {
   private leftContext2D: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
   private rightContext2D: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
 
-  @Builder GradientMask(context2D: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number) {
+  @Builder
+  GradientMask(context2D: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number) {
     Column() {
       Canvas(context2D)
         .width(TabTitleBar.gradientMaskWidth)
@@ -127,14 +130,14 @@ export struct TabTitleBar {
           Stack({ alignContent: Alignment.Start }) {
             Column() {
               List({ initialIndex: 0, scroller: this.scroller, space: 0 }) {
-                ForEach(this.tabItems, (tabItem, index?: number) => {
+                ForEach(this.tabItems, (tabItem, index) => {
                   ListItem() {
                     TabContentItem({
                       item: tabItem,
                       index: index,
                       maxIndex: this.tabItems.length - 1,
                       currentIndex: this.currentIndex,
-                      onCustomClick: () => this.currentIndex = index,
+                      onCustomClick: (itemIndex) => this.currentIndex = itemIndex,
                       onImageComplete: (width) => {
                         this.imageWidths[index] = px2vp(width)
                         this.loadOffsets()
@@ -158,7 +161,7 @@ export struct TabTitleBar {
         }
 
         if (this.menuItems !== undefined && this.menuItems.length > 0) {
-          CollapsibleMenuSection({ menuItems: this.menuItems })
+          CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ })
           .height(TabTitleBar.totalHeight)
           .onAreaChange((_oldValue: Area, newValue: Area) => {
             this.menuSectionWidth = Number(newValue.width)
@@ -180,9 +183,10 @@ export struct TabTitleBar {
         .height('100%')
         .curve(Curve.Friction)
         .onChange((index) => {
+          const offset = this.tabOffsets[index] + TabTitleBar.correctionOffset
           this.currentIndex = index
           this.scroller.scrollTo({
-            xOffset: this.tabOffsets[index] + TabTitleBar.correctionOffset,
+            xOffset: offset > 0 ? offset : 0,
             yOffset: 0,
             animation: {
               duration: 300,
@@ -202,10 +206,12 @@ export struct TabTitleBar {
 @Component
 struct CollapsibleMenuSection {
   menuItems: Array<TabTitleBarMenuItem>
+  index: number
 
   static readonly maxCountOfVisibleItems = 1
   private static readonly focusPadding = 4
   private static readonly marginsNum = 2
+  private firstFocusableIndex = -1
 
   @State isPopupShown: boolean = false
 
@@ -229,16 +235,24 @@ struct CollapsibleMenuSection {
     }
   }
 
+  aboutToAppear() {
+    this.menuItems.forEach((item, index) => {
+      if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        this.firstFocusableIndex = this.index * 1000 + index + 1
+      }
+    })
+  }
+
   build() {
     Column() {
       Row() {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item) => {
-            ImageMenuItem({ item: item })
+          ForEach(this.menuItems, (item, index) => {
+            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item) => {
-            ImageMenuItem({ item: item })
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item, index) => {
+            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
 
           Row() {
@@ -297,7 +311,12 @@ struct CollapsibleMenuSection {
             placement: Placement.Bottom,
             popupColor: Color.White,
             enableArrow: false,
-            onStateChange: (e) => this.isPopupShown = e.isVisible
+            onStateChange: (e) => {
+              this.isPopupShown = e.isVisible
+              if (!e.isVisible) {
+                this.isMoreIconOnClick = false
+              }
+            }
           })
         }
       }
@@ -306,14 +325,18 @@ struct CollapsibleMenuSection {
     .justifyContent(FlexAlign.Center)
   }
 
-  @Builder popupBuilder() {
+  @Builder
+  popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item, _index?) => {
-        ImageMenuItem({ item: item })
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item, index) => {
+        ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
       })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
+    .onAppear(() => {
+      focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+    })
   }
 }
 
@@ -322,7 +345,7 @@ struct TabContentItem {
   item: TabTitleBarTabItem
   index: number
   maxIndex: number
-  onCustomClick?: () => void
+  onCustomClick?: (index: number) => void
   onImageComplete?: (width: number) => void
 
   @Prop currentIndex: number
@@ -406,7 +429,7 @@ struct TabContentItem {
                   this.isOnClick = false
                 }
               })
-              .onClick(() => this.onCustomClick && this.onCustomClick())
+              .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
           } else {
             Row() {
               Image(this.item.icon)
@@ -453,7 +476,7 @@ struct TabContentItem {
                 this.isOnClick = false
               }
             })
-            .onClick(() => this.onCustomClick && this.onCustomClick())
+            .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
           }
         }
         .justifyContent(FlexAlign.Center)
@@ -486,12 +509,14 @@ struct TabContentItem {
 @Component
 struct ImageMenuItem {
   item: TabTitleBarMenuItem
+  index: number
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
   static readonly buttonBorderRadius = 8
   static readonly focusBorderWidth = 2
   static readonly disabledImageOpacity = 0.4
+  static readonly focusablePrefix = "Id-TabTitleBar-ImageMenuItem-"
 
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
@@ -519,6 +544,7 @@ struct ImageMenuItem {
         .width(ImageMenuItem.imageSize)
         .height(ImageMenuItem.imageSize)
         .focusable(this.item.isEnabled)
+        .key(ImageMenuItem.focusablePrefix + this.index)
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
