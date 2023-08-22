@@ -29,9 +29,23 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t MAX_PINCH_FINGERS = 5;
+constexpr int32_t DEFAULT_PINCH_FINGERS = 2;
+constexpr Dimension DEFAULT_PINCH_DISTANCE = Dimension(5.0, DimensionUnit::VP);
 constexpr double SCALE_PER_AXIS_EVENT = 0.1f;
 
 } // namespace
+
+PinchRecognizer::PinchRecognizer(int32_t fingers, double distance)
+    : MultiFingersRecognizer(fingers), distance_(distance)
+{
+    if (fingers_ > MAX_PINCH_FINGERS || fingers_ < DEFAULT_PINCH_FINGERS) {
+        LOGW("pinchRecognizer fingers_ is illegal, change to DEFAULT_PINCH_FINGERS.");
+        fingers_ = DEFAULT_PINCH_FINGERS;
+    }
+    if (distance_ <= 0) {
+        distance_ = DEFAULT_PINCH_DISTANCE.ConvertToPx();
+    }
+}
 
 void PinchRecognizer::OnAccepted()
 {
@@ -58,11 +72,6 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     LOGD("pinch recognizer receives touch down event, begin to detect pinch event");
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
-        return;
-    }
-    if (fingers_ > MAX_PINCH_FINGERS) {
-        LOGE("the finger is larger than max finger");
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
@@ -94,8 +103,7 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch up event");
-    if (currentFingers_ < fingers_) {
-        LOGW("PinchGesture current finger number is less than requiried finger number.");
+    if (currentFingers_ != fingers_) {
         return;
     }
 
@@ -135,8 +143,7 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pinch recognizer receives touch move event");
-    if (currentFingers_ < fingers_) {
-        LOGW("PinchGesture current finger number is less than requiried finger number.");
+    if (currentFingers_ != fingers_) {
         return;
     }
 
