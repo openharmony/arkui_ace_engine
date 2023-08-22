@@ -324,8 +324,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
                 overlayManager->CallOnHideMenuCallback();
                 auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
                 // clear contextMenu then return
-                if (menuWrapperPattern && (menuWrapperPattern->IsContextMenu() ||
-                    menuWrapperPattern->IsRichEditorSelectMenu())) {
+                if (menuWrapperPattern && menuWrapperPattern->IsContextMenu()) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
                     return;
                 }

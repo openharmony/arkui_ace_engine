@@ -161,7 +161,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
 
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (IsContextMenu() || IsRichEditorSelectMenu()) {
+    if (IsContextMenu()) {
         SetHotAreas(dirty);
     }
     if (isFirstShow_) {
@@ -174,7 +174,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    if (layoutWrapper->GetAllChildrenWithBuild().empty() || (!IsContextMenu() && !IsRichEditorSelectMenu())) {
+    if (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) {
         return;
     }
     auto layoutProps = layoutWrapper->GetLayoutProperty();

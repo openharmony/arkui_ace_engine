@@ -226,7 +226,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 void MenuView::UpdateMenuPaintProperty(
     const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& type)
 {
-    if (!(type == MenuType::CONTEXT_MENU) && !(type == MenuType::RICH_EDIT_SELECT_MENU)) {
+    if (!(type == MenuType::CONTEXT_MENU)) {
         return;
     }
     auto paintProperty = menuNode->GetPaintProperty<MenuPaintProperty>();

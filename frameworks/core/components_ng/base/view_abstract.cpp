@@ -1219,7 +1219,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     type = MenuType::MENU;
 #endif
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
-    if (type == MenuType::CONTEXT_MENU || type == MenuType::RICH_EDIT_SELECT_MENU) {
+    if (type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
