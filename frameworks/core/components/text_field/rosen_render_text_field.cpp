@@ -632,14 +632,12 @@ void RosenRenderTextField::PaintFocus(const Offset& offset, const Size& widthHei
 
 void RosenRenderTextField::PaintScrollBar(const Offset& offset, RenderContext& context, SkCanvas* canvas)
 {
-    LOGI("Enter function RosenRenderTextField::PaintScrollBar:");
     if (scrollBar_ && scrollBar_->NeedPaint()) {
-        LOGI("need paint scroll bar");
         scrollBar_->UpdateScrollBarRegion(offset, GetLayoutSize(), GetLastOffset(), GetLongestLine());
         RefPtr<RosenScrollBarPainter> scrollBarPainter = AceType::MakeRefPtr<RosenScrollBarPainter>();
         scrollBarPainter->PaintBar(canvas, offset, GetPaintRect(), scrollBar_, GetGlobalOffset(), OPTICITY);
     } else {
-        LOGI("no need paint scroll bar");
+        LOGD("no need paint scroll bar");
     }
 }
 

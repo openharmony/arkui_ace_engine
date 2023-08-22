@@ -139,13 +139,13 @@ public:
     void ResetSlidingPanelParentHeight();
     void InitScrollBar(const RefPtr<TextFieldComponent>& component);
     void SetScrollBarCallback();
-    bool UpdateScrollPosition(double offset, int32_t source);
+    void UpdateScrollPosition(double offset, int32_t source);
     void SetEstimatedHeight(double val)
     {
         estimateHeight_ = val;
     }
 
-    double GetEstimatedHeight()
+    double GetEstimatedHeight() const
     {
         return estimateHeight_;
     }
@@ -463,7 +463,7 @@ protected:
     virtual DirectionStatus GetDirectionStatusOfPosition(int32_t position) const = 0;
     virtual Size ComputeDeflateSizeOfErrorAndCountText() const = 0;
     virtual void ResetStatus() {};
-    virtual double GetLongestLine()
+    virtual double GetLongestLine() const
     {
         return 0;
     }
@@ -492,7 +492,7 @@ protected:
     void UpdateDirectionStatus();
     void UpdateCaretInfoToController();
     Offset GetPositionForExtend(int32_t extend, bool isSingleHandle);
-    Offset GetLastOffset();
+    Offset GetLastOffset() const;
     /**
      * Get grapheme cluster length before or after extend.
      * For example, here is a sentence: 123🎉👍
@@ -501,7 +501,7 @@ protected:
      * When calling GetGraphemeClusterLength(3, true), '3' is in Utf16Bmp, so result is 1.
      */
     int32_t GetGraphemeClusterLength(int32_t extend, bool isPrefix) const;
-    bool IsOverflowX()
+    bool IsOverflowX() const
     {
         return overflowX_ == TextFieldOverflowX::AUTO || overflowX_ == TextFieldOverflowX::SCROLL;
     }
@@ -652,8 +652,8 @@ protected:
     RefPtr<RenderImage> renderHideIcon_;
 
     RefPtr<ScrollBar> scrollBar_; // system defined scroll bar
-    double lastOffset_;
-    double currentOffset_;
+    double lastOffset_ = 0.0;
+    double currentOffset_ = 0.0;
     Offset clickOffset_;
     // For ensuring caret is visible on screen, we take a strategy that move the whole text painting area.
     // It maybe seems rough, and doesn't support scrolling smoothly.
@@ -715,7 +715,7 @@ private:
     // distribute
     void ApplyRestoreInfo();
     void OnTapCallback();
-    virtual double GetRealTextWidth()
+    virtual double GetRealTextWidth() const
     {
         return 0;
     }

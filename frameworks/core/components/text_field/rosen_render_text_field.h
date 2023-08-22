@@ -95,7 +95,7 @@ protected:
     Offset GetHandleOffset(int32_t extend) override;
     Size ComputeDeflateSizeOfErrorAndCountText() const override;
     void ResetStatus() override;
-    double GetLongestLine() override;
+    double GetLongestLine() const override;
 
 private:
 #ifndef USE_GRAPHIC_TEXT_GINE

@@ -389,9 +389,9 @@ void RenderTextField::SetScrollBarCallback()
         auto textField = weakList.Upgrade();
         if (!textField) {
             LOGE("textField is released");
-            return false;
+            return;
         }
-        return textField->UpdateScrollPosition(value, source);
+        textField->UpdateScrollPosition(value, source);
     };
     auto&& barEndCallback = [weakList = AceType::WeakClaim(this)](int32_t value) {
         auto textField = weakList.Upgrade();
@@ -402,19 +402,16 @@ void RenderTextField::SetScrollBarCallback()
         textField->scrollBarOpacity_ = value;
         textField->MarkNeedRender();
     };
-    auto&& scrollEndCallback = []() {
-        // nothing to do
-    };
-    scrollBar_->SetCallBack(scrollCallback, barEndCallback, scrollEndCallback);
+    scrollBar_->SetCallBack(scrollCallback, barEndCallback, nullptr);
 }
 
-bool RenderTextField::UpdateScrollPosition(double offset, int32_t source)
+void RenderTextField::UpdateScrollPosition(double offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
-        return true;
+        return;
     }
     if (NearZero(offset)) {
-        return true;
+        return;
     }
     currentOffset_ += offset;
     if (scrollBar_ && scrollBar_->NeedScrollBar()) {
@@ -425,7 +422,7 @@ bool RenderTextField::UpdateScrollPosition(double offset, int32_t source)
     value.MoveToPosition(position);
     SetEditingValue(std::move(value));
     MarkNeedLayout(true);
-    return true;
+    return;
 }
 
 void RenderTextField::SetCallback(const RefPtr<TextFieldComponent>& textField)
@@ -750,7 +747,7 @@ void RenderTextField::OnTouchTestHit(
 
 void RenderTextField::InitScrollBar(const RefPtr<TextFieldComponent>& component)
 {
-    LOGE("Enter function RenderTextField::InitScrollBar:");
+    LOGD("Enter function RenderTextField::InitScrollBar:");
     if (scrollBar_) {
         scrollBar_->Reset();
         return;
