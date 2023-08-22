@@ -119,7 +119,6 @@ void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
     int32_t extend = paragraph_->GetHandlePositionForClick(pos);
-#ifndef USE_GRAPHIC_TEXT_GINE
     int32_t start = 0;
     int32_t end = 0;
     if (!paragraph_->GetWordBoundary(extend, start, end)) {
@@ -128,11 +127,6 @@ void TextPattern::InitSelection(const Offset& pos)
             static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
     }
     textSelector_.Update(start, end);
-#else
-    int32_t extendEnd =
-        std::min(static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
-    textSelector_.Update(extend, extendEnd);
-#endif
 }
 
 OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
@@ -142,8 +136,8 @@ OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectL
     auto rect = host->GetGeometryNode()->GetFrameRect();
     CHECK_NULL_RETURN(paragraph_, OffsetF(0.0f, 0.0f));
     CaretMetrics metrics;
-    auto computeSuccess = paragraph_->ComputeOffsetForCaretUpstream(position, metrics) ||
-                          paragraph_->ComputeOffsetForCaretDownstream(position, metrics);
+    auto computeSuccess = paragraph_->ComputeOffsetForCaretDownstream(position, metrics) ||
+                          paragraph_->ComputeOffsetForCaretUpstream(position, metrics);
     if (!computeSuccess) {
         LOGW("Get caret offset failed, set it to text tail");
         return { rect.Width(), 0.0f };

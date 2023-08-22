@@ -1151,9 +1151,7 @@ private:
 
     bool ResetObscureTickCountDown();
     bool IsInPasswordMode() const;
-#ifndef USE_GRAPHIC_TEXT_GINE
     void GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end);
-#endif
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void UpdateErrorTextMargin();

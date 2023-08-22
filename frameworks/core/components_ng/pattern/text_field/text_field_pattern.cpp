@@ -1038,8 +1038,11 @@ void TextFieldPattern::GetTextRectsInRange(
                 RSTypographyProperties::RectWidthStyle::TIGHT);
 #else
         if (offset.GetX() < textBoxes[0].rect.GetLeft() || offset.GetY() < textBoxes[0].rect.GetTop()) {
-            auto tmp = paragraph_->GetTextRectsByBoundary(base - 1, destination - 1,
-                RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM, RSTextRectWidthStyle::TIGHT);
+            int32_t start = 0;
+            int32_t end = 0;
+            GetWordBoundaryPositon(base - 1, start, end);
+            auto tmp = paragraph_->GetTextRectsByBoundary(start, end, RSTextRectHeightStyle::COVER_TOP_AND_BOTTOM,
+                RSTextRectWidthStyle::TIGHT);
 #endif
             if (tmp.size() != 1) {
                 return;
@@ -1222,15 +1225,20 @@ int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localO
 #endif
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 void TextFieldPattern::GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end)
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     CHECK_NULL_VOID_NOLOG(paragraph_);
     auto positon = paragraph_->GetWordBoundary(offset);
     start = static_cast<int32_t>(positon.start_);
     end = static_cast<int32_t>(positon.end_);
-}
+#else
+    CHECK_NULL_VOID_NOLOG(paragraph_);
+    auto positon = paragraph_->GetWordBoundaryByIndex(offset);
+    start = static_cast<int32_t>(positon.leftIndex);
+    end = static_cast<int32_t>(positon.rightIndex);
 #endif
+}
 
 bool TextFieldPattern::DisplayPlaceHolder()
 {
@@ -2609,18 +2617,10 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 void TextFieldPattern::UpdateSelectorByPosition(const int32_t& pos)
 {
     CHECK_NULL_VOID(paragraph_);
-#ifndef USE_GRAPHIC_TEXT_GINE
     int32_t start = 0;
     int32_t end = 0;
     GetWordBoundaryPositon(pos, start, end);
     textSelector_.Update(start, end);
-    if (textEditingValue_.caretPosition != end) {
-        textEditingValue_.caretPosition = end;
-    }
-#else
-    int32_t extendEnd = pos + GetGraphemeClusterLength(GetEditingValue().GetWideText(), pos);
-    textSelector_.Update(pos, extendEnd);
-#endif
 }
 
 int32_t TextFieldPattern::GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev)
