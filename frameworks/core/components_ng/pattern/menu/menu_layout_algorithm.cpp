@@ -341,7 +341,7 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    if (menuPattern->IsContextMenu()) {
+    if (menuPattern->IsContextMenu() || (menuPattern->IsSubMenu() && Container::CurrentId() >= MIN_SUBCONTAINER_ID)) {
         // no need to modify for context menu, because context menu wrapper is full screen.
         return;
     }
