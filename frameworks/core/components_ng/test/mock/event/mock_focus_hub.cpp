@@ -30,7 +30,7 @@ bool FocusHub::IsFocusable()
 
 void FocusHub::SetFocusable(bool focusable) {}
 
-bool FocusHub::RequestFocusImmediately()
+bool FocusHub::RequestFocusImmediately(bool isWholePathFocusable)
 {
     return true;
 }
