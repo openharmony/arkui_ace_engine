@@ -60,8 +60,6 @@ constexpr int32_t OPACITY_BACKBUTTON_IN_DELAY = 150;
 constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
 constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 400;
-const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
-const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 const RefPtr<InterpolatingSpring> interpolatingSpringCurve =
     AceType::MakeRefPtr<InterpolatingSpring>(18.0f, 1.0f, 324.0f, 36.0f);
 } // namespace
