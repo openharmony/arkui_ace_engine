@@ -26,6 +26,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -283,6 +284,14 @@ void MenuItemPattern::RegisterOnClick()
         if (pattern->GetSubBuilder() != nullptr) {
             pattern->ShowSubMenu();
             return;
+        }
+
+        // no need close menu
+        if (pattern->GetMenu() && pattern->GetMenu()->GetPattern()) {
+            auto menuPattern = DynamicCast<MenuPattern>(pattern->GetMenu()->GetPattern());
+            if (menuPattern && menuPattern->IsSelectOverlayCustomMenu()) {
+                return;
+            }
         }
 
         // hide menu when menu item is clicked

@@ -2608,7 +2608,6 @@ void RichEditorPattern::OnAreaChangedInner()
 void RichEditorPattern::CloseSelectionMenu()
 {
     CloseSelectOverlay();
-    ResetSelection();
 }
 
 void RichEditorPattern::CloseSelectOverlay()
