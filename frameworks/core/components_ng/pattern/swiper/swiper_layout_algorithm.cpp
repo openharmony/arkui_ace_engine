@@ -735,14 +735,18 @@ RefPtr<LayoutWrapper> SwiperLayoutAlgorithm::GetNodeLayoutWrapperByTag(
     int32_t lastChildIndex = totalChildCount - 1;
     if (swiperPattern->HasIndicatorNode() && !swiperPattern->HasLeftButtonNode() &&
         !swiperPattern->HasRightButtonNode()) {
-        nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(lastChildIndex);
-        return nodeWrapper;
+        if (itemPosition_.find(lastChildIndex) != itemPosition_.end()) {
+            nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(lastChildIndex);
+            return nodeWrapper;
+        }
     }
     int32_t endLoopChildIndex = lastChildIndex - SWIPER_HAS_CHILD;
     for (int32_t index = lastChildIndex; index > endLoopChildIndex && index >= 0; index--) {
-        nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (nodeWrapper && (nodeWrapper->GetHostTag() == tagName)) {
-            return nodeWrapper;
+        if (itemPosition_.find(lastChildIndex) != itemPosition_.end()) {
+            nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (nodeWrapper && (nodeWrapper->GetHostTag() == tagName)) {
+                return nodeWrapper;
+            }
         }
     }
 
