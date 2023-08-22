@@ -378,6 +378,7 @@ void SearchPattern::InitTouchEvent()
     CHECK_NULL_VOID(gesture);
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto searchPattern = weak.Upgrade();
+        CHECK_NULL_VOID(searchPattern);
         auto touchType = info.GetTouches().front().GetTouchType();
         auto touchLocalPosition = info.GetTouches().front().GetLocalLocation();
         auto touchPoint = PointF(touchLocalPosition.GetX(), touchLocalPosition.GetY());
