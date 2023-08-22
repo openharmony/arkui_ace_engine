@@ -402,7 +402,10 @@ void RenderTextField::SetScrollBarCallback()
         textField->scrollBarOpacity_ = value;
         textField->MarkNeedRender();
     };
-    scrollBar_->SetCallBack(scrollCallback, barEndCallback, nullptr);
+    auto&& scrollEndCallback = []() {
+        // nothing to do
+    };
+    scrollBar_->SetCallBack(scrollCallback, barEndCallback, scrollEndCallback);
 }
 
 void RenderTextField::UpdateScrollPosition(double offset, int32_t source)
@@ -2792,7 +2795,7 @@ Offset RenderTextField::GetPositionForExtend(int32_t extend, bool isSingleHandle
     return GetHandleOffset(extend);
 }
 
-Offset RenderTextField::GetLastOffset()
+Offset RenderTextField::GetLastOffset() const
 {
     return Offset(lastOffset_, 0.0);
 }
