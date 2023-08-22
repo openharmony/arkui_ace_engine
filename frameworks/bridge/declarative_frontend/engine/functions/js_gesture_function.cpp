@@ -63,9 +63,22 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
 
     JSRef<JSArray> fingerArr = JSRef<JSArray>::New();
     const std::list<FingerInfo>& fingerList = info.GetFingerList();
-    uint32_t idx = 0;
-    for (const FingerInfo& info : fingerList) {
-        JSRef<JSObject> element = CreateFingerInfo(info);
+    std::list<FingerInfo> notTouchFingerList;
+    int32_t maxFingerId = -1;
+    for (const FingerInfo& fingerInfo : fingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
+        if (fingerInfo.sourceType_ == SourceType::TOUCH && fingerInfo.sourceTool_ == SourceTool::FINGER) {
+            fingerArr->SetValueAt(fingerInfo.fingerId_, element);
+            if (fingerInfo.fingerId_ > maxFingerId) {
+                maxFingerId = fingerInfo.fingerId_;
+            }
+        } else {
+            notTouchFingerList.emplace_back(fingerInfo);
+        }
+    }
+    auto idx = maxFingerId + 1;
+    for (const FingerInfo& fingerInfo : notTouchFingerList) {
+        JSRef<JSObject> element = CreateFingerInfo(fingerInfo);
         fingerArr->SetValueAt(idx++, element);
     }
     gestureInfoObj->SetPropertyObject("fingerList", fingerArr);
