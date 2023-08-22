@@ -275,6 +275,7 @@ public:
 
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void UpdateInputFilterErrorText(const std::string& errorText) override;
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
