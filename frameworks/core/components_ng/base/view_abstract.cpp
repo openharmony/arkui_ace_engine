@@ -852,10 +852,14 @@ void ViewAbstract::SetDraggable(bool draggable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (draggable && !frameNode->IsDraggable()) {
-        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (draggable) {
+        if (!frameNode->IsDraggable()) {
+            gestureHub->InitDragDropEvent();
+        }
+    } else {
+        gestureHub->RemoveDragEvent();
     }
     frameNode->SetDraggable(draggable);
 }
