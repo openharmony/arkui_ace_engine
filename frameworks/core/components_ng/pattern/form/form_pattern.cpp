@@ -351,6 +351,17 @@ void FormPattern::OnVisibleChange(bool isVisible)
     isVisible_ = isVisible;
 }
 
+void FormPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    // FormComponent do not response to user's onClick callback.
+    gestureEventHub->ClearUserOnClick();
+}
+
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
