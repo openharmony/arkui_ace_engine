@@ -31,7 +31,8 @@ foreach(module, common_napi_libs) {
     }
   } else if (!is_cross_platform_build) {
     ace_napi_lib(module) {
-      platform = "ohos"
+      # napi libs remain isolate in libace.z.so
+      platform = "ohos_ng"
     }
   }
 

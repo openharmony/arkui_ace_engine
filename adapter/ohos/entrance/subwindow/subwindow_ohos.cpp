@@ -54,7 +54,9 @@
 namespace OHOS::Ace {
 namespace {
 const Rect MIN_WINDOW_HOT_AREA = Rect(0.0f, 0.0f, 1.0f, 1.0f);
+#ifndef NG_BUILD
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
+#endif
 } // namespace
 
 int32_t SubwindowOhos::id_ = 0;
@@ -144,6 +146,7 @@ void SubwindowOhos::InitContainer()
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
+#ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
@@ -159,6 +162,15 @@ void SubwindowOhos::InitContainer()
         }
     }
 #endif
+#endif
+#ifdef NG_BUILD
+    auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
+        Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
+    CHECK_NULL_VOID(subPipelineContextNG);
+    subPipelineContextNG->SetParentPipeline(parentContainer->GetPipelineContext());
+    subPipelineContextNG->SetupSubRootElement();
+    subPipelineContextNG->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
+#else
     if (container->IsCurrentUseNewPipeline()) {
         auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
             Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
@@ -174,6 +186,7 @@ void SubwindowOhos::InitContainer()
     subPipelineContext->SetParentPipeline(parentContainer->GetPipelineContext());
     subPipelineContext->SetupSubRootElement();
     subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
+#endif
 }
 
 RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
@@ -208,6 +221,7 @@ NG::RectF SubwindowOhos::GetRect()
 
 void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
 {
+#ifndef NG_BUILD
     ShowWindow();
     auto stack = GetStack();
     CHECK_NULL_VOID(stack);
@@ -219,10 +233,12 @@ void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disabl
     if (bubble) {
         bubble->SetWeakStack(WeakClaim(RawPtr(stack)));
     }
+#endif
 }
 
 bool SubwindowOhos::CancelPopup(const std::string& id)
 {
+#ifndef NG_BUILD
     auto stack = GetStack();
     CHECK_NULL_RETURN_NOLOG(stack, false);
     stack->PopPopup(id);
@@ -230,6 +246,7 @@ bool SubwindowOhos::CancelPopup(const std::string& id)
     CHECK_NULL_RETURN_NOLOG(context, false);
     context->FlushPipelineImmediately();
     HideWindow();
+#endif
     return true;
 }
 
@@ -332,6 +349,27 @@ void SubwindowOhos::HideWindow()
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
 
+#ifdef NG_BUILD
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    if (!rootNode->GetChildren().empty()) {
+        LOGD("there are still nodes mounted on root in subwindow");
+        auto lastChildId = rootNode->GetLastChild()->GetId();
+        if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
+            auto hotAreaRect = hotAreasMap_[lastChildId];
+            OHOS::Rosen::WMError ret = window_->SetTouchHotAreas(hotAreaRect);
+            if (ret != OHOS::Rosen::WMError::WM_OK) {
+                LOGW("Set hot areas failed with errCode: %{public}d", static_cast<int32_t>(ret));
+            }
+        }
+        return;
+    }
+    auto focusHub = rootNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetIsDefaultHasFocused(false);
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
         CHECK_NULL_VOID(context);
@@ -359,6 +397,7 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         rootNode->SetIsDefaultHasFocused(false);
     }
+#endif
 
     if (window_->IsFocused()) {
         auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -382,8 +421,10 @@ void SubwindowOhos::HideWindow()
     }
     isShowed_ = false;
     LOGI("Hide the subwindow successfully.");
+#ifndef NG_BUILD
     auto context = aceContainer->GetPipelineContext();
     CHECK_NULL_VOID(context);
+#endif
     AccessibilityEvent event;
     event.type = AccessibilityEventType::PAGE_CHANGE;
     event.windowId = context->GetWindowId();
@@ -393,6 +434,7 @@ void SubwindowOhos::HideWindow()
 
 void SubwindowOhos::AddMenu(const RefPtr<Component>& newComponent)
 {
+#ifndef NG_BUILD
     LOGI("Subwindow push new component start.");
     auto stack = GetStack();
     CHECK_NULL_VOID(stack);
@@ -404,10 +446,12 @@ void SubwindowOhos::AddMenu(const RefPtr<Component>& newComponent)
         LOGE("Add menu failed, this is not a popup component.");
     }
     LOGI("Subwindow push new component end.");
+#endif
 }
 
 void SubwindowOhos::ClearMenu()
 {
+#ifndef NG_BUILD
     LOGI("Subwindow Clear menu start.");
     auto stack = GetStack();
     CHECK_NULL_VOID(stack);
@@ -418,6 +462,7 @@ void SubwindowOhos::ClearMenu()
     context->FlushPipelineImmediately();
     HideWindow();
     LOGI("Subwindow clear menu end.");
+#endif
 }
 
 void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
@@ -501,6 +546,7 @@ void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 
 void SubwindowOhos::CloseMenu()
 {
+#ifndef NG_BUILD
     LOGI("Close the menu");
     if (!isShowed_) {
         LOGW("Subwindow is not showed.");
@@ -509,16 +555,21 @@ void SubwindowOhos::CloseMenu()
     if (popup_) {
         popup_->CloseContextMenu();
     }
+#endif
 }
 
 RefPtr<StackElement> SubwindowOhos::GetStack()
 {
+#ifndef NG_BUILD
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_RETURN(aceContainer, nullptr);
 
     auto context = DynamicCast<PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_RETURN(context, nullptr);
     return context->GetLastStack();
+#else
+    return nullptr;
+#endif
 }
 
 void SubwindowOhos::SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId)
@@ -625,6 +676,7 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
 
 bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float density)
 {
+#ifndef NG_BUILD
     LOGI("SubwindowOhos::InitToastDialogView begin");
     dialogWindow_->SetUIContent("", nullptr, nullptr, false);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(dialogWindow_->GetWindowId());
@@ -672,6 +724,9 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     }
     LOGI("SubwindowOhos::InitToastDialogView end");
     return true;
+#else
+    return true;
+#endif
 }
 
 bool SubwindowOhos::CreateEventRunner()

@@ -969,6 +969,29 @@ bool WebDelegate::LoadDataWithRichText()
     if (!context) {
         return false;
     }
+#ifdef NG_BUILD
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    auto webData = webPattern->GetWebData();
+    CHECK_NULL_RETURN(webData, false);
+    const std::string& data = webData.value();
+    if (data.empty()) {
+        return false;
+    }
+
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), data]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->LoadWithDataAndBaseUrl("", data, "", "", "");
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+    return true;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_RETURN(webPattern, false);
@@ -1011,6 +1034,7 @@ bool WebDelegate::LoadDataWithRichText()
         },
         TaskExecutor::TaskType::PLATFORM);
     return true;
+#endif
 }
 
 void WebDelegate::Refresh()
@@ -1868,6 +1892,24 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
     CHECK_NULL_VOID(nweb_);
     auto webId = nweb_->GetWebId();
 
+#ifdef NG_BUILD
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto setWebIdCallback = pattern->GetSetWebIdCallback();
+    CHECK_NULL_VOID(setWebIdCallback);
+    setWebIdCallback(webId);
+    auto onControllerAttachedCallback = pattern->GetOnControllerAttachedCallback();
+    if (onControllerAttachedCallback) {
+        onControllerAttachedCallback();
+    }
+    if (!hapPath_.empty()) {
+        auto setHapPathCallback = pattern->GetSetHapPathCallback();
+        CHECK_NULL_VOID(setHapPathCallback);
+        setHapPathCallback(hapPath_);
+    }
+    NotifyPopupWindowResult(true);
+    return;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto pattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1897,10 +1939,17 @@ void WebDelegate::RunSetWebIdAndHapPathCallback()
         setHapPathCallback(hapPath_);
     }
     NotifyPopupWindowResult(true);
+#endif
 }
 
 void WebDelegate::RunJsProxyCallback()
 {
+#ifdef NG_BUILD
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->CallJsProxyCallback();
+    return;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto pattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1910,6 +1959,7 @@ void WebDelegate::RunJsProxyCallback()
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_VOID(webCom);
     webCom->CallJsProxyCallback();
+#endif
 }
 
 void WebDelegate::RegisterConfigObserver()
@@ -2360,6 +2410,29 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
 {
     CHECK_NULL_VOID(nweb_);
     auto setting = nweb_->GetPreference();
+#ifdef NG_BUILD
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    setting->PutDomStorageEnabled(webPattern->GetDomStorageAccessEnabledValue(false));
+    setting->PutJavaScriptEnabled(webPattern->GetJsEnabledValue(true));
+    setting->PutEnableRawFileAccess(webPattern->GetFileAccessEnabledValue(true));
+    setting->PutEnableContentAccess(true);
+    setting->PutLoadImageFromNetworkDisabled(!webPattern->GetOnLineImageAccessEnabledValue(true));
+    setting->PutImageLoadingAllowed(webPattern->GetImageAccessEnabledValue(true));
+    setting->PutAccessModeForSecureOriginLoadFromInsecure(static_cast<OHOS::NWeb::NWebPreference::AccessMode>(
+        webPattern->GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW)));
+    setting->PutZoomingFunctionEnabled(webPattern->GetZoomAccessEnabledValue(true));
+    setting->PutGeolocationAllowed(webPattern->GetGeolocationAccessEnabledValue(true));
+    setting->PutCacheMode(static_cast<OHOS::NWeb::NWebPreference::CacheModeFlag>(
+        webPattern->GetCacheModeValue(WebCacheMode::DEFAULT)));
+    setting->PutLoadWithOverviewMode(webPattern->GetOverviewModeAccessEnabledValue(true));
+    setting->PutEnableRawFileAccessFromFileURLs(webPattern->GetFileFromUrlAccessEnabledValue(true));
+    setting->PutDatabaseAllowed(webPattern->GetDatabaseAccessEnabledValue(false));
+    setting->PutZoomingForTextFactor(webPattern->GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
+    setting->PutWebDebuggingAccess(webPattern->GetWebDebuggingAccessEnabledValue(false));
+    setting->PutMediaPlayGestureAccess(webPattern->GetMediaPlayGestureAccessValue(true));
+    return;
+#else
     if (useNewPipe) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -2402,6 +2475,7 @@ void WebDelegate::UpdateSettting(bool useNewPipe)
     setting->PutZoomingForTextFactor(component->GetTextZoomRatio());
     setting->PutWebDebuggingAccess(component->GetWebDebuggingAccessEnabled());
     setting->PutMediaPlayGestureAccess(component->IsMediaPlayGestureAccess());
+#endif
 }
 
 std::string WebDelegate::GetCustomScheme()
@@ -3776,6 +3850,16 @@ void WebDelegate::OnFullScreenExit()
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             auto param = std::make_shared<FullScreenExitEvent>(false);
+#ifdef NG_BUILD
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnFullScreenExitEvent = webEventHub->GetOnFullScreenExitEvent();
+            CHECK_NULL_VOID(propOnFullScreenExitEvent);
+            propOnFullScreenExitEvent(param);
+            return;
+#else
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
@@ -3791,6 +3875,7 @@ void WebDelegate::OnFullScreenExit()
             if (onFullScreenExitV2) {
                 onFullScreenExitV2(param);
             }
+#endif
         },
         TaskExecutor::TaskType::JS);
 }
@@ -3906,6 +3991,14 @@ bool WebDelegate::OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, Dia
     jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, dialogEventType, &result]() {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
+#ifdef NG_BUILD
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        result = webEventHub->FireOnCommonDialogEvent(info, dialogEventType);
+        return;
+#else
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
@@ -3918,6 +4011,7 @@ bool WebDelegate::OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, Dia
         CHECK_NULL_VOID(webCom);
         result = webCom->OnCommonDialog(info.get(), dialogEventType);
         return;
+#endif
     });
     return result;
 }
@@ -3932,6 +4026,18 @@ void WebDelegate::OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenEx
             CHECK_NULL_VOID(delegate);
             auto param = std::make_shared<FullScreenEnterEvent>(
                 AceType::MakeRefPtr<FullScreenExitHandlerOhos>(handler, weak));
+#ifdef NG_BUILD
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->RequestFullScreen();
+            webPattern->SetFullScreenExitHandler(param);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnFullScreenEnterEvent = webEventHub->GetOnFullScreenEnterEvent();
+            CHECK_NULL_VOID(propOnFullScreenEnterEvent);
+            propOnFullScreenEnterEvent(param);
+            return;
+#else
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
@@ -3947,6 +4053,7 @@ void WebDelegate::OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenEx
             auto webCom = delegate->webComponent_.Upgrade();
             CHECK_NULL_VOID(webCom);
             webCom->OnFullScreenEnter(param.get());
+#endif
         },
         TaskExecutor::TaskType::JS);
 }
@@ -3960,6 +4067,16 @@ bool WebDelegate::OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info)
     jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
+#ifdef NG_BUILD
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnHttpAuthRequestEvent = webEventHub->GetOnHttpAuthRequestEvent();
+        CHECK_NULL_VOID(propOnHttpAuthRequestEvent);
+        result = propOnHttpAuthRequestEvent(info);
+        return;
+#else
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
@@ -3973,6 +4090,7 @@ bool WebDelegate::OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info)
         auto webCom = delegate->webComponent_.Upgrade();
         CHECK_NULL_VOID(webCom);
         result = webCom->OnHttpAuthRequest(info.get());
+#endif
     });
     return result;
 }
@@ -3986,6 +4104,16 @@ bool WebDelegate::OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
     jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
+#ifdef NG_BUILD
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnSslErrorEvent = webEventHub->GetOnSslErrorRequestEvent();
+        CHECK_NULL_VOID(propOnSslErrorEvent);
+        result = propOnSslErrorEvent(info);
+        return;
+#else
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
@@ -3999,6 +4127,7 @@ bool WebDelegate::OnSslErrorRequest(const std::shared_ptr<BaseEventInfo>& info)
         auto webCom = delegate->webComponent_.Upgrade();
         CHECK_NULL_VOID(webCom);
         result = webCom->OnSslErrorRequest(info.get());
+#endif
     });
     return result;
 }
@@ -4012,6 +4141,16 @@ bool WebDelegate::OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& i
     jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
+#ifdef NG_BUILD
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnSslSelectCertRequestEvent = webEventHub->GetOnSslSelectCertRequestEvent();
+        CHECK_NULL_VOID(propOnSslSelectCertRequestEvent);
+        result = propOnSslSelectCertRequestEvent(info);
+        return;
+#else
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
@@ -4025,6 +4164,7 @@ bool WebDelegate::OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& i
         auto webCom = delegate->webComponent_.Upgrade();
         CHECK_NULL_VOID(webCom);
         result = webCom->OnSslSelectCertRequest(info.get());
+#endif
     });
     return result;
 }
@@ -4116,6 +4256,13 @@ void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResource
 
 bool WebDelegate::IsEmptyOnInterceptRequest()
 {
+#ifdef NG_BUILD
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    auto webEventHub = webPattern->GetWebEventHub();
+    CHECK_NULL_RETURN(webEventHub, false);
+    return webEventHub->GetOnInterceptRequestEvent() == nullptr;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_RETURN(webPattern, false);
@@ -4126,6 +4273,7 @@ bool WebDelegate::IsEmptyOnInterceptRequest()
     auto webCom = webComponent_.Upgrade();
     CHECK_NULL_RETURN(webCom, true);
     return webCom->IsEmptyOnInterceptRequest();
+#endif
 }
 
 RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info)
@@ -4270,6 +4418,16 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
     jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
+#ifdef NG_BUILD
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        auto webEventHub = webPattern->GetWebEventHub();
+        CHECK_NULL_VOID(webEventHub);
+        auto propOnContextMenuShowEvent = webEventHub->GetOnContextMenuShowEvent();
+        CHECK_NULL_VOID(propOnContextMenuShowEvent);
+        result = propOnContextMenuShowEvent(info);
+        return;
+#else
         if (Container::IsCurrentUseNewPipeline()) {
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
@@ -4283,6 +4441,7 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         auto webCom = delegate->webComponent_.Upgrade();
         CHECK_NULL_VOID(webCom);
         result = webCom->OnContextMenuShow(info.get());
+#endif
     });
     return result;
 }
@@ -4291,9 +4450,8 @@ void WebDelegate::OnContextMenuHide(const std::string& info)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
-    bool result = false;
     auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
-    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info, &result]() {
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), info]() {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
         if (Container::IsCurrentUseNewPipeline()) {
@@ -4509,6 +4667,16 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
             int32_t parentNWebId = (delegate->nweb_ ? delegate->nweb_->GetWebId() : -1);
             auto param = std::make_shared<WebWindowNewEvent>(targetUrl, isAlert, isUserTrigger,
                 AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler, parentNWebId));
+#ifdef NG_BUILD
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnWindowNewEvent = webEventHub->GetOnWindowNewEvent();
+            CHECK_NULL_VOID(propOnWindowNewEvent);
+            propOnWindowNewEvent(param);
+            return;
+#else
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);
@@ -4522,6 +4690,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
             auto webCom = delegate->webComponent_.Upgrade();
             CHECK_NULL_VOID(webCom);
             webCom->OnWindowNewEvent(param);
+#endif
         },
         TaskExecutor::TaskType::JS);
 }
@@ -4706,6 +4875,11 @@ void WebDelegate::OnBlur()
 bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
+#ifdef NG_BUILD
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->RunQuickMenu(params, callback);
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_RETURN(webPattern, false);
@@ -4718,10 +4892,17 @@ bool WebDelegate::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> 
     }
 
     return renderWeb->RunQuickMenu(params, callback);
+#endif
 }
 
 void WebDelegate::OnQuickMenuDismissed()
 {
+#ifdef NG_BUILD
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnQuickMenuDismissed();
+    return;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -4731,12 +4912,19 @@ void WebDelegate::OnQuickMenuDismissed()
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_VOID(renderWeb);
     renderWeb->OnQuickMenuDismissed();
+#endif
 }
 
 void WebDelegate::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle)
 {
+#ifdef NG_BUILD
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
+    return;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -4746,10 +4934,16 @@ void WebDelegate::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchH
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_VOID(renderWeb);
     renderWeb->OnTouchSelectionChanged(insertHandle, startSelectionHandle, endSelectionHandle);
+#endif
 }
 
 bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info)
 {
+#ifdef NG_BUILD
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    return webPattern->OnCursorChange(type, info);
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_RETURN(webPattern, false);
@@ -4758,12 +4952,19 @@ bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS:
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_RETURN(renderWeb, false);
     return renderWeb->OnCursorChange(type, info);
+#endif
 }
 
 void WebDelegate::OnSelectPopupMenu(
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
 {
+#ifdef NG_BUILD
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnSelectPopupMenu(params, callback);
+    return;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -4773,6 +4974,7 @@ void WebDelegate::OnSelectPopupMenu(
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_VOID(renderWeb);
     return renderWeb->OnSelectPopupMenu(params, callback);
+#endif
 }
 
 void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)
@@ -4965,6 +5167,18 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
 
 void WebDelegate::UpdateScreenOffSet(double& offsetX, double& offsetY)
 {
+#ifdef NG_BUILD
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    offsetX += webPattern->GetHost()->GetTransformRelativeOffset().GetX();
+    offsetY += webPattern->GetHost()->GetTransformRelativeOffset().GetY();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto windowOffset = context->GetDisplayWindowRectInfo().GetOffset();
+    offsetX += windowOffset.GetX();
+    offsetY += windowOffset.GetY();
+    return;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
@@ -4991,10 +5205,29 @@ void WebDelegate::UpdateScreenOffSet(double& offsetX, double& offsetY)
         offsetX += CONTAINER_BORDER_WIDTH.ConvertToPx();
         offsetY += CONTAINER_TITLE_HEIGHT.ConvertToPx();
     }
+#endif
 }
 
 void WebDelegate::RegisterSurfacePositionChangedCallback()
 {
+#ifdef NG_BUILD
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(context_.Upgrade());
+    CHECK_NULL_VOID(pipelineContext);
+    if (callbackId_ <= 0) {
+        callbackId_ = pipelineContext->RegisterSurfacePositionChangedCallback(
+            [weak = WeakClaim(this)](int32_t posX, int32_t posY) {
+                auto delegate = weak.Upgrade();
+                if (delegate && delegate->nweb_ && !delegate->window_) {
+                    double offsetX = 0;
+                    double offsetY = 0;
+                    delegate->UpdateScreenOffSet(offsetX, offsetY);
+                    delegate->nweb_->SetScreenOffSet(offsetX, offsetY);
+                }
+            }
+        );
+    }
+    return;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto pipelineContext = DynamicCast<NG::PipelineContext>(context_.Upgrade());
         CHECK_NULL_VOID(pipelineContext);
@@ -5028,6 +5261,7 @@ void WebDelegate::RegisterSurfacePositionChangedCallback()
             }
         );
     }
+#endif
 }
 
 void WebDelegate::UnregisterSurfacePositionChangedCallback()
@@ -5036,6 +5270,13 @@ void WebDelegate::UnregisterSurfacePositionChangedCallback()
         LOGE("callbackId_ = %{public}d", callbackId_);
         return;
     }
+#ifdef NG_BUILD
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(context_.Upgrade());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UnregisterSurfacePositionChangedCallback(callbackId_);
+    callbackId_ = 0;
+    return;
+#else
     if (Container::IsCurrentUseNewPipeline()) {
         auto pipelineContext = DynamicCast<NG::PipelineContext>(context_.Upgrade());
         CHECK_NULL_VOID(pipelineContext);
@@ -5047,6 +5288,7 @@ void WebDelegate::UnregisterSurfacePositionChangedCallback()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UnregisterSurfacePositionChangedCallback(callbackId_);
     callbackId_ = 0;
+#endif
 }
 
 void WebDelegate::OnCompleteSwapWithNewSize()

@@ -26,7 +26,7 @@ using LIBHANDLE = HMODULE;
 #else
 #include <dlfcn.h>
 using LIBHANDLE = void*;
-#define LOADLIB(libPath) dlopen(libPath, RTLD_LAZY)
+#define LOADLIB(libPath) dlopen(libPath, RTLD_LAZY|RTLD_LOCAL)
 #define FREELIB(libHandle) dlclose(libHandle)
 #define LOADSYM(libHandle, symbol) dlsym(libHandle, symbol)
 #endif

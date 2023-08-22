@@ -84,6 +84,7 @@
                 "qrcodegen",
                 "css-what",
                 "weex-loader",
+                "third_party_skia",
                 "skia",
                 "zlib",
                 "bounds_checking_function",
@@ -125,6 +126,15 @@
                 },
                 {
                     "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ace/",
+                        "header_files": [
+                            "ace_forward_compatibility.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_forward_compatibility"
+                },
+                {
+                    "header": {
                         "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/form_render/include",
                         "header_files": [
                             "form_renderer_group.h"
@@ -150,6 +160,16 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/build:libace"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_files": [
+                            "adapter/preview/entrance/ace_ability.h",
+                            "adapter/preview/entrance/ace_run_args.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/build:libace_compatible"
                 }
             ],
             "test": [

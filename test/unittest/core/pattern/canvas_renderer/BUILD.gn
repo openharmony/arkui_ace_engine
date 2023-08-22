@@ -20,7 +20,7 @@ ohos_unittest("canvas_renderer_test_ng") {
   sources = [ "canvas_renderer_test_ng.cpp" ]
 
   deps = [
-    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/bridge:framework_bridge_ohos",

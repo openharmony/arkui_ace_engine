@@ -16,25 +16,16 @@
 #include "interfaces/inner_api/ace/declarative_module_preloader.h"
 
 #include "utils.h"
+#include "ace_forward_compatibility.h"
 
 namespace OHOS::Ace {
-
-#if defined(WINDOWS_PLATFORM)
-constexpr char ACE_LIB_NAME[] = "libace.dll";
-#elif defined(MAC_PLATFORM)
-constexpr char ACE_LIB_NAME[] = "libace.dylib";
-#elif defined(LINUX_PLATFORM)
-constexpr char ACE_LIB_NAME[] = "libace.so";
-#else
-constexpr char ACE_LIB_NAME[] = "libace.z.so";
-#endif
 
 using CreateFunc = void (*)(void*);
 constexpr char PRE_INIT_ACE_MODULE_FUNC[] = "OHOS_ACE_PreloadAceModule";
 
 void InitAceModule(void* runtime)
 {
-    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
     if (handle == nullptr) {
         return;
     }
@@ -60,7 +51,7 @@ constexpr char RELOAD_ACE_MODULE_FUNC_CARD[] = "OHOS_ACE_ReloadAceModuleCard";
 
 void InitAceModuleCard(void* runtime, const char* bundleName)
 {
-    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
     if (handle == nullptr) {
         return;
     }
@@ -81,7 +72,7 @@ void DeclarativeModulePreloader::PreloadCard(NativeEngine& runtime, const std::s
 
 void ReloadAceModuleCard(void* runtime, const char* bundleName)
 {
-    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
     if (handle == nullptr) {
         return;
     }

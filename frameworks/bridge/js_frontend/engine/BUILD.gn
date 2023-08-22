@@ -50,7 +50,7 @@ template("js_engine") {
         config.use_build_in_js_engine) {
       deps += [ "$ace_root/frameworks/bridge:framework_bridge_$platform" ]
     } else {
-      deps += [ "$ace_root/build:libace" ]
+      deps += [ "$ace_root/build:libace_compatible" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
         if (is_cross_platform_build) {

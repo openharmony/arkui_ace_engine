@@ -70,6 +70,10 @@ template("framework_bridge_ng") {
       "common/accessibility:bridge_accessibility_$platform",
       "declarative_frontend:declarative_frontend_$platform",
     ]
+
+    if (defined(config.js_pa_support) && config.js_pa_support) {
+      deps += [ "$ace_root/${config.pa_engine_path}:pa_backend_$platform" ]
+    }
   }
 }
 
@@ -86,5 +90,11 @@ foreach(item, ace_platforms) {
 
   framework_bridge_ng("framework_bridge_ng_" + item.name) {
     platform = item.name
+    config = {
+    }
+
+    if (defined(item.config)) {
+      config = item.config
+    }
   }
 }

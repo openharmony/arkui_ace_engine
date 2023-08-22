@@ -323,7 +323,7 @@ static napi_module inspector_module = {
     .reserved = { 0 },
 };
 
-extern "C" __attribute__((constructor)) void Register()
+extern "C" __attribute__((constructor)) void RegisterInspector()
 {
     napi_module_register(&inspector_module);
 }

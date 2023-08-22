@@ -170,6 +170,9 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
 {
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID_NOLOG(container);
+#ifdef NG_BUILD
+    treeJsonStr = NG::Inspector::GetInspector(true);
+#else
     if (container->IsUseNewPipeline()) {
         treeJsonStr = NG::Inspector::GetInspector(true);
     } else {
@@ -177,6 +180,7 @@ void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t 
         CHECK_NULL_VOID(pipelineContext);
         treeJsonStr = V2::Inspector::GetInspectorTree(pipelineContext, true);
     }
+#endif
 }
 
 void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message)
