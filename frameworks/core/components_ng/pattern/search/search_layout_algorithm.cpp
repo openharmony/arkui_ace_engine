@@ -39,7 +39,6 @@ constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t MULTIPLE_2 = 2;
-
 } // namespace
 
 bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
@@ -155,7 +154,11 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     float leftPadding = padding.left.value_or(0.0f);
     float rightPadding = padding.right.value_or(0.0f);
     auto textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
-                          searchTheme->GetSearchIconRightSpace().ConvertToPx() - leftPadding - rightPadding;
+        searchTheme->GetSearchIconRightSpace().ConvertToPx() - leftPadding - rightPadding;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
+                         searchTheme->GetSearchIconRightSpace().ConvertToPx();
+    }
     if (searchButtonEvent->IsEnabled()) {
         textFieldWidth = textFieldWidth - buttonWidth - searchTheme->GetSearchDividerWidth().ConvertToPx() -
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
@@ -477,6 +480,9 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float topPadding = padding.top.value_or(0.0f);
     float bottomPadding = padding.bottom.value_or(0.0f);
     float leftOffset = padding.left.value_or(0.0f);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        leftOffset = 0.0f;
+    }
     float iconHorizontalOffset = leftOffset + searchIconLeftSpace + (iconRenderWidth - iconFrameWidth) / 2;
     auto searchIconConstraint = imageWrapper->GetLayoutProperty()->GetLayoutConstraint();
     auto iconUserHeight =
@@ -531,6 +537,9 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto searchButtonFrameSize = searchButtonGeometryNode->GetFrameSize();
     float searchButtonVerticalOffset = centerVerticalOffset - searchButtonFrameSize.Height() / 2;
     float rightOffset = padding.right.value_or(0.0f);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        rightOffset = 0.0f;
+    }
     float searchButtonHorizontalOffset =
         searchFrameWidth - searchButtonFrameSize.Width() - searchButtonSpace - rightOffset;
     searchButtonHorizontalOffset = std::max(searchButtonHorizontalOffset, 0.0f);
