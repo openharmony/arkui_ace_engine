@@ -389,9 +389,10 @@ void RenderTextField::SetScrollBarCallback()
         auto textField = weakList.Upgrade();
         if (!textField) {
             LOGE("textField is released");
-            return;
+            return false;
         }
         textField->UpdateScrollPosition(value, source);
+        return true;
     };
     auto&& barEndCallback = [weakList = AceType::WeakClaim(this)](int32_t value) {
         auto textField = weakList.Upgrade();
