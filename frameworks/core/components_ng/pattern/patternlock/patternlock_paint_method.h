@@ -59,7 +59,6 @@ private:
     float scaleBackgroundCircleRadius_ = 1.0f;
     float scaleWaveCircleRadiusStart_ = 1.0f;
     float scaleWaveCircleRadiusEnd_ = 1.0f;
-    float pressRadiusScale_ = 1.0f;
     float hoverRadiusScale_ = 1.0f;
 
     Dimension circleRadius_;
@@ -70,7 +69,6 @@ private:
     Color wrongColor_;
     Color correctColor_;
     Color hoverColor_;
-    Color pressColor_;
     Dimension pathStrokeWidth_;
     Dimension activeCircleRadius_;
 

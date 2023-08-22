@@ -75,8 +75,6 @@ constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr float PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE = 0.5f;
-constexpr float SPRING_RESPONSE = 0.347f;
-constexpr float SPRING_DAMPING_FRACTION = 0.99f;
 #endif // ENABLE_DRAG_FRAMEWORK
 
 constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
@@ -631,6 +629,8 @@ void OverlayManager::HideCustomPopups()
             if (isTypeWithOption) {
                 continue;
             }
+            popupInfo.markNeedUpdate = true;
+            popupInfo.popupId = -1;
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
@@ -660,6 +660,8 @@ void OverlayManager::HideAllPopups()
             CHECK_NULL_VOID(popupNode);
             auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
             CHECK_NULL_VOID(layoutProp);
+            popupInfo.markNeedUpdate = true;
+            popupInfo.popupId = -1;
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
@@ -774,16 +776,14 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     LOGI("menuNode mounted in subwindow");
 }
 
-void OverlayManager::HideMenuInSubWindow(int32_t targetId)
+void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId)
 {
     LOGI("OverlayManager::HideMenuInSubWindow");
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
-        return;
     }
-    auto node = menuMap_[targetId];
-    CHECK_NULL_VOID(node);
-    PopMenuAnimation(node);
+    CHECK_NULL_VOID(menu);
+    PopMenuAnimation(menu);
 }
 
 void OverlayManager::HideMenuInSubWindow()
@@ -800,15 +800,14 @@ void OverlayManager::HideMenuInSubWindow()
     }
 }
 
-void OverlayManager::HideMenu(int32_t targetId, bool isMenuOnTouch)
+void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
     LOGI("OverlayManager::HideMenuNode menu targetId is %{public}d", targetId);
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
-        return;
     }
-    PopMenuAnimation(menuMap_[targetId]);
-    menuMap_[targetId]->OnAccessibilityEvent(
+    PopMenuAnimation(menu);
+    menu->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 #ifdef ENABLE_DRAG_FRAMEWORK
     RemoveEventColumn();
@@ -1002,13 +1001,58 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
 }
 
+bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed)
+{
+    if (overlay->IsRemoving()) {
+        return false;
+    }
+    if (FireBackPressEvent()) {
+        return true;
+    }
+    auto hub = overlay->GetEventHub<DialogEventHub>();
+    if (hub) {
+        hub->FireCancelEvent();
+    }
+    CloseDialog(overlay);
+    if (isBackPressed) {
+        SetBackPressEvent(nullptr);
+    }
+    return true;
+}
+
+bool OverlayManager::RemoveBubble(const RefPtr<FrameNode>& overlay)
+{
+    auto bubbleEventHub = overlay->GetEventHub<BubbleEventHub>();
+    CHECK_NULL_RETURN(bubbleEventHub, false);
+    bubbleEventHub->FireChangeEvent(false);
+    auto rootNode = overlay->GetParent();
+    CHECK_NULL_RETURN(rootNode, false);
+    for (const auto& popup : popupMap_) {
+        auto targetId = popup.first;
+        auto popupInfo = popup.second;
+        if (overlay == popupInfo.popupNode) {
+            popupMap_.erase(targetId);
+            rootNode->RemoveChild(overlay);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            return true;
+        }
+    }
+    return false;
+}
+bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
+{
+    auto menuWrapperPattern = overlay->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    menuWrapperPattern->HideMenu();
+    return true;
+}
+
 bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
     DestroyKeyboard();
-    auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
         // stage node is at index 0, remove overlay at last
         auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
@@ -1016,36 +1060,13 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (InstanceOf<DialogPattern>(pattern)) {
-            if (FireBackPressEvent()) {
-                return true;
-            }
-            auto hub = overlay->GetEventHub<DialogEventHub>();
-            if (hub) {
-                hub->FireCancelEvent();
-            }
-            CloseDialog(overlay);
-            if (isBackPressed) {
-                SetBackPressEvent(nullptr);
-            }
-            return true;
-        } else if (AceType::DynamicCast<BubblePattern>(pattern)) {
-            auto popupNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildAtIndex(childrenSize - 1));
-            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-            for (const auto& popup : popupMap_) {
-                auto targetId = popup.first;
-                auto popupInfo = popup.second;
-                if (popupNode == popupInfo.popupNode) {
-                    popupMap_.erase(targetId);
-                    rootNode->RemoveChild(popupNode);
-                    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-                    return true;
-                }
-            }
-            return false;
+            return RemoveDialog(overlay, isBackPressed);
+        }
+        if (InstanceOf<BubblePattern>(pattern)) {
+            return RemoveBubble(overlay);
         }
         if (InstanceOf<MenuWrapperPattern>(pattern)) {
-            DynamicCast<MenuWrapperPattern>(pattern)->HideMenu();
-            return true;
+            return RemoveMenu(overlay);
         }
         if (!modalStack_.empty()) {
             if (isPageRouter) {
@@ -1154,15 +1175,10 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     CHECK_NULL_RETURN(overlay, false);
     // close dialog with animation
     auto pattern = overlay->GetPattern();
-    if (AceType::InstanceOf<DialogPattern>(pattern)) {
-        auto hub = overlay->GetEventHub<DialogEventHub>();
-        if (hub) {
-            hub->FireCancelEvent();
-        }
-        CloseDialog(overlay);
-        return true;
+    if (InstanceOf<DialogPattern>(pattern)) {
+        return RemoveDialog(overlay, false);
     }
-    if (AceType::InstanceOf<BubblePattern>(pattern)) {
+    if (InstanceOf<BubblePattern>(pattern)) {
         overlay->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         for (const auto& popup : popupMap_) {
             auto targetId = popup.first;
@@ -1179,9 +1195,8 @@ bool OverlayManager::RemoveOverlayInSubwindow()
         }
         return false;
     }
-    if (AceType::InstanceOf<MenuWrapperPattern>(pattern)) {
-        HideMenuInSubWindow();
-        return true;
+    if (InstanceOf<MenuWrapperPattern>(pattern)) {
+        return RemoveMenu(overlay);
     }
     rootNode->RemoveChild(overlay);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -1984,14 +1999,21 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     int32_t height = pixelMap->GetHeight();
 
     AnimationOption option;
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_RESPONSE, SPRING_DAMPING_FRACTION, 0);
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
-    option.SetCurve(motion);
     option.SetOnFinishEvent([this, id = Container::CurrentId()] {
         ContainerScope scope(id);
         LOGD("Drag window start with default pixelMap");
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
-        RemovePixelMap();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskScheduler = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask(
+            [overlayManager = AceType::Claim(this)]() {
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->RemovePixelMap();
+            },
+            TaskExecutor::TaskType::UI);
     });
     auto shadow = imageContext->GetBackShadow();
     if (!shadow.has_value()) {

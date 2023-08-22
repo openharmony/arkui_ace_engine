@@ -587,18 +587,29 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
     overlayManager->UpdatePopupNode(targetId2, popups[1]);
     EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
     /**
-     * @tc.steps: step3. call HidePopup when childCount is 2
+     * @tc.steps: step3. call HideCustomPopups when childCount is 2
      * @tc.expected: popupMap's data is updated successfully
      */
-    overlayManager->HideAllPopups();
+    overlayManager->HideCustomPopups();
     EXPECT_FALSE(overlayManager->popupMap_.empty());
+    EXPECT_EQ(rootNode->GetChildren().size(), 2);
     /**
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
-     * @tc.expected: remove successfully
+     * @tc.expected: remove one popupNode at a time
      */
     overlayManager->UpdatePopupNode(targetId1, popups[0]);
     overlayManager->UpdatePopupNode(targetId2, popups[1]);
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
+    EXPECT_FALSE(overlayManager->popupMap_.empty());
+    overlayManager->ErasePopup(targetId1);
+    overlayManager->ErasePopup(targetId2);
+    EXPECT_TRUE(overlayManager->popupMap_.empty());
+    /**
+     * @tc.steps: step5. call HideCustomPopups when popupMap_ is empty
+     * @tc.expected: function exits normally
+     */
+    overlayManager->HideCustomPopups();
+    EXPECT_TRUE(overlayManager->popupMap_.empty());
 }
 /**
  * @tc.name: PopupTest003
@@ -665,10 +676,10 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
     auto targetId = rootNode->GetId();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
-    overlayManager->HideMenu(targetId);
+    overlayManager->HideMenu(menuNode, targetId);
     EXPECT_FALSE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
-    overlayManager->HideMenuInSubWindow(rootNode->GetId());
+    overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
     EXPECT_FALSE(overlayManager->menuMap_.empty());
 
@@ -678,8 +689,8 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
      */
     overlayManager->HideAllMenus();
     overlayManager->DeleteMenu(targetId);
-    overlayManager->HideMenu(targetId);
-    overlayManager->HideMenuInSubWindow(targetId);
+    overlayManager->HideMenu(menuNode, targetId);
+    overlayManager->HideMenuInSubWindow(menuNode, targetId);
     overlayManager->HideMenuInSubWindow();
     EXPECT_TRUE(overlayManager->menuMap_.empty());
 
@@ -724,7 +735,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
     overlayManager->UpdatePopupNode(targetId, popupInfo);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
-
+    EXPECT_EQ(rootNode->GetChildren().size(), 0);
     /**
      * @tc.steps: step3. update ShowInSubwindow and call HideAllPopups again.
      * @tc.expected: popupMap's data is updated successfully

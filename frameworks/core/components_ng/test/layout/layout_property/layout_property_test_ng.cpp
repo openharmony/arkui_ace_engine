@@ -13,11 +13,21 @@
  * limitations under the License.
  */
 
+#include <optional>
+
+#include "gtest/gtest.h"
+
 #define protected public
 #define private public
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "base/geometry/dimension.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #undef private
 #undef protected
@@ -27,11 +37,11 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::optional<float> ZERO {0.0};
-const std::optional<int32_t> SPAN_ONE {-1};
-const std::optional<int32_t> OFFSET_ONE {-1};
-const std::optional<int> WIDTH_OPT {10};
-const std::optional<int> HEIGHT_OPT {5};
+const std::optional<float> ZERO { 0.0 };
+const std::optional<int32_t> SPAN_ONE { -1 };
+const std::optional<int32_t> OFFSET_ONE { -1 };
+const std::optional<int> WIDTH_OPT { 10 };
+const std::optional<int> HEIGHT_OPT { 5 };
 const std::optional<int32_t> SPAN;
 const std::optional<int32_t> OFFSET;
 
@@ -41,20 +51,19 @@ constexpr Dimension TOPONE = 3.0_vp;
 constexpr Dimension BOTTOMONE = 4.0_vp;
 
 const std::string VALUE_TEST = "test";
-const std::string STRING_TEST =
-    "{\"top\":\"3.00vp\",\"right\":\"2.00vp\",\"bottom\":\"4.00vp\",\"left\":\"1.00vp\"}";
+const std::string STRING_TEST = "{\"top\":\"3.00vp\",\"right\":\"2.00vp\",\"bottom\":\"4.00vp\",\"left\":\"1.00vp\"}";
 
 const auto FRAME_NODE_ROOT = FrameNode::CreateFrameNode("root", 1, AceType::MakeRefPtr<Pattern>(), true);
 const auto FRAME_NODE_TEST = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<Pattern>(), true);
 
-const CalcSize CALC_SIZE = {CalcLength(WIDTH), CalcLength(HEIGHT)};
+const CalcSize CALC_SIZE = { CalcLength(WIDTH), CalcLength(HEIGHT) };
 MagicItemProperty magicItemProperty;
 
 LayoutConstraintF layoutConstraintF = {
-    .minSize = {1, 1},
-    .maxSize = {10, 10},
-    .percentReference = {5, 5},
-    .parentIdealSize = {2, 2},
+    .minSize = { 1, 1 },
+    .maxSize = { 10, 10 },
+    .percentReference = { 5, 5 },
+    .parentIdealSize = { 2, 2 },
 };
 
 SafeAreaExpandOpts expandOpts = {
@@ -86,10 +95,10 @@ void MakeProperty(RefPtr<LayoutProperty> layoutProperty)
 PaddingPropertyT<CalcLength> MakePadding()
 {
     PaddingPropertyT<CalcLength> paddingProperty;
-    paddingProperty.left = {CalcLength(WIDTH)};
-    paddingProperty.right = {CalcLength(HEIGHT)};
-    paddingProperty.top = {CalcLength(TOPONE)};
-    paddingProperty.bottom = {CalcLength(BOTTOMONE)};
+    paddingProperty.left = { CalcLength(WIDTH) };
+    paddingProperty.right = { CalcLength(HEIGHT) };
+    paddingProperty.top = { CalcLength(TOPONE) };
+    paddingProperty.bottom = { CalcLength(BOTTOMONE) };
 
     return paddingProperty;
 }
@@ -200,7 +209,6 @@ HWTEST_F(LayoutPropertyTestNg, ToJsonValue002, TestSize.Level1)
     EXPECT_EQ(layoutProperty->propertyChangeFlag_, 3);
 }
 
-
 /**
  * @tc.name: UpdateCalcLayoutProperty001
  * @tc.desc: Test cast to LayoutPropertyTestNg
@@ -220,7 +228,6 @@ HWTEST_F(LayoutPropertyTestNg, UpdateCalcLayoutProperty001, TestSize.Level1)
      */
     layoutProperty->UpdateCalcLayoutProperty(std::move(constraint));
     EXPECT_EQ(layoutProperty->propertyChangeFlag_, 1);
-
 
     /**
      * @tc.steps3: call ToJsonValue with json.
@@ -296,7 +303,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckBorderAndPadding001, TestSize.Level1)
      * @tc.steps2: call CheckBorderAndPadding.push selfIdealSize is {1,-1}.
      * @tc.expected: Return expected results..
      */
-    layoutConstraintF.selfIdealSize = {1, -1};
+    layoutConstraintF.selfIdealSize = { 1, -1 };
     layoutProperty->layoutConstraint_ = layoutConstraintF;
     layoutProperty->CheckBorderAndPadding();
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Width(), 1);
@@ -306,7 +313,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckBorderAndPadding001, TestSize.Level1)
      * @tc.steps3: call CheckBorderAndPadding.push selfIdealSize is {-1,1}.
      * @tc.expected: Return expected results..
      */
-    layoutConstraintF.selfIdealSize = {-1, 1};
+    layoutConstraintF.selfIdealSize = { -1, 1 };
     layoutProperty->layoutConstraint_ = layoutConstraintF;
     layoutProperty->CheckBorderAndPadding();
     EXPECT_EQ(layoutProperty->layoutConstraint_->selfIdealSize.Width(), 0);
@@ -351,7 +358,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckAspectRatio001, TestSize.Level1)
      * @tc.steps3: push selfIdealSize Width hasvalue.
      * @tc.expected: Return expected results.
      */
-    layoutConstraintF.maxSize = {2, 4};
+    layoutConstraintF.maxSize = { 2, 4 };
     layoutConstraintF.selfIdealSize.SetWidth(WIDTH_OPT);
     layoutProperty->layoutConstraint_ = layoutConstraintF;
     layoutProperty->CheckAspectRatio();
@@ -391,7 +398,7 @@ HWTEST_F(LayoutPropertyTestNg, CheckAspectRatio002, TestSize.Level1)
      * @tc.steps3: push selfIdealSize maxSize hasvalue.
      * @tc.expected: Return expected results.
      */
-    constraintF.maxSize = {1, 2};
+    constraintF.maxSize = { 1, 2 };
     layoutProperty->layoutConstraint_ = constraintF;
     magicItemProperty.UpdateAspectRatio(1.0);
     layoutProperty->magicItemProperty_ = std::make_unique<MagicItemProperty>(magicItemProperty);
@@ -578,7 +585,7 @@ HWTEST_F(LayoutPropertyTestNg, OnVisibilityUpdate001, TestSize.Level1)
      * @tc.expected: expected host is null.
      */
     layoutProperty->OnVisibilityUpdate(VisibleType::VISIBLE, false);
-    auto host =layoutProperty->GetHost();
+    auto host = layoutProperty->GetHost();
     EXPECT_EQ(host, nullptr);
 
     /**
@@ -598,7 +605,7 @@ HWTEST_F(LayoutPropertyTestNg, OnVisibilityUpdate001, TestSize.Level1)
     FRAME_NODE_ROOT->SetParent(FRAME_NODE_TEST);
     layoutProperty->SetHost(FRAME_NODE_ROOT);
     layoutProperty->OnVisibilityUpdate(VisibleType::VISIBLE, true);
-    auto host_test =layoutProperty->GetHost();
+    auto host_test = layoutProperty->GetHost();
     ASSERT_NE(host_test, nullptr);
 
     /**
@@ -609,7 +616,6 @@ HWTEST_F(LayoutPropertyTestNg, OnVisibilityUpdate001, TestSize.Level1)
     auto parent_test = layoutProperty->GetHost()->GetAncestorNodeOfFrame();
     ASSERT_NE(parent_test, nullptr);
 }
-
 
 /**
  * @tc.name: CreateChildConstraint001
@@ -680,7 +686,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateContentConstraint001, TestSize.Level1)
      * @tc.expected: Return expected percentReference is {1, 0}.
      */
     LayoutConstraintF constraintF;
-    constraintF.percentReference = {1, 0};
+    constraintF.percentReference = { 1, 0 };
     layoutProperty->layoutConstraint_ = constraintF;
     layoutProperty->UpdateContentConstraint();
     EXPECT_EQ(layoutProperty->contentConstraint_->percentReference.Width(), 1);
@@ -690,7 +696,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateContentConstraint001, TestSize.Level1)
      * @tc.steps4: call UpdateContentConstraint, push layoutConstraint_ is hasvalue, the parentIdealSize is {4, 4}.
      * @tc.expected: Return expected percentReference is {4, 4}.
      */
-    constraintF.parentIdealSize = {4, 4};
+    constraintF.parentIdealSize = { 4, 4 };
     layoutProperty->layoutConstraint_ = constraintF;
     MakeProperty(layoutProperty);
     layoutProperty->UpdateContentConstraint();
@@ -728,12 +734,376 @@ HWTEST_F(LayoutPropertyTestNg, UpdateSafeAreaExpandOpts001, TestSize.Level1)
      * @tc.steps3: call UpdateSafeAreaExpandOpts and UpdateSafeAreaInsets.
      * @tc.expected: Return safeAreaExpandOpts_ edges is 1.
      */
-    layoutProperty->safeAreaExpandOpts_= std::make_unique<SafeAreaExpandOpts>(opts);
-    layoutProperty->safeAreaInsets_= std::make_unique<SafeAreaInsets>(safeArea);
+    layoutProperty->safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>(opts);
+    layoutProperty->safeAreaInsets_ = std::make_unique<SafeAreaInsets>(safeArea);
     layoutProperty->UpdateSafeAreaExpandOpts(expandOpts);
     layoutProperty->UpdateSafeAreaInsets(safeAreaInset);
     EXPECT_EQ(layoutProperty->safeAreaExpandOpts_->edges, SAFE_AREA_TYPE_SYSTEM);
     EXPECT_EQ(layoutProperty->safeAreaExpandOpts_->type, SAFE_AREA_EDGE_TOP);
     EXPECT_EQ(layoutProperty->propertyChangeFlag_, 3);
 }
+
+/**
+ * @tc.name: ResetCalcMinSize001
+ * @tc.desc: Test cast to ResetCalcMinSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, ResetCalcMinSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto width = CalcLength::FromString("1px");
+    auto height = CalcLength::FromString("1px");
+    CalcSize calcSize(width, height);
+    MeasureProperty calcLayoutConstraint;
+    calcLayoutConstraint.UpdateMinSizeWithCheck(calcSize);
+
+    width = CalcLength::FromString("0px");
+    height = CalcLength::FromString("0px");
+    CalcSize resetCalcSize(width, height);
+
+    /**
+     * @tc.steps2 call ResetCalcMinSize with calcLayoutConstraint.
+     */
+    layoutProperty->UpdateCalcLayoutProperty(calcLayoutConstraint);
+    layoutProperty->ResetCalcMinSize();
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize, std::nullopt);
+
+    /**
+     * @tc.steps3 call ResetCalcMinSize with calcLayoutConstraint_ NULL.
+     */
+    layoutProperty->calcLayoutConstraint_.reset();
+    layoutProperty->ResetCalcMinSize();
+    EXPECT_FALSE(layoutProperty->calcLayoutConstraint_);
 }
+
+/**
+ * @tc.name: ResetCalcMinSize002
+ * @tc.desc: Test cast to ResetCalcMinSize(bool resetWidth)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, ResetCalcMinSize002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto width = CalcLength::FromString("1px");
+    auto height = CalcLength::FromString("1px");
+    CalcSize calcSize(width, height);
+    MeasureProperty calcLayoutConstraint;
+    calcLayoutConstraint.UpdateMinSizeWithCheck(calcSize);
+    layoutProperty->UpdateCalcLayoutProperty(calcLayoutConstraint);
+
+    /**
+     * @tc.steps2 call ResetCalcMinSize with resetWidth false calcLayoutConstraint.
+     */
+    layoutProperty->ResetCalcMinSize(false);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize.value().Width(), width);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize.value().Height(), std::nullopt);
+
+    /**
+     * @tc.steps3 call ResetCalcMinSize with resetWidth true calcLayoutConstraint.
+     */
+    calcLayoutConstraint.UpdateMinSizeWithCheck(calcSize);
+    layoutProperty->UpdateCalcLayoutProperty(calcLayoutConstraint);
+    layoutProperty->ResetCalcMinSize(true);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize.value().Height(), height);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->minSize.value().Width(), std::nullopt);
+
+    /**
+     * @tc.steps3 call ResetCalcMinSize with calcLayoutConstraint_ NULL.
+     */
+    layoutProperty->calcLayoutConstraint_.reset();
+    layoutProperty->ResetCalcMinSize();
+    EXPECT_FALSE(layoutProperty->calcLayoutConstraint_);
+}
+
+/**
+ * @tc.name: ResetCalcMinSize001
+ * @tc.desc: Test cast to ResetCalcMaxSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, ResetCalcMaxSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto width = CalcLength::FromString("10px");
+    auto height = CalcLength::FromString("10px");
+    CalcSize calcSize(width, height);
+    MeasureProperty calcLayoutConstraint;
+    calcLayoutConstraint.UpdateMaxSizeWithCheck(calcSize);
+    layoutProperty->UpdateCalcLayoutProperty(calcLayoutConstraint);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize, calcSize);
+
+    /**
+     * @tc.steps2 call ResetCalcMaxSize with calcLayoutConstraint.
+     */
+    layoutProperty->ResetCalcMaxSize();
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize, std::nullopt);
+
+    /**
+     * @tc.steps3 call ResetCalcMaxSize with calcLayoutConstraint_ NULL.
+     */
+    layoutProperty->calcLayoutConstraint_.reset();
+    layoutProperty->ResetCalcMaxSize();
+    EXPECT_FALSE(layoutProperty->calcLayoutConstraint_);
+}
+
+/**
+ * @tc.name: ResetCalcMaxSize002
+ * @tc.desc: Test cast to ResetCalcMaxSize(bool resetWidth)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, ResetCalcMaxSize002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto width = CalcLength::FromString("10px");
+    auto height = CalcLength::FromString("10px");
+    CalcSize calcSize(width, height);
+    MeasureProperty calcLayoutConstraint;
+    calcLayoutConstraint.UpdateMaxSizeWithCheck(calcSize);
+    layoutProperty->UpdateCalcLayoutProperty(calcLayoutConstraint);
+
+    /**
+     * @tc.steps2 call ResetCalcMaxSize with resetWidth false calcLayoutConstraint.
+     */
+    layoutProperty->ResetCalcMaxSize(false);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value().Width(), width);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value().Height(), std::nullopt);
+
+    /**
+     * @tc.steps3 call ResetCalcMaxSize with resetWidth true calcLayoutConstraint.
+     */
+    calcLayoutConstraint.UpdateMaxSizeWithCheck(calcSize);
+    layoutProperty->UpdateCalcLayoutProperty(calcLayoutConstraint);
+    layoutProperty->ResetCalcMaxSize(true);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value().Height(), height);
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->maxSize.value().Width(), std::nullopt);
+
+    /**
+     * @tc.steps3 call ResetCalcMaxSize with calcLayoutConstraint_ NULL.
+     */
+    layoutProperty->calcLayoutConstraint_.reset();
+    layoutProperty->ResetCalcMaxSize();
+    EXPECT_FALSE(layoutProperty->calcLayoutConstraint_);
+}
+
+/**
+ * @tc.name: UpdateFlexGrow001
+ * @tc.desc: Test cast to UpdateFlexGrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, UpdateFlexGrow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    EXPECT_FALSE(layoutProperty->flexItemProperty_);
+
+    layoutProperty->UpdateFlexGrow(1);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    EXPECT_FALSE(layoutProperty->flexItemProperty_->GetTwoHorizontalDirectionAligned());
+}
+
+/**
+ * @tc.name: ResetFlexGrow001
+ * @tc.desc: Test cast to UpdateFlexGrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, ResetFlexGrow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    /**
+     * @tc.steps2 Call ResetFlexGrow without flexItemProperty_.
+     */
+    layoutProperty->ResetFlexGrow();
+    EXPECT_FALSE(layoutProperty->flexItemProperty_);
+
+    /**
+     * @tc.steps3 Call ResetFlexGrow with flexItemProperty_.
+     */
+    layoutProperty->UpdateFlexGrow(1.0);
+    layoutProperty->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    layoutProperty->ResetFlexGrow();
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: ResetFlexShrink001
+ * @tc.desc: Test cast to ResetFlexShrink
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, ResetFlexShrink001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    /**
+     * @tc.steps2 Call ResetFlexShrink without flexItemProperty_.
+     */
+    layoutProperty->ResetFlexShrink();
+    EXPECT_FALSE(layoutProperty->flexItemProperty_);
+
+    /**
+     * @tc.steps3 Call ResetFlexShrink with flexItemProperty_.
+     */
+    layoutProperty->UpdateFlexShrink(1.0);
+    layoutProperty->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    layoutProperty->ResetFlexShrink();
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: UpdateFlexBasis001
+ * @tc.desc: Test cast to UpdateFlexBasis
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, UpdateFlexBasis001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    /**
+     * @tc.steps2 Call UpdateFlexBasis without flexItemProperty_.
+     */
+    auto flexBasis = Dimension::FromString("1px");
+    layoutProperty->UpdateFlexBasis(flexBasis);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: ResetAlignSelf001
+ * @tc.desc: Test cast to ResetAlignSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, ResetAlignSelf001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    /**
+     * @tc.steps2 Call UpdateFlexBasis without flexItemProperty_.
+     */
+    layoutProperty->ResetAlignSelf();
+    EXPECT_FALSE(layoutProperty->flexItemProperty_);
+
+    /**
+     * @tc.steps3 Call UpdateFlexBasis with flexItemProperty_.
+     */
+    FlexAlign flexAlign = FlexAlign::CENTER;
+    layoutProperty->UpdateAlignSelf(flexAlign);
+    layoutProperty->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    layoutProperty->ResetAlignSelf();
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: UpdateDisplayIndex001
+ * @tc.desc: Test cast to UpdateDisplayIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, UpdateDisplayIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+
+    /**
+     * @tc.steps2 Call UpdateFlexBasis without flexItemProperty_.
+     */
+    EXPECT_FALSE(layoutProperty->flexItemProperty_);
+    layoutProperty->UpdateDisplayIndex(0);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+}
+
+/**
+ * @tc.name: SetOverlayOffset001
+ * @tc.desc: Test cast to SetOverlayOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, SetOverlayOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->overlayOffsetX_ = Dimension::FromString("1px");
+    layoutProperty->overlayOffsetY_ = Dimension::FromString("1px");
+
+    /**
+     * @tc.steps2 Call UpdateFlexBasis with overlayOffsetX and overlayOffsetY.
+            xChanged = false, yChanged = false.
+     */
+    auto overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("1px"));
+    auto overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("1px"));
+    layoutProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
+
+    /**
+     * @tc.steps3 Call UpdateFlexBasis with overlayOffsetX and overlayOffsetY.
+        @tc.expect: overlayOffsetX_ == overlayOffsetX and overlayOffsetY_ == overlayOffsetY
+     */
+    overlayOffsetX = std::make_optional<Dimension>(Dimension::FromString("2px"));
+    overlayOffsetY = std::make_optional<Dimension>(Dimension::FromString("2px"));
+    layoutProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
+    EXPECT_EQ(layoutProperty->overlayOffsetX_, overlayOffsetX.value());
+    EXPECT_EQ(layoutProperty->overlayOffsetY_, overlayOffsetY.value());
+
+    /**
+     * @tc.steps3 Call UpdateFlexBasis with overlayOffsetX and overlayOffsetY.
+        @tc.expect: overlayOffsetX_ == overlayOffsetX and overlayOffsetY_ == overlayOffsetY
+     */
+    overlayOffsetX = std::nullopt;
+    overlayOffsetY = std::nullopt;
+    layoutProperty->SetOverlayOffset(overlayOffsetX, overlayOffsetY);
+    EXPECT_EQ(layoutProperty->overlayOffsetX_, Dimension::FromString("0.0px"));
+    EXPECT_EQ(layoutProperty->overlayOffsetY_, Dimension::FromString("0.0px"));
+}
+
+/**
+ * @tc.name: UpdateAllGeometryTransition001
+ * @tc.desc: Test cast to UpdateAllGeometryTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNg, UpdateAllGeometryTransition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty.
+     */
+    auto parent = FrameNode::CreateFrameNode("parentNode", 0, AceType::MakeRefPtr<Pattern>());
+    parent->GetLayoutProperty()->UpdateGeometryTransition("parent", true);
+
+    auto child = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>());
+    child->GetLayoutProperty()->UpdateGeometryTransition("child", true);
+    child->MountToParent(parent);
+
+    LayoutProperty::UpdateAllGeometryTransition(parent);
+    EXPECT_FALSE(child->GetLayoutProperty()->GetGeometryTransition());
+}
+} // namespace OHOS::Ace::NG

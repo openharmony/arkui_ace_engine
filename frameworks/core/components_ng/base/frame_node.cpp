@@ -959,6 +959,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     }
     SetRootMeasureNode(true);
     UpdateLayoutPropertyFlag();
+    SetSkipSyncGeometryNode(false);
     {
         ACE_SCOPED_TRACE("Measure");
         Measure(GetLayoutConstraint());
@@ -1339,7 +1340,7 @@ void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList
     allList.emplace_back(Claim(this));
 }
 
-void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
@@ -1347,13 +1348,7 @@ void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Fr
     if (!isActive_ || (!IsVisible() && !context->HasTransitionOutAnimation())) {
         return;
     }
-    if (index > visibleList.size()) {
-        visibleList.emplace_back(Claim(this));
-    } else {
-        auto iter = visibleList.begin();
-        std::advance(iter, index);
-        visibleList.insert(iter, Claim(this));
-    }
+    visibleList.emplace_back(Claim(this));
 }
 
 bool FrameNode::IsMeasureBoundary()
@@ -1474,12 +1469,14 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto name = GetInspectorId().value_or("");
     auto param = renderContext_->GetTrans();
-    TransformConfig cfg = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7], param[8],
-        GetId() };
+    if (param.empty()) {
+        translateCfg[GetId()] = { .id = GetId() };
+    } else {
+        translateCfg[GetId()] = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7],
+            param[8], GetId() };
+    }
     auto parent = GetAncestorNodeOfFrame();
-    translateCfg[GetId()] = cfg;
     if (parent) {
         AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
         translateIds[GetId()] = ancestorNodeInfo;
@@ -2297,6 +2294,12 @@ void FrameNode::Layout()
 {
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
+    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
+    if (geometryTransition != nullptr) {
+        if (!IsRootMeasureNode() && geometryTransition->IsNodeInAndActive(Claim(this))) {
+            SetSkipSyncGeometryNode();
+        }
+    }
     if (CheckNeedLayout(layoutProperty_->GetPropertyChangeFlag())) {
         if (!layoutProperty_->GetLayoutConstraint()) {
             const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
@@ -2337,6 +2340,10 @@ void FrameNode::SyncGeometryNode()
 
     if (!isActive_ && !hasTransition) {
         LOGD("current node is inactive, don't need to render");
+        layoutAlgorithm_.Reset();
+        return;
+    }
+    if (SkipSyncGeometryNode() && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
         layoutAlgorithm_.Reset();
         return;
     }
@@ -2436,8 +2443,11 @@ void FrameNode::SyncGeometryNode()
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
 {
     auto child = frameProxy_->GetFrameNodeByIndex(index, true);
-    if (addToRenderTree && child) {
-        child->SetActive(true);
+    if (child) {
+        child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
+        if (addToRenderTree) {
+            child->SetActive(true);
+        }
     }
     return child;
 }
@@ -2450,10 +2460,11 @@ RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index)
 const std::list<RefPtr<LayoutWrapper>>& FrameNode::GetAllChildrenWithBuild(bool addToRenderTree)
 {
     const auto& children = frameProxy_->GetAllFrameChildren();
-    if (addToRenderTree) {
-        for (const auto& child : children) {
+    for (const auto& child : children) {
+        if (addToRenderTree) {
             child->SetActive(true);
         }
+        child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
     }
 
     return children;

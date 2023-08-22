@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GridLayoutProperty : public LayoutProperty {
@@ -41,6 +42,7 @@ public:
         value->propCellLength_ = CloneCellLength();
         value->propEdgeEffect_ = CloneEdgeEffect();
         value->propScrollEnabled_ = CloneScrollEnabled();
+        value->propLayoutOptions_ = CloneLayoutOptions();
         return value;
     }
 
@@ -58,6 +60,7 @@ public:
         ResetCellLength();
         ResetEdgeEffect();
         ResetScrollEnabled();
+        ResetLayoutOptions();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -80,13 +83,13 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ColumnsTemplate, std::string);
-    void OnColumnsTemplateUpdate(const std::string& /*columnsTemplate*/) const
+    void OnColumnsTemplateUpdate(const std::string& /* columnsTemplate */) const
     {
         ResetGridLayoutInfoAndMeasure();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RowsTemplate, std::string);
-    void OnRowsTemplateUpdate(const std::string& /*rowsTemplate*/) const
+    void OnRowsTemplateUpdate(const std::string& /* rowsTemplate */) const
     {
         ResetGridLayoutInfoAndMeasure();
     }
@@ -95,28 +98,34 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RowsGap, Dimension, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CachedCount, int32_t);
-    void OnCachedCountUpdate(int32_t /*cachedCount*/) const {}
+    void OnCachedCountUpdate(int32_t /* cachedCount */) const {}
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(GridDirection, FlexDirection);
-    void OnGridDirectionUpdate(FlexDirection /*gridDirection*/) const
+    void OnGridDirectionUpdate(FlexDirection /* gridDirection */) const
     {
         ResetGridLayoutInfoAndMeasure();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MaxCount, int32_t);
-    void OnMaxCountUpdate(int32_t /*maxCount*/) const
+    void OnMaxCountUpdate(int32_t /* maxCount */) const
     {
         ResetGridLayoutInfoAndMeasure();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MinCount, int32_t);
-    void OnMinCountUpdate(int32_t /*minCount*/) const
+    void OnMinCountUpdate(int32_t /* minCount */) const
     {
         ResetGridLayoutInfoAndMeasure();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CellLength, int32_t);
-    void OnCellLengthUpdate(int32_t /*cellLength*/) const
+    void OnCellLengthUpdate(int32_t /* cellLength */) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LayoutOptions, GridLayoutOptions);
+    void OnLayoutOptionsUpdate(GridLayoutOptions /* layoutOptions */) const
     {
         ResetGridLayoutInfoAndMeasure();
     }

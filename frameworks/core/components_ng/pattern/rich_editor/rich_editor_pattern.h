@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #if not defined(ACE_UNITTEST)
@@ -47,6 +48,20 @@ class OnTextChangedListener;
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
+
+struct SelectionMenuParams {
+    RichEditorType type;
+    std::function<void()> buildFunc;
+    std::function<void()> onAppear;
+    std::function<void()> onDisappear;
+    ResponseType responseType;
+
+    SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc, std::function<void()> _onAppear,
+        std::function<void()> _onDisappear, ResponseType _responseType)
+        : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
+          responseType(_responseType)
+    {}
+};
 
 class RichEditorPattern : public TextPattern, public TextInputClient {
     DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, TextInputClient);
@@ -137,6 +152,7 @@ public:
     void DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info);
     void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
     void ClearContent(const RefPtr<UINode>& child);
+    void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -177,6 +193,7 @@ public:
 
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CopySelectionMenuParams(SelectOverlayInfo& selectInfo);
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif
@@ -191,6 +208,12 @@ public:
             CloseCustomKeyboard();
         }
         customKeyboardBulder_ = keyboardBuilder;
+    }
+    void BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>& menuBuilder,
+        std::function<void()>& onAppear, std::function<void()>& onDisappear)
+    {
+        selectionMenuParams_ =
+            std::make_shared<SelectionMenuParams>(richEditorType, menuBuilder, onAppear, onDisappear, type);
     }
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
@@ -281,9 +304,6 @@ private:
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
     bool isFirstMouseSelect_ = true;
-#ifdef ENABLE_DRAG_FRAMEWORK
-    bool isMouseTryDragging_ = false;
-#endif
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
     bool imeShown_ = false;
@@ -297,6 +317,7 @@ private:
     bool isRichEditorInit_ = false;
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
+    bool blockPress_ = false;
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
     OffsetF rightClickOffset_;
@@ -314,6 +335,8 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
+    std::shared_ptr<SelectionMenuParams> selectionMenuParams_ = nullptr;
+
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

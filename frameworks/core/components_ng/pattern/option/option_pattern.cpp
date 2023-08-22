@@ -86,8 +86,7 @@ void OptionPattern::OnSelectProcess()
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto targetId = menuPattern->GetTargetId();
-    overlayManager->HideMenu(targetId);
+    menuPattern->HideMenu();
 }
 
 void OptionPattern::PlayBgColorAnimation(bool isHoverChange)

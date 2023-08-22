@@ -196,11 +196,11 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void SubwindowManager::HideMenuNG(int32_t targetId)
+void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->HideMenuNG(targetId);
+        subwindow->HideMenuNG(menu, targetId);
     }
 }
 

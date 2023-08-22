@@ -1,0 +1,46 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+es2abc_gen_abc("gen_swiperefresher_abc") {
+  src_js = rebase_path("swiperefresher.js")
+  dst_file = rebase_path(target_out_dir + "/swiperefresher.abc")
+  in_puts = [ "swiperefresher.js" ]
+  out_puts = [ target_out_dir + "/swiperefresher.abc" ]
+  extra_args = [ "--module" ]
+}
+
+gen_js_obj("swiperefresher_abc") {
+  input = get_label_info(":gen_swiperefresher_abc", "target_out_dir") +
+          "/swiperefresher.abc"
+  output = target_out_dir + "/swiperefresher_abc.o"
+  dep = ":gen_swiperefresher_abc"
+}
+
+ohos_shared_library("swiperefresher") {
+  sources = [ "swiperefresher.cpp" ]
+
+  deps = [ ":swiperefresher_abc" ]
+
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
+
+  relative_install_dir = "module/arkui/advanced"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

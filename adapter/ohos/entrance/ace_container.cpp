@@ -1571,6 +1571,11 @@ void AceContainer::ReloadForm()
     themeManager->SetColorScheme(colorScheme_);
     themeManager->LoadCustomTheme(assetManager_);
     themeManager->LoadResourceThemes();
+
+    auto cache = pipelineContext_->GetImageCache();
+    if (cache) {
+        cache->Clear();
+    }
 }
 
 void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)

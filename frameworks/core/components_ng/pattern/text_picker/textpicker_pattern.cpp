@@ -388,6 +388,18 @@ void TextPickerPattern::PaintFocusState()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void TextPickerPattern::SetFocusCornerRadius(RoundRect& paintRect)
+{
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
+        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
+        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
+        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
+        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+}
+
 void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
@@ -424,22 +436,22 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     } else {
         piantRectHeight = piantRectHeight - DIALOG_OFFSET.ConvertToPx();
         centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
+        centerX = centerX + FOUCS_WIDTH.ConvertToPx();
     }
     if (piantRectWidth > columnWidth) {
-        piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx();
-        centerX = focusKeyID_ * piantRectWidth + FOUCS_WIDTH.ConvertToPx() / HALF;
+        if (!GetIsShowInDialog()) {
+            piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
+            centerX = focusKeyID_ * (piantRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
+                FOUCS_WIDTH.ConvertToPx();
+        } else {
+            piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx();
+            centerX = focusKeyID_ * piantRectWidth + FOUCS_WIDTH.ConvertToPx() / HALF;
+        }
     } else {
         centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
-        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
-        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
-        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
-        static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+    SetFocusCornerRadius(paintRect);
 }
 
 bool TextPickerPattern::OnKeyEvent(const KeyEvent& event)

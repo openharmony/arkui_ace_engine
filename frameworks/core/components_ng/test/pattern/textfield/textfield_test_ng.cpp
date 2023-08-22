@@ -76,6 +76,8 @@ constexpr float TEXT_RECT_HEIGHT_LARGE = 20.0f;
 constexpr float TEXT_RECT_WIDTH = 5.0f;
 constexpr float TEXT_RECT_Y = 5.0f;
 constexpr float TEXT_RECT_Y_LARGE = 50.0f;
+constexpr float DEVICE_WIDTH = 480.f;
+constexpr float DEVICE_HEIGHT = 800.f;
 const std::string EMPTY_TEXT_VALUE;
 const std::string TEXT_EDITING_VALUE("textEditingValue");
 const std::string PLACEHOLDER("DEFAULT PLACEHOLDER");
@@ -544,11 +546,11 @@ HWTEST_F(TextFieldPatternTestNg, GetTextOrPlaceHolderFontSize001, TestSize.Level
 }
 
 /**
- * @tc.name: UpdateCaretPosition
- * @tc.desc: test UpdateCaretPosition
+ * @tc.name: UpdateCaretRect
+ * @tc.desc: test UpdateCaretRect
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretRect, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create TextFieldPattern.
@@ -563,7 +565,7 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
     frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
 
     /**
-     * @tc.steps: step2. set clipboard avoid nullptr and call UpdateCaretPosition.
+     * @tc.steps: step2. set clipboard avoid nullptr and call UpdateCaretRect.
      * @tc.expected: Check it is not nullptr.
      */
     auto pipeline = MockPipelineBase::GetCurrent();
@@ -575,26 +577,26 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
         CaretUpdateType::RIGHT_CLICK, CaretUpdateType::HANDLE_MOVE };
     for (auto caretType : exptectFalseTypes) {
         textFieldPattern->caretUpdateType_ = caretType;
-        EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+        EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
     }
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     textFieldPattern->isMousePressed_ = true;
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
     textFieldPattern->selectionMode_ = SelectionMode::SELECT;
     textFieldPattern->textSelector_.baseOffset = 0;
     textFieldPattern->textSelector_.destinationOffset = 5;
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
     textFieldPattern->UpdateEditingValue("", 0);
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::NONE;
     textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_TRUE(textFieldPattern->UpdateCaretRect());
     textFieldPattern->UpdateEditingValue("", 0);
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_TRUE(textFieldPattern->UpdateCaretRect());
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::EVENT;
     layoutProperty->UpdateShowPasswordIcon(false);
@@ -602,15 +604,15 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
     textFieldPattern->cursorVisible_ = true;
     textFieldPattern->isMousePressed_ = true;
     textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     textFieldPattern->isMousePressed_ = false;
     textFieldPattern->isFocusedBeforeClick_ = true;
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     /**
-     * @tc.steps: step3. set in search node and call UpdateCaretPosition.
+     * @tc.steps: step3. set in search node and call UpdateCaretRect.
      * @tc.expected: Check it is not nullptr.
      */
     auto* stack = ViewStackProcessor::GetInstance();
@@ -618,7 +620,7 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
     auto searchNode = AceType::MakeRefPtr<FrameNode>(V2::SEARCH_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>(), false);
     frameNode->MountToParent(searchNode);
     textFieldPattern->caretUpdateType_ = CaretUpdateType::HANDLE_MOVE;
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_TRUE(textFieldPattern->UpdateCaretRect());
 }
 
 /**
@@ -711,11 +713,11 @@ HWTEST_F(TextFieldPatternTestNg, UpdateDestinationToCaretByEvent001, TestSize.Le
 }
 
 /**
- * @tc.name: UpdateCaretOffsetByLastTouchOffset001
- * @tc.desc: test UpdateCaretOffsetByLastTouchOffset
+ * @tc.name: UpdateCaretPositionByLastTouchOffset001
+ * @tc.desc: test UpdateCaretPositionByLastTouchOffset
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset001, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPositionByLastTouchOffset001, TestSize.Level1)
 {
     auto textFieldPattern = GetPattern();
     ASSERT_NE(textFieldPattern, nullptr);
@@ -728,17 +730,17 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset001, TestSize
     textFieldPattern->textRect_.SetSize(textSize);
     textFieldPattern->InitEditingValueText(TEXT_VALUE);
     textFieldPattern->lastTouchOffset_ = Offset(725.0, 0.0);
-    textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
+    textFieldPattern->UpdateCaretPositionByLastTouchOffset();
     EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, 0);
     EXPECT_EQ(textFieldPattern->GetCaretOffsetX(), 0);
 }
 
 /**
- * @tc.name: UpdateCaretOffsetByLastTouchOffset002
- * @tc.desc: test UpdateCaretOffsetByLastTouchOffset
+ * @tc.name: UpdateCaretPositionByLastTouchOffset002
+ * @tc.desc: test UpdateCaretPositionByLastTouchOffset
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset002, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPositionByLastTouchOffset002, TestSize.Level1)
 {
     auto textFieldPattern = GetPattern();
     ASSERT_NE(textFieldPattern, nullptr);
@@ -752,16 +754,16 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset002, TestSize
     textFieldPattern->textRect_.SetSize(textSize);
     textFieldPattern->textRect_.SetOffset(textOffset);
     textFieldPattern->InitEditingValueText(TEXT_VALUE);
-    textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
+    textFieldPattern->UpdateCaretPositionByLastTouchOffset();
     EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, 0);
 }
 
 /**
- * @tc.name: UpdateCaretOffsetByLastTouchOffset003
- * @tc.desc: test UpdateCaretOffsetByLastTouchOffset
+ * @tc.name: UpdateCaretPositionByLastTouchOffset003
+ * @tc.desc: test UpdateCaretPositionByLastTouchOffset
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset003, TestSize.Level2)
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPositionByLastTouchOffset003, TestSize.Level2)
 {
     auto textFieldPattern = GetPattern();
     ASSERT_NE(textFieldPattern, nullptr);
@@ -773,7 +775,7 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset003, TestSize
     textFieldPattern->contentRect_.SetSize(contentSize);
     textFieldPattern->textRect_.SetSize(textSize);
     textFieldPattern->InitEditingValueText(TEXT_VALUE);
-    textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
+    textFieldPattern->UpdateCaretPositionByLastTouchOffset();
     EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, 0);
     EXPECT_EQ(textFieldPattern->GetCaretOffsetX(), 0.0);
 }
@@ -6174,5 +6176,144 @@ HWTEST_F(TextFieldPatternTestNg, OnHandleMoveDone001, TestSize.Level1)
     pattern->isSingleHandle_ = false;
     pattern->OnHandleMoveDone(RectF(0.0f, 0.0f, 10.0f, 10.0f), true);
     EXPECT_EQ(pattern->caretUpdateType_, CaretUpdateType::HANDLE_MOVE_DONE);
+}
+
+/**
+ * @tc.name: TextFieldPatternSaveInlineState001
+ * @tc.desc: test SaveInlineState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternSaveInlineState001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    ASSERT_NE(textFieldTheme, nullptr);
+
+    textFieldPattern->SaveInlineStates();
+    EXPECT_FALSE(textFieldPattern->GetTextInputFlag());
+    auto textColor = layoutProperty->GetTextColorValue(textFieldTheme->GetTextColor());
+    EXPECT_EQ(textFieldPattern->inlineState_.textColor, textColor);
+}
+
+/**
+ * @tc.name: TextFieldPatternApplyInlineState001
+ * @tc.desc: test ApplyInlineState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternApplyInlineState001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    ASSERT_NE(textFieldTheme, nullptr);
+    textFieldPattern->ApplyInlineStates(true);
+    auto textColor = layoutProperty->GetTextColorValue(textFieldTheme->GetTextColor());
+    EXPECT_EQ(textColor, textFieldTheme->GetInlineTextColor());
+}
+
+/**
+ * @tc.name: TextFieldPatternSaveInlineState002
+ * @tc.desc: test SaveInlineState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternSaveInlineState002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    ASSERT_NE(textFieldTheme, nullptr);
+
+    textFieldPattern->SaveInlineStates();
+    EXPECT_FALSE(textFieldPattern->GetTextInputFlag());
+    auto bgColor = renderContext->GetBackgroundColor().value_or(textFieldTheme->GetBgColor());
+    EXPECT_EQ(textFieldPattern->inlineState_.bgColor, bgColor);
+}
+
+/**
+ * @tc.name: TextFieldPatternRestorePreInlineStates001
+ * @tc.desc: test RestorePreInlineStates
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternRestorePreInlineStates001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    textFieldPattern->RestorePreInlineStates();
+    textFieldPattern->inlineState_.textColor = Color::RED;
+    textFieldPattern->inlineState_.bgColor = Color::WHITE;
+    layoutProperty->UpdateTextColor(textFieldPattern->inlineState_.textColor);
+    renderContext->UpdateBackgroundColor(textFieldPattern->inlineState_.bgColor);
+    textFieldPattern->RestorePreInlineStates();
+    auto borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
+    ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
+    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 2.0);
+    EXPECT_EQ(layoutProperty->GetTextColor(), textFieldPattern->inlineState_.textColor);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), textFieldPattern->inlineState_.bgColor);
+
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(DEVICE_WIDTH), CalcLength(DEVICE_HEIGHT)));
+    auto idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_EQ(idealSize->Width().value(), CalcLength(DEVICE_WIDTH));
+    EXPECT_EQ(idealSize->Height().value(), CalcLength(DEVICE_HEIGHT));
+}
+
+/**
+ * @tc.name: TextFieldPatternApplyInlineState002
+ * @tc.desc: test ApplyInlineState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternApplyInlineState002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = pipeline->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    ASSERT_NE(textFieldTheme, nullptr);
+    textFieldPattern->ApplyInlineStates(true);
+    renderContext->UpdateBackgroundColor(textFieldTheme->GetInlineBgColor());
+    EXPECT_EQ(renderContext->GetBackgroundColor(), textFieldTheme->GetInlineBgColor());
 }
 } // namespace OHOS::Ace::NG

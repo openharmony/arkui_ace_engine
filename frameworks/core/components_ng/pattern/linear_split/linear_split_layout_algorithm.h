@@ -92,6 +92,7 @@ private:
         int32_t index);
     static std::pair<float, float> GetDividerMargin(LayoutWrapper* layoutWrapper);
     static float GetLinearSplitChildMinSize(LayoutWrapper* layoutWrapper);
+    static int32_t GetVisibleChildCount(LayoutWrapper* layoutWrapper);
 
     SplitType splitType_;
     std::set<RefPtr<LayoutWrapper>> displayNodes_;
@@ -103,6 +104,7 @@ private:
     std::vector<float> childrenConstrains_;
     float splitLength_ = 0.0f;
     bool isOverParent_ = false;
+    int32_t visibleChildCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(LinearSplitLayoutAlgorithm);
 };

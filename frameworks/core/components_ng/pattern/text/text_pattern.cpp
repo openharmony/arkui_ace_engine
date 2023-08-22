@@ -188,7 +188,7 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
-    if (copyOption_ == CopyOptions::None) {
+    if (copyOption_ == CopyOptions::None || isMousePressed_) {
         return;
     }
     auto host = GetHost();
@@ -308,11 +308,6 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
     auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(wideText.length())), 0,
         static_cast<int32_t>(wideText.length()));
     return StringUtils::ToString(wideText.substr(min, max - min));
-}
-
-bool TextPattern::IsSelected() const
-{
-    return textSelector_.IsValid() && !textSelector_.StartEqualToDest();
 }
 
 void TextPattern::HandleOnCopy()
@@ -539,7 +534,54 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        return;
     }
+    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            isMousePressed_ = true;
+            if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+                blockPress_ = true;
+                return;
+            }
+            mouseStatus_ = MouseStatus::PRESSED;
+            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+            Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+                info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+            CHECK_NULL_VOID(paragraph_);
+            auto start = paragraph_->GetHandlePositionForClick(textOffset);
+            textSelector_.Update(start, start);
+        }
+
+        if (info.GetAction() == MouseAction::MOVE) {
+            if (blockPress_) {
+                return;
+            }
+            mouseStatus_ = MouseStatus::MOVE;
+            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+            Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+                info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+            CHECK_NULL_VOID(paragraph_);
+            auto end = paragraph_->GetHandlePositionForClick(textOffset);
+            textSelector_.Update(textSelector_.baseOffset, end);
+        }
+
+        if (info.GetAction() == MouseAction::RELEASE) {
+            if (blockPress_) {
+                blockPress_ = false;
+            }
+            mouseStatus_ = MouseStatus::RELEASED;
+            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+            Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+                info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+            CHECK_NULL_VOID(paragraph_);
+            auto end = paragraph_->GetHandlePositionForClick(textOffset);
+            textSelector_.Update(textSelector_.baseOffset, end);
+            isMousePressed_ = false;
+        }
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextPattern::InitTouchEvent()

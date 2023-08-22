@@ -93,6 +93,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (totalItemCount_ > 0) {
         OnSurfaceChanged(layoutWrapper);
+        CheckJumpToIndex();
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
@@ -377,19 +378,56 @@ float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper
     return mainLen;
 }
 
+void ListLayoutAlgorithm::CheckJumpToIndex()
+{
+    if (jumpIndex_.has_value()) {
+        return;
+    }
+    if (LessOrEqual(std::abs(currentDelta_), contentMainSize_ * 2.0f) || itemPosition_.empty()) {
+        return;
+    }
+    for (const auto& pos : itemPosition_) {
+        if (pos.second.isGroup) {
+            return;
+        }
+    }
+    float totalHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
+    float averageHeight = totalHeight / itemPosition_.size();
+    int32_t targetIndex = itemPosition_.begin()->first;
+    if (NonNegative(currentDelta_)) {
+        int32_t items = currentDelta_ / averageHeight;
+        targetIndex += items;
+        currentDelta_ -= items * averageHeight;
+    } else {
+        int32_t items = -currentDelta_ / averageHeight;
+        targetIndex -= items;
+        currentDelta_ += items * averageHeight;
+    }
+    jumpIndex_ = std::clamp(targetIndex, 0, totalItemCount_ - 1);
+}
+
 void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
 {
     int32_t startIndex = 0;
     int32_t endIndex = 0;
     float startPos = 0.0f;
     float endPos = 0.0f;
-    float startItemHeight = 0.0f;
     if (!itemPosition_.empty()) {
         startPos = itemPosition_.begin()->second.startPos;
         endPos = itemPosition_.rbegin()->second.endPos;
-        startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
         startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
+        if (IsScrollSnapAlignCenter(layoutWrapper) && overScrollFeature_) {
+            float itemHeight = 0.0f;
+            if (startIndex == 0) {
+                itemHeight = itemPosition_.begin()->second.endPos - startPos;
+                contentStartOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+            }
+            if (endIndex == totalItemCount_ - 1) {
+                itemHeight = endPos - itemPosition_.rbegin()->second.startPos;
+                contentEndOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+            }
+        }
         OffScreenLayoutDirection();
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
@@ -522,7 +560,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
 {
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
-    float endMainPos = overScrollFeature_ ? std::max(startPos + contentMainSize_, endMainPos_) : endMainPos_;
+    float endMainPos = overScrollFeature_ ?
+        std::max(startPos + contentMainSize_ - contentStartOffset_, endMainPos_) : endMainPos_;
     if (forwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
         endMainPos = Infinity<float>();
     }
@@ -607,7 +646,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
 {
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
-    float startMainPos = overScrollFeature_ ? std::min(endPos - contentMainSize_, startMainPos_) : startMainPos_;
+    float startMainPos = overScrollFeature_ ?
+        std::min(endPos - contentMainSize_ + contentEndOffset_, startMainPos_) : startMainPos_;
     if (backwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
         startMainPos = -Infinity<float>();
     }
@@ -643,8 +683,10 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
                 contentMainSize_ = std::min(contentMainSize_, itemTotalSize);
             }
         }
-        endMainPos_ = currentStartPos + contentMainSize_;
-        startMainPos_ = currentStartPos;
+        if (!IsScrollSnapAlignCenter(layoutWrapper) || jumpIndex_.has_value()) {
+            endMainPos_ = currentStartPos + contentMainSize_;
+            startMainPos_ = currentStartPos;
+        }
     }
 
     if (overScrollFeature_) {

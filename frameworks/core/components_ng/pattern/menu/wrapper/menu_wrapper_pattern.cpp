@@ -27,15 +27,6 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
     isHided_ = true;
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    for (auto subMenuId : subMenuIds_) {
-        LOGI("MenuWrapperPattern::HideMenu subMenu id is %{public}d", subMenuId);
-        overlayManager->HideMenu(subMenuId);
-    }
-
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     LOGI("MenuWrapperPattern closing menu %{public}d", targetId_);

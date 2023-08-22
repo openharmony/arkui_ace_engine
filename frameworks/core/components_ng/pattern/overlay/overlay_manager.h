@@ -95,10 +95,10 @@ public:
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenu(int32_t targetId, bool isMenuOnTouch = false);
+    void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenuInSubWindow(int32_t targetId);
+    void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);
     void HideMenuInSubWindow();
     void CleanMenuInSubWindow();
     void HideAllMenus();
@@ -129,6 +129,9 @@ public:
      *   @return    true if popup was removed, false if no overlay exists
      */
     bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
+    bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed);
+    bool RemoveBubble(const RefPtr<FrameNode>& overlay);
+    bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
     bool RemoveOverlayInSubwindow();

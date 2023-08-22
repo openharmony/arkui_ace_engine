@@ -54,6 +54,7 @@
 namespace OHOS::Ace {
 namespace {
 const Rect MIN_WINDOW_HOT_AREA = Rect(0.0f, 0.0f, 1.0f, 1.0f);
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 } // namespace
 
 int32_t SubwindowOhos::id_ = 0;
@@ -450,7 +451,7 @@ void SubwindowOhos::HideMenuNG()
     overlay->HideMenuInSubWindow();
 }
 
-void SubwindowOhos::HideMenuNG(int32_t targetId)
+void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
 {
     if (!isShowed_) {
         return;
@@ -464,7 +465,7 @@ void SubwindowOhos::HideMenuNG(int32_t targetId)
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    overlay->HideMenuInSubWindow(targetId_);
+    overlay->HideMenuInSubWindow(menu, targetId_);
 #ifdef ENABLE_DRAG_FRAMEWORK
     HideEventColumn();
     HidePixelMap(false, 0, 0, false);
@@ -661,6 +662,14 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->SetupRootElement();
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    if (parentContainer) {
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_RETURN(parentPipeline, false);
+        pipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
+    } else {
+        pipelineContext->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
+    }
     LOGI("SubwindowOhos::InitToastDialogView end");
     return true;
 }

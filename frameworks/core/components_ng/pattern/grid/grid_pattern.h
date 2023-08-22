@@ -128,6 +128,7 @@ public:
         gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
+        gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -145,11 +146,6 @@ public:
     }
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
-
-    void SetScrollState(int32_t scrollState)
-    {
-        scrollState_ = scrollState;
-    }
 
     bool OutBoundaryCallback() override;
 
@@ -241,7 +237,6 @@ private:
     bool isConfigScrollable_ = false;
 
     bool scrollable_ = true;
-    int32_t scrollState_ = SCROLL_FROM_NONE;
 
     bool firstShow_ = true;
 

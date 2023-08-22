@@ -310,6 +310,14 @@ public:
         hitTestMode_ = hitTestMode;
     }
 
+    void RemoveDragEvent()
+    {
+        if (!dragEventActuator_) {
+            return;
+        }
+        dragEventActuator_->ClearDragEvent();
+    }
+
     void CombineIntoExclusiveRecognizer(
         const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
 
@@ -403,16 +411,6 @@ public:
     {
         return isTextDraggable_;
     }
-
-    bool IsTextField() const
-    {
-        return isTextField_;
-    }
-
-    void SetTextField(bool isTextField)
-    {
-        isTextField_ = isTextField;
-    }
 #endif // ENABLE_DRAG_FRAMEWORK
 
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
@@ -476,7 +474,7 @@ private:
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
-        const DragDropInfo& dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+        const DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -511,7 +509,6 @@ private:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;
-    bool isTextField_ = false;
     bool isTextDraggable_ = false;
     std::function<void()> callback_;
 #endif

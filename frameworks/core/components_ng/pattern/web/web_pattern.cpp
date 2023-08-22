@@ -142,9 +142,11 @@ constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5;
 constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
+constexpr double DEFAULT_WEB_WIDTH = 100.0;
+constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 // web feature params
-const std::string VISIBLE_ACTIVE_ENABLE = "persist.web.visible_active_enable";
-const std::string MEMORY_LEVEL_ENABEL = "persist.web.memory_level_enable";
+constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
+constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
 
 WebPattern::WebPattern() = default;
 
@@ -1007,6 +1009,13 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
         return false;
     }
 
+    if (GreatOrEqual(drawSize.Width(), Infinity<double>())) {
+        drawSize.SetWidth(DEFAULT_WEB_WIDTH);
+    }
+    if (GreatOrEqual(drawSize.Height(), Infinity<double>())) {
+        drawSize.SetHeight(DEFAULT_WEB_HEIGHT);
+    }
+
     drawSize_ = drawSize;
     drawSizeCache_ = drawSize_;
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
@@ -1459,6 +1468,10 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     if (NearZero(keyboard)) {
         drawSize_.SetSize(drawSizeCache_);
         UpdateWebLayoutSize(width, height);
+        if (isVirtualKeyBoardShow_ == VkState::VK_HIDE) {
+            LOGI("Web ProcessVirtualKeyBoard no need to process");
+            return false;
+        }
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);

@@ -224,6 +224,7 @@ template("declarative_js_engine") {
       "jsview/js_offscreen_rendering_context.cpp",
       "jsview/js_page_transition.cpp",
       "jsview/js_pan_handler.cpp",
+      "jsview/js_particle.cpp",
       "jsview/js_paste_button.cpp",
       "jsview/js_path.cpp",
       "jsview/js_path2d.cpp",

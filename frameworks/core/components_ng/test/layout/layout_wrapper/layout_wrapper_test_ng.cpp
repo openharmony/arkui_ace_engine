@@ -20,21 +20,25 @@
 #define protected public
 #define private public
 
+#include "base/hiviewdfx/hichecker/interfaces/native/innerkits/include/hichecker.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -1585,6 +1589,65 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest041, TestSize.Level1)
     layoutWrapper->ExpandSafeArea();
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
+
+    /**
+     * @tc.steps: step7. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_TYPE_NONE.
+     * @tc.expected: frame is not expanded.
+     */
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 1 });
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_NONE });
+    layoutWrapper->ExpandSafeArea();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
+
+    /**
+     * @tc.steps: step8. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_EDGE_START.
+     * @tc.expected: frame is not expanded.
+     */
+    safeAreaManager->systemSafeArea_ = SafeAreaInsets({ 0, 1 }, { 0, 1 }, {}, {});
+    layoutWrapper->geometryNode_->SetFrameOffset({ 1, 0 });
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_START });
+    layoutWrapper->ExpandSafeArea();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
+
+    /**
+     * @tc.steps: step9. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_TYPE_NONE.
+     * @tc.expected: frame is not expanded.
+     */
+    safeAreaManager->systemSafeArea_ = SafeAreaInsets({}, {}, { 0, RK356_WIDTH + 3 }, {});
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_END });
+    layoutWrapper->ExpandSafeArea();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
+
+    /**
+     * @tc.steps: step10. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_EDGE_BOTTOM.
+     * @tc.expected: frame is not expanded.
+     */
+    safeAreaManager->systemSafeArea_ = SafeAreaInsets({}, {}, {}, { 0, RK356_HEIGHT + 3 });
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_BOTTOM });
+    layoutWrapper->ExpandSafeArea();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
+
+    /**
+     * @tc.steps: step11. call ExpandSafeArea on a frame with SafeAreaExpandOpts SAFE_AREA_EDGE_BOTTOM.
+     * @tc.expected: frame is not expanded.
+     */
+    safeAreaManager->systemSafeArea_ = SafeAreaInsets({}, {}, {}, {});
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_ALL, SAFE_AREA_EDGE_ALL });
+    layoutWrapper->layoutProperty_->UpdateAspectRatio(1.0);
+    layoutWrapper->ExpandSafeArea();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameSize(), SizeF(RK356_WIDTH, RK356_WIDTH));
 }
 
 /**
@@ -1610,6 +1673,12 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest042, TestSize.Level1)
     layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
     layoutWrapper->OffsetNodeToSafeArea();
     EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 1));
+
+    layoutWrapper->layoutProperty_->UpdateSafeAreaInsets(
+        SafeAreaInsets({ 0, 5 }, { 0, 1 }, {}, { RK356_HEIGHT - 1, RK356_HEIGHT }));
+    layoutWrapper->geometryNode_->SetFrameOffset({ 0, 0 });
+    layoutWrapper->OffsetNodeToSafeArea();
+    EXPECT_EQ(layoutWrapper->geometryNode_->GetFrameOffset(), OffsetF(5, 1));
 }
 
 /**
@@ -1634,5 +1703,80 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest043, TestSize.Level1)
     // parent already expanded
     child->ExpandIntoKeyboard();
     EXPECT_EQ(child->GetGeometryNode()->GetFrameOffset(), OffsetF(0, 0));
+
+    layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_ALL });
+    child->ExpandIntoKeyboard();
+    EXPECT_EQ(child->GetGeometryNode()->GetFrameOffset(), OffsetF(0, -50.0f));
+}
+
+/**
+ * @tc.name: LayoutWrapperTest044
+ * @tc.desc: Test AvoidKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest044, TestSize.Level1)
+{
+    auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::PAGE_ETS_TAG, NODE_ID_0);
+    layoutWrapper->AvoidKeyboard();
+    string ret = "";
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.name: LayoutWrapperTest045
+ * @tc.desc: Test CreateRootConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest045, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    context->rootHeight_ = RK356_HEIGHT;
+    context->rootWidth_ = RK356_WIDTH;
+
+    auto [node, layoutWrapper] = CreateNodeAndWrapper(ROW_FRAME_NODE, NODE_ID_0);
+    layoutWrapper->geometryNode_->SetFrameSize({ RK356_WIDTH, RK356_HEIGHT });
+    layoutWrapper->layoutProperty_->UpdateAspectRatio(2.0);
+    layoutWrapper->CreateRootConstraint();
+    EXPECT_EQ(layoutWrapper->layoutProperty_->layoutConstraint_->percentReference.Height(), RK356_HEIGHT / 2);
+}
+
+/**
+ * @tc.name: LayoutWrapperTest046
+ * @tc.desc: Test AvoidKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest046, TestSize.Level1)
+{
+    auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
+
+    /**
+     * @tc.steps: step1. call AddNodeFlexLayouts on a frame with parent JS_VIEW_ETS_TAG.
+     * @tc.expected:
+     */
+    auto [node1, nodeLayoutWrapper1] = CreateNodeAndWrapper(OHOS::Ace::V2::JS_VIEW_ETS_TAG, NODE_ID_1);
+    node1->MountToParent(parent);
+
+    auto [child, childWrapper] = CreateNodeAndWrapper(FIRST_CHILD_FRAME_NODE, NODE_ID_2);
+    child->MountToParent(node1);
+    childWrapper->AddNodeFlexLayouts();
+    EXPECT_EQ(node1->GetFlexLayouts(), 0);
+
+    /**
+     * @tc.steps: step2. call AddNodeFlexLayouts on a frame with parent COMMON_VIEW_ETS_TAG.
+     * @tc.expected:
+     */
+    auto [child2, childWrapper2] = CreateNodeAndWrapper(FIRST_CHILD_FRAME_NODE, NODE_ID_3);
+    child2->MountToParent(child);
+    node1->tag_ = OHOS::Ace::V2::COMMON_VIEW_ETS_TAG;
+    childWrapper->AddNodeFlexLayouts();
+    EXPECT_EQ(child2->GetFlexLayouts(), 0);
+
+    /**
+     * @tc.steps: step3. call AddNodeFlexLayouts on a frame with parent ROW_FRAME_NODE.
+     * @tc.expected:
+     */
+    node1->tag_ = ROW_FRAME_NODE;
+    childWrapper->AddNodeFlexLayouts();
+    EXPECT_EQ(child->GetFlexLayouts(), 0);
 }
 } // namespace OHOS::Ace::NG

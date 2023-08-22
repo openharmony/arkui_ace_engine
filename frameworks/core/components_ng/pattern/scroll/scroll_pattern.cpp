@@ -162,6 +162,7 @@ void ScrollPattern::FireOnScrollStart()
     if (scrollBar) {
         scrollBar->PlayScrollBarStartAnimation();
     }
+    StopScrollBarAnimatorByProxy();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollEventHub>();
@@ -177,6 +178,11 @@ void ScrollPattern::FireOnScrollStop()
         SetScrollAbort(false);
         return;
     }
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->ScheduleDisapplearDelayTask();
+    }
+    StartScrollBarAnimatorByProxy();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollEventHub>();
@@ -412,7 +418,7 @@ void ScrollPattern::HandleCrashBottom() const
 
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
-    SetScrollState(source);
+    SetScrollSource(source);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (NearZero(delta)) {
@@ -451,7 +457,6 @@ void ScrollPattern::OnAnimateStop()
     CHECK_NULL_VOID_NOLOG(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-    StartScrollBarAnimatorByProxy();
     scrollStop_ = true;
 }
 
@@ -501,7 +506,6 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
     StopAnimate();
     float cachePosition = currentOffset_;
     DoJump(position, source);
-    StartScrollBarAnimatorByProxy();
     if (cachePosition != currentOffset_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);

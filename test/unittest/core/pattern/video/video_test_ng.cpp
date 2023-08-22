@@ -521,7 +521,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      * @tc.expected: step2. IsMediaPlayerValid will be called two times
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(2)
+        .Times(3)
         .WillRepeatedly(Return(false));
     pattern->UpdateMediaPlayerOnBg();
 
@@ -531,7 +531,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      * @tc.expected: step3. IsMediaPlayerValid will be called 4 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(4)
+        .Times(3)
         .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayerOnBg();
 
@@ -554,7 +554,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      * @tc.expected: step5. IsMediaPlayerValid will be called 4 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(5)
+        .Times(3)
         .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayerOnBg();
 
@@ -741,7 +741,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     auto flag = playBtnGestureEventHub->ActClick();
     EXPECT_TRUE(flag);
     // case2: MediaPlayer is valid & isPlaying = true
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Pause()).Times(1).WillOnce(Return(0));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Pause()).Times(2).WillOnce(Return(0));
     flag = playBtnGestureEventHub->ActClick();
     EXPECT_TRUE(flag);
     // case3: MediaPlayer is valid & isPlaying = false
