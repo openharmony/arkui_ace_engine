@@ -115,7 +115,7 @@ private:
     // Make an offset when no text exists. The position of caret depends on the [textAlign_] && [textDirection_].
     Offset MakeEmptyOffset() const;
     Size Measure() override;
-    double GetRealTextWidth() override;
+    double GetRealTextWidth() const override;
 #ifndef USE_GRAPHIC_TEXT_GINE
     double MeasureParagraph(
         const std::unique_ptr<txt::ParagraphStyle>& paragraphStyle, std::unique_ptr<txt::TextStyle>& txtStyle);

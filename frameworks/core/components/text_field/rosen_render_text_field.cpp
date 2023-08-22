@@ -2002,7 +2002,7 @@ void RosenRenderTextField::ResetStatus()
     template_.reset();
 }
 
-double RosenRenderTextField::GetLongestLine()
+double RosenRenderTextField::GetLongestLine() const
 {
     if (paragraph_) {
 #ifndef USE_GRAPHIC_TEXT_GINE
