@@ -403,10 +403,7 @@ void RenderTextField::SetScrollBarCallback()
         textField->scrollBarOpacity_ = value;
         textField->MarkNeedRender();
     };
-    auto&& scrollEndCallback = []() {
-        // nothing to do
-    };
-    scrollBar_->SetCallBack(scrollCallback, barEndCallback, scrollEndCallback);
+    scrollBar_->SetCallBack(scrollCallback, barEndCallback, nullptr);
 }
 
 void RenderTextField::UpdateScrollPosition(double offset, int32_t source)
