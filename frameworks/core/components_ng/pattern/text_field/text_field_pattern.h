@@ -686,6 +686,7 @@ public:
     }
 
     void UpdateEditingValueToRecord();
+    void UpdateEditingValueCaretPositionToRecord();
     void UpdateScrollBarOffset() override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override
@@ -1004,6 +1005,11 @@ public:
 
     void DumpInfo() override;
 
+    void ShowPasswordIconChange()
+    {
+        caretUpdateType_ = CaretUpdateType::VISIBLE_PASSWORD_ICON;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -1063,9 +1069,10 @@ private:
     void UpdateSelection(int32_t start, int32_t end);
     void FireOnSelectionChange(int32_t start, int32_t end);
     void UpdateDestinationToCaretByEvent();
-    void UpdateCaretOffsetByLastTouchOffset();
+    void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
+    bool UpdateCaretRect();
     bool CharLineChanged(int32_t caretPosition);
 
     void ScheduleCursorTwinkling();
@@ -1082,6 +1089,7 @@ private:
 
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeCreateLayoutWrapper() override;
 
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
