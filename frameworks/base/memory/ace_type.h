@@ -127,6 +127,11 @@ public:
     struct OnConfigurationChange {
         bool colorModeUpdate = false;
         bool languageUpdate = false;
+        bool DirectionOrDpiUpdate = false;
+        bool IsNeedUpdate() const
+        {
+            return colorModeUpdate || languageUpdate || DirectionOrDpiUpdate;
+        }
     };
 
 protected:

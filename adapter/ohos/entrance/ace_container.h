@@ -37,6 +37,20 @@
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
+
+struct ParsedConfig {
+    std::string colorMode;
+    std::string deviceAccess;
+    std::string languageTag;
+    std::string direction;
+    std::string densitydpi;
+    bool IsValid() const
+    {
+        return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
+                 densitydpi.empty());
+    }
+};
+
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
@@ -382,8 +396,7 @@ public:
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(const std::string& bundle,
         const std::string& module);
 
-    void UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice,
-        const std::string& languageTag, const std::string& configuration);
+    void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
         bool needReloadTransition, const OnConfigurationChange& configurationChange = {false, false}) override;

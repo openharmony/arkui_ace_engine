@@ -81,7 +81,6 @@ public:
     MOCK_METHOD0(PostponePageTransition, void());
     MOCK_METHOD0(LaunchPageTransition, void());
     MOCK_METHOD2(GetBoundingRectData, void(int32_t nodeId, Rect& rect));
-    MOCK_METHOD0(FlushReload, void());
     MOCK_METHOD0(FlushBuild, void());
     MOCK_METHOD0(FlushReloadTransition, void());
     MOCK_METHOD1(NotifyMemoryLevel, void(int32_t level));
@@ -101,6 +100,8 @@ public:
     MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
     MOCK_METHOD1(UpdateSystemSafeArea, void(const SafeAreaInsets& systemSafeArea));
     MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
+    MOCK_METHOD0(NotifyConfigurationChange, void());
+
     static RefPtr<MockPipelineBase> pipeline_;
 
     void FlushUITasks() {}

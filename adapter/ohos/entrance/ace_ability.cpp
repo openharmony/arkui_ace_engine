@@ -616,10 +616,15 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
         [weakContainer = WeakPtr<Platform::AceContainer>(container), configuration]() {
             auto container = weakContainer.Upgrade();
             CHECK_NULL_VOID_NOLOG(container);
-            auto colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            auto deviceAccess = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-            auto languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-            container->UpdateConfiguration(colorMode, deviceAccess, languageTag, configuration.GetName());
+            Platform::ParsedConfig parsedConfig;
+            parsedConfig.colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+            parsedConfig.deviceAccess =
+                configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+            parsedConfig.languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            parsedConfig.direction = configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
+            parsedConfig.densitydpi =
+                configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            container->UpdateConfiguration(parsedConfig, configuration.GetName());
         },
         TaskExecutor::TaskType::UI);
     LOGI("AceAbility::OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());

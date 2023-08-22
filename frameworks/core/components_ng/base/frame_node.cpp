@@ -633,6 +633,11 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    if (configurationChange.DirectionOrDpiUpdate) {
+        pattern_->OnDirectionOrDpiConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void FrameNode::OnVisibleChange(bool isVisible)

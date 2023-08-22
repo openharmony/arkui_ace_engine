@@ -695,4 +695,11 @@ std::string ResourceAdapterImpl::GetActualResourceName(const std::string& resNam
     return resName.substr(index + 1, resName.length() - index - 1);
 }
 
+uint32_t ResourceAdapterImpl::GetResourceLimitKeys() const
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, 0);
+    return manager->GetResourceLimitKeys();
+}
+
 } // namespace OHOS::Ace
