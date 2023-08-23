@@ -43,9 +43,11 @@ class LongPressRecognizer : public MultiFingersRecognizer {
 
 public:
     explicit LongPressRecognizer() = default;
-    LongPressRecognizer(int32_t duration, int32_t fingers, bool repeat,
-        bool isForDrag = false, bool isDisableMouseLeft = false);
-
+    LongPressRecognizer(
+        int32_t duration, int32_t fingers, bool repeat, bool isForDrag = false, bool isDisableMouseLeft = false)
+        : MultiFingersRecognizer(fingers), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
+          isDisableMouseLeft_(isDisableMouseLeft)
+    {}
     LongPressRecognizer(bool isForDrag = false, bool isDisableMouseLeft = false)
         : isForDrag_(isForDrag), isDisableMouseLeft_(isDisableMouseLeft)
     {}

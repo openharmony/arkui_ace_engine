@@ -30,26 +30,10 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t MAX_PAN_FINGERS = 10;
-constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr Dimension DISTANCE_PER_MOUSE_DEGREE = LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
 
 } // namespace
-
-PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance)
-    : MultiFingersRecognizer(fingers), direction_(direction), distance_(distance), newFingers_(fingers_),
-      newDistance_(distance_), newDirection_(direction_)
-{
-    if ((direction_.type & PanDirection::VERTICAL) == 0) {
-        velocityTracker_ = VelocityTracker(Axis::HORIZONTAL);
-    } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
-        velocityTracker_ = VelocityTracker(Axis::VERTICAL);
-    }
-    if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
-        LOGW("panRecognizer fingers_ is illegal, change to DEFAULT_PAN_FINGERS.");
-        fingers_ = DEFAULT_PAN_FINGERS;
-    }
-}
 
 PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)
 {
@@ -60,11 +44,8 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
     int32_t fingersNumber = panGestureOption->GetFingers();
 
     distance_ = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceNumber;
-    fingers_ = fingersNumber;
-    if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
-        LOGW("panRecognizer fingers_ is illegal, change to DEFAULT_PAN_FINGERS.");
-        fingers_ = DEFAULT_PAN_FINGERS;
-    }
+    fingers_ = fingersNumber <= DEFAULT_PAN_FINGER ? DEFAULT_PAN_FINGER : fingersNumber;
+    fingers_ = fingers_ > MAX_PAN_FINGERS ? DEFAULT_PAN_FINGER : fingers_;
 
     if (directNum >= PanDirection::NONE && directNum <= PanDirection::ALL) {
         direction_.type = directNum;
@@ -118,6 +99,12 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
+
+    if (fingers_ > MAX_PAN_FINGERS) {
+        LOGI("fingers_ is larger than max fingers");
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
 
     if (direction_.type == PanDirection::NONE) {
         LOGI("the direction type is none");
@@ -177,7 +164,8 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGI("pan recognizer receives %{public}d touch up event", event.id);
-    if (currentFingers_ != fingers_) {
+    if (currentFingers_ < fingers_) {
+        LOGW("PanGesture current finger number is less than requiried finger number.");
         return;
     }
     globalPoint_ = Point(event.x, event.y);
@@ -221,7 +209,8 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("pan recognizer receives touch move event");
-    if (currentFingers_ != fingers_) {
+    if (currentFingers_ < fingers_) {
+        LOGW("PanGesture current finger number is less than requiried finger number.");
         return;
     }
     globalPoint_ = Point(event.x, event.y);
