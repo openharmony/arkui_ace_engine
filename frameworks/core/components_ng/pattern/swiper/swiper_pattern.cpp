@@ -1383,10 +1383,6 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         return;
     }
 
-    if (!IsOutOfIndicatorZone(dragPoint)) {
-        return;
-    }
-
     UpdateCurrentOffset(static_cast<float>(mainDelta));
     UpdateItemRenderGroup(true);
 }
@@ -2365,25 +2361,6 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, true);
-
-    auto hotRegion = geometryNode->GetFrameRect();
-    return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
-}
-
-bool SwiperPattern::IsOutOfIndicatorZone(const PointF& dragPoint)
-{
-    if (!HasIndicatorNode() || !IsShowIndicator() || (GetIndicatorType() != SwiperIndicatorType::DOT)) {
-        return true;
-    }
-
-    auto swiperNode = GetHost();
-    CHECK_NULL_RETURN(swiperNode, true);
-    auto indicatorNode = swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetIndicatorId()));
-    CHECK_NULL_RETURN(indicatorNode, true);
-    auto indicatorFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode);
-    CHECK_NULL_RETURN(indicatorFrameNode, true);
-    auto geometryNode = indicatorFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, true);
 
     auto hotRegion = geometryNode->GetFrameRect();
