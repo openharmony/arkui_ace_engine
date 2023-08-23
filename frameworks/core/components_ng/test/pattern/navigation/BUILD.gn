@@ -244,6 +244,7 @@ ohos_unittest("navigation_test_ng") {
     "navdestination_test_ng.cpp",
     "navigation_test_ng.cpp",
     "title_bar_test_ng.cpp",
+    "tool_bar_test_ng.cpp",
   ]
 
   deps = [
