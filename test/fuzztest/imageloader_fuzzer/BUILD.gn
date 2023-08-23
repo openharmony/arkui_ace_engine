@@ -81,6 +81,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
 
     # mock
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_skia_image.cpp",
+    "$ace_root/test/mock/adapter/mock_file_uri_helper_ohos.cpp",
 
     #fuzz
     "$ace_root/adapter/ohos/entrance/file_asset_provider.cpp",

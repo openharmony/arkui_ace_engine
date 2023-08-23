@@ -147,12 +147,14 @@ void MediaPlayerImpl::SetRenderSurface(const RefPtr<RenderSurface>& renderSurfac
 }
 
 void MediaPlayerImpl::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
-    StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent)
+    StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
+    CommonEvent&& startRenderFrameEvent)
 {
     positionUpdateCallback_ = positionUpdatedEvent;
     stateChangeCallback_ = stateChangedEvent;
     errorCallback_ = errorEvent;
     resolutionChangeCallback_ = resolutionChangeEvent;
+    startRenderFrameCallback_ = startRenderFrameEvent;
 }
 
 int32_t MediaPlayerImpl::GetDuration(int32_t& duration)

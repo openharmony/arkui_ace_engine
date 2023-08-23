@@ -196,11 +196,11 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void SubwindowManager::HideMenuNG(int32_t targetId)
+void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->HideMenuNG(targetId);
+        subwindow->HideMenuNG(menu, targetId);
     }
 }
 
@@ -268,7 +268,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [containerId, newComponent, disableTouchEvent] {
+        [containerId, newComponentWeak = WeakPtr<Component>(newComponent), disableTouchEvent] {
             auto manager = SubwindowManager::GetInstance();
             CHECK_NULL_VOID(manager);
             auto subwindow = manager->GetSubwindow(containerId);
@@ -278,6 +278,8 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
                 subwindow->InitContainer();
                 manager->AddSubwindow(containerId, subwindow);
             }
+            auto newComponent = newComponentWeak.Upgrade();
+            CHECK_NULL_VOID(newComponent);
             subwindow->ShowPopup(newComponent, disableTouchEvent);
         },
         TaskExecutor::TaskType::PLATFORM);

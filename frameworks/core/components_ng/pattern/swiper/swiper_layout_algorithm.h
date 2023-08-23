@@ -166,11 +166,6 @@ public:
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
-    int32_t GetAutoPlayCurrentIndex() const
-    {
-        return autoPlayCurrentIndex_;
-    }
-
     void SetMainSizeIsMeasured(bool mainSizeIsMeasured)
     {
         mainSizeIsMeasured_ = mainSizeIsMeasured;
@@ -202,7 +197,6 @@ private:
         LayoutWrapper* layoutWrapper, float startMainPos, float endMainPos, std::optional<int32_t> targetIndex);
 
     void PlaceDigitChild(const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty);
-    double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
     void MeasureArrow(const RefPtr<LayoutWrapper>& arrowWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
     void ArrowLayout(
@@ -212,7 +206,6 @@ private:
     float nextMargin_ = 0.0f;
 
     PositionMap itemPosition_;
-    int32_t autoPlayCurrentIndex_ = 0;
     float currentOffset_ = 0.0f;
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;

@@ -50,6 +50,35 @@ CalendarPickerModel* CalendarPickerModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+double GetMSByDate(const std::string& date)
+{
+    auto json = JsonUtil::ParseJsonString(date);
+    if (!json || json->IsNull()) {
+        return 0.0f;
+    }
+
+    std::tm dateTime = { 0 };
+    auto year = json->GetValue("year");
+    if (year && year->IsNumber()) {
+        dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+    }
+    auto month = json->GetValue("month");
+    if (month && month->IsNumber()) {
+        dateTime.tm_mon = month->GetInt() - 1;
+    }
+    auto day = json->GetValue("day");
+    if (day && day->IsNumber()) {
+        dateTime.tm_mday = day->GetInt();
+    }
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto local = std::localtime(&now);
+    CHECK_NULL_RETURN_NOLOG(local, 0.0f);
+    dateTime.tm_hour = local->tm_hour;
+    dateTime.tm_min = local->tm_min;
+    dateTime.tm_sec = local->tm_sec;
+    return Date::GetMilliSecondsByDateTime(dateTime);
+}
+
 void JSCalendarPicker::JSBind(BindingTarget globalObj)
 {
     JSClass<JSCalendarPicker>::Declare("CalendarPicker");
@@ -113,9 +142,9 @@ void JSCalendarPicker::SetOnChange(const JSCallbackInfo& info)
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        std::vector<std::string> keys = { "year", "month", "day" };
         ACE_SCORING_EVENT("CalendarPicker.onChange");
-        func->Execute(keys, info);
+        auto dateObj = JSDate::New(GetMSByDate(info));
+        func->ExecuteJS(1, &dateObj);
     };
     CalendarPickerModel::GetInstance()->SetOnChange(std::move(onChange));
 }
@@ -130,27 +159,7 @@ void JSCalendarPicker::ParseSelectedDateObject(const JSCallbackInfo& info, const
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
-        auto selectedJson = JsonUtil::ParseJsonString(info);
-        if (!selectedJson || selectedJson->IsNull()) {
-            return;
-        }
-
-        std::tm dateTime = { 0 };
-        auto year = selectedJson->GetValue("year");
-        if (year && year->IsNumber()) {
-            dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
-        }
-        auto month = selectedJson->GetValue("month");
-        if (month && month->IsNumber()) {
-            dateTime.tm_mon = month->GetInt();
-        }
-        auto day = selectedJson->GetValue("day");
-        if (day && day->IsNumber()) {
-            dateTime.tm_mday = day->GetInt();
-        }
-
-        auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
-        auto dateObj = JSDate::New(milliseconds);
+        auto dateObj = JSDate::New(GetMSByDate(info));
         func->ExecuteJS(1, &dateObj);
     };
     CalendarPickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
@@ -286,9 +295,9 @@ std::map<std::string, NG::DialogEvent> JSCalendarPickerDialog::ChangeDialogEvent
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
         auto changeId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "year", "month", "day" };
             ACE_SCORING_EVENT("CalendarDialog.onChange");
-            func->Execute(keys, info);
+            auto dateObj = JSDate::New(GetMSByDate(info));
+            func->ExecuteJS(1, &dateObj);
         };
         dialogEvent["changeId"] = changeId;
     }
@@ -297,9 +306,9 @@ std::map<std::string, NG::DialogEvent> JSCalendarPickerDialog::ChangeDialogEvent
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
         auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "year", "month", "day" };
             ACE_SCORING_EVENT("CalendarDialog.onAccept");
-            func->Execute(keys, info);
+            auto dateObj = JSDate::New(GetMSByDate(info));
+            func->ExecuteJS(1, &dateObj);
         };
         dialogEvent["acceptId"] = acceptId;
     }
@@ -369,6 +378,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
 
     auto theme = GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     NG::CalendarSettingData settingData;
     auto selectedDate = paramObj->GetProperty("selected");
     auto parseSelectedDate = ParseDate(selectedDate);
@@ -390,6 +400,9 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     }
     properties.customStyle = false;
     properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
+    NG::BorderRadiusProperty dialogRadius;
+    dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
+    properties.borderRadius = dialogRadius;
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

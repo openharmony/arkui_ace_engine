@@ -28,6 +28,7 @@ ohos_unittest("image_painter_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_data.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/pixelmap_image.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/svg_canvas_image.cpp",
 

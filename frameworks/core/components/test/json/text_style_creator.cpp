@@ -35,6 +35,8 @@ constexpr FontStyle FONT_STYLES[] = { FontStyle::NORMAL, FontStyle::ITALIC };
 constexpr TextBaseline BASE_LINES[] = { TextBaseline::ALPHABETIC, TextBaseline::IDEOGRAPHIC };
 constexpr TextDecoration TEXT_DECORATIONS[] = { TextDecoration::NONE, TextDecoration::UNDERLINE,
     TextDecoration::OVERLINE, TextDecoration::LINE_THROUGH, TextDecoration::INHERIT };
+constexpr TextDecorationStyle TEXT_DECORATION_STYLES[] = { TextDecorationStyle::SOLID, TextDecorationStyle::DOUBLE,
+    TextDecorationStyle::DOTTED, TextDecorationStyle::DASHED, TextDecorationStyle::WAVY };
 const char TEXT_SHADOW[] = "textShadow";
 const char TEXT_ADAPT_HEIGHT[] = "adaptHeight";
 const char TEXT_ALLOW_SCALE[] = "allowScale";
@@ -109,6 +111,10 @@ TextStyle TextStyleCreator::CreateFromJson(const JsonValue& json)
     if (json.Contains(TEXT_DECORATION) && json.GetValue(TEXT_DECORATION)->IsNumber()) {
         textStyle.SetTextDecoration(
             ConvertIntToEnum(json.GetValue(TEXT_DECORATION)->GetInt(), TEXT_DECORATIONS, TextDecoration::NONE));
+    }
+    if (json.Contains(TEXT_DECORATION_STYLE) && json.GetValue(TEXT_DECORATION_STYLE)->IsNumber()) {
+        textStyle.SetTextDecorationStyle(ConvertIntToEnum(
+            json.GetValue(TEXT_DECORATION_STYLE)->GetInt(), TEXT_DECORATION_STYLES, TextDecorationStyle::SOLID));
     }
     if (json.Contains(TEXT_DECORATION_COLOR) && json.GetValue(TEXT_DECORATION_COLOR)->IsString()) {
         TextDeclaration colorDecoration;

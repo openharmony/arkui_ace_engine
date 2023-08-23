@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 AbilityComponentPattern::AbilityComponentPattern(const std::string& bundleName, const std::string& abilityName)
 {
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardEnabled()) {
         auto wantWrap = Ace::WantWrap::CreateWantWrap(bundleName, abilityName);
         auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
         Rosen::SessionInfo extensionSessionInfo = {
@@ -45,7 +45,7 @@ AbilityComponentPattern::AbilityComponentPattern(const std::string& bundleName, 
 void AbilityComponentPattern::OnModifyDone()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardEnabled()) {
         Pattern::OnModifyDone();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -71,7 +71,7 @@ void AbilityComponentPattern::OnModifyDone()
         CHECK_NULL_VOID(host);
         adapter_ = WindowExtensionConnectionProxyNG::CreateAdapter();
         CHECK_NULL_VOID(adapter_);
-        if (container && container->IsScenceBoardWindow()) {
+        if (container && container->IsSceneBoardEnabled()) {
             CHECK_NULL_VOID(session_);
             sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
             CHECK_NULL_VOID(extensionSession);

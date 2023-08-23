@@ -27,6 +27,7 @@
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -40,8 +41,8 @@
 
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public Pattern, public TextDragBase {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase);
+class TextPattern : public Pattern, public TextDragBase, public TextBase {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
 
 public:
     TextPattern() = default;
@@ -191,7 +192,11 @@ public:
     }
     float GetLineHeight() const override;
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
+#else
+    std::vector<RSTextRect> GetTextBoxes() override;
+#endif
     OffsetF GetParentGlobalOffset() const override;
 
     RefPtr<FrameNode> MoveDragNode() override
@@ -218,7 +223,7 @@ public:
     // ===========================================================
 
     void InitSurfaceChangedCallback();
-    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     bool HasSurfaceChangedCallback()
     {
         return surfaceChangedCallbackId_.has_value();
@@ -264,6 +269,14 @@ public:
 
     void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
     void CheckHandles(SelectHandleInfo& handleInfo);
+    bool IsMeasureBoundary() const override
+    {
+        return isMeasureBoundary_;
+    }
+    void SetIsMeasureBoundary(bool isMeasureBoundary)
+    {
+        isMeasureBoundary_ = isMeasureBoundary;
+    }
 
 protected:
     virtual void HandleOnCopy();
@@ -280,7 +293,6 @@ protected:
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    bool IsSelected() const;
     bool IsSelectAll();
     virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     virtual void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
@@ -302,7 +314,6 @@ protected:
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeHolderIndex_;
-    TextSelector textSelector_;
     float baselineOffset_ = 0.0f;
     bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
@@ -311,6 +322,7 @@ protected:
     std::vector<Rect> rectsForPlaceholders_;
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
+    bool isMeasureBoundary_ = false;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -324,7 +336,11 @@ private:
     void HandlePanEnd(const GestureEvent& info);
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
+#ifndef USE_GRAPHIC_TEXT_GINE
     inline RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
+#else
+    inline RSTextRect ConvertRect(const Rect& rect);
+#endif
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
@@ -335,6 +351,8 @@ private:
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
     bool panEventInitialized_ = false;
+    bool isMousePressed_ = false;
+    bool blockPress_ = false;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     RefPtr<TextContentModifier> textContentModifier_;

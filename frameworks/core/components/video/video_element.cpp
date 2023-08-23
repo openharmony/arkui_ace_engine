@@ -24,6 +24,7 @@
 #include <sys/types.h>
 
 #include "base/i18n/localization.h"
+#include "base/image/file_uri_helper.h"
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
@@ -74,7 +75,6 @@ const char* EXIT_FULLSCREEN_LABEL = "exitFullscreen";
 #ifdef OHOS_STANDARD_SYSTEM
 const char* SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
-constexpr int32_t FILE_PREFIX_LENGTH = 7;
 constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
 const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://RAWFILE/");
 const std::regex MEDIA_RES_ID_REGEX(R"(^resource://\w+/([0-9]+)\.\w+$)", std::regex::icase);
@@ -488,7 +488,7 @@ void VideoElement::SetMediaSource(std::string& filePath, int32_t& fd)
         CHECK_NULL_VOID(dataProvider);
         fd = dataProvider->GetDataProviderFile(filePath, "r");
     } else if (StringUtils::StartWith(filePath, "file://")) {
-        filePath = GetAssetAbsolutePath(filePath.substr(FILE_PREFIX_LENGTH));
+        filePath = FileUriHelper::GetRealPath(filePath);
         fd = open(filePath.c_str(), O_RDONLY);
     } else if (StringUtils::StartWith(filePath, "resource:///")) {
         // file path: resources/base/media/xxx.xx --> resource:///xxx.xx

@@ -258,23 +258,24 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
         node.layoutWrapper = child;
         node.layoutConstraint = childLayoutConstraint;
 
-        if (child && child->GetHostNode() && child->GetHostNode()->GetLayoutProperty() &&
-            child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
-            node.layoutConstraint.selfIdealSize = OptionalSize<float>(0.0f, 0.0f);
-            continue;
-        }
+        bool childGone = child && child->GetHostNode() && child->GetHostNode()->GetLayoutProperty() &&
+            child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE;
         int32_t childDisplayPriority = 1;
         float childLayoutWeight = 0.0f;
-        if (childMagicItemProperty) {
-            childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
-        }
-        if (childFlexItemProperty) {
-            childDisplayPriority = childFlexItemProperty->GetDisplayIndex().value_or(1);
-            if (!childrenHasAlignSelfBaseLine_ &&
-                childFlexItemProperty->GetAlignSelf().value_or(FlexAlign::FLEX_START) == FlexAlign::BASELINE) {
-                childrenHasAlignSelfBaseLine_ = true;
+        if (!childGone) {
+            if (childMagicItemProperty) {
+                childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
+            }
+            if (childFlexItemProperty) {
+                childDisplayPriority = childFlexItemProperty->GetDisplayIndex().value_or(1);
+                if (!childrenHasAlignSelfBaseLine_ &&
+                    childFlexItemProperty->GetAlignSelf().value_or(FlexAlign::FLEX_START) == FlexAlign::BASELINE &&
+                    childGone) {
+                    childrenHasAlignSelfBaseLine_ = true;
+                }
             }
         }
+
         if (!magicNodes_.count(childDisplayPriority)) {
             magicNodes_.insert(
                 std::map<int32_t, std::list<MagicLayoutNode>>::value_type(childDisplayPriority, { node }));
@@ -287,8 +288,10 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
                 magicNodeWeights_[childDisplayPriority] += childLayoutWeight;
             }
         }
-        totalFlexWeight_ += GreatNotEqual(childLayoutWeight, 0.0f) ? childLayoutWeight : 0.0f;
-        maxDisplayPriority_ = std::max(childDisplayPriority, maxDisplayPriority_);
+        if (!childGone) {
+            totalFlexWeight_ += GreatNotEqual(childLayoutWeight, 0.0f) ? childLayoutWeight : 0.0f;
+            maxDisplayPriority_ = std::max(childDisplayPriority, maxDisplayPriority_);
+        }
     }
 }
 
@@ -502,13 +505,13 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 const auto& childLayoutWrapper = child.layoutWrapper;
                 UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
                 childLayoutWrapper->Measure(child.layoutConstraint);
-                UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
                 if (child.layoutWrapper && child.layoutWrapper->GetHostNode() &&
                     child.layoutWrapper->GetHostNode()->GetLayoutProperty() &&
                     child.layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
                         VisibleType::GONE) {
                     continue;
                 }
+                UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
                 CheckSizeValidity(childLayoutWrapper);
                 CheckBaselineProperties(childLayoutWrapper);
                 if (!isInfiniteLayout_ || (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
@@ -832,7 +835,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
 {
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     if (children.empty()) {
         LOGD("FlexLayoutAlgorithm::GetTotalAllocatedSize, children is empty");
         allocatedSize_ = 0.0f;
@@ -868,7 +871,7 @@ float FlexLayoutAlgorithm::GetStretchCrossAxisLimit() const
 
 void FlexLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     if (children.empty()) {
         LOGD("FlexLayoutAlgorithm::Layout, children is empty");
         return;
@@ -944,7 +947,7 @@ void FlexLayoutAlgorithm::PlaceChildren(
         mainAxisSize_, crossAxisSize_, direction_, frontSpace, betweenSpace);
     float childMainPos = IsStartTopLeft(direction_, textDir_) ? frontSpace : mainAxisSize_ - frontSpace;
     float childCrossPos = 0.0f;
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     for (const auto& child : children) {
         if (child->IsOutOfLayout() || !child->IsActive()) {
             // adjust by postion property.

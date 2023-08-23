@@ -48,7 +48,7 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<SlidingPanelLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
         LOGE("fail to measure slidingPanel due to layoutConstraint is nullptr");
         return;
@@ -75,7 +75,10 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
     }
     childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    childLayoutConstraint.parentIdealSize =
+        OptionalSizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
     childLayoutConstraint.percentReference = childLayoutConstraint.maxSize;
+    layoutConstraint->percentReference = childLayoutConstraint.maxSize;
     auto colunmNodeWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::COLUMN_ETS_TAG);
     if (colunmNodeWrapper) {
         colunmNodeWrapper->Measure(childLayoutConstraint);
@@ -101,7 +104,9 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto columnGeometryNode = columnWrapper->GetGeometryNode();
     CHECK_NULL_VOID(columnGeometryNode);
 
-    auto childOffsetX = static_cast<float>((idealSize_.Width() - maxWidth_) / HALF_VALUS);
+    auto left = geometryNode->GetPadding()->left.value_or(0.0f);
+    auto right = geometryNode->GetPadding()->right.value_or(0.0f);
+    auto childOffsetX = static_cast<float>((idealSize_.Width() - left - right - maxWidth_) / HALF_VALUS);
     fullHeight_ =
         layoutProperty->GetFullHeight().value_or(Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()));
     halfHeight_ = layoutProperty->GetHalfHeight().value_or(
@@ -139,8 +144,7 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto closeIconWidth = closeIconLayoutProperty->GetCloseIconWidthValue();
     auto closeIconMarginTop = closeIconLayoutProperty->GetCloseIconMarginTopValue();
     auto closeIconMargionRight = closeIconLayoutProperty->GetCloseIconMarginRightValue();
-    auto closeIconX = static_cast<float>(Dimension(frameSize.Width()).ConvertToPx()) - childOffsetX -
-                      static_cast<float>(closeIconWidth.ConvertToPx()) -
+    auto closeIconX = maxWidth_ + childOffsetX - static_cast<float>(closeIconWidth.ConvertToPx()) -
                       static_cast<float>(closeIconMargionRight.ConvertToPx());
     auto closeIconY = childOffset.GetY() + static_cast<float>(closeIconMarginTop.ConvertToPx());
     auto closeIconOffset = OffsetF(closeIconX, closeIconY);
@@ -212,6 +216,9 @@ float SlidingPanelLayoutAlgorithm::GetMaxWidthByScreenSizeType(const SizeF& maxS
             break;
         default:
             break;
+    }
+    if (width > maxSize.Width()) {
+        return maxSize.Width();
     }
     return width;
 }

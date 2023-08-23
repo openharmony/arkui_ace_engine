@@ -42,7 +42,6 @@ void TextFieldModelNG::CreateNode(
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textEditingValue = pattern->GetTextEditingValue();
     if (value.has_value() && value.value() != textEditingValue.text) {
-        pattern->SetCaretUpdateType(CaretUpdateType::EVENT);
         pattern->InitEditingValueText(value.value());
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
@@ -158,9 +157,6 @@ void TextFieldModelNG::SetType(TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->EditingValueFilterChange();
 }
 
 void TextFieldModelNG::SetPlaceholderColor(const Color& value)
@@ -290,6 +286,15 @@ void TextFieldModelNG::SetInputStyle(InputStyle value)
 
 void TextFieldModelNG::SetShowPasswordIcon(bool value)
 {
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (layoutProperty->GetShowPasswordIcon().has_value() && layoutProperty->GetShowPasswordIconValue() != value) {
+        pattern->ShowPasswordIconChange();
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordIcon, value);
 }
 

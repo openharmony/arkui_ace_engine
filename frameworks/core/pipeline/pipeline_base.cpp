@@ -144,11 +144,11 @@ void PipelineBase::ClearImageCache()
     }
 }
 
-void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageChache)
+void PipelineBase::SetImageCache(const RefPtr<ImageCache>& imageCache)
 {
     std::lock_guard<std::shared_mutex> lock(imageMtx_);
-    if (imageChache) {
-        imageCache_ = imageChache;
+    if (imageCache) {
+        imageCache_ = imageCache;
     }
 }
 
@@ -162,12 +162,13 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height)
 {
     ACE_SCOPED_TRACE("SetRootSize(%lf, %d, %d)", density, width, height);
     density_ = density;
-    auto task = [weak = AceType::WeakClaim(this), density, width, height]() {
+    auto task = [weak = AceType::WeakClaim(this), width, height]() {
         auto context = weak.Upgrade();
         if (!context) {
             return;
         }
         context->SetRootRect(width, height);
+
     };
 #ifdef NG_BUILD
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
@@ -515,6 +516,8 @@ void PipelineBase::PrepareCloseImplicitAnimation()
     if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
         if (!isReloading_ && !IsLayouting()) {
             FlushUITasks();
+        } else if (IsLayouting()) {
+            LOGW("IsLayouting, prepareCloseImplicitAnimation has tasks not flushed");
         }
     }
     if (!pendingImplicitLayout_.empty()) {

@@ -203,6 +203,10 @@ public:
 
     void SetRootRect(double width, double height, double offset) override;
 
+    void SetWindowSceneConsumed(bool isConsumed);
+    
+    bool IsWindowSceneConsumed();
+
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
     const RefPtr<SafeAreaManager>& GetSafeAreaManager() const
@@ -292,6 +296,7 @@ public:
 
     void SetContainerWindow(bool isShow) override;
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetCloseButtonStatus(bool isEnabled);
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -423,6 +428,7 @@ private:
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
+    void AnimateOnSafeAreaUpdate();
     void SyncSafeArea(bool onKeyboard = false);
 
     // only used for static form.
@@ -495,6 +501,7 @@ private:
     bool onFocus_ = true;
     bool isNeedFlushMouseEvent_ = false;
     bool canUseLongPredictTask_ = false;
+    bool isWindowSceneConsumed_ = false;
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;

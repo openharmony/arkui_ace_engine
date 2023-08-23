@@ -159,6 +159,11 @@ public:
         textDecoration_ = textDecoration;
     }
 
+    void SetTextDecorationStyle(TextDecorationStyle textDecorationStyle)
+    {
+        textDecorationStyle_ = textDecorationStyle;
+    }
+
     FontStyle GetFontStyle() const
     {
         return fontStyle_;
@@ -212,6 +217,11 @@ public:
     TextDecoration GetTextDecoration() const
     {
         return textDecoration_;
+    }
+
+    TextDecorationStyle GetTextDecorationStyle() const
+    {
+        return textDecorationStyle_;
     }
 
     const Dimension& GetWordSpacing() const
@@ -438,7 +448,7 @@ public:
         return textShadows_;
     }
 
-    void SetTextShadows(std::vector<Shadow>&& textShadows)
+    void SetTextShadows(const std::vector<Shadow>& textShadows)
     {
         textShadows_ = textShadows;
     }
@@ -469,6 +479,7 @@ private:
     TextAlign textAlign_ { TextAlign::START };
     Color textColor_ { Color::BLACK };
     Color textDecorationColor_ { Color::BLACK };
+    TextDecorationStyle textDecorationStyle_ { TextDecorationStyle::SOLID };
     TextDecoration textDecoration_ { TextDecoration::NONE };
     std::vector<Shadow> textShadows_;
     WhiteSpace whiteSpace_{ WhiteSpace::PRE };

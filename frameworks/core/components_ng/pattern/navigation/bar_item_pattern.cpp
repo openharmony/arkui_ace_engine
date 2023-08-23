@@ -34,6 +34,9 @@ void BarItemPattern::OnModifyDone()
         eventHub->FireItemAction();
         pattern->UpdateBarItemActiveStatusResource();
     };
+    if (clickListener_) {
+        gesture->RemoveClickEvent(clickListener_);
+    }
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
 }

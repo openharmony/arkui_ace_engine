@@ -240,6 +240,16 @@ void JSList::SetSticky(int32_t sticky)
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
 }
 
+void JSList::SetContentStartOffset(float startOffset)
+{
+    ListModel::GetInstance()->SetContentStartOffset(startOffset);
+}
+
+void JSList::SetContentEndOffset(float endOffset)
+{
+    ListModel::GetInstance()->SetContentEndOffset(endOffset);
+}
+
 void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
 {
     V2::ScrollSnapAlign param;
@@ -629,6 +639,8 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);
     JSClass<JSList>::StaticMethod("sticky", &JSList::SetSticky);
+    JSClass<JSList>::StaticMethod("contentStartOffset", &JSList::SetContentStartOffset);
+    JSClass<JSList>::StaticMethod("contentEndOffset", &JSList::SetContentEndOffset);
     JSClass<JSList>::StaticMethod("nestedScroll", &JSList::SetNestedScroll);
     JSClass<JSList>::StaticMethod("enableScrollInteraction", &JSList::SetScrollEnabled);
     JSClass<JSList>::StaticMethod("scrollSnapAlign", &JSList::SetScrollSnapAlign);

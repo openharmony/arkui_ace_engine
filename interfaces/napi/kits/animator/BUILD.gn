@@ -43,6 +43,20 @@ template("napi_animator_static") {
       deps += [ config.libace_target ]
     }
 
+    if (platform != "ohos") {
+      if (frame_trace_support) {
+        sources +=
+            [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp" ]
+        external_deps += [
+          "frame_aware_sched:frame_trace_intf",
+          "init:libbegetutil",
+        ]
+      } else {
+        sources +=
+            [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_fake_impl.cpp" ]
+      }
+    }
+
     deps += [ "../utils:napi_utils_static_${platform}" ]
 
     subsystem_name = ace_engine_subsystem

@@ -104,7 +104,6 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_modifier.cpp",
@@ -165,6 +164,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/flex/mock_flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock/mock_image_pattern.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
@@ -176,6 +176,7 @@ ohos_unittest("navigation_test_ng") {
     # mock
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_frame_report.cpp",
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
     "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
@@ -252,6 +253,7 @@ ohos_unittest("navigation_test_ng") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
     "//third_party/googletest:gmock_main",
   ]
 

@@ -16,28 +16,48 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_DATA_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_IMAGE_DATA_H
 
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/image_provider/svg_dom_base.h"
-
+#include "base/image/pixel_map.h"
+#include "frameworks/base/memory/ace_type.h"
 namespace OHOS::Ace::NG {
 
 class ImageData : public AceType {
     DECLARE_ACE_TYPE(ImageData, AceType);
+
 public:
-    explicit ImageData(const RefPtr<PixelMap>& pixelMap) : pixelMap_(pixelMap) {}
     ImageData() = default;
     ~ImageData() override = default;
     static RefPtr<ImageData> MakeFromDataWithCopy(const void* data, size_t length);
+    // for sk_sp<SkData>
     static RefPtr<ImageData> MakeFromDataWrapper(void* dataWrapper);
-    static RefPtr<ImageData> MakeFromPixelMap(const RefPtr<PixelMap>& pixelMap);
-    virtual size_t GetSize() const;
-    virtual const void* GetData() const;
+    virtual const void* GetDataWrapper() const
+    {
+        return nullptr;
+    };
 
-    bool HasPixelMapData();
-    RefPtr<PixelMap>& GetPixelMapData();
+    virtual size_t GetSize() const = 0;
+    virtual const void* GetData() const = 0;
 
-protected:
-    RefPtr<PixelMap> pixelMap_;
+    ACE_DISALLOW_COPY_AND_MOVE(ImageData);
+};
+
+class PixmapData : public ImageData {
+    DECLARE_ACE_TYPE(PixmapData, ImageData);
+
+public:
+    explicit PixmapData(const RefPtr<PixelMap>& data) : pixmap_(data) {}
+    ~PixmapData() override = default;
+
+    size_t GetSize() const override;
+    const void* GetData() const override;
+    const RefPtr<PixelMap>& GetPixmap()
+    {
+        return pixmap_;
+    }
+
+private:
+    const RefPtr<PixelMap> pixmap_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(PixmapData);
 };
 
 } // namespace OHOS::Ace::NG

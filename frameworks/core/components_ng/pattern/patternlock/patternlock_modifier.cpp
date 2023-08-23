@@ -59,6 +59,7 @@ constexpr float CONNECTED_LINE_SPRING_DAMPING = 0.88f;
 constexpr float CANCELED_LINE_SPRING_RESPONSE = 0.22f;
 constexpr float CANCELED_LINE_SPRING_DAMPING = 0.88f;
 constexpr int32_t ANIMATABLE_POINT_COUNT = 2;
+constexpr float DIAMETER_TO_RADIUS = 0.5f;
 } // namespace
 
 PatternLockCell::PatternLockCell(int32_t column, int32_t row)
@@ -78,7 +79,6 @@ void PatternLockModifier::CreateProperties()
     hoverColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLACK);
     wrongColor_ = AceType::MakeRefPtr<PropertyColor>(Color::RED);
     correctColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLUE);
-    pressColor_ = AceType::MakeRefPtr<PropertyColor>(Color::BLACK);
     pathColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::BLUE));
     pointAnimateColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::BLACK));
     pathStrokeWidth_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
@@ -101,7 +101,6 @@ void PatternLockModifier::AttachProperties()
     AttachProperty(hoverColor_);
     AttachProperty(wrongColor_);
     AttachProperty(correctColor_);
-    AttachProperty(pressColor_);
     AttachProperty(pathColor_);
     AttachProperty(pointAnimateColor_);
     AttachProperty(pathStrokeWidth_);
@@ -173,30 +172,35 @@ void PatternLockModifier::PaintLockLine(RSCanvas& canvas, const OffsetF& offset)
 
     pen.SetColor(pathColor.GetValue());
     canvas.Save();
+    SetCircleClip(canvas);
     canvas.AttachPen(pen);
+    RSPath path;
     if (count > ANIMATABLE_POINT_COUNT) {
         for (size_t i = 0; i < count - ANIMATABLE_POINT_COUNT; i++) {
             OffsetF pointBegin = GetCircleCenterByXY(offset, choosePoint_[i].GetColumn(), choosePoint_[i].GetRow());
             OffsetF pointEnd =
                 GetCircleCenterByXY(offset, choosePoint_[i + 1].GetColumn(), choosePoint_[i + 1].GetRow());
-            canvas.DrawLine(RSPoint(pointBegin.GetX(), pointBegin.GetY()), RSPoint(pointEnd.GetX(), pointEnd.GetY()));
+            path.MoveTo(pointBegin.GetX(), pointBegin.GetY());
+            path.LineTo(pointEnd.GetX(), pointEnd.GetY());
         }
     }
-    PaintConnectedLineTail(canvas, offset);
+    AddConnectedLineToPath(path, offset);
     if (isMoveEventValid_->Get()) {
         OffsetF pointBegin =
             GetCircleCenterByXY(offset, choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
         OffsetF pointEnd = GetPointEndByCellCenter();
         if (pointEnd != pointBegin) {
-            canvas.DrawLine(RSPoint(pointBegin.GetX(), pointBegin.GetY()), RSPoint(pointEnd.GetX(), pointEnd.GetY()));
+            path.MoveTo(pointBegin.GetX(), pointBegin.GetY());
+            path.LineTo(pointEnd.GetX(), pointEnd.GetY());
         }
     }
-    PaintCanceledLineTail(canvas, offset);
+    AddCanceledLineToPath(path, offset);
+    canvas.DrawPath(path);
     canvas.DetachPen();
     canvas.Restore();
 }
 
-void PatternLockModifier::PaintConnectedLineTail(RSCanvas& canvas, const OffsetF& offset)
+void PatternLockModifier::AddConnectedLineToPath(RSPath& path, const OffsetF& offset)
 {
     size_t count = choosePoint_.size();
     if (count < ANIMATABLE_POINT_COUNT) {
@@ -206,11 +210,12 @@ void PatternLockModifier::PaintConnectedLineTail(RSCanvas& canvas, const OffsetF
         choosePoint_[count - ANIMATABLE_POINT_COUNT].GetRow());
     OffsetF pointEnd = GetConnectedLineTailPoint();
     if (pointEnd != pointBegin) {
-        canvas.DrawLine(RSPoint(pointBegin.GetX(), pointBegin.GetY()), RSPoint(pointEnd.GetX(), pointEnd.GetY()));
+        path.MoveTo(pointBegin.GetX(), pointBegin.GetY());
+        path.LineTo(pointEnd.GetX(), pointEnd.GetY());
     }
 }
 
-void PatternLockModifier::PaintCanceledLineTail(RSCanvas& canvas, const OffsetF& offset)
+void PatternLockModifier::AddCanceledLineToPath(RSPath& path, const OffsetF& offset)
 {
     if (!needCanceledLine_) {
         return;
@@ -220,7 +225,8 @@ void PatternLockModifier::PaintCanceledLineTail(RSCanvas& canvas, const OffsetF&
         GetCircleCenterByXY(offset, choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
     OffsetF pointEnd = GetCanceledLineTailPoint();
     if (pointEnd != pointBegin) {
-        canvas.DrawLine(RSPoint(pointBegin.GetX(), pointBegin.GetY()), RSPoint(pointEnd.GetX(), pointEnd.GetY()));
+        path.MoveTo(pointBegin.GetX(), pointBegin.GetY());
+        path.LineTo(pointEnd.GetX(), pointEnd.GetY());
     }
 }
 
@@ -229,18 +235,13 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
     auto activeColor = activeColor_->Get();
     auto regularColor = regularColor_->Get();
     auto selectedColor = selectedColor_->Get();
-    auto sideLength = sideLength_->Get();
     auto circleRadius = circleRadius_->Get();
     auto pointAnimateColor = pointAnimateColor_->Get();
     auto pathColor = pathColor_->Get();
-    auto pressColor = pressColor_->Get();
 
     OffsetF cellcenter = GetCircleCenterByXY(offset, x, y);
     float offsetX = cellcenter.GetX();
     float offsetY = cellcenter.GetY();
-    const int32_t radiusCount = RADIUS_TO_DIAMETER * PATTERN_LOCK_COL_COUNT;
-    float handleCircleRadius = std::min(circleRadius, sideLength / scaleActiveCircleRadius_ / radiusCount);
-    circleRadius = std::max(handleCircleRadius, 0.0f);
 
     auto index = (x - 1) * PATTERN_LOCK_COL_COUNT + y - 1;
     if (CheckChoosePoint(x, y)) {
@@ -249,7 +250,6 @@ void PatternLockModifier::PaintLockCircle(RSCanvas& canvas, const OffsetF& offse
         const int32_t lastIndexFir = 1;
         CheckIsHoverAndPaint(canvas, offsetX, offsetY, GetActiveCircleRadius(index), index);
         if (isMoveEventValid_->Get() && CheckChoosePointIsLastIndex(x, y, lastIndexFir)) {
-            PaintCircle(canvas, offsetX, offsetY, circleRadius * pressRadiusScale_, ToRSColor(pressColor));
             PaintCircle(canvas, offsetX, offsetY, GetActiveCircleRadius(index), ToRSColor(activeColor));
         } else {
             if (challengeResult_.has_value()) {
@@ -354,6 +354,13 @@ void PatternLockModifier::SetSideLength(float sideLength)
 void PatternLockModifier::SetCircleRadius(float circleRadius)
 {
     CHECK_NULL_VOID(circleRadius_);
+    auto sideLength = sideLength_->Get();
+    if (NearZero(scaleBackgroundCircleRadius_)) {
+        return;
+    }
+    float handleCircleRadius =
+        std::min(circleRadius, sideLength / scaleBackgroundCircleRadius_ / PATTERN_LOCK_COL_COUNT * DIAMETER_TO_RADIUS);
+    circleRadius = std::max(handleCircleRadius, 0.0f);
     if (!NearEqual(circleRadius_->Get(), circleRadius)) {
         circleRadius_->Set(circleRadius);
         for (const auto& cell : choosePoint_) {
@@ -413,14 +420,6 @@ void PatternLockModifier::SetCorrectColor(const Color& correctColor)
 {
     CHECK_NULL_VOID(correctColor_);
     correctColor_->Set(correctColor);
-}
-
-void PatternLockModifier::SetPressColor(const Color& pressColor)
-{
-    CHECK_NULL_VOID(pressColor_);
-    if (pressColor_->Get() != pressColor) {
-        pressColor_->Set(pressColor);
-    }
 }
 
 void PatternLockModifier::SetPathStrokeWidth(float pathStrokeWidth)
@@ -539,11 +538,6 @@ void PatternLockModifier::SetLightRingRadiusStartScale(float scale)
 void PatternLockModifier::SetLightRingRadiusEndScale(float scale)
 {
     scaleLightRingRadiusEnd_ = scale;
-}
-
-void PatternLockModifier::SetPressRadiusScale(float scale)
-{
-    pressRadiusScale_ = scale;
 }
 
 void PatternLockModifier::SetHoverRadiusScale(float scale)
@@ -748,5 +742,28 @@ OffsetF PatternLockModifier::GetPointEndByCellCenter() const
     y = y > offset.GetY() + sideLength ? offset.GetY() + sideLength : y;
     y = y < offset.GetY() ? offset.GetY() : y;
     return OffsetF(x, y);
+}
+
+void PatternLockModifier::SetCircleClip(RSCanvas& canvas)
+{
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t index = 0;
+    OffsetF center;
+    float backgroundCircleRadius = 0.0f;
+    float activeCircleRadius = 0.0f;
+    float clipRadius = 0.0f;
+    RSPath path;
+    for (const auto& point : choosePoint_) {
+        x = point.GetColumn();
+        y = point.GetRow();
+        center = GetCircleCenterByXY(offset_->Get(), x, y);
+        index = (x - 1) * PATTERN_LOCK_COL_COUNT + y - 1;
+        backgroundCircleRadius = GetBackgroundCircleRadius(index);
+        activeCircleRadius = GetActiveCircleRadius(index);
+        clipRadius = backgroundCircleRadius > activeCircleRadius ? backgroundCircleRadius : activeCircleRadius;
+        path.AddCircle(center.GetX(), center.GetY(), clipRadius);
+    }
+    canvas.ClipPath(path, RSClipOp::DIFFERENCE, true);
 }
 } // namespace OHOS::Ace::NG

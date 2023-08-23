@@ -41,7 +41,7 @@ int32_t AceChecker::flexLayouts_ = 0;
 // =================================================================================
 // resolve compile error temporarily and wait
 // for unittest cases to be integrated and modified
-ScopedDelegate::ScopedDelegate(Framework::FrontendDelegate* delegate, int32_t id)
+ScopedDelegate::ScopedDelegate(const RefPtr<Framework::FrontendDelegate>& delegate, int32_t id)
     : delegate_(delegate), scope_(new ContainerScope(id))
 {}
 

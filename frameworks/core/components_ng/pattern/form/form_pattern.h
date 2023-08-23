@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H
 
+#include "transaction/rs_interfaces.h"
+
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
@@ -75,16 +77,6 @@ public:
         return isLoaded_;
     }
 
-    void SetIsUnTrust(bool isUnTrust)
-    {
-        isUnTrust_ = isUnTrust;
-    }
-
-    void SetIsDynamic(bool isDynamic)
-    {
-        isDynamic_ = isDynamic;
-    }
-
     void SetFormLinkInfos(const std::vector<std::string>& infos)
     {
         formLinkInfos_.clear();
@@ -96,6 +88,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnVisibleChange(bool isVisible) override;
+    void OnModifyDone() override;
 
     void InitFormManagerDelegate();
     void CreateCardContainer();
@@ -106,6 +99,8 @@ private:
     void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;
+    void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic);
+    void FireFormSurfaceChangeCallback(float width, float height);
     void UpdateBackgroundColorWhenUnTrustForm();
 
     bool ISAllowUpdate() const;

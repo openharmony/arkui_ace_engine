@@ -17,8 +17,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
-
-#include "core/components_ng/base/geometry_node.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 
 #define private public
 #define protected public
@@ -28,6 +27,7 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -298,7 +298,7 @@ void TextTestNg::SetContentModifier(TextContentModifier& textContentModifier)
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textContentModifier.SetTextShadow(textShadow);
+    textContentModifier.SetTextShadow({ textShadow });
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
     OffsetF paintOffset;
@@ -310,8 +310,7 @@ void TextTestNg::SetPaintMethodModifier(TextPaintMethod& textPaintMethod)
     textPaintMethod.textContentModifier_->fontSize_ = ADAPT_FONT_SIZE_VALUE;
     textPaintMethod.textContentModifier_->fontWeight_ = FontWeight::LIGHTER;
     textPaintMethod.textContentModifier_->textColor_ = TEXT_COLOR_VALUE;
-    Shadow textShadow;
-    textPaintMethod.textContentModifier_->textShadow_ = textShadow;
+    textPaintMethod.textContentModifier_->AddDefaultShadow();
     textPaintMethod.textContentModifier_->textDecorationColorAlpha_ =
         AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
     textPaintMethod.textContentModifier_->textDecoration_ = TextDecoration::NONE;
@@ -330,7 +329,7 @@ void TextTestNg::UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutP
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textLayoutProperty->UpdateTextShadow(textShadow);
+    textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
@@ -425,6 +424,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator002, TestSize.Level1)
 {
     TestProperty testProperty;
     testProperty.letterSpacing = std::make_optional(LETTER_SPACING);
+    testProperty.baselineOffsetValue = std::make_optional(BASELINE_OFFSET_VALUE);
     auto frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -503,9 +503,6 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnAttachToFrameNode001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     pattern->OnAttachToFrameNode();
     EXPECT_EQ(pattern->longPressEvent_, nullptr);
@@ -518,9 +515,6 @@ HWTEST_F(TextTestNg, OnAttachToFrameNode001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnDetachFromFrameNode001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     pattern->selectOverlayProxy_ = nullptr;
     pattern->OnDetachFromFrameNode(nullptr);
@@ -534,9 +528,6 @@ HWTEST_F(TextTestNg, OnDetachFromFrameNode001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnDetachFromFrameNode002, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     /**
      * @tc.steps: step1. construct a SelectOverlayManager
@@ -675,9 +666,6 @@ HWTEST_F(TextTestNg, ShowSelectOverlay001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, ShowSelectOverlay002, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     pattern->selectOverlayProxy_ = nullptr;
     RectF firstHandle;
@@ -693,9 +681,6 @@ HWTEST_F(TextTestNg, ShowSelectOverlay002, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnModifyDone001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
@@ -712,13 +697,10 @@ HWTEST_F(TextTestNg, OnModifyDone001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -750,9 +732,6 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
@@ -777,9 +756,6 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
@@ -804,9 +780,6 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
@@ -837,9 +810,6 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
@@ -866,9 +836,6 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper002, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
@@ -892,9 +859,6 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper002, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper003, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
@@ -926,9 +890,6 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper003, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper004, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
@@ -957,9 +918,6 @@ HWTEST_F(TextTestNg, BeforeCreateLayoutWrapper004, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, DumpInfo001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     pattern->selectOverlayProxy_ = nullptr;
     pattern->DumpInfo();
@@ -973,9 +931,6 @@ HWTEST_F(TextTestNg, DumpInfo001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, OnHandleMove001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     pattern->AttachToFrameNode(frameNode);
@@ -1007,7 +962,7 @@ HWTEST_F(TextTestNg, TextCreatParagraphTest001, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1059,7 +1014,7 @@ HWTEST_F(TextTestNg, TextLayoutTest001, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1110,7 +1065,7 @@ HWTEST_F(TextTestNg, TextLayoutTest002, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1157,7 +1112,7 @@ HWTEST_F(TextTestNg, TextLayoutTest003, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1210,7 +1165,7 @@ HWTEST_F(TextTestNg, TextLayoutTest004, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1264,7 +1219,7 @@ HWTEST_F(TextTestNg, TextLayoutTest005, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1318,7 +1273,7 @@ HWTEST_F(TextTestNg, TextLayoutTest006, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1370,7 +1325,7 @@ HWTEST_F(TextTestNg, TextLayoutTest007, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1422,7 +1377,7 @@ HWTEST_F(TextTestNg, TextLayoutTest008, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1475,7 +1430,7 @@ HWTEST_F(TextTestNg, ToJsonValue001, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1503,7 +1458,7 @@ HWTEST_F(TextTestNg, ToJsonValue002, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1536,7 +1491,7 @@ HWTEST_F(TextTestNg, ToJsonValue003, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1569,7 +1524,7 @@ HWTEST_F(TextTestNg, ToJsonValue004, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1602,7 +1557,7 @@ HWTEST_F(TextTestNg, ToJsonValue005, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1635,7 +1590,7 @@ HWTEST_F(TextTestNg, ToJsonValue006, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1669,7 +1624,7 @@ HWTEST_F(TextTestNg, DidExceedMaxLines001, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1720,7 +1675,7 @@ HWTEST_F(TextTestNg, DidExceedMaxLines002, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
 
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1771,7 +1726,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1821,7 +1776,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1846,7 +1801,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     textLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
     textLayoutProperty->UpdateTextColor(TEXT_COLOR_VALUE);
     Shadow textShadow;
-    textLayoutProperty->UpdateTextShadow(textShadow);
+    textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(BASELINE_OFFSET_VALUE);
@@ -1882,7 +1837,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1928,7 +1883,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest004, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1973,7 +1928,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest005, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2018,7 +1973,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2074,7 +2029,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2134,7 +2089,7 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2194,7 +2149,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2237,7 +2192,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2282,7 +2237,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2387,7 +2342,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode and textLayoutProperty.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -2418,7 +2373,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest002, TestSize.Level1)
     textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
     textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textLayoutProperty->UpdateTextShadow(textShadow);
+    textLayoutProperty->UpdateTextShadow({ textShadow });
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
@@ -2444,6 +2399,7 @@ HWTEST_F(TextTestNg, TextPaintMethodTest002, TestSize.Level1)
 HWTEST_F(TextTestNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
 {
     TextModelNG textModel;
+    textModel.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -2470,6 +2426,7 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetText001, TestSize.Level1)
 HWTEST_F(TextTestNg, TextAccessibilityPropertyIsSelected001, TestSize.Level1)
 {
     TextModelNG textModel;
+    textModel.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
@@ -2487,6 +2444,7 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyIsSelected001, TestSize.Level1)
 HWTEST_F(TextTestNg, TextAccessibilityPropertyGetTextSelectionStart001, TestSize.Level1)
 {
     TextModelNG textModel;
+    textModel.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -2506,6 +2464,7 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetTextSelectionStart001, TestSize
 HWTEST_F(TextTestNg, TextAccessibilityPropertyGetTextSelectionEnd001, TestSize.Level1)
 {
     TextModelNG textModel;
+    textModel.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -2525,6 +2484,7 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetTextSelectionEnd001, TestSize.L
 HWTEST_F(TextTestNg, TextAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
     TextModelNG textModel;
+    textModel.Create(CREATE_VALUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto textPattern = frameNode->GetPattern<TextPattern>();
@@ -2556,7 +2516,7 @@ HWTEST_F(TextTestNg, TextModelNgTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
@@ -2572,10 +2532,10 @@ HWTEST_F(TextTestNg, TextModelNgTest001, TestSize.Level1)
     text.Create("text");
     text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     Shadow textShadow;
-    text.SetTextShadow(textShadow);
+    text.SetTextShadow({ textShadow });
     EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
         TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-    EXPECT_EQ(textLayoutProperty->GetTextShadowValue(textShadow), textShadow);
+    EXPECT_EQ(*textLayoutProperty->GetTextShadowValue({ textShadow }).begin(), textShadow);
 }
 
 /**
@@ -2588,7 +2548,7 @@ HWTEST_F(TextTestNg, TextPatternTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode and textPattern.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
@@ -2615,7 +2575,7 @@ HWTEST_F(TextTestNg, TextPatternTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode and textPattern.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
@@ -2638,7 +2598,7 @@ HWTEST_F(TextTestNg, TextPatternTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. create textFrameNode and textPattern.
      */
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
@@ -2689,9 +2649,6 @@ HWTEST_F(TextTestNg, TextPatternTest004, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, CreateParagraph001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -2717,8 +2674,6 @@ HWTEST_F(TextTestNg, CreateParagraph001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto pattern = AceType::MakeRefPtr<TextPattern>();
@@ -2759,9 +2714,6 @@ HWTEST_F(TextTestNg, Layout001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, ApplyIndents001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -2774,7 +2726,6 @@ HWTEST_F(TextTestNg, ApplyIndents001, TestSize.Level1)
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
     rowLayoutAlgorithm->ApplyIndents(textStyle, RECT_WIDTH_VALUE);
@@ -2789,9 +2740,6 @@ HWTEST_F(TextTestNg, ApplyIndents001, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, AddChildSpanItem001, TestSize.Level1)
 {
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -2804,7 +2752,8 @@ HWTEST_F(TextTestNg, AddChildSpanItem001, TestSize.Level1)
         frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
     TextStyle textStyle;
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     pattern->AddChildSpanItem(element);
@@ -2935,11 +2884,199 @@ HWTEST_F(TextTestNg, DragBase001, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     auto boxes = pattern->GetTextBoxes();
     EXPECT_EQ(boxes.size(), 1);
+#ifndef USE_GRAPHIC_TEXT_GINE
     EXPECT_EQ(boxes[0].rect_.GetLeft(), 0);
     EXPECT_EQ(boxes[0].rect_.GetRight(), 20);
+#else
+    EXPECT_EQ(boxes[0].rect.GetLeft(), 0);
+    EXPECT_EQ(boxes[0].rect.GetRight(), 20);
+#endif
 
     auto height = pattern->GetLineHeight();
     EXPECT_EQ(height, 20);
+}
+
+/**
+ * @tc.name: TextDecorationStyleTest001
+ * @tc.desc: test text_model_ng.cpp SetTextDecorationStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextDecorationStyleTest001, TestSize.Level1)
+{
+    TextModelNG text;
+    text.Create(CREATE_VALUE);
+    text.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
+}
+
+/**
+ * @tc.name: TextDecorationStyleTest002
+ * @tc.desc: Test TextDecorationStyle of Text will be inheritted by Span
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextDecorationStyleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text FrameNode and set TextDecoration values
+     * @tc.expected: Successfully created parent Node
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    textModelNG.SetTextDecoration(TextDecoration::LINE_THROUGH);
+    textModelNG.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+
+    /**
+     * @tc.steps: step2. create spanNode without setting TextDecoration values
+     * @tc.expected: Successfully created spanNode
+     */
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+
+    /**
+     * @tc.steps: step3. SpanNode mount to parent
+     */
+    textFrameNode->AddChild(spanNode);
+
+    /**
+     * @tc.steps: step4. called BeforeCreateLayoutWrapper function to UpdateChildProperty
+     * @tc.expected: spanNode inherits parent property
+     */
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(spanNode->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanNode->GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
+}
+
+/**
+ * @tc.name: TextDecorationStyleTest003
+ * @tc.desc: Test TextDecorationStyle of Text won't override that of Span
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextDecorationStyleTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text FrameNode and set TextDecoration values
+     * @tc.expected: Successfully created parent Node
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    textModelNG.SetTextDecoration(TextDecoration::LINE_THROUGH);
+    textModelNG.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+
+    /**
+     * @tc.steps: step2. create spanNode1 and set TextDecoration values
+     * @tc.expected: Successfully created spanNode1
+     */
+    SpanModelNG spanModelNG1;
+    spanModelNG1.Create(CREATE_VALUE);
+    spanModelNG1.SetTextDecoration(TextDecoration::OVERLINE);
+    spanModelNG1.SetTextDecorationStyle(TextDecorationStyle::WAVY);
+    auto spanNode1 = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+
+    /**
+     * @tc.steps: step3. create spanNode2 without setting TextDecoration values
+     * @tc.expected: Successfully created spanNode2
+     */
+    SpanModelNG spanModelNG2;
+    spanModelNG2.Create(TEXT_CONTENT);
+    auto spanNode2 = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+
+    /**
+     * @tc.steps: step4. SpanNode mount to parent
+     */
+    textFrameNode->AddChild(spanNode1);
+    textFrameNode->AddChild(spanNode2);
+
+    /**
+     * @tc.steps: step5. called BeforeCreateLayoutWrapper function to UpdateChildProperty
+     * @tc.expected: spanNode1 uses own property and spanNode2 inherits parent property
+     */
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(spanNode1->GetTextDecoration(), TextDecoration::OVERLINE);
+    EXPECT_EQ(spanNode1->GetTextDecorationStyle(), TextDecorationStyle::WAVY);
+    EXPECT_EQ(spanNode2->GetTextDecoration(), TextDecoration::LINE_THROUGH);
+    EXPECT_EQ(spanNode2->GetTextDecorationStyle(), TextDecorationStyle::DOUBLE);
+}
+
+/**
+ * @tc.name: TextDecorationToJsonValue001
+ * @tc.desc: Test Text Decoration ToJsonValue when values set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextDecorationToJsonValue001, TestSize.Level1)
+{
+    TextModelNG text;
+    text.Create(CREATE_VALUE);
+    text.SetTextDecoration(TextDecoration::LINE_THROUGH);
+    text.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    text.SetTextDecorationStyle(TextDecorationStyle::DOUBLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto json = JsonUtil::Create(true);
+    textLayoutProperty->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("content"));
+    EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
+    EXPECT_TRUE(json->Contains("decoration"));
+    std::string decorationStr = json->GetValue("decoration")->GetString();
+    auto decorationJson = JsonUtil::ParseJsonString(decorationStr);
+    ASSERT_NE(decorationJson, nullptr);
+    EXPECT_TRUE(decorationJson->Contains("type"));
+    EXPECT_TRUE(decorationJson->GetValue("type")->GetString() ==
+                V2::ConvertWrapTextDecorationToStirng(TextDecoration::LINE_THROUGH));
+    EXPECT_TRUE(decorationJson->Contains("color"));
+    EXPECT_TRUE(decorationJson->GetValue("color")->GetString() == TEXT_COLOR_VALUE.ColorToString());
+    EXPECT_TRUE(decorationJson->Contains("style"));
+    EXPECT_TRUE(decorationJson->GetValue("style")->GetString() ==
+                V2::ConvertWrapTextDecorationStyleToString(TextDecorationStyle::DOUBLE));
+}
+
+/**
+ * @tc.name: TextDecorationToJsonValue002
+ * @tc.desc: Test Text Decoration ToJsonValue when default values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextDecorationToJsonValue002, TestSize.Level1)
+{
+    TextModelNG text;
+    text.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto json = JsonUtil::Create(true);
+    textLayoutProperty->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("content"));
+    EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
+    EXPECT_TRUE(json->Contains("decoration"));
+    std::string decorationStr = json->GetValue("decoration")->GetString();
+    auto decorationJson = JsonUtil::ParseJsonString(decorationStr);
+    ASSERT_NE(decorationJson, nullptr);
+    EXPECT_TRUE(decorationJson->Contains("type"));
+    EXPECT_TRUE(
+        decorationJson->GetValue("type")->GetString() == V2::ConvertWrapTextDecorationToStirng(TextDecoration::NONE));
+    EXPECT_TRUE(decorationJson->Contains("color"));
+    EXPECT_TRUE(decorationJson->GetValue("color")->GetString() == Color::BLACK.ColorToString());
+    EXPECT_TRUE(decorationJson->Contains("style"));
+    EXPECT_TRUE(decorationJson->GetValue("style")->GetString() ==
+                V2::ConvertWrapTextDecorationStyleToString(TextDecorationStyle::SOLID));
 }
 
 /**
@@ -3557,7 +3694,7 @@ HWTEST_F(TextTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: Related function is called.
      */
     RectF rect(0.0f, 0.0f, 0.0f, 0.0f);
-    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_))),
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_),
         GetPaintRectWithTransform())
         .WillRepeatedly(Return(rect));
     EXPECT_TRUE(textAccessibilityProperty->ActActionSetSelection(1, TEXT_SIZE_INT));
@@ -3932,5 +4069,114 @@ HWTEST_F(TextTestNg, TextModelGetFont001, TestSize.Level1)
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
     textModelNG.SetFont(font);
     EXPECT_EQ(textLayoutProperty->GetFont(), TEXT_EQUALS_VALUE);
+}
+
+/**
+ * @tc.name: BetweenSelectedPosition001
+ * @tc.desc: test text_pattern.cpp BetweenSelectedPosition function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, BetweenSelectedPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    pattern->copyOption_ = CopyOptions::Distributed;
+    pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
+    host->draggable_ = true;
+    host->eventHub_->SetOnDragStart(
+        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
+    
+    /**
+     * @tc.steps: step2. set selected rect to [0, 0] - [20, 20]
+     */
+    pattern->textSelector_.Update(0, 20);
+    
+    /**
+     * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
+     * @tc.expected: Running the BetweenSelectedPosition function and check the result with expected results. 
+     */
+    std::vector<Offset> cases = {
+        Offset(1, 1), Offset(21, 21), 
+    };
+    std::vector<bool> exceptResults = {
+        true, false
+    };
+    for (uint32_t turn = 0; turn < cases.size(); ++turn) {
+        EXPECT_EQ(pattern->BetweenSelectedPosition(cases[turn]), exceptResults[turn]);
+    }
+}
+
+/**
+ * @tc.name: OnHandleMove002
+ * @tc.desc: test text_pattern.cpp OnHandleMove function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnHandleMove002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    auto pipeline = host->GetContext();
+    pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    pattern->selectOverlayProxy_ = proxy;
+    pipeline->rootNode_->GetGeometryNode()->SetFrameOffset({3.0, 5.0});
+    
+    /**
+     * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
+     * @tc.expected: Running the OnHandleMove function and check the result with expected results. 
+     */
+    std::vector<RectF> handleRects = {
+        {1.0, 2.0, 3.0, 4.0}, {5.0, 6.0, 7.0, 8.0}, {-9.0, -10.0, 11.0, 12.0}
+    };
+    std::vector<vector<TextSelector>> expectResults = {
+        {TextSelector(0, -1), TextSelector(0, 0)},
+        {TextSelector(0, 0), TextSelector(0, 0)},
+        {TextSelector(0, 0), TextSelector(0, 0)}
+    };
+    for (uint32_t turn = 0; turn < handleRects.size(); ++turn) {
+        pattern->OnHandleMove(handleRects[turn], true);
+        EXPECT_EQ(pattern->textSelector_, expectResults[turn][0]);
+        pattern->OnHandleMove(handleRects[turn], false);
+        EXPECT_EQ(pattern->textSelector_, expectResults[turn][1]);
+    }
+}
+
+/**
+ * @tc.name: GetGlobalOffset001
+ * @tc.desc: test text_pattern.cpp GetGlobalOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetGlobalOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    auto pipeline = host->GetContext();
+    
+    /**
+     * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
+     * @tc.expected: Running GetGlobalOffset function and check the result with expected results. 
+     */
+    std::vector<OffsetF> offsetCases = {
+    {3.0, 5.0}, {4.0, 5.0}, {6.0, 7.0}
+    };
+    std::vector<Offset> expectResults = {
+    {-3.0, -5.0}, {-4.0, -5.0}, {-6.0, -7.0}
+    };
+    for (uint32_t turn = 0; turn < offsetCases.size(); ++turn) {
+        pipeline->rootNode_->GetGeometryNode()->SetFrameOffset(offsetCases[turn]);
+        Offset tmp;
+        pattern->GetGlobalOffset(tmp);
+        EXPECT_EQ(tmp, expectResults[turn]);
+    }
 }
 } // namespace OHOS::Ace::NG

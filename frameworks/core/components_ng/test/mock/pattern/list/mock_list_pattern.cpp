@@ -48,6 +48,8 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
 
 void ListPattern::OnScrollEndCallback() {}
 
+void ListPattern::OnScrollStartCallback() {}
+
 bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 {
     return false;

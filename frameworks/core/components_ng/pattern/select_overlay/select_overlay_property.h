@@ -58,9 +58,13 @@ struct SelectMenuInfo {
     bool showCopyAll = true;
     bool showCut = true;
     std::optional<OffsetF> menuOffset;
+    std::function<void()> menuBuilder;
 
     bool IsIconChanged(const SelectMenuInfo& info) const
     {
+        if (menuBuilder != nullptr || info.menuBuilder != nullptr) {
+            return true;
+        }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
                  (showCut == info.showCut));
     }
@@ -71,6 +75,9 @@ struct SelectMenuCallback {
     std::function<void()> onPaste;
     std::function<void()> onSelectAll;
     std::function<void()> onCut;
+
+    std::function<void()> onAppear;
+    std::function<void()> onDisappear;
 };
 
 struct SelectOverlayInfo {
@@ -111,6 +118,8 @@ struct SelectOverlayInfo {
     std::function<void(bool)> onClose;
 
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
+
+    bool isHandleLineShow = true;
 };
 
 } // namespace OHOS::Ace::NG

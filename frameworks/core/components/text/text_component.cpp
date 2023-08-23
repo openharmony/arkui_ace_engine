@@ -70,6 +70,8 @@ uint32_t TextComponent::Compare(const RefPtr<Component>& component) const
         UpdateRenderType::NONE : UpdateRenderType::LAYOUT);
     updateType |= static_cast<uint32_t>(declarationStyle.GetTextDecoration() == textStyle.GetTextDecoration() ?
         UpdateRenderType::NONE : UpdateRenderType::LAYOUT);
+    updateType |= static_cast<uint32_t>(declarationStyle.GetTextDecorationStyle() ==
+        textStyle.GetTextDecorationStyle() ? UpdateRenderType::NONE : UpdateRenderType::LAYOUT);
     updateType |= static_cast<uint32_t>(declarationStyle.GetTextDecorationColor() ==
         textStyle.GetTextDecorationColor() ? UpdateRenderType::NONE : UpdateRenderType::PAINT);
     updateType |= static_cast<uint32_t>(declarationStyle.GetFontStyle() == textStyle.GetFontStyle() ?

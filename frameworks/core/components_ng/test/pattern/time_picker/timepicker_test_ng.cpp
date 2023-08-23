@@ -67,7 +67,7 @@ constexpr double TOSS_DELTA = 20.0;
 const int CURRENT_VALUE1 = 3;
 const int CURRENT_VALUE2 = 10;
 const int MIDDLE_OF_COUNTS = 2;
-const int SHOW_COUNT = 5;
+const int SHOW_COUNT = 7;
 const int DEFAULT_INDEX = -1;
 const std::string AM = "上午";
 const std::string PM = "下午";
@@ -86,13 +86,12 @@ const double OFFSET_Y = 8.0;
 const double OFFSET_DISTANCE = 10.0;
 const int32_t DEFAULT_FINGER_ID = 1;
 const uint32_t INVALID_SHOW_COUNT = 1;
-const uint32_t INDEX = 5;
+const uint32_t INDEX = 7;
 const double SCALE = 1.0;
 const double DEFAULT_JUMP_INTERVAL = 2.0;
 const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
-const float TEXT_HOUR24_HEIGHT_NUMBER = 9.0f;
 const float EXTRA_WIDTH = 50.0f;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
@@ -105,6 +104,7 @@ const double YOFFSET_START1 = 0.0;
 const double YOFFSET_END1 = 1000.0;
 const double TIME_PLUS = 1 * 100.0;
 const SizeF TEST_FRAME_SIZE { 20, 50 };
+constexpr double COLUMN_VELOCITY = 2000.0;
 } // namespace
 class TimePickerPatternTestNg : public testing::Test {
 public:
@@ -112,6 +112,10 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
+    void CreateTimePickerColumnNode();
+
+    RefPtr<FrameNode> columnNode_;
+    RefPtr<TimePickerColumnPattern> columnPattern_;
 };
 
 class TestNode : public UINode {
@@ -152,6 +156,29 @@ void TimePickerPatternTestNg::SetUp()
 void TimePickerPatternTestNg::TearDown()
 {
     MockPipelineBase::GetCurrent()->themeManager_ = nullptr;
+}
+
+void TimePickerPatternTestNg::CreateTimePickerColumnNode()
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    columnNode_ = allChildNode["minute"];
+    ASSERT_NE(columnNode_, nullptr);
+    columnPattern_ = columnNode_->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->SetShowCount(SHOW_COUNT);
+    columnPattern_->OnAttachToFrameNode();
+    auto host = timePickerRowPattern->GetHost();
+    EXPECT_NE(host, nullptr);
 }
 
 /**
@@ -1069,7 +1096,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     gestureEvent.SetGlobalPoint(point);
     panEvent->actionStart_(gestureEvent);
     EXPECT_EQ(minuteColumnPattern->GetToss()->yStart_, OFFSET_Y);
-    EXPECT_EQ(minuteColumnPattern->yOffset_, OFFSET_Y);
+    EXPECT_EQ(minuteColumnPattern->yOffset_, YOFFSET_START1);
     EXPECT_EQ(minuteColumnPattern->yLast_, OFFSET_Y);
     EXPECT_TRUE(minuteColumnPattern->pressed_);
 
@@ -1097,10 +1124,9 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     gestureEvent.SetGlobalPoint(point);
     gestureEvent.SetInputEventType(InputEventType::MOUSE_BUTTON);
     minuteColumnPattern->SetCurrentIndex(totalOptionCount);
-    minuteColumnPattern->SetShowCount(totalOptionCount * 2);
     panEvent->actionUpdate_(gestureEvent);
     EXPECT_EQ(minuteColumnPattern->GetToss()->yEnd_, OFFSET_Y + 2);
-    EXPECT_FALSE(minuteColumnPattern->CanMove(true));
+    EXPECT_TRUE(minuteColumnPattern->CanMove(true));
 
     minuteColumnPattern->SetCurrentIndex(totalOptionCount - 1);
     panEvent->actionUpdate_(gestureEvent);
@@ -1142,7 +1168,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern010, TestSize.Level1)
     toss->SetStart(YOFFSET_START1);
     toss->SetEnd(YOFFSET_END1);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
-    EXPECT_TRUE(toss->Play());
+    EXPECT_FALSE(toss->Play());
     gestureEvent.SetInputEventType(InputEventType::TOUCH_SCREEN);
     panEvent->actionEnd_(gestureEvent);
     EXPECT_FALSE(minuteColumnPattern->pressed_);
@@ -1264,14 +1290,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern013, TestSize.Level1)
     EXPECT_EQ(
         minuteColumnPattern->dividerHeight_, minuteColumnPattern->gradientHeight_ + gradientHeight + dividerSpacing);
     EXPECT_EQ(minuteColumnPattern->dividerSpacingWidth_, dividerSpacing * TEXT_WEIGHT_NUMBER);
-
-    minuteColumn->children_.pop_back();
-    minuteColumn->children_.pop_back();
-    minuteColumnPattern->SetDividerHeight(OPTION_COUNT_PHONE_LANDSCAPE + 1);
-    EXPECT_EQ(minuteColumnPattern->gradientHeight_, gradientHeight - TEXT_HOUR24_HEIGHT_NUMBER);
-
-    minuteColumnPattern->SetDividerHeight(OPTION_COUNT_PHONE_LANDSCAPE);
-    EXPECT_EQ(minuteColumnPattern->gradientHeight_, gradientHeight - TEXT_HOUR24_HEIGHT_NUMBER);
 }
 
 /**
@@ -1299,13 +1317,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern014, TestSize.Level1)
     auto options = minuteColumnPattern->GetOptions();
     int totalOptionCount = static_cast<int>(options[minuteColumn]);
     minuteColumnPattern->SetCurrentIndex(totalOptionCount);
-    minuteColumnPattern->SetShowCount(totalOptionCount * 2);
     minuteColumnPattern->UpdateColumnChildPosition(OFFSET_X);
-    EXPECT_FALSE(minuteColumnPattern->CanMove(true));
-
-    minuteColumnPattern->SetCurrentIndex(totalOptionCount - 2);
-    minuteColumnPattern->UpdateColumnChildPosition(OFFSET_X);
-    EXPECT_EQ(minuteColumnPattern->scrollDelta_, OFFSET_X - OFFSET_Y);
+    EXPECT_TRUE(minuteColumnPattern->CanMove(true));
 }
 
 /**
@@ -1851,6 +1864,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond001, TestSize.Level1)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
     std::vector<RefPtr<FrameNode>> tags;
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
 
     auto hourColumn = allChildNode["hour"];
@@ -1889,6 +1903,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond002, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
 
     auto amPmColumn = allChildNode["amPm"];
@@ -1937,6 +1952,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond003, TestSize.Level1)
     /**
      * @tc.steps: step2. check the secondColumn has been created.
      */
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     auto secondColumn = allChildNode["second"];
     ASSERT_NE(secondColumn, nullptr);
@@ -1965,6 +1981,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode001, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
 
     auto hourColumn = allChildNode["hour"];
@@ -1988,6 +2005,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode002, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
 
     auto hourColumn = allChildNode["hour"];
@@ -2012,6 +2030,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode003, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
 
     auto minuteColumn = allChildNode["minute"];
@@ -2037,6 +2056,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerWheelMode004, TestSize.Level1)
     frameNode->MarkModifyDone();
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
 
     auto minuteColumn = allChildNode["minute"];
@@ -2145,5 +2165,75 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level1)
     timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
     auto frameSize = layoutWrapper.geometryNode_->GetFrameSize();
     EXPECT_EQ(frameSize, TEST_FRAME_SIZE);
+}
+
+/**
+ * @tc.name: TimePickerColumnPattern016
+ * @tc.desc: Test TossAnimationController.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TimePickerColumn.
+     */
+    CreateTimePickerColumnNode();
+
+    /**
+     * @tc.steps: step2. Set velocity and toss offset .
+     */
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->SetMainVelocity(COLUMN_VELOCITY);
+    auto toss = columnPattern_->GetToss();
+    ASSERT_NE(toss, nullptr);
+    toss->SetStart(YOFFSET_START1);
+    toss->SetEnd(YOFFSET_END1);
+    toss->timeEnd_ = toss->timeStart_ + TIME_PLUS;
+
+    /**
+     * @tc.step: step3. call toss::Play and check yStart_ and yEnd_.
+     * @tc.expected: yStart_ and yEnd_ same as setting, return value is true.
+     */
+    auto ret = toss->Play();
+    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
+    EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
+    EXPECT_TRUE(ret);
+    toss->StopTossAnimation();
+    EXPECT_FALSE(columnPattern_->GetTossStatus());
+}
+
+/**
+ * @tc.name: TimePickerColumnPattern017
+ * @tc.desc: Test OnAroundButtonClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TimePickerColumnNode.
+     */
+    CreateTimePickerColumnNode();
+
+    /**
+     * @tc.steps: step2. Call OnAroundButtonClick .
+     */
+    ASSERT_NE(columnNode_, nullptr);
+    auto childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(1));
+    ASSERT_NE(childNode, nullptr);
+    auto param = AceType::MakeRefPtr<TimePickerEventParam>();
+    param->instance_ = childNode;
+    param->itemIndex_ = 1;
+    param->itemTotalCounts_ = static_cast<int32_t>(columnNode_->GetChildren().size());
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->OnAroundButtonClick(param);
+
+    /**
+     * @tc.step: step3. call IsRunning.
+     * @tc.expected: Check animator isRunning calue.
+     */
+    auto controller = columnPattern_->fromController_;
+    ASSERT_NE(controller, nullptr);
+    auto isRunning = controller->IsRunning();
+    EXPECT_TRUE(isRunning);
 }
 } // namespace OHOS::Ace::NG

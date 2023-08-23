@@ -87,14 +87,16 @@ void ScreenPattern::UpdateDisplayInfo()
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
     auto screenProperty = screenSession_->GetScreenProperty();
-    auto screenRotation = screenProperty.GetRotation();
-    auto screenBounds = screenProperty.GetBounds();
+    auto dpi = screenProperty.GetDensity();
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintRect = host->GetPaintRectWithTransform();
     MMI::Rect screenRect = {
-        screenBounds.rect_.left_,
-        screenBounds.rect_.top_,
-        screenBounds.rect_.width_,
-        screenBounds.rect_.height_
+        paintRect.Left(),
+        paintRect.Top(),
+        paintRect.Width(),
+        paintRect.Height()
     };
 
     MMI::WindowInfo windowInfo = {
@@ -108,26 +110,31 @@ void ScreenPattern::UpdateDisplayInfo()
         .flags = 0  // touchable
     };
 
-    constexpr int32_t dpi = 240; // to get dpi
     MMI::DisplayInfo displayInfo = {
         .id = screenId,
-        .x = screenBounds.rect_.left_,
-        .y = screenBounds.rect_.top_,
-        .width = screenBounds.rect_.width_,
-        .height = screenBounds.rect_.height_,
+        .x = paintRect.Left(),
+        .y = paintRect.Top(),
+        .width = paintRect.Width(),
+        .height = paintRect.Height(),
         .dpi = dpi,
         .name = "display" + std::to_string(screenId),
         .uniq = "default" + std::to_string(screenId),
-        .direction = ConvertDegreeToMMIRotation(screenRotation)
+        .direction = ConvertDegreeToMMIRotation(DIRECTION0)
     };
 
     MMI::DisplayGroupInfo displayGroupInfo = {
-        .width = screenBounds.rect_.width_,
-        .height = screenBounds.rect_.height_,
+        .width = paintRect.Width(),
+        .height = paintRect.Height(),
         .focusWindowId = 0, // root scene id 0
         .windowsInfo = { windowInfo },
         .displaysInfo = { displayInfo }
     };
     MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
+}
+
+bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
+{
+    UpdateDisplayInfo();
+    return true;
 }
 } // namespace OHOS::Ace::NG

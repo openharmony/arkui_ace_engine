@@ -221,6 +221,7 @@ const char INLINE_TEXT_COLOR[] = "inline_text_color";
 const char INLINE_RADIUS_SIZE[] = "inline_radius_size";
 const char INLINE_BG_COLOR[] = "inline_bg_color";
 const char INLINE_BORDER_COLOR[] = "inline_border_color";
+const char PASSWORD_STYLE_HEIGHT[] = "password_style_height";
 
 // linear split attributes
 const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";

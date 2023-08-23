@@ -27,8 +27,8 @@
 
 namespace OHOS::Ace::Napi {
 namespace {
-const uint32_t SHOW_DIALOG_BUTTON_NUM_MAX = 3;
-const uint32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
+const int32_t SHOW_DIALOG_BUTTON_NUM_MAX = -1;
+const int32_t SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
@@ -238,21 +238,21 @@ void DeleteContextAndThrowError(
     NapiThrow(env, errorMessage, Framework::ERROR_CODE_PARAM_INVALID);
 }
 
-bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, uint32_t maxButtonNum)
+bool ParseButtons(napi_env env, std::shared_ptr<PromptAsyncContext>& context, int32_t maxButtonNum)
 {
     uint32_t buttonsLen = 0;
     napi_value buttonArray = nullptr;
     napi_value textNApi = nullptr;
     napi_value colorNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
-    uint32_t index = 0;
+    int32_t index = 0;
     napi_get_array_length(env, context->buttonsNApi, &buttonsLen);
-    uint32_t buttonsLenInt = buttonsLen;
+    int32_t buttonsLenInt = buttonsLen;
     if (buttonsLenInt == 0) {
         DeleteContextAndThrowError(env, context, "Required input parameters are missing.");
         return false;
     }
-    if (buttonsLenInt > maxButtonNum) {
+    if (buttonsLenInt > maxButtonNum && maxButtonNum != -1) {
         buttonsLenInt = maxButtonNum;
         LOGW("Supports 1 - %{public}u buttons", maxButtonNum);
     }
@@ -296,7 +296,7 @@ bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValu
         double value = 0;
         napi_get_value_double(env, napiValue, &value);
         result.SetUnit(defaultUnit);
-        result = value;
+        result.SetValue(value);
         return true;
     } else if (valueType == napi_string) {
         std::string valueString;
@@ -304,6 +304,21 @@ bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValu
             return false;
         }
         result = StringUtils::StringToCalcDimension(valueString, false, defaultUnit);
+        return true;
+    } else if (valueType == napi_object) {
+        int32_t id = 0;
+        int32_t type = 0;
+        std::vector<std::string> params;
+        std::string parameterStr;
+        if (!ParseResourceParam(env, napiValue, id, type, params)) {
+            LOGE("can not parse resource info from inout params.");
+            return false;
+        }
+        if (!ParseString(id, type, params, parameterStr)) {
+            LOGE("can not get message from resource manager.");
+            return false;
+        }
+        result = StringUtils::StringToDimensionWithUnit(parameterStr, defaultUnit);
         return true;
     }
     return false;
@@ -320,7 +335,7 @@ void GetNapiDialogProps(napi_env env, const std::shared_ptr<PromptAsyncContext>&
     if (valueType == napi_number) {
         int32_t num;
         napi_get_value_int32(env, asyncContext->alignmentApi, &num);
-        if (num >= 0 && num < DIALOG_ALIGNMENT.size()) {
+        if (num >= 0 && num < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             alignment = DIALOG_ALIGNMENT[num];
         }
     }
@@ -557,8 +572,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             }
         }
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        SubwindowManager::GetInstance()->ShowDialog(asyncContext->titleString, asyncContext->messageString,
-            asyncContext->buttons, asyncContext->autoCancelBool, std::move(callBack), asyncContext->callbacks);
+        SubwindowManager::GetInstance()->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack),
+                                                    asyncContext->callbacks);
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();

@@ -72,7 +72,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
 
 LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
 {
-    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
@@ -83,7 +83,7 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
-        pattern->OnImageLoadFail();
+        pattern->OnImageLoadFail(errorMsg);
     };
 }
 
@@ -106,7 +106,7 @@ void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 {
     CHECK_NULL_VOID_NOLOG(image);
     // set animation flush function for svg / gif
-    image->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+    image->SetRedrawCallback([weak = WeakPtr(GetHost())] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkNeedRenderOnly();
@@ -210,17 +210,16 @@ void ImagePattern::OnImageDataReady()
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void ImagePattern::OnImageLoadFail()
+void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     auto imageEventHub = GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    LoadImageFailEvent loadImageFailEvent_(
-        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), "");
-    // TODO: remove errorMsg in fail event
-    imageEventHub->FireErrorEvent(std::move(loadImageFailEvent_));
+    LoadImageFailEvent event(
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height(), errorMsg);
+    imageEventHub->FireErrorEvent(event);
 }
 
 void ImagePattern::SetImagePaintConfig(

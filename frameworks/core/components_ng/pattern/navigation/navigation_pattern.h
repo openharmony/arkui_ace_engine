@@ -225,21 +225,34 @@ public:
     {
         userSetMinContentFlag_ = userSetMinContentFlag;
     }
+
+    bool GetUserSetNavBarWidthFlag() const
+    {
+        return userSetNavBarWidthFlag_;
+    }
+
+    void SetUserSetNavBarWidthFlag(bool userSetNavBarWidthFlag)
+    {
+        userSetNavBarWidthFlag_ = userSetNavBarWidthFlag;
+    }
+
+    void UpdateContextRect(const RefPtr<NavDestinationGroupNode>& curDestination,
+        const RefPtr<NavigationGroupNode>& navigation);
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
+        const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
     void DoNavigationTransitionAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
+    RefPtr<FrameNode> GetDividerNode() const;
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
     void OnHover(bool isHover);
-    void UpdateResponseRegion(
-        float realDividerWidth, float realNavBarWidth, float dragRegionHeight, OffsetF dragRectOffset);
     void AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm);
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
@@ -259,6 +272,7 @@ private:
     bool navBarVisibilityChange_ = false;
     bool userSetNavBarRangeFlag_ = false;
     bool userSetMinContentFlag_ = false;
+    bool userSetNavBarWidthFlag_ = false;
     Dimension minNavBarWidthValue_ = 0.0_vp;
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;

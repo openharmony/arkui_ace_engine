@@ -189,7 +189,6 @@ void SearchModelNG::SetSearchSrcPath(const std::string& src)
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-
     if (src.empty()) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -604,6 +603,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
 void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode)
 {
     auto nodeId = parentNode->GetImageId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     ImageSourceInfo imageSourceInfo(src);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -616,18 +617,11 @@ void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std:
         auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SEARCH_SVG);
         imageSourceInfo.SetSrc(iconPath, searchTheme->GetSearchIconColor());
     }
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     auto iconHeight = searchTheme->GetIconHeight();
     CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
-
-    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    imageRenderProperty->UpdateSvgFillColor(searchTheme->GetSearchIconColor());
-
     if (!hasImageNode) {
         frameNode->MountToParent(parentNode);
         frameNode->MarkModifyDone();
@@ -698,6 +692,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
 
     auto buttonRenderContext = frameNode->GetRenderContext();
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonRenderContext->UpdateClipEdge(true);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     std::string defaultText = "Search";

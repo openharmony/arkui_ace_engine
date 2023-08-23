@@ -92,7 +92,7 @@ void ImageLoadingContext::OnLoadSuccess()
 void ImageLoadingContext::OnLoadFail()
 {
     if (notifiers_.onLoadFail_) {
-        notifiers_.onLoadFail_(src_);
+        notifiers_.onLoadFail_(src_, errorMsg_);
     }
 }
 
@@ -166,6 +166,7 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
 
 void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
+    errorMsg_ = errorMsg;
     LOGW("Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(), errorMsg.c_str());
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
 }

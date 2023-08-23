@@ -90,7 +90,8 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     child->Measure(childLayoutConstraint);
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
     if (useCustom && !showInSubWindow) {
-        auto context = layoutWrapper->GetHostNode()->GetContext();
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         float rootH = context->GetRootHeight();
         float rootW = context->GetRootWidth();
         auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();

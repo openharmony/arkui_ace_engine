@@ -43,12 +43,15 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+protected:
+    void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
+    void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
+
 private:
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
-    void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
-    void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
+    virtual void SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper);
 
     // fill start of viewport
     bool FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
@@ -71,7 +74,7 @@ private:
 
     // Compote position of grid item in cross axis.
     float ComputeItemCrossPosition(LayoutWrapper* layoutWrapper, int32_t crossStart) const;
-    void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem);
+    virtual void LargeItemLineHeight(const RefPtr<LayoutWrapper>& itemWrapper, bool& hasNormalItem);
     // Find next valid cell when current is not valid.
     bool GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
     // Find a valid cell to place grid item and save to grid matrix.
@@ -83,7 +86,8 @@ private:
         const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
     bool IsIndexInMatrix(int32_t index, int32_t& startLine);
     void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize);
-    void GetTargetIndexInfoWithBenchMark(LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex);
+    virtual void GetTargetIndexInfoWithBenchMark(
+        LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex);
 
     void UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize);
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
@@ -94,7 +98,8 @@ private:
     OffsetF CalculateLargeItemOffset(
         OffsetF currOffset, int32_t itemIndex, int32_t currLineIndex, int32_t currentCrossIndex);
     bool NeedAdjust(const RefPtr<GridItemLayoutProperty>& itemLayoutWrapper);
-    void AdjustRowColSpan(const RefPtr<LayoutWrapper>& itemLayoutWrapper);
+    virtual void AdjustRowColSpan(
+        const RefPtr<LayoutWrapper>& itemLayoutWrapper, LayoutWrapper* layoutWrapper, int32_t itemIndex);
     void LargeItemNextLineHeight(int32_t currentLineIndex, LayoutWrapper* layoutWrapper);
     void LargeItemForwardLineHeight(int32_t currentLineIndex, LayoutWrapper* LayoutWrapper);
     int32_t CalculateLineIndexForLargeItem(std::map<int32_t, std::map<int32_t, int32_t>>::iterator gridMatrixIter,
@@ -105,6 +110,7 @@ private:
     void ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex);
     void UpdateCurrentOffsetForJumpTo(LayoutWrapper* layoutWrapper, float mainSize);
 
+protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
     int32_t currentItemRowSpan_ = 0;
@@ -113,6 +119,9 @@ private:
     int32_t currentItemColStart_ = -1;
     int32_t currentItemRowEnd_ = -1;
     int32_t currentItemColEnd_ = -1;
+    float cellAveLength_ = -1.0f;
+
+private:
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
@@ -127,7 +136,7 @@ private:
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
     bool canOverScroll_ = false;
-    float cellAveLength_ = -1.0f;
+
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };
 

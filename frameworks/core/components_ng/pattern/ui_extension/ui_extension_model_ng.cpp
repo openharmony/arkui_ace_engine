@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
-#include "interfaces/inner_api/ace/modal_ui_extension_callbacks.h"
+#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -54,6 +54,8 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const Moda
     pattern->SetOnErrorCallback(std::move(callbacks.onError));
     pattern->SetOnResultCallback(std::move(callbacks.onResult));
     pattern->SetOnReceiveCallback(std::move(callbacks.onReceive));
+    pattern->SetModalOnRemoteReadyCallback(std::move(callbacks.onRemoteReady));
+    pattern->SetModalOnDestroy(std::move(callbacks.onDestroy));
     return frameNode;
 }
 

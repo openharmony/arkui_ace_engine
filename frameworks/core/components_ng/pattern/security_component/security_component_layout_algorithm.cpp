@@ -62,10 +62,8 @@ void SecurityComponentLayoutAlgorithm::MeasureIcon(LayoutWrapper* layoutWrapper,
 {
     auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
     CHECK_NULL_VOID(iconWrapper);
-    auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(iconWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(imageLayoutProperty);
 
-    auto iconConstraint = imageLayoutProperty->GetContentLayoutConstraint();
+    auto iconConstraint = securityComponentProperty->GetContentLayoutConstraint();
     iconWrapper->Measure(iconConstraint);
     iconSizeF_ = iconWrapper->GetGeometryNode()->GetFrameSize();
 }
@@ -77,7 +75,10 @@ void SecurityComponentLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper,
     CHECK_NULL_VOID(textWrapper);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textConstraint = textLayoutProperty->GetContentLayoutConstraint();
+    auto textConstraint = securityComponentProperty->GetContentLayoutConstraint();
+
+    SizeT<float> maxSize { Infinity<float>(), Infinity<float>() };
+    textConstraint->maxSize = maxSize;
     textWrapper->Measure(textConstraint);
     textSizeF_ = textWrapper->GetGeometryNode()->GetFrameSize();
 }
@@ -98,7 +99,7 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
             NG::CalcLength(componentHeight_)));
     }
 
-    auto buttonConstraint = buttonWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+    auto buttonConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
     buttonWrapper->Measure(buttonConstraint);
     buttonSizeF_ = buttonWrapper->GetGeometryNode()->GetFrameSize();
 }

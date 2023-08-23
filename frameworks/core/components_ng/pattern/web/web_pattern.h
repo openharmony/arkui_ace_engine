@@ -402,6 +402,7 @@ private:
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
+    int GetWebId();
 
     void InitEvent();
     void InitFeatureParam();

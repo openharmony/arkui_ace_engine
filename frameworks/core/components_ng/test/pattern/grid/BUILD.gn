@@ -81,6 +81,7 @@ ace_unittest("grid_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/templates_parser.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/nav_bar/mock_nav_bar_pattern.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_accessibility_property.cpp",
@@ -98,6 +99,7 @@ ace_unittest("grid_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_position_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_utils.cpp",
     "$ace_root/frameworks/core/components_v2/grid/grid_event.cpp",
     "grid_test_ng.cpp",

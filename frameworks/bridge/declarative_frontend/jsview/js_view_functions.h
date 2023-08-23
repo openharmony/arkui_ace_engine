@@ -53,7 +53,9 @@ public:
     void ExecuteAppear();
     void ExecuteDisappear();
     void ExecuteMeasure(NG::LayoutWrapper* layoutWrapper);
+    void ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper);
     void ExecuteLayout(NG::LayoutWrapper* layoutWrapper);
+    void ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper);
     void ExecuteAboutToBeDeleted();
     void ExecuteAboutToRender();
     void ExecuteOnRenderDone();
@@ -69,7 +71,9 @@ public:
 
     bool HasPageTransition() const;
     bool HasMeasure() const;
+    bool HasMeasureSize() const;
     bool HasLayout() const;
+    bool HasPlaceChildren() const;
 
     void ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo);
     void ExecuteFunctionWithParams(JSWeak<JSFunc>& func, const char* debugInfo, const std::string& jsonData);
@@ -88,7 +92,9 @@ private:
     JSWeak<JSFunc> jsAppearFunc_;
     JSWeak<JSFunc> jsDisappearFunc_;
     JSWeak<JSFunc> jsMeasureFunc_;
+    JSWeak<JSFunc> jsMeasureSizeFunc_;
     JSWeak<JSFunc> jsLayoutFunc_;
+    JSWeak<JSFunc> jsPlaceChildrenFunc_;
     JSWeak<JSFunc> jsAboutToRenderFunc_;
     JSWeak<JSFunc> jsAboutToBeDeletedFunc_;
     JSWeak<JSFunc> jsRenderDoneFunc_;

@@ -20,20 +20,21 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
-#include "base/window/drag_window.h"
-
 #define private public
 #define protected public
+
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/test/mock/mock_pixel_map.h"
+#include "base/window/drag_window.h"
 #include "core/components/counter/counter_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_layout_algorithm.h"
+#include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -2348,5 +2349,196 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
         navigationStack->navPathList_.clear();
     }
     ASSERT_TRUE(navigationStack->navPathList_.empty());
+}
+
+/**
+ * @tc.name: NavrouterTestNg0039
+ * @tc.desc: Test BarItemPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create BarItemNode.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto barItemNode = AceType::MakeRefPtr<BarItemNode>("BarItemNode", 1);
+    ASSERT_NE(barItemNode, nullptr);
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    ASSERT_NE(barItemPattern, nullptr);
+    barItemPattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(barItemNode)));
+    ASSERT_NE(barItemPattern->GetHost(), nullptr);
+
+    barItemNode->icon_ = FrameNode::CreateFrameNode("icon", 2, AceType::MakeRefPtr<ImagePattern>());
+    barItemNode->text_ = FrameNode::CreateFrameNode("text", 3, AceType::MakeRefPtr<TextPattern>());
+
+    barItemPattern->UpdateBarItemActiveStatusResource();
+    ASSERT_EQ(barItemPattern->status_, NavToolbarItemStatus::NORMAL);
+    ASSERT_EQ(barItemPattern->iconStatus_, ToolbarIconStatus::INITIAL);
+    /**
+     * @tc.steps: step2. change status_ and iconStatus_.
+     * @tc.expected: check whether the properties is correct.
+     */
+    barItemPattern->status_ = NavToolbarItemStatus::ACTIVE;
+    barItemPattern->iconStatus_ = ToolbarIconStatus::INITIAL;
+    barItemPattern->UpdateBarItemActiveStatusResource();
+    ASSERT_EQ(barItemPattern->status_, NavToolbarItemStatus::ACTIVE);
+    ASSERT_EQ(barItemPattern->iconStatus_, ToolbarIconStatus::ACTIVE);
+
+    barItemPattern->UpdateBarItemActiveStatusResource();
+    ASSERT_EQ(barItemPattern->status_, NavToolbarItemStatus::ACTIVE);
+    ASSERT_EQ(barItemPattern->iconStatus_, ToolbarIconStatus::INITIAL);
+
+    barItemPattern->status_ = NavToolbarItemStatus::NORMAL;
+    barItemPattern->iconStatus_ = ToolbarIconStatus::ACTIVE;
+    barItemPattern->UpdateBarItemActiveStatusResource();
+    ASSERT_EQ(barItemPattern->status_, NavToolbarItemStatus::NORMAL);
+    ASSERT_EQ(barItemPattern->iconStatus_, ToolbarIconStatus::ACTIVE);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0040
+ * @tc.desc: Test BarItemPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create BarItemNode.
+     */
+    auto barItemNode = AceType::MakeRefPtr<BarItemNode>("BarItemNode", 1);
+    ASSERT_NE(barItemNode, nullptr);
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    ASSERT_NE(barItemPattern, nullptr);
+    barItemPattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(barItemNode)));
+    ASSERT_NE(barItemPattern->GetHost(), nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode("text", 3, AceType::MakeRefPtr<TextPattern>());
+    auto iconNode = FrameNode::CreateFrameNode("icon", 2, AceType::MakeRefPtr<ImagePattern>());
+
+    barItemNode->icon_ = iconNode;
+    barItemNode->text_ = textNode;
+
+    auto layoutWrapper = barItemNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto algorithm = AceType::MakeRefPtr<BarItemLayoutAlgorithm>();
+    ASSERT_NE(algorithm, nullptr);
+
+    barItemNode->children_.push_back(textNode);
+
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
+    textLayoutWrapper->GetLayoutProperty()->contentConstraint_ = LayoutConstraintF();
+    layoutWrapper->GetLayoutProperty()->layoutConstraint_ = LayoutConstraintF();
+
+    auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    barItemLayoutProperty->layoutConstraint_ = LayoutConstraintF();
+    barItemLayoutProperty->contentConstraint_ = LayoutConstraintF();
+    ASSERT_EQ(barItemLayoutProperty, layoutWrapper->GetLayoutProperty());
+
+    layoutWrapper->childrenMap_[0] = textLayoutWrapper;
+    layoutWrapper->currentChildCount_ = 1;
+    /**
+     * @tc.steps: step2. create mock theme manager.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    /**
+     * @tc.steps: step3. call algorithm->Measure then change isInToolbar_.
+     */
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(barItemNode->isInToolbar_);
+
+    barItemNode->isInToolbar_ = true;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(barItemNode->isInToolbar_);
+
+    auto temp = LayoutConstraintF();
+    temp.maxSize = SizeF(300, 300);
+    barItemLayoutProperty->contentConstraint_ = temp;
+    barItemLayoutProperty->layoutConstraint_ = temp;
+    algorithm->barItemMaxWidth_ = 300.0f;
+    textLayoutWrapper->GetGeometryNode()->SetContentSize(SizeF(500, 500));
+    ASSERT_EQ(barItemLayoutProperty->CreateChildConstraint().maxSize.Width(), 300);
+
+    barItemNode->isInToolbar_ = true;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(barItemNode->isInToolbar_);
+
+    temp.maxSize = SizeF(300, 300);
+    barItemLayoutProperty->contentConstraint_ = temp;
+    barItemLayoutProperty->layoutConstraint_ = temp;
+    algorithm->barItemMaxWidth_ = 800.0f;
+    textLayoutWrapper->GetGeometryNode()->SetContentSize(SizeF(500, 500));
+    ASSERT_EQ(barItemLayoutProperty->CreateChildConstraint().maxSize.Width(), 300);
+
+    barItemNode->isInToolbar_ = true;
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(barItemNode->isInToolbar_);
+}
+
+/**
+ * @tc.name: NavrouterTestNg0041
+ * @tc.desc: Test BarItemLayoutAlgorithm::Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create BarItemNode.
+     */
+    auto barItemNode = AceType::MakeRefPtr<BarItemNode>("BarItemNode", 1);
+    ASSERT_NE(barItemNode, nullptr);
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    ASSERT_NE(barItemPattern, nullptr);
+    barItemPattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(barItemNode)));
+    ASSERT_NE(barItemPattern->GetHost(), nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode("text", 3, AceType::MakeRefPtr<TextPattern>());
+    auto iconNode = FrameNode::CreateFrameNode("icon", 2, AceType::MakeRefPtr<ImagePattern>());
+
+    barItemNode->icon_ = iconNode;
+    barItemNode->text_ = textNode;
+
+    auto layoutWrapper = barItemNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto algorithm = AceType::MakeRefPtr<BarItemLayoutAlgorithm>();
+    ASSERT_NE(algorithm, nullptr);
+
+    barItemNode->children_.push_back(textNode);
+    barItemNode->children_.push_back(iconNode);
+
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
+    textLayoutWrapper->GetLayoutProperty()->contentConstraint_ = LayoutConstraintF();
+    layoutWrapper->GetLayoutProperty()->layoutConstraint_ = LayoutConstraintF();
+
+    auto iconLayoutWrapper = iconNode->CreateLayoutWrapper();
+    iconLayoutWrapper->GetLayoutProperty()->contentConstraint_ = LayoutConstraintF();
+
+    auto barItemLayoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    barItemLayoutProperty->layoutConstraint_ = LayoutConstraintF();
+    barItemLayoutProperty->contentConstraint_ = LayoutConstraintF();
+    ASSERT_EQ(barItemLayoutProperty, layoutWrapper->GetLayoutProperty());
+
+    layoutWrapper->childrenMap_[0] = textLayoutWrapper;
+    layoutWrapper->childrenMap_[1] = iconLayoutWrapper;
+    layoutWrapper->currentChildCount_ = 2;
+    /**
+     * @tc.steps: step2. create mock theme manager.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    /**
+     * @tc.steps: step3. call algorithm->Layout then change isInToolbar_.
+     */
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_FALSE(barItemNode->isInToolbar_);
+
+    barItemNode->isInToolbar_ = true;
+    algorithm->Layout(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(barItemNode->isInToolbar_);
 }
 } // namespace OHOS::Ace::NG

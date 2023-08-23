@@ -16,6 +16,8 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 
 #include "common/rs_vector2.h"
@@ -30,6 +32,7 @@
 #include "render_service_client/core/ui/rs_effect_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
+#include "rosen_render_context.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -39,6 +42,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/animation/native_curve_helper.h"
 #include "core/animation/page_transition_common.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
@@ -101,6 +105,15 @@ constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr int32_t DEFAULT_OPTION_DURATION = 100;
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
+constexpr int32_t PARTICLE_DEFAULT_COLOR = 0xFFFFFFFF;
+constexpr float PARTICLE_DEFAULT_OPACITY = 1.0f;
+constexpr float PARTICLE_DEFAULT_SCALE = 1.0f;
+constexpr float PARTICLE_DEFAULT_SPEED = 0.0f;
+constexpr float PARTICLE_DEFAULT_ANGLE = 0.0f;
+constexpr float PARTICLE_DEFAULT_SPIN = 0.0f;
+constexpr int64_t PARTICLE_DEFAULT_LIFETIME = 1000;
+constexpr int32_t PARTICLE_DEFAULT_EMITTER_RATE = 5;
+
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
     static const LinearEnumMapNode<RenderFit, Rosen::Gravity> gravityMap[] = {
@@ -379,6 +392,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (NeedDebugBoundary() && SystemProperties::GetDebugBoundaryEnabled()) {
         PaintDebugBoundary();
+    }
+
+    if (propParticleOptionArray_.has_value()) {
+        OnParticleOptionArrayUpdate(propParticleOptionArray_.value());
     }
 }
 
@@ -684,6 +701,286 @@ void RosenRenderContext::OnLightUpEffectUpdate(double radio)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RectF rect = GetPaintRectWithoutTransform();
+    if (rect.IsEmpty()) {
+        return;
+    }
+    std::vector<OHOS::Rosen::ParticleParams> particleParams;
+    for (auto& item : optionList) {
+        particleParams.emplace_back(ConvertParticleOptionToParams(item, rect));
+    }
+    rsNode_->SetParticleParams(particleParams);
+    RequestNextFrame();
+}
+
+Rosen::ParticleParams RosenRenderContext::ConvertParticleOptionToParams(
+    const ParticleOption& particleOption, const RectF& rect)
+{
+    auto emitterOption = particleOption.GetEmitterOption();
+    auto colorOptionOpt = particleOption.GetParticleColorOption();
+    auto opacityOptionOpt = particleOption.GetParticleOpacityOption();
+    auto scaleOptionOpt = particleOption.GetParticleScaleOption();
+    auto velocityOptionOpt = particleOption.GetParticleVelocityOption();
+    auto accelerationOpt = particleOption.GetParticleAccelerationOption();
+    auto spinOptionOpt = particleOption.GetParticleSpinOption();
+    auto rsEmitterConfig = ConvertParticleEmitterOption(emitterOption, rect);
+    std::optional<OHOS::Rosen::ParticleColorParaType> rsColorOpt;
+    std::optional<OHOS::Rosen::ParticleParaType<float>> rsSpinOpt;
+    std::optional<OHOS::Rosen::ParticleVelocity> rsVelocityOpt;
+    std::optional<OHOS::Rosen::ParticleParaType<float>> rsOpacityOpt;
+    std::optional<OHOS::Rosen::ParticleParaType<float>> rsScaleOpt;
+    std::optional<OHOS::Rosen::ParticleAcceleration> rsAccelerationOpt;
+    if (colorOptionOpt.has_value()) {
+        rsColorOpt = ConvertParticleColorOption(colorOptionOpt.value());
+    } else {
+        rsColorOpt = ConvertParticleDefaultColorOption(std::nullopt);
+    }
+    if (opacityOptionOpt.has_value()) {
+        rsOpacityOpt = ConvertParticleFloatOption(opacityOptionOpt.value());
+    } else {
+        OHOS::Rosen::Range<float> rsInitRange(PARTICLE_DEFAULT_OPACITY, PARTICLE_DEFAULT_OPACITY);
+        rsOpacityOpt = ConvertParticleDefaultFloatOption(rsInitRange);
+    }
+    if (scaleOptionOpt.has_value()) {
+        rsScaleOpt = ConvertParticleFloatOption(scaleOptionOpt.value());
+    } else {
+        OHOS::Rosen::Range<float> rsInitRange(PARTICLE_DEFAULT_SCALE, PARTICLE_DEFAULT_SCALE);
+        rsScaleOpt = ConvertParticleDefaultFloatOption(rsInitRange);
+    }
+    if (velocityOptionOpt.has_value()) {
+        rsVelocityOpt = ConvertParticleVelocityOption(velocityOptionOpt.value());
+    } else {
+        rsVelocityOpt = ConvertParticleDefaultVelocityOption();
+    }
+    if (accelerationOpt.has_value()) {
+        rsAccelerationOpt = ConvertParticleAccelerationOption(accelerationOpt.value());
+    } else {
+        rsAccelerationOpt = ConvertParticleDefaultAccelerationOption();
+    }
+    if (spinOptionOpt.has_value()) {
+        rsSpinOpt = ConvertParticleFloatOption(spinOptionOpt.value());
+    } else {
+        OHOS::Rosen::Range<float> rsInitRange(PARTICLE_DEFAULT_SPIN, PARTICLE_DEFAULT_SPIN);
+        rsSpinOpt = ConvertParticleDefaultFloatOption(rsInitRange);
+    }
+    return OHOS::Rosen::ParticleParams(rsEmitterConfig, rsVelocityOpt.value(), rsAccelerationOpt.value(),
+        rsColorOpt.value(), rsOpacityOpt.value(), rsScaleOpt.value(), rsSpinOpt.value());
+}
+
+Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
+    const EmitterOption& emitterOption, const RectF& rect)
+{
+    auto emitterRateOpt = emitterOption.GetEmitterRate();
+    auto pointOpt = emitterOption.GetPosition();
+    auto sizeOpt = emitterOption.GetSize();
+    auto shapeOpt = emitterOption.GetShape();
+    auto particle = emitterOption.GetParticle();
+    auto particleType = particle.GetParticleType();
+    auto particleConfig = particle.GetConfig();
+    auto particleCount = particle.GetCount();
+    auto lifeTimeOpt = particle.GetLifeTime();
+    auto rsPoint = pointOpt.has_value()
+                       ? OHOS::Rosen::Vector2f(ConvertDimensionToPx(pointOpt.value().first, rect.Width()),
+                             ConvertDimensionToPx(pointOpt.value().second, rect.Height()))
+                       : OHOS::Rosen::Vector2f(0.0f, 0.0f);
+    auto rsSize = sizeOpt.has_value() ? OHOS::Rosen::Vector2f(ConvertDimensionToPx(sizeOpt.value().first, rect.Width()),
+                                            ConvertDimensionToPx(sizeOpt.value().second, rect.Height()))
+                                      : OHOS::Rosen::Vector2f(rect.Width(), rect.Height());
+    auto shapeInt = static_cast<int32_t>(shapeOpt.value_or(ParticleEmitterShape::RECTANGLE));
+    if (particleType == ParticleType::IMAGE) {
+        auto imageParameter = particleConfig.GetImageParticleParameter();
+        auto imageSource = imageParameter.GetImageSource();
+        auto imageSize = imageParameter.GetSize();
+        auto imageWidth = Dimension(ConvertDimensionToPx(imageSize.first, rect.Width()), DimensionUnit::PX);
+        auto imageHeight = Dimension(ConvertDimensionToPx(imageSize.second, rect.Height()), DimensionUnit::PX);
+        ImageSourceInfo imageSourceInfo(imageParameter.GetImageSource(), imageWidth, imageHeight);
+        LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
+        auto loadingManager = AceType::MakeRefPtr<ImageLoadingContext>(imageSourceInfo, std::move(loadNotifier));
+        loadingManager->LoadImageData();
+        auto rsImagePtr = std::make_shared<Rosen::RSImage>();
+        if (imageSourceInfo.GetPixmap()) {
+            rsImagePtr->SetPixelMap(imageSourceInfo.GetPixmap()->GetPixelMapSharedPtr());
+        }
+        rsImagePtr->SetImageFit(static_cast<int32_t>(imageParameter.GetImageFit().value_or(ImageFit::COVER)));
+        OHOS::Rosen::Vector2f rsImageSize(imageWidth.ConvertToPx(), imageHeight.ConvertToPx());
+        return OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
+            static_cast<OHOS::Rosen::ShapeType>(shapeInt), rsPoint, rsSize, particleCount,
+            lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME), OHOS::Rosen::ParticleType::IMAGES, 0.0f, rsImagePtr,
+            rsImageSize);
+    } else {
+        auto pointParameter = particleConfig.GetPointParticleParameter();
+        auto radius = pointParameter.GetRadius();
+        return OHOS::Rosen::EmitterConfig(emitterRateOpt.value_or(PARTICLE_DEFAULT_EMITTER_RATE),
+            static_cast<OHOS::Rosen::ShapeType>(shapeInt), rsPoint, rsSize, particleCount,
+            lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME), OHOS::Rosen::ParticleType::POINTS, radius,
+            std::make_shared<OHOS::Rosen::RSImage>(), OHOS::Rosen::Vector2f());
+    }
+}
+
+float RosenRenderContext::ConvertDimensionToPx(Dimension& src, float size)
+{
+    if (src.Unit() == DimensionUnit::PERCENT) {
+        return src.ConvertToPxWithSize(size);
+    }
+    return src.ConvertToPx();
+}
+
+Rosen::ParticleVelocity RosenRenderContext::ConvertParticleVelocityOption(const VelocityProperty& velocity)
+{
+    auto rsSpeedRange = OHOS::Rosen::Range<float>(velocity.GetSpeedRange().first, velocity.GetSpeedRange().second);
+    auto rsAngleRange = OHOS::Rosen::Range<float>(velocity.GetAngleRange().first, velocity.GetAngleRange().second);
+    return OHOS::Rosen::ParticleVelocity(rsSpeedRange, rsAngleRange);
+}
+
+Rosen::ParticleVelocity RosenRenderContext::ConvertParticleDefaultVelocityOption()
+{
+    auto rsSpeedRange = OHOS::Rosen::Range<float>(PARTICLE_DEFAULT_SPEED, PARTICLE_DEFAULT_SPEED);
+    auto rsAngleRange = OHOS::Rosen::Range<float>(PARTICLE_DEFAULT_ANGLE, PARTICLE_DEFAULT_ANGLE);
+    return OHOS::Rosen::ParticleVelocity(rsSpeedRange, rsAngleRange);
+}
+
+Rosen::ParticleAcceleration RosenRenderContext::ConvertParticleAccelerationOption(
+    const AccelerationProperty& acceleration)
+{
+    auto speedOpt = acceleration.GetSpeed();
+    auto angleOpt = acceleration.GetAngle();
+    std::optional<OHOS::Rosen::ParticleParaType<float>> rsSpeedOpt;
+    std::optional<OHOS::Rosen::ParticleParaType<float>> rsAngleOpt;
+    OHOS::Rosen::Range<float> rsInitSpeedRange(PARTICLE_DEFAULT_SPEED, PARTICLE_DEFAULT_SPEED);
+    if (speedOpt.has_value()) {
+        rsSpeedOpt = ConvertParticleFloatOption(speedOpt.value());
+    } else {
+        rsSpeedOpt = ConvertParticleDefaultFloatOption(rsInitSpeedRange);
+    }
+    OHOS::Rosen::Range<float> rsInitAngleRange(PARTICLE_DEFAULT_ANGLE, PARTICLE_DEFAULT_ANGLE);
+    if (angleOpt.has_value()) {
+        rsAngleOpt = ConvertParticleFloatOption(angleOpt.value());
+    } else {
+        rsAngleOpt = ConvertParticleDefaultFloatOption(rsInitAngleRange);
+    }
+    return OHOS::Rosen::ParticleAcceleration(rsSpeedOpt.value(), rsAngleOpt.value());
+}
+
+Rosen::ParticleAcceleration RosenRenderContext::ConvertParticleDefaultAccelerationOption()
+{
+    OHOS::Rosen::Range<float> rsInitRange(PARTICLE_DEFAULT_SPEED, PARTICLE_DEFAULT_SPEED);
+    return OHOS::Rosen::ParticleAcceleration(
+        ConvertParticleDefaultFloatOption(rsInitRange), ConvertParticleDefaultFloatOption(rsInitRange));
+}
+
+Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleColorOption(
+    const ParticleColorPropertyOption& colorOption)
+{
+    auto initRange = colorOption.GetRange();
+    auto updaterOpt = colorOption.GetUpdater();
+    OHOS::Rosen::Range<OHOS::Rosen::RSColor> rsInitRange(
+        OHOS::Rosen::RSColor(initRange.first.GetRed(), initRange.first.GetGreen(), initRange.first.GetBlue(),
+            initRange.first.GetAlpha()),
+        OHOS::Rosen::RSColor(initRange.second.GetRed(), initRange.second.GetGreen(), initRange.second.GetBlue(),
+            initRange.second.GetAlpha()));
+    if (updaterOpt.has_value()) {
+        auto updater = updaterOpt.value();
+        auto updateType = updater.GetUpdateType();
+        auto config = updater.GetConfig();
+        if (updateType == UpdaterType::RANDOM) {
+            auto randomConfig = config.GetRandomConfig();
+            auto redRandom = randomConfig.GetRedRandom();
+            auto greenRandom = randomConfig.GetGreenRandom();
+            auto blueRandom = randomConfig.GetBlueRandom();
+            auto alphaRandom = randomConfig.GetAlphaRandom();
+            OHOS::Rosen::Range<float> rsRedRandom(redRandom.first, redRandom.second);
+            OHOS::Rosen::Range<float> rsGreenRandom(greenRandom.first, greenRandom.second);
+            OHOS::Rosen::Range<float> rsBlueRandom(blueRandom.first, blueRandom.second);
+            OHOS::Rosen::Range<float> rsAlphaRandom(alphaRandom.first, alphaRandom.second);
+            std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> invalidCurve;
+            return OHOS::Rosen::ParticleColorParaType(rsInitRange, OHOS::Rosen::ParticleUpdator::RANDOM, rsRedRandom,
+                rsGreenRandom, rsBlueRandom, rsAlphaRandom, invalidCurve);
+        } else if (updateType == UpdaterType::CURVE) {
+            auto& curveConfig = config.GetAnimationArray();
+            std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> valChangeOverLife;
+            for (const auto& colorAnimationConfig : curveConfig) {
+                auto fromColor = colorAnimationConfig.GetFrom();
+                auto toColor = colorAnimationConfig.GetTo();
+                auto startMills = colorAnimationConfig.GetStartMills();
+                auto endMills = colorAnimationConfig.GetEndMills();
+                auto curve = colorAnimationConfig.GetCurve();
+                auto rsCurve = NativeCurveHelper::ToNativeCurve(curve);
+                valChangeOverLife.emplace_back(OHOS::Rosen::Change<OHOS::Rosen::RSColor>(
+                    OHOS::Rosen::RSColor(
+                        fromColor.GetRed(), fromColor.GetGreen(), fromColor.GetBlue(), fromColor.GetAlpha()),
+                    OHOS::Rosen::RSColor(toColor.GetRed(), toColor.GetGreen(), toColor.GetBlue(), toColor.GetAlpha()),
+                    startMills, endMills, rsCurve));
+            }
+            return OHOS::Rosen::ParticleColorParaType(rsInitRange, ParticleUpdator::CURVE, OHOS::Rosen::Range<float>(),
+                OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
+                valChangeOverLife);
+        }
+    }
+    return ConvertParticleDefaultColorOption(rsInitRange);
+}
+
+Rosen::ParticleColorParaType RosenRenderContext::ConvertParticleDefaultColorOption(
+    std::optional<OHOS::Rosen::Range<OHOS::Rosen::RSColor>> rsInitRangeOpt)
+{
+    std::vector<OHOS::Rosen::Change<OHOS::Rosen::RSColor>> invalidCurve;
+    if (rsInitRangeOpt.has_value()) {
+        return OHOS::Rosen::ParticleColorParaType(rsInitRangeOpt.value(), OHOS::Rosen::ParticleUpdator::NONE,
+            OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
+            OHOS::Rosen::Range<float>(), invalidCurve);
+    }
+    return OHOS::Rosen::ParticleColorParaType(
+        OHOS::Rosen::Range<OHOS::Rosen::RSColor>(
+            OHOS::Rosen::RSColor(PARTICLE_DEFAULT_COLOR), OHOS::Rosen::RSColor(PARTICLE_DEFAULT_COLOR)),
+        OHOS::Rosen::ParticleUpdator::NONE, OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(),
+        OHOS::Rosen::Range<float>(), OHOS::Rosen::Range<float>(), invalidCurve);
+}
+
+Rosen::ParticleParaType<float> RosenRenderContext::ConvertParticleFloatOption(
+    const ParticleFloatPropertyOption& floatOption)
+{
+    auto initRange = floatOption.GetRange();
+    OHOS::Rosen::Range<float> rsInitRange(initRange.first, initRange.second);
+    auto updaterOpt = floatOption.GetUpdater();
+    if (updaterOpt.has_value()) {
+        auto updater = updaterOpt.value();
+        auto updateType = updater.GetUpdaterType();
+        auto& config = updater.GetConfig();
+        if (updateType == UpdaterType::RANDOM) {
+            auto& randomRangeConfig = config.GetRandomConfig();
+            std::vector<OHOS::Rosen::Change<float>> invalidChangeInOverLifeArray;
+            return OHOS::Rosen::ParticleParaType<float>(rsInitRange, OHOS::Rosen::ParticleUpdator::RANDOM,
+                OHOS::Rosen::Range<float>(randomRangeConfig.first, randomRangeConfig.second),
+                invalidChangeInOverLifeArray);
+        } else if (updateType == UpdaterType::CURVE) {
+            auto curveConfig = config.GetAnimations();
+            std::vector<OHOS::Rosen::Change<float>> valChangeOverLife;
+            for (auto& animationConfig : curveConfig) {
+                auto from = animationConfig.GetFrom();
+                auto to = animationConfig.GetTo();
+                auto startMills = animationConfig.GetStartMills();
+                auto endMills = animationConfig.GetEndMills();
+                auto rsCurve = NativeCurveHelper::ToNativeCurve(animationConfig.GetCurve());
+                valChangeOverLife.emplace_back(OHOS::Rosen::Change<float>(from, to, startMills, endMills, rsCurve));
+            }
+            OHOS::Rosen::Range<float> rsInvalidRange;
+            return OHOS::Rosen::ParticleParaType<float>(
+                rsInitRange, OHOS::Rosen::ParticleUpdator::CURVE, rsInvalidRange, valChangeOverLife);
+        }
+    }
+    return ConvertParticleDefaultFloatOption(rsInitRange);
+}
+
+Rosen::ParticleParaType<float> RosenRenderContext::ConvertParticleDefaultFloatOption(
+    OHOS::Rosen::Range<float>& rsInitRange)
+{
+    std::vector<OHOS::Rosen::Change<float>> invalidChangeInOverLifeArray;
+    return OHOS::Rosen::ParticleParaType<float>(
+        rsInitRange, OHOS::Rosen::ParticleUpdator::NONE, OHOS::Rosen::Range<float>(), invalidChangeInOverLifeArray);
+}
+
 void RosenRenderContext::OnOpacityUpdate(double opacity)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -832,21 +1129,42 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
     RequestNextFrame();
 }
 
-const int degree90 = 90;
-const int degree180 = 180;
-const int degree135 = 135;
-const int degree45 = 45;
+RectF gRect;
+
+double Degree2Radian(int32_t degree)
+{
+    const float pi = 3.14159265;
+    degree = degree % 360;
+    if (degree < 0) {
+        degree += 360;
+    }
+    return degree * pi / 180;
+}
+
+void SetCorner(double& x, double& y, double width, double height, int32_t degree)
+{
+    if (degree == 90) {
+        x = 0;
+        y = height;
+    } else if (degree == 180) {
+        x = width;
+        y = height;
+    } else if (degree == 270) {
+        x = width;
+        y = 0;
+    }
+}
 
 RectF RosenRenderContext::GetPaintRectWithTransform()
 {
     RectF rect;
 
-    const float pi = 3.14159265;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
+    auto degree = rsNode_->GetStagingProperties().GetRotation();
     // calculate new pos.
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
@@ -857,26 +1175,42 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto oldSize = rect.GetSize();
     auto newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
     rect.SetSize(newSize);
+    transInfo_ = { scale[0], scale[1], centerPos.GetX(), centerPos.GetY(), rect.GetX(), rect.GetY(), translate[0],
+        translate[1], degree };
     // calculate rotate
-    int degree = rsNode_->GetStagingProperties().GetRotation();
-
-    if ((abs(degree) % degree180 > degree45) && (abs(degree) % degree180 < degree135)) {
-        degree = degree90;
-        OffsetF leftCornerRotate(0, 0);
-        OffsetF leftCorner(-1 * oldSize.Width() * scale[0] / 2, -1 * oldSize.Height() * scale[1] / 2);
-        leftCornerRotate.SetX(leftCorner.GetX() * cos(degree * pi / degree180) * -1 -
-                              leftCorner.GetY() * sin(degree * pi / degree180) * -1);
-        leftCornerRotate.SetY(leftCorner.GetX() * sin(degree * pi / degree180) * -1 +
-                              leftCorner.GetY() * cos(degree * pi / degree180) * -1);
-        OffsetF screenRotate(rect.GetX() + leftCornerRotate.GetX() - leftCorner.GetX(),
-            rect.GetY() + oldSize.Height() * scale[1] - leftCornerRotate.GetY() + leftCorner.GetY());
-        rect.SetOffset(screenRotate);
-        if (abs(degree) % degree180 != 0) {
+    degree = static_cast<int32_t>(degree) % 360;
+    auto radian = Degree2Radian(degree);
+    if (degree != 0) {
+        auto newRect = GetPaintRectWithoutTransform();
+        double leftX = 0.0;
+        double leftY = 0.0;
+        degree = degree < 0 ? degree + 360 : degree;
+        SetCorner(leftX, leftY, oldSize.Width(), oldSize.Height(), degree);
+        double centerX = oldSize.Width() * center[0];
+        double centerY = oldSize.Height() * center[1];
+        auto tmp = leftX;
+        leftX = (leftX - centerX) * cos(-1 * radian) + (leftY - centerY) * sin(-1 * radian);
+        leftY = -1 * (tmp - centerX) * sin(-1 * radian) + (leftY - centerY) * cos(-1 * radian);
+        auto leftXCalc = leftX + centerX;
+        auto leftYCalc = leftY + centerY;
+        leftX = newRect.GetOffset().GetX() + leftXCalc;
+        leftY = newRect.GetOffset().GetY() + leftYCalc;
+        auto offset = OffsetF(leftX + translate[0], leftY + translate[1]);
+        rect.SetOffset(offset);
+        if (degree == 180) {
+            newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
+        } else {
             newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
-            rect.SetSize(newSize);
         }
+        rect.SetSize(newSize);
     }
+    gRect = rect;
     return rect;
+}
+
+std::vector<double> RosenRenderContext::GetTrans()
+{
+    return transInfo_;
 }
 
 RectF RosenRenderContext::GetPaintRectWithTranslate()
@@ -895,7 +1229,28 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
+    RectF rect = GetPaintRectWithoutTransform();
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+    int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+    degree = degree % 360;
+    auto radian = Degree2Radian(degree);
+    if (degree != 0) {
+        point = point + gRect.GetOffset();
+        point = point - OffsetF(translate[0], translate[1]);
+        auto centOffset = OffsetF(center[0] * gRect.Width(), center[1] * gRect.Height());
+        auto centerPos = gRect.GetOffset() + centOffset - OffsetF(translate[0], translate[1]);
+        auto centerX = centerPos.GetX();
+        auto centerY = centerPos.GetY();
+
+        double currentPointX = (point.GetX() - centerX) * cos(radian) + (point.GetY() - centerY) * sin(radian);
+        double currentPointY = -1 * (point.GetX() - centerX) * sin(radian) + (point.GetY() - centerY) * cos(radian);
+        currentPointX = currentPointX + centerX;
+        currentPointY = currentPointY + centerY;
+        point.SetX(currentPointX - rect.Left());
+        point.SetY(currentPointY - rect.Top());
+    }
 }
+
 
 RectF RosenRenderContext::GetPaintRectWithoutTransform()
 {
@@ -1235,7 +1590,7 @@ void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixe
 
 void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)
 {
-    NG::ComponentSnapshot::JsCallback callback = [weak = WeakClaim(RawPtr(GetHost())),
+    NG::ComponentSnapshot::JsCallback callback = [weak = WeakPtr(GetHost()),
                                                      containerId = Container::CurrentId()](
                                                      std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode) {
         CHECK_NULL_VOID(pixmap);
@@ -2618,6 +2973,12 @@ void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
     rsNode_->SetFrameGravity(gravity);
 }
 
+void RosenRenderContext::AddFRCSceneInfo(const std::string& scene, float speed)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->AddFRCSceneInfo(scene, speed);
+}
+
 void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();
@@ -3113,6 +3474,7 @@ void RosenRenderContext::OnRenderFitUpdate(RenderFit renderFit)
 void RosenRenderContext::SetContentRectToFrame(RectF rect)
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto&& padding = host->GetGeometryNode()->GetPadding();
     // minus padding to get contentRect
     if (padding) {

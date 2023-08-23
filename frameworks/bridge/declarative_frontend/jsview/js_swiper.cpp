@@ -226,6 +226,7 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
 
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
         SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+        SwiperModel::GetInstance()->ResetDisplayCount();
     } else if (info[0]->IsNumber()) {
         SwiperModel::GetInstance()->SetDisplayCount(info[0]->ToNumber<int32_t>());
     }
@@ -697,7 +698,7 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         parseOk = ParseJsDimensionVp(bottomValue, dimPosition);
         swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
         parseOk = ParseJsDimensionVp(sizeValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
-        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
+        SetIsIndicatorCustomSize(dimPosition, parseOk);
         swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
         swiperParameters.selectedItemWidth =
@@ -777,8 +778,17 @@ void JSSwiper::SetDisplayMode(int32_t index)
     SwiperModel::GetInstance()->SetDisplayMode(DISPLAY_MODE[index]);
 }
 
-void JSSwiper::SetCachedCount(int32_t cachedCount)
+void JSSwiper::SetCachedCount(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    int32_t cachedCount = 1;
+    if (info[0]->IsNumber()) {
+        cachedCount = info[0]->ToNumber<int32_t>();
+    }
     SwiperModel::GetInstance()->SetCachedCount(cachedCount);
 }
 
@@ -1054,7 +1064,7 @@ void JSSwiperController::FinishAnimation(const JSCallbackInfo& args)
         auto onFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Swiper.finishAnimation");
-            LOGD("Swiper finish callback execute.");
+            LOGI("Swiper finish callback execute.");
             func->Execute();
         };
 

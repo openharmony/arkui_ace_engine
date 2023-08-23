@@ -38,6 +38,12 @@
         },
         "datepicker":{
             "lunarSwitch":"显示农历"
+        },
+        "textclock":{
+            "week":"周",
+            "year":"年",
+            "month":"月",
+            "day":"日"
         }
     },
     "en-US":{

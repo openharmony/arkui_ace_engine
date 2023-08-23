@@ -93,6 +93,7 @@
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "bridge/declarative_frontend/jsview/js_pan_handler.h"
+#include "bridge/declarative_frontend/jsview/js_particle.h"
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
 #include "bridge/declarative_frontend/jsview/js_path2d.h"
@@ -529,6 +530,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "FormLink", JSFormLink::JSBind },
     { "LocationButton", JSLocationButton::JSBind },
     { "PasteButton", JSPasteButton::JSBind },
+    { "Particle", JSParticle::JSBind },
     { "SaveButton", JSSaveButton::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityComponent", JSAbilityComponent::JSBind },

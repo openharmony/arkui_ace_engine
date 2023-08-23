@@ -57,13 +57,14 @@ void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_
 }
 
 RefPtr<FrameNode> DialogPattern::CreateButton(
-    const ButtonInfo& params, int32_t index, bool isCancel, bool useRelativeLayout)
+    const ButtonInfo& params, int32_t index, bool isCancel, bool isVertical, int32_t length)
 {
     return nullptr;
 }
 
 // alert dialog buttons
-RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& buttons)
+RefPtr<FrameNode> DialogPattern::BuildButtons(
+    const std::vector<ButtonInfo>& buttons, const DialogButtonDirection& direction)
 {
     return nullptr;
 }

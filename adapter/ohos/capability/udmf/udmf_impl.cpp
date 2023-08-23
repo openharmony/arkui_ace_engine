@@ -33,6 +33,7 @@
 #include "video.h"
 #include "native_engine/native_engine.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "js_native_api_types.h"
 
@@ -302,5 +303,15 @@ int32_t UdmfClientImpl::GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData
     auto video = static_cast<UDMF::Video*>(records[0].get());
     uri = video->GetUri();
     return 0;
+}
+
+std::pair<int32_t, std::string> UdmfClientImpl::GetErrorInfo(int32_t errorCode)
+{
+    switch (errorCode) {
+        case UDMF::E_NOT_FOUND:
+            return { Framework::ERROR_CODE_DRAG_DATA_NOT_FOUND, "GetData failed, data not found." };
+        default:
+            return { Framework::ERROR_CODE_DRAG_DATA_ERROR, "GetData failed, data error." };
+    }
 }
 } // namespace OHOS::Ace

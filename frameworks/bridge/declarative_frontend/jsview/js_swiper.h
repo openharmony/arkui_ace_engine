@@ -46,7 +46,7 @@ protected:
     static void SetDisplayMode(int32_t index);
     static void SetEffectMode(const JSCallbackInfo& info);
     static void SetDisplayCount(const JSCallbackInfo& info);
-    static void SetCachedCount(int32_t cachedCount);
+    static void SetCachedCount(const JSCallbackInfo& info);
     static void SetEnabled(const JSCallbackInfo& info);
     static void SetDisableSwipe(bool disableSwipe);
     static void SetCurve(const JSCallbackInfo& info);

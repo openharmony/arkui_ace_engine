@@ -147,7 +147,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
     }
 }
 
-bool FocusHub::RequestFocusImmediately()
+bool FocusHub::RequestFocusImmediately(bool isWholePathFocusable)
 {
     auto context = NG::PipelineContext::GetCurrentContext();
     if (context && context->GetIsFocusingByTab()) {
@@ -160,7 +160,7 @@ bool FocusHub::RequestFocusImmediately()
         return true;
     }
 
-    if (!IsFocusable()) {
+    if (!isWholePathFocusable && !IsFocusableWholePath()) {
         return false;
     }
 
@@ -518,6 +518,10 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
 
     auto info = KeyEventInfo(keyEvent);
+    if (pipeline &&
+        (pipeline->IsKeyInPressed(KeyCode::KEY_META_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_META_RIGHT))) {
+        info.SetMetaKey(1);
+    }
     auto retCallback = false;
     auto onKeyEventCallback = GetOnKeyCallback();
     if (onKeyEventCallback) {
@@ -765,7 +769,7 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
             focusNodeNeedBlur->LostFocus();
         }
     } else {
-        RequestFocusImmediately();
+        RequestFocusImmediately(true);
     }
 }
 
@@ -1485,10 +1489,15 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id)
         LOGI("Request focus id: %{public}s can not found.", id.c_str());
         return false;
     }
+    auto result = true;
+    if (!focusNode->IsFocusable()) {
+        LOGI("Request focus id: %{public}s is not focusable.", id.c_str());
+        result = false;
+    }
     LOGI("Request focus immediately by id: %{public}s. The node is %{public}s/%{public}d.", id.c_str(),
         focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
     focusNode->RequestFocus();
-    return true;
+    return result;
 }
 
 int32_t FocusHub::GetFocusingTabNodeIdx(TabIndexNodeList& tabIndexNodes)
@@ -1528,11 +1537,11 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHu
     });
     int32_t curTabFocusIndex = mainFocusHub->GetFocusingTabNodeIdx(tabIndexNodes);
     if ((curTabFocusIndex < 0 || curTabFocusIndex >= static_cast<int32_t>(tabIndexNodes.size())) &&
-        curTabFocusIndex != DEFAULT_TAB_FOCUSED_INDEX) {
+        curTabFocusIndex != DEFAULT_TAB_FOCUSED_INDEX && curTabFocusIndex != NONE_TAB_FOCUSED_INDEX) {
         LOGI("Current focused tabIndex node: %{public}d. Use default focus system.", curTabFocusIndex);
         return false;
     }
-    if (curTabFocusIndex == DEFAULT_TAB_FOCUSED_INDEX) {
+    if (curTabFocusIndex == DEFAULT_TAB_FOCUSED_INDEX || curTabFocusIndex == NONE_TAB_FOCUSED_INDEX) {
         curTabFocusIndex = 0;
     } else {
         if (event.IsShiftWith(KeyCode::KEY_TAB)) {
@@ -1544,8 +1553,7 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHu
         }
     }
     if (curTabFocusIndex < 0 || curTabFocusIndex >= static_cast<int32_t>(tabIndexNodes.size())) {
-        LOGI("Focus from tab index node to normal node. Use default focus system.");
-        return false;
+        curTabFocusIndex = (curTabFocusIndex + tabIndexNodes.size()) % tabIndexNodes.size();
     }
     return GoToFocusByTabNodeIdx(tabIndexNodes, curTabFocusIndex);
 }

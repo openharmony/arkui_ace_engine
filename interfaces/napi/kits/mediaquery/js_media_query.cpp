@@ -373,7 +373,7 @@ static napi_module media_query_module = {
     .reserved = { 0 },
 };
 
-extern "C" __attribute__((constructor)) void Register()
+extern "C" __attribute__((constructor)) void RegisterMediaQuery()
 {
     napi_module_register(&media_query_module);
 }

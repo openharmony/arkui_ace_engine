@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/event/mouse_event.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
@@ -65,6 +66,7 @@ public:
     }
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollEndCallback() {};
+    virtual void OnScrollStartCallback() {};
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -180,14 +182,11 @@ public:
     {
         isCoordEventNeedSpring_ = IsCoordEventNeedSpring;
     }
-
-    void SetCoordEventNeedMoveUp(bool isCoordEventNeedMoveUp)
-    {
-        isCoordEventNeedMoveUp_ = isCoordEventNeedMoveUp;
-    }
     
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     RefPtr<ScrollablePattern> GetParentScrollable();
+    void GetParentNavigition();
+	
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
         return { 0, 0 };
@@ -276,6 +275,25 @@ public:
         return false;
     }
 
+    void SetScrollSource(int32_t scrollSource)
+    {
+        if (scrollSource == SCROLL_FROM_JUMP) {
+            if (scrollBar_ && overlayModifier_) {
+                overlayModifier_->SetOpacity(UINT8_MAX);
+                scrollBar_->ScheduleDisapplearDelayTask();
+            }
+            StopScrollBarAnimatorByProxy();
+            StartScrollBarAnimatorByProxy();
+        }
+        
+        scrollSource_ = scrollSource;
+    }
+
+    int32_t GetScrollSource() const
+    {
+        return scrollSource_;
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -333,6 +351,9 @@ private:
     void OnScrollEnd();
     bool OnScrollPosition(double offset, int32_t source);
     void SetParentScrollable();
+    void ProcessNavBarReactOnStart();
+    bool ProcessNavBarReactOnUpdate(bool isDraggedDown, float offset);
+    void ProcessNavBarReactOnEnd();
 
     void OnAttachToFrameNode() override;
 
@@ -355,6 +376,7 @@ private:
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<ScrollableCoordinationEvent> coordinationEvent_;
+    int32_t scrollSource_ = SCROLL_FROM_NONE;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
@@ -365,7 +387,6 @@ private:
     double scrollBarOutBoundaryExtent_ = 0.0;
     bool isDraggedDown_ = false;
     bool isCoordEventNeedSpring_ = true;
-    bool isCoordEventNeedMoveUp_ = false;
     double friction_ = FRICTION;
     // scroller
     RefPtr<Animator> animator_;
@@ -382,6 +403,7 @@ private:
     MouseInfo lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<NavBarPattern> navBarPattern_;
 };
 } // namespace OHOS::Ace::NG
 

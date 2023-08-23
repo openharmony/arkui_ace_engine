@@ -24,15 +24,29 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double MIN_TIME = 1.0;
-constexpr int32_t MIN_DURATION = 250;
-constexpr double DRAG = 0.995;
-constexpr double ZERO_SPEED = 0.5;
+constexpr int32_t DISMIN = 0;
+constexpr double VMIN = 0;
+constexpr double PICKER_SPEED_TH = 0.25;
+constexpr int32_t VELOCTY_TRANS = 1000;
+constexpr float PICKER_SPRING_MASS = 1.f;
+constexpr float PICKER_SPRING_STIFFNESS = 20.f;
+constexpr float PICKER_SPRING_DAMPING = 10.f;
+constexpr int32_t DISMAX = 30;
+constexpr double VMAX = 5.0;
 } // namespace
 
 void TimePickerTossAnimationController::SetStart(double y)
 {
-    if (toss_) {
-        toss_->Stop();
+    auto weak = AceType::WeakClaim(this);
+    auto ref = weak.Upgrade();
+    auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
+    CHECK_NULL_VOID(column);
+    auto isTouchBreak = column->GetTouchBreakStatus();
+    if (isTouchBreak == false) {
+        column->SetYOffset(0.0);
+    }
+    if (property_) {
+        StopTossAnimation();
     }
 
     yStart_ = y;
@@ -41,69 +55,115 @@ void TimePickerTossAnimationController::SetStart(double y)
 
 void TimePickerTossAnimationController::SetEnd(double y)
 {
-    if (toss_) {
-        toss_->Stop();
+    if (property_) {
+        StopTossAnimation();
     }
 
     yEnd_ = y;
     timeEnd_ = GetCurrentTime();
 }
 
-void TimePickerTossAnimationController::Stop()
-{
-    stopped_ = true;
-    if (toss_) {
-        toss_->Stop();
-    }
-}
-
 bool TimePickerTossAnimationController::Play()
 {
-    stopped_ = false;
+    auto weak = AceType::WeakClaim(this);
+    auto ref = weak.Upgrade();
+    auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
+    CHECK_NULL_RETURN(column, false);
     auto timeDiff = timeEnd_ - timeStart_;
     if (timeDiff < MIN_TIME) {
         LOGW("toss time[%{public}lf] too small.", timeDiff);
         return false;
     }
-
-    double speed = (yEnd_ - yStart_) / timeDiff;
-    if (NearZero(speed)) {
-        LOGW("toss speed is zero");
+    speed_ = column->GetMainVelocity() / VELOCTY_TRANS;
+    if (std::abs(speed_) < PICKER_SPEED_TH) {
         return false;
     }
-
-    double zeroSpeed = GreatNotEqual(speed, 0.0) ? ZERO_SPEED : -ZERO_SPEED;
-    double time = zeroSpeed / speed;
-    time = std::log(time) / std::log(DRAG);
-    if (time < MIN_DURATION) {
-        LOGW("toss time[%{public}lf] to small.", time);
-        return false;
-    }
-
-    LOGD("toss play speed: %{public}lf, time: %{public}lf", speed, time);
-    speed_ = speed;
-    int nTime = static_cast<int>(time);
-    auto weak = AceType::WeakClaim(this);
-    toss_ = AceType::MakeRefPtr<PickerAnimation>(pipeline_, 0.0, time, 0, nTime, Curves::LINEAR, [weak](double value) {
-        auto ref = weak.Upgrade();
-        CHECK_NULL_VOID(ref);
-        auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
-        CHECK_NULL_VOID(column);
-        double distance = std::pow(DRAG, value);
-        distance = (distance - 1.0) * ref->speed_ / std::log(DRAG);
-        if (!ref->IsStopped()) {
-            column->UpdateToss(ref->yEnd_ + distance);
-        }
-    });
-    toss_->AddStopCallback([weak] {
-        auto ref = weak.Upgrade();
-        CHECK_NULL_VOID(ref);
-        auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
-        CHECK_NULL_VOID(column);
-        column->TossStoped();
-    });
-    toss_->Play();
+    StartSpringMotion();
     return true;
+}
+
+void TimePickerTossAnimationController::StartSpringMotion()
+{
+    auto weak = AceType::WeakClaim(this);
+    auto ref = weak.Upgrade();
+    auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
+    CHECK_NULL_VOID(column);
+    auto columnNode = column->GetHost();
+    CHECK_NULL_VOID(columnNode);
+    auto offset = column->GetOffset();
+    auto speed = column->GetMainVelocity() / VELOCTY_TRANS;
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto springCurve = UpdatePlayAnimationValue();
+    CHECK_NULL_VOID(springCurve);
+    double midIndex = column->GetShowCount() / 2;
+    auto optionProperties = column->GetMidShiftDistance();
+    auto midShiftDistance =
+        (speed) < 0.0 ? optionProperties[midIndex].prevDistance : optionProperties[midIndex].nextDistance;
+    column->SetYLast(0.0);
+    end_ = midShiftDistance * showCount_ - offset;
+    AnimationOption option = AnimationOption();
+    option.SetCurve(springCurve);
+    auto propertyCallback = [weak, column](float position) {
+        auto isTouchBreak = column->GetTouchBreakStatus();
+        if (isTouchBreak) {
+            return;
+        }
+        column->UpdateToss(static_cast<int>(position));
+        column->SetTossStatus(true);
+    };
+    property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    CHECK_NULL_VOID(property_);
+    renderContext->AttachNodeAnimatableProperty(property_);
+    auto finishCallback = [weak, column]() {
+        auto ref = weak.Upgrade();
+        CHECK_NULL_VOID(ref);
+        column->UpdateToss(static_cast<int>(ref->end_));
+        column->TossAnimationStoped();
+        auto isTouchBreak = column->GetTouchBreakStatus();
+        if (isTouchBreak == false) {
+            column->SetTossStatus(false);
+            column->SetYOffset(0.0);
+        }
+    };
+    AnimationUtils::Animate(
+        option,
+        [weak]() {
+            auto ref = weak.Upgrade();
+            CHECK_NULL_VOID(ref);
+            ref->property_->Set(ref->end_);
+        },
+        finishCallback);
+}
+
+void TimePickerTossAnimationController::StopTossAnimation()
+{
+    auto weak = AceType::WeakClaim(this);
+    auto ref = weak.Upgrade();
+    CHECK_NULL_VOID(ref);
+    auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
+    CHECK_NULL_VOID(column);
+    column->SetTossStatus(false);
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(0);
+    option.SetDelay(0);
+    AnimationUtils::Animate(option, [weak]() {
+        auto ref = weak.Upgrade();
+        CHECK_NULL_VOID(ref);
+        ref->property_->Set(0.0);
+    });
+}
+RefPtr<Curve> TimePickerTossAnimationController::UpdatePlayAnimationValue()
+{
+    double mass = PICKER_SPRING_MASS;
+    double stiffness = PICKER_SPRING_STIFFNESS;
+    double damping = PICKER_SPRING_DAMPING;
+    double showCountMax = DISMAX;
+    double velocityMax = VMAX;
+    speed_ = std::abs(speed_) >= std::abs(velocityMax) ? std::abs(velocityMax) : std::abs(speed_);
+    showCount_ = static_cast<int>(DISMIN + (showCountMax - DISMIN) * (std::abs(speed_) - VMIN) / (velocityMax - VMIN));
+    return AceType::MakeRefPtr<InterpolatingSpring>(speed_, mass, stiffness, damping);
 }
 
 double TimePickerTossAnimationController::GetCurrentTime() const

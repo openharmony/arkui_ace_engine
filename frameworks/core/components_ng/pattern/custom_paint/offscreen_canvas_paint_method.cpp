@@ -15,8 +15,13 @@
 
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
+#else
+#include "rosen_text/typography_create.h"
+#include "rosen_text/typography_style.h"
+#endif
 #include "include/core/SkMaskFilter.h"
 #include "core/components/common/properties/paint_state.h"
 #ifndef NEW_SKIA
@@ -287,6 +292,17 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     InitImagePaint(imagePaint_);
 #else
     InitImagePaint(imagePaint_, sampleOptions_);
+
+    if (globalState_.HasGlobalAlpha()) {
+        imagePaint_.setAlphaf(globalState_.GetAlpha());
+    }
+
+    if (HasShadow()) {
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        SkPath path;
+        path.addRect(skRect);
+        RosenDecorationPainter::PaintShadow(path, shadow_, skCanvas, &imagePaint_);
+    }
 #endif
     switch (canvasImage.flag) {
         case 0:
@@ -471,18 +487,38 @@ void OffscreenCanvasPaintMethod::StrokeText(
 double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#else
+    Rosen::TypographyStyle style;
+    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
+    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+#endif
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, 0.0);
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
+#else
+    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
+    Rosen::TextStyle txtStyle;
+#endif
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
     txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
+#else
+    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+#endif
     builder->PushStyle(txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(text));
     auto paragraph = builder->Build();
+#else
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->CreateTypography();
+#endif
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetMaxIntrinsicWidth();
 }
@@ -490,18 +526,38 @@ double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const Pa
 double OffscreenCanvasPaintMethod::MeasureTextHeight(const std::string& text, const PaintState& state)
 {
     using namespace Constants;
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#else
+    Rosen::TypographyStyle style;
+    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
+    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+#endif
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, 0.0);
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
+#else
+    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
+    Rosen::TextStyle txtStyle;
+#endif
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
     txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
+#else
+    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+#endif
     builder->PushStyle(txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(text));
     auto paragraph = builder->Build();
+#else
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->CreateTypography();
+#endif
     paragraph->Layout(Size::INFINITE_SIZE);
     return paragraph->GetHeight();
 }
@@ -510,18 +566,38 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 {
     using namespace Constants;
     TextMetrics textMetrics = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(state.GetTextAlign());
     style.text_direction = ConvertTxtTextDirection(state.GetOffTextDirection());
+#else
+    Rosen::TypographyStyle style;
+    style.textAlign = ConvertTxtTextAlign(state.GetTextAlign());
+    style.textDirection = ConvertTxtTextDirection(state.GetOffTextDirection());
+#endif
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, textMetrics);
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
+#else
+    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
+    Rosen::TextStyle txtStyle;
+#endif
     ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
     txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
+#else
+    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+#endif
     builder->PushStyle(txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(text));
     auto paragraph = builder->Build();
+#else
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    auto paragraph = builder->CreateTypography();
+#endif
     paragraph->Layout(Size::INFINITE_SIZE);
 
     auto textAlign = state.GetTextAlign();
@@ -613,7 +689,11 @@ void OffscreenCanvasPaintMethod::PaintText(
 #endif
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
+#else
+double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph)
+#endif
 {
     double y = 0.0;
     switch (baseline) {
@@ -642,48 +722,105 @@ double OffscreenCanvasPaintMethod::GetBaselineOffset(TextBaseline baseline, std:
     return y;
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow)
+#else
+bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, bool isStroke,
+    const PaintState& state, bool hasShadow)
+#endif
 {
     using namespace Constants;
+#ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
+#else
+    Rosen::TypographyStyle style;
+#endif
     if (isStroke) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         style.text_align = ConvertTxtTextAlign(strokeState_.GetTextAlign());
+#else
+        style.textAlign = ConvertTxtTextAlign(strokeState_.GetTextAlign());
+#endif
     } else {
+#ifndef USE_GRAPHIC_TEXT_GINE
         style.text_align = ConvertTxtTextAlign(fillState_.GetTextAlign());
+#else
+        style.textAlign = ConvertTxtTextAlign(fillState_.GetTextAlign());
+#endif
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     style.text_direction = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
     style.text_align = GetEffectiveAlign(style.text_align, style.text_direction);
+#else
+    style.textDirection = ConvertTxtTextDirection(fillState_.GetOffTextDirection());
+    style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
+#endif
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, false);
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
+#else
+    std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
+    Rosen::TextStyle txtStyle;
+#endif
     if (!isStroke && hasShadow) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         txt::TextShadow txtShadow;
         txtShadow.color = shadow_.GetColor().GetValue();
         txtShadow.offset.fX = shadow_.GetOffset().GetX();
         txtShadow.offset.fY = shadow_.GetOffset().GetY();
+#else
+        Rosen::TextShadow txtShadow;
+        txtShadow.color = shadow_.GetColor().GetValue();
+        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
+        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
+#endif
 #ifndef NEW_SKIA
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtShadow.blur_radius = shadow_.GetBlurRadius();
 #else
+        txtShadow.blurRadius = shadow_.GetBlurRadius();
+#endif
+#else
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtShadow.blur_sigma = shadow_.GetBlurRadius();
 #endif
+#endif
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.text_shadows.emplace_back(txtShadow);
+#else
+        txtStyle.shadows.emplace_back(txtShadow);
+#endif
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
     UpdateTextStyleForeground(isStroke, txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(text));
     paragraph_ = builder->Build();
+#else
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    paragraph_ = builder->CreateTypography();
+#endif
     return true;
 }
 
+#ifndef USE_GRAPHIC_TEXT_GINE
 void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
+#else
+void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow)
+#endif
 {
 #ifndef USE_ROSEN_DRAWING
     using namespace Constants;
     if (!isStroke) {
         txtStyle.color = ConvertSkColor(fillState_.GetColor());
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = fillState_.GetTextStyle().GetFontSize().Value();
+#else
+        txtStyle.fontSize = fillState_.GetTextStyle().GetFontSize().Value();
+#endif
         ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
         if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
@@ -696,12 +833,20 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
             paint.setStyle(SkPaint::Style::kFill_Style);
             UpdatePaintShader(OffsetF(0, 0), paint, fillState_.GetGradient());
             txtStyle.foreground = paint;
+#ifndef USE_GRAPHIC_TEXT_GINE
             txtStyle.has_foreground = true;
+#endif
         }
         if (globalState_.HasGlobalAlpha()) {
+#ifndef USE_GRAPHIC_TEXT_GINE
             if (txtStyle.has_foreground) {
                 txtStyle.foreground.setColor(fillState_.GetColor().GetValue());
                 txtStyle.foreground.setAlphaf(globalState_.GetAlpha()); // set alpha after color
+#else
+            if (txtStyle.foreground.has_value()) {
+                txtStyle.foreground->setColor(fillState_.GetColor().GetValue());
+                txtStyle.foreground->setAlphaf(globalState_.GetAlpha()); // set alpha after color
+#endif
             } else {
                 SkPaint paint;
 #ifndef NEW_SKIA
@@ -713,7 +858,9 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
                 paint.setColor(fillState_.GetColor().GetValue());
                 paint.setAlphaf(globalState_.GetAlpha()); // set alpha after color
                 txtStyle.foreground = paint;
+#ifndef USE_GRAPHIC_TEXT_GINE
                 txtStyle.has_foreground = true;
+#endif
             }
         }
     } else {
@@ -726,8 +873,13 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
         GetStrokePaint(paint, options);
 #endif
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
         if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
+#else
+        txtStyle.fontSize = strokeState_.GetTextStyle().GetFontSize().Value();
+        if (strokeState_.GetGradient().IsValid()) {
+#endif
             UpdatePaintShader(OffsetF(0, 0), paint, strokeState_.GetGradient());
         }
         if (hasShadow) {
@@ -736,7 +888,9 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, txt::T
                 NG::SkiaDecorationPainter::ConvertRadiusToSigma(shadow_.GetBlurRadius())));
         }
         txtStyle.foreground = paint;
+#ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.has_foreground = true;
+#endif
     }
 #else
     LOGE("Drawing is not supported");

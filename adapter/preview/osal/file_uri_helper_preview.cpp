@@ -13,25 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MODAL_CONFIG_H
-#define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MODAL_CONFIG_H
-
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <string>
-
-namespace OHOS::AAFwk {
-class Want;
-class WantParams;
-} // namespace OHOS::AAFwk
+#include "base/image/file_uri_helper.h"
 
 namespace OHOS::Ace {
-struct ModalUIExtensionCallbacks {
-    std::function<void(int32_t)> onRelease;
-    std::function<void(int32_t, const AAFwk::Want&)> onResult;
-    std::function<void(const AAFwk::WantParams&)> onReceive;
-    std::function<void(int32_t, const std::string&, const std::string&)> onError;
-};
+std::string FileUriHelper::GetRealPath(std::string fileUriStr)
+{
+    const std::string fileHead = "file://";
+    size_t pos = fileUriStr.find(fileHead);
+    if (pos != std::string::npos) {
+        return fileUriStr.substr(pos + fileHead.length());
+    }
+    return {};
+}
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MODAL_CONFIG_H

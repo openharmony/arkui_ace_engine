@@ -272,7 +272,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textLayoutProperty->UpdateFlexShrink(1.0f);
+    if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
+        textLayoutProperty->UpdateFlexShrink(1.0f);
+    }
 
     // Update property of image.
     auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -322,6 +324,14 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
     tabBarNode->RemoveChild(tabBarItemNode);
     CHECK_NULL_VOID(tabBarNode);
     tabContentNode->ResetTabBarItemId();
+
+    auto tabsNode = FindTabsNode(tabContentNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBar = tabsNode->GetTabBar();
+    CHECK_NULL_VOID(tabBar);
+    auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBar);
+    CHECK_NULL_VOID(tabBarFrameNode);
+    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void TabContentModelNG::SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,

@@ -19,6 +19,10 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
+#ifdef USE_GRAPHIC_TEXT_GINE
+#include "rosen_text/text_style.h"
+#endif
+
 namespace OHOS::Ace::NG {
 class CanvasPaintMethod;
 class RosenRenderContext;
@@ -84,17 +88,19 @@ public:
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
-#ifndef USE_ROSEN_DRAWING
-    sk_sp<SkImage> GetImage(const std::string& src) override;
-#else
-    std::shared_ptr<RSImage> GetImage(const std::string& src) override;
-#endif
-
     void PaintText(const OffsetF& offset, const SizeF& contentSize, double x, double y, std::optional<double> maxWidth,
         bool isStroke, bool hasShadow = false);
+#ifndef USE_GRAPHIC_TEXT_GINE
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
+#else
+    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<OHOS::Rosen::Typography>& paragraph);
+#endif
     bool UpdateParagraph(const OffsetF& offset, const std::string& text, bool isStroke, bool hasShadow = false);
+#ifndef USE_GRAPHIC_TEXT_GINE
     void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
+#else
+    void UpdateTextStyleForeground(const OffsetF& offset, bool isStroke, Rosen::TextStyle& txtStyle, bool hasShadow);
+#endif
 #ifndef USE_ROSEN_DRAWING
     void PaintShadow(
         const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint = nullptr) override;
@@ -121,7 +127,6 @@ private:
     std::list<TaskFunc> tasks_;
 
     RefPtr<Ace::ImageObject> imageObj_ = nullptr;
-    RefPtr<ImageCache> imageCache_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPaintMethod);
 };

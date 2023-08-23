@@ -28,7 +28,7 @@ void SvgCanvasImage::DrawToRSCanvas(
 {
     CHECK_NULL_VOID(svgDom_);
     svgDom_->SetRadius(radiusXY);
-    svgDom_->DrawImage(canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), {});
+    svgDom_->DrawImage(canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()));
 }
 
 bool SvgCanvasImage::IsStatic()

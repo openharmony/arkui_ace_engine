@@ -89,6 +89,11 @@ void SpanModelNG::SetTextDecoration(Ace::TextDecoration value)
     ACE_UPDATE_SPAN_PROPERTY(TextDecoration, value, PropertyInfo::TEXTDECORATION);
 }
 
+void SpanModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(TextDecorationStyle, value, PropertyInfo::NONE);
+}
+
 void SpanModelNG::SetTextDecorationColor(const Color& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(TextDecorationColor, value, PropertyInfo::NONE);

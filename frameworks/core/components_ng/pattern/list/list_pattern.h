@@ -104,16 +104,6 @@ public:
         return maxListItemIndex_;
     }
 
-    void SetScrollState(int32_t scrollState)
-    {
-        scrollState_ = scrollState;
-    }
-
-    int32_t GetScrollState() const
-    {
-        return scrollState_;
-    }
-
     bool IsScrollable() const override
     {
         return scrollable_;
@@ -208,8 +198,17 @@ public:
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 
+    void SetPredictLayoutParam(std::optional<ListPredictLayoutParam> param)
+    {
+        predictLayoutParam_ = param;
+    }
+    std::optional<ListPredictLayoutParam> GetPredictLayoutParam() const
+    {
+        return predictLayoutParam_;
+    }
 private:
     void OnScrollEndCallback() override;
+    void OnScrollStartCallback() override;
 
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -257,6 +256,7 @@ private:
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
+    void RefreshLanesItemRange();
 
     RefPtr<ListContentModifier> listContentModifier_;
 
@@ -271,6 +271,8 @@ private:
     float currentOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;
+    float contentStartOffset_ = 0.0f;
+    float contentEndOffset_ = 0.0f;
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
@@ -288,7 +290,6 @@ private:
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;
-    int32_t scrollState_ = SCROLL_FROM_NONE;
 
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
@@ -308,6 +309,7 @@ private:
     RefPtr<Scrollable> scrollableTouchEvent_;
 
     bool isScrollEnd_ = false;
+    std::optional<ListPredictLayoutParam> predictLayoutParam_;
 };
 } // namespace OHOS::Ace::NG
 

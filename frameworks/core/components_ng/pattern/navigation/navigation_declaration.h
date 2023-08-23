@@ -48,7 +48,6 @@ constexpr float TITLE_WIDTH = 100.0f;
 constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 
 // title
-constexpr Dimension TITLE_HEIGHT = 56.0_vp;
 constexpr Dimension MAX_TITLE_FONT_SIZE = 30.0_vp;
 constexpr Dimension MIN_TITLE_FONT_SIZE = 20.0_vp;
 constexpr Dimension MIN_ADAPT_TITLE_FONT_SIZE = 14.0_vp;
@@ -104,6 +103,10 @@ constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
 // maximum number of toolbar items
 constexpr uint32_t MAXIMUM_TOOLBAR_ITEMS_IN_BAR = 5;
 constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
+
+// navigation mask color
+const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
+const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 
 enum class NavToolbarItemStatus {
     NORMAL = 0,

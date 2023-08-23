@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
+#include <cmath>
+
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/animation/curves.h"
@@ -88,8 +90,8 @@ void ScrollBar::UpdateScrollBarRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
     // return if nothing changes to avoid changing opacity
-    if (!positionModeUpdate_ && !normalWidthUpdate_ && !reservedHeightUpdate_ && paintOffset_ == offset &&
-        viewPortSize_ == size && lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f)) {
+    if (!positionModeUpdate_ && !normalWidthUpdate_ && paintOffset_ == offset && viewPortSize_ == size &&
+        lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f)) {
         return;
     }
     if (!NearZero(estimatedHeight)) {
@@ -106,7 +108,6 @@ void ScrollBar::UpdateScrollBarRegion(
         }
         positionModeUpdate_ = false;
         normalWidthUpdate_ = false;
-        reservedHeightUpdate_ = false;
     }
 }
 
@@ -299,7 +300,7 @@ bool ScrollBar::NeedScrollBar() const
 
 bool ScrollBar::NeedPaint() const
 {
-    return NeedScrollBar() && isScrollable_ && GreatNotEqual(normalWidth_.Value(), 0.0);
+    return NeedScrollBar() && isScrollable_;
 }
 
 double ScrollBar::GetNormalWidthToPx() const
@@ -459,7 +460,7 @@ void ScrollBar::CalcReservedHeight()
         startReservedHeight_ = Dimension(0.0, DimensionUnit::PX);
         endReservedHeight_ = theme->GetReservedHeight();
         LOGD("scrollBar set reservedHeight by theme");
-        SetReservedHeightUpdate(true);
+        FlushBarWidth();
         return;
     }
     float startRadius = 0.0;
@@ -487,6 +488,12 @@ void ScrollBar::CalcReservedHeight()
         default:
             break;
     }
+    if (std::isnan(startRadius)) {
+        startRadius = 0.0f;
+    }
+    if (std::isnan(endRadius)) {
+        endRadius = 0.0f;
+    }
     barMargin = padding + NormalizeToPx(normalWidth_) / 2;
     if (LessOrEqual(startRadius, barMargin)) {
         startReservedHeight_ = Dimension(0.0, DimensionUnit::PX);
@@ -503,7 +510,7 @@ void ScrollBar::CalcReservedHeight()
     }
     LOGD("scrollBar calculate reservedHeight, startReservedHeight_:%{public}f, endReservedHeight_:%{public}f",
         startReservedHeight_.Value(), endReservedHeight_.Value());
-    SetReservedHeightUpdate(true);
+    FlushBarWidth();
 }
 
 void ScrollBar::InitPanRecognizer()

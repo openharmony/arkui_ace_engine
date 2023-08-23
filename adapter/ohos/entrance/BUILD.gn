@@ -80,6 +80,7 @@ template("ace_ohos_standard_source_set") {
       "//foundation/window/window_manager/interfaces/innerkits",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
       "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+      "//foundation/multimedia/media_library/interfaces/inner_api/media_library_helper/include",
       "//third_party/node/src",
     ]
 
@@ -127,6 +128,7 @@ template("ace_ohos_standard_source_set") {
       "input:libmmi-client",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
+      "media_library:media_library_manager",
       "napi:ace_napi",
       "preferences:native_preferences",
       "relational_store:native_dataability",
@@ -134,14 +136,19 @@ template("ace_ohos_standard_source_set") {
       "resource_management:global_resmgr",
       "window_manager:libdm",
       "window_manager:libwm",
+      "window_manager:libwsutils",
     ]
+
+    if (enable_graphic_text_gine) {
+      external_deps += [ "graphic_2d:rosen_text" ]
+    }
   }
 }
 
 foreach(item, ace_platforms) {
   platform = item.name
-  if (platform == "ohos") {
-    ace_ohos_standard_source_set("ace_ohos_standard_entrance") {
+  if (platform == "ohos" || platform == "ohos_ng") {
+    ace_ohos_standard_source_set("ace_ohos_standard_entrance_${platform}") {
       platform = item.name
       defines = []
       cflags_cc = []

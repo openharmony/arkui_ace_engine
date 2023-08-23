@@ -75,6 +75,7 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
 
+    isLinked_ = false;
     auto enabled = hub->IsEnabled();
     auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
     CHECK_NULL_VOID(hyperlinkLayoutProperty);
@@ -170,7 +171,10 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
             hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
                 theme->GetTextLinkedColor()));
         } else {
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor());
+            hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(
+                theme->GetTextTouchedColor()));
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
+                theme->GetTextTouchedColor()));
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (touchType == TouchType::UP) {
@@ -181,13 +185,16 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
 
 void HyperlinkPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (clickListener_) {
+        return;
+    }
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->LinkToAddress();
     };
-    auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gestureHub->AddClickEvent(clickListener);
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickListener_);
 }
 
 void HyperlinkPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)

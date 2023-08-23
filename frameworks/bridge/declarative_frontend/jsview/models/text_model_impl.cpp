@@ -68,7 +68,7 @@ void TextModelImpl::SetTextColor(const Color& value)
     component->SetTextStyle(textStyle);
 }
 
-void TextModelImpl::SetTextShadow(const Shadow& value) {}
+void TextModelImpl::SetTextShadow(const std::vector<Shadow>& value) {}
 
 void TextModelImpl::SetItalicFontStyle(Ace::FontStyle value)
 {
@@ -164,6 +164,15 @@ void TextModelImpl::SetTextDecorationColor(const Color& value)
     CHECK_NULL_VOID(component);
     auto textStyle = component->GetTextStyle();
     textStyle.SetTextDecorationColor(value);
+    component->SetTextStyle(textStyle);
+}
+
+void TextModelImpl::SetTextDecorationStyle(TextDecorationStyle value)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetTextDecorationStyle(value);
     component->SetTextStyle(textStyle);
 }
 

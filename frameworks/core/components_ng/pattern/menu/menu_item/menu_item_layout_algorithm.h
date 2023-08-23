@@ -32,7 +32,9 @@ public:
 
 private:
     void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
+    void MeasureItem(LayoutWrapper* layoutWrapper);
     float horInterval_ = 0.0f;
+    bool isMenuWidth_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);
 };

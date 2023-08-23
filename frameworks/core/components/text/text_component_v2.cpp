@@ -61,7 +61,9 @@ void TextComponentV2::CheckAndSetChildStyle(const RefPtr<Component>& child)
     if (!spanDeclaration->HasSetTextDecoration()) {
         spanStyle.SetTextDecoration(textStyle.GetTextDecoration());
         spanStyle.SetTextDecorationColor(textStyle.GetTextDecorationColor());
+        spanStyle.SetTextDecorationStyle(textStyle.GetTextDecorationStyle());
     }
+
     if (!spanDeclaration->HasSetFontFamily()) {
         spanStyle.SetFontFamilies(textStyle.GetFontFamilies());
     }

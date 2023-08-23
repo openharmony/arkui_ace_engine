@@ -386,7 +386,9 @@ private:
     std::string GetCardId() const;
 
     bool pageCreated_ = false;
+#ifndef NG_BUILD
     bool showCommandConsumed_ = false;
+#endif
     int32_t fragmentCount_ = 0;
 
     WeakPtr<PipelineBase> pipelineContext_;

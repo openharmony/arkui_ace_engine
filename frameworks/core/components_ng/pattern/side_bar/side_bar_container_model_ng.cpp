@@ -304,6 +304,11 @@ void SideBarContainerModelNG::SetControlButtonLeft(const Dimension& left)
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonLeft, left);
 }
 
+void SideBarContainerModelNG::ResetControlButtonLeft()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SideBarContainerLayoutProperty, ControlButtonLeft, PROPERTY_UPDATE_LAYOUT);
+}
+
 void SideBarContainerModelNG::SetControlButtonTop(const Dimension& top)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonTop, top);

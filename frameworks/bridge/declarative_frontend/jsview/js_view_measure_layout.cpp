@@ -15,6 +15,9 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 
+#include "jsnapi.h"
+
+#include "base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 
@@ -78,8 +81,15 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
             ->UpdateCalcMaxSize(NG::CalcSize(std::nullopt, NG::CalcLength(maxHeight)));
     }
     (*iterMeasureChildren_)->Measure(measureDefaultConstraint_);
+
+    Dimension measureWidth((*iterMeasureChildren_)->GetGeometryNode()->GetFrameRect().Width(), DimensionUnit::PX);
+    Dimension measureHeight((*iterMeasureChildren_)->GetGeometryNode()->GetFrameRect().Height(), DimensionUnit::PX);
+    Local<ObjectRef> measureResultObject = ObjectRef::New(vm);
+    measureResultObject->Set(vm, ToJSValue("width"), ToJSValue(measureWidth.ConvertToVp()));
+    measureResultObject->Set(vm, ToJSValue("height"), ToJSValue(measureHeight.ConvertToVp()));
+
     iterMeasureChildren_++;
-    return panda::JSValueRef::Undefined(vm);
+    return measureResultObject;
 }
 
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCallInfo* runtimeCallInfo)
@@ -105,6 +115,43 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     JSRef<JSObject> sizeObj = layoutInfo->GetProperty("position");
     JSRef<JSVal> xVal = sizeObj->GetProperty("x");
     JSRef<JSVal> yVal = sizeObj->GetProperty("y");
+    CalcDimension dimenX;
+    CalcDimension dimenY;
+    auto xResult = JSViewAbstract::ParseJsDimensionVp(xVal, dimenX);
+    auto yResult = JSViewAbstract::ParseJsDimensionVp(yVal, dimenY);
+    if (!(xResult || yResult)) {
+        LOGE("the position prop is illegal");
+    } else {
+        (*iterLayoutChildren_)->GetGeometryNode()->SetFrameOffset({ dimenX.ConvertToPx(), dimenY.ConvertToPx() });
+    }
+    (*iterLayoutChildren_)->Layout();
+    iterLayoutChildren_++;
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRuntimeCallInfo* runtimeCallInfo)
+{
+    ACE_SCOPED_TRACE("ViewMeasureLayout::JSPlaceChildren");
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+
+    if (iterLayoutChildren_ == layoutChildren_.end()) {
+        LOGE("Call layout exceed limit");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto info = runtimeCallInfo;
+    if (info->GetArgsNumber() != 1 || !info->GetCallArgRef(0)->IsObject()) {
+        LOGE("JSPlaceChildren arg is wrong");
+        (*iterLayoutChildren_)->Layout();
+        iterLayoutChildren_++;
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto jsObject = JsiObject(info->GetCallArgRef(0)->ToObject(vm));
+    JSRef<JSObject> layoutInfo = JSRef<JSObject>::Make(jsObject);
+    JSRef<JSVal> xVal = layoutInfo->GetProperty("x");
+    JSRef<JSVal> yVal = layoutInfo->GetProperty("y");
     CalcDimension dimenX;
     CalcDimension dimenY;
     auto xResult = JSViewAbstract::ParseJsDimensionVp(xVal, dimenX);

@@ -56,6 +56,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
@@ -1637,8 +1638,26 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     }
 
     double value = 0.0;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     if (!ParseJsDouble(info[0], value)) {
-        return;
+        // add version protection, undefined use default value
+        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsNull() || info[0]->IsUndefined())) {
+            ViewAbstractModel::GetInstance()->ResetAspectRatio();
+            return;
+        } else {
+            return;
+        }
+    }
+
+    // negative use default value.
+    if (LessOrEqual(value, 0.0)) {
+        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            ViewAbstractModel::GetInstance()->ResetAspectRatio();
+            return;
+        } else {
+            value = 1.0;
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetAspectRatio(static_cast<float>(value));
@@ -2234,6 +2253,7 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
     }
     if (info[0]->IsNumber()) {
         int32_t align = info[0]->ToNumber<int32_t>();
+        bgImgPosition.SetIsAlign(true);
         switch (align) {
             case 0:
                 SetBgImgPosition(DimensionUnit::PERCENT, DimensionUnit::PERCENT, 0.0, 0.0, bgImgPosition);
@@ -2285,11 +2305,11 @@ void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
         DimensionUnit typeX = DimensionUnit::PX;
         DimensionUnit typeY = DimensionUnit::PX;
         if (x.Unit() == DimensionUnit::PERCENT) {
-            valueX = x.Value() * FULL_DIMENSION;
+            valueX = x.Value();
             typeX = DimensionUnit::PERCENT;
         }
         if (y.Unit() == DimensionUnit::PERCENT) {
-            valueY = y.Value() * FULL_DIMENSION;
+            valueY = y.Value();
             typeY = DimensionUnit::PERCENT;
         }
         SetBgImgPosition(typeX, typeY, valueX, valueY, bgImgPosition);
@@ -4598,43 +4618,13 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsShadow", info, checkList)) {
         return;
     }
-
-    int32_t shadowStyle = 0;
-    if (ParseJsInteger<int32_t>(info[0], shadowStyle)) {
-        auto style = static_cast<ShadowStyle>(shadowStyle);
-        Shadow shadow = Shadow::CreateShadow(style);
-        std::vector<Shadow> shadows = { shadow };
-        ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
-        return;
-    }
-    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
-    if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+    Shadow shadow;
+    if (!ParseShadowProps(info[0], shadow)) {
+        LOGI("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
         info.ReturnSelf();
         return;
     }
-    double radius = 0.0;
-    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
-    if (LessNotEqual(radius, 0.0)) {
-        radius = 0.0;
-    }
-    std::vector<Shadow> shadows(1);
-    shadows.begin()->SetBlurRadius(radius);
-    CalcDimension offsetX;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
-        shadows.begin()->SetOffsetX(offsetX.Value());
-    }
-    CalcDimension offsetY;
-    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
-        shadows.begin()->SetOffsetY(offsetY.Value());
-    }
-    Color color;
-    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
-        shadows.begin()->SetColor(color);
-    }
-    auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
-    type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
-    shadows.begin()->SetShadowType(static_cast<ShadowType>(type));
+    std::vector<Shadow> shadows { shadow };
     ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
 }
 
@@ -5922,6 +5912,42 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         return false;
     }
     result = themeConstants->GetColor(resId->GetUInt());
+    return true;
+}
+
+bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow)
+{
+    int32_t shadowStyle = 0;
+    if (ParseJsInteger<int32_t>(jsValue, shadowStyle)) {
+        auto style = static_cast<ShadowStyle>(shadowStyle);
+        shadow = Shadow::CreateShadow(style);
+        return true;
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(jsValue->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        return false;
+    }
+    double radius = 0.0;
+    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
+    }
+    shadow.SetBlurRadius(radius);
+    CalcDimension offsetX;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
+        shadow.SetOffsetX(offsetX.Value());
+    }
+    CalcDimension offsetY;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
+        shadow.SetOffsetY(offsetY.Value());
+    }
+    Color color;
+    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
+        shadow.SetColor(color);
+    }
+    auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
+    type = std::clamp(type, static_cast<int32_t>(ShadowType::COLOR), static_cast<int32_t>(ShadowType::BLUR));
+    shadow.SetShadowType(static_cast<ShadowType>(type));
     return true;
 }
 

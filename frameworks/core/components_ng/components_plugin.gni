@@ -35,27 +35,27 @@ template("build_component_plugin") {
       src_js = rebase_path("${js_source}.js")
       dst_file = rebase_path(target_out_dir + "/${js_source}.abc")
       in_puts = [ "${js_source}.js" ]
-      out_puts = [ target_out_dir + "/${js_source}.abc" ]
+      out_puts = [ target_out_dir + "/${platform}/${js_source}.abc" ]
       extra_args = [ "--module" ]
     }
 
     gen_obj("${js_source}_js_$platform") {
       input = "${js_source}.js"
       if (target_os == "ios") {
-        output = target_out_dir + "/${js_source}.c"
+        output = target_out_dir + "/${platform}/${js_source}.c"
       } else {
-        output = target_out_dir + "/${js_source}.o"
+        output = target_out_dir + "/${platform}/${js_source}.o"
       }
       snapshot_dep = []
     }
 
     gen_obj("${js_source}_abc_$platform") {
       input = get_label_info(":gen_${js_source}_abc", "target_out_dir") +
-              "/${js_source}.abc"
+              "/${platform}/${js_source}.abc"
       if (target_os == "ios") {
-        output = target_out_dir + "/${js_source}_abc.c"
+        output = target_out_dir + "/${platform}/${js_source}_abc.c"
       } else {
-        output = target_out_dir + "/${js_source}_abc.o"
+        output = target_out_dir + "/${platform}/${js_source}_abc.o"
       }
       snapshot_dep = [ ":gen_${js_source}_abc_$platform" ]
     }
@@ -95,7 +95,7 @@ template("build_component_plugin") {
         cflags_cc += invoker.cflags_cc
       }
 
-      # using graphcis_2d drawing lib
+      # using graphic_2d drawing lib
       include_dirs = [
         "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
         "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
@@ -107,6 +107,7 @@ template("build_component_plugin") {
         "//foundation/graphic/graphic_2d/rosen/modules",
         "//third_party/bounds_checking_function/include",
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
+        "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
       ]
 
       if (ace_use_new_skia) {

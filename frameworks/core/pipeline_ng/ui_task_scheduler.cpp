@@ -32,7 +32,7 @@ void UITaskScheduler::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
-    dirtyLayoutNodes_[dirty->GetPageId()].emplace(dirty);
+    dirtyLayoutNodes_.emplace_back(dirty);
 }
 
 void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
@@ -45,40 +45,25 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
-static inline bool Cmp(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB)
-{
-    if (!nodeA || !nodeB) {
-        return false;
-    }
-    return nodeA->GetLayoutPriority() > nodeB->GetLayoutPriority();
-}
-
 void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    if (dirtyLayoutNodes_.empty()) {
+        return;
+    }
     isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
-    std::vector<RefPtr<FrameNode>> orderedNodes;
-    for (auto&& pageNodes : dirtyLayoutNodes) {
-        for (auto&& node : pageNodes.second) {
-            if (!node || node->IsInDestroying()) {
-                continue;
-            }
-            orderedNodes.emplace_back(node);
-        }
-    }
-    std::sort(orderedNodes.begin(), orderedNodes.end(), Cmp);
+    PageDirtySet dirtyLayoutNodesSet(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
 
     // Priority task creation
     int64_t time = 0;
-    for (auto& node : orderedNodes) {
+    for (auto&& node : dirtyLayoutNodesSet) {
         // need to check the node is destroying or not before CreateLayoutTask
         if (!node || node->IsInDestroying()) {
             continue;
         }
         time = GetSysTimestamp();
-        frameId_++;
         auto task = node->CreateLayoutTask(forceUseMainThread);
         if (task) {
             if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
@@ -134,7 +119,13 @@ bool UITaskScheduler::NeedAdditionalLayout()
 {
     bool ret = false;
     ElementRegister::GetInstance()->ReSyncGeometryTransition();
-    for (auto&& pageNodes : dirtyLayoutNodes_) {
+
+    RootDirtyMap dirtyLayoutNodesMap;
+    for (auto&& dirty : dirtyLayoutNodes_) {
+        dirtyLayoutNodesMap[dirty->GetPageId()].emplace(dirty);
+    }
+
+    for (auto&& pageNodes : dirtyLayoutNodesMap) {
         for (auto&& node : pageNodes.second) {
             if (!node || !node->GetLayoutProperty()) {
                 continue;

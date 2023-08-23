@@ -128,6 +128,7 @@ public:
         gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
+        gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -145,11 +146,6 @@ public:
     }
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
-
-    void SetScrollState(int32_t scrollState)
-    {
-        scrollState_ = scrollState;
-    }
 
     bool OutBoundaryCallback() override;
 
@@ -206,7 +202,6 @@ private:
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex, int32_t tarIndex = -1);
     std::unordered_set<int32_t> GetFocusableChildCrossIndexesAt(int32_t tarMainIndex);
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
-    void FlushCurrentFocus();
     void FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo);
     std::pair<bool, bool> IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex);
     std::pair<FocusStep, FocusStep> GetFocusSteps(int32_t curMainIndex, int32_t curCrossIndex, FocusStep step);
@@ -226,6 +221,7 @@ private:
                       bool prevReachEnd, bool reachStart);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
+    void OnScrollStartCallback() override;
     void FireOnScrollStart();
     void InitScrollableEvent();
 
@@ -241,12 +237,8 @@ private:
     bool isConfigScrollable_ = false;
 
     bool scrollable_ = true;
-    int32_t scrollState_ = SCROLL_FROM_NONE;
 
     bool firstShow_ = true;
-
-    int32_t lastFocusItemMainIndex_ = 0;
-    int32_t lastFocusItemCrossIndex_ = 0;
 
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
 

@@ -53,7 +53,7 @@ HWTEST_F(ParseGTestNg, ParseTest001, TestSize.Level1)
     auto g = AceType::DynamicCast<SvgG>(svg->children_.at(0));
     ASSERT_STREQ(g->nodeId_.c_str(), ID.c_str());
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }

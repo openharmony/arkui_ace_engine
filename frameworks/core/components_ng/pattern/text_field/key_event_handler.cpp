@@ -63,7 +63,7 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
                 pattern->HandleOnUndoAction();
             } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
                        keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
-                pattern->HandleOnSelectAll();
+                pattern->HandleOnSelectAll(true);
             } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
                        keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
                 pattern->HandleOnCopy();
@@ -180,6 +180,7 @@ bool KeyEventHandler::HandleDirectionalKey(const KeyEvent& keyEvent)
 {
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
+    pattern->ResetTouchAtLeftOffsetFlag();
     bool updateSelection = false;
     if (keyEvent.IsShiftWith(KeyCode::KEY_DPAD_UP)) {
         pattern->HandleSelectionUp();

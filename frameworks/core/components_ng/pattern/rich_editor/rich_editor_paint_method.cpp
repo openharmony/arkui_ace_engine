@@ -35,6 +35,10 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     TextPaintMethod::UpdateOverlayModifier(paintWrapper);
     auto richEditorPattern = DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
+    if (!richEditorPattern->HasFocus()) {
+        richEditorOverlayModifier_->SetCaretVisible(false);
+        return;
+    }
     auto caretVisible = richEditorPattern->GetCaretVisible();
     richEditorOverlayModifier_->SetCaretVisible(caretVisible);
     richEditorOverlayModifier_->SetCaretColor(Color::BLUE.GetValue());

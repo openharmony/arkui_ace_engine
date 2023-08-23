@@ -41,7 +41,7 @@ public:
     virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
-    virtual void SetTextShadow(const Shadow& value) = 0;
+    virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
@@ -52,6 +52,7 @@ public:
     virtual void SetLineHeight(const Dimension& value) = 0;
     virtual void SetTextDecoration(TextDecoration value) = 0;
     virtual void SetTextDecorationColor(const Color& value) = 0;
+    virtual void SetTextDecorationStyle(TextDecorationStyle value) = 0;
     virtual void SetBaselineOffset(const Dimension& value) = 0;
     virtual void SetTextCase(TextCase value) = 0;
     virtual void SetLetterSpacing(const Dimension& value) = 0;

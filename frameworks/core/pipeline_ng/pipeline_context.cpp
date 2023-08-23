@@ -773,37 +773,17 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    AnimationOption option;
-    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
-    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), systemSafeArea]() {
-        auto pipeline = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pipeline);
-        auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID_NOLOG(safeAreaManager);
-        if (safeAreaManager->UpdateSystemSafeArea(systemSafeArea)) {
-            pipeline->SyncSafeArea();
-            pipeline->FlushUITasks();
-        }
-    });
+    if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
+        AnimateOnSafeAreaUpdate();
+    }
 }
 
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    AnimationOption option;
-    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
-    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), cutoutSafeArea]() {
-        auto pipeline = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pipeline);
-        auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID_NOLOG(safeAreaManager);
-        if (safeAreaManager->UpdateCutoutSafeArea(cutoutSafeArea)) {
-            pipeline->SyncSafeArea();
-            pipeline->FlushUITasks();
-        }
-    });
+    if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
+        AnimateOnSafeAreaUpdate();
+    }
 }
 
 void PipelineContext::SetIgnoreViewSafeArea(bool value)
@@ -1096,12 +1076,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if (scalePoint.type == TouchType::MOVE) {
         touchEvents_.emplace_back(point);
         auto container = Container::Current();
-        if (container && !container->IsScenceBoardWindow()) {
-            hasIdleTasks_ = true;
-            RequestFrame();
+        if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
+            FlushTouchEvents();
             return;
         } else {
-            FlushTouchEvents();
+            hasIdleTasks_ = true;
+            RequestFrame();
             return;
         }
     }
@@ -2013,5 +1993,41 @@ void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node)
     if (fontManager_) {
         fontManager_->RemoveFontNodeNG(node);
     }
+}
+
+void PipelineContext::SetWindowSceneConsumed(bool isConsumed)
+{
+    isWindowSceneConsumed_ = isConsumed;
+}
+
+bool PipelineContext::IsWindowSceneConsumed()
+{
+    return isWindowSceneConsumed_;
+}
+
+void PipelineContext::SetCloseButtonStatus(bool isEnabled)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->SetCloseButtonStatus(isEnabled);
+}
+
+void PipelineContext::AnimateOnSafeAreaUpdate()
+{
+    // complete other layout tasks before animation
+    FlushUITasks();
+    AnimationOption option;
+    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(self);
+        self->SyncSafeArea();
+        self->FlushUITasks();
+    });
 }
 } // namespace OHOS::Ace::NG

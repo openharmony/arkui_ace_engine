@@ -46,6 +46,27 @@ public:
 
     bool Play();
 
+    RefPtr<Animator> GetTossAnimation()
+    {
+        return springController_;
+    }
+
+    RefPtr<NodeAnimatablePropertyFloat> GetTossNodeAnimation()
+    {
+        return property_;
+    }
+
+    void StartSpringMotion();
+
+    RefPtr<Curve> UpdatePlayAnimationValue();
+
+    void StopTossAnimation();
+
+    double GetTossEndPosition()
+    {
+        return end_;
+    }
+
 private:
     double GetCurrentTime() const;
 
@@ -54,10 +75,16 @@ private:
     double timeStart_ = 0.0;
     double timeEnd_ = 0.0;
     double speed_ = 0.0;
-
+    int32_t showCount_ = 0;
+    double end_ = 0.0;
     RefPtr<PickerAnimation> toss_;
     WeakPtr<DatePickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;
+
+    RefPtr<NodeAnimatablePropertyFloat> property_;
+    RefPtr<SpringMotion> springMotion_;
+    RefPtr<SpringProperty> spring_;
+    RefPtr<Animator> springController_;
 };
 } // namespace OHOS::Ace::NG
 

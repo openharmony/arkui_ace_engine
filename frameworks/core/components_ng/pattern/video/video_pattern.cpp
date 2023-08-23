@@ -311,7 +311,16 @@ void VideoPattern::RegisterMediaPlayerEvent()
         });
     };
 
-    mediaPlayer_->RegisterMediaPlayerEvent(positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent);
+    auto&& startRenderFrameEvent = [videoPattern, uiTaskExecutor]() {
+        uiTaskExecutor.PostSyncTask([&videoPattern] {
+            auto video = videoPattern.Upgrade();
+            CHECK_NULL_VOID_NOLOG(video);
+            video->OnStartRenderFrameCb();
+        });
+    };
+
+    mediaPlayer_->RegisterMediaPlayerEvent(
+        positionUpdatedEvent, stateChangedEvent, errorEvent, resolutionChangeEvent, startRenderFrameEvent);
 }
 
 void VideoPattern::PrintPlayerStatus(PlaybackStatus status)
@@ -450,6 +459,19 @@ void VideoPattern::OnResolutionChange() const
     videoLayoutProperty->UpdateVideoSize(videoSize);
     LOGI("OnResolutionChange video size: %{public}s", videoSize.ToString().c_str());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void VideoPattern::OnStartRenderFrameCb() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto video = AceType::DynamicCast<VideoNode>(host);
+    CHECK_NULL_VOID(video);
+    auto image = AceType::DynamicCast<FrameNode>(video->GetPreviewImage());
+    CHECK_NULL_VOID(image);
+    auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    image->MarkModifyDone();
 }
 
 void VideoPattern::OnPrepared(double width, double height, uint32_t duration, uint32_t currentPos, bool needFireEvent)
@@ -778,8 +800,18 @@ void VideoPattern::UpdateControllerBar()
             CHECK_NULL_VOID(textLayoutProperty);
             std::string label = IntTimeToText(currentPos_);
             textLayoutProperty->UpdateContent(label);
+
+            auto durationNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(DURATION_POS));
+            CHECK_NULL_VOID(durationNode);
+            auto durationTextLayoutProperty = durationNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(durationTextLayoutProperty);
+            std::string durationText = IntTimeToText(duration_);
+            durationTextLayoutProperty->UpdateContent(durationText);
+
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             textNode->MarkModifyDone();
+            durationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            durationNode->MarkModifyDone();
             auto controllerLayoutProperty = controller->GetLayoutProperty<LinearLayoutProperty>();
             controllerLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             controller->MarkModifyDone();
@@ -1149,16 +1181,6 @@ void VideoPattern::Start()
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto video = AceType::DynamicCast<VideoNode>(host);
-    CHECK_NULL_VOID(video);
-    auto image = AceType::DynamicCast<FrameNode>(video->GetPreviewImage());
-    CHECK_NULL_VOID(image);
-    auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
-    posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    image->MarkModifyDone();
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
@@ -1283,7 +1305,7 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
     if (!mediaPlayer_->IsMediaPlayerValid()) {
         return;
     }
-    if (GreatOrEqual(currentPos, 0.0) && LessOrEqual(currentPos, duration_)) {
+    if (GreatOrEqual(currentPos, 0.0)) {
         LOGD("Video Seek");
         mediaPlayer_->Seek(static_cast<int32_t>(currentPos * MILLISECONDS_TO_SECONDS), seekMode);
     }

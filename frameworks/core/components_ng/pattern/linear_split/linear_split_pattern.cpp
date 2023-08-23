@@ -183,10 +183,8 @@ void LinearSplitPattern::ConstrainDragRange()
     auto &offset = childrenDragPos_[dragedSplitIndex_ + 1];
     if (offset < min) {
         offset = min;
-        isDragedMoving_ = false;
     } else if (offset > max) {
         offset = max;
-        isDragedMoving_ = false;
     }
 }
 

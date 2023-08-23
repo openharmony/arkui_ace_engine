@@ -71,6 +71,8 @@ enum class TimePickerOptionIndex {
     COLUMN_INDEX_2,
     COLUMN_INDEX_3,
     COLUMN_INDEX_4,
+    COLUMN_INDEX_5,
+    COLUMN_INDEX_6,
 };
 
 class TimePickerColumnPattern : public LinearLayoutPattern {
@@ -242,6 +244,63 @@ public:
 
     void UpdateScrollDelta(double delta);
 
+    void SetYLast(double value)
+    {
+        yLast_ = value;
+    }
+    double GetOffset()
+    {
+        return offsetCurSet_;
+    }
+    void PlayRestAnimation();
+
+    void TossAnimationStoped();
+
+    std::vector<TimePickerOptionProperty> GetMidShiftDistance()
+    {
+        return optionProperties_;
+    }
+
+    void SetMainVelocity(double mainVelocity)
+    {
+        mainVelocity_ = mainVelocity;
+    }
+
+    double GetMainVelocity() const
+    {
+        return mainVelocity_;
+    }
+
+    void SetTossStatus(bool status)
+    {
+        isTossStatus_ = status;
+    }
+
+    bool GetTossStatus()
+    {
+        return isTossStatus_;
+    }
+
+    void SetYOffset(double value)
+    {
+        yOffset_ = value;
+    }
+
+    bool GetTouchBreakStatus()
+    {
+        return touchBreak_;
+    }
+
+    bool GetClickBreakStatus()
+    {
+        return clickBreak_;
+    }
+
+    void SetclickBreak(bool value)
+    {
+        clickBreak_ = value;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -256,13 +315,14 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-
+    RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
     void CreateAnimation();
     RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
+    RefPtr<CurveAnimation<double>> CreateClickAnimation(double from, double to);
     void HandleCurveStopped();
     void ScrollOption(double delta, bool isJump = false);
 
@@ -300,7 +360,7 @@ private:
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void SetAccessibilityAction();
-
+    double mainVelocity_ = 0.0;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
@@ -319,10 +379,15 @@ private:
     double jumpInterval_;
     uint32_t showCount_ = 0;
     bool isVertical_ = true;
-    float gradientHeight_;
-    float dividerHeight_;
-    float dividerSpacingWidth_;
-
+    float gradientHeight_ = 0.0f;
+    float dividerHeight_ = 0.0f;
+    float dividerSpacingWidth_ = 0.0f;
+    double distancePercent_ = 0.0;
+    double offsetCurSet_ = 0.0;
+    bool isTossStatus_ = false;
+    bool clickBreak_ = false;
+    bool touchBreak_ = false;
+    bool animationBreak_ = false;
     float deltaSize_ = 0.0f;
     RefPtr<PanEvent> panEvent_;
     bool pressed_ = false;

@@ -32,12 +32,13 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     if (fontStyle) {
         UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
         UPDATE_TEXT_STYLE(fontStyle, TextColor, SetTextColor);
-        UPDATE_TEXT_STYLE(fontStyle, TextShadow, SetShadow);
+        UPDATE_TEXT_STYLE(fontStyle, TextShadow, SetTextShadows);
         UPDATE_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
         UPDATE_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
         UPDATE_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
+        UPDATE_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
         UPDATE_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
         UPDATE_TEXT_STYLE(fontStyle, AdaptMinFontSize, SetAdaptMinFontSize);
         UPDATE_TEXT_STYLE(fontStyle, AdaptMaxFontSize, SetAdaptMaxFontSize);

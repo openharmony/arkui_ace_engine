@@ -32,7 +32,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr float SPRING_SCROLL_MASS = 1.0f;
-constexpr float SPRING_SCROLL_STIFFNESS = 288.0f;
+constexpr float SPRING_SCROLL_STIFFNESS = 228.0f;
 constexpr float SPRING_SCROLL_DAMPING = 30.0f;
 constexpr double CAP_COEFFICIENT = 0.45;
 constexpr int32_t FIRST_THRESHOLD = 5;
@@ -838,7 +838,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     auto end = currentPos_ + predictSnapOffset;
     scrollSnapMotion_ = AceType::MakeRefPtr<SpringMotion>(start, end, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
 
-    scrollSnapMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
+    scrollSnapMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->ProcessScrollSnapMotion(position);

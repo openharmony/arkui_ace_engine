@@ -37,9 +37,8 @@ RefPtr<ImageData> ImageData::MakeFromDataWithCopy(const void* data, size_t lengt
 
 RefPtr<ImageData> ImageData::MakeFromDataWrapper(void* dataWrapper)
 {
-    sk_sp<SkData>* skDataPtr = reinterpret_cast<sk_sp<SkData>*>(dataWrapper);
-    CHECK_NULL_RETURN_NOLOG(skDataPtr, nullptr);
-    CHECK_NULL_RETURN_NOLOG(*skDataPtr, nullptr);
+    auto* skDataPtr = reinterpret_cast<sk_sp<SkData>*>(dataWrapper);
+    CHECK_NULL_RETURN_NOLOG(skDataPtr && *skDataPtr, nullptr);
     return MakeRefPtr<SkiaImageData>(*skDataPtr);
 }
 
@@ -77,7 +76,7 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
         return nullptr;
     }
     svgDom_->SetFuncNormalizeToPx(
-        [pipeline = WeakClaim(RawPtr(PipelineContext::GetCurrentContext()))](const Dimension& value) -> double {
+        [pipeline = WeakPtr(PipelineContext::GetCurrentContext())](const Dimension& value) -> double {
             auto context = pipeline.Upgrade();
             CHECK_NULL_RETURN(context, 0.0);
             return context->NormalizeToPx(value);
@@ -104,4 +103,8 @@ std::pair<SizeF, int32_t> SkiaImageData::Parse() const
     return { imageSize, codec->getFrameCount() };
 }
 
+const void* SkiaImageData::GetDataWrapper() const
+{
+    return &skData_;
+}
 } // namespace OHOS::Ace::NG

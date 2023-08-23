@@ -182,7 +182,7 @@ public:
 
     int32_t GetCurrentShownIndex() const
     {
-        return GetLoopIndex(currentIndex_);
+        return IsLoop() ? currentIndex_ : GetLoopIndex(currentIndex_);
     }
 
     RefPtr<SwiperController> GetSwiperController() const
@@ -208,6 +208,11 @@ public:
     float GetTurnPageRate() const
     {
         return turnPageRate_;
+    }
+
+    bool IsIndicatorAnimatorRunning() const
+    {
+        return indicatorController_ ? indicatorController_->IsRunning() : false;
     }
 
     void SetTurnPageRate(float turnPageRate)
@@ -408,6 +413,11 @@ public:
         surfaceChangedCallbackId_ = id;
     }
 
+    void SetIndicatorLongPress(bool isIndicatorLongPress)
+    {
+        isIndicatorLongPress_ = isIndicatorLongPress;
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -421,7 +431,10 @@ public:
 
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
-    void SwipeToWithoutAnimationAutoPlay();
+    void StopAutoPlay();
+    void StartAutoPlay();
+    void StopTranslateAnimation();
+    void StopSpringAnimation();
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -473,12 +486,8 @@ private:
     // Implement of swiper controller
 
     void FinishAnimation();
-    void StopTranslateAnimation();
-    void StopSpringAnimation();
     void StopFadeAnimation();
 
-    void StopAutoPlay();
-    void StartAutoPlay();
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
     float GetRemainingOffset() const;
     float MainSize() const;
@@ -585,7 +594,6 @@ private:
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
-    int32_t autoPlayCurrentIndex_ = 0;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -636,6 +644,8 @@ private:
     bool usePropertyAnimation_ = false;
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
+    bool isVoluntarilyClear_ = false;
+    bool isIndicatorLongPress_ = false;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;

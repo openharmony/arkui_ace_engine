@@ -18,11 +18,14 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 
 namespace OHOS::Ace::Framework {
+#ifndef NG_BUILD
+// dismiss unused warning in NG_BUILD
 namespace {
 
 int32_t g_tabControllerId = 0;
 
 } // namespace
+#endif
 
 JSTabsController::JSTabsController()
 {

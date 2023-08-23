@@ -74,7 +74,7 @@ void DeclarativeFrontendNG::AttachPipelineContext(const RefPtr<PipelineBase>& co
     }
 }
 
-void DeclarativeFrontendNG::AttachSubPipelineContext(const RefPtr<PipelineContext>& context)
+void DeclarativeFrontendNG::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
 {
     LOGI("DeclarativeFrontendNG AttachSubPipelineContext.");
     if (!delegate_) {

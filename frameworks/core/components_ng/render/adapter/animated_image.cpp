@@ -334,7 +334,7 @@ void AnimatedPixmap::CacheFrame(const std::string& key)
     CHECK_NULL_VOID(cache);
 
     std::scoped_lock<std::mutex> lock(frameMtx_);
-    cache->CacheImageData(key, MakeRefPtr<PixmapCachedData>(currentFrame_));
+    cache->CacheImageData(key, MakeRefPtr<PixmapData>(currentFrame_));
 }
 
 RefPtr<CanvasImage> AnimatedPixmap::GetCachedFrameImpl(const std::string& key)

@@ -46,7 +46,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 // subwindow only contains one menu instance.
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu) {}
 
-void OverlayManager::HideMenu(int32_t targetId, bool isMenuOnTouch) {}
+void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch) {}
 
 void OverlayManager::HideAllMenus() {}
 

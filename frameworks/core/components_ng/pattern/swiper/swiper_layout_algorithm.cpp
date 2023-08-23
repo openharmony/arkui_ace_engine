@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -104,6 +106,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             contentMainSize_ =
                 GetMainAxisSize(parentPercentReference, axis) - paddingBeforeContent_ - paddingAfterContent_;
             mainSizeIsDefined_ = false;
+            contentIdealSize.SetMainSize(contentMainSize_, axis);
         }
     } else {
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis);
@@ -484,12 +487,6 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         }
     }
 
-    for (auto pos = itemPosition_.begin(); pos != itemPosition_.end(); pos++) {
-        if (GreatNotEqual(pos->second.endPos, startMainPos_)) {
-            autoPlayCurrentIndex_ = pos->first;
-            break;
-        }
-    }
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         if (GreatNotEqual(
@@ -696,77 +693,32 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
     CHECK_NULL_VOID_NOLOG(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
-
-    float dightPadding = std::abs(swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx() - indicatorHeight) / 2;
     if (LessNotEqual(indicatorHeight, swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx())) {
         indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
     }
 
-    auto layoutPropertyConstraint = indicatorWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutPropertyConstraint);
-    const auto& layoutConstraint = layoutPropertyConstraint->GetLayoutConstraint();
-    auto swiperWidth = layoutConstraint->parentIdealSize.Width().value();
-    auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
-    const auto& swiperPaddingProperty = swiperLayoutProperty->GetPaddingProperty();
-    float swiperPaddingLeft = 0.0f;
-    float swiperPaddingRight = 0.0f;
-    float swiperPaddingTop = 0.0f;
-    float swiperPaddingBottom = 0.0f;
-    if (swiperPaddingProperty != nullptr) {
-        swiperPaddingLeft =
-            static_cast<float>(swiperPaddingProperty->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
-        swiperPaddingRight =
-            static_cast<float>(swiperPaddingProperty->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
-        swiperPaddingTop =
-            static_cast<float>(swiperPaddingProperty->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
-        swiperPaddingBottom =
-            static_cast<float>(swiperPaddingProperty->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
-    }
-    auto left = swiperLayoutProperty->GetLeft();
-    auto right = swiperLayoutProperty->GetRight();
-    auto top = swiperLayoutProperty->GetTop();
-    auto bottom = swiperLayoutProperty->GetBottom();
-    auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
-    Offset position;
-    if (left.has_value() && !NearZero(left.value().Value())) {
-        auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth, left.value());
-        position.SetX(leftValue + swiperPaddingLeft);
-    } else if (right.has_value() && !NearZero(right.value().Value())) {
-        auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth, right.value());
-        position.SetX(swiperWidth - indicatorWidth - rightValue - swiperPaddingRight);
-    } else {
-        position.SetX(axis == Axis::HORIZONTAL
-                          ? (swiperWidth - swiperPaddingRight + swiperPaddingLeft - indicatorWidth) * 0.5
-                          : swiperWidth - indicatorWidth - swiperPaddingRight);
-    }
-    if (top.has_value() && !NearZero(top.value().Value())) {
-        auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight, top.value());
-        position.SetY(topValue + swiperPaddingTop);
-    } else if (bottom.has_value() && !NearZero(bottom.value().Value())) {
-        auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight, bottom.value());
-        position.SetY(swiperHeight - indicatorHeight - bottomValue - swiperPaddingBottom);
-    } else {
-        if (axis == Axis::HORIZONTAL) {
-            position.SetY(swiperHeight - indicatorHeight - swiperPaddingBottom -
-                          swiperIndicatorTheme->GetIndicatorDigitVerticalPadding().ConvertToPx() + dightPadding);
-        } else {
-            position.SetY((swiperHeight - swiperPaddingBottom + swiperPaddingTop - indicatorHeight) * 0.5);
+    auto frameNode = indicatorWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto indicatorlayoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(indicatorlayoutProperty);
+
+    auto currentOffset = SwiperIndicatorUtils::CalcIndicatrFrameOffSet(swiperLayoutProperty,
+                                                                       indicatorlayoutProperty,
+                                                                       indicatorWidth, indicatorHeight);
+
+    if (swiperLayoutProperty->GetDirectionValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
+        auto top = indicatorlayoutProperty->GetTop();
+        auto bottom = indicatorlayoutProperty->GetBottom();
+        if ((!top.has_value() || NearZero(top.value().Value())) &&
+            (!bottom.has_value() || NearZero(bottom.value().Value()))) {
+            auto dightPadding =
+                std::abs(swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx() - indicatorHeight) / 2;
+            auto dightVerPadding = swiperIndicatorTheme->GetIndicatorDigitVerticalPadding().ConvertToPx();
+            currentOffset.SetY(currentOffset.GetY() - dightVerPadding + dightPadding);
         }
     }
-    auto currentOffset = OffsetF { static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
-    indicatorGeometryNode->SetMarginFrameOffset(currentOffset);
-}
 
-double SwiperLayoutAlgorithm::GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge)
-{
-    double edgeLength = edge.Unit() == DimensionUnit::PERCENT ? swiperLength * edge.Value() : edge.ConvertToPx();
-    if (!NearZero(edgeLength) && edgeLength > swiperLength - indicatorLength) {
-        edgeLength = swiperLength - indicatorLength;
-    }
-    if (edgeLength < 0.0) {
-        edgeLength = 0.0;
-    }
-    return edgeLength;
+    indicatorGeometryNode->SetMarginFrameOffset(currentOffset);
 }
 
 RefPtr<LayoutWrapper> SwiperLayoutAlgorithm::GetNodeLayoutWrapperByTag(
@@ -785,14 +737,18 @@ RefPtr<LayoutWrapper> SwiperLayoutAlgorithm::GetNodeLayoutWrapperByTag(
     int32_t lastChildIndex = totalChildCount - 1;
     if (swiperPattern->HasIndicatorNode() && !swiperPattern->HasLeftButtonNode() &&
         !swiperPattern->HasRightButtonNode()) {
-        nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(lastChildIndex);
-        return nodeWrapper;
+        if (itemPosition_.find(lastChildIndex) != itemPosition_.end()) {
+            nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(lastChildIndex);
+            return nodeWrapper;
+        }
     }
     int32_t endLoopChildIndex = lastChildIndex - SWIPER_HAS_CHILD;
     for (int32_t index = lastChildIndex; index > endLoopChildIndex && index >= 0; index--) {
-        nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (nodeWrapper && (nodeWrapper->GetHostTag() == tagName)) {
-            return nodeWrapper;
+        if (itemPosition_.find(lastChildIndex) != itemPosition_.end()) {
+            nodeWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (nodeWrapper && (nodeWrapper->GetHostTag() == tagName)) {
+                return nodeWrapper;
+            }
         }
     }
 
@@ -844,17 +800,43 @@ void SwiperLayoutAlgorithm::ArrowLayout(
         (!swiperLayoutProperty->GetIsSidebarMiddleValue(false) && swiperLayoutProperty->GetShowIndicatorValue(true));
     SizeF indicatorFrameSize;
     RectF indicatorFrameRect;
+    auto normalArrowMargin = 0.0f;
     if (isShowIndicatorArrow) {
-        auto hostNode = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(hostNode);
-        auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
-        CHECK_NULL_VOID(swiperPattern);
         auto indicatorWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::SWIPER_INDICATOR_ETS_TAG);
         CHECK_NULL_VOID(indicatorWrapper);
         auto indicatorGeometry = indicatorWrapper->GetGeometryNode();
         CHECK_NULL_VOID(indicatorGeometry);
         indicatorFrameSize = indicatorGeometry->GetFrameSize();
         indicatorFrameRect = indicatorGeometry->GetFrameRect();
+        if (indicatorType == SwiperIndicatorType::DOT) {
+            auto hostNode = layoutWrapper->GetHostNode();
+            CHECK_NULL_VOID(hostNode);
+            auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(swiperPattern);
+            auto itemCount = swiperPattern->TotalCount();
+            auto indicatorNode = indicatorWrapper->GetHostNode();
+            CHECK_NULL_VOID(indicatorNode);
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+            CHECK_NULL_VOID(theme);
+            auto indicatorPaintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+            CHECK_NULL_VOID(indicatorPaintProperty);
+            auto itemWidth =
+                static_cast<float>(indicatorPaintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx());
+            auto selectedItemWidth =
+                static_cast<float>(indicatorPaintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx());
+            auto indicatorPadding = static_cast<float>(theme->GetIndicatorDotPadding().ConvertToPx());
+            auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount + 1);
+            if (indicatorPaintProperty->GetIsCustomSizeValue(false)) {
+                allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
+            }
+            auto allPointSpaceSum =
+                static_cast<float>(theme->GetIndicatorDotItemSpace().ConvertToPx()) * (itemCount - 1);
+            auto indicatorWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
+            normalArrowMargin = ((axis == Axis::HORIZONTAL ? indicatorFrameSize.Width() : indicatorFrameSize.Height()) -
+                                    indicatorWidth) * 0.5f;
+        }
     }
     auto isLeftArrow = arrowWrapper->GetHostTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -867,11 +849,11 @@ void SwiperLayoutAlgorithm::ArrowLayout(
         auto indicatorPadding = indicatorType == SwiperIndicatorType::DIGIT
                                     ? swiperIndicatorTheme->GetIndicatorDigitPadding().ConvertToPx()
                                     : swiperIndicatorTheme->GetIndicatorDotPadding().ConvertToPx();
-        startPoint =
-            isLeftArrow
-                ? (indicatorFrameRect.Left() - arrowFrameSize.Width() -
-                      swiperIndicatorTheme->GetArrowScale().ConvertToPx() + indicatorPadding)
-                : (indicatorFrameRect.Right() + swiperIndicatorTheme->GetArrowScale().ConvertToPx() - indicatorPadding);
+        startPoint = isLeftArrow ? (indicatorFrameRect.Left() - arrowFrameSize.Width() -
+                                       swiperIndicatorTheme->GetArrowScale().ConvertToPx() + indicatorPadding +
+                                       normalArrowMargin)
+                                 : (indicatorFrameRect.Right() + swiperIndicatorTheme->GetArrowScale().ConvertToPx() -
+                                       indicatorPadding - normalArrowMargin);
         arrowOffset.SetX(startPoint);
         if (isLeftArrow && !NonNegative(arrowOffset.GetX() - padding.left.value_or(0.0f))) {
             arrowOffset.SetX(padding.left.value_or(0.0f));
@@ -895,10 +877,12 @@ void SwiperLayoutAlgorithm::ArrowLayout(
         auto indicatorPadding = indicatorType == SwiperIndicatorType::DIGIT
                                     ? swiperIndicatorTheme->GetIndicatorDigitPadding().ConvertToPx()
                                     : swiperIndicatorTheme->GetIndicatorDotPadding().ConvertToPx();
-        startPoint = isLeftArrow ? (indicatorFrameRect.Top() - arrowFrameSize.Height() - padding.top.value_or(0.0f) -
-                                       swiperIndicatorTheme->GetArrowScale().ConvertToPx() + indicatorPadding)
-                                 : (indicatorFrameRect.Bottom() + padding.bottom.value_or(0.0f) +
-                                       swiperIndicatorTheme->GetArrowScale().ConvertToPx() - indicatorPadding);
+        startPoint =
+            isLeftArrow
+                ? (indicatorFrameRect.Top() - arrowFrameSize.Height() - padding.top.value_or(0.0f) -
+                      swiperIndicatorTheme->GetArrowScale().ConvertToPx() + indicatorPadding + normalArrowMargin)
+                : (indicatorFrameRect.Bottom() + padding.bottom.value_or(0.0f) +
+                      swiperIndicatorTheme->GetArrowScale().ConvertToPx() - indicatorPadding - normalArrowMargin);
         arrowOffset.SetX(indicatorFrameRect.Left() + (indicatorFrameSize.Width() - arrowFrameSize.Width()) * 0.5f);
         arrowOffset.SetY(startPoint);
         if (isLeftArrow && !NonNegative(arrowOffset.GetY() - padding.top.value_or(0.0f))) {

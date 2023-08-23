@@ -50,11 +50,6 @@ public:
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
 
-    bool GetspringEffect()
-    {
-        return springEffect_;
-    }
-
     void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
     {
         titleBarMenuItems_ = menuItems;
@@ -107,6 +102,11 @@ public:
     {
         return landscapeMenuNodeId_.has_value();
     }
+    
+    void OnCoordScrollStart();
+    void OnCoordScrollUpdate(float offset);
+    void OnCoordScrollEnd();
+    bool GetDraggedDown();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -119,13 +119,8 @@ private:
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
-    void InitCoordinationEvent();
-    void OnCoordScrollStart();
-    void OnCoordScrollUpdate(float offset);
-    void OnCoordScrollEnd();
     RefPtr<FrameNode> FindScrollableChild();
     float offset_ = 0.0f;
-    bool springEffect_ = false;
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
     bool isOritationListenerRegisted_ = false;

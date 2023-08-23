@@ -84,7 +84,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     and also notify with this.aboutToChange();
   */
   private setValueInternal(newValue: T): boolean {
-    if (newValue == this.wrappedValue_) {
+    if (newValue === this.wrappedValue_) {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] newValue unchanged`);
       return false;
     }
@@ -126,7 +126,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
   }
 
   public set(newValue: T): void {
-    if (this.wrappedValue_ == newValue) {
+    if (this.wrappedValue_ === newValue) {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
       return;
     }

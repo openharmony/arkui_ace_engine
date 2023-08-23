@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 std::shared_mutex EngineHelper::mutex_;
 std::unordered_map<int32_t, WeakPtr<Framework::JsEngine>> EngineHelper::engineWeakMap_;
 
-ScopedDelegate::ScopedDelegate(Framework::FrontendDelegate* delegate, int32_t id)
+ScopedDelegate::ScopedDelegate(const RefPtr<Framework::FrontendDelegate>& delegate, int32_t id)
     : delegate_(delegate), scope_(new ContainerScope(id))
 {}
 

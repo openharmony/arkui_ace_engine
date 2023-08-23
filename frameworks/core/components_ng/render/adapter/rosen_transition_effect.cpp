@@ -440,7 +440,9 @@ void RosenTranslateTransitionEffect::OnUpdateTransitionContext(
     // translate dimension to pixel, and update active value
     float translateX = translateValue_.x.ConvertToPxWithSize(selfRect.Width());
     float translateY = translateValue_.y.ConvertToPxWithSize(selfRect.Height());
-    SetActiveValue({ translateX, translateY });
+    float translateZ = translateValue_.z.ConvertToPx();
+    std::get<InternalTranslateEffect>(effects_).SetActiveValue({ translateX, translateY });
+    std::get<InternalTranslateZEffect>(effects_).SetActiveValue(translateZ);
 }
 
 void RosenTranslateTransitionEffect::SetTranslateEffect(const TranslateOptions& option)
@@ -570,6 +572,10 @@ InternalRotationZEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0
 
 template<>
 InternalTranslateEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0f, 0.0f), activeValue_(0.0f, 0.0f)
+{}
+
+template<>
+InternalTranslateZEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0f), activeValue_(0.0f)
 {}
 
 template<>

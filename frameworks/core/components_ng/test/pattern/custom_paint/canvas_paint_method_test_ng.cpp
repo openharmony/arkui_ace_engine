@@ -357,7 +357,11 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg006, TestSize.Level1)
     EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
+#else
+    std::unique_ptr<Rosen::Typography> paragraph(std::move(mockParagraph));
+#endif
 
     /**
      * @tc.steps2: Test functions GetAlignOffset.
@@ -387,7 +391,11 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg007, TestSize.Level1)
     EXPECT_CALL(*mockParagraph, GetAlphabeticBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetIdeographicBaseline()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
     EXPECT_CALL(*mockParagraph, GetHeight()).WillRepeatedly(testing::Return(DEFAULT_DOUBLE10));
+#ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::Paragraph> paragraph(std::move(mockParagraph));
+#else
+    std::unique_ptr<Rosen::Typography> paragraph(std::move(mockParagraph));
+#endif
 
     /**
      * @tc.steps2: Test functions GetBaselineOffset.
@@ -478,12 +486,6 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg010, TestSize.Level1)
     paintMethod_->loadingSource_.SetSrc(loadingSrc);
     paintMethod_->ImageObjReady(imageObj);
     EXPECT_EQ(paintMethod_->currentSource_.GetSrc(), loadingSrc);
-
-    /**
-     * @tc.steps4: Call the function GetForegroundDrawFunction.
-     * @tc.expected: The return value is non-null.
-     */
-    EXPECT_NE(paintMethod_->GetForegroundDrawFunction(nullptr), nullptr);
 }
 
 #ifndef NEW_SKIA

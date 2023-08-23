@@ -37,7 +37,7 @@ void SubwindowManager::HidePopupNG(int32_t targetId, int32_t instanceId)
 
 void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) {}
 
-void SubwindowManager::HideMenuNG(int32_t targetId) {}
+void SubwindowManager::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) {}
 
 void SubwindowManager::HideMenuNG() {}
 

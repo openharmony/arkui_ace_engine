@@ -78,6 +78,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetIsSingleHandle(info_.isSingleHandle);
     selectOverlayContentModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow);
     selectOverlayContentModifier_->SetSecondHandleIsShow(info_.secondHandle.isShow);
+    selectOverlayContentModifier_->SetIsHandleLineShow(info_.isHandleLineShow);
+    selectOverlayContentModifier_->SetIsHiddenHandle(isHiddenHandle_);
 
     selectOverlayContentModifier_->SetViewPort(viewPort);
     selectOverlayContentModifier_->SetFirstHandle(info_.firstHandle.paintRect - offset);

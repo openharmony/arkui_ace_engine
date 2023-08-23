@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 
+#include "core/components/common/layout/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -124,6 +125,14 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto layoutAlgorithm = DynamicCast<ScrollBarLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
+    if (displayMode_ != DisplayMode::OFF) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN_NOLOG(host, false);
+        auto layoutProperty = host->GetLayoutProperty<ScrollBarLayoutProperty>();
+        CHECK_NULL_RETURN_NOLOG(layoutProperty, false);
+        auto visible = Positive(controlDistance_) ? VisibleType::VISIBLE : VisibleType::INVISIBLE;
+        layoutProperty->UpdateVisibility(visible);
+    }
     return false;
 }
 
@@ -285,6 +294,9 @@ void ScrollBarPattern::HandleDragStart(const GestureEvent& info)
         frictionController_->Stop();
     }
     if (scrollPositionCallback_) {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->NotifyScrollStart();
+        }
         scrollPositionCallback_(0, SCROLL_FROM_START);
     }
 }
@@ -340,6 +352,9 @@ void ScrollBarPattern::ProcessFrictionMotion(double value)
 void ScrollBarPattern::ProcessFrictionMotionStop()
 {
     if (scrollEndCallback_) {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->NotifyScrollStop();
+        }
         scrollEndCallback_();
     }
 }

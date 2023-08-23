@@ -82,6 +82,11 @@ using RSScalar = float;
 using RSPathFillType = Testing::TestingPathFillType;
 using RSParagraph = Testing::TestingTypography;
 using RSTypographyProperties = Testing::TestingTypographyProperties;
+#ifdef USE_GRAPHIC_TEXT_GINE
+using RSTextRectHeightStyle = Testing::TestingTypographyProperties::TextRectHeightStyle;
+using RSTextRectWidthStyle = Testing::TestingTypographyProperties::TextRectWidthStyle;
+using RSTextRect = Testing::TestingTypographyProperties::TextRect;
+#endif
 using RSParagraphStyle = Testing::TestingTypographyStyle;
 using RSParagraphBuilder = Testing::TestingTypographyCreate;
 using RSFontCollection = Testing::TestingFontCollection;

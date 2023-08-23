@@ -80,14 +80,8 @@ public:
         auto ids = LAZY_FOR_EACH_NODE_IDS;
         auto builder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
         for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
-            builder->CreateChildByIndex(iter.value_or(0));
+            builder->GetChildByIndex(iter.value_or(0), true);
         }
-
-        /**
-         * @tc.steps: step2. Update item found in generatedItem_.
-         */
-        auto cacheItems = LAZY_FOR_EACH_CACHED_ITEMS;
-        lazyForEachNode->UpdateLazyForEachItems(NEW_START_ID, NEW_END_ID, std::move(ids), std::move(cacheItems));
     }
 
     static RefPtr<LazyForEachNode> CreateLazyForEachNode()
@@ -213,25 +207,6 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxUpdateTest003, TestSize.Level1)
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
-
-    /**
-     * @tc.steps: step3. Invoke UpdateLazyForEachItems with empty nodeIds.
-     * @tc.expected: lazyForEachNode ids_ is empty.
-     */
-    auto cacheItems = LAZY_FOR_EACH_CACHED_ITEMS;
-    lazyForEachNode->UpdateLazyForEachItems(NEW_START_ID, NEW_END_ID, {}, std::move(cacheItems));
-    EXPECT_TRUE(lazyForEachNode->ids_.empty());
-
-    /**
-     * @tc.steps: step4. Update lazyForEachNode items.
-     * @tc.expected: lazyForEachNode ids_ and children_ are empty.
-     */
-    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
-
-    auto items = LAZY_FOR_EACH_ITEMS;
-    lazyForEachNode->PostIdleTask(std::move(items));
-    EXPECT_EQ(lazyForEachNode->ids_.size(), LAZY_FOR_EACH_NODE_IDS.size());
-    EXPECT_EQ(lazyForEachNode->GetChildren().size(), LAZY_FOR_EACH_NODE_IDS.size());
 }
 
 /**

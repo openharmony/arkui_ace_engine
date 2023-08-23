@@ -28,7 +28,7 @@ void BilateralSpringNode::NotifyNext(double endValue, double initVelocity)
         LOGE("Notify next failed. adapter is null.");
         return;
     }
-    if (this != AceType::RawPtr(adapter_->GetControlNode()) || adapter_->GetSize() < 2) {
+    if (Claim(this) != adapter_->GetControlNode() || adapter_->GetSize() < 2) {
         return;
     }
 

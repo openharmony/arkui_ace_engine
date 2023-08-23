@@ -16,6 +16,8 @@
 #include "core/image/flutter_image_cache.h"
 
 #include "include/core/SkGraphics.h"
+
+#include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 
@@ -30,16 +32,7 @@ RefPtr<ImageCache> ImageCache::Create()
     return MakeRefPtr<FlutterImageCache>();
 }
 
-void FlutterImageCache::Clear()
-{
-    std::scoped_lock clearLock(imageCacheMutex_, dataCacheListMutex_, imageDataCacheMutex_);
-    cacheList_.clear();
-    imageCache_.clear();
-    dataCacheList_.clear();
-    imageDataCache_.clear();
-}
-
-RefPtr<CachedImageData> FlutterImageCache::GetDataFromCacheFile(const std::string& filePath)
+RefPtr<NG::ImageData> FlutterImageCache::GetDataFromCacheFile(const std::string& filePath)
 {
     std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
     if (!GetFromCacheFileInner(filePath)) {
@@ -49,7 +42,7 @@ RefPtr<CachedImageData> FlutterImageCache::GetDataFromCacheFile(const std::strin
     auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
 #ifndef USE_ROSEN_DRAWING
     auto data = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
-    return data ? AceType::MakeRefPtr<SkiaCachedImageData>(data) : nullptr;
+    return data ? AceType::MakeRefPtr<NG::SkiaImageData>(data) : nullptr;
 #else
     auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
     return rsData ? AceType::MakeRefPtr<RosenCachedImageData>(rsData) : nullptr;

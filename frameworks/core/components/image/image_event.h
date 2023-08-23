@@ -97,8 +97,8 @@ class ACE_EXPORT LoadImageFailEvent : public BaseEventInfo {
 public:
     LoadImageFailEvent(double componentWidth, double componentHeight, std::string errorMessage)
         : BaseEventInfo("LoadImageFailEvent"), componentWidth_(componentWidth), componentHeight_(componentHeight),
-        errorMessage_(errorMessage) {}
-    ~LoadImageFailEvent() = default;
+        errorMessage_(std::move(errorMessage)) {}
+    ~LoadImageFailEvent() override = default;
 
     double GetComponentWidth() const
     {

@@ -28,34 +28,34 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT CalendarDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const CalendarSettingData& settingData,
-        std::map<std::string, NG::DialogEvent> dialogEvent,
-        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+        const std::map<std::string, NG::DialogEvent>& dialogEvent,
+        const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
 
 private:
     static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode);
     static RefPtr<FrameNode> CreateTitleImageNode(
         const RefPtr<FrameNode>& calendarNode, const InternalResource::ResourceId& resourceId);
     static RefPtr<FrameNode> CreateCalendarNode(const RefPtr<FrameNode>& calendarDialogNode,
-        const CalendarSettingData& settingData, std::map<std::string, NG::DialogEvent> dialogEvent);
+        const CalendarSettingData& settingData, const std::map<std::string, NG::DialogEvent>& dialogEvent);
     static RefPtr<FrameNode> CreateCalendarSwiperNode();
     static RefPtr<FrameNode> CreateCalendarMonthNode(int32_t calendarNodeId,
-        const CalendarSettingData& settingData, DialogEvent& changeEvent);
+        const CalendarSettingData& settingData, const DialogEvent& changeEvent);
     static void UpdateCalendarMonthData(const RefPtr<FrameNode>& calendarDialogNode,
         const RefPtr<FrameNode>& calendarNode, const CalendarMonth& currentMonth);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(bool isConfirm);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& calendarNode, DialogEvent& acceptEvent);
-    static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
+    static RefPtr<FrameNode> CreateCancelNode(const NG::DialogGestureEvent& cancelEvent);
     static RefPtr<FrameNode> CreateDividerNode();
     static RefPtr<FrameNode> CreateOptionsNode(const RefPtr<FrameNode>& dialogNode, const RefPtr<FrameNode>& dateNode,
-        std::map<std::string, NG::DialogEvent> dialogEvent,
-        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+        const std::map<std::string, NG::DialogEvent>& dialogEvent,
+        const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static void SetCalendarPaintProperties(const CalendarSettingData& settingData);
     static void InitOnRequestDataEvent(
         const RefPtr<FrameNode>& calendarDialogNode, const RefPtr<FrameNode>& calendarNode);
-    static void OnSelectedChangeEvent(
-        int32_t calendarNodeId, const std::string& callbackInfo, const DialogEvent&& onChange);
+    static void OnSelectedChangeEvent(int32_t calendarNodeId, const std::string& callbackInfo,
+        const DialogEvent& onChange, const CalendarSettingData& settingData);
 };
 } // namespace OHOS::Ace::NG
 

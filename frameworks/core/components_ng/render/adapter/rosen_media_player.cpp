@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "base/image/file_uri_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -32,22 +33,10 @@ constexpr float SPEED_1_00_X = 1.00;
 constexpr float SPEED_1_25_X = 1.25;
 constexpr float SPEED_1_75_X = 1.75;
 constexpr float SPEED_2_00_X = 2.00;
-constexpr int32_t FILE_PREFIX_LENGTH = 7;
 constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
 const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://RAWFILE/");
 const std::regex MEDIA_RES_ID_REGEX(R"(^resource://\w+/([0-9]+)\.\w+$)", std::regex::icase);
 const std::regex MEDIA_APP_RES_ID_REGEX(R"(^resource://.*/([0-9]+)\.\w+$)", std::regex::icase);
-
-std::string GetAssetAbsolutePath(const std::string& fileName)
-{
-    const auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, fileName);
-    auto assetManager = pipelineContext->GetAssetManager();
-    CHECK_NULL_RETURN(assetManager, fileName);
-    std::string filePath = assetManager->GetAssetPath(fileName, true);
-    std::string absolutePath = filePath + fileName;
-    return absolutePath;
-}
 
 OHOS::Media::PlayerSeekMode ConvertToMediaSeekMode(SeekMode seekMode)
 {
@@ -266,7 +255,7 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& 
         fd = dataProvider->GetDataProviderFile(filePath, "r");
         useFd = true;
     } else if (StringUtils::StartWith(filePath, "file://")) {
-        filePath = GetAssetAbsolutePath(filePath.substr(FILE_PREFIX_LENGTH));
+        filePath = FileUriHelper::GetRealPath(filePath);
         fd = open(filePath.c_str(), O_RDONLY);
         useFd = true;
     } else if (StringUtils::StartWith(filePath, "resource:///")) {
@@ -293,17 +282,19 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& 
 
 void RosenMediaPlayer::SetRenderSurface(const RefPtr<RenderSurface>& renderSurface)
 {
-    renderSurface_ = WeakClaim(RawPtr(DynamicCast<RosenRenderSurface>(renderSurface)));
+    renderSurface_ = DynamicCast<RosenRenderSurface>(renderSurface);
 }
 
 void RosenMediaPlayer::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
-    StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent)
+    StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
+    CommonEvent&& startRenderFrameEvent)
 {
     mediaPlayerCallback_ = std::make_shared<MediaPlayerCallback>(ContainerScope::CurrentId());
     mediaPlayerCallback_->SetPositionUpdatedEvent(std::move(positionUpdatedEvent));
     mediaPlayerCallback_->SetStateChangedEvent(std::move(stateChangedEvent));
     mediaPlayerCallback_->SetErrorEvent(std::move(errorEvent));
     mediaPlayerCallback_->SetResolutionChangeEvent(std::move(resolutionChangeEvent));
+    mediaPlayerCallback_->SetStartRenderFrameEvent(std::move(startRenderFrameEvent));
     mediaPlayer_->SetPlayerCallback(mediaPlayerCallback_);
 }
 

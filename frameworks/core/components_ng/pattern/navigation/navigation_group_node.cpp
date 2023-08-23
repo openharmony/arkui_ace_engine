@@ -60,8 +60,6 @@ constexpr int32_t OPACITY_BACKBUTTON_IN_DELAY = 150;
 constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
 constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 400;
-const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
-const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 const RefPtr<InterpolatingSpring> interpolatingSpringCurve =
     AceType::MakeRefPtr<InterpolatingSpring>(18.0f, 1.0f, 324.0f, 36.0f);
 } // namespace
@@ -115,7 +113,6 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         CHECK_NULL_VOID(navDestinationPattern);
         navDestinationPattern->SetName(childNode.first);
         navDestinationPattern->SetNavDestinationNode(uiNode);
-        SetBackButtonVisible(navDestination);
         SetBackButtonEvent(navDestination);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
@@ -161,7 +158,9 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             if (shallowBuilder) {
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
             }
-            navDestination->GetContentNode()->Clean();
+            if (navDestination->GetContentNode()) {
+                navDestination->GetContentNode()->Clean();
+            }
             navigationContentNode->RemoveChild(navDestination, true);
             hasChanged = true;
         } else {
@@ -297,11 +296,7 @@ void NavigationGroupNode::SetBackButtonEvent(
         }; // backButton event
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
-    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(onBackButtonEvent));
-    if (!backButtonEventHub->GetGestureEventHub()) {
-        return;
-    }
-    backButtonEventHub->GetOrCreateGestureEventHub()->AddClickEvent(clickEvent);
+    backButtonEventHub->GetOrCreateGestureEventHub()->SetUserOnClick(onBackButtonEvent);
 }
 
 RefPtr<FrameNode> NavigationGroupNode::GetNavDestinationNodeToHandleBack()
@@ -375,7 +370,9 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
                     if (shallowBuilder) {
                         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                     }
-                    node->GetContentNode()->Clean();
+                    if (node->GetContentNode()) {
+                        node->GetContentNode()->Clean();
+                    }
                     auto parent = node->GetParent();
                     CHECK_NULL_VOID(parent);
                     parent->RemoveChild(node);

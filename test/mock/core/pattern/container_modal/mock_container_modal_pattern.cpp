@@ -63,4 +63,6 @@ void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaxi
 {
     hideSplitButton_ = hideSplit;
 }
+
+void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled) {}
 } // namespace OHOS::Ace::NG

@@ -47,11 +47,25 @@ public:
 
     bool Play();
 
-    void Stop();
-
-    bool IsStopped()
+    RefPtr<Animator> GetTossAnimation()
     {
-        return stopped_;
+        return springController_;
+    }
+
+    RefPtr<NodeAnimatablePropertyFloat> GetTossNodeAnimation()
+    {
+        return property_;
+    }
+
+    void StartSpringMotion();
+
+    RefPtr<Curve> UpdatePlayAnimationValue();
+
+    void StopTossAnimation();
+
+    double GetTossEndPosition()
+    {
+        return end_;
     }
 
 private:
@@ -62,11 +76,16 @@ private:
     double timeStart_ = 0.0;
     double timeEnd_ = 0.0;
     double speed_ = 0.0;
-    bool stopped_ = false;
-
+    int32_t showCount_ = 0;
+    double end_ = 0.0;
     RefPtr<PickerAnimation> toss_;
     WeakPtr<TimePickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;
+
+    RefPtr<NodeAnimatablePropertyFloat> property_;
+    RefPtr<SpringMotion> springMotion_;
+    RefPtr<SpringProperty> spring_;
+    RefPtr<Animator> springController_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerTossAnimationController);
 };

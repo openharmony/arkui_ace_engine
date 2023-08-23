@@ -25,6 +25,7 @@
 #include "base/i18n/localization.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/text/text_theme.h"
@@ -37,15 +38,17 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#ifndef USE_GRAPHIC_TEXT_GINE
 #include "core/components_ng/render/font_collection.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#else
 #include "core/common/font_manager.h"
+#include "core/components_ng/render/adapter/txt_font_collection.h"
+#endif
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
-constexpr float ERROR_TEXT_UNDERLINE_MARGIN = 27.0f;
-constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
 constexpr float INLINE_SAFE_BOUNDARY_VALUE = 2.0f;
 } // namespace
 
@@ -75,10 +78,10 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetHeight(std::min(layoutConstraint->maxSize.Width(),
                     contentWidth + pattern->GetHorizontalPaddingSum()));
             } else if (!calcLayoutConstraint) {
-            // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
+                // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
                 frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
             } else {
-            // If maxWidth is not set and calcLayoutConstraint is set, set minWidth to layoutConstraint
+                // If maxWidth is not set and calcLayoutConstraint is set, set minWidth to layoutConstraint
                 frameSize.SetWidth(layoutConstraint->minSize.Width());
             }
         }
@@ -92,8 +95,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetHeight(std::min(layoutConstraint->maxSize.Height(),
                     contentHeight + pattern->GetVerticalPaddingSum()));
             } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
-            // calcLayoutConstraint initialized once when setting width, set minHeight=0,
-            // so add "minHeight=0" to the constraint.
+                // calcLayoutConstraint initialized once when setting width, set minHeight=0,
+                // so add "minHeight=0" to the constraint.
                 frameSize.SetHeight(
                     std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
             } else {
@@ -180,7 +183,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
-    auto contentModifier = pattern->GetContentModifier();
+
+    // Construct a textstyle.
     TextStyle textStyle;
     std::string textContent;
     bool showPlaceHolder = false;
@@ -190,10 +194,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     idealSize.UpdateSizeWhenSmaller(contentConstraint.maxSize);
     idealWidth = idealSize.Width();
     idealHeight = idealSize.Height();
-    auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
-    auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, std::nullopt);
     auto isInlineStyle = pattern->IsNormalInlineState();
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
@@ -207,6 +207,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
     }
+
+    // use for modifier.
+    auto contentModifier = pattern->GetContentModifier();
     if (contentModifier) {
         SetPropertyToModifier(textStyle, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
@@ -214,6 +217,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
     auto disableTextAlign = !pattern->IsTextArea() && !showPlaceHolder && !isInlineStyle;
+    // Create paragraph.
     if (pattern->IsDragging() && !showPlaceHolder) {
         TextStyle dragTextStyle = textStyle;
         Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
@@ -225,39 +229,56 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         CreateParagraph(textStyle, textContent, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder,
             pattern->GetNakedCharPosition(), disableTextAlign);
     }
+
+    // paragraph  Layout.
     float imageSize = 0.0f;
     auto showPasswordIcon = textFieldLayoutProperty->GetShowPasswordIcon().value_or(true);
     imageSize = showPasswordIcon ? pattern->GetIconSize() : 0.0f;
-    auto imageHotZoneWidth = showPasswordIcon ? imageSize + pattern->GetIconRightOffset() : 0.0;
+    auto imageHotZoneWidth = showPasswordIcon ? imageSize + pattern->GetIconRightOffset() : 0.0f;
     auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
     CHECK_NULL_RETURN(scrollBarTheme, std::nullopt);
-    if (textStyle.GetMaxLines() == 1 && !showPlaceHolder && !isInlineStyle) {
+    const auto& layoutConstraint = textFieldLayoutProperty->GetLayoutConstraint();
+    if (isInlineStyle) {
+        // for InlineStyle, max width is content width with safe boundary.
+        float inlineBoxWidth = 0.0f;
+        auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2 + INLINE_SAFE_BOUNDARY_VALUE;
+        if (pattern->IsSelected()) {
+            inlineBoxWidth = pattern->GetPreviewWidth() < layoutConstraint->maxSize.Width()
+                                 ? (pattern->GetPreviewWidth() + safeBoundary)
+                                 : (layoutConstraint->maxSize.Width() - safeBoundary);
+        } else {
+            inlineBoxWidth = idealWidth;
+        }
+        paragraph_->Layout(pattern->GetPreviewWidth() == 0 ? idealWidth : inlineBoxWidth);
+    } else if (showPlaceHolder) {
+        // for placeholder.
+        if (isPasswordType) {
+            paragraph_->Layout(idealWidth - imageHotZoneWidth);
+        } else {
+            paragraph_->Layout(idealWidth);
+        }
+    } else if (textStyle.GetMaxLines() == 1) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
-        // for text area or placeholder, max width is content width without password icon
-        if (isInlineStyle) {
-            paragraph_->Layout(pattern->GetPreviewWidth() == 0 ? idealWidth : pattern->GetPreviewWidth() +
-                textFieldTheme->GetInlineBorderWidth().ConvertToPx() +
-                textFieldTheme->GetInlineBorderWidth().ConvertToPx() + INLINE_SAFE_BOUNDARY_VALUE);
-        } else if (showPlaceHolder && isPasswordType) {
-            paragraph_->Layout(idealWidth - imageHotZoneWidth);
-        } else {
-            paragraph_->Layout(
-                idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
-        }
+        // for text area, max width is content width without scroll bar.
+        paragraph_->Layout(
+            idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
     }
-    if (layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength()) {
+
+    // counterParagraph Layout.
+    if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength()) {
         auto textLength = showPlaceHolder ? 0 : StringUtils::ToWstring(textContent).length();
-        auto maxLength = layoutProperty->GetMaxLength().value();
+        auto maxLength = textFieldLayoutProperty->GetMaxLength().value();
         CreateCounterParagraph(textLength, maxLength, textFieldTheme);
         if (counterParagraph_) {
             counterParagraph_->Layout(
                 idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
         }
     }
-    if (layoutProperty->GetShowErrorTextValue(false)) {
-        CreateErrorParagraph(layoutProperty->GetErrorTextValue(""), textFieldTheme);
+    // errorParagraph  Layout.
+    if (textFieldLayoutProperty->GetShowErrorTextValue(false)) {
+        CreateErrorParagraph(textFieldLayoutProperty->GetErrorTextValue(""), textFieldTheme);
         if (errorParagraph_) {
             errorParagraph_->Layout(std::numeric_limits<double>::infinity());
         }
@@ -274,27 +295,41 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
-    if (pattern->GetTextInputFlag() && !pattern->IsTextArea()) {
-        pattern->SetSingleLineHeight(preferredHeight);
+    if (isInlineStyle && pattern->IsSelected() && paragraph_->GetLineCount() != 0) {
+        pattern->SetSingleLineHeight(preferredHeight / paragraph_->GetLineCount());
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
+    paragraphWidth_ = paragraph_->GetLongestLine();
+#else
+    paragraphWidth_ = paragraph_->GetActualWidth();
+#endif
+    // textarea size.
     if (pattern->IsTextArea()) {
         auto paragraphHeight =
             (textContent.empty() || !showPlaceHolder) ? preferredHeight : static_cast<float>(paragraph_->GetHeight());
         auto useHeight =
             static_cast<float>(paragraphHeight + (counterParagraph_ ? counterParagraph_->GetHeight() : 0.0f));
-        if (isInlineStyle && pattern->GetTextInputFlag()) {
+        if (isInlineStyle && pattern->IsSelected()) {
             idealHeight = pattern->GetSingleLineHeight() *
-                layoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+                          textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+#ifndef USE_GRAPHIC_TEXT_GINE
             idealWidth = paragraph_->GetLongestLine();
+#else
+            idealWidth = paragraph_->GetActualWidth();
+#endif
         }
-        textRect_.SetSize(SizeF(
-            idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
-            paragraph_->GetHeight()));
+        textRect_.SetSize(
+            SizeF(idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
+                paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     // check password image size.
     if (!showPasswordIcon || !isPasswordType) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
+#else
+        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetActualWidth()), preferredHeight));
+#endif
         imageRect_.Reset();
         if (textFieldLayoutProperty->GetWidthAutoValue(false)) {
             if (LessOrEqual(contentConstraint.minSize.Width(), 0.0f)) {
@@ -309,13 +344,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         return SizeF(idealWidth, std::min(preferredHeight, idealHeight));
     }
 
-    if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
-        // for textArea, need to delete imageWidth and remeasure.
-        paragraph_->Layout(idealWidth - imageSize);
-        textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
-        imageRect_.SetSize(SizeF(0.0f, 0.0f));
-        return SizeF(idealWidth, imageSize);
-    }
+    // password type size.
     imageRect_.SetSize(SizeF(imageSize, imageSize));
     if (pattern->GetTextObscured() && pattern->GetHidePasswordIconCtx()) {
         pattern->GetHidePasswordIconCtx()->MakeCanvasImage(imageRect_.GetSize(), true, ImageFit::NONE);
@@ -323,7 +352,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         pattern->GetShowPasswordIconCtx()->MakeCanvasImage(imageRect_.GetSize(), true, ImageFit::NONE);
     }
     preferredHeight = std::min(static_cast<float>(paragraph_->GetHeight()), idealHeight);
+#ifndef USE_GRAPHIC_TEXT_GINE
     textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), static_cast<float>(preferredHeight)));
+#else
+    textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetActualWidth()), static_cast<float>(preferredHeight)));
+#endif
     return SizeF(idealWidth - imageHotZoneWidth, std::min(idealHeight, preferredHeight));
 }
 
@@ -368,23 +401,22 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
-    auto isHandleMoving = pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE;
-    auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::DEL ||
+    auto isUsingMouse = pattern->GetMouseStatus() == MouseStatus::MOVE ||
+                        pattern->GetMouseStatus() == MouseStatus::RELEASED || pattern->GetIsMousePressed();
+    auto needForceCheck = ((pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
+                               pattern->GetCaretUpdateType() == CaretUpdateType::DEL) &&
+                              (paragraphWidth_ <= contentSize.Width())) ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED ||
-                          layoutProperty->GetTextAlignChangedValue(false) ||
-                          pattern->GetTextEditingValue().text.empty();
-    auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
-                              pattern->GetIsMousePressed();
+                          pattern->GetCaretUpdateType() == CaretUpdateType::VISIBLE_PASSWORD_ICON ||
+                          layoutProperty->GetTextAlignChangedValue(false);
+    auto needToKeepTextRect = isUsingMouse || !needForceCheck;
     if (needToKeepTextRect) {
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
     }
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!pattern->IsTextArea() && !needToKeepTextRect && !(paintProperty->GetInputStyleValue(InputStyle::DEFAULT) ==
-        InputStyle::INLINE && layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) ==
-        TextInputType::UNSPECIFIED)) {
+    if (!pattern->IsTextArea() && !needToKeepTextRect &&
+        (!pattern->IsNormalInlineState() || layoutProperty->GetValueValue("").empty())) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft() + pattern->GetBorderLeft();
@@ -413,19 +445,6 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         imageRect_.SetOffset(imageOffset);
     }
 
-    auto frameBottom = pattern->GetMarginBottom();
-    MarginProperty errorMargin;
-    if (layoutProperty->GetShowUnderlineValue(false) && layoutProperty->GetShowErrorTextValue(false) &&
-        (frameBottom < ERROR_TEXT_UNDERLINE_MARGIN)  &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
-        errorMargin.bottom = CalcLength(ERROR_TEXT_UNDERLINE_MARGIN);
-        frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
-    }
-    if (pattern->NeedShowPasswordIcon() && layoutProperty->GetShowErrorTextValue(false) &&
-        (frameBottom < ERROR_TEXT_CAPSULE_MARGIN)) {
-        errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
-        frameNode->GetLayoutProperty()->UpdateMargin(errorMargin);
-    }
     UpdateUnitLayout(layoutWrapper);
 }
 
@@ -567,10 +586,19 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     bool needObscureText, int32_t nakedCharPosition, bool disableTextAlign)
 {
     RSParagraphStyle paraStyle;
+#ifndef USE_GRAPHIC_TEXT_GINE
     paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
+#else
+    paraStyle.textDirection = ToRSTextDirection(GetTextDirection(content));
+#endif
     if (!disableTextAlign) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         paraStyle.textAlign_ = ToRSTextAlign(textStyle.GetTextAlign());
+#else
+        paraStyle.textAlign = ToRSTextAlign(textStyle.GetTextAlign());
+#endif
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     paraStyle.maxLines_ = textStyle.GetMaxLines();
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
@@ -579,17 +607,42 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     if (!fontFamilies.empty()) {
         paraStyle.fontFamily_ = fontFamilies.at(0);
     }
+#else
+    paraStyle.maxLines = textStyle.GetMaxLines();
+    paraStyle.locale = Localization::GetInstance()->GetFontLocale();
+    paraStyle.wordBreakType = ToRSWordBreakType(textStyle.GetWordBreak());
+    paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
+    paraStyle.fontFamily = textStyle.GetFontFamilies().at(0);
+#endif
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
+#else
+        paraStyle.ellipsis = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
+#endif
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+#else
+    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
+#endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition, needObscureText);
     builder->AddText(displayText);
-    builder->Pop();
+#else
+    auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition, needObscureText);
+    builder->AppendText(displayText);
+#endif
 
+#ifndef USE_GRAPHIC_TEXT_GINE
+    builder->Pop();
     auto paragraph = builder->Build();
+#else
+    builder->PopStyle();
+    auto paragraph = builder->CreateTypography();
+#endif
     paragraph_.reset(paragraph.release());
 }
 
@@ -598,10 +651,19 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
 {
     auto textStyle = textStyles.begin();
     RSParagraphStyle paraStyle;
+#ifndef USE_GRAPHIC_TEXT_GINE
     paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
+#else
+    paraStyle.textDirection = ToRSTextDirection(GetTextDirection(content));
+#endif
     if (!disableTextAlign) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         paraStyle.textAlign_ = ToRSTextAlign(textStyle->GetTextAlign());
+#else
+        paraStyle.textAlign = ToRSTextAlign(textStyle->GetTextAlign());
+#endif
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     paraStyle.maxLines_ = textStyle->GetMaxLines();
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle->GetWordBreak());
@@ -610,28 +672,58 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
     if (!fontFamilies.empty()) {
         paraStyle.fontFamily_ = fontFamilies.at(0);
     }
+#else
+    paraStyle.maxLines = textStyle->GetMaxLines();
+    paraStyle.locale = Localization::GetInstance()->GetFontLocale();
+    paraStyle.wordBreakType = ToRSWordBreakType(textStyle->GetWordBreak());
+    paraStyle.fontSize = textStyle->GetFontSize().ConvertToPx();
+    paraStyle.fontFamily = textStyle->GetFontFamilies().at(0);
+#endif
     if (textStyle->GetTextOverflow() == TextOverflow::ELLIPSIS) {
+#ifndef USE_GRAPHIC_TEXT_GINE
         paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
+#else
+        paraStyle.ellipsis = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
+#endif
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+#else
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
+#endif
     for (size_t i = 0; i < contents.size(); i++) {
         std::string splitStr = contents[i];
         if (splitStr.empty()) {
             continue;
         }
-        auto &style = textStyles[i];
+        auto& style = textStyles[i];
         builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), style));
         StringUtils::TransformStrCase(splitStr, static_cast<int32_t>(style.GetTextCase()));
         if (needObscureText) {
+#ifndef USE_GRAPHIC_TEXT_GINE
             builder->AddText(
                 TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(splitStr).length())));
+#else
+            builder->AppendText(
+                TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(splitStr).length())));
+#endif
         } else {
+#ifndef USE_GRAPHIC_TEXT_GINE
             builder->AddText(StringUtils::Str8ToStr16(splitStr));
+#else
+            builder->AppendText(StringUtils::Str8ToStr16(splitStr));
+#endif
         }
     }
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder->Pop();
 
     auto paragraph = builder->Build();
+#else
+    builder->PopStyle();
+    auto paragraph = builder->CreateTypography();
+#endif
     paragraph_.reset(paragraph.release());
 }
 
@@ -642,16 +734,33 @@ void TextFieldLayoutAlgorithm::CreateCounterParagraph(
     TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
     std::string counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     RSParagraphStyle paraStyle;
+#ifndef USE_GRAPHIC_TEXT_GINE
     paraStyle.fontSize_ = countTextStyle.GetFontSize().ConvertToPx();
     paraStyle.textAlign_ = ToRSTextAlign(TextAlign::END);
     paraStyle.maxLines_ = COUNTER_TEXT_MAXLINE;
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+#else
+    paraStyle.fontSize = countTextStyle.GetFontSize().ConvertToPx();
+    paraStyle.textAlign = ToRSTextAlign(TextAlign::END);
+    paraStyle.maxLines = COUNTER_TEXT_MAXLINE;
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
+#endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), countTextStyle));
     StringUtils::TransformStrCase(counterText, static_cast<int32_t>(countTextStyle.GetTextCase()));
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(counterText));
     builder->Pop();
+#else
+    builder->AppendText(StringUtils::Str8ToStr16(counterText));
+    builder->PopStyle();
+#endif
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto paragraph = builder->Build();
+#else
+    auto paragraph = builder->CreateTypography();
+#endif
     counterParagraph_.reset(paragraph.release());
 }
 
@@ -661,15 +770,28 @@ void TextFieldLayoutAlgorithm::CreateErrorParagraph(const std::string& content, 
     TextStyle errorTextStyle = theme->GetErrorTextStyle();
     std::string counterText = content;
     RSParagraphStyle paraStyle;
+#ifndef USE_GRAPHIC_TEXT_GINE
     paraStyle.fontSize_ = errorTextStyle.GetFontSize().ConvertToPx();
     paraStyle.textAlign_ = ToRSTextAlign(TextAlign::START);
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
+#else
+    paraStyle.fontSize = errorTextStyle.GetFontSize().ConvertToPx();
+    paraStyle.textAlign = ToRSTextAlign(TextAlign::START);
+    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
+#endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), errorTextStyle));
     StringUtils::TransformStrCase(counterText, static_cast<int32_t>(errorTextStyle.GetTextCase()));
+#ifndef USE_GRAPHIC_TEXT_GINE
     builder->AddText(StringUtils::Str8ToStr16(counterText));
     builder->Pop();
 
     auto paragraph = builder->Build();
+#else
+    builder->AppendText(StringUtils::Str8ToStr16(counterText));
+    builder->PopStyle();
+    auto paragraph = builder->CreateTypography();
+#endif
     errorParagraph_.reset(paragraph.release());
 }
 

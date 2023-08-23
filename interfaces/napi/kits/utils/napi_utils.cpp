@@ -213,6 +213,23 @@ bool ParseResourceParam(napi_env env, napi_value value, int32_t& id, int32_t& ty
     return true;
 }
 
+std::string DimensionToString(Dimension dimension)
+{
+    static const int32_t unitsNum = 6;
+    static const int32_t percentIndex = 3;
+    static const int32_t percentUnit = 100;
+    static std::array<std::string, unitsNum> units = { "px", "vp", "fp", "%", "lpx", "auto" };
+    auto unit = dimension.Unit();
+    auto value = dimension.Value();
+    if (unit == DimensionUnit::NONE) {
+        return StringUtils::DoubleToString(value).append("none");
+    }
+    if (units[static_cast<int>(unit)] == units[percentIndex]) {
+        return StringUtils::DoubleToString(value * percentUnit).append(units[static_cast<int>(unit)]);
+    }
+    return StringUtils::DoubleToString(value).append(units[static_cast<int>(unit)]);
+}
+
 bool ParseString(int32_t resId, int32_t type, std::vector<std::string>& params, std::string& result)
 {
     auto themeConstants = GetThemeConstants();
@@ -235,6 +252,8 @@ bool ParseString(int32_t resId, int32_t type, std::vector<std::string>& params, 
     } else if (type == static_cast<int>(ResourceType::RAWFILE)) {
         auto fileName = params[0];
         result = themeConstants->GetRawfile(fileName);
+    } else if (type == static_cast<int>(ResourceType::FLOAT)) {
+        result = DimensionToString(themeConstants->GetDimension(resId));
     } else {
         auto originStr = themeConstants->GetString(resId);
         ReplaceHolder(originStr, params, 0);

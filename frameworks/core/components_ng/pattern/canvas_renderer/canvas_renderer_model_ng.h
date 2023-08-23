@@ -37,9 +37,9 @@ public:
     void SetStrokePattern(const BaseInfo& baseInfo, const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetStrokeColor(const BaseInfo& baseInfo, const Color& color, bool colorFlag) override;
     void DrawImage(const BaseInfo& baseInfo, const ImageInfo& imageInfo) override;
-    void PutImageData(const BaseInfo& baseInfo, const ImageData& imageData) override;
+    void PutImageData(const BaseInfo& baseInfo, const Ace::ImageData& imageData) override;
     void CloseImageBitmap(const BaseInfo& baseInfo, const std::string& src) override;
-    std::unique_ptr<ImageData> GetImageData(const BaseInfo& baseInfo, const ImageSize& imageSize) override;
+    std::unique_ptr<Ace::ImageData> GetImageData(const BaseInfo& baseInfo, const ImageSize& imageSize) override;
     void DrawPixelMap(const BaseInfo& baseInfo, const ImageInfo& imageInfo) override;
     void SetFilterParam(const BaseInfo& baseInfo, const std::string& src) override;
     void SetTextDirection(const BaseInfo& baseInfo, const TextDirection& direction) override;

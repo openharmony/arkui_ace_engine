@@ -28,8 +28,8 @@ using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>
 
 // inherited by TextPattern and TextFieldPattern
 // Text Drag polymorphism
-class TextDragBase : public virtual SelectionHost {
-    DECLARE_ACE_TYPE(TextDragBase, SelectionHost);
+class TextDragBase : public virtual AceType {
+    DECLARE_ACE_TYPE(TextDragBase, AceType);
 
 public:
     TextDragBase() = default;
@@ -41,7 +41,11 @@ public:
     virtual const RectF& GetTextContentRect() const = 0;
     virtual float GetLineHeight() const = 0;
 
+#ifndef USE_GRAPHIC_TEXT_GINE
     virtual std::vector<RSTypographyProperties::TextBox> GetTextBoxes() = 0;
+#else
+    virtual std::vector<RSTextRect> GetTextBoxes() = 0;
+#endif
     virtual OffsetF GetParentGlobalOffset() const = 0;
 
     virtual RefPtr<FrameNode> MoveDragNode() = 0;

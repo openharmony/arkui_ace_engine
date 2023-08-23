@@ -30,7 +30,7 @@ ohos_unittest("flutter_test") {
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   deps = [
-    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "//third_party/googletest:gmock_main",

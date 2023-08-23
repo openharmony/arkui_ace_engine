@@ -51,7 +51,7 @@ sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& /
     return nullptr;
 }
 
-void ImageLoader::CacheImageDataToImageCache(const std::string& key, const RefPtr<CachedImageData>& imageData) {}
+void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData) {}
 
 RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string& /*key*/, const std::string& /*suffix*/)
 {

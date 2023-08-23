@@ -31,11 +31,13 @@ constexpr double TEST_FONT_SIZE = 50.0;
 constexpr int32_t TEST_FONT_WEIGHT = 1;
 constexpr int32_t TEST_FONT_STYLE = 1;
 constexpr int32_t TEST_TEXT_DECORATION = 2;
+constexpr int32_t TEST_TEXT_DECORATION_STYLE = 2;
 const std::string TEST_FONT_FAMILY = "serif";
 
 constexpr int32_t DEFAULT_FONT_WEIGHT = 10;
 constexpr int32_t DEFAULT_FONT_STYLE = 0;
 constexpr int32_t DEFAULT_TEXT_DECORATION = 0;
+constexpr int32_t DEFAULT_TEXT_DECORATION_STYLE = 0;
 constexpr uint32_t TEST_FONT_FEATURES_SIZE = 6;
 constexpr uint32_t TEST_FONT_FEATURES_NONE_SIZE = 5;
 
@@ -248,4 +250,63 @@ HWTEST_F(DomSpanTest, DomSpanTest005, TestSize.Level1)
     EXPECT_EQ(textStyle.GetFontFeatures().size(), TEST_FONT_FEATURES_NONE_SIZE);
 }
 
+/**
+ * @tc.name: DomSpanTest006
+ * @tc.desc: Verify textDecorationStyle of DomSpan can be set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DomSpanTest, DomSpanTest006, TestSize.Level1)
+{
+    const std::string jsonSpanStr = ""
+                                    "{                                                "
+                                    "  \"tag\": \"span\",                             "
+                                    "  \"style\": [{                                  "
+                                    "           \"textDecorationStyle\":\"dotted\"    "
+                                    "            }]                                   "
+                                    "}";
+
+    /**
+     * @tc.steps: step1. call JsonUtil interface and create DomText.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonSpanStr);
+    RefPtr<TextSpanComponent> spanChild =
+        AceType::DynamicCast<TextSpanComponent>(domNodeRoot->GetSpecializedComponent());
+    const auto textStyle = spanChild->GetTextStyle();
+
+    /**
+     * @tc.steps: step2. Check TextDecorationStyle is correct.
+     * @tc.expected: step2. TextDecorationStyle is correct.
+     */
+    EXPECT_TRUE(NearEqual(static_cast<int32_t>(textStyle.GetTextDecorationStyle()), TEST_TEXT_DECORATION_STYLE));
+}
+
+/**
+ * @tc.name: DomSpanTest007
+ * @tc.desc: Verify textDecorationStyle of DomSpan can be set to default value when the attribute is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DomSpanTest, DomSpanTest007, TestSize.Level1)
+{
+    const std::string jsonSpanStr = ""
+                                    "{                                                      "
+                                    "  \"tag\": \"span\",                                   "
+                                    "  \"style\": [{                                        "
+                                    "           \"textDecorationStyle\":\"invalidValue\"    "
+                                    "            }]                                         "
+                                    "}";
+
+    /**
+     * @tc.steps: step1. call JsonUtil interface and create DomText.
+     */
+    auto domNodeRoot = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonSpanStr);
+    RefPtr<TextSpanComponent> spanChild =
+        AceType::DynamicCast<TextSpanComponent>(domNodeRoot->GetSpecializedComponent());
+    const auto textStyle = spanChild->GetTextStyle();
+
+    /**
+     * @tc.steps: step2. Check TextDecorationStyle is set to default value.
+     * @tc.expected: step2. TextDecorationStyle is set to default value.
+     */
+    EXPECT_TRUE(NearEqual(static_cast<int32_t>(textStyle.GetTextDecorationStyle()), DEFAULT_TEXT_DECORATION_STYLE));
+}
 } // namespace OHOS::Ace::Framework
