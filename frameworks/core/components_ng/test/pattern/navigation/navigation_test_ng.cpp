@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#include <optional>
+
 #include "gtest/gtest.h"
+
+#include "base/memory/ace_type.h"
 
 #define protected public
 #define private public
@@ -1542,5 +1546,80 @@ HWTEST_F(NavigationTestNg, NavigationModelNG005, TestSize.Level1)
     toolBarWrapper->GetLayoutProperty()->layoutConstraint_ = temp;
     toolbarLayoutAlgorithm->Measure(AceType::RawPtr(toolBarWrapper));
     ASSERT_TRUE(toolBarNode->isNewToolbar_);
+}
+
+/**
+ * @tc.name: NavigationModelNG006
+ * @tc.desc: Test NavigationPattern::CheckTopNavPathChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    /**
+     * @tc.steps: step2. construct failed arguments of navigationPattern->CheckTopNavPathChange then call it.
+     * @tc.expected: check whether the properties is correct.
+     */
+    std::optional<std::pair<std::string, RefPtr<UINode>>> preTopNavPath = std::pair<std::string, RefPtr<UINode>>();
+    std::optional<std::pair<std::string, RefPtr<UINode>>> newTopNavPath = std::pair<std::string, RefPtr<UINode>>();
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, preTopNavPath, false);
+
+    preTopNavPath = std::pair<std::string, RefPtr<UINode>>();
+    newTopNavPath = std::nullopt;
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
+    ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::AUTO);
+
+    preTopNavPath = std::nullopt;
+    newTopNavPath = std::pair<std::string, RefPtr<UINode>>();
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
+    ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::STACK);
+    /**
+     * @tc.steps: step3. construct correct arguments of navigationPattern->CheckTopNavPathChange then call it.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    preTopNavPath = std::pair<std::string, RefPtr<UINode>>("preTopNavDestination", preTopNavDestination);
+    newTopNavPath = std::pair<std::string, RefPtr<UINode>>("newTopNavDestination", newTopNavDestination);
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
+    ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::STACK);
+
+    auto preNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(preNavDestinationPattern, nullptr);
+    auto newNavDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(newNavDestinationPattern, nullptr);
+    preNavDestinationPattern->isOnShow_ = true;
+    // newNavDestinationPattern->isOnShow_ = true;
+    ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
+
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, true);
+    ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
+
+    preNavDestinationPattern->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
+        []() { return FrameNode::CreateFrameNode("child1", 102, AceType::MakeRefPtr<ButtonPattern>()); });
+    preTopNavDestination->contentNode_ =FrameNode::CreateFrameNode("child1", 103, AceType::MakeRefPtr<ButtonPattern>());
+    preTopNavDestination->parent_ = AceType::WeakClaim(AceType::RawPtr(navigation));
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    preNavDestinationPattern->isOnShow_ = true;
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, true);
+    ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
+
+    navigationPattern->navigationStack_->Add("preTopNavDestination", preTopNavDestination);
+    navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
+    ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
 }
 } // namespace OHOS::Ace::NG
