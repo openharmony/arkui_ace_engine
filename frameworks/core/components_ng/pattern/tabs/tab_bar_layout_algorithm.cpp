@@ -83,6 +83,7 @@ void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstr
 
 void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    previousChildrenMainSize_ = childrenMainSize_;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -164,6 +165,23 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         childrenMainSize_ += childWrapper->GetGeometryNode()->GetMarginFrameSize().MainSize(axis);
     }
+    MeasureMask(layoutWrapper, childCount);
+}
+
+void TabBarLayoutAlgorithm::MeasureMask(LayoutWrapper* layoutWrapper, int32_t childCount) const
+{
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto maskLayoutConstraint = layoutProperty->CreateChildConstraint();
+    auto selectedMaskWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount);
+    CHECK_NULL_VOID(selectedMaskWrapper);
+    maskLayoutConstraint.selfIdealSize = OptionalSizeF(selectedMaskWrapper->GetGeometryNode()->GetFrameSize());
+    selectedMaskWrapper->Measure(maskLayoutConstraint);
+
+    auto unselectedMaskWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount + 1);
+    CHECK_NULL_VOID(unselectedMaskWrapper);
+    maskLayoutConstraint.selfIdealSize = OptionalSizeF(unselectedMaskWrapper->GetGeometryNode()->GetFrameSize());
+    unselectedMaskWrapper->Measure(maskLayoutConstraint);
 }
 
 void TabBarLayoutAlgorithm::ConfigHorizontal(LayoutWrapper* layoutWrapper, const SizeF& frameSize, int32_t childCount)
@@ -651,7 +669,8 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
         return;
     }
-    if (tabBarStyle_ != TabBarStyle::SUBTABBATSTYLE || axis == Axis::VERTICAL) {
+    if (tabBarStyle_ != TabBarStyle::SUBTABBATSTYLE || axis == Axis::VERTICAL ||
+        previousChildrenMainSize_ != childrenMainSize_) {
         auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
         currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
     }
@@ -766,6 +785,13 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper)
             auto childOffset = childWrapper->GetGeometryNode()->GetMarginFrameOffset();
             auto offset = currentWrapper->GetGeometryNode()->GetMarginFrameOffset();
             currentWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + childOffset);
+            auto imageWrapper = currentWrapper->GetOrCreateChildByIndex(0);
+            CHECK_NULL_VOID(imageWrapper);
+            auto imageNode = imageWrapper->GetHostNode();
+            CHECK_NULL_VOID(imageNode);
+            auto imageRenderContext = imageNode->GetRenderContext();
+            CHECK_NULL_VOID(imageRenderContext);
+            imageRenderContext->SetVisible(true);
         }
         currentWrapper->Layout();
     }
