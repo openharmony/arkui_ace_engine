@@ -4487,6 +4487,15 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
 
+void TextFieldPattern::UpdateInputFilterErrorText(const std::string& errorText)
+{
+    if (!errorText.empty()) {
+        auto textFieldEventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(textFieldEventHub);
+        textFieldEventHub->FireOnInputFilterError(errorText);
+    }
+}
+
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
 
 void TextFieldPattern::OnAreaChangedInner()
