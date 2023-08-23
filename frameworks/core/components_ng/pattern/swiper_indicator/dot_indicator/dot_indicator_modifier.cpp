@@ -185,10 +185,15 @@ void DotIndicatorModifier::PaintUnselectedIndicator(
             rectItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
             rectItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
         }
-        float rectLeft = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) - rectItemWidth * 0.5;
-        float rectTop = (axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX()) - rectItemHeight * 0.5;
-        float rectRight = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) + rectItemWidth * 0.5;
-        float rectBottom = (axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX()) + rectItemHeight * 0.5;
+        float rectLeft =
+            (axis_ == Axis::HORIZONTAL ? center.GetX() - rectItemWidth * 0.5 : center.GetY() - rectItemHeight * 0.5);
+        float rectTop =
+            (axis_ == Axis::HORIZONTAL ? center.GetY() - rectItemHeight * 0.5 : center.GetX() - rectItemWidth * 0.5);
+        float rectRight =
+            (axis_ == Axis::HORIZONTAL ? center.GetX() + rectItemWidth * 0.5 : center.GetY() + rectItemHeight * 0.5);
+        float rectBottom =
+            (axis_ == Axis::HORIZONTAL ? center.GetY() + rectItemHeight * 0.5 : center.GetX() + rectItemWidth * 0.5);
+
         if (rectItemHeight > rectItemWidth || !isCustomSize_) {
             canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, rectItemWidth, rectItemWidth });
         } else if (rectItemHeight < rectItemWidth) {
@@ -213,14 +218,17 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
     brush.SetColor(ToRSColor(selectedColor_->Get()));
     canvas.AttachBrush(brush);
 
-    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() : leftCenter.GetY()) -
-                        itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-    float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX()) -
-                    itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
-    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY()) +
-                        itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-    float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX()) +
-                        itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]
+                                                : leftCenter.GetY() - itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]);
+
+    float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() - itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]
+                                               : leftCenter.GetX() - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]);
+    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]
+                                                 : rightCenter.GetY() + itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]);
+
+    float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() + itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]
+                                                  : rightCenter.GetX() + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]);
+
     float rectSelectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
     float rectSelectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
 

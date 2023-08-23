@@ -78,8 +78,13 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // The width and height of the entire indicator.
     auto indicatorHeight = static_cast<float>(((userItemHeight > userSelectedItemHeight) ?
         userItemHeight : userSelectedItemHeight) + indicatorPadding.ConvertToPx() * 2);
-    auto indicatorWidth = static_cast<float>(indicatorPadding.ConvertToPx() * 2 +
-        ((userItemWidth + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) + userSelectedItemWidth);
+    auto allPointDiameterSum = userItemWidth * (itemCount + 1);
+    if (paintProperty->GetIsCustomSizeValue(false)) {
+        allPointDiameterSum = userItemWidth * (itemCount - 1) + userSelectedItemWidth;
+    }
+    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1);
+    auto indicatorWidth =
+        indicatorPadding.ConvertToPx() + allPointDiameterSum + allPointSpaceSum + indicatorPadding.ConvertToPx();
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;

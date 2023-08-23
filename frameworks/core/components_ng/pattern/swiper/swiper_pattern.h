@@ -210,6 +210,11 @@ public:
         return turnPageRate_;
     }
 
+    bool IsIndicatorAnimatorRunning() const
+    {
+        return indicatorController_ ? indicatorController_->IsRunning() : false;
+    }
+
     void SetTurnPageRate(float turnPageRate)
     {
         turnPageRate_ = turnPageRate;
