@@ -321,7 +321,7 @@ public:
         cacheCount_ = cacheCount;
     }
 
-    const std::map<int32_t, LazyForEachChild>& GetAllChildren() const
+    const std::map<int32_t, LazyForEachChild>& GetAllChildren()
     {
         if (!cachedItems_.empty()) {
             startIndex_ = cachedItems_.begin()->first;
