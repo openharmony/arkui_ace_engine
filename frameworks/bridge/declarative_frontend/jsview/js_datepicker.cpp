@@ -1159,7 +1159,7 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
         LOGE("timePicker Theme is null");
         return;
     }
-    auto componentsValue = paramObj->GetProperty("displayedComponents");
+    auto componentsValue = paramObj->GetProperty("displayedComponent");
     bool showSecond = false;
     if (componentsValue->IsNumber()) {
         auto displayedComponent = static_cast<TimePickerDisplayedComponents>(componentsValue->ToNumber<int32_t>());
