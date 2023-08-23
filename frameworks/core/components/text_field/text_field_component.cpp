@@ -603,7 +603,7 @@ void TextFieldComponent::SetOverflowX(const TextFieldOverflowX& overflowX)
     declaration_->SetOverflowX(overflowX);
 }
 
-const TextFieldOverflowX& TextFieldComponent::GetOverflowX()
+TextFieldOverflowX& TextFieldComponent::GetOverflowX() const
 {
     return declaration_->GetOverflowX();
 }

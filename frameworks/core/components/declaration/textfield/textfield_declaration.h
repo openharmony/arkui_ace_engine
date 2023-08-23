@@ -560,7 +560,7 @@ public:
         style.height = height;
     }
 
-    const TextFieldOverflowX& GetOverflowX()
+    TextFieldOverflowX& GetOverflowX() const
     {
         auto& style = static_cast<TextFieldStyle&>(GetStyle(StyleTag::SPECIALIZED_STYLE));
         return style.overflowX;

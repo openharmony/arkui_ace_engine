@@ -201,7 +201,7 @@ public:
     bool IsVisible() const;
 
     void SetOverflowX(const TextFieldOverflowX& overflowX);
-    const TextFieldOverflowX& GetOverflowX();
+    TextFieldOverflowX& GetOverflowX() const;
 
     void SetResetToStart(bool resetToStart);
     bool GetResetToStart() const;
