@@ -510,7 +510,7 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
-    bool RequestFocusImmediately();
+    bool RequestFocusImmediately(bool isWholePathFocusable = false);
     void RequestFocus() const;
     void RequestFocusWithDefaultFocusFirstly() const;
     void UpdateAccessibilityFocusInfo();
