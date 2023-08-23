@@ -44,6 +44,7 @@ public:
     void SetDisplayMode(SwiperDisplayMode displayMode) override;
     void SetDisplayCount(int32_t displayCount) override;
     void ResetDisplayCount() override;
+    void ResetDisplayMode() override;
     void SetMinSize(const Dimension& minSize) override;
     void SetShowIndicator(bool showIndicator) override;
     void SetIndicatorType(SwiperIndicatorType indicatorType) override;

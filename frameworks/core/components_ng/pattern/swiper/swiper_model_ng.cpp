@@ -70,12 +70,18 @@ void SwiperModelNG::SetDisplayCount(int32_t displayCount)
         return;
     }
 
+    ResetDisplayMode();
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount);
 }
 
 void SwiperModelNG::ResetDisplayCount()
 {
     ACE_RESET_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount);
+}
+
+void SwiperModelNG::ResetDisplayMode()
+{
+    ACE_RESET_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayMode);
 }
 
 void SwiperModelNG::SetMinSize(const Dimension& minSize)
