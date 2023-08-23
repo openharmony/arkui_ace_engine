@@ -175,6 +175,12 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         return;
     }
 
+    if (PipelineBase::GetCurrentContext() &&
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        JsSetProgressStyleOptions(info);
+        return;
+    }
+
     JsSetCommonOptions(info);
 
     switch (g_progressType) {
