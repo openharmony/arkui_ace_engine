@@ -4095,10 +4095,10 @@ HWTEST_F(TextTestNg, BetweenSelectedPosition001, TestSize.Level1)
     
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
-     * @tc.expected: Running the BetweenSelectedPosition function and check the result with expected results. 
+     * @tc.expected: Running the BetweenSelectedPosition function and check the result with expected results.
      */
     std::vector<Offset> cases = {
-        Offset(1, 1), Offset(21, 21), 
+        Offset(1, 1), Offset(21, 21)
     };
     std::vector<bool> exceptResults = {
         true, false
@@ -4131,7 +4131,7 @@ HWTEST_F(TextTestNg, OnHandleMove002, TestSize.Level1)
     
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
-     * @tc.expected: Running the OnHandleMove function and check the result with expected results. 
+     * @tc.expected: Running the OnHandleMove function and check the result with expected results.
      */
     std::vector<RectF> handleRects = {
         {1.0, 2.0, 3.0, 4.0}, {5.0, 6.0, 7.0, 8.0}, {-9.0, -10.0, 11.0, 12.0}
@@ -4164,7 +4164,7 @@ HWTEST_F(TextTestNg, GetGlobalOffset001, TestSize.Level1)
     
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
-     * @tc.expected: Running GetGlobalOffset function and check the result with expected results. 
+     * @tc.expected: Running GetGlobalOffset function and check the result with expected results.
      */
     std::vector<OffsetF> offsetCases = {
     {3.0, 5.0}, {4.0, 5.0}, {6.0, 7.0}
@@ -4178,5 +4178,57 @@ HWTEST_F(TextTestNg, GetGlobalOffset001, TestSize.Level1)
         pattern->GetGlobalOffset(tmp);
         EXPECT_EQ(tmp, expectResults[turn]);
     }
+}
+
+/**
+ * @tc.name: CreateImageSpanAndLayout001
+ * @tc.desc: test text_layout_algorithm.cpp CreateImageSpanAndLayout function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateImageSpanAndLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [frameNode, pattern] = Init();
+    auto pipeline = frameNode->GetContext();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+
+    /**
+     * @tc.steps: step2. Add Text and Image Span.
+     */
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->children_.push_back(layoutWrapper);
+    
+    auto textSpanNode = CreateSpanNodeWithSetDefaultProperty("this is a test.");
+    ASSERT_NE(textSpanNode, nullptr);
+    pattern->AddChildSpanItem(textSpanNode);
+    frameNode->AddChild(textSpanNode);
+    nodeId = stack->ClaimNodeId();
+    auto imageSpanNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageSpanNode, nullptr);
+    pattern->AddChildSpanItem(imageSpanNode);
+    frameNode->AddChild(imageSpanNode);
+
+    /**
+     * @tc.steps: step3. Init TextLayoutAlgorithm and Paragraph, then run the CreateImageSpanAndLayout Func.
+     * @tc.expected: Construct result is True.
+     */
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    auto ret = rowLayoutAlgorithm->CreateImageSpanAndLayout(
+        textStyle, "", contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+
+    EXPECT_EQ(ret, true);
 }
 } // namespace OHOS::Ace::NG
