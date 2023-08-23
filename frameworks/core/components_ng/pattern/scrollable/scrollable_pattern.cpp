@@ -170,10 +170,6 @@ void ScrollablePattern::OnScrollEnd()
             return;
         }
     }
-    if (scrollBar_) {
-        scrollBar_->ScheduleDisapplearDelayTask();
-    }
-    StartScrollBarAnimatorByProxy();
 }
 
 void ScrollablePattern::AddScrollEvent()

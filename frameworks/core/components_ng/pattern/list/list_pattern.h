@@ -104,16 +104,6 @@ public:
         return maxListItemIndex_;
     }
 
-    void SetScrollState(int32_t scrollState)
-    {
-        scrollState_ = scrollState;
-    }
-
-    int32_t GetScrollState() const
-    {
-        return scrollState_;
-    }
-
     bool IsScrollable() const override
     {
         return scrollable_;
@@ -300,7 +290,6 @@ private:
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;
-    int32_t scrollState_ = SCROLL_FROM_NONE;
 
     std::map<int32_t, int32_t> lanesItemRange_;
     int32_t lanes_ = 1;
