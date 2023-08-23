@@ -55,7 +55,6 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
-constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
@@ -425,11 +424,12 @@ void JSSideBar::ParseControlButtonNG(JSRef<JSObject> value)
     }
     SideBarContainerModel::GetInstance()->SetControlButtonHeight(controlButtonHeight);
 
-    auto controlButtonLeft = DEFAULT_CONTROL_BUTTON_LEFT;
     if (left->IsNumber() && GreatOrEqual(left->ToNumber<double>(), 0.0)) {
-        controlButtonLeft = CalcDimension(left->ToNumber<double>(), DimensionUnit::VP);
+        auto controlButtonLeft = CalcDimension(left->ToNumber<double>(), DimensionUnit::VP);
+        SideBarContainerModel::GetInstance()->SetControlButtonLeft(controlButtonLeft);
+    } else {
+        SideBarContainerModel::GetInstance()->ResetControlButtonLeft();
     }
-    SideBarContainerModel::GetInstance()->SetControlButtonLeft(controlButtonLeft);
 
     auto controlButtonTop = DEFAULT_CONTROL_BUTTON_TOP;
     if (top->IsNumber() && GreatOrEqual(top->ToNumber<double>(), 0.0)) {
