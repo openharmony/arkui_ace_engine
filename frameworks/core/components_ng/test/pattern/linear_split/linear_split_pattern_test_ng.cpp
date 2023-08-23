@@ -48,6 +48,7 @@ const int32_t FIVE_ITEM_SIZE = 5;
 const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
 constexpr int32_t PLATFORM_VERSION_10 = 10;
+constexpr int32_t PLATFORM_VERSION_9 = 9;
 } // namespace
 
 class LinearSplitPatternTestNg : public testing::Test {
@@ -773,5 +774,185 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest009, TestSize.Level1)
     gestureInfo.SetGlobalLocation(globalLocation);
     linearSplitPattern->HandlePanEnd(gestureInfo);
     EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, DEFAULT_DRAG_INDEX);
+}
+/**
+ * @tc.name: LinearSplitPatternTest010
+ * @tc.desc: Test RowSplit Layout with children nodes with API9.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create rowSplit and initialize related properties.
+     */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_9);
+    LinearSplitModelNG model;
+    model.Create(SplitType::ROW_SPLIT);
+    model.SetResizeable(SplitType::ROW_SPLIT, true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Get linearSplitPattern and layoutWrapper.
+     */
+    RefPtr<LinearSplitPattern> linearSplitPattern = frameNode->GetPattern<LinearSplitPattern>();
+    ASSERT_NE(linearSplitPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    frameNode->SetGeometryNode(geometryNode);
+    auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
+    ASSERT_NE(linearSplitLayoutProperty, nullptr);
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos;
+    RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
+        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::ROW_SPLIT, dragSplitOffset, childrenDragPos, false);
+    RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(RK356_WIDTH), CalcLength(COLUMN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    PaddingProperty noPadding;
+    noPadding.left = CalcLength(NO_PADDING);
+    noPadding.right = CalcLength(NO_PADDING);
+    noPadding.top = CalcLength(NO_PADDING);
+    noPadding.bottom = CalcLength(NO_PADDING);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+    /**
+     * @tc.steps: step3. Create childFrameNode and Get childLayoutWrapper.
+     */
+    /* corresponding ets code:
+        RowSplit(){
+            Text('1').width(50).backgroundColor(0xD2B48C).textAlign(TextAlign.Center).height('100%')
+            Text('2').width(50).backgroundColor(0xD2B48C).textAlign(TextAlign.Center).height('100%')
+            Text('3').width(50).backgroundColor(0xD2B48C).textAlign(TextAlign.Center).height('100%')
+            Text('4').width(50).backgroundColor(0xD2B48C).textAlign(TextAlign.Center).height('100%')
+            Text('5').width(50).backgroundColor(0xF5DEB3).textAlign(TextAlign.Center).height('100%')
+        }
+        .resizeable(true)
+        .width('100%')
+        .height(150)
+        .backgroundColor(Color.Pink)
+    */
+    for (int32_t i = 0; i < FIVE_ITEM_SIZE; i++) {
+        auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, i + 1, AceType::MakeRefPtr<Pattern>());
+        RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeometryNode->Reset();
+        RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
+        itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+        itemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(COLUMN_HEIGHT)));
+        itemLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+        auto boxLayoutAlgorithm = itemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+        EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+        itemLayoutWrapper->SetLayoutAlgorithm(
+            AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+        frameNode->AddChild(itemFrameNode);
+        layoutWrapper->AppendChild(itemLayoutWrapper);
+    }
+    /**
+     * @tc.steps: step4. Call Measure and Layout.
+     * @tc.expected: size and offset are right
+     */
+    linearLayoutAlgorithm->Measure(layoutWrapper);
+    linearLayoutAlgorithm->Layout(layoutWrapper);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+
+    auto horizontalRemaining = RK356_WIDTH - FIVE_ITEM_SIZE * SMALL_ITEM_WIDTH;
+    for (int32_t i = 0; i < FIVE_ITEM_SIZE; i++) {
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
+        auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
+        auto childOffset = childWrapper->GetGeometryNode()->GetFrameOffset();
+        EXPECT_EQ(childSize, SizeF(SMALL_ITEM_WIDTH, COLUMN_HEIGHT));
+        EXPECT_EQ(childOffset, OffsetF(horizontalRemaining / 2 + i * (SMALL_ITEM_WIDTH + DEFAULT_SPLIT_WIDTH), ZERO));
+    }
+
+    linearSplitPattern->splitRects_ = linearLayoutAlgorithm->GetSplitRects();
+    EXPECT_TRUE(linearSplitPattern->splitRects_[1].IsInRegion(Point(335, 10)));
+    /**
+     * @tc.steps: step5. Construct GestureEvent info and Start dragging.
+     */
+    GestureEvent info;
+    Offset localLocation(335, 10);
+    info.SetLocalLocation(localLocation);
+    info.SetOffsetX(2);
+    linearSplitPattern->dragSplitOffset_ = { ZERO, ZERO, ZERO, ZERO, ZERO };
+    /**
+     * @tc.steps: step6. Set IsOverParent and Call HandlePanEvent function.
+     * @tc.expected: PanStart and PanUpdate return normally when IsOverParent is true
+     * check the value is right when gestureEventInfo is in splitRects[1] region
+     */
+    bool isOverParent[2] = { true, false };
+    for (int i = 0; i < 2; i++) {
+        linearSplitPattern->isOverParent_ = isOverParent[i];
+        linearSplitPattern->HandlePanStart(info);
+        linearSplitPattern->HandlePanUpdate(info);
+        EXPECT_EQ(linearSplitPattern->preOffset_, 2.0f);
+        EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
+
+        /**
+         * @tc.steps: step7. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
+         * @tc.expected: check isDraged is false
+         */
+        linearSplitPattern->HandlePanEnd(info);
+        EXPECT_FALSE(linearSplitPattern->isDraged_);
+        linearSplitPattern->HandlePanUpdate(info);
+        EXPECT_FALSE(linearSplitPattern->isDraged_);
+        EXPECT_TRUE(linearSplitPattern->isDragedMoving_);
+        MouseInfo mouseInfo2;
+        mouseInfo2.SetLocalLocation(localLocation);
+        linearSplitPattern->HandleMouseEvent(mouseInfo2);
+        EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
+        mouseInfo2.SetButton(MouseButton::LEFT_BUTTON);
+        mouseInfo2.SetAction(MouseAction::PRESS);
+        linearSplitPattern->HandleMouseEvent(mouseInfo2);
+        EXPECT_TRUE(linearSplitPattern->isDragedMoving_);
+    }
+    /**
+     * @tc.steps: step8. Dragging back and Call HandlePanEvent function.
+     * @tc.expected: check the value is right
+     */
+    info.SetOffsetX(-2);
+    for (int i = 0; i < 2; i++) {
+        linearSplitPattern->isOverParent_ = isOverParent[i];
+        linearSplitPattern->HandlePanStart(info);
+        EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
+        info.SetOffsetX(-3);
+        linearSplitPattern->HandlePanUpdate(info);
+        EXPECT_EQ(linearSplitPattern->dragSplitOffset_[1], 0.0f);
+
+        /**
+         * @tc.steps: step9. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
+         * @tc.expected: check isDraged is false
+         */
+        linearSplitPattern->HandlePanEnd(info);
+        EXPECT_FALSE(linearSplitPattern->isDraged_);
+        MouseInfo mouseInfo2;
+        mouseInfo2.SetLocalLocation(localLocation);
+        linearSplitPattern->HandleMouseEvent(mouseInfo2);
+        EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
+    }
+    /**
+     * @tc.steps: step10. Construct GestureEvent and Call HandlePanEvent function.
+     * @tc.expected: function exits normally when gestureEventInfo is not in splitRects region
+     */
+    GestureEvent info2;
+    Offset localLocation2(300, 10);
+    info2.SetLocalLocation(localLocation2);
+    linearSplitPattern->HandlePanUpdate(info2);
+    EXPECT_EQ(linearSplitPattern->preOffset_, info2.GetOffsetX());
 }
 } // namespace OHOS::Ace::NG
