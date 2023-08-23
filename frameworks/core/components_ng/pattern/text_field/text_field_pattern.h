@@ -1004,6 +1004,7 @@ public:
     }
 
     void DumpInfo() override;
+    void OnColorConfigurationUpdate() override;
 
     void ShowPasswordIconChange()
     {
