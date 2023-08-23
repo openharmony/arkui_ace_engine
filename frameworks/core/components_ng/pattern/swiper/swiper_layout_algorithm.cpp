@@ -289,6 +289,9 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
             }
         } else if (GreatNotEqual(startIndexInVisibleWindow, targetIndex_.value())) {
+            int32_t stepsFromCurrentToTarget = endIndex - targetIndex_.value();
+            endIndex -= (stepsFromCurrentToTarget > (totalItemCount_ - 1))
+                ? (stepsFromCurrentToTarget - totalItemCount_ + 1) : 0;
             LayoutBackward(layoutWrapper, layoutConstraint, axis, endIndex, endPos);
             if (LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, GetEndIndex() + 1, GetEndPosition());
