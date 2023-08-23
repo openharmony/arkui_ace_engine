@@ -1090,9 +1090,6 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     int32_t dragDelta = offsetY - yLast_;
     yLast_ = offsetY;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
-        CHECK_NULL_VOID_NOLOG(GetToss());
-        auto toss = GetToss();
-        toss->Stop();
         return;
     }
     offsetCurSet_ = 0.0;
