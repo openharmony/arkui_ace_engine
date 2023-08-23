@@ -993,6 +993,7 @@ public:
     }
 
     void DumpInfo() override;
+    void OnColorConfigurationUpdate() override;
 
 private:
     bool HasFocus() const;
