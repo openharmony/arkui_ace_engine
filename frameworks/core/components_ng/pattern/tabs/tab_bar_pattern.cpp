@@ -1080,7 +1080,8 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     Color color = pressColor;
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     if (color == Color::TRANSPARENT && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && index == indicator_ &&
-        selectedModes_[index] == SelectedMode::BOARD && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
+        selectedModes_[index] == SelectedMode::BOARD &&
+        layoutProperty->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         color = indicatorStyles_[index].color;
     }
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), selectedIndex = index, color = color]() {
