@@ -437,6 +437,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Button.createWithChild();
+      Button.hitTestBehavior(HitTestMode.Block);
       Button.fontSize({
         id: -1,
         type: 10002,
@@ -460,8 +461,6 @@ class OperateItemStruct extends ViewPU {
         moduleName: ""
       });
       Button.labelStyle({ maxLines: 1 });
-      Button.onClick((() => {
-      }));
       Button.onFocus((() => {
         this.parentCanFocus = !1
       }));
@@ -500,9 +499,10 @@ class OperateItemStruct extends ViewPU {
   }
 
   createIcon(e, t = null) {
-    this.observeComponentCreation(((t, o) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(t);
+    this.observeComponentCreation(((e, t) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Button.createWithChild({ type: ButtonType.Normal });
+      Button.hitTestBehavior(HitTestMode.Block);
       Button.backgroundColor(Color.Transparent);
       Button.height(48);
       Button.width(48);
@@ -528,9 +528,7 @@ class OperateItemStruct extends ViewPU {
           this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
         }
       }));
-      Button.onClick(null == e.action ? () => {
-      } : e.action);
-      o || Button.pop();
+      t || Button.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     this.observeComponentCreation(((t, o) => {
@@ -595,6 +593,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((t, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(t);
       Button.createWithChild({ type: ButtonType.Normal });
+      Button.hitTestBehavior(HitTestMode.Block);
       Button.backgroundColor(Color.Transparent);
       Button.height(24);
       Button.width(12);
@@ -613,8 +612,7 @@ class OperateItemStruct extends ViewPU {
           this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
         }
       }));
-      Button.onClick(null == e.action ? () => {
-      } : e.action);
+      Button.onClick(e.action);
       o || Button.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -631,7 +629,6 @@ class OperateItemStruct extends ViewPU {
         bundleName: "",
         moduleName: ""
       });
-      Image.onClick(e.action);
       Image.draggable(!1);
       o || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
@@ -650,6 +647,7 @@ class OperateItemStruct extends ViewPU {
       Radio.onFocus((() => {
         this.parentCanFocus = !1
       }));
+      Radio.hitTestBehavior(HitTestMode.Block);
       Radio.onTouch((e => {
         e.type == TouchType.Down && (this.parentCanTouch = !1);
         e.type == TouchType.Up && (this.parentCanTouch = !0)
@@ -678,6 +676,7 @@ class OperateItemStruct extends ViewPU {
       Checkbox.onFocus((() => {
         this.parentCanFocus = !1
       }));
+      Checkbox.hitTestBehavior(HitTestMode.Block);
       Checkbox.onTouch((e => {
         e.type == TouchType.Down && (this.parentCanTouch = !1);
         e.type == TouchType.Up && (this.parentCanTouch = !0)
@@ -728,6 +727,7 @@ class OperateItemStruct extends ViewPU {
       Toggle.onClick((() => {
         this.switchState = !this.switchState
       }));
+      Toggle.hitTestBehavior(HitTestMode.Block);
       o || Toggle.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -736,9 +736,10 @@ class OperateItemStruct extends ViewPU {
   }
 
   createTextArrow(e, t, o = null) {
-    this.observeComponentCreation(((e, o) => {
+    this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Button.createWithChild({ type: ButtonType.Normal });
+      Button.hitTestBehavior(HitTestMode.Block);
       Button.labelStyle({ maxLines: 1 });
       Button.backgroundColor(Color.Transparent);
       Button.height(32);
@@ -764,9 +765,7 @@ class OperateItemStruct extends ViewPU {
           this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
         }
       }));
-      Button.onClick(null == t.action ? () => {
-      } : t.action);
-      o || Button.pop();
+      t || Button.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     this.observeComponentCreation(((e, t) => {
@@ -1071,11 +1070,10 @@ export class ComposeListItem extends ViewPU {
       }));
       Flex.onTouch((e => {
         e.type == TouchType.Down && this.canTouch && (this.frontColor = "#1a000000");
-        e.type == TouchType.Up && (this.frontColor = this.isActive ? "#1a0a59f7" : Color.Transparent.toString())
-      }));
-      Flex.onClick((() => {
-        this.isActive = !this.isActive;
-        this.frontColor = this.isActive ? "#1a0a59f7" : Color.Transparent.toString()
+        if (e.type == TouchType.Up) {
+          this.isActive = !this.isActive;
+          this.frontColor = this.isActive ? "#1a0a59f7" : Color.Transparent.toString()
+        }
       }));
       t || Flex.pop();
       ViewStackProcessor.StopGetAccessRecording()
