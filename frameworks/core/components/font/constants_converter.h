@@ -36,6 +36,7 @@ enum class FontWeight;
 enum class FontStyle;
 enum class TextAlign;
 enum class TextDirection;
+enum class TextDecorationStyle;
 } // namespace txt
 #else
 namespace OHOS::Rosen {
@@ -45,6 +46,7 @@ enum class TextAlign;
 enum class TextBaseline;
 enum class TextDirection;
 enum class PlaceholderVerticalAlignment;
+enum class TextDecorationStyle;
 struct TextStyle;
 struct PlaceholderSpan;
 
@@ -62,6 +64,7 @@ enum class TextBaseline;
 enum class TextAlign;
 enum class TextDirection;
 enum class TextDecoration;
+enum class TextDecorationStyle;
 enum class WhiteSpace;
 class Color;
 
@@ -79,6 +82,8 @@ txt::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
 txt::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 
 txt::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
+
+txt::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle);
 
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle);
 
@@ -100,6 +105,8 @@ OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
 OHOS::Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 
 OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration);
+
+OHOS::Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle);
 
 void ConvertTxtStyle(const TextStyle &textStyle,
     const WeakPtr<PipelineBase> &context, OHOS::Rosen::TextStyle &txtStyle);

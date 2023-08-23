@@ -395,6 +395,8 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(tmpInfo);
         JSRef<JSVal> typeValue = obj->GetProperty("type");
         JSRef<JSVal> colorValue = obj->GetProperty("color");
+        JSRef<JSVal> styleValue = obj->GetProperty("style");
+
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
@@ -405,8 +407,15 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         }
         Color result = theme->GetTextStyle().GetTextDecorationColor();
         ParseJsColor(colorValue, result);
+        std::optional<TextDecorationStyle> textDecorationStyle;
+        if (styleValue->IsNumber()) {
+            textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
+        }
         TextModel::GetInstance()->SetTextDecoration(textDecoration);
         TextModel::GetInstance()->SetTextDecorationColor(result);
+        if (textDecorationStyle) {
+            TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+        }
     } while (false);
     info.SetReturnValue(info.This());
 }

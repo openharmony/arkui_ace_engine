@@ -243,7 +243,7 @@ inline FontWeight ConvertStrToFontWeight(const std::string& weight, FontWeight d
 
 inline TextDecoration ConvertStrToTextDecoration(const std::string& textDecoration)
 {
-    // this map should be sorted bu key.
+    // this map should be sorted by key.
     static const LinearMapNode<TextDecoration> textDecorationTable[] = {
         { DOM_TEXT_DECORATION_INHERIT, TextDecoration::INHERIT },
         { DOM_TEXT_DECORATION_LINETHROUGH, TextDecoration::LINE_THROUGH },
@@ -256,9 +256,24 @@ inline TextDecoration ConvertStrToTextDecoration(const std::string& textDecorati
     return index < 0 ? TextDecoration::NONE : textDecorationTable[index].value;
 }
 
+inline TextDecorationStyle ConvertStrToTextDecorationStyle(const std::string& textDecorationStyle)
+{
+    // this map should be sorted by key.
+    static const LinearMapNode<TextDecorationStyle> textDecorationStyleTable[] = {
+        { DOM_TEXT_DECORATION_STYLE_DASHED, TextDecorationStyle::DASHED },
+        { DOM_TEXT_DECORATION_STYLE_DOTTED, TextDecorationStyle::DOTTED },
+        { DOM_TEXT_DECORATION_STYLE_DOUBLE, TextDecorationStyle::DOUBLE },
+        { DOM_TEXT_DECORATION_STYLE_SOLID, TextDecorationStyle::SOLID },
+        { DOM_TEXT_DECORATION_STYLE_WAVY, TextDecorationStyle::WAVY }, };
+
+    auto index = BinarySearchFindIndex(textDecorationStyleTable, ArraySize(textDecorationStyleTable),
+        textDecorationStyle.c_str());
+    return index < 0 ? TextDecorationStyle::SOLID : textDecorationStyleTable[index].value;
+}
+
 inline WhiteSpace ConvertStrToWhiteSpace(const std::string& whiteSpace)
 {
-    // this map should be sorted bu key.
+    // this map should be sorted by key.
     static const LinearMapNode<WhiteSpace> whiteSpaceTable[] = {
         { DOM_WHITE_SPACE_INHERIT, WhiteSpace::INHERIT },
         { DOM_WHITE_SPACE_NORMAL, WhiteSpace::NORMAL },

@@ -68,6 +68,12 @@ void DOMSpan::CheckAndSetCurrentSpanStyle(
     if (!domSpan->HasSetTextDecoration()) {
         currentStyle.SetTextDecoration(parentStyle.GetTextDecoration());
     }
+    if (!domSpan->HasSetTextDecorationColor()) {
+        currentStyle.SetTextDecorationColor(parentStyle.GetTextDecorationColor());
+    }
+    if (!domSpan->HasSetTextDecorationStyle()) {
+        currentStyle.SetTextDecorationStyle(parentStyle.GetTextDecorationStyle());
+    }
     if (!domSpan->HasSetFontFamily()) {
         currentStyle.SetFontFamilies(parentStyle.GetFontFamilies());
     }

@@ -84,6 +84,14 @@ void DOMText::CheckAndSetSpanStyle(const RefPtr<DOMSpan>& dmoSpan, TextStyle& sp
         LOGD("Set Text Decoration to Span");
         spanStyle.SetTextDecoration(textStyle.GetTextDecoration());
     }
+    if (!dmoSpan->HasSetTextDecorationColor()) {
+        LOGD("Set Text Decoration Color to Span");
+        spanStyle.SetTextDecorationColor(textStyle.GetTextDecorationColor());
+    }
+    if (!dmoSpan->HasSetTextDecorationStyle()) {
+        LOGD("Set Text Decoration Style to Span");
+        spanStyle.SetTextDecorationStyle(textStyle.GetTextDecorationStyle());
+    }
     if (!dmoSpan->HasSetFontFamily()) {
         LOGD("Set Text Font Family to Span");
         spanStyle.SetFontFamilies(textStyle.GetFontFamilies());

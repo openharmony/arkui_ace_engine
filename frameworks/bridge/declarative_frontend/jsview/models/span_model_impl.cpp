@@ -126,6 +126,15 @@ void SpanModelImpl::SetTextDecorationColor(const Color& value)
     component->SetTextStyle(textStyle);
 }
 
+void SpanModelImpl::SetTextDecorationStyle(Ace::TextDecorationStyle value)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+    auto textStyle = component->GetTextStyle();
+    textStyle.SetTextDecorationStyle(value);
+    component->SetTextStyle(textStyle);
+}
+
 void SpanModelImpl::SetTextCase(Ace::TextCase value)
 {
     auto component = GetComponent();

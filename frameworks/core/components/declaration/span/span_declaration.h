@@ -127,6 +127,24 @@ public:
         return isSetTextDecoration_;
     }
 
+    void SetHasSetTextDecorationColor(bool isSetTextDecorationColor)
+    {
+        isSetTextDecorationColor_ = isSetTextDecorationColor;
+    }
+    bool HasSetTextDecorationColor() const
+    {
+        return isSetTextDecorationColor_;
+    }
+
+    void SetHasSetTextDecorationStyle(bool isSetTextDecorationStyle)
+    {
+        isSetTextDecorationStyle_ = isSetTextDecorationStyle;
+    }
+    bool HasSetTextDecorationStyle() const
+    {
+        return isSetTextDecorationStyle_;
+    }
+
     void SetHasSetAllowScale(bool isSetAllowScale)
     {
         isSetAllowScale_ = isSetAllowScale;
@@ -178,6 +196,8 @@ protected:
     bool isSetFontSize_ = false;
     bool isSetFontFamily_ = false;
     bool isSetTextDecoration_ = false;
+    bool isSetTextDecorationColor_ = false;
+    bool isSetTextDecorationStyle_ = false;
     bool isSetAllowScale_ = false;
     bool isSetFontFeatures_ = false;
     bool isSetLetterSpacing_ = false;

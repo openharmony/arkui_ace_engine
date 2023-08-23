@@ -32,18 +32,20 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::string TEXT_DATA = "test1234@?!";
-constexpr int32_t TEST_OVER_FLOW = 1;
+constexpr int32_t TEST_OVER_FLOW = 2;
 constexpr double TEST_FONT_SIZE = 50.0;
 constexpr int32_t TEST_FONT_WEIGHT = 1;
 const std::string TEST_COLOR_VALUE = "#0x0000ff";
 constexpr double TEST_LINE_HEIGHT = 11.0;
 constexpr int32_t TEST_FONT_STYLE = 1;
 constexpr int32_t TEST_TEXT_DECORATION = 2;
+constexpr int32_t TEST_TEXT_DECORATION_STYLE = 2;
+constexpr int32_t DEFAULT_TEXT_DECORATION_STYLE = 0;
 constexpr uint32_t TEST_MAX_LINE = 10;
 constexpr Dimension TEST_LETTER_SPACING = 11.0_px;
 constexpr int32_t TEST_TEXT_ALIGN = 1;
 const std::string TEST_FONT_FAMILY = "serif";
-constexpr int32_t DEFAULT_OVER_FLOW = 0;
+constexpr int32_t DEFAULT_OVER_FLOW = 1;
 constexpr int32_t DEFAULT_TEXT_ALIGN = 4;
 constexpr int32_t DEFAULT_TEXT_ALIGN_INVALIDVALUE = 2;
 const Dimension TEST_MIN_FONT_SIZE = Dimension(10.0);
@@ -350,6 +352,64 @@ HWTEST_F(DomTextTest, DomTextTest006, TestSize.Level1)
      * @tc.expected: step3. Font feature is correct.
      */
     EXPECT_EQ(textStyle.GetFontFeatures().size(), TEST_FONT_FEATURES_NONE_SIZE);
+}
+
+/**
+ * @tc.name: DomTextTest007
+ * @tc.desc: Verify textDecorationStyle of DomText can be set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DomTextTest, DomTextTest007, TestSize.Level1)
+{
+    const std::string jsonTextStr = ""
+                                    "{                                               "
+                                    "  \"tag\": \"text\",                            "
+                                    "  \"style\": [{                                 "
+                                    "           \"textDecorationStyle\":\"dotted\"   "
+                                    "            }]                                  "
+                                    "}";
+
+    /**
+     * @tc.steps: step1. call JsonUtil interface and create DomText.
+     */
+    auto domNodeText = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonTextStr);
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeText);
+    RefPtr<TextComponent> textChild = AceType::DynamicCast<TextComponent>(boxChild->GetChild());
+    const auto textStyle = textChild->GetTextStyle();
+    /**
+     * @tc.steps: step2. Check TextDecorationStyle is correct.
+     * @tc.expected: step2. TextDecorationStyle is correct.
+     */
+    EXPECT_TRUE(NearEqual(static_cast<int32_t>(textStyle.GetTextDecorationStyle()), TEST_TEXT_DECORATION_STYLE));
+}
+
+/**
+ * @tc.name: DomTextTest008
+ * @tc.desc: Verify textDecorationStyle of DomText can be set to default value when the attribute is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DomTextTest, DomTextTest008, TestSize.Level1)
+{
+    const std::string jsonTextStr = ""
+                                    "{                                               "
+                                    "  \"tag\": \"text\",                            "
+                                    "  \"style\": [{                                 "
+                                    "           \"textDecorationStyle\":\"invalid\"  "
+                                    "            }]                                  "
+                                    "}";
+
+    /**
+     * @tc.steps: step1. call JsonUtil interface and create DomText.
+     */
+    auto domNodeText = DOMNodeFactory::GetInstance().CreateDOMNodeFromDsl(jsonTextStr);
+    auto boxChild = DOMNodeFactory::GetInstance().GetBoxChildComponent(domNodeText);
+    RefPtr<TextComponent> textChild = AceType::DynamicCast<TextComponent>(boxChild->GetChild());
+    const auto textStyle = textChild->GetTextStyle();
+    /**
+     * @tc.steps: step2. Check TextDecorationStyle is set to default value.
+     * @tc.expected: step2. TextDecorationStyle is set to default value.
+     */
+    EXPECT_TRUE(NearEqual(static_cast<int32_t>(textStyle.GetTextDecorationStyle()), DEFAULT_TEXT_DECORATION_STYLE));
 }
 
 } // namespace OHOS::Ace::Framework

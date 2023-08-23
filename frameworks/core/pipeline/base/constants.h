@@ -62,6 +62,7 @@ extern const char TEXT_DATA[];
 extern const char TEXT_DIRECTION[];
 extern const char TEXT_COLOR[];
 extern const char TEXT_DECORATION[];
+extern const char TEXT_DECORATION_STYLE[];
 extern const char TEXT_FONT_WEIGHT[];
 extern const char TEXT_FONT_SIZE[];
 extern const char TEXT_FONT_STYLE[];

@@ -252,6 +252,15 @@ var TextOverflow;
   TextOverflow[TextOverflow["MARQUEE"] = 3] = "MARQUEE";
 })(TextOverflow || (TextOverflow = {}));
 
+var TextDecorationStyle;
+(function (TextDecorationStyle) {
+  TextDecorationStyle[TextDecorationStyle["SOLID"] = 0] = "SOLID";
+  TextDecorationStyle[TextDecorationStyle["DOUBLE"] = 1] = "DOUBLE";
+  TextDecorationStyle[TextDecorationStyle["DOTTED"] = 2] = "DOTTED";
+  TextDecorationStyle[TextDecorationStyle["DASHED"] = 3] = "DASHED";
+  TextDecorationStyle[TextDecorationStyle["WAVY"] = 4] = "WAVY";
+})(TextDecorationStyle || (TextDecorationStyle= {}));
+
 var TextDecorationType;
 (function (TextDecorationType) {
   TextDecorationType[TextDecorationType["None"] = 0] = "None";
