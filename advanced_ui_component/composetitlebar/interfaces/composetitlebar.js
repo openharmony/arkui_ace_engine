@@ -18,7 +18,7 @@ var __decorate = this && this.__decorate || function(e, t, o, i) {
     n = r < 3 ? t : null === i ? i = Object.getOwnPropertyDescriptor(t, o) : i;
   if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) n = Reflect.decorate(e, t, o, i);
   else
-    for (var c = e.length - 1; c >= 0; c--)(s = e[c]) && (n = (r < 3 ? s(n) : r > 3 ? s(t, o, n) : s(t, o)) || n);
+    for (var a = e.length - 1; a >= 0; a--)(s = e[a]) && (n = (r < 3 ? s(n) : r > 3 ? s(t, o, n) : s(t, o)) || n);
   return r > 3 && n && Object.defineProperty(t, o, n), n
 };
 const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
@@ -32,9 +32,6 @@ export class ComposeTitleBar extends ViewPU {
     this.subtitle = void 0;
     this.menuItems = void 0;
     this.__titleMaxWidth = new ObservedPropertySimplePU(0, this, "titleMaxWidth");
-    this.__isItemOnFocus = new ObservedPropertySimplePU(!1, this, "isItemOnFocus");
-    this.__isItemOnHover = new ObservedPropertySimplePU(!1, this, "isItemOnHover");
-    this.__isItemOnClick = new ObservedPropertySimplePU(!1, this, "isItemOnClick");
     this.__backActive = new ObservedPropertySimplePU(!1, this, "backActive");
     this.setInitiallyProvidedValue(t)
   }
@@ -44,24 +41,15 @@ export class ComposeTitleBar extends ViewPU {
     void 0 !== e.subtitle && (this.subtitle = e.subtitle);
     void 0 !== e.menuItems && (this.menuItems = e.menuItems);
     void 0 !== e.titleMaxWidth && (this.titleMaxWidth = e.titleMaxWidth);
-    void 0 !== e.isItemOnFocus && (this.isItemOnFocus = e.isItemOnFocus);
-    void 0 !== e.isItemOnHover && (this.isItemOnHover = e.isItemOnHover);
-    void 0 !== e.isItemOnClick && (this.isItemOnClick = e.isItemOnClick);
     void 0 !== e.backActive && (this.backActive = e.backActive)
   }
   updateStateVars(e) {}
   purgeVariableDependenciesOnElmtId(e) {
     this.__titleMaxWidth.purgeDependencyOnElmtId(e);
-    this.__isItemOnFocus.purgeDependencyOnElmtId(e);
-    this.__isItemOnHover.purgeDependencyOnElmtId(e);
-    this.__isItemOnClick.purgeDependencyOnElmtId(e);
     this.__backActive.purgeDependencyOnElmtId(e)
   }
   aboutToBeDeleted() {
     this.__titleMaxWidth.aboutToBeDeleted();
-    this.__isItemOnFocus.aboutToBeDeleted();
-    this.__isItemOnHover.aboutToBeDeleted();
-    this.__isItemOnClick.aboutToBeDeleted();
     this.__backActive.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal()
@@ -71,24 +59,6 @@ export class ComposeTitleBar extends ViewPU {
   }
   set titleMaxWidth(e) {
     this.__titleMaxWidth.set(e)
-  }
-  get isItemOnFocus() {
-    return this.__isItemOnFocus.get()
-  }
-  set isItemOnFocus(e) {
-    this.__isItemOnFocus.set(e)
-  }
-  get isItemOnHover() {
-    return this.__isItemOnHover.get()
-  }
-  set isItemOnHover(e) {
-    this.__isItemOnHover.set(e)
-  }
-  get isItemOnClick() {
-    return this.__isItemOnClick.get()
-  }
-  set isItemOnClick(e) {
-    this.__isItemOnClick.set(e)
   }
   get backActive() {
     return this.__backActive.get()
@@ -157,7 +127,8 @@ export class ComposeTitleBar extends ViewPU {
           value: PUBLIC_BACK,
           isEnabled: !0,
           action: () => this.backActive = !0
-        }
+        },
+        index: -1
       }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -186,54 +157,8 @@ export class ComposeTitleBar extends ViewPU {
               moduleName: ""
             }
           });
-          Image.focusable(this.item.isEnabled);
+          Image.focusable(!1);
           Image.borderRadius(ImageMenuItem.buttonBorderRadius);
-          Image.onFocus((() => this.isItemOnFocus = !0));
-          Image.onBlur((() => this.isItemOnFocus = !1));
-          Image.onHover((e => this.isItemOnHover = e));
-          Image.hoverEffect(HoverEffect.Scale);
-          ViewStackProcessor.visualState("focused");
-          Image.border({
-            radius: {
-              id: -1,
-              type: 10002,
-              params: ["sys.float.ohos_id_corner_radius_clicked"],
-              bundleName: "",
-              moduleName: ""
-            },
-            width: ImageMenuItem.focusBorderWidth,
-            color: {
-              id: -1,
-              type: 10001,
-              params: ["sys.color.ohos_id_color_focused_outline"],
-              bundleName: "",
-              moduleName: ""
-            },
-            style: BorderStyle.Solid
-          });
-          ViewStackProcessor.visualState("normal");
-          Image.border({
-            radius: {
-              id: -1,
-              type: 10002,
-              params: ["sys.float.ohos_id_corner_radius_clicked"],
-              bundleName: "",
-              moduleName: ""
-            },
-            width: 0
-          });
-          ViewStackProcessor.visualState();
-          Image.onKeyEvent((e => {
-            if (e.keyCode === KeyCode.KEYCODE_ENTER || e.keyCode === KeyCode.KEYCODE_SPACE) {
-              e.type === KeyType.Down && (this.isItemOnClick = !0);
-              e.type === KeyType.Up && (this.isItemOnClick = !1)
-            }
-          }));
-          Image.onTouch((e => {
-            e.type === TouchType.Down && (this.isItemOnClick = !0);
-            e.type === TouchType.Up && (this.isItemOnClick = !1)
-          }));
-          Image.onClick((() => this.item.isEnabled && this.item.action && this.item.action()));
           t || Image.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }))
@@ -353,7 +278,8 @@ export class ComposeTitleBar extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           t ? ViewPU.create(new CollapsibleMenuSection(this, {
-            menuItems: this.menuItems
+            menuItems: this.menuItems,
+            index: 1 + ComposeTitleBar.instanceCount++
           }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
           ViewStackProcessor.StopGetAccessRecording()
         }))
@@ -374,10 +300,13 @@ ComposeTitleBar.rightPadding = 12;
 ComposeTitleBar.portraitImageSize = 40;
 ComposeTitleBar.portraitImageLeftPadding = 4;
 ComposeTitleBar.portraitImageRightPadding = 16;
+ComposeTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
     this.menuItems = void 0;
+    this.index = void 0;
+    this.firstFocusableIndex = -1;
     this.__isPopupShown = new ObservedPropertySimplePU(!1, this, "isPopupShown");
     this.__isMoreIconOnFocus = new ObservedPropertySimplePU(!1, this, "isMoreIconOnFocus");
     this.__isMoreIconOnHover = new ObservedPropertySimplePU(!1, this, "isMoreIconOnHover");
@@ -386,6 +315,8 @@ class CollapsibleMenuSection extends ViewPU {
   }
   setInitiallyProvidedValue(e) {
     void 0 !== e.menuItems && (this.menuItems = e.menuItems);
+    void 0 !== e.index && (this.index = e.index);
+    void 0 !== e.firstFocusableIndex && (this.firstFocusableIndex = e.firstFocusableIndex);
     void 0 !== e.isPopupShown && (this.isPopupShown = e.isPopupShown);
     void 0 !== e.isMoreIconOnFocus && (this.isMoreIconOnFocus = e.isMoreIconOnFocus);
     void 0 !== e.isMoreIconOnHover && (this.isMoreIconOnHover = e.isMoreIconOnHover);
@@ -460,6 +391,11 @@ class CollapsibleMenuSection extends ViewPU {
       moduleName: ""
     } : Color.Transparent
   }
+  aboutToAppear() {
+    this.menuItems.forEach(((e, t) => {
+      e.isEnabled && -1 == this.firstFocusableIndex && t > CollapsibleMenuSection.maxCountOfVisibleItems - 2 && (this.firstFocusableIndex = 1e3 * this.index + t + 1)
+    }))
+  }
   initialRender() {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
@@ -491,16 +427,17 @@ class CollapsibleMenuSection extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           ForEach.create();
-          this.forEachUpdateFunction(e, this.menuItems, (e => {
-            const t = e;
-            this.observeComponentCreation(((e, o) => {
+          this.forEachUpdateFunction(e, this.menuItems, ((e, t) => {
+            const o = e;
+            this.observeComponentCreation(((e, i) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
-              o ? ViewPU.create(new ImageMenuItem(this, {
-                item: t
+              i ? ViewPU.create(new ImageMenuItem(this, {
+                item: o,
+                index: 1e3 * this.index + t + 1
               }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
               ViewStackProcessor.StopGetAccessRecording()
             }))
-          }));
+          }), void 0, !0, !1);
           t || ForEach.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -509,16 +446,17 @@ class CollapsibleMenuSection extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           ForEach.create();
-          this.forEachUpdateFunction(e, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (e => {
-            const t = e;
-            this.observeComponentCreation(((e, o) => {
+          this.forEachUpdateFunction(e, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), ((e, t) => {
+            const o = e;
+            this.observeComponentCreation(((e, i) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
-              o ? ViewPU.create(new ImageMenuItem(this, {
-                item: t
+              i ? ViewPU.create(new ImageMenuItem(this, {
+                item: o,
+                index: 1e3 * this.index + t + 1
               }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
               ViewStackProcessor.StopGetAccessRecording()
             }))
-          }));
+          }), void 0, !0, !1);
           t || ForEach.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -584,7 +522,10 @@ class CollapsibleMenuSection extends ViewPU {
             placement: Placement.Bottom,
             popupColor: Color.White,
             enableArrow: !1,
-            onStateChange: e => this.isPopupShown = e.isVisible
+            onStateChange: e => {
+              this.isPopupShown = e.isVisible;
+              e.isVisible || (this.isMoreIconOnClick = !1)
+            }
           });
           t || Row.pop();
           ViewStackProcessor.StopGetAccessRecording()
@@ -616,6 +557,9 @@ class CollapsibleMenuSection extends ViewPU {
         top: CollapsibleMenuSection.focusPadding,
         bottom: CollapsibleMenuSection.focusPadding
       });
+      Column.onAppear((() => {
+        focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+      }));
       t || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -624,10 +568,11 @@ class CollapsibleMenuSection extends ViewPU {
       ForEach.create();
       this.forEachUpdateFunction(e, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), ((e, t) => {
         const o = e;
-        this.observeComponentCreation(((e, t) => {
+        this.observeComponentCreation(((e, i) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
-          t ? ViewPU.create(new ImageMenuItem(this, {
-            item: o
+          i ? ViewPU.create(new ImageMenuItem(this, {
+            item: o,
+            index: 1e3 * this.index + CollapsibleMenuSection.maxCountOfVisibleItems + t
           }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
           ViewStackProcessor.StopGetAccessRecording()
         }))
@@ -650,6 +595,7 @@ class ImageMenuItem extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
     this.item = void 0;
+    this.index = void 0;
     this.__isOnFocus = new ObservedPropertySimplePU(!1, this, "isOnFocus");
     this.__isOnHover = new ObservedPropertySimplePU(!1, this, "isOnHover");
     this.__isOnClick = new ObservedPropertySimplePU(!1, this, "isOnClick");
@@ -657,6 +603,7 @@ class ImageMenuItem extends ViewPU {
   }
   setInitiallyProvidedValue(e) {
     void 0 !== e.item && (this.item = e.item);
+    void 0 !== e.index && (this.index = e.index);
     void 0 !== e.isOnFocus && (this.isOnFocus = e.isOnFocus);
     void 0 !== e.isOnHover && (this.isOnHover = e.isOnHover);
     void 0 !== e.isOnClick && (this.isOnClick = e.isOnClick)
@@ -793,6 +740,7 @@ class ImageMenuItem extends ViewPU {
       Image.width(ImageMenuItem.imageSize);
       Image.height(ImageMenuItem.imageSize);
       Image.focusable(this.item.isEnabled);
+      Image.key(ImageMenuItem.focusablePrefix + this.index);
       t || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -807,6 +755,7 @@ ImageMenuItem.imageHotZoneWidth = 48;
 ImageMenuItem.buttonBorderRadius = 8;
 ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.disabledImageOpacity = .4;
+ImageMenuItem.focusablePrefix = "Id-ComposeTitleBar-ImageMenuItem-";
 export default {
   ComposeTitleBar: ComposeTitleBar
 };

@@ -79,6 +79,7 @@ export struct SelectTitleBar {
   private static readonly rightPadding = 24
   private static readonly badgePadding = 16
   private static readonly subtitleLeftPadding = 4
+  private static instanceCount = 0
 
   @State selectMaxWidth: number = 0
   @State backActive: boolean = false
@@ -97,7 +98,7 @@ export struct SelectTitleBar {
             value: PUBLIC_BACK,
             isEnabled: true,
             action: () => this.backActive = true
-          } })
+          }, index: -1 })
         }
 
         Column() {
@@ -165,7 +166,7 @@ export struct SelectTitleBar {
       .margin({ left: this.hidesBackButton ? $r('sys.float.ohos_id_max_padding_start') : $r('sys.float.ohos_id_default_padding_start') })
 
       if (this.menuItems !== undefined && this.menuItems.length > 0) {
-        CollapsibleMenuSection({ menuItems: this.menuItems })
+        CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + SelectTitleBar.instanceCount++ })
       }
     }
     .width('100%')
@@ -198,10 +199,12 @@ export struct SelectTitleBar {
 @Component
 struct CollapsibleMenuSection {
   menuItems: Array<SelectTitleBarMenuItem>
+  index: number
 
   static readonly maxCountOfVisibleItems = 3
   private static readonly focusPadding = 4
   private static readonly marginsNum = 2
+  private firstFocusableIndex = -1
 
   @State isPopupShown: boolean = false
 
@@ -225,16 +228,24 @@ struct CollapsibleMenuSection {
     }
   }
 
+  aboutToAppear() {
+    this.menuItems.forEach((item, index) => {
+      if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        this.firstFocusableIndex = this.index * 1000 + index + 1
+      }
+    })
+  }
+
   build() {
     Column() {
       Row() {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item) => {
-            ImageMenuItem({ item: item })
+          ForEach(this.menuItems, (item, index) => {
+            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item) => {
-            ImageMenuItem({ item: item })
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item, index) => {
+            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
 
           Row() {
@@ -293,7 +304,12 @@ struct CollapsibleMenuSection {
             placement: Placement.Bottom,
             popupColor: Color.White,
             enableArrow: false,
-            onStateChange: (e) => this.isPopupShown = e.isVisible
+            onStateChange: (e) => {
+              this.isPopupShown = e.isVisible
+              if (!e.isVisible) {
+                this.isMoreIconOnClick = false
+              }
+            }
           })
         }
       }
@@ -303,26 +319,32 @@ struct CollapsibleMenuSection {
     .justifyContent(FlexAlign.Center)
   }
 
-  @Builder popupBuilder() {
+  @Builder
+  popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item, _index?) => {
-        ImageMenuItem({ item: item })
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item, index) => {
+        ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
       })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
+    .onAppear(() => {
+      focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+    })
   }
 }
 
 @Component
 struct ImageMenuItem {
   item: SelectTitleBarMenuItem
+  index: number
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
   static readonly buttonBorderRadius = 8
   static readonly focusBorderWidth = 2
   static readonly disabledImageOpacity = 0.4
+  static readonly focusablePrefix = "Id-SelectTitleBar-ImageMenuItem-"
 
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
@@ -350,6 +372,7 @@ struct ImageMenuItem {
         .width(ImageMenuItem.imageSize)
         .height(ImageMenuItem.imageSize)
         .focusable(this.item.isEnabled)
+        .key(ImageMenuItem.focusablePrefix + this.index)
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
