@@ -295,9 +295,15 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
+#ifndef USE_GRAPHIC_TEXT_GINE // support sigleline
+    if (isInlineStyle && pattern->IsSelected()) {
+        pattern->SetSingleLineHeight(preferredHeight);
+    }
+#else // support multi-line
     if (isInlineStyle && pattern->IsSelected() && paragraph_->GetLineCount() != 0) {
         pattern->SetSingleLineHeight(preferredHeight / paragraph_->GetLineCount());
     }
+#endif
 #ifndef USE_GRAPHIC_TEXT_GINE
     paragraphWidth_ = paragraph_->GetLongestLine();
 #else

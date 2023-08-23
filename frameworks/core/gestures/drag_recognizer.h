@@ -218,17 +218,10 @@ private:
             return;
         }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-        auto marker = EventMarker(
-            [this, f = std::forward<TFunc>(func), args = std::make_tuple(std::forward<Ts>(args)...)]() mutable {
-                std::apply(f, std::move(args));
-            });
-#else
         auto marker = EventMarker(
             [f = std::forward<TFunc>(func), args = std::make_tuple(std::forward<Ts>(args)...)]() mutable {
                 std::apply(f, std::move(args));
             });
-#endif
 
         ctx->FireAsyncEvent(std::move(marker));
     }

@@ -135,7 +135,9 @@ template("build_component") {
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
-        external_deps += [ "graphic_2d:rosen_text" ]
+        if (enable_graphic_text_gine) {
+          external_deps += [ "graphic_2d:rosen_text" ]
+        }
         if (is_cross_platform_build) {
           deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
         } else {
