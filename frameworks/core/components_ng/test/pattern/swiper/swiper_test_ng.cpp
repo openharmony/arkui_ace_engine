@@ -3828,9 +3828,8 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
     auto rightArrowGeometryNode = rightArrowNodeWrapper->GetGeometryNode();
     ASSERT_NE(rightArrowGeometryNode, nullptr);
     auto rightArrowOffset = rightArrowGeometryNode->GetMarginFrameOffset();
-
-    EXPECT_EQ(leftArrowOffset, OffsetF(214.0f, 196.0f));
-    EXPECT_EQ(rightArrowOffset, OffsetF(394.0f, 196.0f));
+    EXPECT_EQ(leftArrowOffset, OffsetF(286.0f, 196.0f));
+    EXPECT_EQ(rightArrowOffset, OffsetF(322.0f, 196.0f));
 
     /**
      * @tc.cases: case2. Axis is HORIZONTAL, arrow is outside the switch.
@@ -3865,8 +3864,8 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
 
     leftArrowOffset = leftArrowGeometryNode->GetMarginFrameOffset();
     rightArrowOffset = rightArrowGeometryNode->GetMarginFrameOffset();
-    EXPECT_EQ(leftArrowOffset, OffsetF(12.0f, 14.0f));
-    EXPECT_EQ(rightArrowOffset, OffsetF(12.0f, 150.0f));
+    EXPECT_EQ(leftArrowOffset, OffsetF(12.0f, 64.0f));
+    EXPECT_EQ(rightArrowOffset, OffsetF(12.0f, 100.0f));
 
     /**
      * @tc.cases: case5. Axis is VERTICAL, arrow is outside the switch.
@@ -3877,9 +3876,8 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayout005, TestSize.Level1)
 
     leftArrowOffset = leftArrowGeometryNode->GetMarginFrameOffset();
     rightArrowOffset = rightArrowGeometryNode->GetMarginFrameOffset();
-
-    EXPECT_EQ(leftArrowOffset, OffsetF(12.0f, 0.0f));
-    EXPECT_EQ(rightArrowOffset, OffsetF(12.0f, 204.0f));
+    EXPECT_EQ(leftArrowOffset, OffsetF(12.0f, 89.0f));
+    EXPECT_EQ(rightArrowOffset, OffsetF(12.0f, 125.0f));
 
     /**
      * @tc.cases: case6. Axis is VERTICAL, arrow is in the switch, not show indicator.
@@ -4108,11 +4106,11 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPaintNormalIndicator001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call PaintNormalIndicator.
-     * @tc.expected: paintMethod->normalMargin_.X is 336.0
-     *               paintMethod->normalMargin_.Y is 547.5
+     * @tc.expected: paintMethod->normalMargin_.X is 342.0
+     *               paintMethod->normalMargin_.Y is 548.5
      */
     paintMethod->PaintNormalIndicator(&paintWrapper);
-    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 347.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 342.0);
     EXPECT_EQ(paintMethod->normalMargin_.GetY(), 548.5);
 }
 
@@ -4163,11 +4161,11 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPaintNormalIndicator002, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call PaintNormalIndicator.
-     * @tc.expected: paintMethod->normalMargin_.X is 196.0
-     *               paintMethod->normalMargin_.Y is 547.5
+     * @tc.expected: paintMethod->normalMargin_.X is 202.0
+     *               paintMethod->normalMargin_.Y is 548.5
      */
     paintMethod->PaintNormalIndicator(&paintWrapper);
-    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 207.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 202.0);
     EXPECT_EQ(paintMethod->normalMargin_.GetY(), 548.5);
 }
 

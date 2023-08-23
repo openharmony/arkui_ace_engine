@@ -229,8 +229,11 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
     auto itemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
     auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
     auto selectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
-    auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
-    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount_ - 1));
+    auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
+    if (IsCustomSizeValue_) {
+        allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
+    }
+    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount_ - 1);
     auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
     auto contentHeight = indicatorPadding + itemHeight + indicatorPadding;
