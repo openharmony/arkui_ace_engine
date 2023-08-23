@@ -713,7 +713,7 @@ float TabBarLayoutAlgorithm::CalculateFrontChildrenMainSize(LayoutWrapper* layou
         auto childFrameSize = childGeometryNode->GetMarginFrameSize();
         frontChildrenMainSize += childFrameSize.MainSize(axis);
     }
-    return frontChildrenMainSize;
+    return indicator == 0 ? 0.0f : frontChildrenMainSize;
 }
 
 void TabBarLayoutAlgorithm::LayoutChildren(
@@ -810,7 +810,7 @@ float TabBarLayoutAlgorithm::CalculateBackChildrenMainSize(LayoutWrapper* layout
         auto childFrameSize = childGeometryNode->GetMarginFrameSize();
         backChildrenMainSize += childFrameSize.MainSize(axis);
     }
-    return backChildrenMainSize;
+    return indicator == childCount - 1 ? 0.0f : backChildrenMainSize;
 }
 
 GridSizeType TabBarLayoutAlgorithm::GetGridSizeType(const SizeF& frameSize) const
