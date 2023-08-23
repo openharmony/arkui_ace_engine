@@ -2101,4 +2101,167 @@ HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest006, TestSize.Level
     barItemPattern->UpdateBarItemActiveStatusResource();
     EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::INITIAL);
 }
+
+/**
+ * @tc.name: NavigationModelNG007
+ * @tc.desc: Test NavigationPattern::CheckTopNavPathChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    ASSERT_NE(AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode()), nullptr);
+    /**
+     * @tc.steps: step2. construct correct arguments of navigationPattern->CheckTopNavPathChange then call it.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    navigationPattern->DoNavigationTransitionAnimation(nullptr, nullptr, false);
+    navigationPattern->DoNavigationTransitionAnimation(preTopNavDestination, nullptr, false);
+    ASSERT_EQ(preTopNavDestination->transitionType_, PageTransitionType::EXIT_POP);
+    navigationPattern->DoNavigationTransitionAnimation(nullptr, newTopNavDestination, false);
+    ASSERT_EQ(newTopNavDestination->transitionType_, PageTransitionType::ENTER_PUSH);
+    navigationPattern->DoNavigationTransitionAnimation(preTopNavDestination, newTopNavDestination, false);
+    ASSERT_EQ(newTopNavDestination->transitionType_, PageTransitionType::ENTER_PUSH);
+    navigationPattern->DoNavigationTransitionAnimation(preTopNavDestination, newTopNavDestination, true);
+    ASSERT_EQ(preTopNavDestination->transitionType_, PageTransitionType::EXIT_POP);
+}
+
+/**
+ * @tc.name: NavigationModelNG008
+ * @tc.desc: Test NavigationPattern::OnNavBarStateChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    ASSERT_NE(AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode()), nullptr);
+
+    /**
+     * @tc.steps: step2. construct correct condition of navigationPattern->OnNavBarStateChange then call it.
+     * @tc.expected: check whether the properties is correct.
+     */
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    navigationPattern->GetLayoutProperty<NavigationLayoutProperty>()->propHideNavBar_ = false;
+    navigationPattern->OnNavBarStateChange(true);
+    ASSERT_FALSE(navigationPattern->GetLayoutProperty<NavigationLayoutProperty>()->propHideNavBar_.value());
+
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    navigationPattern->GetLayoutProperty<NavigationLayoutProperty>()->propHideNavBar_ = false;
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationPattern->navigationStack_->Add("preTopNavDestination", preTopNavDestination);
+    navigationPattern->OnNavBarStateChange(true);
+    ASSERT_FALSE(navigationPattern->navigationStack_->Empty());
+
+    navigationPattern->navBarVisibilityChange_ = false;
+    navigationPattern->OnNavBarStateChange(false);
+
+    navigationPattern->navBarVisibilityChange_ = true;
+    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    navigationPattern->OnNavBarStateChange(false);
+
+    navigationPattern->navBarVisibilityChange_ = true;
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    navigationPattern->OnNavBarStateChange(false);
+    ASSERT_FALSE(navigationPattern->navBarVisibilityChange_);
+
+    navigationPattern->navBarVisibilityChange_ = true;
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    navigationPattern->GetLayoutProperty<NavigationLayoutProperty>()->propHideNavBar_ = true;
+    navigationPattern->OnNavBarStateChange(false);
+    ASSERT_FALSE(navigationPattern->navBarVisibilityChange_);
+}
+
+/**
+ * @tc.name: NavigationModelNG009
+ * @tc.desc: Test NavigationPattern::OnDirtyLayoutWrapperSwap && UpdateTitleModeChangeEventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    ASSERT_NE(AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode()), nullptr);
+    /**
+     * @tc.steps: step2. construct correct arguments of navigationPattern->OnDirtyLayoutWrapperSwap then call it.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto dirty = navigation->CreateLayoutWrapper();
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+
+    auto preTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 100, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationPattern->navigationStack_->Add("preTopNavDestination", preTopNavDestination);
+
+    navigationPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    /**
+     * @tc.steps: step3. construct correct condition of navigationPattern->UpdateTitleModeChangeEventHub() then call it.
+     * @tc.expected: check whether the properties is correct.
+     */
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigation->navBarNode_);
+    ASSERT_NE(navBarNode, nullptr);
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    ASSERT_NE(navBarProperty, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->titleBarNode_);
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+
+    titleBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FULL;
+    navigationPattern->UpdateTitleModeChangeEventHub(navigation);
+    ASSERT_EQ(titleBarLayoutProperty->propTitleMode_.value(), NavigationTitleMode::FULL);
+
+    titleBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    titleBarPattern->titleMode_ = NavigationTitleMode::FULL;
+    navigationPattern->titleMode_ = NavigationTitleMode::FREE;
+    navigationPattern->UpdateTitleModeChangeEventHub(navigation);
+
+    titleBarLayoutProperty->propTitleMode_ = NavigationTitleMode::FREE;
+    titleBarPattern->titleMode_ = NavigationTitleMode::FULL;
+    navigationPattern->titleMode_ = NavigationTitleMode::FULL;
+    navigationPattern->UpdateTitleModeChangeEventHub(navigation);
+    /**
+     * @tc.steps: step3. construct correct condition of navigationPattern->UpdateContextRect() then call it.
+     * @tc.expected: check whether the properties is correct.
+     */
+    navigationPattern->UpdateContextRect(preTopNavDestination, navigation);
+    ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::INVISIBLE);
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    navigationPattern->UpdateContextRect(preTopNavDestination, navigation);
+    ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::VISIBLE);
+}
 } // namespace OHOS::Ace::NG
