@@ -414,6 +414,18 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
+    auto sideBarIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+        CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true).ConvertToSizeT():
+        CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    realSideBarHeight_ = sideBarIdealSize.Height() - padding.top.value_or(0) - padding.bottom.value_or(0);
+    if (LessNotEqual(realSideBarHeight_, 0.0f)) {
+        realSideBarHeight_ = 0.0f;
+    }
+    sideBarIdealSize.SetWidth(realSideBarWidth_);
+    sideBarIdealSize.SetHeight(realSideBarHeight_);
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -422,32 +434,20 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
         CHECK_NULL_VOID(sideBarLayoutProperty);
         auto&& calcConstraint = sideBarLayoutProperty->GetCalcLayoutConstraint();
         if (calcConstraint) {
-            if (layoutProperty->GetMaxSideBarWidth().has_value() && calcConstraint->maxSize.has_value()) {
-                auto maxWidth = adjustMaxSideBarWidth_.ConvertToPx();
-                auto maxHeight = calcConstraint->maxSize->Height();
-                calcConstraint->UpdateMaxSizeWithCheck(CalcSize(CalcLength(maxWidth), maxHeight));
+            if (calcConstraint->maxSize.has_value()) {
+                auto maxWidth = CalcLength(realSideBarWidth_);
+                auto maxHeight = CalcLength(realSideBarHeight_);
+                calcConstraint->UpdateMaxSizeWithCheck(CalcSize(maxWidth, maxHeight));
             }
 
-            if (layoutProperty->GetMinSideBarWidth().has_value() && calcConstraint->minSize.has_value()) {
-                auto minWidth = adjustMinSideBarWidth_.ConvertToPx();
-                auto minHeight = calcConstraint->minSize->Height();
-                calcConstraint->UpdateMinSizeWithCheck(CalcSize(CalcLength(minWidth), minHeight));
+            if (calcConstraint->minSize.has_value()) {
+                auto minWidth = CalcLength(realSideBarWidth_);
+                auto minHeight = CalcLength(realSideBarHeight_);
+                calcConstraint->UpdateMinSizeWithCheck(CalcSize(minWidth, minHeight));
             }
         }
     }
 
-    auto sideBarIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
-        CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
-        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true).ConvertToSizeT():
-        CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
-        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
-    const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    sideBarIdealSize.SetWidth(realSideBarWidth_);
-    realSideBarHeight_ = sideBarIdealSize.Height() - padding.top.value_or(0) - padding.bottom.value_or(0);
-    if (LessNotEqual(realSideBarHeight_, 0.0f)) {
-        realSideBarHeight_ = 0.0f;
-    }
-    sideBarIdealSize.SetHeight(realSideBarHeight_);
     auto sideBarConstraint = layoutProperty->CreateChildConstraint();
     sideBarConstraint.selfIdealSize = OptionalSizeF(sideBarIdealSize);
 
