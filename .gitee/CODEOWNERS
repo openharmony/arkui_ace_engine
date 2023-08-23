@@ -323,7 +323,7 @@ frameworks/core/components_ng/test/pattern/container_modal/  @suiwuyue
 frameworks/core/components_ng/test/pattern/counter/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/custom/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/custom_paint/  @zhangbingce
-frameworks/core/components_ng/test/pattern/data_panel/  @zcdqs
+frameworks/core/components_ng/test/pattern/data_panel/  @jinweiliu
 frameworks/core/components_ng/test/pattern/dialog/  @zhao-xinyu007
 frameworks/core/components_ng/test/pattern/divider/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/effect_component/  @liuchao92
