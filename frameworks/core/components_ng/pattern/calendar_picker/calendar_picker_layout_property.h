@@ -34,16 +34,6 @@ public:
     CalendarPickerLayoutProperty() : LinearLayoutProperty(false) {};
     ~CalendarPickerLayoutProperty() override = default;
 
-    RefPtr<LayoutProperty> Clone() const override
-    {
-        auto value = MakeRefPtr<CalendarPickerLayoutProperty>();
-        value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
-        value->propDialogAlignType_ = CloneDialogAlignType();
-        value->propDialogOffset_ = CloneDialogOffset();
-        value->propTextStyle_ = CloneTextStyle();
-        return value;
-    }
-
     void Reset() override
     {
         LinearLayoutProperty::Reset();
@@ -56,6 +46,7 @@ public:
     {
         LayoutProperty::ToJsonValue(json);
         auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
         RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
         CHECK_NULL_VOID(calendarTheme);
         auto dialogALignType = GetDialogAlignType().value_or(CalendarEdgeAlign::EDGE_ALIGN_END);
@@ -75,15 +66,18 @@ public:
         CHECK_NULL_VOID(jsonDialogAlign);
         jsonDialogAlign->Put("alignType", alignType.c_str());
         auto jsonOffset = JsonUtil::Create(true);
+        CHECK_NULL_VOID(jsonOffset);
         jsonOffset->Put("dx", dialogOffset.GetX().ToString().c_str());
         jsonOffset->Put("dy", dialogOffset.GetY().ToString().c_str());
         jsonDialogAlign->Put("offset", jsonOffset);
         json->Put("edgeAlign", jsonDialogAlign);
 
         auto font = JsonUtil::Create(true);
+        CHECK_NULL_VOID(font);
         font->Put("size", GetFontSize().value_or(calendarTheme->GetEntryFontSize()).ToString().c_str());
         font->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
         auto textStyle = JsonUtil::Create(true);
+        CHECK_NULL_VOID(textStyle);
         textStyle->Put("color", GetColor().value_or(calendarTheme->GetEntryFontColor()).ColorToString().c_str());
         textStyle->Put("font", font);
         json->Put("textStyle", textStyle);
@@ -96,6 +90,17 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(TextStyle, FontSize, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(TextStyle, TextColor, Color, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(TextStyle, FontWeight, Weight, FontWeight, PROPERTY_UPDATE_MEASURE);
+
+protected:
+    RefPtr<LayoutProperty> Clone() const override
+    {
+        auto value = MakeRefPtr<CalendarPickerLayoutProperty>();
+        value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
+        value->propDialogAlignType_ = CloneDialogAlignType();
+        value->propDialogOffset_ = CloneDialogOffset();
+        value->propTextStyle_ = CloneTextStyle();
+        return value;
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPickerLayoutProperty);
