@@ -77,15 +77,34 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
  * - IfElseNode::FlushUpdateAndMarkDirty is called upon If.Pop()  FIXME
  */
 
-void IfElseNode::SetBranchId(int32_t value)
+void IfElseNode::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
 {
     branchIdChanged_ = (branchId_ != value);
     if (branchIdChanged_) {
-        LOGD("%{public}s id %{public}d, branchId changed to %{public}d", AceType::TypeName(this), GetId(), value);
-        // TODO check if we need to do anything to properly unregister old children!
-        // same issue to check for ForEach CompareAndUpdateChildren
+        LOGE("%{public}s id %{public}d, branchId changed to %{public}d", AceType::TypeName(this), GetId(), value);
+        // collect elmtIds of all children and their children up to CustomNode object
+        // these will be removed, but possibly with a delay if their is an animation
+        // list of elmtIds is sent back to calling TS ViewPU.ifElseBranchUpdateFunction()
+        CollectRemovedChildren(GetChildren(), removedElmtId);
         Clean(false, true);
         branchId_ = value;
+    }
+}
+
+void IfElseNode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId)
+{
+    for (auto const& child : children) {
+        CollectRemovedChild(child, removedElmtId);
+    }
+}
+
+void IfElseNode::CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId)
+{
+    LOGE("add %s elmtId %d", child->GetTag().c_str(), (int32_t)child->GetId());
+    removedElmtId.emplace_back(child->GetId());
+    if (child->GetTag() != V2::JS_VIEW_ETS_TAG) {
+        // add CustomNode but do not recurse into its children
+        CollectRemovedChildren(child->GetChildren(), removedElmtId);
     }
 }
 

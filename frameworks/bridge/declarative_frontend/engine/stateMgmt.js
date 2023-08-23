@@ -1767,16 +1767,16 @@ Environment.instance_ = undefined;
 */
 class stateMgmtConsole {
     static log(...args) {
-        aceConsole.log(...args);
+        aceConsole.error(...args);
     }
     static debug(...args) {
-        aceConsole.debug(...args);
+        aceConsole.error(...args);
     }
     static info(...args) {
-        aceConsole.info(...args);
+        aceConsole.error(...args);
     }
     static warn(...args) {
-        aceConsole.warn(...args);
+        aceConsole.error(...args);
     }
     static error(...args) {
         aceConsole.error(...args);
@@ -4749,8 +4749,25 @@ class ViewPU extends NativeViewPartialUpdate {
             
             return;
         }
-        If.branchId(branchId);
-        branchfunc();
+        // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
+        // ifElseNode stores the most recent branch, so we can compare
+        // removedChildElmtIds will be filled with the elmtIds of all childten and their children will be deleted in response to if .. else chnage
+        let removedChildElmtIds = new Array();
+        If.branchId(branchId, removedChildElmtIds);
+        // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
+        
+        this.purgeDeletedElmtIds(removedChildElmtIds);
+        // option 2 below:
+        // this solution also works if the C++ side adds the UINodes to ElementRegister right away
+        // I understand (to be conformed) adding can have a delay if there is an animation
+        // then above solution will still work (should get a test case)
+        //let deletedElmtIds: number[] = [];
+        //this.getDeletedElemtIds(deletedElmtIds);
+        //
+        // this.purgeDeletedElmtIds(deletedElmtIds);
+        if (branchfunc) {
+            branchfunc();
+        }
     }
     /**
      Partial updates for ForEach.

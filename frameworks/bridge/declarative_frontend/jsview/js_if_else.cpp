@@ -73,4 +73,26 @@ void JSIfElse::CanRetake(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
+// JS signature branchId(branchId: number, removedIfElseChildelmtIds : Array<number>)
+void JSIfElse::SetBranchId(const JSCallbackInfo& info)
+{
+      if ((info.Length() < 2) || (!info[0]->IsNumber()) || (!info[1]->IsArray())) {
+        LOGE("invalid JS function signature: required SetBranchId(branchId, Array<number>)");
+        return;
+      }
+    const int32_t branchid = info[0]->ToNumber<int32_t>();
+    std::list<int32_t> removedElmtIds;
+    IfElseModel::GetInstance()->SetBranchId(branchid, removedElmtIds);
+
+    if (!removedElmtIds.size()) {
+        return;
+    }
+    // convert list of removed elmtIds: std::list to JSArray<number>
+    JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(info[1]);
+    size_t index = jsArr->Length();
+    for (const auto& rmElmtId : removedElmtIds) {
+        LOGE("rmElmtId %d", rmElmtId);
+        jsArr->SetValueAt(index++, JSRef<JSVal>::Make(ToJSValue(rmElmtId)));
+    }
+}
 } // namespace OHOS::Ace::Framework
