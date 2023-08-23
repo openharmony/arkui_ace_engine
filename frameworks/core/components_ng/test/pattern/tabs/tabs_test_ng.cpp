@@ -3328,6 +3328,263 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint001, TestSize.Lev
 }
 
 /**
+ * @tc.name: TabBarLayoutAlgorithmMeasureMaxHeight002
+ * @tc.desc: test MeasureMaxHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasureMaxHeight002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(tabsLayoutAlgorithm, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    LayoutWrapperNode layoutWrapper_test =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    ASSERT_NE(swiperNode, nullptr);
+    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode, geometryNode1, swiperNode->GetLayoutProperty());
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(swiperLayoutWrapper);
+
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    SizeF frameSize(SizeF(0.0f, 0.0f));
+
+    /**
+     * @tc.steps: step2. call MeasureMaxHeight function.
+     * @tc.expected: The function is run ok.
+     */
+    tabBarLayoutAlgorithm->MeasureMaxHeight(&layoutWrapper, 5);
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+    tabBarLayoutAlgorithm->MeasureMaxHeight(&layoutWrapper, 5);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmMeasureItemWidths002
+ * @tc.desc: test MeasureItemWidths
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmMeasureItemWidths002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(tabsLayoutAlgorithm, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    LayoutWrapperNode layoutWrapper_test =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode, geometryNode1, swiperNode->GetLayoutProperty());
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(swiperLayoutWrapper);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+
+    /**
+     * @tc.steps: step2. call MeasureItemWidths function.
+     * @tc.expected: The function is run ok.
+     */
+    tabBarLayoutAlgorithm->MeasureItemWidths(&layoutWrapper, 5);
+
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+    tabBarLayoutAlgorithm->MeasureItemWidths(&layoutWrapper, 5);
+    EXPECT_EQ(tabBarLayoutAlgorithm->maxHeight_, 0);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle003
+ * @tc.desc: test HandleAlwaysAverageSplitLayoutStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(tabsLayoutAlgorithm, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    LayoutWrapperNode layoutWrapper_test =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    ASSERT_NE(swiperNode, nullptr);
+    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode, geometryNode1, swiperNode->GetLayoutProperty());
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(swiperLayoutWrapper);
+
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. call HandleAlwaysAverageSplitLayoutStyle function.
+     * @tc.expected: The function is run ok.
+     */
+    tabBarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, FIRST_ITEM_SIZE, 5);
+
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+    tabBarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, FIRST_ITEM_SIZE, 5);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayoutStyle002
+ * @tc.desc: test HandleSpaceBetweenOrCenterLayoutStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayoutStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(tabsLayoutAlgorithm, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    LayoutWrapperNode layoutWrapper_test =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    ASSERT_NE(swiperNode, nullptr);
+    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode, geometryNode1, swiperNode->GetLayoutProperty());
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(swiperLayoutWrapper);
+
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    SizeF frameSize(SizeF(0.0f, 0.0f));
+    /**
+     * @tc.steps: step2. call HandleSpaceBetweenOrCenterLayoutStyle function.
+     * @tc.expected: The function is run ok.
+     */
+    tabBarLayoutAlgorithm->HandleSpaceBetweenOrCenterLayoutStyle(&layoutWrapper, FIRST_ITEM_SIZE, 5);
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+    tabBarLayoutAlgorithm->HandleSpaceBetweenOrCenterLayoutStyle(&layoutWrapper, FIRST_ITEM_SIZE, 5);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmGetGridSizeType002
+ * @tc.desc: test GetGridSizeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmGetGridSizeType002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(tabsLayoutAlgorithm, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabBarNode, geometryNode, tabBarNode->GetLayoutProperty<TabBarLayoutProperty>());
+
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    /**
+     * @tc.steps: step2. call GetGridSizeType function.
+     * @tc.expected: The function is run ok.
+     */
+    tabBarLayoutAlgorithm->GetGridSizeType(FIRST_ITEM_SIZE);
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+    tabBarLayoutAlgorithm->GetGridSizeType(FIRST_ITEM_SIZE);
+}
+
+/**
  * @tc.name: TabBarLayoutAlgorithmCalculateBackChildrenMainSize001
  * @tc.desc: test CalculateBackChildrenMainSize
  * @tc.type: FUNC
