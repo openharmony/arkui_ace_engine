@@ -166,7 +166,7 @@ bool CreateCubicCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsV
     double x1 = argv[2]->ToDouble(runtime);
     double y1 = argv[3]->ToDouble(runtime);
     x0 = std::clamp(x0, 0.0, 1.0);
-    x1 = std::clamp(x0, 0.0, 1.0);
+    x1 = std::clamp(x1, 0.0, 1.0);
 
     curve = AceType::MakeRefPtr<CubicCurve>(x0, y0, x1, y1);
     return true;
