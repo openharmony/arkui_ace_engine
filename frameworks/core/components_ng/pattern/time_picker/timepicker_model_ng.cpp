@@ -137,10 +137,7 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
 
 void TimePickerModelNG::SetWheelModeEnabled(bool wheelModeEnabled)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    timePickerRowPattern->SetWheelModeEnabled(wheelModeEnabled);
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, wheelModeEnabled);
 }
 
 void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)
