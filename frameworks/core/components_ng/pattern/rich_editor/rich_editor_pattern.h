@@ -25,7 +25,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
-#include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -86,7 +86,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(spanItemChildren_, paragraph_);
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_);
     }
 
     FocusPattern GetFocusPattern() const override
@@ -94,20 +94,7 @@ public:
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        if (!richEditorContentModifier_) {
-            richEditorContentModifier_ = MakeRefPtr<RichEditorContentModifier>(textStyle_);
-        }
-        if (!richEditorOverlayModifier_) {
-            richEditorOverlayModifier_ = MakeRefPtr<RichEditorOverlayModifier>();
-        }
-        if (isCustomFont_) {
-            richEditorContentModifier_->SetIsCustomFont(true);
-        }
-        return MakeRefPtr<RichEditorPaintMethod>(
-            WeakClaim(this), paragraph_, baselineOffset_, richEditorContentModifier_, richEditorOverlayModifier_);
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     const RefPtr<RichEditorController>& GetRichEditorController()
     {
@@ -137,8 +124,12 @@ public:
     int32_t GetInstanceId() const;
     void InsertValue(const std::string& insertValue);
     void InsertValueByPaste(const std::string& insertValue);
+    bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
         RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
+    void SpanNodeFission(
+        RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
+    void SpanNodeFission(RefPtr<SpanNode>& spanNode);
     void CreateTextSpanNode(
         RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void DeleteBackward(int32_t length = 0);
@@ -163,19 +154,22 @@ public:
     void ClearContent(const RefPtr<UINode>& child);
     void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition);
-    void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
+
+    void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
+    void UpdateParagraphStyle(int32_t start, int32_t end, const TextStyle& textStyle);
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
-    void AddSpanItem(RefPtr<SpanItem> item, int32_t offset);
+    void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
     std::u16string GetLeftTextOfCursor(int32_t number);
     std::u16string GetRightTextOfCursor(int32_t number);
     int32_t GetTextIndexAtCursor();
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false);
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
+    int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
     void HandleOnSelectAll() override;
@@ -201,6 +195,11 @@ public:
         return caretSpanIndex_;
     }
 
+    ParagraphManager* GetParagraphManager()
+    {
+        return &paragraphs_;
+    }
+
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo);
@@ -215,20 +214,30 @@ public:
     bool CloseCustomKeyboard();
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
     {
-        if (customKeyboardBulder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
+        if (customKeyboardBuilder_ && isCustomKeyboardAttached_ && !keyboardBuilder) {
             CloseCustomKeyboard();
         }
-        customKeyboardBulder_ = keyboardBuilder;
+        customKeyboardBuilder_ = keyboardBuilder;
     }
     void BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>& menuBuilder,
-        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
+        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear)
+    {
+        selectionMenuParams_ =
+            std::make_shared<SelectionMenuParams>(richEditorType, menuBuilder, onAppear, onDisappear, type);
+    }
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     bool IsDisabled() const;
+    float GetLineHeight() const override;
+#ifndef USE_GRAPHIC_TEXT_GINE
+    std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override;
+#else
+    std::vector<RSTextRect> GetTextBoxes() override;
+#endif
 
 private:
-    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
+    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
     {
         auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
         bool isShowItem = copyOption_ != CopyOptions::None;
@@ -305,8 +314,8 @@ private:
     bool CloseKeyboard(bool forceClose) override;
     void CalcInsertValueObj(TextInsertValueInfo& info);
     void CalcDeleteValueObj(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
-    int32_t DeleteValueSetImageSpan(const RefPtr<SpanItem> spanItem, RichEditorAbstractSpanResult& spanResult);
-    int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem> spanItem, int32_t currentPosition, int32_t length,
+    int32_t DeleteValueSetImageSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
+    int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
     bool OnKeyEvent(const KeyEvent& keyEvent);
@@ -328,26 +337,34 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
-    int32_t moveLength_ = 0;
-    int32_t instanceId_ = -1;
-    int32_t caretPosition_ = 0;
-    int32_t caretSpanIndex_ = -1;
+
     bool isTextChange_ = false;
     bool caretVisible_ = false;
     bool isRichEditorInit_ = false;
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
     bool blockPress_ = false;
-    bool leftMousePress_ = false;
+    bool isCustomKeyboardAttached_ = false;
+    bool usingMouseRightButton_ = false;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    bool isDragMoving_ = false;
+#endif
+
+    int32_t moveLength_ = 0;
+    int32_t instanceId_ = -1;
+    int32_t caretPosition_ = 0;
+    int32_t caretSpanIndex_ = -1;
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
     OffsetF rightClickOffset_;
+
+    // still in progress
+    ParagraphManager paragraphs_;
+
     RefPtr<TouchEventImpl> touchListener_;
     struct UpdateSpanStyle updateSpanStyle_;
     CancelableCallback<void()> caretTwinklingTask_;
     RefPtr<RichEditorController> richEditorController_;
-    RefPtr<RichEditorContentModifier> richEditorContentModifier_;
-    RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
     RectF frameRect_;
     std::optional<struct UpdateSpanStyle> typingStyle_;
@@ -355,11 +372,10 @@ private:
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
 #endif // ENABLE_DRAG_FRAMEWORK
-    bool isCustomKeyboardAttached_ = false;
-    bool usingMouseRightButton_ = false;
-    std::function<void()> customKeyboardBulder_;
     std::map<std::pair<RichEditorType, ResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
     std::optional<RichEditorType> selectedType_;
+
+    std::function<void()> customKeyboardBuilder_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };

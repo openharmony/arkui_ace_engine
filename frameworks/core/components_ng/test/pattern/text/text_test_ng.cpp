@@ -1735,7 +1735,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest001, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    textPattern->textContentModifier_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    textPattern->cModifier_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
@@ -1820,7 +1820,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     auto pipeline = frameNode->GetContext();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    textPattern->textContentModifier_ =
+    textPattern->cModifier_ =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(std::move(textStyle)));
     auto contentModifier = textPattern->GetContentModifier();
     textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier);
@@ -2562,8 +2562,8 @@ HWTEST_F(TextTestNg, TextPatternTest001, TestSize.Level1)
      */
     auto nodePaintMethod = textPattern->CreateNodePaintMethod();
     ASSERT_NE(nodePaintMethod, nullptr);
-    ASSERT_NE(textPattern->textContentModifier_, nullptr);
-    ASSERT_NE(textPattern->textOverlayModifier_, nullptr);
+    ASSERT_NE(textPattern->cModifier_, nullptr);
+    ASSERT_NE(textPattern->oModifier_, nullptr);
 }
 
 /**
@@ -2729,7 +2729,7 @@ HWTEST_F(TextTestNg, ApplyIndents001, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    rowLayoutAlgorithm->ApplyIndents(textStyle, RECT_WIDTH_VALUE);
+    rowLayoutAlgorithm->ApplyIndent(textStyle, RECT_WIDTH_VALUE);
     auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
     EXPECT_TRUE(ret);
 }
@@ -3264,7 +3264,7 @@ HWTEST_F(TextTestNg, HandleClickEvent002, TestSize.Level1)
     std::list<RefPtr<SpanItem>> spanItemChildren;
     auto spanItemChild1 = AceType::MakeRefPtr<SpanItem>();
     spanItemChildren.emplace_back(spanItemChild1);
-    pattern->spanItemChildren_ = spanItemChildren;
+    pattern->spans_ = spanItemChildren;
 
     /**
      * @tc.steps: step3. create paragraph
@@ -4255,7 +4255,7 @@ HWTEST_F(TextTestNg, ApplyIndents002, TestSize.Level1)
      * @tc.steps: step3. run the ApplyIndents Func.
      * @tc.expected: paragraph_.rawPtr_ is nullptr.
      */
-    rowLayoutAlgorithm->ApplyIndents(textStyle, 10.0);
+    rowLayoutAlgorithm->ApplyIndent(textStyle, 10.0);
     EXPECT_NE(rowLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
 }
 
@@ -4283,7 +4283,7 @@ HWTEST_F(TextTestNg, ApplyIndents003, TestSize.Level1)
      * @tc.steps: step3. run the ApplyIndents Func.
      * @tc.expected: paragraph_.rawPtr_ is nullptr.
      */
-    rowLayoutAlgorithm->ApplyIndents(textStyle, 10.0);
+    rowLayoutAlgorithm->ApplyIndent(textStyle, 10.0);
     EXPECT_NE(rowLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
 }
 

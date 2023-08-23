@@ -15,48 +15,59 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/text/text_content_modifier.h"
+#include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
-RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph,
-    float baselineOffset, RefPtr<RichEditorContentModifier> richEditorContentModifier,
-    RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier)
-    : TextPaintMethod(pattern, paragraph, baselineOffset, richEditorContentModifier, richEditorOverlayModifier),
-      pattern_(pattern), paragraph_(std::move(paragraph)), richEditorOverlayModifier_(richEditorOverlayModifier)
+RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, ParagraphManager* pManager,
+    float baselineOffset, const RefPtr<TextContentModifier>& cModifier,
+    const RefPtr<TextOverlayModifier>& oModifier)
+    : TextPaintMethod(pattern, pManager->GetParagraphs().begin()->paragraph, baselineOffset, cModifier, oModifier),
+      pManager_(pManager)
 {}
-RichEditorPaintMethod::~RichEditorPaintMethod() = default;
 
 void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     TextPaintMethod::UpdateOverlayModifier(paintWrapper);
-    auto richEditorPattern = DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
+    auto oModifier = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     if (!richEditorPattern->HasFocus()) {
-        richEditorOverlayModifier_->SetCaretVisible(false);
+        oModifier->SetCaretVisible(false);
         return;
     }
     auto caretVisible = richEditorPattern->GetCaretVisible();
-    richEditorOverlayModifier_->SetCaretVisible(caretVisible);
-    richEditorOverlayModifier_->SetCaretColor(Color::BLUE.GetValue());
-    richEditorOverlayModifier_->SetCaretWidth(
-        static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
+    oModifier->SetCaretVisible(caretVisible);
+    oModifier->SetCaretColor(Color::BLUE.GetValue());
+    oModifier->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
     if (richEditorPattern->GetTextContentLength() > 0) {
         float caretHeight = 0;
         OffsetF caretOffset =
             richEditorPattern->CalcCursorOffsetByPosition(richEditorPattern->GetCaretPosition(), caretHeight);
-        richEditorOverlayModifier_->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+        oModifier->SetCaretOffsetAndHeight(caretOffset, caretHeight);
     } else {
         auto rect = richEditorPattern->GetTextContentRect();
-        richEditorOverlayModifier_->SetCaretOffsetAndHeight(
+        oModifier->SetCaretOffsetAndHeight(
             OffsetF(rect.GetX(), rect.GetY()), Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx());
     }
     std::vector<Rect> selectedRects;
     const auto& selection = richEditorPattern->GetTextSelector();
     if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-        paragraph_->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
+        selectedRects = pManager_->GetRects(selection.GetTextStart(), selection.GetTextEnd());
     }
     auto contentRect = richEditorPattern->GetTextContentRect();
-    richEditorOverlayModifier_->SetContentRect(contentRect);
-    richEditorOverlayModifier_->SetSelectedRects(selectedRects);
+    oModifier->SetContentRect(contentRect);
+    oModifier->SetSelectedRects(selectedRects);
+}
+
+void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    auto cModifier = DynamicCast<RichEditorContentModifier>(GetContentModifier(paintWrapper));
+    CHECK_NULL_VOID(cModifier);
+    cModifier->SetParagraphManager(pManager_);
+    TextPaintMethod::UpdateContentModifier(paintWrapper);
 }
 } // namespace OHOS::Ace::NG

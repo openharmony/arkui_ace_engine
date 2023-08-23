@@ -21,6 +21,8 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/image/pixel_map.h"
 #include "base/utils/linear_map.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -264,6 +266,26 @@ public:
         textIndent_ = textIndent;
     }
 
+    NG::SizeF GetLeadingMarginSize() const
+    {
+        return leadingMarginSize_;
+    }
+
+    void SetLeadingMarginSize(const NG::SizeF& leadingMarginSize)
+    {
+        leadingMarginSize_ = leadingMarginSize;
+    }
+
+    RefPtr<PixelMap> GetPlaceholder() const
+    {
+        return placeholder_;
+    }
+
+    void SetPlaceholder(const RefPtr<PixelMap>& placeholder)
+    {
+        placeholder_ = placeholder;
+    }
+
     const std::unordered_map<std::string, int32_t>& GetFontFeatures() const
     {
         return fontFeatures_;
@@ -485,6 +507,8 @@ private:
     WhiteSpace whiteSpace_{ WhiteSpace::PRE };
     Dimension wordSpacing_;
     Dimension textIndent_ { 0.0f, DimensionUnit::PX };
+    NG::SizeF leadingMarginSize_ {};
+    RefPtr<PixelMap> placeholder_ {};
     Dimension letterSpacing_;
     uint32_t maxLines_ = UINT32_MAX;
     bool adaptTextSize_ = false;

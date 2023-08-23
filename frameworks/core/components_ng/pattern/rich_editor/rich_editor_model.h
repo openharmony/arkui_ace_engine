@@ -82,6 +82,10 @@ struct UpdateSpanStyle {
         updateFontFamily.reset();
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
+        updateTextAlign.reset();
+        updateTextIndent.reset();
+        updateTextPlaceholder.reset();
+        updateTextLeadingMarginSize.reset();
 
         updateImageWidth.reset();
         updateImageHeight.reset();
@@ -96,6 +100,10 @@ struct UpdateSpanStyle {
     std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
+    std::optional<TextAlign> updateTextAlign = std::nullopt;
+    std::optional<Dimension> updateTextIndent = std::nullopt;
+    std::optional<RefPtr<PixelMap>> updateTextPlaceholder = std::nullopt;
+    std::optional<DimensionSize> updateTextLeadingMarginSize = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;

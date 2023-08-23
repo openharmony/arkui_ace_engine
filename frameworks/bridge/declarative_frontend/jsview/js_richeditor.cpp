@@ -40,6 +40,10 @@
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
+namespace {
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY,
+    TextAlign::LEFT, TextAlign::RIGHT };
+}
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
 std::mutex RichEditorModel::mutex_;
 RichEditorModel* RichEditorModel::GetInstance()
@@ -632,6 +636,45 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
             style.SetTextDecorationColor(decorationColor);
         }
     }
+    auto textAlignObj = styleObject->GetProperty("textAlign");
+    if (!textAlignObj->IsNull() && textAlignObj->IsNumber()) {
+        auto value = textAlignObj->ToNumber<int32_t>();
+        if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+            updateSpanStyle_.updateTextAlign = TEXT_ALIGNS[value];
+            style.SetTextAlign(TEXT_ALIGNS[value]);
+        }
+    }
+    auto leadingMarginObj = styleObject->GetProperty("leadingMargin");
+    JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(leadingMarginObj);
+    if (!leadingMarginObject->IsUndefined()) {
+        LOGI("zxm: leadingMarginObject is defined");
+        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("placeholder");
+        if (IsPixelMap(placeholder)) {
+#if defined(PIXEL_MAP_SUPPORTED)
+            auto pixelMap = CreatePixelMapFromNapiValue(placeholder);
+            updateSpanStyle_.updateTextPlaceholder = pixelMap;
+            style.SetPlaceholder(pixelMap);
+#endif
+        }
+
+        JSRef<JSVal> sizeVal = leadingMarginObject->GetProperty("size");
+        if (!sizeVal->IsUndefined() && sizeVal->IsArray()) {
+            auto rangeArray = JSRef<JSArray>::Cast(sizeVal);
+            JSRef<JSVal> widthVal = rangeArray->GetValueAt(0);
+            JSRef<JSVal> heightVal = rangeArray->GetValueAt(1);
+
+            CalcDimension width;
+            CalcDimension height;
+            JSContainerBase::ParseJsDimensionVp(widthVal, width);
+            JSContainerBase::ParseJsDimensionVp(heightVal, height);
+            DimensionSize dimensionSize = { width, height };
+            LOGI("zxm: leadingMarginObject size=%{public}s", dimensionSize.ToString().c_str());
+            updateSpanStyle_.updateTextLeadingMarginSize = dimensionSize;
+            updateSpanStyle_.updateTextIndent.emplace(width);
+            style.SetTextIndent(width);
+            style.SetLeadingMarginSize(NG::SizeF(width.ConvertToPx(), height.ConvertToPx()));
+        }
+    }
     return style;
 }
 
@@ -735,6 +778,20 @@ bool JSRichEditorController::IsDrawable(const JSRef<JSVal>& jsValue)
         return false;
     }
     JSRef<JSVal> func = jsObj->GetProperty("getPixelMap");
+    return (!func->IsNull() && func->IsFunction());
+}
+
+bool JSRichEditorController::IsPixelMap(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (jsObj->IsUndefined()) {
+        return false;
+    }
+    JSRef<JSVal> func = jsObj->GetProperty("readPixelsToBuffer");
+    LOGI("zxm IsPixelMap");
     return (!func->IsNull() && func->IsFunction());
 }
 

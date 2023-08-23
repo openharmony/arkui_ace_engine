@@ -180,8 +180,7 @@ public:
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func);
     bool FireAboutToDelete(const RichEditorDeleteValue& info);
     void SetOnDeleteComplete(std::function<void()>&& func);
-    void FireOndeleteComplete();
-
+    void FireOnDeleteComplete();
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type) override;
 
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)

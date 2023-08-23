@@ -300,4 +300,11 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     builder->PopStyle();
     return index;
 }
+
+void SpanItem::GetIndex(int32_t& start, int32_t& end) const
+{
+    auto contentLen = StringUtils::ToWstring(content).length();
+    start = position - contentLen;
+    end = position;
+}
 } // namespace OHOS::Ace::NG

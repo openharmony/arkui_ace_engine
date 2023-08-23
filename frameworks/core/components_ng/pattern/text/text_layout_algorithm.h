@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H
 
+#include <list>
 #include <optional>
 #include <string>
 #include <utility>
@@ -25,6 +26,7 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -37,8 +39,8 @@ class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm {
 public:
     TextLayoutAlgorithm();
 
-    TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren, const RefPtr<Paragraph>& paragraph)
-        : spanItemChildren_(std::move(spanItemChildren)), paragraph_(paragraph)
+    explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spanItemChildren)
+        : spanItemChildren_(std::move(spanItemChildren))
     {}
 
     ~TextLayoutAlgorithm() override = default;
@@ -57,13 +59,37 @@ public:
     std::list<RefPtr<SpanItem>>&& GetSpanItemChildren();
 
     float GetBaselineOffset() const;
-    
+
     size_t GetLineCount() const;
 
     std::optional<TextStyle> GetTextStyle() const;
-    void ApplyIndents(const TextStyle& textStyle, double width);
+
+protected:
+    const std::list<RefPtr<SpanItem>>& GetSpans() const
+    {
+        return spanItemChildren_;
+    }
+    void SetSpans(const std::list<RefPtr<SpanItem>>& spans)
+    {
+        spanItemChildren_ = spans;
+    }
+
+    void SetParagraph(const RefPtr<Paragraph>& paragraph)
+    {
+        paragraph_ = paragraph;
+    }
+
+    virtual int32_t GetPreviousLength() const
+    {
+        return 0;
+    }
+
+    virtual void GetPlaceholderRects(std::vector<Rect>& rects);
+
+    virtual ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
 
 private:
+    virtual void ApplyIndent(const TextStyle& textStyle, double width);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,

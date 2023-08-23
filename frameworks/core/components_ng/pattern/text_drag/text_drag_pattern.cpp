@@ -57,51 +57,6 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     return dragNode;
 }
 
-RefPtr<FrameNode> TextDragPattern::CreateDragNode(
-    const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren)
-{
-    auto hostPattern = hostNode->GetPattern<TextDragBase>();
-    auto dragNode = TextDragPattern::CreateDragNode(hostNode);
-    auto dragPattern = dragNode->GetPattern<TextDragPattern>();
-    auto textPattern = hostNode->GetPattern<TextPattern>();
-    auto placeHolderIndex = textPattern->GetPlaceHolderIndex();
-    auto rectsForPlaceholders = textPattern->GetRectsForPlaceholders();
-
-    size_t index = 0;
-    std::vector<Rect> realRectsForPlaceholders;
-    std::list<RefPtr<FrameNode>> realImageChildren;
-    auto boxes = hostPattern->GetTextBoxes();
-    for (const auto& child : imageChildren) {
-        auto imageIndex = placeHolderIndex[index];
-        auto rect = rectsForPlaceholders.at(imageIndex);
-
-        for (const auto& box : boxes) {
-#ifndef USE_GRAPHIC_TEXT_GINE
-            if (LessOrEqual(box.rect_.GetLeft(), rect.Left()) &&
-                GreatOrEqual(box.rect_.GetRight(), rect.Right()) &&
-                LessOrEqual(box.rect_.GetTop(), rect.Top()) &&
-                GreatOrEqual(box.rect_.GetBottom(), rect.Bottom())) {
-#else
-            if (LessOrEqual(box.rect.GetLeft(), rect.Left()) &&
-                GreatOrEqual(box.rect.GetRight(), rect.Right()) &&
-                LessOrEqual(box.rect.GetTop(), rect.Top()) &&
-                GreatOrEqual(box.rect.GetBottom(), rect.Bottom())) {
-#endif
-                realImageChildren.emplace_back(child);
-                realRectsForPlaceholders.emplace_back(rect);
-            }
-        }
-        ++index;
-    }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    dragPattern->SetLastLineHeight(boxes.back().rect_.GetHeight());
-#else
-    dragPattern->SetLastLineHeight(boxes.back().rect.GetHeight());
-#endif
-    dragPattern->InitSpanImageLayout(realImageChildren, realRectsForPlaceholders);
-    return dragNode;
-}
-
 TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPattern, RefPtr<FrameNode>& dragNode)
 {
     auto dragContext = dragNode->GetRenderContext();

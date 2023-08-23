@@ -21,6 +21,7 @@
 #include <string>
 
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -78,8 +79,7 @@ public:                                                                      \
             return;                                                          \
         }                                                                    \
         spanItem_->fontStyle->Update##name(value);                           \
-    }                                                                        \
-
+    }
 
 #define DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(name, type)                             \
 public:                                                                          \
@@ -147,12 +147,13 @@ public:
     {
         children.clear();
     }
+    // position of last char + 1
     int32_t position = -1;
     std::string content;
     std::unique_ptr<FontStyle> fontStyle;
     std::unique_ptr<TextLineStyle> textLineStyle;
     GestureEventFunc onClick;
-    std::list<RefPtr<SpanItem>> children;
+    [[deprecated]] std::list<RefPtr<SpanItem>> children;
     int32_t placeHolderIndex = -1;
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t selectedStart = -1;
@@ -161,6 +162,7 @@ public:
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         double width = 0.0f, double height = 0.0f, VerticalAlign verticalAlign = VerticalAlign::BASELINE);
     virtual void UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
+    virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
     std::string GetFont() const;
@@ -187,8 +189,8 @@ struct ImageSpanItem : public SpanItem {
 public:
     ImageSpanItem() = default;
     ~ImageSpanItem() override = default;
-    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign) override;
+    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
+        double height, VerticalAlign verticalAlign) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
 
     TextStyle textStyle;
@@ -206,6 +208,8 @@ enum class PropertyInfo {
     TEXTCASE,
     LETTERSPACE,
     LINEHEIGHT,
+    TEXT_ALIGN,
+    INDENT,
     NONE,
 };
 
@@ -254,6 +258,10 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextIndent, Dimension);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMarginSize, SizeF);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(Placeholder, RefPtr<PixelMap>);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -290,21 +298,15 @@ public:
         propertyInfo_.clear();
     }
 
-    std::set<PropertyInfo> CaculateInheritPropertyInfo()
+    std::set<PropertyInfo> CalculateInheritPropertyInfo()
     {
         std::set<PropertyInfo> inheritPropertyInfo;
-        const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE,
-                                                               PropertyInfo::FONTCOLOR,
-                                                               PropertyInfo::FONTSTYLE,
-                                                               PropertyInfo::FONTWEIGHT,
-                                                               PropertyInfo::FONTFAMILY,
-                                                               PropertyInfo::TEXTDECORATION,
-                                                               PropertyInfo::TEXTCASE,
-                                                               PropertyInfo::LETTERSPACE,
-                                                               PropertyInfo::LINEHEIGHT };
-        set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(),
-                       propertyInfo_.begin(), propertyInfo_.end(),
-                       inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
+        const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
+            PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
+            PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
+            PropertyInfo::INDENT };
+        set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
+            propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
         return inheritPropertyInfo;
     }
 

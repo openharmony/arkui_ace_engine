@@ -61,12 +61,8 @@ OffsetF TextPattern::GetParentGlobalOffset() const
     return {};
 }
 
-void TextPattern::CloseSelectOverlay()
-{
-}
-void TextPattern::CreateHandles()
-{
-}
+void TextPattern::CloseSelectOverlay() {}
+void TextPattern::CreateHandles() {}
 
 bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 {
@@ -77,6 +73,10 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
 {
     return {};
 }
+RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
+{
+    return nullptr;
+};
 
 void TextPattern::OnColorConfigurationUpdate() {}
 void TextPattern::InitSurfaceChangedCallback() {}

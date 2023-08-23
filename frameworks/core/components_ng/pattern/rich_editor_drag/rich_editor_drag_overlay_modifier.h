@@ -13,34 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_DRAG_TEXT_DRAG_OVERLAY_MODIFIER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_DRAG_TEXT_DRAG_OVERLAY_MODIFIER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_DRAG_RICH_EDITOR_DRAG_OVERLAY_MODIFIER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_DRAG_RICH_EDITOR_DRAG_OVERLAY_MODIFIER_H
 
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
-class TextDragOverlayModifier : public OverlayModifier {
-    DECLARE_ACE_TYPE(TextDragOverlayModifier, OverlayModifier);
+class RichEditorDragOverlayModifier : public TextDragOverlayModifier {
+    DECLARE_ACE_TYPE(RichEditorDragOverlayModifier, TextDragOverlayModifier);
 
 public:
-    explicit TextDragOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern);
-    ~TextDragOverlayModifier() override = default;
+    explicit RichEditorDragOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
+        : TextDragOverlayModifier(pattern)
+    {}
+    ~RichEditorDragOverlayModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
-    void StartAnimate();
-    void SetBackgroundOffset(float offset);
 
-protected:
-    WeakPtr<Pattern> pattern_;
-    bool isAnimating_ = false;
-    RefPtr<AnimatablePropertyFloat> backgroundOffset_;
-
-    ACE_DISALLOW_COPY_AND_MOVE(TextDragOverlayModifier);
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragOverlayModifier);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_DRAG_TEXT_DRAG_OVERLAY_MODIFIER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_DRAG_RICH_EDITOR_DRAG_OVERLAY_MODIFIER_H
