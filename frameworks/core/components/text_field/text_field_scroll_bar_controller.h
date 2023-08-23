@@ -27,7 +27,7 @@ public:
     ~TextFieldScrollBarController() override = default;
 
     void MarkScrollRender() override;
-    bool CheckScroll() override;
+    bool CheckScroll() const override;
 
 protected:
     bool UpdateScrollPosition(double offset, int32_t source) override;

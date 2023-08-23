@@ -25,7 +25,7 @@ void TextFieldScrollBarController::MarkScrollRender()
     }
 }
 
-bool TextFieldScrollBarController::CheckScroll()
+bool TextFieldScrollBarController::CheckScroll() const
 {
     auto textFiled = AceType::DynamicCast<RenderTextField>(scroll_.Upgrade());
     return textFiled != nullptr;
