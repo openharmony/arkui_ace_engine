@@ -104,7 +104,7 @@ public:
 
             for (auto& [oldindex, id] : temp) {
                 cachedItems_.try_emplace(
-                    index > static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
+                    index >= static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
             }
         }
         for (auto& [key, node] : expiringItem_) {
@@ -321,8 +321,12 @@ public:
         cacheCount_ = cacheCount;
     }
 
-    const std::map<int32_t, LazyForEachChild>& GetAllChildren() const
+    const std::map<int32_t, LazyForEachChild>& GetAllChildren()
     {
+        if (!cachedItems_.empty()) {
+            startIndex_ = cachedItems_.begin()->first;
+            endIndex_ = cachedItems_.rbegin()->first;
+        }
         return cachedItems_;
     }
 
@@ -340,7 +344,7 @@ private:
 
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
-    int32_t cacheCount_ = 1;
+    int32_t cacheCount_ = 0;
     bool needTransition = false;
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
