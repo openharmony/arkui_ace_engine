@@ -30,14 +30,20 @@ void StepperModelNG::Create(uint32_t index)
     auto nodeId = stack->ClaimNodeId();
     auto stepperNode = StepperNode::GetOrCreateStepperNode(
         V2::STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    stack->Push(stepperNode);
     bool hasSwiperNode = stepperNode->HasSwiperNode();
     auto swiperId = stepperNode->GetSwiperId();
     if (!hasSwiperNode) {
         auto swiperNode = CreateSwiperChild(swiperId, index);
         swiperNode->MountToParent(stepperNode);
+        ACE_UPDATE_LAYOUT_PROPERTY(StepperLayoutProperty, Index, index);
+    } else {
+        auto swiperNode = AceType::DynamicCast<FrameNode>(
+            stepperNode->GetChildAtIndex(stepperNode->GetChildIndexById(stepperNode->GetSwiperId())));
+        CHECK_NULL_VOID(swiperNode);
+        auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
+        swiperController->SwipeTo(index);
     }
-    stack->Push(stepperNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(StepperLayoutProperty, Index, index);
 }
 
 void StepperModelNG::SetOnFinish(RoutineCallbackEvent&& eventOnFinish)
@@ -90,12 +96,15 @@ RefPtr<FrameNode> StepperModelNG::CreateSwiperChild(int32_t id, uint32_t index)
     auto swiperNode =
         FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, id, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    swiperPaintProperty->UpdateLoop(false);
+    CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::NONE);
     swiperPaintProperty->UpdateDisableSwipe(true);
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateCachedCount(0);
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(static_cast<int32_t>(index));
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateLoop(false);
+    swiperLayoutProperty->UpdateCachedCount(0);
+    swiperLayoutProperty->UpdateIndex(static_cast<int32_t>(index));
+    swiperLayoutProperty->UpdateShowIndicator(false);
     swiperNode->MarkModifyDone();
     return swiperNode;
 }

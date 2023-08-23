@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_grid_item.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "bridge/declarative_frontend/jsview/models/grid_item_model_impl.h"
 #include "core/common/container.h"
@@ -127,6 +128,30 @@ void JSGridItem::SelectCallback(const JSCallbackInfo& args)
     GridItemModel::GetInstance()->SetOnSelect(std::move(onSelectId));
 }
 
+void JSGridItem::SetSelected(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have 1 or 2 arguments");
+        return;
+    }
+    bool select = false;
+    if (info[0]->IsBoolean()) {
+        select = info[0]->ToBoolean();
+    }
+    GridItemModel::GetInstance()->SetSelected(select);
+
+    if (info.Length() > 1 && info[1]->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("GridItem.ChangeEvent");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+            func->ExecuteJS(1, &newJSVal);
+        };
+        GridItemModel::GetInstance()->SetSelectChangeEvent(std::move(changeEvent));
+    }
+}
+
 void JSGridItem::JSBind(BindingTarget globalObj)
 {
     LOGD("GridItem:JSBind");
@@ -143,6 +168,7 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("onSelect", &JSGridItem::SelectCallback);
     JSClass<JSGridItem>::StaticMethod("width", &JSGridItem::SetGridItemWidth);
     JSClass<JSGridItem>::StaticMethod("height", &JSGridItem::SetGridItemHeight);
+    JSClass<JSGridItem>::StaticMethod("selected", &JSGridItem::SetSelected);
     JSClass<JSGridItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSGridItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSGridItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);

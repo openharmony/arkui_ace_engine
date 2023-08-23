@@ -44,20 +44,19 @@ public:
     virtual void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) = 0;
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) = 0;
     virtual void HidePopupNG(int32_t targetId) = 0;
-    virtual void HidePopupNG() = 0;
     virtual void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) = 0;
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
     virtual void ClearMenuNG() = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
-        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) = 0;
+        const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual void HideSubWindowNG() = 0;
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;
 
     // Add interface for hot regions
-    virtual void SetHotAreas(const std::vector<Rect>& rects) {};
+    virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId) {};
 
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
@@ -72,10 +71,22 @@ public:
         subwindowId_ = id;
     }
 
+    void SetAboveApps(bool isAboveApps)
+    {
+        isAboveApps_ = isAboveApps;
+    }
+
+    bool GetAboveApps() const
+    {
+        return isAboveApps_;
+    }
+
     virtual void ShowToast(const std::string& message, int32_t duration, const std::string& bottom) = 0;
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) = 0;
+    virtual void ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks) = 0;
     virtual void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback) = 0;
     virtual void CloseDialog(int32_t instanceId) = 0;
@@ -84,6 +95,7 @@ public:
 
 private:
     int32_t subwindowId_ = 0;
+    bool isAboveApps_ = false;
 };
 
 } // namespace OHOS::Ace

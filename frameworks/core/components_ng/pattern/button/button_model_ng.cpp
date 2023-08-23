@@ -132,6 +132,11 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
     buttonAccessibilityProperty->SetText(label);
     stack->Push(buttonNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, label);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetPaddingProperty()) {
+        return;
+    }
     auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     auto padding = buttonTheme->GetPadding();
@@ -188,7 +193,6 @@ void ButtonModelNG::SetSize(const std::optional<Dimension>& width, const std::op
 
 void ButtonModelNG::SetBorderRadius(const Dimension& radius)
 {
-    NG::ViewAbstract::SetBorderRadius(radius);
     NG::BorderRadiusProperty borderRadius;
     borderRadius.radiusTopLeft = radius;
     borderRadius.radiusTopRight = radius;
@@ -208,7 +212,6 @@ void ButtonModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLef
     borderRadius.radiusBottomLeft = radiusBottomLeft;
     borderRadius.radiusBottomRight = radiusBottomRight;
     borderRadius.multiValued = true;
-    NG::ViewAbstract::SetBorderRadius(borderRadius);
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
 }
 

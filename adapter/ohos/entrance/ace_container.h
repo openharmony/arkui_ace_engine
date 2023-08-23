@@ -32,6 +32,7 @@
 #include "core/common/container.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/pipeline/pipeline_context.h"
+#include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
@@ -47,7 +48,7 @@ public:
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
-    ~AceContainer() override = default;
+    ~AceContainer() override;
 
     void Initialize() override;
 
@@ -287,6 +288,13 @@ public:
         return parentId_;
     }
 
+    void SetFocusWindowId(uint32_t focusWindowId)
+    {
+        if (pipelineContext_) {
+            pipelineContext_->SetFocusWindowId(focusWindowId);
+        }
+    }
+
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool useNewPipeline = false);
@@ -377,7 +385,8 @@ public:
     void UpdateConfiguration(const std::string& colorMode, const std::string& inputDevice,
         const std::string& languageTag, const std::string& configuration);
 
-    void NotifyConfigurationChange(bool needReloadTransition) override;
+    void NotifyConfigurationChange(
+        bool needReloadTransition, const OnConfigurationChange& configurationChange = {false, false}) override;
     void HotReload() override;
 
     bool IsUseStageModel() const override
@@ -398,11 +407,12 @@ public:
         return webHapPath_;
     }
 
-    SafeAreaEdgeInserts GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
+    void ReloadForm();
 
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
@@ -411,6 +421,11 @@ public:
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
     bool IsLauncherContainer() override;
+    bool IsScenceBoardWindow() override;
+
+    void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
+    bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+        StopDragCallback&& stopDragCallback) override;
 
 private:
     void InitializeFrontend();
@@ -418,13 +433,14 @@ private:
     void InitializeTask();
     void InitWindowCallback();
 
-    SafeAreaEdgeInserts GetViewSafeArea(sptr<OHOS::Rosen::Window> window);
-
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
-        int32_t windowId, UIEnvCallback callback = nullptr);
+        uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
+
+    void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
+
     int32_t instanceId_ = 0;
     AceView* aceView_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -468,6 +484,10 @@ private:
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
+    // For custom drag event
+    std::mutex pointerEventMutex_;
+    std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
+    std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
 

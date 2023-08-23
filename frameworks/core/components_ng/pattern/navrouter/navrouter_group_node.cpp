@@ -79,18 +79,24 @@ void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
 void NavRouterGroupNode::OnDetachFromMainTree(bool recursive)
 {
     FrameNode::OnDetachFromMainTree(recursive);
-    auto parent = GetParent();
-    while (parent) {
-        if (CleanNodeInNavigation(parent)) {
-            return;
-        }
-        parent = parent->GetParent();
-    }
 }
 
 void NavRouterGroupNode::OnAttachToMainTree(bool recursive)
 {
+    if (!UseOffscreenProcess()) {
+        ProcessDestinationChangeEvent();
+    }
     FrameNode::OnAttachToMainTree(recursive);
+}
+
+void NavRouterGroupNode::OnOffscreenProcess(bool recursive)
+{
+    ProcessDestinationChangeEvent();
+    FrameNode::OnOffscreenProcess(recursive);
+}
+
+void NavRouterGroupNode::ProcessDestinationChangeEvent()
+{
     auto parent = GetParent();
     while (parent) {
         auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
@@ -111,9 +117,8 @@ void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
         CHECK_NULL_VOID(navRouter);
         auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
-            layoutProperty->UpdateDestinationChange(true);
-        }
+        auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+        CHECK_NULL_VOID(navigationPattern);
         navRouter->AddNavDestinationToNavigation(navigation);
     };
     auto eventHub = GetEventHub<NavRouterEventHub>();
@@ -136,13 +141,10 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     }
     auto navRouterPattern = GetPattern<NavRouterPattern>();
     CHECK_NULL_VOID(navRouterPattern);
-    if (navigationNode->GetIsOnAnimation()) {
-        LOGI("navigation is on animation");
-        return;
-    }
     auto navigationStack = navigationPattern->GetNavigationStack();
     auto routeInfo = navRouterPattern->GetRouteInfo();
     std::string name;
+    auto navRouteMode = navRouterPattern->GetNavRouteMode();
     if (!navDestination && routeInfo) {
         // create navDestination with routeInfo
         name = routeInfo->GetName();
@@ -167,7 +169,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
     if (currentNavDestination && currentNavDestination != navDestination) {
         auto destinationContent = currentNavDestination->GetContentNode();
-        if (destinationContent) {
+        if (destinationContent && (navRouteMode != NavRouteMode::PUSH)) {
             auto navDestinationPattern = currentNavDestination->GetPattern<NavDestinationPattern>();
             CHECK_NULL_VOID(navDestinationPattern);
             auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
@@ -175,7 +177,6 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
             shallowBuilder->MarkIsExecuteDeepRenderDone(false);
             destinationContent->Clean();
         }
-        navigationNode->SetOnStateChangeFalse(currentNavDestination, navDestination);
     }
 
     auto parentNode = GetParent();
@@ -187,73 +188,33 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         parentNode = parentNode->GetParent();
     }
     auto navBarNode = AceType::DynamicCast<NavBarNode>(parentNode);
-    auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationNode->GetContentNode());
-    CHECK_NULL_VOID(navigationContentNode);
-    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
-    auto navRouteMode = navRouterPattern->GetNavRouteMode();
     // deal with split mode without user provided navigation stack
-    if (navBarNode && navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT &&
+    if (navBarNode && navigationPattern->GetNavigationMode() == NavigationMode::SPLIT &&
         !navigationPattern->GetNavigationStackProvided()) {
-        navigationContentNode->Clean();
         navigationPattern->CleanStack();
     }
-    if (navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::STACK) {
-        if (navBarNode) {
-            // jump to the first level NavDestination page
-            auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-            auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
-            auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-            if (titleBarNode || destinationTitleBarNode) {
-                navigationNode->TitleTransitionInAnimation(titleBarNode, destinationTitleBarNode);
-            }
-            if (backButtonNode) {
-                navigationNode->BackButtonAnimation(backButtonNode, true);
-            }
-            navigationNode->NavTransitionInAnimation(navBarNode, navDestination);
-        } else {
-            // stack. More than one destination
-            currentNavDestination =
-                AceType::DynamicCast<NavDestinationGroupNode>(navigationPattern->GetNavDestinationNode());
-            CHECK_NULL_VOID(currentNavDestination);
-            auto curNavTitleBarNode = AceType::DynamicCast<TitleBarNode>(currentNavDestination->GetTitleBarNode());
-            auto destinationTitleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
-            auto backButtonNode = AceType::DynamicCast<FrameNode>(destinationTitleBarNode->GetBackButton());
-            if (curNavTitleBarNode || destinationTitleBarNode) {
-                navigationNode->TitleTransitionInAnimation(curNavTitleBarNode, destinationTitleBarNode);
-            }
-            if (backButtonNode) {
-                navigationNode->BackButtonAnimation(backButtonNode, true);
-            }
-            navigationNode->NavTransitionInAnimation(currentNavDestination, navDestination);
-        }
-    }
-
     // remove if this navDestinationNode is already in the NavigationStack and not at the top, as the latter will
     // later be modified by NavRouteMode
     navigationPattern->RemoveIfNeeded(name, navDestination);
 
-    navigationContentNode->AddChild(navDestination);
     if (routeInfo) {
         navigationPattern->AddNavDestinationNode(name, navDestination, navRouteMode, routeInfo);
     } else {
         navigationPattern->AddNavDestinationNode(navRouterPattern->GetNavDestination(), navDestination, navRouteMode);
     }
 
-    auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    navigationNode->MarkModifyDone();
-    navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    // when js navigationStack is provided, modifyDone will be called by state manager.
+    if (!navigationPattern->GetNavigationStackProvided()) {
+        navigationNode->MarkModifyDone();
+        navigationNode->MarkDirtyNode();
+    }
 }
 
 bool NavRouterGroupNode::CleanNodeInNavigation(const RefPtr<UINode>& parent)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
     CHECK_NULL_RETURN(navigationNode, false);
-    if (navigationNode->GetIsOnAnimation()) {
-        LOGI("navigation is on animation");
-        return false;
-    }
+
     auto navRouterPattern = GetPattern<NavRouterPattern>();
     CHECK_NULL_RETURN(navRouterPattern, false);
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
@@ -269,7 +230,7 @@ bool NavRouterGroupNode::CleanNodeInNavigation(const RefPtr<UINode>& parent)
         const auto& childNode = *iter;
         auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(childNode);
         if (navDestinationNode == navDestination) {
-            navigationContentNode->RemoveChildAtIndex(navDestinationNode);
+            navigationContentNode->RemoveChild(navDestinationNode);
             return true;
         }
     }

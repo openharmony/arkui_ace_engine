@@ -45,6 +45,18 @@ bool AceTraceBeginWithArgs(const char* format, ...)
     return retVal;
 }
 
+void AceCountTraceWidthArgs(int32_t count, const char* format, ...)
+{
+    char name[MAX_STRING_SIZE] = { 0 };
+    va_list args;
+    va_start(args, format);
+    if (vsnprintf_s(name, sizeof(name), sizeof(name) - 1, format, args) < 0) {
+        return;
+    }
+    va_end(args);
+    AceCountTrace(name, count);
+}
+
 AceScopedTrace::AceScopedTrace(const char* format, ...) : traceEnabled_(AceTraceEnabled())
 {
     if (traceEnabled_) {

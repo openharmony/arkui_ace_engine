@@ -129,6 +129,11 @@ void ListModelNG::SetLaneMaxLength(const Dimension& laneMaxLength)
     }
 }
 
+void ListModelNG::SetLaneGutter(const Dimension& laneGutter)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter);
+}
+
 void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign);
@@ -142,6 +147,11 @@ void ListModelNG::SetCachedCount(int32_t cachedCount)
 void ListModelNG::SetSticky(V2::StickyStyle stickyStyle)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StickyStyle, stickyStyle);
+}
+
+void ListModelNG::SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
 }
 
 void ListModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
@@ -160,6 +170,20 @@ void ListModelNG::SetMultiSelectable(bool selectable)
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMultiSelectable(selectable);
+}
+
+void ListModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
+void ListModelNG::SetFriction(double friction)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFriction(friction);
 }
 
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
@@ -320,6 +344,6 @@ void ListModelNG::AddDragFrameNodeToManager() const
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
 
-    dragDropManager->AddListDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 } // namespace OHOS::Ace::NG

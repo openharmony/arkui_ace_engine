@@ -56,6 +56,14 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 } // namespace
 
+void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
+{
+    if (styleValue >= static_cast<int32_t>(DialogButtonStyle::DEFAULT) &&
+        styleValue <= static_cast<int32_t>(DialogButtonStyle::HIGHTLIGHT)) {
+        buttonInfo.dlgButtonStyle = static_cast<DialogButtonStyle>(styleValue);
+    }
+}
+
 void ParseButtonObj(
     const JSCallbackInfo& args, DialogProperties& properties, JSRef<JSObject> obj, const std::string& property)
 {
@@ -69,6 +77,25 @@ void ParseButtonObj(
     ButtonInfo buttonInfo;
     if (JSAlertDialog::ParseJsString(value, buttonValue)) {
         buttonInfo.text = buttonValue;
+    }
+
+    // Parse enabled
+    auto enabledValue = objInner->GetProperty("enabled");
+    if (enabledValue->IsBoolean()) {
+        buttonInfo.enabled = enabledValue->ToBoolean();
+    }
+
+    // Parse defaultFocus
+    auto defaultFocusValue = objInner->GetProperty("defaultFocus");
+    if (defaultFocusValue->IsBoolean()) {
+        buttonInfo.defaultFocus = defaultFocusValue->ToBoolean();
+    }
+
+    // Parse style
+    auto style = objInner->GetProperty("style");
+    if (style->IsNumber()) {
+        auto styleValue = style->ToNumber<int32_t>();
+        SetParseStyle(buttonInfo, styleValue);
     }
 
     auto fontColorValue = objInner->GetProperty("fontColor");
@@ -118,6 +145,13 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         std::string title;
         if (ParseJsString(titleValue, title)) {
             properties.title = title;
+        }
+
+        // Parse subtitle.
+        auto subtitleValue = obj->GetProperty("subtitle");
+        std::string subtitle;
+        if (ParseJsString(subtitleValue, subtitle)) {
+            properties.subtitle = subtitle;
         }
 
         // Parses message.
@@ -180,6 +214,13 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             auto dyValue = offsetObj->GetProperty("dy");
             ParseJsDimensionVp(dyValue, dy);
             properties.offset = DimensionOffset(dx, dy);
+        }
+
+        // Parse maskRect.
+        auto maskRectValue = obj->GetProperty("maskRect");
+        DimensionRect maskRect;
+        if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+            properties.maskRect = maskRect;
         }
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }

@@ -113,6 +113,24 @@ public:
     Dimension ACE_EXPORT GetGutterWidth() const;
     Dimension GetMarginLeft() const;
     Dimension GetMarginRight() const;
+    void SetGutterWidth(const Dimension& gutterWidth)
+    {
+        if (GreatOrEqual(gutterWidth.Value(), 0.0)) {
+            gutterWidth_ = gutterWidth;
+        }
+    }
+    void SetMarginLeft(const Dimension& marginLeft)
+    {
+        if (GreatOrEqual(marginLeft.Value(), 0.0)) {
+            marginLeft_ = marginLeft;
+        }
+    }
+    void SetMarginRight(const Dimension& marginRight)
+    {
+        if (GreatOrEqual(marginRight.Value(), 0.0)) {
+            marginRight_ = marginRight;
+        }
+    }
 
     /*
      * Use system screen width build column width.

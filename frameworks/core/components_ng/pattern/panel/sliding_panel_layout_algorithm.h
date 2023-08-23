@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,18 +74,36 @@ public:
         return miniHeight_;
     }
 
+    CalcDimension GetCustomHeight()
+    {
+        return customHeight_;
+    }
+
     void SetInvisibleFlag(bool invisibleFlag)
     {
         invisibleFlag_ = invisibleFlag;
     }
 
+    float GetMaxWidth() const
+    {
+        return maxWidth_;
+    }
+
 private:
+    RefPtr<LayoutWrapper> GetNodeLayoutWrapperByTag(LayoutWrapper* layoutWrapper, const std::string& tagName) const;
+    void MeasureCloseIcon(
+        const RefPtr<LayoutWrapper>& closeIconWrapper, const RefPtr<LayoutProperty>& layoutProperty) const;
+    float GetMaxWidthByScreenSizeType(const SizeF& maxSize, const SizeF& idealSize) const;
+
     float currentOffset_ = 0.0f;
     bool isFirstLayout_ = true;
     Dimension fullHeight_;
     Dimension halfHeight_;
     Dimension miniHeight_;
+    CalcDimension customHeight_;
     bool invisibleFlag_ = false;
+    float maxWidth_ = 0.0f;
+    SizeF idealSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelLayoutAlgorithm);
 };

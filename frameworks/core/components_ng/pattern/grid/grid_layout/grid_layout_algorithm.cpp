@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
+#include <cstdint>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -70,17 +71,33 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
     rowsGap_ = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, idealSize.Height()).value_or(0);
     columnsGap_ = ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, idealSize.Width()).value_or(0);
-    auto rowsLen = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetRowsTemplate().value_or("")),
+    auto rows = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetRowsTemplate().value_or("")),
         idealSize.Height(), rowsGap_, layoutWrapper->GetTotalChildCount());
-    auto colsLen = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetColumnsTemplate().value_or("")),
+    auto cols = ParseTemplateArgs(GridUtils::ParseArgs(layoutProperty->GetColumnsTemplate().value_or("")),
         idealSize.Width(), columnsGap_, layoutWrapper->GetTotalChildCount());
-
+    auto rowsLen = rows.first;
+    auto colsLen = cols.first;
     if (rowsLen.empty()) {
         rowsLen.push_back(idealSize.Height());
+    }
+    if (rows.second) {
+        rowsGap_ = 0;
     }
     if (colsLen.empty()) {
         colsLen.push_back(idealSize.Width());
     }
+    if (cols.second) {
+        columnsGap_ = 0;
+    }
+
+    if (static_cast<uint32_t>(mainCount_) != rowsLen.size()) {
+        mainCount_ = rowsLen.size();
+    }
+    if (static_cast<uint32_t>(crossCount_) != colsLen.size()) {
+        crossCount_ = colsLen.size();
+        gridLayoutInfo_.crossCount_ = crossCount_;
+    }
+
     gridCells_.clear();
     int32_t row = 0;
     for (const auto& height : rowsLen) {
@@ -225,8 +242,8 @@ void GridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize =
         CreateIdealSize(gridLayoutProperty->GetLayoutConstraint().value(), axis, MeasureType::MATCH_PARENT, true);
     if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
-        LOGE("size of main axis value is infinity, please check");
-        return;
+        idealSize = gridLayoutProperty->GetLayoutConstraint().value().percentReference;
+        LOGI("size of main axis value is infinity, use percent reference");
     }
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
@@ -299,13 +316,13 @@ void GridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, frameSize);
     layoutWrapper->RemoveAllChildInRenderTree();
     for (int32_t index = 0; index < mainCount_ * crossCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childWrapper) {
-            break;
-        }
         OffsetF childOffset;
         auto childPosition = itemsPosition_.find(index);
         if (childPosition != itemsPosition_.end()) {
+            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!childWrapper) {
+                break;
+            }
             childOffset = itemsPosition_.at(index);
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(padding.Offset() + childOffset);
             childWrapper->Layout();

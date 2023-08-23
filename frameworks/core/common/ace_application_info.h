@@ -29,6 +29,14 @@
 
 namespace OHOS::Ace {
 
+enum class PlatformVersion {
+    VERSION_FIVE = 5,
+    VERSION_SIX,
+    VERSION_SEVEN,
+    VERSION_EIGHT,
+    VERSION_NINE,
+    VERSION_TEN
+};
 struct AceBundleInfo {
     uint32_t versionCode = 0;
     std::string versionName;
@@ -184,6 +192,15 @@ public:
         return pid_;
     }
 
+    void SetMissionId(int32_t missionId)
+    {
+        missionId_ = missionId;
+    }
+    int32_t GetMissionId() const
+    {
+        return missionId_;
+    }
+
 protected:
     std::string countryOrRegion_;
     std::string language_;
@@ -211,6 +228,7 @@ protected:
     int32_t apiVersion_ = 0;
     std::string versionName_;
     uint32_t versionCode_ = 0;
+    int32_t missionId_ = -1;
 };
 
 } // namespace OHOS::Ace

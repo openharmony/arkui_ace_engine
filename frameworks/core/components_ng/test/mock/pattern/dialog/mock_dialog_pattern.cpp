@@ -33,7 +33,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 }
 
 // set render context properties of content frame
-void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode)
+void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props)
 {
 }
 
@@ -92,4 +92,6 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
 void DialogPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
 }
+
+void DialogPattern::OnColorConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG

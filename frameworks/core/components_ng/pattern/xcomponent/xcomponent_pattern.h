@@ -163,6 +163,7 @@ private:
     void SetTouchPoint(
         const std::list<TouchLocationInfo>& touchInfoList, int64_t timeStamp, const TouchType& touchType);
 
+    std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     std::string id_;
     XComponentType type_;
     std::string libraryname_;
@@ -184,7 +185,7 @@ private:
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
     RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
     WeakPtr<NG::PipelineContext> context_;
-    int32_t scopeId_;
+    int32_t instanceId_;
     SizeF initSize_;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;

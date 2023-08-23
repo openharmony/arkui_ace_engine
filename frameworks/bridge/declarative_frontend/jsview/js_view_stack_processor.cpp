@@ -111,6 +111,9 @@ VisualState JSViewStackProcessor::StringToVisualState(const std::string& stateSt
     if (stateString == "hover") {
         return VisualState::HOVER;
     }
+    if (stateString == "selected") {
+        return VisualState::SELECTED;
+    }
     LOGE("Unknown visual state \"%{public}s\", resetting to UNDEFINED", stateString.c_str());
     return VisualState::NOTSET;
 }

@@ -17,9 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_INFO_H
 
 #include <map>
+#include <optional>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/rect_t.h"
+#include "core/components/scroll/scroll_controller_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,7 +32,9 @@ struct GridLayoutInfo {
     {
         float lengthOfItemsInViewport = 0.0;
         for (auto i = startMainLineIndex_; i <= endMainLineIndex_; i++) {
-            lengthOfItemsInViewport += (lineHeightMap_[i] + mainGap);
+            if (GreatOrEqual(lineHeightMap_[i], 0)) {
+                lengthOfItemsInViewport += (lineHeightMap_[i] + mainGap);
+            }
         }
         return lengthOfItemsInViewport - mainGap;
     }
@@ -84,6 +88,16 @@ struct GridLayoutInfo {
         offsetEnd_ = false;
     }
 
+    bool IsResetted() const
+    {
+        return startIndex_ != 0 && gridMatrix_.empty();
+    }
+
+    void SetScrollAlign(ScrollAlign align)
+    {
+        scrollAlign_ = align;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
@@ -91,6 +105,7 @@ struct GridLayoutInfo {
     float lastMainSize_ = 0.0f;
     float totalHeightOfItemsInView_ = 0.0f;
 
+    std::optional<int32_t> lastCrossCount_;
     // index of first and last GridItem in viewport
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;
@@ -102,6 +117,7 @@ struct GridLayoutInfo {
     int32_t jumpIndex_ = -1;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
+    ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
 
     bool reachEnd_ = false;
     bool reachStart_ = false;

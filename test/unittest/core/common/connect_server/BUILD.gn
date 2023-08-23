@@ -32,4 +32,8 @@ ohos_unittest("ace_connect_server_manager_test") {
     "$ace_root/frameworks/base:ace_base_ohos",
     "//third_party/googletest:gmock_main",
   ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }

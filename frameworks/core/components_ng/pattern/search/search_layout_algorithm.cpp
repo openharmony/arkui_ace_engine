@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-
 #include "core/components_ng/pattern/search/search_layout_algorithm.h"
+
+#include <algorithm>
 
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -82,7 +82,7 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
 
     // calculate theme space from cancel button to cancel image
     auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
-        searchTheme->GetIconHeight().ConvertToPx();
+                       searchTheme->GetIconHeight().ConvertToPx();
 
     // calculate cancel button height
     auto cancelButtonHeight =
@@ -125,9 +125,15 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
     auto cancelButtonNode = cancelButtonWrapper->GetHostNode();
     auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
-
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    float leftPadding = 0.0f;
+    float rightPadding = 0.0f;
+    if (geometryNode && geometryNode->GetPadding()) {
+        leftPadding = geometryNode->GetPadding()->left.value_or(0.0f);
+        rightPadding = geometryNode->GetPadding()->right.value_or(0.0f);
+    }
     auto textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
-                           searchTheme->GetSearchIconRightSpace().ConvertToPx();
+                    searchTheme->GetSearchIconRightSpace().ConvertToPx() - leftPadding - rightPadding;
     if (searchButtonEvent->IsEnabled()) {
         textFieldWidth = textFieldWidth - buttonWidth - searchTheme->GetSearchDividerWidth().ConvertToPx() -
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
@@ -174,11 +180,13 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
 
     // calculate theme space from search button to font
     auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
-        searchTheme->GetFontSize().ConvertToPx();
+                       searchTheme->GetFontSize().ConvertToPx();
 
     // calculate search button height
-    auto searchButtonHeight =
-        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPx() + spaceHeight;
+    auto defaultButtonHeight =
+        searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
+    auto searchButtonHeight = std::max(defaultButtonHeight,
+        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPx() + spaceHeight);
     CalcSize searchButtonCalcSize;
     searchButtonCalcSize.SetHeight(CalcLength(searchButtonHeight));
     buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize);
@@ -299,10 +307,6 @@ void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CancelButtonMeasure(layoutWrapper);
     TextFieldMeasure(layoutWrapper);
     SelfMeasure(layoutWrapper);
-
-    if (IsFixedHeightMode(layoutWrapper)) {
-        CalcChildrenHotZone(layoutWrapper);
-    }
 }
 
 void SearchLayoutAlgorithm::CalcChildrenHotZone(LayoutWrapper* layoutWrapper)
@@ -334,6 +338,10 @@ void SearchLayoutAlgorithm::CalcChildrenHotZone(LayoutWrapper* layoutWrapper)
     auto searchButtonWidth = searchButtonFrameSize.Width();
     auto searchButtonHeight = searchButtonFrameSize.Height();
 
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    auto buttonSpace = searchTheme->GetSearchButtonSpace().ConvertToPx();
     // calculate cancel button hot zone
     cancelButtonFrameNode->RemoveLastHotZoneRect();
     DimensionRect cancelButtonHotZone;
@@ -342,8 +350,10 @@ void SearchLayoutAlgorithm::CalcChildrenHotZone(LayoutWrapper* layoutWrapper)
         double hotZoneOffsetY = (cancelButtonHeight - searchHeight) / 2;
         cancelButtonHotZone.SetOffset(DimensionOffset(Dimension(0), Dimension(hotZoneOffsetY)));
     } else {
-        cancelButtonHotZone.SetSize(DimensionSize(Dimension(cancelButtonWidth), Dimension(cancelButtonHeight)));
-        cancelButtonHotZone.SetOffset(DimensionOffset(Dimension(0), Dimension(0)));
+        cancelButtonHotZone.SetSize(DimensionSize(
+            Dimension(cancelButtonWidth + 2 * buttonSpace), Dimension(cancelButtonHeight + 2 * buttonSpace)));
+        cancelButtonHotZone.SetOffset(
+            DimensionOffset(Offset(static_cast<float>(-buttonSpace), static_cast<float>(-buttonSpace))));
     }
     cancelButtonFrameNode->AddHotZoneRect(cancelButtonHotZone);
 
@@ -355,8 +365,10 @@ void SearchLayoutAlgorithm::CalcChildrenHotZone(LayoutWrapper* layoutWrapper)
         double hotZoneOffsetY = (searchButtonHeight - searchHeight) / 2;
         searchButtonHotZone.SetOffset(DimensionOffset(Dimension(0), Dimension(hotZoneOffsetY)));
     } else {
-        searchButtonHotZone.SetSize(DimensionSize(Dimension(searchButtonWidth), Dimension(searchButtonHeight)));
-        searchButtonHotZone.SetOffset(DimensionOffset(Dimension(0), Dimension(0)));
+        searchButtonHotZone.SetSize(DimensionSize(
+            Dimension(searchButtonWidth + 2 * buttonSpace), Dimension(searchButtonHeight + 2 * buttonSpace)));
+        searchButtonHotZone.SetOffset(
+            DimensionOffset(Offset(static_cast<float>(-buttonSpace), static_cast<float>(-buttonSpace))));
     }
     searchButtonFrameNode->AddHotZoneRect(searchButtonHotZone);
 }
@@ -400,8 +412,12 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto iconFrameHeight = searchIconSizeMeasure_.Height();
     auto iconRenderWidth = layoutProperty->GetSearchIconUDSizeValue(Dimension(iconFrameWidth)).ConvertToPx();
 
+    float leftOffset = 0.0f;
+    if (geometryNode->GetPadding()) {
+        leftOffset = geometryNode->GetPadding()->left.value_or(0.0f);
+    }
     // layout search icon
-    float iconHorizontalOffset = searchIconLeftSpace + (iconRenderWidth - iconFrameWidth) / 2.0;
+    float iconHorizontalOffset = leftOffset + searchIconLeftSpace + (iconRenderWidth - iconFrameWidth) / 2.0;
     float imageVerticalOffset = (searchFrameHeight - iconFrameHeight) / 2.0;
     OffsetF imageOffset(iconHorizontalOffset, imageVerticalOffset);
     imageGeometryNode->SetMarginFrameOffset(imageOffset);
@@ -412,7 +428,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textFieldWrapper);
     auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textFieldGeometryNode);
-    float textFieldHorizontalOffset = searchIconLeftSpace + iconRenderWidth + searchIconRightSpace;
+    float textFieldHorizontalOffset = leftOffset + searchIconLeftSpace + iconRenderWidth + searchIconRightSpace;
     float textFieldVerticalOffset = (searchFrameHeight - textFieldGeometryNode->GetFrameSize().Height()) / 2.0;
     textFieldGeometryNode->SetMarginFrameOffset(OffsetF(textFieldHorizontalOffset, textFieldVerticalOffset));
     textFieldWrapper->Layout();
@@ -435,6 +451,10 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto cancelImageFrameWidth = cancelImageFrameSize.Width();
     auto cancelImageFrameHeight = cancelImageFrameSize.Height();
 
+    float rightOffset = 0.0f;
+    if (geometryNode->GetPadding()) {
+        rightOffset = geometryNode->GetPadding()->right.value_or(0.0f);
+    }
     // layout search button
     auto searchButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     CHECK_NULL_VOID(searchButtonWrapper);
@@ -442,7 +462,8 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(searchButtonGeometryNode);
     auto searchButtonFrameSize = searchButtonGeometryNode->GetFrameSize();
     float searchButtonVerticalOffset = (searchFrameHeight - searchButtonFrameSize.Height()) / 2.0;
-    float searchButtonHorizontalOffset = searchFrameWidth - searchButtonFrameSize.Width() - searchButtonSpace;
+    float searchButtonHorizontalOffset = searchFrameWidth - searchButtonFrameSize.Width() -
+                                         searchButtonSpace - rightOffset;
     searchButtonHorizontalOffset = std::max(searchButtonHorizontalOffset, 0.0f);
     OffsetF searchButtonOffset = OffsetF(searchButtonHorizontalOffset, searchButtonVerticalOffset);
     searchButtonGeometryNode->SetMarginFrameOffset(searchButtonOffset);
@@ -457,7 +478,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto cancelButtonOffsetToSearchButton = cancelButtonFrameWidth + 2 * dividerSideSpace + dividerWidth;
         cancelButtonHorizontalOffset = std::max(searchButtonOffset.GetX() - cancelButtonOffsetToSearchButton, 0.0);
     } else {
-        cancelButtonHorizontalOffset = searchFrameWidth - cancelButtonFrameWidth - searchButtonSpace;
+        cancelButtonHorizontalOffset = searchFrameWidth - cancelButtonFrameWidth - searchButtonSpace - rightOffset;
     }
     OffsetF cancelButtonOffset = OffsetF(cancelButtonHorizontalOffset, cancelButtonVerticalOffset);
     cancelButtonGeometryNode->SetMarginFrameOffset(cancelButtonOffset);
@@ -470,6 +491,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     OffsetF cancelImageOffset = OffsetF(cancelImageHorizontalOffset, cancelImageVerticalOffset);
     cancelImageGeometryNode->SetMarginFrameOffset(cancelImageOffset);
     cancelImageWrapper->Layout();
+    CalcChildrenHotZone(layoutWrapper);
 }
 
 } // namespace OHOS::Ace::NG

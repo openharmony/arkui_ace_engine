@@ -21,7 +21,7 @@ bool SelectOverlayProxy::IsClosed() const
     return false;
 }
 
-void SelectOverlayProxy::Close() const {}
+void SelectOverlayProxy::Close(bool animation) const {}
 
 void SelectOverlayProxy::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info) const {}
 
@@ -32,4 +32,6 @@ void SelectOverlayProxy::UpdateFirstAndSecondHandleInfo(
 {}
 
 void SelectOverlayProxy::SetSelectInfo(const std::string& selectInfo) const {}
+
+void SelectOverlayProxy::UpdateSelectMenuInfo(const SelectMenuInfo& info) const {}
 } // namespace OHOS::Ace::NG

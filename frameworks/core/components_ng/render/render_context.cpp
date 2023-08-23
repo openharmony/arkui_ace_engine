@@ -16,8 +16,21 @@
 #include "core/components_ng/render/render_context.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+std::string RenderFitToString(RenderFit renderFit)
+{
+    static const std::string RenderFitStyles[] = { "RenderFit.CENTER", "RenderFit.TOP", "RenderFit.BOTTOM",
+        "RenderFit.LEFT", "RenderFit.RIGHT", "RenderFit.TOP_LEFT", "RenderFit.TOP_RIGHT", "RenderFit.BOTTOM_LEFT",
+        "RenderFit.BOTTOM_RIGHT", "RenderFit.RESIZE_FILL", "RenderFit.RESIZE_CONTAIN",
+        "RenderFit.RESIZE_CONTAIN_TOP_LEFT", "RenderFit.RESIZE_CONTAIN_BOTTOM_RIGHT", "RenderFit.RESIZE_COVER",
+        "RenderFit.RESIZE_COVER_TOP_LEFT", "RenderFit.RESIZE_COVER_BOTTOM_RIGHT" };
+    return RenderFitStyles[static_cast<int>(renderFit)];
+}
+} // namespace
+
 void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame)
 {
     requestFrame_ = requestFrame;
@@ -27,6 +40,13 @@ void RenderContext::RequestNextFrame() const
 {
     if (requestFrame_) {
         requestFrame_();
+        auto framenode = GetHost();
+        CHECK_NULL_VOID(framenode);
+        if (framenode->GetInspectorId().has_value()) {
+            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetNeedRenderNode(framenode);
+        }
     }
 }
 
@@ -91,6 +111,8 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("clickEffect", clickEffectJsonValue);
     }
     ObscuredToJsonValue(json);
+    json->Put("renderGroup", propRenderGroup_.value_or(false) ? "true" : "false");
+    json->Put("renderFit", RenderFitToString(propRenderFit_.value_or(RenderFit::TOP_LEFT)).c_str());
 }
 
 void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const

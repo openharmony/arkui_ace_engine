@@ -19,7 +19,6 @@
 #include <ui/rs_surface_node.h>
 
 #include "ability_process.h"
-#include "display_type.h"
 #include "dm/display_manager.h"
 #include "form_utils_impl.h"
 #include "init_data.h"
@@ -28,6 +27,7 @@
 #include "resource_manager.h"
 #include "session_info.h"
 #include "string_wrapper.h"
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
@@ -35,22 +35,21 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
-#include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
+#include "adapter/ohos/entrance/capability_registry.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/rect.h"
-#include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
+#include "core/common/form_manager.h"
 #include "core/common/frontend.h"
+#include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/plugin_utils.h"
-#include "core/common/form_manager.h"
-#include "core/common/layout_inspector.h"
 namespace OHOS {
 namespace Ace {
 namespace {
@@ -59,6 +58,7 @@ const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 static int32_t g_instanceId = 0;
 
 FrontendType GetFrontendType(const std::string& frontendType)
@@ -406,7 +406,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
         auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/"),
-                                  std::string("assets/js/") };
+            std::string("assets/js/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
 
@@ -478,11 +478,9 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         context->SetKeyboardAnimationConfig(config);
         context->SetMinPlatformVersion(apiCompatibleVersion);
 
-        const static int32_t PLATFORM_VERSION_TEN = 10;
         if (apiCompatibleVersion >= PLATFORM_VERSION_TEN && context->GetIsAppWindow()) {
-            context->SetSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
-            context->SetCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
-            context->AppBarAdaptToSafeArea();
+            context->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
+            context->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
         }
     }
 
@@ -703,7 +701,8 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
     if (pipelineContext) {
         pipelineContext->SetDisplayWindowRectInfo(
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
-        pipelineContext->SetIsLayoutFullScreen(Ability::GetWindow()->IsLayoutFullScreen());
+        pipelineContext->SetIsLayoutFullScreen(
+            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -767,10 +766,7 @@ void AceAbility::Dump(const std::vector<std::string>& params, std::vector<std::s
     CHECK_NULL_VOID(taskExecutor);
     ContainerScope scope(abilityId_);
     taskExecutor->PostSyncTask(
-        [container, params, &info] {
-            container->Dump(params, info);
-        },
-        TaskExecutor::TaskType::UI);
+        [container, params, &info] { container->Dump(params, info); }, TaskExecutor::TaskType::UI);
 }
 
 void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
@@ -802,8 +798,9 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
 
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
-    auto container = Platform::AceContainer::GetContainer(abilityId_);
+    auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(abilityId_));
     CHECK_NULL_RETURN(container, false);
+    container->SetCurPointerEvent(pointerEvent);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     CHECK_NULL_RETURN(aceView, false);
     aceView->DispatchTouchEvent(aceView, pointerEvent);
@@ -879,49 +876,31 @@ uint32_t AceAbility::GetBackgroundColor()
     return bgColor;
 }
 
-void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
+void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
     auto container = Platform::AceContainer::GetContainer((abilityId_));
     CHECK_NULL_VOID_NOLOG(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    CHECK_NULL_VOID_NOLOG(pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
-                          pipelineContext->GetIsAppWindow());
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID_NOLOG(pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
     LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
          "width:%{public}d, height%{public}d",
         type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
         (int32_t)avoidArea.topRect_.height_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID_NOLOG(taskExecutor);
-    Rect leftRect(static_cast<double>(avoidArea.leftRect_.posX_), static_cast<double>(avoidArea.leftRect_.posY_),
-        static_cast<double>(avoidArea.leftRect_.width_), static_cast<double>(avoidArea.leftRect_.height_));
-    Rect topRect(static_cast<double>(avoidArea.topRect_.posX_), static_cast<double>(avoidArea.topRect_.posY_),
-        static_cast<double>(avoidArea.topRect_.width_), static_cast<double>(avoidArea.topRect_.height_));
-    Rect rightRect(static_cast<double>(avoidArea.rightRect_.posX_), static_cast<double>(avoidArea.rightRect_.posY_),
-        static_cast<double>(avoidArea.rightRect_.width_), static_cast<double>(avoidArea.rightRect_.height_));
-    Rect bottomRect(static_cast<double>(avoidArea.bottomRect_.posX_), static_cast<double>(avoidArea.bottomRect_.posY_),
-        static_cast<double>(avoidArea.bottomRect_.width_), static_cast<double>(avoidArea.bottomRect_.height_));
-    SafeAreaEdgeInserts safeArea(leftRect, topRect, rightRect, bottomRect);
-    if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
-        CHECK_NULL_VOID_NOLOG(safeArea != pipelineContext->GetSystemSafeArea());
-        pipelineContext->SetSystemSafeArea(safeArea);
-    } else if (type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
-        CHECK_NULL_VOID_NOLOG(safeArea != pipelineContext->GetCutoutSafeArea());
-        pipelineContext->SetCutoutSafeArea(safeArea);
-    } else {
-        return;
-    }
-
+    auto safeArea = ConvertAvoidArea(avoidArea);
+    ContainerScope scope(abilityId_);
     taskExecutor->PostTask(
-        [container, abilityId = abilityId_] {
-            CHECK_NULL_VOID(container);
-            ContainerScope scope(abilityId);
-            auto context = container->GetPipelineContext();
-            CHECK_NULL_VOID_NOLOG(context);
-            context->ResetViewSafeArea();
+        [pipeline, safeArea, type]() {
+            if (type == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+                pipeline->UpdateSystemSafeArea(safeArea);
+            } else if (type == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) {
+                pipeline->UpdateCutoutSafeArea(safeArea);
+            }
         },
         TaskExecutor::TaskType::UI);
 }
+
 } // namespace Ace
 } // namespace OHOS

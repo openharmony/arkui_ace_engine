@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,6 +85,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG, "ic_public_arrow_right" },
     { InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG, "ic_public_arrow_up" },
     { InternalResource::ResourceId::IC_PUBLIC_ARROW_DOWN_SVG, "ic_public_arrow_down" },
+    { InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_LEFT_SVG, "ic_public_double_arrow_left" },
+    { InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG, "ic_public_double_arrow_right" },
     { InternalResource::ResourceId::IC_CUT_SVG, "ic_public_cut" },
     { InternalResource::ResourceId::IC_COPY_SVG, "ic_public_copy" },
     { InternalResource::ResourceId::IC_PASTE_SVG, "ic_public_paste" },
@@ -101,7 +103,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L, "ic_window_menu_screen_l" },
     { InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, "ic_window_menu_screen_n" },
     { InternalResource::ResourceId::IC_WINDOW_MIN, "ic_window_min" },
-    { InternalResource::ResourceId::IC_WINDOW_RESTORES, "ic_window_restores" }
+    { InternalResource::ResourceId::IC_WINDOW_RESTORES, "ic_window_restores" },
+    { InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG, "ic_bottomsheet_close" }
 };
 }
 

@@ -17,13 +17,21 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 
 #include "base/geometry/axis.h"
+#include "core/animation/select_motion.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
+#ifndef WEARABLE_PRODUCT
+constexpr double FRICTION = 0.6;
+#else
+constexpr double FRICTION = 0.9;
+#endif
 class ScrollablePattern : public Pattern {
     DECLARE_ACE_TYPE(ScrollablePattern, Pattern);
 
@@ -65,10 +73,15 @@ public:
     {
         CHECK_NULL_VOID_NOLOG(scrollableEvent_);
         scrollableEvent_->SetEnabled(enable);
+        if (!enable) {
+            scrollableEvent_->SetAxis(Axis::NONE);
+        } else {
+            scrollableEvent_->SetAxis(axis_);
+        }
     }
     void SetScrollableAxis(Axis axis);
-    const RefPtr<GestureEventHub>& GetGestureHub();
-    const RefPtr<InputEventHub>& GetInputHub();
+    RefPtr<GestureEventHub> GetGestureHub();
+    RefPtr<InputEventHub> GetInputHub();
 
     // edgeEffect
     const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
@@ -95,7 +108,7 @@ public:
         return estimatedHeight_;
     }
 
-    float GetCurrentPosition() const
+    float GetBarOffset() const
     {
         return barOffset_;
     }
@@ -136,19 +149,53 @@ public:
         scrollable->StopScrollable();
     }
 
-    bool IsScrollBarPressed() const
+    void StartScrollSnapMotion(float scrollSnapDelta, float scrollSnapVelocity)
     {
-        if (scrollBar_) {
-            return scrollBar_->IsPressed();
-        }
-        return false;
+        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID_NOLOG(scrollable);
+        scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
     }
 
+    void SetScrollFrameBeginCallback(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
+    {
+        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID_NOLOG(scrollable);
+        scrollable->SetOnScrollFrameBegin(scrollFrameBeginCallback);
+    }
+
+    bool IsScrollableSpringEffect() const
+    {
+        CHECK_NULL_RETURN_NOLOG(scrollEffect_, false);
+        return scrollEffect_->IsSpringEffect();
+    }
+
+    void SetParentDraggedDown(bool isDraggedDown)
+    {
+        isDraggedDown_ = isDraggedDown;
+    }
+
+    void SetCoordEventNeedSpringEffect(bool IsCoordEventNeedSpring)
+    {
+        isCoordEventNeedSpring_ = IsCoordEventNeedSpring;
+    }
+
+    void SetCoordEventNeedMoveUp(bool isCoordEventNeedMoveUp)
+    {
+        isCoordEventNeedMoveUp_ = isCoordEventNeedMoveUp;
+    }
+    
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     RefPtr<ScrollablePattern> GetParentScrollable();
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
         return { 0, 0 };
+    }
+
+    virtual bool OnScrollSnapCallback(double targetOffset, double velocity)
+    {
+        return false;
     }
 
     void StartScrollBarAnimatorByProxy()
@@ -165,6 +212,70 @@ public:
         }
     }
 
+    void SetFriction(double friction);
+
+    double GetFriction() const
+    {
+        return friction_;
+    }
+
+    void StopAnimate();
+    bool AnimateRunning() const
+    {
+        return animator_ && animator_->IsRunning();
+    }
+    bool AnimateStoped() const
+    {
+        return !animator_ || animator_->IsStopped();
+    }
+    void AbortScrollAnimator()
+    {
+        if (animator_ && !animator_->IsStopped()) {
+            scrollAbort_ = true;
+            animator_->Stop();
+        }
+    }
+    bool GetScrollAbort() const
+    {
+        return scrollAbort_;
+    }
+    void SetScrollAbort(bool abort)
+    {
+        scrollAbort_ = abort;
+    }
+    void PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping);
+    virtual float GetTotalOffset() const
+    {
+        return 0.0f;
+    }
+    // main size of all children
+    virtual float GetTotalHeight() const
+    {
+        return 0.0f;
+    }
+    virtual void OnAnimateStop() {}
+    virtual void ScrollTo(float position);
+    virtual void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth);
+    bool CanOverScroll(int32_t source)
+    {
+        return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
+            IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
+    }
+    void MarkSelectedItems();
+    bool ShouldSelectScrollBeStopped();
+
+    // scrollSnap
+    virtual std::optional<float> CalePredictSnapOffset(float delta)
+    {
+        std::optional<float> predictSnapPosition;
+        return predictSnapPosition;
+    }
+
+    virtual bool NeedScrollSnapToSide(float delta)
+    {
+        return false;
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
@@ -174,19 +285,71 @@ protected:
     {
         return scrollBarProxy_;
     }
-    void SetScrollBarDriving(bool Driving)
-    {
-        if (scrollBar_) {
-            scrollBar_->SetDriving(Driving);
-        }
-    }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
+    // select with mouse
+    struct ItemSelectedStatus {
+        std::function<void(bool)> onSelected;
+        std::function<void(bool)> selectChangeEvent;
+        RectF rect;
+        bool selected = false;
+        void FireSelectChangeEvent(bool isSelected)
+        {
+            if (selected == isSelected) {
+                return;
+            }
+            selected = isSelected;
+            if (onSelected) {
+                onSelected(isSelected);
+            }
+            if (selectChangeEvent) {
+                selectChangeEvent(isSelected);
+            }
+        }
+    };
+    void InitMouseEvent();
+    void UninitMouseEvent();
+    void DrawSelectedZone(const RectF& selectedZone);
+    void ClearSelectedZone();
+    bool multiSelectable_ = false;
+    bool isMouseEventInit_ = false;
+    OffsetF mouseStartOffset_;
+    float totalOffsetOfMousePressed_ = 0.0f;
+    std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
+
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
+    {
+        return overlayModifier_;
+    }
+
+    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier)
+    {
+        overlayModifier_ = scrollBarOverlayModifier;
+    }
+
 private:
+    void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
     void OnScrollEnd();
     bool OnScrollPosition(double offset, int32_t source);
     void SetParentScrollable();
+
+    void OnAttachToFrameNode() override;
+
+    // select with mouse
+    virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
+    virtual void ClearMultiSelect() {};
+    virtual bool IsItemSelected(const MouseInfo& info)
+    {
+        return false;
+    }
+    void ClearInvisibleItemsSelectedStatus();
+    void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
+    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
+    void OnMouseRelease();
+    void SelectWithScroll();
+    RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
+    float GetOutOfScrollableOffset() const;
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -195,12 +358,30 @@ private:
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
+    RefPtr<ScrollBarOverlayModifier> overlayModifier_;
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     double scrollBarOutBoundaryExtent_ = 0.0;
+    bool isDraggedDown_ = false;
+    bool isCoordEventNeedSpring_ = true;
+    bool isCoordEventNeedMoveUp_ = false;
+    double friction_ = FRICTION;
+    // scroller
+    RefPtr<Animator> animator_;
+    RefPtr<SpringMotion> springMotion_;
+    bool scrollAbort_ = false;
+    bool animateOverScroll_ = false;
 
     NestedScrollOptions nestedScroll_;
+
+    // select with mouse
+    bool mousePressed_ = false;
+    OffsetF mouseEndOffset_;
+    OffsetF mousePressOffset_;
+    MouseInfo lastMouseMove_;
+    RefPtr<SelectMotion> selectMotion_;
+    RefPtr<InputEvent> mouseEvent_;
 };
 } // namespace OHOS::Ace::NG
 

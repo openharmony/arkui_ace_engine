@@ -20,6 +20,7 @@
 #include <string>
 #include <utility>
 
+#include "base/thread/cancelable_callback.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace {
@@ -69,8 +71,8 @@ enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 #endif
 } // namespace
 
-class WebPattern : public Pattern {
-    DECLARE_ACE_TYPE(WebPattern, Pattern);
+class WebPattern : public Pattern, public SelectionHost {
+    DECLARE_ACE_TYPE(WebPattern, Pattern, SelectionHost);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -242,6 +244,16 @@ public:
         return MakeRefPtr<WebLayoutAlgorithm>();
     }
 
+    bool BetweenSelectedPosition(const Offset& globalOffset) override
+    {
+        return false;
+    }
+
+    int32_t GetDragRecordSize() override
+    {
+        return 1;
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -317,11 +329,21 @@ public:
     {
         selectPopupMenuShowing_ = showing;
     }
+    void SetCurrentStartHandleDragging(bool isStartHandle)
+    {
+        isCurrentStartHandleDragging_ = isStartHandle;
+    }
+    void UpdateSelectHandleInfo();
+    bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     bool NotifyStartDragTask();
+    bool IsImageDrag();
+    DragRet GetDragAcceptableStatus();
+    Offset GetDragOffset() const;
+
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -382,17 +404,20 @@ private:
     void OnScrollBarColorUpdate(const std::string& value);
 
     void InitEvent();
+    void InitFeatureParam();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
+    void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart(const GestureEvent& info);
-    void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragStart(int32_t x, int32_t y);
+    void HandleDragEnd(int32_t x, int32_t y);
     void HandleDragCancel();
+    void ClearDragData();
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
@@ -404,6 +429,22 @@ private:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
+    void ResetDragAction();
+
+    NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragLeave(int32_t x, int32_t y);
+    void HandleOnDragEnd(int32_t x, int32_t y);
+    int onDragMoveCnt = 0;
+    std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
+    std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
+    std::chrono::time_point<std::chrono::system_clock> curMoveInTime;
+    CancelableCallback<void()> timer_;
+    int32_t duration_ = 100; // 100: 100ms
+    void DoRepeat();
+    void StartRepeatTimer();
 
     void HandleTouchDown(const TouchEventInfo& info, bool fromOverlay);
 
@@ -490,9 +531,11 @@ private:
     bool isEnhanceSurface_ = false;
     bool isAllowWindowOpenMethod_ = false;
     OffsetF webOffset_;
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
+    bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
@@ -500,8 +543,11 @@ private:
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
     bool isVisible_ = true;
+    bool isVisibleActiveEnable_ = true;
+    bool isMemoryLevelEnable_ = true;
     RefPtr<WebDelegate> delegate_;
     RefPtr<WebDelegateObserver> observer_;
+    std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

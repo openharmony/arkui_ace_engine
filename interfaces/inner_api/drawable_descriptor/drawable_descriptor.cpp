@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <string>
 
 #include "base/utils/string_utils.h"
 
@@ -24,15 +25,45 @@
 #include "include/core/SkSamplingOptions.h"
 #endif
 #include "cJSON.h"
+#ifndef PREVIEW
 #include "image_source.h"
+#endif
 #include "include/core/SkImage.h"
 #include "include/core/SkRect.h"
 
+// 区分此函数是在Windows环境调用还是Linux/mac环境调用
+#ifdef PREVIEW
+#ifdef WINDOWS_PLATFORM
+#include <windows.h>
+#include <direct.h>
+#elif defined(MAC_PLATFORM)
+#include <mach-o/dyld.h>
+#else
+#include <unistd.h>
+#endif
+#endif
+
 namespace OHOS::Ace::Napi {
 namespace {
+#ifndef PREVIEW
 const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
+#endif
 constexpr float SIDE = 192.0;
+
+// define for get resource path in preview scenes
+const static char PREVIEW_LOAD_RESOURCE_ID[] = "ohos_drawable_descriptor_path";
+#ifdef PREVIEW
+#ifdef WINDOWS_PLATFORM
+constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "\\resources\\entry\\resources.index";
+#else
+constexpr static char PREVIEW_LOAD_RESOURCE_PATH[] = "/resources/entry/resources.index";
+#endif
+
+#ifdef LINUX_PLATFORM
+const static size_t MAX_PATH_LEN = 255;
+#endif
+#endif
 } // namespace
 
 bool DrawableDescriptor::GetPixelMapFromBuffer()
@@ -48,8 +79,10 @@ bool DrawableDescriptor::GetPixelMapFromBuffer()
     mediaData_.reset();
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
-    auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
-    pixelMap_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    if (imageSource) {
+        auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
+        pixelMap_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    }
     if (errorCode != 0 || !pixelMap_) {
         HILOG_ERROR("Get PixelMap from buffer failed");
         return false;
@@ -91,6 +124,7 @@ std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource
 
 bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
 {
+#ifndef PREVIEW
     cJSON* roots = cJSON_ParseWithLength(reinterpret_cast<const char*>(jsonBuf_.get()), len_);
 
     if (roots == nullptr) {
@@ -134,6 +168,9 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         return false;
     }
     return true;
+#else
+    return false;
+#endif
 }
 
 bool LayeredDrawableDescriptor::GetDefaultMask()
@@ -302,5 +339,44 @@ std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
 
     HILOG_ERROR("Failed to GetPixelMap!");
     return nullptr;
+}
+
+std::string LayeredDrawableDescriptor::GetStaticMaskClipPath()
+{
+    std::string data;
+    std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+
+#ifdef PREVIEW
+    std::string pathTmp = "";
+#ifdef WINDOWS_PLATFORM
+    char pathBuf [MAX_PATH];
+    _getcwd(pathBuf, MAX_PATH);
+    pathTmp = pathBuf;
+#elif defined(MAC_PLATFORM)
+    uint32_t size = 0;
+    _NSGetExecutablePath(nullptr, &size);
+
+    char pathBuf [size + 1];
+    if (_NSGetExecutablePath(pathBuf, &size) != 0) {
+        pathBuf[0] = '\0';
+        HILOG_ERROR("Failed, buffer too small!");
+    }
+    pathBuf[size] = '\0';
+
+    std::string previewFullPath = pathBuf;
+    size_t lastPathIdx = previewFullPath.find_last_of("\\/");
+    pathTmp = (lastPathIdx != std::string::npos) ? previewFullPath.substr(0, lastPathIdx) : "";
+#else
+    char pathBuf [MAX_PATH_LEN];
+    readlink("/proc/self/exe", pathBuf, MAX_PATH_LEN);
+    pathTmp = pathBuf;
+#endif
+    size_t lastPathSepLoc = pathTmp.find_last_of("\\/");
+    std::string path = (lastPathSepLoc != std::string::npos) ? pathTmp.substr(0, lastPathSepLoc) : "";
+    path += PREVIEW_LOAD_RESOURCE_PATH;
+    resMgr->AddResource(path.c_str());
+#endif
+    resMgr->GetStringByName(PREVIEW_LOAD_RESOURCE_ID, data);
+    return data;
 }
 } // namespace OHOS::Ace::Napi

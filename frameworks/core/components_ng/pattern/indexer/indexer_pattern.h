@@ -95,7 +95,8 @@ private:
     bool MoveIndexByStep(int32_t step);
     bool KeyIndexByStep(int32_t step);
     bool MoveIndexBySearch(const std::string& searchStr);
-    void ApplyIndexChanged(bool refreshBubble = true, bool fromTouchUp = false);
+    void ApplyIndexChanged(
+        bool isTextNodeInTree, bool refreshBubble = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
     void OnSelect(bool changed = false);
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
@@ -168,9 +169,11 @@ private:
     int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
     int32_t lastSelectProp_ = -1;
-    int32_t popupClickedIndex_ = -1;
+    uint32_t popupClickedIndex_ = -1;
     int32_t lastFireSelectIndex_ = -1;
+    float lastItemSize_ = -1.0f;
     bool lastIndexFromPress_ = false;
+    bool selectChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -86,9 +86,10 @@ ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
 node_js_path = "//prebuilts/ace-toolkit/nodejs/current/bin/"
 ark_toolchain_path = "//arkcompiler/toolchain"
 window_manager_path = "//foundation/window/window_manager"
-graphic_standard_path = "//foundation/graphic/graphic_2d"
+graphic_2d_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
+crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
 
 # Config toolchain
@@ -124,7 +125,7 @@ ace_engine_subsystem = "arkui"
 # Config part name
 if (is_ohos_standard_system) {
   ace_engine_part = "ace_engine"
-  hilog_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  hilog_deps = [ "hilog:libhilog" ]
   ark_runtime_path = "//arkcompiler/runtime_core"
 } else {
   if (is_cross_platform_build) {
@@ -172,6 +173,12 @@ ace_use_new_skia = false
 if (defined(use_new_skia) && use_new_skia) {
   ace_use_new_skia = true
   ace_common_defines += [ "NEW_SKIA" ]
+}
+
+ace_use_rosen_drawing = false
+if (defined(use_rosen_drawing) && use_rosen_drawing) {
+  ace_use_rosen_drawing = true
+  ace_common_defines += [ "USE_ROSEN_DRAWING" ]
 }
 
 if (enable_ng_build) {

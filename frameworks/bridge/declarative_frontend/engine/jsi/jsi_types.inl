@@ -69,10 +69,10 @@ JsiType<T>& JsiType<T>::operator=(JsiType<T>&& rhs)
 }
 
 template<typename T>
-void JsiType<T>::SetWeak()
+void JsiType<T>::SetWeakCallback(void *ref, panda::WeakRefClearCallBack callback)
 {
     if (!handle_.IsEmpty()) {
-        handle_.SetWeak();
+        handle_.SetWeakCallback(ref, callback, nullptr);
     }
 }
 
@@ -125,10 +125,11 @@ JsiType<T>::operator panda::CopyableGlobal<T>() const
 }
 
 template<typename T>
-JsiType<T> JsiType<T>::New()
+template<class... Args>
+JsiType<T> JsiType<T>::New(Args&&... args)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    return JsiType<T>(T::New(runtime->GetEcmaVm()));
+    return JsiType<T>(T::New(runtime->GetEcmaVm(), std::forward<Args>(args)...));
 }
 
 template<typename T>

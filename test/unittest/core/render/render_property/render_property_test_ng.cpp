@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "base/utils/utils.h"
 #define protected public
@@ -33,27 +33,27 @@ const std::string SRC_IMAGES = "images/mmm.jpg";
 const std::string BACKGROUND_IMAGES = "images/mmm.jpg, ImageRepeat.NoRepeat";
 constexpr char SHADOW_TEST[] = "shadow";
 
-const Dimension POSITION_X {10.0, DimensionUnit::PX};
-const Dimension POSITION_Y {20.0, DimensionUnit::PX};
-const Dimension OFFSET_X {40.0, DimensionUnit::PX};
-const Dimension OFFSET_Y {80.0, DimensionUnit::PX};
-const Dimension ANCHOR_X {100.0, DimensionUnit::PX};
-const Dimension ANCHOR_Y {200.0, DimensionUnit::PX};
+const Dimension POSITION_X { 10.0, DimensionUnit::PX };
+const Dimension POSITION_Y { 20.0, DimensionUnit::PX };
+const Dimension OFFSET_X { 40.0, DimensionUnit::PX };
+const Dimension OFFSET_Y { 80.0, DimensionUnit::PX };
+const Dimension ANCHOR_X { 100.0, DimensionUnit::PX };
+const Dimension ANCHOR_Y { 200.0, DimensionUnit::PX };
 
 const float VALUE_TEST = 720.0f;
 const Color WHITE = Color(0xffffffff);
-const Offset OFFSETS {2.0, 2.0};
+const Offset OFFSETS { 2.0, 2.0 };
 
-const NG::VectorF VECTOR_TEST = {10.0, 20.0};
-const NG::Vector4F VECTOR_4F_TEST = {20.0, 40.0, 60.0, 80.0};
-const NG::TranslateOptions PTTION_TEST = {OFFSET_X, OFFSET_Y, POSITION_X};
-const NG::OffsetT<Dimension> POSITION = {POSITION_X, POSITION_Y};
-const NG::OffsetT<Dimension> OFFSET_TEST = {OFFSET_X, OFFSET_Y};
-const NG::OffsetT<Dimension> ANCHOR = {ANCHOR_X, ANCHOR_Y};
+const NG::VectorF VECTOR_TEST = { 10.0, 20.0 };
+const NG::Vector5F VECTOR_5F_TEST = { 20.0f, 40.0f, 60.0f, 80.0f, 0.0f };
+const NG::TranslateOptions PTTION_TEST = { OFFSET_X, OFFSET_Y, POSITION_X };
+const NG::OffsetT<Dimension> POSITION = { POSITION_X, POSITION_Y };
+const NG::OffsetT<Dimension> OFFSET_TEST = { OFFSET_X, OFFSET_Y };
+const NG::OffsetT<Dimension> ANCHOR = { ANCHOR_X, ANCHOR_Y };
 
-const BackgroundImageSize BACKGROUND_SIZE {BackgroundImageSizeType::COVER, 1.0};
-const BackgroundImagePosition BACKGROUND_POSITION {BackgroundImagePositionType::PERCENT, -1.0,
-    BackgroundImagePositionType::PERCENT, 0.0};
+const BackgroundImageSize BACKGROUND_SIZE { BackgroundImageSizeType::COVER, 1.0 };
+const BackgroundImagePosition BACKGROUND_POSITION { BackgroundImagePositionType::PERCENT, -1.0,
+    BackgroundImagePositionType::PERCENT, 0.0 };
 
 void MakeGraphicsProperty(NG::GraphicsProperty& graphicsProperty)
 {
@@ -66,7 +66,7 @@ void MakeGraphicsProperty(NG::GraphicsProperty& graphicsProperty)
     graphicsProperty.propFrontHueRotate = VALUE_TEST;
     graphicsProperty.propFrontColorBlend = WHITE;
 };
-}
+} // namespace
 
 class RenderPropertyTestNg : public testing::Test {};
 
@@ -91,8 +91,8 @@ HWTEST_F(RenderPropertyTestNg, RenderPositionPropertyTest001, TestSize.Level1)
     /**
      * @tc.expected: Return expected results.
      */
-    EXPECT_EQ(json->GetValue("position")->GetString("x"), ZERO_STRING);
-    EXPECT_EQ(json->GetValue("position")->GetString("y"), ZERO_STRING);
+    EXPECT_EQ(json->GetValue("position")->GetString("x"), "");
+    EXPECT_EQ(json->GetValue("position")->GetString("y"), "");
     EXPECT_EQ(json->GetValue("offset")->GetString("x"), ZERO_STRING);
     EXPECT_EQ(json->GetValue("offset")->GetString("y"), ZERO_STRING);
     EXPECT_EQ(json->GetValue("markAnchor")->GetString("x"), ZERO_STRING);
@@ -407,11 +407,11 @@ HWTEST_F(RenderPropertyTestNg, TransformPropertyTest001, TestSize.Level1)
     json->Delete("translate");
 
     /**
-     * @tc.steps: step3. call ToJsonValue. push propTransformRotate is VECTOR_4F_TEST.
+     * @tc.steps: step3. call ToJsonValue. push propTransformRotate is VECTOR_5F_TEST.
      * @tc.steps: step3. push propTransformScale is VECTOR_TEST.
      * @tc.steps: step3. push propTransformTranslate is PTTION_TEST.
      */
-    transformProperty.propTransformRotate = VECTOR_4F_TEST;
+    transformProperty.propTransformRotate = VECTOR_5F_TEST;
     transformProperty.propTransformScale = VECTOR_TEST;
     transformProperty.propTransformTranslate = PTTION_TEST;
     transformProperty.ToJsonValue(json);

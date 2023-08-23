@@ -379,6 +379,7 @@ protected:
     size_t initialIndex_ = INITIAL_CHILD_INDEX;
     std::list<RefPtr<RenderListItem>> items_;
 
+    int32_t midDisplayIndex_ = 0;
     double spaceWidth_ = 0.0;
     double lastOffset_ = 0.0;
     double startIndexOffset_ = 0.0;

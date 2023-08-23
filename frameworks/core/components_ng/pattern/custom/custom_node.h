@@ -35,9 +35,9 @@ public:
     CustomNode(int32_t nodeId, const std::string& viewKey);
     ~CustomNode() override = default;
 
-    void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) override;
+    void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
+    RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
 
     bool IsAtomicNode() const override
     {
@@ -76,10 +76,15 @@ public:
         return jsViewName_;
     }
 
+    void MarkNeedSyncRenderTree(bool needRebuild = false) override;
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index) override;
+    void SetJSViewActive(bool active) override;
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;
     RenderFunction completeReloadFunc_;
+    bool needMarkParent_ = true;
 };
 } // namespace OHOS::Ace::NG
 

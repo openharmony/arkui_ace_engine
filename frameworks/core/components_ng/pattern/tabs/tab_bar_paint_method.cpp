@@ -39,15 +39,21 @@ CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
+    MarginPropertyF padding;
+    if (geometryNode->GetPadding()) {
+        padding.left = geometryNode->GetPadding()->left;
+        padding.right = geometryNode->GetPadding()->right;
+    }
 
-    auto paintFunc = [gradientRegions = gradientRegions_, barRect = frameRect,
-        backgroundColor = backgroundColor_](
-                         RSCanvas& canvas) { PaintGradient(canvas, barRect, backgroundColor, gradientRegions); };
+    auto paintFunc = [gradientRegions = gradientRegions_, barRect = frameRect, backgroundColor = backgroundColor_,
+                         padding](RSCanvas& canvas) {
+        PaintGradient(canvas, barRect, backgroundColor, gradientRegions, padding);
+    };
     return paintFunc;
 }
 
-void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& barRect,
-    const Color& backgroundColor, std::vector<bool> gradientRegions)
+void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+    const std::vector<bool>& gradientRegions, const MarginPropertyF& padding)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -56,14 +62,17 @@ void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& barRect,
     float shadowMargin = static_cast<float>(tabTheme->GetTabBarShadowMargin().ConvertToPx());
     float gradientWidth = static_cast<float>(tabTheme->GetTabBarGradientWidth().ConvertToPx());
 
+    auto leftPadding = padding.left.value_or(0.0f);
+    auto rightPadding = padding.right.value_or(0.0f);
+
     for (int8_t position = 0; position < POS_NUM; position++) {
         if (gradientRegions[position]) {
             switch (position) {
                 case LEFT_GRADIENT:
-                    PaintLeftGradient(canvas, barRect, backgroundColor, shadowMargin, gradientWidth);
+                    PaintLeftGradient(canvas, barRect, backgroundColor, shadowMargin, gradientWidth, leftPadding);
                     break;
                 case RIGHT_GRADIENT:
-                    PaintRightGradient(canvas, barRect, backgroundColor, shadowMargin, gradientWidth);
+                    PaintRightGradient(canvas, barRect, backgroundColor, shadowMargin, gradientWidth, rightPadding);
                     break;
                 case TOP_GRADIENT:
                     PaintTopGradient(canvas, barRect, backgroundColor, shadowMargin, gradientWidth);
@@ -79,32 +88,32 @@ void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& barRect,
 }
 
 void TabBarPaintMethod::PaintLeftGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
-    float shadowMargin, float gradientWidth)
+    float shadowMargin, float gradientWidth, float padding)
 {
-    RSRect gradientRect(0.0f, 0.0f, shadowMargin + gradientWidth, barRect.Height());
+    RSRect gradientRect(0.0f, 0.0f, padding + shadowMargin + gradientWidth, barRect.Height());
     RSPoint leftStartPoint;
-    leftStartPoint.SetX(shadowMargin + gradientWidth);
+    leftStartPoint.SetX(shadowMargin + gradientWidth + padding);
     leftStartPoint.SetY(0.0f);
     RSPoint leftEndPoint;
     leftEndPoint.SetX(0.0f);
     leftEndPoint.SetY(0.0f);
-    PaintGradientRect(canvas, gradientRect, backgroundColor, leftStartPoint, leftEndPoint, shadowMargin,
-        gradientWidth);
+    PaintGradientRect(
+        canvas, gradientRect, backgroundColor, leftStartPoint, leftEndPoint, padding + shadowMargin, gradientWidth);
 }
 
 void TabBarPaintMethod::PaintRightGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
-    float shadowMargin, float gradientWidth)
+    float shadowMargin, float gradientWidth, float padding)
 {
-    RSRect gradientRect(barRect.Width() - shadowMargin - gradientWidth,
-                    0.0f, barRect.Width(), barRect.Height());
+    RSRect gradientRect(
+        barRect.Width() - shadowMargin - gradientWidth - padding, 0.0f, barRect.Width(), barRect.Height());
     RSPoint rightStartPoint;
-    rightStartPoint.SetX(barRect.Width() - shadowMargin - gradientWidth);
+    rightStartPoint.SetX(barRect.Width() - shadowMargin - gradientWidth - padding);
     rightStartPoint.SetY(0.0f);
     RSPoint rightEndPoint;
     rightEndPoint.SetX(barRect.Width());
     rightEndPoint.SetY(0.0f);
-    PaintGradientRect(canvas, gradientRect, backgroundColor, rightStartPoint, rightEndPoint, shadowMargin,
-        gradientWidth);
+    PaintGradientRect(
+        canvas, gradientRect, backgroundColor, rightStartPoint, rightEndPoint, shadowMargin + padding, gradientWidth);
 }
 
 void TabBarPaintMethod::PaintTopGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
@@ -166,7 +175,7 @@ void TabBarPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (paintProperty) {
         RectF rect;
         auto indicator = paintProperty->GetIndicator().value_or(rect);
-        indicator.SetLeft(currentIndicatorOffset_);
+        indicator.SetLeft(currentIndicatorOffset_ - indicatorStyle_.width.ConvertToPx() / 2);
         tabBarModifier_->SetIndicator(indicator);
     }
     tabBarModifier_->SetIndicatorColor(LinearColor(indicatorStyle_.color));

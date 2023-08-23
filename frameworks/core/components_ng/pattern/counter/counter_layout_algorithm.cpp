@@ -38,21 +38,19 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    frameSize.SetWidth(constraint->selfIdealSize.Width().value_or(constraint->maxSize.Width()));
-    frameSize.SetHeight(constraint->selfIdealSize.Height().value_or(constraint->maxSize.Height()));
+    auto frameWidthMax = ((constraint->selfIdealSize.Width().has_value())
+                              ? std::min(constraint->selfIdealSize.Width().value(), constraint->maxSize.Width())
+                              : std::min(constraint->percentReference.Width(), constraint->maxSize.Width()));
+    frameSize.SetWidth(std::max(frameWidthMax, constraint->minSize.Width()));
+    auto frameHeightMax = ((constraint->selfIdealSize.Height().has_value())
+                              ? std::min(constraint->selfIdealSize.Height().value(), constraint->maxSize.Height())
+                              : std::min(constraint->percentReference.Height(), constraint->maxSize.Height()));
+    frameSize.SetHeight(std::max(frameHeightMax, constraint->minSize.Height()));
     geometryNode->SetFrameSize(frameSize);
-
+    SizeF selfContentSize(frameSize.Width(), frameSize.Height());
     const auto& padding = layoutProperty->CreatePaddingWithoutBorder();
-    auto widthMax = ((constraint->selfIdealSize.Width().has_value())
-                            ? std::min(constraint->selfIdealSize.Width().value(), constraint->maxSize.Width())
-                            : std::min(constraint->percentReference.Width(), constraint->maxSize.Width())) -
-                    padding.left.value_or(0) - padding.right.value_or(0);
-    auto heightMax = ((constraint->selfIdealSize.Height().has_value())
-                             ? std::min(constraint->selfIdealSize.Height().value(), constraint->maxSize.Height())
-                             : std::min(constraint->percentReference.Height(), constraint->maxSize.Height())) -
-                     padding.top.value_or(0) - padding.bottom.value_or(0);
-    geometryNode->SetContentSize(SizeF(widthMax, heightMax));
-
+    MinusPaddingToSize(padding, selfContentSize);
+    geometryNode->SetContentSize(selfContentSize);
     // sub button measure
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -67,7 +65,7 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(subButtonLayoutProperty);
     CalcSize subButtonSize;
     subButtonSize.SetWidth(CalcLength(buttonWidth));
-    subButtonSize.SetHeight(CalcLength(heightMax));
+    subButtonSize.SetHeight(CalcLength(selfContentSize.Height()));
     subButtonLayoutProperty->UpdateUserDefinedIdealSize(subButtonSize);
     auto subButtonTextWrapper = subButtonWrapper->GetOrCreateChildByIndex(SUB_TEXT);
     CHECK_NULL_VOID(subButtonTextWrapper);
@@ -85,8 +83,8 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto contentLayoutProperty = contentWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(contentLayoutProperty);
     CalcSize contentSize;
-    contentSize.SetWidth(CalcLength(widthMax - 2 * buttonWidth));
-    contentSize.SetHeight(CalcLength(heightMax));
+    contentSize.SetWidth(CalcLength(selfContentSize.Width() - 2 * buttonWidth));
+    contentSize.SetHeight(CalcLength(selfContentSize.Height()));
     contentLayoutProperty->UpdateUserDefinedIdealSize(contentSize);
     contentWrapper->Measure(layoutConstraint);
 
@@ -99,7 +97,7 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(addButtonLayoutProperty);
     CalcSize addButtonSize;
     addButtonSize.SetWidth(CalcLength(buttonWidth));
-    addButtonSize.SetHeight(CalcLength(heightMax));
+    addButtonSize.SetHeight(CalcLength(selfContentSize.Height()));
     auto addButtonTextWrapper = addButtonWrapper->GetOrCreateChildByIndex(ADD_TEXT);
     CHECK_NULL_VOID(addButtonTextWrapper);
     auto addButtonTextLayoutProperty = addButtonTextWrapper->GetLayoutProperty();

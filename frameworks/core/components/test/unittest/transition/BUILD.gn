@@ -69,6 +69,7 @@ common_module_files = [
   # common
   "$ace_root/frameworks/core/common/ace_application_info.cpp",
   "$ace_root/frameworks/core/common/ace_engine.cpp",
+  "$ace_root/frameworks/core/common/frontend.cpp",
   "$ace_root/frameworks/core/common/container.cpp",
   "$ace_root/frameworks/core/common/container_scope.cpp",
   "$ace_root/frameworks/core/common/thread_checker.cpp",
@@ -239,15 +240,15 @@ ohos_unittest("TransitionElementTest") {
   if (is_ohos_standard_system) {
     external_deps = [
       "eventhandler:libeventhandler",
-      "hitrace_native:hitrace_meter",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
       "init:libbegetutil",
       "ipc:ipc_core",
     ]
   } else {
     external_deps = [
       "hilog:libhilog",
-      "hitrace_native:hitrace_meter",
+      "hitrace:hitrace_meter",
       "init_lite:libbegetutil",
     ]
   }
@@ -296,15 +297,15 @@ ohos_unittest("SharedTransitionElementTest") {
   if (is_ohos_standard_system) {
     external_deps = [
       "eventhandler:libeventhandler",
-      "hitrace_native:hitrace_meter",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
       "init:libbegetutil",
       "ipc:ipc_core",
     ]
   } else {
     external_deps = [
       "hilog:libhilog",
-      "hitrace_native:hitrace_meter",
+      "hitrace:hitrace_meter",
       "init_lite:libbegetutil",
     ]
   }
@@ -354,8 +355,8 @@ ohos_unittest("TransitionPropertyElementTest") {
   if (is_ohos_standard_system) {
     external_deps = [
       "eventhandler:libeventhandler",
-      "hitrace_native:hitrace_meter",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hitrace:hitrace_meter",
       "init:libbegetutil",
       "ipc:ipc_core",
     ]
@@ -364,7 +365,7 @@ ohos_unittest("TransitionPropertyElementTest") {
   } else {
     external_deps = [
       "hilog:libhilog",
-      "hitrace_native:hitrace_meter",
+      "hitrace:hitrace_meter",
       "init_lite:libbegetutil",
     ]
   }

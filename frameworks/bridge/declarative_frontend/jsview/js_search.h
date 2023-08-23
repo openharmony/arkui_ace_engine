@@ -45,6 +45,8 @@ public:
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void OnSubmit(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
+    static void SetOnTextSelectionChange(const JSCallbackInfo& info);
+    static void SetOnScroll(const JSCallbackInfo& info);
     static void SetHeight(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
@@ -52,6 +54,8 @@ public:
     static void SetCopyOption(const JSCallbackInfo& info);
     static void SetIconStyle(const JSCallbackInfo& info);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
+    static void SetSelectionMenuHidden(const JSCallbackInfo& info);
+    static void SetCustomKeyboard(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {
@@ -63,12 +67,18 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSSearchController* scroller);
     void CaretPosition(int32_t caretPosition);
+    void StopEditing();
     void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controller_ = controller;
     }
 
+    void GetTextContentRect(const JSCallbackInfo& info);
+    void GetTextContentLinesNum(const JSCallbackInfo& info);
+
 private:
+    JSRef<JSObject> CreateRectangle(const Rect& info);
+
     WeakPtr<TextFieldControllerBase> controller_;
     ACE_DISALLOW_COPY_AND_MOVE(JSSearchController);
 };

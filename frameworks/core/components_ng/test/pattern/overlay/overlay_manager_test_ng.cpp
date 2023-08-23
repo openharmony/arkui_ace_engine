@@ -19,14 +19,21 @@
 #include "gtest/gtest.h"
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/color.h"
 
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "base/geometry/ng/offset_t.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
+#include "core/components/picker/picker_data.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -34,6 +41,8 @@
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -43,8 +52,11 @@
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -56,6 +68,12 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr MenuType TYPE = MenuType::MENU;
 const OffsetF MENU_OFFSET(10.0, 10.0);
+const std::string MESSAGE = "hello world";
+const std::string BOTTOM = "test";
+constexpr int32_t DURATION = 2;
+constexpr int32_t START_YEAR_BEFORE = 1990;
+constexpr int32_t SELECTED_YEAR = 2000;
+constexpr int32_t END_YEAR = 2090;
 } // namespace
 class OverlayManagerTestNg : public testing::Test {
 public:
@@ -177,10 +195,11 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover001, TestSize.Level1)
      * @tc.steps: step3. create modal node and get modal node, get pattern.
      * @tc.expected: related function is called.
      */
-    int32_t modalTransition = 1;
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
@@ -204,10 +223,15 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto geometryNode = stageNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1.0, 1.0));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->stageManager_->stageNode_ = stageNode;
 
     /**
      * @tc.steps: step2. create target node.
@@ -226,30 +250,42 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover002, TestSize.Level1)
      * @tc.steps: step3. create modal node and get modal node, get pattern.
      * @tc.expected: related function is called.
      */
-    int32_t modalTransition = 1;
+    ModalStyle modalStyle;
     bool isShow = true;
+    auto onAppear = []() {};
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, onAppear, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     EXPECT_NE(topModalPattern, nullptr);
     auto type = topModalPattern->GetType();
-    EXPECT_EQ(type, ModalTransition::NONE);
+    EXPECT_EQ(type, ModalTransition::DEFAULT);
 
     /**
      * @tc.steps: step4. Change the ModalTransition.
      * @tc.expected: the ModalTransition is updated successfully
      */
-    modalTransition = 0;
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    modalStyle.modalTransition = ModalTransition::NONE;
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
     topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     EXPECT_NE(topModalPattern, nullptr);
     type = topModalPattern->GetType();
-    EXPECT_EQ(type, ModalTransition::DEFAULT);
+    EXPECT_EQ(type, ModalTransition::NONE);
+
+    /**
+     * @tc.steps: step5. Change the backgroundColor.
+     * @tc.expected: the backgroundColor is updated successfully
+     */
+    modalStyle.backgroundColor = Color::GREEN;
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
+    topModalNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_NE(topModalNode, nullptr);
+    EXPECT_EQ(topModalNode->GetRenderContext()->GetBackgroundColorValue(), Color::GREEN);
+    overlayManager->BindContentCover(!isShow, nullptr, nullptr, modalStyle, nullptr, nullptr, targetId);
 }
 
 /**
@@ -287,17 +323,19 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover003, TestSize.Level1)
     /**
      * @tc.steps: step3. create modal node.
      */
-    int32_t modalTransition = 1;
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
 
     /**
      * @tc.steps: step4. destroy modal page.
      * @tc.expected: destroy successfully
      */
-    overlayManager->BindContentCover(!isShow, nullptr, nullptr, modalTransition, targetId);
+    auto onDisappear = []() {};
+    overlayManager->BindContentCover(!isShow, nullptr, nullptr, modalStyle, nullptr, onDisappear, targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
 
@@ -345,7 +383,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
     auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, targetId);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
@@ -400,12 +438,13 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
     SheetStyle sheetStyle;
     CreateSheetStyle(sheetStyle);
     bool isShow = true;
+    auto onAppear = []() {};
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, targetId);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, onAppear, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
@@ -420,7 +459,7 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
      */
     sheetStyle.sheetMode = SheetMode::LARGE;
     sheetStyle.showDragBar = false;
-    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, targetId);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -429,6 +468,17 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
     style = sheetNodeLayoutProperty->GetSheetStyle();
     EXPECT_EQ(style->sheetMode.value(), SheetMode::LARGE);
     EXPECT_EQ(style->showDragBar.value(), false);
+
+    /**
+     * @tc.steps: step4. Change the backgroundColor.
+     * @tc.expected: the backgroundColor is updated successfully
+     */
+    sheetStyle.backgroundColor = Color::GREEN;
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    EXPECT_EQ(sheetNode->GetRenderContext()->GetBackgroundColorValue(), Color::GREEN);
+    overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, nullptr, nullptr, targetId);
 }
 
 /**
@@ -475,16 +525,17 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
     auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, targetId);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
-    EXPECT_EQ(sheetNode->GetTag(), "SheetPage");
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
 
     /**
      * @tc.steps: step4. destroy modal page.
      * @tc.expected: destroy modal successfully.
      */
-    overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, targetId);
+    auto onDisappear = []() {};
+    overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, nullptr, onDisappear, targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
 /**
@@ -539,6 +590,8 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
      * @tc.expected: remove successfully
      */
+    overlayManager->UpdatePopupNode(targetId1, popups[0]);
+    overlayManager->UpdatePopupNode(targetId2, popups[1]);
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
 }
 /**
@@ -594,7 +647,7 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
     auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, menuId, AceType::MakeRefPtr<MenuPattern>(1, "Test", TYPE));
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     menuNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();
@@ -687,6 +740,20 @@ HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
     overlayManager->RemoveIndexerPopup();
     EXPECT_TRUE(overlayManager->customPopupMap_.empty());
     overlayManager->RemoveIndexerPopup();
+    EXPECT_TRUE(overlayManager->customPopupMap_.empty());
+
+    /**
+     * @tc.steps: step5. call ShowIndexerPopup and RemoveIndexerPopupById.
+     * @tc.expected: mount and remove successfully,Repeatedly calling the function exits normally
+     */
+    EXPECT_TRUE(overlayManager->customPopupMap_.empty());
+    overlayManager->ShowIndexerPopup(targetId, popupNode);
+    EXPECT_FALSE(overlayManager->customPopupMap_.empty());
+    overlayManager->ShowIndexerPopup(targetId, popupNode);
+    EXPECT_EQ(overlayManager->customPopupMap_[targetId], popupNode);
+    overlayManager->RemoveIndexerPopupById(targetId);
+    EXPECT_TRUE(overlayManager->customPopupMap_.empty());
+    overlayManager->RemoveIndexerPopupById(targetId);
     EXPECT_TRUE(overlayManager->customPopupMap_.empty());
 }
 /**
@@ -817,10 +884,11 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
      * @tc.steps: step3. create modal node and call removeOverlay when modalStack is not empty.
      * @tc.expected: remove successfully.
      */
-    int32_t modalTransition = 0;
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = ModalTransition::NONE;
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
 
@@ -828,8 +896,259 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest002, TestSize.Level1)
      * @tc.steps: step4. Change the ModalTransition and Call RemoveModalInOverlay.
      * @tc.expected: remove successfully.
      */
-    modalTransition = 2;
-    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalTransition, targetId);
+    modalStyle.modalTransition = ModalTransition::ALPHA;
+    overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
+}
+/**
+ * @tc.name: ToastTest001
+ * @tc.desc: Test OverlayManager::ShowToast->PopToast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, ToastTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is nullptr.
+     * @tc.expected: toastMap_ is empty
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOM, true);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    /**
+     * @tc.steps: step2. call PopToast.
+     * @tc.expected: toastMap_ is empty
+     */
+    overlayManager->PopToast(toastId);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+}
+/**
+ * @tc.name: ToastTest002
+ * @tc.desc: Test OverlayManager::ShowToast->PopToast.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, ToastTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is not nullptr.
+     * @tc.expected: toastMap_ is empty
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto toastTheme = AceType::MakeRefPtr<ToastTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toastTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineBase::GetCurrent()->rootNode_ = rootNode;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOM, true);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+    /**
+     * @tc.steps: step2. call PopToast.
+     * @tc.expected: toastMap_ is empty
+     */
+    overlayManager->PopToast(toastId);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+}
+/**
+ * @tc.name: DialogTest001
+ * @tc.desc: Test OverlayManager::ShowCustomDialog->CloseDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create dialog node and root node.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto dialogId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dialogNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, dialogId, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    dialogNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowCustomDialog.
+     * @tc.expected: dialogMap_ is not empty
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowCustomDialog(dialogNode);
+    overlayManager->BeforeShowDialog(dialogNode);
+    EXPECT_FALSE(overlayManager->dialogMap_.empty());
+    /**
+     * @tc.steps: step3. call DialogInMapHoldingFocus when dialogMap_ is not empty and focusHub is nullptr.
+     * @tc.expected: return false
+     */
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    /**
+     * @tc.steps: step4. call CloseDialog when dialogMap_ is not empty.
+     * @tc.expected: remove successfully
+     */
+    overlayManager->CloseDialog(dialogNode);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    /**
+     * @tc.steps: step4. call CloseDialog again when dialogMap_ is empty.
+     * @tc.expected: function exits normally
+     */
+    overlayManager->CloseDialog(dialogNode);
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+}
+/**
+ * @tc.name: DialogTest002
+ * @tc.desc: Test OverlayManager::ShowDialog->RemoveOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and prepare dialogProperties.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogParam;
+    dialogParam.isShowInSubWindow = true;
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDialog.
+     * @tc.expected: dialogNode is created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto dialogNode = overlayManager->ShowDialog(dialogParam, nullptr, true);
+    EXPECT_NE(dialogNode, nullptr);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+
+    /**
+     * @tc.steps: step3. create focusHub and call DialogInMapHoldingFocus when dialogMap_ is not empty.
+     * @tc.expected: return true
+     */
+    auto eventHub = dialogNode->GetEventHub<DialogEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    dialogNode->eventHub_ = eventHub;
+    EXPECT_TRUE(overlayManager->DialogInMapHoldingFocus());
+    /**
+     * @tc.steps: step3. call RemoveOverlayInSubwindow.
+     * @tc.expected: remove successfully.
+     */
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+}
+/**
+ * @tc.name: DialogTest003
+ * @tc.desc: Test OverlayManager::ShowDateDialog->ShowTimeDialog->RemoveOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and prepare dialogProperties.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    DialogProperties dialogProperties;
+    dialogProperties.isShowInSubWindow = true;
+
+    DatePickerSettingData datePickerSettingData;
+    datePickerSettingData.isLunar = false;
+    datePickerSettingData.showTime = true;
+    datePickerSettingData.useMilitary = false;
+
+    PickerTextProperties properties;
+    properties.disappearTextStyle_.textColor = Color::RED;
+    properties.disappearTextStyle_.fontSize = Dimension(0);
+    properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    properties.normalTextStyle_.textColor = Color::BLACK;
+    properties.normalTextStyle_.fontSize = Dimension(10);
+    properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    properties.selectedTextStyle_.textColor = Color::RED;
+    properties.selectedTextStyle_.fontSize = Dimension(15);
+    properties.selectedTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    datePickerSettingData.properties = properties;
+    datePickerSettingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    datePickerSettingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    datePickerSettingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    datePickerSettingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowDateDialog.
+     * @tc.expected: dateDialogNode is created successfully
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowDateDialog(dialogProperties, datePickerSettingData, dialogEvent, dialogCancelEvent);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+
+    /**
+     * @tc.steps: step3. create timePickerSettingData and call ShowTimeDialog.
+     * @tc.expected: timeDialogNode is created successfully
+     */
+    TimePickerSettingData timePickerSettingData;
+    timePickerSettingData.properties = properties;
+    timePickerSettingData.isUseMilitaryTime = false;
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(1, 1, 1);
+
+    overlayManager->ShowTimeDialog(
+        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+
+    /**
+     * @tc.steps: step4. call RemoveOverlay when dialogChildCount is 2
+     * @tc.expected: remove lastChild successfully
+     */
+    EXPECT_TRUE(overlayManager->RemoveOverlay(false));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+
+    /**
+     * @tc.steps: step5. ShowTimeDialog again and call RemoveOverlay with isBackPressed
+     * @tc.expected: remove  successfully
+     */
+    overlayManager->ShowTimeDialog(
+        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
+    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 } // namespace OHOS::Ace::NG

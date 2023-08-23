@@ -178,8 +178,10 @@ public:
     std::string GetValue();
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    void OnColorConfigurationUpdate() override;
 
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -229,7 +231,7 @@ private:
     // add click event to show menu
     void RegisterOnClick();
 
-    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void RegisterOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
 
     // callback when an option is selected
@@ -282,7 +284,8 @@ private:
     bool isHover_ = false;
     bool isSelected_ = false;
     MenuAlign menuAlign_;
-
+    std::string selectValue_;
+    bool isColorConfigurationUpdate_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
 

@@ -99,6 +99,8 @@ public:
     }
 
 private:
+    void UpdateRatingScore(double ratingScore);
+    void MarkDirtyNode(const PropertyChangeFlag& flag);
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void ConstrainsRatingScore();
@@ -106,6 +108,8 @@ private:
     void LoadSecondary();
     void LoadBackground();
     void UpdatePaintConfig();
+    void PrepareAnimation(const RefPtr<CanvasImage>& image);
+    void SetRedrawCallback(const RefPtr<CanvasImage>& image);
     void OnImageDataReady(int32_t imageFlag);
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
@@ -123,6 +127,7 @@ private:
 
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    void OnBlurEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(double ratingScore);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -167,6 +172,8 @@ private:
     int32_t imageSuccessStateCode_ = 0;
     bool hasInit_ = false;
     bool isHover_ = false;
+    bool isfocus_ = false;
+    double focusRatingScore_ = 0.0;
     double lastRatingScore_ = 0.0;
     RatingModifier::RatingAnimationType state_;
     float singleStarWidth_ = .0f;

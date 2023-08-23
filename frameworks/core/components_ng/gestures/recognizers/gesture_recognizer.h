@@ -191,6 +191,14 @@ public:
         return deviceType_;
     }
 
+    void SetSize(std::optional<double> recognizerTargetAreaHeight, std::optional<double> recognizerTargetAreaWidth)
+    {
+        EventTarget recognizerTarget;
+        recognizerTarget.area.SetHeight(Dimension(recognizerTargetAreaHeight.value()));
+        recognizerTarget.area.SetWidth(Dimension(recognizerTargetAreaWidth.value()));
+        recognizerTarget_ = recognizerTarget;
+    }
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -231,7 +239,10 @@ protected:
 
     int64_t deviceId_ = 0;
     SourceType deviceType_ = SourceType::NONE;
+    // size of recognizer target.
+    std::optional<EventTarget> recognizerTarget_ = std::nullopt;
 
+    int32_t currentFingers_ = 0;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
 };

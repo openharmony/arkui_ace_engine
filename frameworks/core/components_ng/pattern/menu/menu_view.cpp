@@ -83,7 +83,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     textProperty->UpdateFontSize(theme->GetMenuTitleFontSize());
     textProperty->UpdateFontWeight(FontWeight::MEDIUM);
     textProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
-    textProperty->UpdateTextColor(theme->GetMenuFontColor());
+    textProperty->UpdateTextColor(theme->GetMenuTitleFontColor());
     textProperty->UpdateContent(title);
 
     CalcSize idealSize;
@@ -118,7 +118,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
     props->UpdatePadding(padding);
     node->MountToParent(scroll);
-
+    theme->SetMenuScrollId(scroll->GetTag(), scroll->GetId());
     return scroll;
 }
 

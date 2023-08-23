@@ -102,6 +102,27 @@ void ListItemModelNG::SetSelectable(bool selectable)
     pattern->SetSelectable(selectable);
 }
 
+void ListItemModelNG::SetSelected(bool selected)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(selected);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, selected);
+}
+
+void ListItemModelNG::SetSelectChangeEvent(std::function<void(bool)>&& changeEvent)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetSelectChangeEvent(std::move(changeEvent));
+}
+
 void ListItemModelNG::SetSelectCallback(OnSelectFunc&& selectCallback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -12,15 +12,4 @@
 # limitations under the License.
 
 persist.sys.arkui.animationscale = accessibility:accessibility:0777
-persist.ace.debug.enabled = accessibility:accessibility:0777
-persist.ace.debug.boundary.enabled = accessibility:accessibility:0777
-persist.ace.trace.enabled  = accessibility:accessibility:0777
-persist.ace.trace.svg.enabled = accessibility:accessibility:0777
-persist.ace.rosen.backend.enabled = accessibility:accessibility:0777
-persist.ace.testmode.enabled = accessibility:accessibility:0777
-persist.ace.framedumpcount = accessibility:accessibility:0777
-persist.ace.memorymonitor.enabled = accessibility:accessibility:0777
-persist.ace.trace.scoringtool = accessibility:accessibility:0777
-persist.ace.newpipe.pkgname = accessibility:accessibility:0777
-persist.ace.partial.pkgname = accessibility:accessibility:0777
-persist.ace.svg.mode = accessibility:accessibility:0777
+persist.ace. = accessibility:accessibility:0777

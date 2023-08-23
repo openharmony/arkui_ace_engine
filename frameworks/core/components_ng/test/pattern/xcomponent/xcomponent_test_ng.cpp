@@ -325,7 +325,7 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest004, TestSize.Level1)
     // Create LayoutWrapper and set XComponentLayoutAlgorithm.
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto xComponentLayoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
     EXPECT_FALSE(xComponentPattern == nullptr);
@@ -390,7 +390,7 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest005, TestSize.Level1)
     // Create LayoutWrapper and set XComponentLayoutAlgorithm.
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto xComponentLayoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
     EXPECT_FALSE(xComponentPattern == nullptr);
@@ -418,8 +418,8 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest005, TestSize.Level1)
     auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     childGeometryNode->Reset();
-    RefPtr<LayoutWrapper> const childLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childFrameNode->GetLayoutProperty());
+    RefPtr<LayoutWrapperNode> const childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childFrameNode, childGeometryNode, childFrameNode->GetLayoutProperty());
     childLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(CHILD_WIDTH), CalcLength(CHILD_HEIGHT)));
 
@@ -472,7 +472,7 @@ HWTEST_F(XComponentTestNg, XComponentLayoutAlgorithmTest006, TestSize.Level1)
     geometryNode->SetContentSize(MAX_SIZE);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     EXPECT_TRUE(layoutProperty);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(xComponentLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     EXPECT_FALSE(pattern->hasXComponentInit_);
@@ -760,7 +760,7 @@ HWTEST_F(XComponentTestNg, XComponentKeyEventTest010, TestSize.Level1)
     for (SourceType& sourceType : sourceTypes) {
         for (KeyAction& keyAction : keyActions) {
             KeyEvent keyEvent { KeyCode::KEY_0, keyAction, 0, 0, 0, sourceType };
-            focusHub->onKeyEventInternal_(keyEvent);
+            focusHub->ProcessOnKeyEventInternal(keyEvent);
             EXPECT_EQ(nativeXComponentImpl->keyEvent_.sourceType, ConvertNativeXComponentEventSourceType(sourceType));
             EXPECT_EQ(nativeXComponentImpl->keyEvent_.action, ConvertNativeXComponentKeyAction(keyAction));
         }

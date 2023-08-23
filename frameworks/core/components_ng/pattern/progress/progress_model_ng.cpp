@@ -261,6 +261,9 @@ void ProgressModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, dou
     CHECK_NULL_VOID(frameNode);
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
+    auto renderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateClipEdge(false);
     RefPtr<ProgressTheme> progressTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(progressTheme);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
@@ -314,6 +317,21 @@ void ProgressModelNG::SetRingSweepingEffect(bool value)
 void ProgressModelNG::SetLinearSweepingEffect(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableLinearScanEffect, value);
+}
+
+void ProgressModelNG::SetSmoothEffect(bool value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, EnableSmoothEffect, value);
+}
+
+void ProgressModelNG::SetStrokeRadius(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius, value);
+}
+
+void ProgressModelNG::ResetStrokeRadius()
+{
+    ACE_RESET_PAINT_PROPERTY(ProgressPaintProperty, StrokeRadius);
 }
 
 } // namespace OHOS::Ace::NG

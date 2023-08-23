@@ -92,6 +92,11 @@ public:
         return layoutInfo_.childrenCount_;
     }
 
+    float GetTotalOffset() const override
+    {
+        return -layoutInfo_.currentOffset_;
+    }
+
     int32_t GetRows() const;
 
     int32_t GetColumns() const;
@@ -100,11 +105,13 @@ public:
 
     void ScrollPage(bool reverse);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void OnAttachToFrameNode() override;
     void InitScrollableEvent();
+    void CheckScrollable();
 
     WaterFlowLayoutInfo layoutInfo_;
 

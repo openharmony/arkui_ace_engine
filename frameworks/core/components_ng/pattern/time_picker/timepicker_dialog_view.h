@@ -34,13 +34,17 @@ public:
     static void SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime = false);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& dateNode,
+        const RefPtr<FrameNode>& timePickerNode,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
-    static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent);
-    static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
+    static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
+        const RefPtr<FrameNode>& timePickerNode,
+        DialogEvent& acceptEvent);
+    static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
+        const RefPtr<FrameNode>& timePickerNode);
     static RefPtr<FrameNode> CreateBoxNode();
 
 private:

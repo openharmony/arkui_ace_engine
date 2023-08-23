@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,9 @@
 
 namespace OHOS::Ace::NG {
 
+using DialogEvent = std::function<void(const std::string&)>;
+using DialogCancelEvent = std::function<void()>;
+using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
 using SelectedChangeEvent = std::function<void(const std::string&)>;
 using RequestDataEvent = std::function<void(const std::string&)>;
 
@@ -62,9 +65,35 @@ public:
         }
     }
 
+    void SetDialogChange(DialogEvent&& onChange)
+    {
+        dialogChangeEvent_ = std::move(onChange);
+    }
+
+    void FireDialogChangeEvent(const std::string& info) const
+    {
+        if (dialogChangeEvent_) {
+            dialogChangeEvent_(info);
+        }
+    }
+
+    void SetDialogAcceptEvent(DialogEvent&& onAccept)
+    {
+        dialogAcceptEvent_ = std::move(onAccept);
+    }
+
+    void FireDialogAcceptEvent(const std::string& info) const
+    {
+        if (dialogAcceptEvent_) {
+            dialogAcceptEvent_(info);
+        }
+    }
+
 private:
     SelectedChangeEvent changeEvent_;
     RequestDataEvent requestDataEvent_;
+    DialogEvent dialogChangeEvent_;
+    DialogEvent dialogAcceptEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CalendarEventHub);
 };

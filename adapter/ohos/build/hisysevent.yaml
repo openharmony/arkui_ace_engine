@@ -165,3 +165,38 @@ JANK_STATS_APP:
   PAGE_URL: {type: STRING, desc: page name}
   JANK_STATS: {type: UINT16, arrsize: 8, desc: jank frame stats}
   JANK_STATS_VER: {type: UINT32, desc: jank range version}
+
+INTERACTION_COMPLETED_LATENCY:
+  __BASE: {type: STATISTIC, level: MINOR, tag: performance, desc: interaction complete statistics}
+  APP_PID: {type: INT32, desc: app pid}
+  BUNDLE_NAME: {type: STRING, desc: package name}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  PAGE_URL: {type: STRING, desc: page url}
+  VERSION_CODE: {type: INT32, desc: version code}
+  VERSION_NAME: {type: STRING, desc: version name}
+  SCENE_ID: {type: STRING, desc: interaction scene id}
+  SOURCE_TYPE: {type: STRING, desc: scene source type}
+  INPUT_TIME: {type: UINT64, desc: input time when multimodel receive from kernel}
+  ANIMATION_START_LATENCY: {type: UINT64, desc: animation start time of the scene}
+  ANIMATION_END_LATENCY: {type: UINT64, desc: end time of the scene}
+  E2E_LATENCY: {type: UINT64, desc: end to end time}
+  NOTE: {type: STRING, desc: extra infomation}
+
+INTERACTION_APP_JANK:
+  __BASE: {type: STATISTIC, level: MINOR, tag: performance, desc: interaction jank statistics}
+  UNIQUE_ID: {type: INT32, desc: unique id}
+  SCENE_ID: {type: STRING, desc: interaction scene id}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  MODULE_NAME: {type: STRING, desc: package name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
+  PAGE_URL: {type: STRING, desc: page url}
+  VERSION_CODE: {type: INT32, desc: version code}
+  VERSION_NAME: {type: STRING, desc: version name}
+  STARTTIME: {type: UINT64, desc: interaction scene begin time}
+  DURATION: {type: UINT64, desc: interaction duration}
+  TOTAL_FRAMES: {type: INT32, desc: total app frames during the scene}
+  TOTAL_MISSED_FRAMES: {type: INT32, desc: total missed frames during the scene}
+  MAX_FRAMETIME: {type: UINT64, desc: max single frame time during the scene}
+  MAX_SEQ_MISSED_FRAMES: {type: INT32, desc: max successive missed frames during the scene}
+  NOTE: {type: STRING, desc: extra infomation}

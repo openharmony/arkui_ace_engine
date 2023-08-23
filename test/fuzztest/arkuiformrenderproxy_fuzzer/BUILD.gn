@@ -47,7 +47,7 @@ ohos_fuzztest("ArkuiFormRenderProxyFuzzTest") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "form_fwk:form_manager",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
   ]

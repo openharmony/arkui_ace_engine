@@ -49,26 +49,47 @@ public:
     {
         return height_;
     }
+    bool IsSucceed()
+    {
+        return isSucceed_;
+    }
 private:
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
 
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImage> GetImage(const std::string& src) override { return sk_sp<SkImage>(); }
+#else
+    std::shared_ptr<RSImage> GetImage(const std::string& src) override
+    {
+        return std::shared_ptr<RSImage>();
+    }
+#endif
 
     void PaintText(const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke,
         bool hasShadow = false);
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
     void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow);
-    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas) override;
+#ifndef USE_ROSEN_DRAWING
+    void PaintShadow(const SkPath& path, const Shadow& shadow, SkCanvas* canvas, const SkPaint* paint) override;
     void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
     SkCanvas* GetRawPtrOfSkCanvas() override
     {
         return skCanvas_.get();
     }
+#else
+    void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas* canvas) override;
+    void Path2DRect(const OffsetF& offset, const PathArgs& args) override;
+    RSCanvas* GetRawPtrOfRSCanvas() override
+    {
+        return rsCanvas_.get();
+    }
+#endif
 
     int32_t width_;
     int32_t height_;
+    bool isSucceed_ = true;
 };
 } // namespace OHOS::Ace::NG
 

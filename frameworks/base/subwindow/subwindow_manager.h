@@ -65,21 +65,21 @@ public:
     Rect GetParentWindowRect();
 
     void ShowMenu(const RefPtr<Component>& newComponent);
-    void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset);
+    void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, int32_t targetId,
+        const NG::OffsetF& offset, bool isAboveApps = false);
     void HideMenuNG(int32_t targetId);
     void HideMenuNG();
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo);
-    void HidePopupNG(int32_t targetId);
-    void HidePopupNG();
+    void HidePopupNG(int32_t targetId, int32_t instanceId = -1);
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
     void ClearMenuNG(int32_t instanceId = -1);
-    RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode);
+    RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     void HideSubWindowNG();
 
-    void SetHotAreas(const std::vector<Rect>& rects);
+    void SetHotAreas(const std::vector<Rect>& rects, int32_t overlayId = -1, int32_t instanceId = -1);
 
     void AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow);
     // Get the dialog subwindow of instance, return the window or nullptr.
@@ -91,6 +91,8 @@ public:
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
+    void ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& napiCallback, const std::set<std::string>& dialogCallbacks);
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
     void CloseDialog(int32_t instanceId);

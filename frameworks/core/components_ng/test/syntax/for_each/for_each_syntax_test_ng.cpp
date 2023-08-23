@@ -171,6 +171,7 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest005, TestSize.Level1)
     forEachNode->SetParent(node);
     forEachNode->children_ = { node };
     forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
     auto tempIds = forEachNode->GetTempIds();
     EXPECT_TRUE(tempIds.empty());
 }
@@ -213,8 +214,10 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest007, TestSize.Level1)
     forEachNode->onMainTree_ = true;
     auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     forEachNode->SetParent(node);
-    forEachNode->children_ = { node };
+    auto childNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->children_ = { childNode };
     forEachNode->CompareAndUpdateChildren();
+    forEachNode->FlushUpdateAndMarkDirty();
     auto tempIds = forEachNode->GetTempIds();
     EXPECT_TRUE(tempIds.empty());
 }

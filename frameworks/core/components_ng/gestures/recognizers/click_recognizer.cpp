@@ -33,17 +33,7 @@ constexpr int32_t MULTI_FINGER_TIMEOUT_MOUSE = 300;
 int32_t MULTI_TAP_TIMEOUT = 300;
 constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 350;
 constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 300;
-int32_t MULTI_TAP_SLOP = 100;
-constexpr int32_t MULTI_TAP_SLOP_TOUCH = 30;
-constexpr int32_t MULTI_TAP_SLOP_MOUSE = 15;
-#ifndef WEARABLE_PRODUCT
-double MAX_THRESHOLD = 20.0;
-constexpr double MAX_THRESHOLD_TOUCH = 20.0;
-#else
-constexpr double MAX_THRESHOLD = 12.0;
-constexpr double MAX_THRESHOLD_TOUCH = 12.0;
-#endif
-constexpr int32_t MAX_THRESHOLD_MOUSE = 15;
+constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 
 } // namespace
@@ -54,15 +44,11 @@ void ClickRecognizer::InitGlobalValue(SourceType sourceType)
         case SourceType::TOUCH:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_TOUCH;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_TOUCH;
-            MULTI_TAP_SLOP = MULTI_TAP_SLOP_TOUCH;
-            MAX_THRESHOLD = MAX_THRESHOLD_TOUCH;
             break;
         case SourceType::MOUSE:
         case SourceType::TOUCH_PAD:
             MULTI_FINGER_TIMEOUT = MULTI_FINGER_TIMEOUT_MOUSE;
             MULTI_TAP_TIMEOUT = MULTI_TAP_TIMEOUT_MOUSE;
-            MULTI_TAP_SLOP = MULTI_TAP_SLOP_MOUSE;
-            MAX_THRESHOLD = MAX_THRESHOLD_MOUSE;
             break;
         default:
             LOGI("Unrecognized input source type: %{public}d", sourceType);
@@ -164,6 +150,10 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    if (currentFingers_ < fingers_) {
+        LOGW("ClickGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
@@ -206,17 +196,16 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    if (currentFingers_ < fingers_) {
+        LOGW("ClickGesture current finger number is less than requiried finger number.");
+        return;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
     }
     InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch move event");
-    Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
-    if (offset.GetDistance() > MAX_THRESHOLD) {
-        LOGI("this gesture is out of offset, try to reject it");
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-    }
 }
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
@@ -274,7 +263,7 @@ bool ClickRecognizer::ExceedSlop()
     if (tappedCount_ > 0 && tappedCount_ < count_) {
         Offset currentFocusPoint = ComputeFocusPoint();
         Offset slop = currentFocusPoint - focusPoint_;
-        if (GreatOrEqual(slop.GetDistance(), MULTI_TAP_SLOP)) {
+        if (GreatOrEqual(SystemProperties::Px2Vp(slop.GetDistance()), MAX_THRESHOLD_MANYTAP)) {
             return true;
         }
     }
@@ -291,10 +280,14 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
+        info.SetScreenLocation(touchPoint.GetScreenOffset());
         info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(touchPoint.GetOffset() - coordinateOffset_);
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
+        if (recognizerTarget_.has_value()) {
+            info.SetTarget(recognizerTarget_.value());
+        }
         info.SetForce(touchPoint.force);
         if (touchPoint.tiltX.has_value()) {
             info.SetTiltX(touchPoint.tiltX.value());
@@ -306,6 +299,7 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
 #ifdef SECURITY_COMPONENT_ENABLE
         info.SetDisplayX(touchPoint.screenX);
         info.SetDisplayY(touchPoint.screenY);
+        info.SetEnhanceData(touchPoint.enhanceData);
 #endif
         (*onAction)(info);
     }

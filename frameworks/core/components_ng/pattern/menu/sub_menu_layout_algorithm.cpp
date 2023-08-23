@@ -35,11 +35,6 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
     float y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
-    auto mainMenuPattern = menuPattern->GetMainMenuPattern();
-    if (mainMenuPattern && !mainMenuPattern->IsContextMenu()) {
-        x -= pageOffset_.GetX();
-        y -= pageOffset_.GetY();
-    }
 
     const auto& geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -80,7 +75,7 @@ float SubMenuLayoutAlgorithm::HorizontalLayoutSubMenu(const SizeF& size, float p
 {
     float wrapperWidth = wrapperSize_.Width();
     float rightSpace = wrapperWidth - position;
-    float leftSpace = position - pageOffset_.GetX() - menuItemSize.Width();
+    float leftSpace = position - menuItemSize.Width();
     // can fit subMenu on the right side of menuItem
     if (rightSpace >= size.Width()) {
         return position;

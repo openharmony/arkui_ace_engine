@@ -83,6 +83,10 @@ void JSTextTimer::Create(const JSCallbackInfo& info)
                     LOGE("Parameter out of range, use default value.");
                 }
             }
+            if (count->IsUndefined() || count->IsNull()) {
+                TextTimerModel::GetInstance()->SetInputCount(TIME_DEFAULT_COUNT);
+                LOGE("Parameter is undefined or null, use default value.");
+            }
         }
     }
 
@@ -109,6 +113,8 @@ void JSTextTimer::JSBind(BindingTarget globalObj)
     JSClass<JSTextTimer>::StaticMethod("onTimer", &JSTextTimer::OnTimer);
     JSClass<JSTextTimer>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTextTimer>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSTextTimer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSTextTimer>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextTimer>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

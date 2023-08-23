@@ -55,8 +55,24 @@ public:
         if (!textOverlayModifier_) {
             textOverlayModifier_ = MakeRefPtr<TextOverlayModifier>();
         }
-        return MakeRefPtr<TextPaintMethod>(
+        auto paintMethod = MakeRefPtr<TextPaintMethod>(
             WeakClaim(this), paragraph_, baselineOffset_, textContentModifier_, textOverlayModifier_);
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, paintMethod);
+        auto context = host->GetRenderContext();
+        CHECK_NULL_RETURN(context, paintMethod);
+        if (context->GetClipEdge().has_value()) {
+            auto geometryNode = host->GetGeometryNode();
+            auto frameOffset = geometryNode->GetFrameOffset();
+            auto frameSize = geometryNode->GetFrameSize();
+            CHECK_NULL_RETURN(paragraph_, paintMethod);
+            auto height = static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
+            if (context->GetClipEdge().value() == false && LessNotEqual(frameSize.Height(), height)) {
+                RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
+                textOverlayModifier_->SetBoundsRect(boundsRect);
+            }
+        }
+        return paintMethod;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -83,7 +99,7 @@ public:
     {
         return true;
     }
-    
+
     void OnModifyDone() override;
 
     void BeforeCreateLayoutWrapper() override;
@@ -192,7 +208,8 @@ public:
     {
         return true;
     }
-    void CloseSelectOverlay() override;
+    virtual void CloseSelectOverlay() override;
+    void CloseSelectOverlay(bool animation);
     void CreateHandles() override;
 
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
@@ -210,76 +227,119 @@ public:
     {
         surfaceChangedCallbackId_ = id;
     }
-protected:
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleClickEvent(GestureEvent& info);
-    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
+    void SetOnClickEvent(GestureEventFunc&& onClick)
+    {
+        onClick_ = std::move(onClick);
+    }
+    void OnColorConfigurationUpdate() override;
 
-    std::list<RefPtr<SpanItem>> spanItemChildren_;
-    float baselineOffset_ = 0.0f;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+    void InitDragEvent();
+    virtual std::function<void(Offset)> GetThumbnailCallback();
+#endif
+
+    void InitSpanImageLayout(const std::vector<int32_t>& placeHolderIndex,
+        const std::vector<Rect>& rectsForPlaceholders, OffsetF contentOffset) override
+    {
+        placeHolderIndex_ = placeHolderIndex;
+        imageOffset_ = contentOffset;
+        rectsForPlaceholders_ = rectsForPlaceholders;
+    }
+
+    const std::vector<int32_t>& GetPlaceHolderIndex()
+    {
+        return placeHolderIndex_;
+    }
+
+    const std::vector<Rect>& GetRectsForPlaceholders()
+    {
+        return rectsForPlaceholders_;
+    }
+
+    OffsetF GetContentOffset() override
+    {
+        return imageOffset_;
+    }
+
+    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
+    void CheckHandles(SelectHandleInfo& handleInfo);
+
+protected:
+    virtual void HandleOnCopy();
+    void InitMouseEvent();
+    void ResetSelection();
+    virtual void HandleOnSelectAll();
+    void InitSelection(const Offset& pos);
+    void HandleLongPress(GestureEvent& info);
+    void HandleClickEvent(GestureEvent& info);
+    bool IsDraggable(const Offset& localOffset);
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    virtual void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
+    int32_t GetGraphemeClusterLength(int32_t extend) const;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool IsSelected() const;
+    bool IsSelectAll();
+    virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    virtual void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
+    std::wstring GetWideText() const;
+    std::string GetSelectedText(int32_t start, int32_t end) const;
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
+    RectF contentRect_;
+    WeakPtr<FrameNode> dragNodeWk_;
+    RefPtr<FrameNode> dragNode_;
     RefPtr<Paragraph> paragraph_;
+    RefPtr<LongPressEvent> longPressEvent_;
+    RefPtr<SelectOverlayProxy> selectOverlayProxy_;
+    RefPtr<Clipboard> clipboard_;
+    CopyOptions copyOption_ = CopyOptions::None;
+
+    OffsetF imageOffset_;
+    std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
+    std::list<RefPtr<SpanItem>> spanItemChildren_;
+    std::vector<MenuOptionsParam> menuOptionItems_;
+    std::vector<int32_t> placeHolderIndex_;
+    TextSelector textSelector_;
+    float baselineOffset_ = 0.0f;
+    bool showSelectOverlay_ = false;
+    bool clickEventInitialized_ = false;
+    bool mouseEventInitialized_ = false;
+    bool touchEventInitialized_ = false;
+    std::vector<Rect> rectsForPlaceholders_;
+    int32_t imageCount_ = 0;
+    SelectMenuInfo selectMenuInfo_;
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
-    void HandleLongPress(GestureEvent& info);
-    void HandleOnSelectAll();
-    void HandleOnCopy();
-    void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
-    void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void InitMouseEvent();
     void HandleMouseEvent(const MouseInfo& info);
     void OnHandleTouchUp();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandlePanStart(const GestureEvent& info);
     void HandlePanUpdate(const GestureEvent& info);
     void HandlePanEnd(const GestureEvent& info);
-
-#ifdef ENABLE_DRAG_FRAMEWORK
-    DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
-    void InitDragEvent();
-    std::function<void(Offset)> GetThumbnailCallback();
-#endif
-
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
-    void InitSelection(const Offset& pos);
-    void ResetSelection();
-    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
-
+    void InitTouchEvent();
+    void HandleTouchEvent(const TouchEventInfo& info);
     inline RSTypographyProperties::TextBox ConvertRect(const Rect& rect);
-
-    bool IsDraggable(const Offset& localOffset);
-
-    int32_t GetGraphemeClusterLength(int32_t extend) const;
-    std::string GetSelectedText(int32_t start, int32_t end) const;
-    std::wstring GetWideText() const;
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
+    void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
+    void FontRegisterCallback(RefPtr<SpanNode> spanNode);
+    // to check if drag is in progress
 
-    std::string textForDisplay_;
-    std::vector<MenuOptionsParam> menuOptionItems_;
-    RefPtr<LongPressEvent> longPressEvent_;
-    RefPtr<SelectOverlayProxy> selectOverlayProxy_;
-    RefPtr<Clipboard> clipboard_;
+    OffsetF contentOffset_;
+    GestureEventFunc onClick_;
+    bool panEventInitialized_ = false;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
-    RefPtr<FrameNode> dragNode_;
-    CopyOptions copyOption_ = CopyOptions::None;
-    TextSelector textSelector_;
-    OffsetF contentOffset_;
-    RectF contentRect_;
-    bool clickEventInitialized_ = false;
-    bool mouseEventInitialized_ = false;
-    bool panEventInitialized_ = false;
-    bool showSelectOverlay_ = false;
-    std::optional<int32_t> surfaceChangedCallbackId_;
-
     RefPtr<TextContentModifier> textContentModifier_;
     RefPtr<TextOverlayModifier> textOverlayModifier_;
-
+    std::optional<int32_t> surfaceChangedCallbackId_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

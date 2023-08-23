@@ -16,8 +16,12 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
+}
 RichEditorOverlayModifier::RichEditorOverlayModifier() : TextOverlayModifier()
 {
     caretVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
@@ -59,6 +63,11 @@ void RichEditorOverlayModifier::SetCaretVisible(bool value)
     caretVisible_->Set(value);
 }
 
+float RichEditorOverlayModifier::GetCareHeight() const
+{
+    return caretHeight_->Get();
+}
+
 void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
 {
     if (!caretVisible_->Get()) {
@@ -80,6 +89,13 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
 
 void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
+    if (contentRect_.has_value()) {
+        auto defaultCaretHeight = Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx();
+        if (contentRect_->Height() < defaultCaretHeight) {
+            contentRect_->SetHeight(defaultCaretHeight);
+        }
+        drawingContext.canvas.ClipRect(ToRSRect(contentRect_.value()), RSClipOp::INTERSECT);
+    }
     PaintCaret(drawingContext);
     TextOverlayModifier::onDraw(drawingContext);
 }

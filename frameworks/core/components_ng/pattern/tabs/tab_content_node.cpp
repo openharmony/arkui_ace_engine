@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 
-#include "core/common/container.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
@@ -27,24 +26,10 @@ constexpr int DEFAULT_MAXLINES = 1;
 
 void TabContentNode::OnAttachToMainTree(bool recursive)
 {
-    auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
-    CHECK_NULL_VOID(tabs);
-    auto swiper = tabs->GetTabs();
-    CHECK_NULL_VOID(swiper);
-    auto myIndex = swiper->GetChildFlatIndex(GetId()).second;
-    bool update = false;
-#ifdef UICAST_COMPONENT_SUPPORTED
-    do {
-        auto container = Container::Current();
-        CHECK_NULL_BREAK(container);
-        auto distributedUI = container->GetDistributedUI();
-        CHECK_NULL_BREAK(distributedUI);
-        if (distributedUI->IsSinkMode()) {
-            update = true;
-        }
-    } while (false);
-#endif
-    TabContentModelNG::AddTabBarItem(Referenced::Claim(this), myIndex, update);
+    if (!UseOffscreenProcess()) {
+        ProcessTabBarItem();
+    }
+    FrameNode::OnOffscreenProcess(recursive);
 }
 
 void TabContentNode::OnDetachFromMainTree(bool recursive)
@@ -74,6 +59,34 @@ void TabContentNode::OnDetachFromMainTree(bool recursive)
         LOGD("RE-activate TAB with new IDX %{public}d from idx %{public}d", currentIdx - 1, deletedIdx);
         swiperPattern->GetSwiperController()->SwipeToWithoutAnimation(currentIdx - 1);
     }
+}
+
+void TabContentNode::OnOffscreenProcess(bool recursive)
+{
+    ProcessTabBarItem();
+    FrameNode::OnOffscreenProcess(recursive);
+}
+
+void TabContentNode::ProcessTabBarItem()
+{
+    auto tabs = TabContentModelNG::FindTabsNode(Referenced::Claim(this));
+    CHECK_NULL_VOID(tabs);
+    auto swiper = tabs->GetTabs();
+    CHECK_NULL_VOID(swiper);
+    auto myIndex = swiper->GetChildFlatIndex(GetId()).second;
+    bool update = false;
+#ifdef UICAST_COMPONENT_SUPPORTED
+    do {
+        auto container = Container::Current();
+        CHECK_NULL_BREAK(container);
+        auto distributedUI = container->GetDistributedUI();
+        CHECK_NULL_BREAK(distributedUI);
+        if (distributedUI->IsSinkMode()) {
+            update = true;
+        }
+    } while (false);
+#endif
+    TabContentModelNG::AddTabBarItem(Referenced::Claim(this), myIndex, update);
 }
 
 RefPtr<TabContentNode> TabContentNode::GetOrCreateTabContentNode(
@@ -145,7 +158,34 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         labelStyle.heightAdaptivePolicy.value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     label->Put("font", font);
     tabBar->Put("labelStyle", label);
-    
+
+    tabBar->Put("padding", tabContentPattern->GetPadding().ToJsonString().c_str());
+    tabBar->Put(
+        "verticalAlign", ConvertFlexAlignToString(tabContentPattern->GetBottomTabBarStyle().verticalAlign).c_str());
+    tabBar->Put("layoutMode", ConvertLayoutModeToString(tabContentPattern->GetBottomTabBarStyle().layoutMode).c_str());
+    tabBar->Put(
+        "symmetricExtensible", tabContentPattern->GetBottomTabBarStyle().symmetricExtensible ? "true" : "false");
+
     json->Put("tabBar", tabBar);
+}
+
+std::string TabContentNode::ConvertFlexAlignToString(FlexAlign verticalAlign) const
+{
+    if (verticalAlign == FlexAlign::FLEX_START) {
+        return "VerticalAlign.Top";
+    } else if (verticalAlign == FlexAlign::FLEX_END) {
+        return "VerticalAlign.Bottom";
+    }
+    return "VerticalAlign.Center";
+}
+
+std::string TabContentNode::ConvertLayoutModeToString(LayoutMode layoutMode) const
+{
+    if (layoutMode == LayoutMode::VERTICAL) {
+        return "LayoutMode.VERTICAL";
+    } else if (layoutMode == LayoutMode::HORIZONTAL) {
+        return "LayoutMode.HORIZONTAL";
+    }
+    return "LayoutMode.AUTO";
 }
 } // namespace OHOS::Ace::NG

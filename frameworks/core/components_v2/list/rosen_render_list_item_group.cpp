@@ -19,6 +19,9 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/painter/rosen_scroll_bar_painter.h"
+#ifdef USE_ROSEN_DRAWING
+#include "core/components_ng/render/drawing.h"
+#endif
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace::V2 {

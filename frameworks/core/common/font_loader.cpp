@@ -47,4 +47,19 @@ void FontLoader::SetVariationChanged(const std::function<void()>& variationChang
     variationChanged_ = variationChanged;
 }
 
+void FontLoader::RemoveCallbackNG(const WeakPtr<NG::UINode>& node)
+{
+    callbacksNG_.erase(node);
+}
+
+void FontLoader::SetOnLoadedNG(const WeakPtr<NG::UINode>& node, const std::function<void()>& callback)
+{
+    CHECK_NULL_VOID_NOLOG(callback);
+    if (isLoaded_) {
+        callback();
+    } else {
+        callbacksNG_.emplace(node, callback);
+    }
+}
+
 } // namespace OHOS::Ace

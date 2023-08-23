@@ -35,6 +35,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_canvas_image_data.h"
@@ -55,6 +56,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_environment.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_foreach.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
@@ -90,7 +92,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
@@ -100,7 +101,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
@@ -143,7 +143,9 @@
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #else
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #endif
 
 #ifdef VIDEO_SUPPORTED
@@ -177,9 +179,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sceneview.h"
 #endif
 #if defined(WINDOW_SCENE_SUPPORTED)
-#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
+#include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -230,6 +232,13 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     // update page life cycle function.
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    // Register RenderDone callback to jsView so that js view can notify pagePattern the render function has been
+    // finish. The onPageShow life cycle must be after the InitialRender function execution.
+    view->RegisterRenderDoneCallback([weak = AceType::WeakClaim(AceType::RawPtr(pagePattern))]() {
+        auto pagePattern = weak.Upgrade();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->MarkRenderDone();
+    });
     pagePattern->SetOnPageShow([weak = Referenced::WeakClaim(view)]() {
         auto view = weak.Upgrade();
         if (view) {
@@ -264,7 +273,7 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
 }
 
 #ifdef USE_COMPONENTS_LIB
-void JSBindLibs(const std::string moduleName, const std::string exportModuleName)
+void JSBindLibs(const std::string moduleName, const std::string exportModuleName, bool isController = false)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     std::shared_ptr<JsValue> global = runtime->GetGlobal();
@@ -274,7 +283,13 @@ void JSBindLibs(const std::string moduleName, const std::string exportModuleName
     }
     std::vector<std::shared_ptr<JsValue>> argv = { runtime->NewString(moduleName) };
     std::shared_ptr<JsValue> napiObj = requireNapiFunc->Call(runtime, global, argv, argv.size());
-    global->SetProperty(runtime, exportModuleName, napiObj);
+    if (napiObj && !napiObj->IsUndefined(runtime)) {
+        if (isController) {
+            global->SetProperty(runtime, exportModuleName, napiObj->GetProperty(runtime, exportModuleName));
+        } else {
+            global->SetProperty(runtime, exportModuleName, napiObj);
+        }
+    }
 }
 #endif
 
@@ -308,13 +323,11 @@ void JsBindViews(BindingTarget globalObj)
     JSNavigator::JSBind(globalObj);
     JSToggle::JSBind(globalObj);
     JSCounter::JSBind(globalObj);
+    JSCalendarPicker::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
-#endif
-#ifdef WINDOW_SCENE_SUPPORTED
-    JSUIExtension::JSBind(globalObj);
 #endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponent::JSBind(globalObj);
@@ -343,6 +356,8 @@ void JsBindViews(BindingTarget globalObj)
     JSWindowScene::JSBind(globalObj);
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);
+    JSUIExtension::JSBind(globalObj);
+    JSUIExtensionProxy::JSBind(globalObj);
 #endif
     JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);
@@ -414,8 +429,6 @@ void JsBindViews(BindingTarget globalObj)
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
-    JSPatternLock::JSBind(globalObj);
-    JSPatternLockController::JSBind(globalObj);
     JSTextTimer::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
     JSTextInputController::JSBind(globalObj);
@@ -435,15 +448,20 @@ void JsBindViews(BindingTarget globalObj)
     JSNavRouter::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
     JSSlidingPanel::JSBind(globalObj);
-    JSRelativeContainer::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
+    JSBindLibs("arkui.relativeContainer", "RelativeContainer");
+    JSBindLibs("arkui.patternlock", "PatternLock");
+    JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
     JSQRCode::JSBind(globalObj);
+    JSRelativeContainer::JSBind(globalObj);
+    JSPatternLock::JSBind(globalObj);
+    JSPatternLockController::JSBind(globalObj);
 #endif
 }
 

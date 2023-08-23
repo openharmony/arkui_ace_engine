@@ -215,6 +215,18 @@ void ViewFunctions::ExecuteRecycle(const std::string& viewName)
     }
 }
 
+void ViewFunctions::ExecuteSetActive(bool active)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsSetActive_.Lock();
+    if (!func->IsEmpty()) {
+        auto isActive = JSRef<JSVal>::Make(ToJSValue(active));
+        func->Call(jsObject_.Lock(), 1, &isActive);
+    } else {
+        LOGE("the set active func is null");
+    }
+}
+
 #else
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
@@ -270,6 +282,18 @@ void ViewFunctions::InitViewFunctions(
             jsRecycleFunc_ = JSRef<JSFunc>::Cast(jsRecycleFunc);
         } else {
             LOGD("View is not a recycle node");
+        }
+
+        JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycle");
+        if (jsAboutToRecycleFunc->IsFunction()) {
+            jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
+        }
+
+        JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActive");
+        if (jsSetActive->IsFunction()) {
+            jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
+        } else {
+            LOGD("View don't have the ability to prevent inactive update");
         }
     }
 
@@ -419,6 +443,11 @@ void ViewFunctions::ExecuteDisappear()
     } else {
         LOGE("jsView Object is undefined and will not execute aboutToDisappear function");
     }
+}
+
+void ViewFunctions::ExecuteAboutToRecycle()
+{
+    ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycle");
 }
 
 bool ViewFunctions::HasLayout() const

@@ -40,10 +40,17 @@ public:
         const RefPtr<UnifiedData>& unifiedData, int32_t formId, const RequestFormInfo& cardInfo) override;
     void AddLinkRecord(
         const RefPtr<UnifiedData>& unifiedData, const std::string& url, const std::string& description) override;
+    void GetLinkRecord(
+        const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) override;
+    void AddHtmlRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& htmlContent,
+        const std::string& plainContent) override;
+    void GetHtmlRecord(
+        const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent) override;
     void AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data) override;
     void AddImageRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& uri) override;
-    void AddTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) override;
-    std::string GetSingleTextRecord(const RefPtr<UnifiedData>& unifiedData) override;
+    void AddPlainTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr) override;
+    std::string GetSinglePlainTextRecord(const RefPtr<UnifiedData>& unifiedData) override;
+    std::vector<std::string> GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData) override;
     int32_t GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData, std::string& uri) override;
 };
 

@@ -57,7 +57,9 @@ std::string IndexerAccessibilityProperty::GetText() const
     if (layoutProperty->GetArrayValue().has_value()) {
         auto arrayValue = layoutProperty->GetArrayValue().value();
         auto selectIndex = GetCurrentIndex();
-        return arrayValue.at(selectIndex);
+        if (selectIndex < static_cast<int32_t>(arrayValue.size())) {
+            return arrayValue.at(selectIndex);
+        }
     }
     return "";
 }

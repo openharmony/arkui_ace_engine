@@ -57,12 +57,12 @@ public:
         return scaleY_;
     }
 
-    int GetWindowId() const
+    uint32_t GetWindowId() const
     {
         return windowId_;
     }
 
-    void SetWindowId(const int windowId)
+    void SetWindowId(uint32_t windowId)
     {
         windowId_ = windowId;
     }
@@ -135,7 +135,7 @@ private:
 
     private:
         WeakPtr<JsAccessibilityManager> js_;
-        int32_t windowId_ = 0;
+        uint32_t windowId_ = 0;
     };
     class ToastAccessibilityConfigObserver : public AccessibilityConfig::AccessibilityConfigObserver {
     public:
@@ -218,7 +218,7 @@ private:
         std::map<std::string, std::string>& paramsMap);
 
     std::string callbackKey_;
-    int windowId_ = 0;
+    uint32_t windowId_ = 0;
     bool isReg_ = false;
     std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;
     std::shared_ptr<ToastAccessibilityConfigObserver> toastObserver_ = nullptr;

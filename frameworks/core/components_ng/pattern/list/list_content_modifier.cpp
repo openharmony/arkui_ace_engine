@@ -21,10 +21,10 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-ListContentModifier::ListContentModifier()
+ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize)
 {
-    clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
-    clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
+    clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(clipOffset);
+    clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(clipSize);
     clip_ = AceType::MakeRefPtr<PropertyBool>(true);
     flushDivider_ = AceType::MakeRefPtr<PropertyBool>(true);
 
@@ -51,10 +51,12 @@ void ListContentModifier::onDraw(DrawingContext& context)
 void ListContentModifier::PaintDivider(
     const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas)
 {
-    float laneLen = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
+    float fSpacingTotal = (dividerInfo.lanes - 1) * dividerInfo.laneGutter;
+    float laneLen =
+        (dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
     float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
-    DividerPainter dividerPainter(dividerInfo.constrainStrokeWidth, crossLen,
-        dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
+    DividerPainter dividerPainter(
+        dividerInfo.constrainStrokeWidth, crossLen, dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
 
     int32_t lanes = dividerInfo.lanes;
     int32_t laneIdx = 0;
@@ -68,13 +70,16 @@ void ListContentModifier::PaintDivider(
             float mainPos = child.second.startPos - divOffset + dividerInfo.mainPadding;
             float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
-                crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
+                crossPos +=
+                    laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
                 dividerPainter.SetDividerLength(laneLen);
             } else {
                 dividerPainter.SetDividerLength(crossLen);
             }
             OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
+            if (dividerPainter.GetDividerLength() > 0) {
+                dividerPainter.DrawLine(canvas, offset);
+            }
         }
         if (laneIdx == 0 || child.second.isGroup) {
             lastLineIndex.clear();
@@ -94,13 +99,16 @@ void ListContentModifier::PaintDivider(
             float mainPos = itemPosition.at(index).endPos + divOffset + dividerInfo.mainPadding;
             float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !itemPosition.at(index).isGroup) {
-                crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
+                crossPos +=
+                    laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
                 dividerPainter.SetDividerLength(laneLen);
             } else {
                 dividerPainter.SetDividerLength(crossLen);
             }
             OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            dividerPainter.DrawLine(canvas, offset);
+            if (dividerPainter.GetDividerLength() > 0) {
+                dividerPainter.DrawLine(canvas, offset);
+            }
             laneIdx++;
         }
     }

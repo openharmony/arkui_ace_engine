@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -68,7 +69,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     totalHeight += headerPadding;
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
-        auto headerHeight = headerWrapper->GetGeometryNode()->GetFrameSize().Height();
+        auto headerHeight = headerWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
         totalHeight += (minItemHeight > headerHeight) ? minItemHeight : headerHeight;
     }
     // measure menu item
@@ -76,9 +77,10 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     int32_t currentIndex = itemStartIndex_;
     while (currentIndex < totalItemCount) {
         auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
-        auto childSize = item->GetGeometryNode()->GetFrameSize();
+        auto childSize = item->GetGeometryNode()->GetMarginFrameSize();
         // set minimum size
         childSize.SetWidth(maxChildrenWidth);
+        MinusPaddingToSize(item->GetLayoutProperty()->CreateMargin(), childSize);
         item->GetGeometryNode()->SetFrameSize(childSize);
 
         float itemHeight = childSize.Height();
@@ -90,7 +92,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (footerIndex_ >= 0) {
         auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
-        auto footerHeight = footerWrapper->GetGeometryNode()->GetFrameSize().Height();
+        auto footerHeight = footerWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
         totalHeight += (minItemHeight > footerHeight) ? minItemHeight : footerHeight;
     }
     // set menu size
@@ -144,9 +146,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper)
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     float headerPadding = (needHeaderPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
                           (headerHeight < minItemHeight ? (minItemHeight - headerHeight) / 2 : 0.0f);
-    LayoutIndex(
-        wrapper, OffsetF(static_cast<float>((theme->GetMenuIconPadding() - theme->GetOutPadding()).ConvertToPx()),
-                     headerPadding));
+    LayoutIndex(wrapper, OffsetF(0.0f, headerPadding));
 }
 
 void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
@@ -167,9 +167,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     float footerPadding = (needFooterPadding_ ? static_cast<float>(groupDividerPadding_.ConvertToPx()) : 0.0f) +
                           (footerHeight < minItemHeight ? (minItemHeight - footerHeight) / 2 : 0.0f);
-    LayoutIndex(
-        wrapper, OffsetF(static_cast<float>((theme->GetMenuIconPadding() - theme->GetOutPadding()).ConvertToPx()),
-                     (groupHeight - footerHeight - footerPadding)));
+    LayoutIndex(wrapper, OffsetF(0.0f, (groupHeight - footerHeight - footerPadding)));
 }
 
 void MenuItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& offset)
@@ -199,7 +197,7 @@ float MenuItemGroupLayoutAlgorithm::GetChildrenMaxWidth(
 
     for (const auto& child : children) {
         child->Measure(layoutConstraint);
-        auto childSize = child->GetGeometryNode()->GetFrameSize();
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         width = std::max(width, childSize.Width());
     }
     return width;

@@ -52,7 +52,7 @@ ProgressModel* ProgressModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
+const static int32_t PLATFORM_VERSION_TEN = 10;
 void JSProgress::Create(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
@@ -175,6 +175,8 @@ void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
         return;
     }
 
+    JsSetCommonOptions(info);
+
     switch (g_progressType) {
         case ProgressType::LINEAR:
             JsSetLinearStyleOptions(info);
@@ -249,9 +251,12 @@ void JSProgress::JsSetRingStyleOptions(const JSCallbackInfo& info)
 
     // Parse stroke width
     CalcDimension strokeWidthDimension;
+    auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
+                              PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
     auto strokeWidth = paramObject->GetProperty("strokeWidth");
     if (strokeWidth->IsUndefined() || strokeWidth->IsNull() ||
-        !ParseJsDimensionVp(strokeWidth, strokeWidthDimension)) {
+        (versionTenOrLarger ? !ParseJsDimensionVpNG(strokeWidth, strokeWidthDimension)
+                            : !ParseJsDimensionVp(strokeWidth, strokeWidthDimension))) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
@@ -323,7 +328,7 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
 
     auto jsBorderWidth = paramObject->GetProperty("borderWidth");
     CalcDimension borderWidth;
-    if (!ParseJsDimensionVp(jsBorderWidth, borderWidth)) {
+    if (!ParseJsDimensionVpNG(jsBorderWidth, borderWidth)) {
         borderWidth = theme->GetBorderWidth();
     }
     if (LessNotEqual(borderWidth.Value(), 0.0) || borderWidth.Unit() == DimensionUnit::PERCENT) {
@@ -361,6 +366,19 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     }
 
     JsSetFontStyle(info);
+}
+
+void JSProgress::JsSetCommonOptions(const JSCallbackInfo& info)
+{
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+
+    // Parse smooth effect
+    auto jsSmoothEffect = paramObject->GetProperty("enableSmoothEffect");
+    bool enable = true;
+    if (!ParseJsBool(jsSmoothEffect, enable)) {
+        enable = true;
+    }
+    ProgressModel::GetInstance()->SetSmoothEffect(enable);
 }
 
 void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
@@ -403,7 +421,7 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     CHECK_NULL_VOID(textTheme);
     auto size = textObject->GetProperty("size");
     CalcDimension fontSize;
-    if (!ParseJsDimensionFp(size, fontSize)) {
+    if (!ParseJsDimensionNG(size, fontSize, DimensionUnit::FP)) {
         fontSize = theme->GetTextSize();
     }
     if (LessNotEqual(fontSize.Value(), 0.0) || fontSize.Unit() == DimensionUnit::PERCENT) {
@@ -479,9 +497,12 @@ void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
 
     // Parse stroke width
     CalcDimension strokeWidthDimension;
+    auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
+                              PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
     auto strokeWidth = paramObject->GetProperty("strokeWidth");
     if (strokeWidth->IsUndefined() || strokeWidth->IsNull() ||
-        !ParseJsDimensionVp(strokeWidth, strokeWidthDimension)) {
+        (versionTenOrLarger ? !ParseJsDimensionVpNG(strokeWidth, strokeWidthDimension)
+                            : !ParseJsDimensionVp(strokeWidth, strokeWidthDimension))) {
         strokeWidthDimension = theme->GetTrackThickness();
     }
 
@@ -497,6 +518,22 @@ void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
         sweepingEffect = false;
     }
     ProgressModel::GetInstance()->SetLinearSweepingEffect(sweepingEffect);
+
+    // Parse stroke radius
+    CalcDimension strokeRadiusDimension;
+    auto strokeRadius = paramObject->GetProperty("strokeRadius");
+    if (strokeRadius->IsUndefined() || strokeRadius->IsNull() ||
+        !ParseJsDimensionVpNG(strokeRadius, strokeRadiusDimension)) {
+        ProgressModel::GetInstance()->ResetStrokeRadius();
+        return;
+    }
+
+    if (LessNotEqual(strokeRadiusDimension.Value(), 0.0f) || strokeRadiusDimension.Unit() == DimensionUnit::PERCENT) {
+        ProgressModel::GetInstance()->ResetStrokeRadius();
+        return;
+    }
+
+    ProgressModel::GetInstance()->SetStrokeRadius(strokeRadiusDimension);
 }
 
 } // namespace OHOS::Ace::Framework

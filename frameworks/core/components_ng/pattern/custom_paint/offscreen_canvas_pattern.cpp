@@ -34,6 +34,11 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
     offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(context, width, height);
 }
 
+bool OffscreenCanvasPattern::IsSucceed()
+{
+    return offscreenPaintMethod_->IsSucceed();
+}
+
 void OffscreenCanvasPattern::FillRect(const Rect& rect)
 {
     offscreenPaintMethod_->FillRect(nullptr, rect);
@@ -207,7 +212,7 @@ int32_t OffscreenCanvasPattern::GetHeight()
     return offscreenPaintMethod_->GetHeight();
 }
 
-const LineDashParam& OffscreenCanvasPattern::GetLineDash() const
+LineDashParam OffscreenCanvasPattern::GetLineDash() const
 {
     return offscreenPaintMethod_->GetLineDash();
 }

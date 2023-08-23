@@ -18,6 +18,7 @@
 #include <regex>
 
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -31,8 +32,9 @@ const std::string UNIT_RATIO = "fr";
 const std::string UNIT_PERCENT = "%";
 const std::string REPEAT_PREFIX = "repeat";
 const std::string UNIT_AUTO_FILL = "auto-fill";
+const std::string UNIT_AUTO_FIT = "auto-fit";
 const std::string TRIM_TEMPLATE = "$1$2";
-const std::string INVALID_PATTERN = R"(((repeat)\(\s{0,}(auto-fill)\s{0,},))";
+const std::string INVALID_PATTERN = R"(((repeat)\(\s{0,}((auto-fill)|(auto-fit))\s{0,},))";
 const std::string SIZE_PATTERN = "\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}";
 const std::string PREFIX_PATTERN = R"(\S{1,}(repeat)|(px|%|vp)\d{1,}|\)\d{1,})";
 const std::regex UNIT_PIXEL_REGEX(R"(^([0-9]\d*|[0-9]\d*.\d*|0\.\d*[0-9]\d*)px$)", std::regex::icase);
@@ -41,8 +43,8 @@ const std::regex UNIT_PERCENT_REGEX(R"(^([0-9]\d*|[0-9]\d*.\d*|0\.\d*[0-9]\d*)%$
 const std::regex AUTO_REGEX(R"(^repeat\((.+),(.+)\))", std::regex::icase);        // regex for "repeat(auto-fill, 10px)"
 const std::regex REPEAT_NUM_REGEX(R"(^repeat\((\d+),(.+)\))", std::regex::icase); // regex for "repeat(2, 100px)"
 const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)", std::regex::icase);
-const std::string REPEAT_WITH_AUTOFILL =
-    R"(((repeat)\(\s{0,}(auto-fill)\s{0,},(\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\s{0,}\)))";
+const std::string REPEAT_WITH_AUTOFILL_OR_AUTOFIT =
+    R"(((repeat)\(\s{0,}((auto-fill)|(auto-fit))\s{0,},(\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\s{0,}\)))";
 
 enum class RepeatType {
     NONE = 0,
@@ -129,7 +131,7 @@ bool SplitTemplate(const std::string& str, std::vector<Value>& vec, bool isRepea
 std::string GetRepeat(const std::string& str)
 {
     std::smatch result;
-    std::regex pattern(REPEAT_WITH_AUTOFILL, std::regex::icase);
+    std::regex pattern(REPEAT_WITH_AUTOFILL_OR_AUTOFIT, std::regex::icase);
     std::string::const_iterator iterStart = str.begin();
     std::string::const_iterator iterEnd = str.end();
     std::string regexResult;
@@ -189,7 +191,7 @@ bool CheckAutoFillParameter(
         return false;
     }
 
-    std::regex pattern(REPEAT_WITH_AUTOFILL, std::regex::icase);
+    std::regex pattern(REPEAT_WITH_AUTOFILL_OR_AUTOFIT, std::regex::icase);
     std::vector<std::string> vec(
         std::sregex_token_iterator(args.begin(), args.end(), pattern, -1), std::sregex_token_iterator());
 
@@ -201,12 +203,13 @@ bool CheckAutoFillParameter(
     return invalidRepeatAutoFill;
 }
 
-std::vector<double> ParseArgsWithAutoFill(const std::string& args, double size, double gap, int32_t childrenCount)
+std::pair<std::vector<double>, bool> ParseArgsWithAutoFill(
+    const std::string& args, double size, double gap, int32_t childrenCount)
 {
     std::vector<double> lens;
     std::vector<Value> retTemplates;
     if (!CheckAutoFillParameter(args, size, lens, retTemplates)) {
-        return lens;
+        return std::make_pair(lens, NearEqual(gap, 0.0));
     }
     size_t countNonRepeat = 0;
     int countRepeat = 0;
@@ -233,6 +236,8 @@ std::vector<double> ParseArgsWithAutoFill(const std::string& args, double size, 
             }
         }
     }
+    if ((countNonRepeat - 1) * gap > size)
+        gap = 0.0;
     double sizeNonRepeatGap = GreatNotEqual(countNonRepeat, 0) ? (countNonRepeat - 1) * gap : 0;
     double sizeLeft = size - sizeNonRepeatGap - sizeNonRepeat;
     double count = 0;
@@ -249,7 +254,7 @@ std::vector<double> ParseArgsWithAutoFill(const std::string& args, double size, 
         lens.insert(lens.end(), repeatLens.begin(), repeatLens.end());
     }
     lens.insert(lens.end(), suffixLens.begin(), suffixLens.end());
-    return lens;
+    return std::make_pair(lens, NearEqual(gap, 0.0));
 }
 
 void ConvertRepeatArgs(std::string& handledArg)
@@ -276,13 +281,16 @@ void ConvertRepeatArgs(std::string& handledArg)
     }
 }
 
-std::vector<double> ParseAutoFill(const std::vector<std::string>& strs, double size, double gap)
+std::pair<std::vector<double>, bool> ParseAutoFill(const std::vector<std::string>& strs, double size, double gap)
 {
     std::vector<double> lens;
     if (strs.size() <= 1) {
-        return lens;
+        return std::make_pair(lens, NearEqual(gap, 0.0));
     }
     auto allocatedSize = size - (strs.size() - 2) * gap; // size() - 2 means 'auto-fill' should be erased.
+    if (allocatedSize > size) {
+        gap = 0.0;
+    }
     double pxSum = 0.0;
     double peSum = 0.0;
     std::vector<double> newLens;
@@ -300,12 +308,12 @@ std::vector<double> ParseAutoFill(const std::vector<std::string>& strs, double s
             lens.emplace_back(num / FULL_PERCENT * size);
         } else {
             LOGE("Unsupported type: %{public}s, and use 0.0", str.c_str());
-            return newLens;
+            return std::make_pair(newLens, NearEqual(gap, 0.0));
         }
     }
     allocatedSize -= pxSum;
     if (LessOrEqual(allocatedSize, 0.0)) {
-        return lens;
+        return std::make_pair(lens, NearEqual(gap, 0.0));
     }
     pxSum += lens.size() * gap;
     auto repeatCount = static_cast<int32_t>(allocatedSize / pxSum);
@@ -320,14 +328,15 @@ std::vector<double> ParseAutoFill(const std::vector<std::string>& strs, double s
         }
         newLens.emplace_back(len);
     }
-    return newLens;
+    return std::make_pair(newLens, NearEqual(gap, 0.0));
 }
 
-std::vector<double> ParseArgsWithoutAutoFill(const std::string& args, double size, double gap)
+std::pair<std::vector<double>, bool> ParseArgsWithoutAutoFill(
+    const std::string& args, double size, double gap)
 {
     std::vector<double> lens;
     if (args.empty()) {
-        return lens;
+        return std::make_pair(lens, NearEqual(gap, 0.0));
     }
     double pxSum = 0.0; // First priority: such as 50px
     double peSum = 0.0; // Second priority: such as 20%
@@ -348,13 +357,14 @@ std::vector<double> ParseArgsWithoutAutoFill(const std::string& args, double siz
         } else if (std::regex_match(str, UNIT_RATIO_REGEX)) {
             frSum += StringUtils::StringToDouble(str);
         } else {
-            return lens;
+            return std::make_pair(lens, NearEqual(gap, 0.0));
         }
     }
     peSum = GreatOrEqual(peSum, FULL_PERCENT) ? FULL_PERCENT : peSum;
     // Second loop calculate actual width or height.
-    double sizeLeft = size - (strs.size() - 1) * gap;
-    double sizeNoGap = size - (strs.size() - 1) * gap;
+    double sizeLeft = size > ((strs.size() - 1) * gap) ? size - (strs.size() - 1) * gap : size;
+    gap = size > ((strs.size() - 1) * gap) ? gap: 0.0;
+    double sizeNoGap = sizeLeft;
     double prSumLeft = FULL_PERCENT;
     double frSizeSum = sizeNoGap * (FULL_PERCENT - peSum) / FULL_PERCENT - pxSum;
     for (const auto& str : strs) {
@@ -373,14 +383,78 @@ std::vector<double> ParseArgsWithoutAutoFill(const std::string& args, double siz
             lens.push_back(NearZero(frSum) ? 0.0 : frSizeSum / frSum * num);
         }
     }
-    return lens;
+    return std::make_pair(lens, NearEqual(gap, 0.0));
+}
+
+std::pair<std::vector<double>, bool> ParseArgsWithAutoFit(
+    const std::string& args, double size, double gap, int32_t childrenCount)
+{
+    std::vector<double> lens;
+    std::vector<Value> retTemplates;
+    if (!CheckAutoFillParameter(args, size, lens, retTemplates)) {
+        return std::make_pair(lens, NearEqual(gap, 0.0));
+    }
+
+    size_t countNonRepeat = 0;
+    int countRepeat = 0;
+    double sizeRepeat = 0.0;
+    double sizeNonRepeat = 0.0;
+    bool invalidRepeatAutoFill = false;
+
+    std::vector<double> prefixLens;
+    std::vector<double> repeatLens;
+    std::vector<double> suffixLens;
+
+    for (const auto& ret : retTemplates) {
+        double sizeItem = ParseUnit(ret, size);
+        if (ret.isRepeat) {
+            invalidRepeatAutoFill = true;
+            sizeRepeat += sizeItem;
+            ++countRepeat;
+            repeatLens.push_back(sizeItem);
+        } else {
+            ++countNonRepeat;
+            sizeNonRepeat += sizeItem;
+            if (invalidRepeatAutoFill) {
+                suffixLens.push_back(sizeItem);
+            } else {
+                prefixLens.push_back(sizeItem);
+            }
+        }
+    }
+
+    double sizeNonRepeatGap = GreatNotEqual(countNonRepeat, 0) ? (countNonRepeat - 1) * gap : 0;
+    double sizeLeft = size - sizeNonRepeatGap - sizeNonRepeat;
+    double count = 0;
+    if (!NearZero(sizeRepeat)) {
+        count = (sizeLeft + gap) / (sizeRepeat + countRepeat * gap);
+        count = LessOrEqual(count, 1) ? 1 : floor(count);
+    } else {
+        if (childrenCount >= static_cast<int32_t>(countNonRepeat) && !retTemplates.empty()) {
+            count = ceil((size - countNonRepeat) * 1.0 / (retTemplates.size() - countNonRepeat));
+        }
+    }
+    if (!NearZero(count)) {
+        double gridWidth = (sizeLeft + gap) / count - gap;
+        lens.insert(lens.end(), prefixLens.begin(), prefixLens.end());
+        for (int i = 0; i < count; i++) {
+            lens.push_back(gridWidth);
+        }
+        lens.insert(lens.end(), suffixLens.begin(), suffixLens.end());
+    }
+
+    return std::make_pair(lens, NearEqual(gap, 0.0));
 }
 } // namespace
 
-std::vector<double> ParseTemplateArgs(const std::string& args, double size, double gap, int32_t childrenCount)
+std::pair<std::vector<double>, bool> ParseTemplateArgs(
+    const std::string& args, double size, double gap, int32_t childrenCount)
 {
     if (args.find(REPEAT_PREFIX) != std::string::npos && args.find(UNIT_AUTO_FILL) != std::string::npos) {
         return ParseArgsWithAutoFill(args, size, gap, childrenCount);
+    }
+    if (args.find(REPEAT_PREFIX) != std::string::npos && args.find(UNIT_AUTO_FIT) != std::string::npos) {
+        return ParseArgsWithAutoFit(args, size, gap, childrenCount);
     }
     return NG::ParseArgsWithoutAutoFill(args, size, gap);
 }

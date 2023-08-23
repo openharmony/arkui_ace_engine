@@ -16,7 +16,10 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 common_napi_libs = [
   # napi .so needs to be all lower case
+  "arkui/componentutils",
   "arkui/component_snapshot",
+  "arkui/drag_controller",
+  "arkui/inspector",
   "configuration",
   "device",
   "font",
@@ -53,6 +56,13 @@ template("ace_napi_lib") {
       }
     }
     deps = [ "$ace_root/interfaces/napi/kits/${module_path}:${module_name}_static_${platform}" ]
+
+    cflags = []
+    ldflags = []
+    if (ace_engine_feature_enable_coverage) {
+      cflags += [ "--coverage" ]
+      ldflags += [ "--coverage" ]
+    }
 
     relative_install_dir = "module" + install_dir
     part_name = ace_engine_part

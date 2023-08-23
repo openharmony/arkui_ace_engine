@@ -17,16 +17,11 @@
 
 namespace OHOS::Ace::Platform {
 
-ClipboardProxyImpl::ClipboardProxyImpl(CallbackSetClipboardData callbackSetData,
-    CallbackGetClipboardData callbackGetData) : callbackSetClipboardData_(callbackSetData),
-    callbackGetClipboardData_(callbackGetData) {}
+ClipboardProxyImpl::ClipboardProxyImpl() {}
 
 RefPtr<Clipboard> ClipboardProxyImpl::GetClipboard(const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    auto clipboard = AceType::MakeRefPtr<ClipboardImpl>(taskExecutor);
-    clipboard->RegisterCallbackSetClipboardData(callbackSetClipboardData_);
-    clipboard->RegisterCallbackGetClipboardData(callbackGetClipboardData_);
-    return clipboard;
+    return AceType::MakeRefPtr<ClipboardImpl>(taskExecutor);
 }
 
 } // namespace OHOS::Ace::Platform

@@ -32,16 +32,19 @@ protected:
     static void SetVertical(const std::string& value);
     static void SetBarPosition(const JSCallbackInfo& info);
     static void SetScrollable(const std::string& value);
-    static void SetBarMode(const std::string& value);
+    static void SetBarMode(const JSCallbackInfo& info);
     static void SetBarWidth(const JSCallbackInfo& info);
     static void SetBarHeight(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnTabBarClick(const JSCallbackInfo& info);
     static void SetAnimationDuration(float value);
     static void SetFadingEdge(const JSCallbackInfo& info);
     static void SetDivider(const JSCallbackInfo& info);
     static void SetBarOverlap(const JSCallbackInfo& info);
     static void SetBarBackgroundColor(const JSCallbackInfo& info);
     static void SetClip(const JSCallbackInfo& info);
+    static void SetBarGridAlign(const JSCallbackInfo& info);
+    static void SetScrollableBarModeOptions(const JSRef<JSVal>& info);
 };
 
 } // namespace OHOS::Ace::Framework

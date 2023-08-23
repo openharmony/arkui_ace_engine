@@ -48,6 +48,13 @@ public:
         json->Put("index", std::to_string(GetIndex().value_or(0)).c_str());
     }
 
+    void UpdateIndexWithoutMeasure(int32_t index)
+    {
+        if (propIndex_ != index) {
+            propIndex_ = index;
+        }
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, uint32_t, PROPERTY_UPDATE_LAYOUT);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(StepperLayoutProperty);

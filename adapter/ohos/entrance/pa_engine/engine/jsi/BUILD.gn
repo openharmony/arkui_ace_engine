@@ -57,13 +57,14 @@ template("js_pa_engine_ark") {
       "$ability_runtime_napi_path/inner/napi_common",
       "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
-    deps = [ "$ability_runtime_napi_path/inner/napi_ability_common:napi_ability_common" ]
+    deps = []
     external_deps = [
       "ability_base:want",
       "ability_base:zuri",
       "ability_runtime:abilitykit_native",
       "ability_runtime:appkit_native",
       "ability_runtime:js_environment",
+      "ability_runtime:napi_ability_common",
       "ability_runtime:napi_common",
       "ability_runtime:runtime",
       "bundle_framework:appexecfwk_base",
@@ -72,8 +73,8 @@ template("js_pa_engine_ark") {
       "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "form_fwk:form_manager",
-      "hisysevent_native:libhisysevent",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hisysevent:libhisysevent",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
       "napi:ace_napi",
@@ -87,7 +88,7 @@ template("js_pa_engine_ark") {
 
     if (is_standard_system) {
       defines += [ "ENABLE_HITRACE" ]
-      external_deps += [ "hitrace_native:libhitracechain" ]
+      external_deps += [ "hitrace:libhitracechain" ]
     }
 
     sources = [

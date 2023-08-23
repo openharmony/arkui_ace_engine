@@ -47,6 +47,8 @@ public:
 
     void FlushUpdateAndMarkDirty() override;
 
+    bool TryRetake(const std::string& id);
+
 private:
     // uniquely identifies branches within if elseif else construct:
     // if() { branch } else if () { branch } else { branch}

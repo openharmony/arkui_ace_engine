@@ -51,14 +51,19 @@ public:
         return scrollableDistance_;
     }
 
-    float GetViewPort() const
+    float GetViewPortLength() const
     {
         return viewPortLength_;
     }
 
-    const SizeF& GetViewPortSize() const
+    const SizeF& GetViewPort() const
     {
         return viewPort_;
+    }
+
+    const SizeF& GetViewSize() const
+    {
+        return viewSize_;
     }
 
     const SizeF& GetViewPortExtent() const
@@ -76,6 +81,7 @@ private:
     float viewPortLength_ = 0.0f;
     SizeF viewPort_;
     SizeF viewPortExtent_;
+    SizeF viewSize_;
 };
 
 } // namespace OHOS::Ace::NG

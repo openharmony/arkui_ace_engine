@@ -45,6 +45,8 @@ void CustomNode::Build()
 void CustomNode::Render()
 {
     if (renderFunction_) {
+        auto renderFunction = std::move(renderFunction_);
+        needMarkParent_ = false;
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
@@ -53,12 +55,12 @@ void CustomNode::Render()
             ACE_SCOPED_TRACE("CustomNode:BuildItem %s", GetJSViewName().c_str());
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
-            auto child = renderFunction_();
+            auto child = renderFunction();
             if (child) {
                 child->MountToParent(Claim(this));
             }
         }
-        renderFunction_ = nullptr;
+        needMarkParent_ = true;
     }
     {
         FireRecycleRenderFunc();
@@ -74,7 +76,12 @@ void CustomNode::FlushReload()
     Render();
 }
 
-void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
+void CustomNode::SetJSViewActive(bool active)
+{
+    FireSetActiveFunc(active);
+}
+
+void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout)
 {
     if (parent->GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {
         Render();
@@ -87,8 +94,8 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bo
         return;
     }
 
-    parent->AppendChild(MakeRefPtr<LayoutWrapper>(
-        [weak = AceType::WeakClaim(this), forceMeasure, forceLayout](RefPtr<LayoutWrapper> layoutWrapper) {
+    parent->AppendChild(MakeRefPtr<LayoutWrapperNode>(
+        [weak = AceType::WeakClaim(this), forceMeasure, forceLayout](RefPtr<LayoutWrapperNode> layoutWrapper) {
             auto customNode = weak.Upgrade();
             CHECK_NULL_VOID(customNode);
 
@@ -114,10 +121,22 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bo
         }));
 }
 
-RefPtr<LayoutWrapper> CustomNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
+RefPtr<LayoutWrapperNode> CustomNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     Build();
     return UINode::CreateLayoutWrapper(forceMeasure, forceLayout);
 }
 
+void CustomNode::MarkNeedSyncRenderTree(bool needRebuild)
+{
+    if (needMarkParent_) {
+        UINode::MarkNeedSyncRenderTree(needRebuild);
+    }
+}
+
+RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index)
+{
+    Render();
+    return UINode::GetFrameChildByIndex(index);
+}
 } // namespace OHOS::Ace::NG

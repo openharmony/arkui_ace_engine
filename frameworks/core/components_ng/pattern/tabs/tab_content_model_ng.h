@@ -43,10 +43,15 @@ public:
     void SetBoard(const BoardStyle& board) override;
     void SetSelectedMode(SelectedMode selectedMode) override;
     void SetLabelStyle(const LabelStyle& labelStyle) override;
+    void SetPadding(const NG::PaddingProperty& padding) override;
+    void SetLayoutMode(LayoutMode layoutMode) override;
+    void SetVerticalAlign(FlexAlign verticalAlign) override;
+    void SetSymmetricExtensible(bool isExtensible) override;
     static void AddTabBarItem(
         const RefPtr<UINode>& tabContent, int32_t position = DEFAULT_NODE_SLOT, bool update = false);
     static void RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode);
     static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
+
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);
 };

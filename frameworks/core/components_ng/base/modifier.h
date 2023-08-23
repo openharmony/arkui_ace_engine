@@ -31,15 +31,11 @@
 #include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-class Modifier : public virtual AceType {
+class ACE_FORCE_EXPORT Modifier : public virtual AceType {
     DECLARE_ACE_TYPE(Modifier, AceType);
 
 public:
-    Modifier()
-    {
-        static std::atomic<int32_t> genId = 0;
-        id_ = genId.fetch_add(1, std::memory_order_relaxed);
-    }
+    Modifier();
     ~Modifier() override
     {
         ModifierAdapter::RemoveModifier(id_);
@@ -161,9 +157,20 @@ public:
         rect_ = rect;
     }
 
+    void SetIsCustomFont(bool isCustomFont)
+    {
+        isCustomFont_ = isCustomFont;
+    }
+
+    bool GetIsCustomFont()
+    {
+        return isCustomFont_;
+    }
+
 private:
     std::vector<RefPtr<PropertyBase>> attachedProperties_;
     std::optional<RectF> rect_;
+    bool isCustomFont_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
 
@@ -218,7 +225,9 @@ DECLARE_PROP_TYPED_CLASS(PropertyInt, NormalProperty, int32_t);
 DECLARE_PROP_TYPED_CLASS(PropertyFloat, NormalProperty, float);
 DECLARE_PROP_TYPED_CLASS(PropertyString, NormalProperty, std::string);
 DECLARE_PROP_TYPED_CLASS(PropertyColor, NormalProperty, Color);
+DECLARE_PROP_TYPED_CLASS(PropertyRectF, NormalProperty, RectF);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyUint8, AnimatableProperty, uint8_t);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorFloat, AnimatableProperty, LinearVector<float>);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorColor, AnimatableProperty, GradientArithmetic);

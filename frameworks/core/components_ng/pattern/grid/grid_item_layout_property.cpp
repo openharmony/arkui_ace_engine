@@ -36,7 +36,9 @@ void GridItemLayoutProperty::ResetGridLayoutInfoAndMeasure() const
     auto pattern = grid->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetGridLayoutInfo();
-    grid->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (grid->GetParent()) {
+        grid->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void GridItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const

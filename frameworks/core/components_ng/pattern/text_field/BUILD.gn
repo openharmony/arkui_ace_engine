@@ -31,7 +31,7 @@ build_component_ng("text_field_pattern_ng") {
 
   standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]
   standard_input_deps = [
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "imf:inputmethod_client",
     "input:libmmi-client",
   ]

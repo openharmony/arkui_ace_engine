@@ -27,26 +27,20 @@
         "deps": {
             "components": [
                 "ability_base",
-                "hiviewdfx_hilog_native",
+                "hilog",
+                "hitrace",
+                "accessibility",
+                "frame_aware_sched",
                 "ability_runtime",
-                "appexecfwk_standard",
                 "ipc",
                 "samgr",
                 "preferences",
                 "relational_store",
-                "hisysevent_native",
+                "hisysevent",
                 "napi",
-                "utils_base",
-                "unittest",
-                "resmgr",
-                "graphic",
-                "bytrace",
-                "startup_l2",
                 "hiview",
-                "input",
+                "hichecker",
                 "window_manager",
-                "abilitykit_native",
-                "data_ability_helper",
                 "c_utils",
                 "eventhandler",
                 "bundle_framework",
@@ -57,26 +51,25 @@
                 "kv_store",
                 "udmf",
                 "os_account",
-                "graphic_standard",
+                "graphic_2d",
                 "safwk",
                 "common_event_service",
                 "data_share",
                 "resource_management",
                 "i18n",
-                "hitrace_native",
+                "hicollie",
                 "init",
-                "multimedia_image_framework",
-                "accessibility",
-                "frame_aware_sched",
-                "hicollie_native",
-                "hitrace_native",
-                "camera_framework",
+                "image_framework",
                 "player_framework",
                 "access_token",
-                "hilog_native",
-                "2d_graphics",
-                "librender_service_client",
-                "device_status"
+                "input",
+                "webview",
+                "imf",
+                "device_status",
+                "soc_perf",
+                "security_component",
+                "camera_framework",
+                "previewer"
             ],
             "third_party": [
                 "json",
@@ -86,20 +79,19 @@
                 "libpng",
                 "parse5",
                 "qrcodegen",
-                "css_what",
-                "weex_loader",
-                "third_party_skia",
+                "css-what",
+                "weex-loader",
+                "skia",
                 "zlib",
                 "bounds_checking_function",
                 "curl",
-                "cjson",
+                "cJSON",
                 "jsframework",
                 "opencl-headers",
                 "libuv",
-                "EGL",
-                "openGLES",
-                "libtxt",
-                "thirdparty_googletest"
+                "egl",
+                "opengles",
+                "googletest"
             ]
         },
         "build": {
@@ -122,7 +114,8 @@
                         "header_files": [
                             "ui_content.h",
                             "viewport_config.h",
-                            "serializeable_object.h"
+                            "serializeable_object.h",
+                            "modal_ui_extension_callbacks.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent"
@@ -144,11 +137,20 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor:drawable_descriptor"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_files": [
+                            "adapter/preview/entrance/ace_ability.h",
+                            "adapter/preview/entrance/ace_run_args.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/build:libace"
                 }
             ],
             "test": [
                 "//foundation/arkui/ace_engine/test/unittest:unittest",
-                "//foundation/arkui/ace_engine/frameworks/bridge/test:unittest",
                 "//foundation/arkui/ace_engine/frameworks/core/components_ng/test:unittest",
                 "//foundation/arkui/ace_engine/test/fuzztest:fuzztest"
             ]

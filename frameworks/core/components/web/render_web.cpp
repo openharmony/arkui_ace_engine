@@ -457,7 +457,7 @@ void RenderWeb::InitPanEvent()
     PanDirection panDirection;
     panDirection.type = PanDirection::VERTICAL;
     panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(
-        context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
+        context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
     panRecognizer_->SetOnActionUpdate([weakItem = AceType::WeakClaim(this)](const GestureEvent& event) {
         auto item = weakItem.Upgrade();
         if (item) {

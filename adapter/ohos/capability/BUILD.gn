@@ -27,16 +27,13 @@ template("ace_capability_ohos_source_set") {
 
     sources = [
       "clipboard/clipboard_impl.cpp",
-      "distributed/storage/distributed_storage.cpp",
       "environment/environment_impl.cpp",
       "environment/environment_proxy_impl.cpp",
       "preference/storage_impl.cpp",
-      "udmf/udmf_impl.cpp",
     ]
     include_dirs = []
     external_deps = [
       "ability_base:want",
-      "data_object:distributeddataobject_impl",
       "ipc:ipc_core",
       "preferences:native_preferences",
     ]
@@ -49,6 +46,7 @@ template("ace_capability_ohos_source_set") {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:udmf_data_napi" ]
+        sources += [ "udmf/udmf_impl.cpp" ]
       }
       external_deps += [ "kv_store:distributeddata_inner" ]
     }
@@ -65,11 +63,12 @@ template("ace_capability_ohos_source_set") {
         "bundle_framework:appexecfwk_base",
         "c_utils:utils",
         "eventhandler:libeventhandler",
-        "graphic_standard:librender_service_client",
-        "graphic_standard:surface",
-        "hiviewdfx_hilog_native:libhilog",
+        "graphic_2d:librender_service_client",
+        "graphic_2d:surface",
+        "hilog:libhilog",
         "input:libmmi-client",
         "ipc:ipc_core",
+        "napi:ace_napi",
         "window_manager:libwindow_extension_client",
         "window_manager:scene_session",
       ]

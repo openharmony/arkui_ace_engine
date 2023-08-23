@@ -28,18 +28,10 @@ void GaugeLayoutAlgorithm::OnReset() {}
 std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, std::nullopt);
-    auto gaugeTheme = pipeline->GetTheme<ProgressTheme>();
-    CHECK_NULL_RETURN(gaugeTheme, std::nullopt);
-    auto defaultThickness = gaugeTheme->GetTrackWidth().ConvertToPx();
-    if ((NearEqual(contentConstraint.maxSize.Width(), Size::INFINITE_SIZE))) {
-        return SizeF(defaultThickness, defaultThickness);
-    }
     if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
+        auto len =
+            std::min(contentConstraint.selfIdealSize.Height().value(), contentConstraint.selfIdealSize.Width().value());
+        return SizeF(len, len);
     }
     if (contentConstraint.selfIdealSize.Width().has_value() &&
         NonNegative(contentConstraint.selfIdealSize.Width().value())) {
@@ -51,8 +43,22 @@ std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
         auto height = contentConstraint.selfIdealSize.Height().value();
         return SizeF(height, height);
     }
-    auto len = std::min(contentConstraint.maxSize.Height(), contentConstraint.maxSize.Width());
-    return SizeF(len, len);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto gaugeTheme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_RETURN(gaugeTheme, std::nullopt);
+    auto defaultThickness = gaugeTheme->GetTrackWidth().ConvertToPx();
+    auto size = SizeF(defaultThickness, defaultThickness);
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    size.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+    if (!NearEqual(size.Width(), size.Height())) {
+        auto length = std::min(size.Width(), size.Height());
+        size.SetWidth(length);
+        size.SetHeight(length);
+    }
+    return size;
 }
 
 } // namespace OHOS::Ace::NG

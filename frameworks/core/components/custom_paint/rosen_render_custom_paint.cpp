@@ -34,12 +34,13 @@
 #include "include/core/SkSurface.h"
 #include "include/effects/SkDashPathEffect.h"
 #include "include/effects/SkGradientShader.h"
+#endif
+#include "include/core/SkVertices.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
 #include "include/utils/SkBase64.h"
 #include "include/utils/SkParsePath.h"
-#endif
 
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
@@ -57,7 +58,11 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components/text/text_theme.h"
+#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
+#else
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#endif
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_provider.h"
@@ -187,15 +192,16 @@ void RosenRenderCustomPaint::CreateBitmap(double viewScale)
     skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
 #else
-    RSBitmapFormat format { RSCOLORTYPE_RGBA_8888,
-        RSAlphaType::ALPHATYPE_UNPREMUL };
-    canvasCache_.Reset();
-    cacheBitmap_.Reset();
+    RSBitmapFormat format { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
+    canvasCache_.Free();
+    cacheBitmap_.Free();
     canvasCache_.Build(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale, format);
     cacheBitmap_.Build(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale, format);
     canvasCache_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
+    drawingCanvas_ = std::make_unique<RSCanvas>();
     drawingCanvas_->Bind(canvasCache_);
+    cacheCanvas_ = std::make_unique<RSCanvas>();
     cacheCanvas_->Bind(cacheBitmap_);
 #endif
 }
@@ -307,7 +313,7 @@ RSPen RosenRenderCustomPaint::GetStrokePaint()
         { LineJoinStyle::BEVEL, RSPen::JoinStyle::BEVEL_JOIN },
     };
     static const LinearEnumMapNode<LineCapStyle, RSPen::CapStyle> skLineCapTable[] = {
-        { LineCapStyle::BUTT, RSPen::CapStyle::BUTT_CAP },
+        { LineCapStyle::BUTT, RSPen::CapStyle::FLAT_CAP },
         { LineCapStyle::ROUND, RSPen::CapStyle::ROUND_CAP },
         { LineCapStyle::SQUARE, RSPen::CapStyle::SQUARE_CAP },
     };
@@ -317,7 +323,7 @@ RSPen RosenRenderCustomPaint::GetStrokePaint()
         strokeState_.GetLineJoin(), skLineJoinTable,
         ArraySize(skLineJoinTable), RSPen::JoinStyle::MITER_JOIN));
     pen.SetCapStyle(ConvertEnumToDrawingEnum(
-        strokeState_.GetLineCap(), skLineCapTable, ArraySize(skLineCapTable), RSPen::CapStyle::BUTT_CAP));
+        strokeState_.GetLineCap(), skLineCapTable, ArraySize(skLineCapTable), RSPen::CapStyle::FLAT_CAP));
     pen.SetWidth(static_cast<RSScalar>(strokeState_.GetLineWidth()));
     pen.SetMiterLimit(static_cast<RSScalar>(strokeState_.GetMiterLimit()));
 
@@ -344,6 +350,7 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
     bool isGpuEnable = false;
     bool success = false;
     if (!isGpuEnable) {
+#ifndef USE_ROSEN_DRAWING
         if (canvasCache_.empty()) {
             LOGE("Bitmap is empty");
             return UNSUPPORTED;
@@ -352,6 +359,15 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
         success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkFilterQuality::kHigh_SkFilterQuality);
 #else
         success = canvasCache_.pixmap().scalePixels(tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
+#endif
+#else
+        if (!canvasCache_.IsValid()) {
+            LOGE("Bitmap is invalid");
+            return UNSUPPORTED;
+        }
+        auto& skBitmap = canvasCache_.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
+        success = skBitmap.pixmap().scalePixels(
+            tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
 #endif
         if (!success) {
             LOGE("scalePixels failed when ToDataURL.");
@@ -454,24 +470,26 @@ void RosenRenderCustomPaint::FillRect(const Offset& offset, const Rect& rect)
         RosenDecorationPainter::PaintShadow(path, shadow_, drawingCanvas_.get());
     }
     if (fillState_.GetGradient().IsValid()) {
-        UpdatePaintShader(offset, brush, fillState_.GetGradient());
+        UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
     }
     if (fillState_.GetPattern().IsValid()) {
-        UpdatePaintShader(fillState_.GetPattern(), brush);
+        UpdatePaintShader(fillState_.GetPattern(), nullptr, &brush);
     }
     if (globalState_.HasGlobalAlpha()) {
-        paint.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
+        brush.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         drawingCanvas_->AttachBrush(brush);
         drawingCanvas_->DrawRect(drawingRect);
         drawingCanvas_->DetachBrush();
     } else {
-        InitPaintBlend(cacheBrush_);
         cacheCanvas_->AttachBrush(brush);
         cacheCanvas_->DrawRect(drawingRect);
         cacheCanvas_->DetachBrush();
+        InitPaintBlend(cacheBrush_);
+        drawingCanvas_->AttachBrush(cacheBrush_);
         drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        drawingCanvas_->DetachBrush();
         cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     }
 #endif
@@ -515,24 +533,26 @@ void RosenRenderCustomPaint::StrokeRect(const Offset& offset, const Rect& rect)
     if (HasShadow()) {
         RSRecordingPath path;
         path.AddRect(drawingRect);
-        RosenDecorationPainter::PaintShadow(path, shadow_, drawingCanvas_);
+        RosenDecorationPainter::PaintShadow(path, shadow_, drawingCanvas_.get());
     }
     if (strokeState_.GetGradient().IsValid()) {
-        UpdatePaintShader(offset, pen, strokeState_.GetGradient());
+        UpdatePaintShader(offset, &pen, nullptr, strokeState_.GetGradient());
     }
     if (strokeState_.GetPattern().IsValid()) {
-        UpdatePaintShader(strokeState_.GetPattern(), pen);
+        UpdatePaintShader(strokeState_.GetPattern(), &pen, nullptr);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         drawingCanvas_->AttachPen(pen);
         drawingCanvas_->DrawRect(drawingRect);
         drawingCanvas_->DetachPen();
     } else {
-        InitPaintBlend(cacheBrush_);
         cacheCanvas_->AttachPen(pen);
         cacheCanvas_->DrawRect(drawingRect);
         cacheCanvas_->DetachPen();
+        InitPaintBlend(cacheBrush_);
+        drawingCanvas_->AttachBrush(cacheBrush_);
         drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        drawingCanvas_->DetachBrush();
         cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     }
 #endif
@@ -553,7 +573,7 @@ void RosenRenderCustomPaint::ClearRect(const Offset& offset, const Rect& rect)
     brush.SetBlendMode(RSBlendMode::CLEAR);
     RSRect drawingRect(rect.Left() + offset.GetX(), rect.Top() + offset.GetY(),
         rect.Right() + offset.GetX(), rect.Bottom() + offset.GetY());
-    drawingCanvas_->Attachbrush(brush);
+    drawingCanvas_->AttachBrush(brush);
     drawingCanvas_->DrawRect(drawingRect);
     drawingCanvas_->DetachBrush();
 #endif
@@ -782,13 +802,13 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
     if (GetLayoutSize().Width() > paragraph_->GetMaxIntrinsicWidth()) {
         paragraph_->Layout(std::ceil(paragraph_->GetMaxIntrinsicWidth()));
     }
+#ifndef USE_ROSEN_DRAWING
     auto align = isStroke ? strokeState_.GetTextAlign() : fillState_.GetTextAlign();
     double dx = offset.GetX() + x + GetAlignOffset(align, paragraph_);
     auto baseline =
         isStroke ? strokeState_.GetTextStyle().GetTextBaseline() : fillState_.GetTextStyle().GetTextBaseline();
     double dy = offset.GetY() + y + GetBaselineOffset(baseline, paragraph_);
 
-#ifndef USE_ROSEN_DRAWING
     if (hasShadow) {
         skCanvas_->save();
         auto shadowOffsetX = shadow_.GetOffset().GetX();
@@ -802,14 +822,12 @@ void RosenRenderCustomPaint::PaintText(const Offset& offset, double x, double y,
 #else
     if (hasShadow) {
         drawingCanvas_->Save();
-        auto shadowOffsetX = shadow_.GetOffset().GetX();
-        auto shadowOffsetY = shadow_.GetOffset().GetY();
-        paragraph_->Paint(drawingCanvas_->GetCanvasData()->ExportSkCanvas(), dx + shadowOffsetX, dy + shadowOffsetY);
+        LOGE("Drawing is not supported");
         drawingCanvas_->Restore();
         return;
     }
 
-    paragraph_->Paint(drawingCanvas_->GetCanvasData()->ExportSkCanvas(), dx, dy);
+    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -949,43 +967,37 @@ void RosenRenderCustomPaint::Arc(const Offset& offset, const ArcParam& param)
         skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(sweepAngle), false);
     }
 #else
-    RSRect rect(left, top, right, bottom);
+    RSPoint point1(left, top);
+    RSPoint point2(right, bottom);
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
         // draw circle
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
-        drawingPath_.ArcTo(
-            rect, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half), false);
-        drawingPath_.ArcTo(rect, static_cast<RSScalar>(half + startAngle),
-            static_cast<RSScalar>(half), false);
+        drawingPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        drawingPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
     } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
-        drawingPath_.ArcTo(
-            rect, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half), false);
-        drawingPath_.ArcTo(rect, static_cast<RSScalar>(half + startAngle),
-            static_cast<RSScalar>(half), false);
-        drawingPath_.ArcTo(rect, static_cast<RSScalar>(half + half + startAngle),
-            static_cast<RSScalar>(sweepAngle), false);
+        drawingPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
+        drawingPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + startAngle), static_cast<RSScalar>(half));
+        drawingPath_.ArcTo(point1, point2, static_cast<RSScalar>(half + half + startAngle),
+            static_cast<RSScalar>(sweepAngle));
     } else {
-        drawingPath_.ArcTo(rect, static_cast<RSScalar>(startAngle),
-            static_cast<RSScalar>(sweepAngle), false);
+        drawingPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(sweepAngle));
     }
 #endif
 }
 
 void RosenRenderCustomPaint::ArcTo(const Offset& offset, const ArcToParam& param)
 {
+#ifndef USE_ROSEN_DRAWING
     double x1 = param.x1 + offset.GetX();
     double y1 = param.y1 + offset.GetY();
     double x2 = param.x2 + offset.GetX();
     double y2 = param.y2 + offset.GetY();
     double radius = param.radius;
-#ifndef USE_ROSEN_DRAWING
     skPath_.arcTo(SkDoubleToScalar(x1), SkDoubleToScalar(y1), SkDoubleToScalar(x2), SkDoubleToScalar(y2),
         SkDoubleToScalar(radius));
 #else
-    drawingPath_.ArcTo(static_cast<RSScalar>(x1), static_cast<RSScalar>(y1),
-        static_cast<RSScalar>(x2), static_cast<RSScalar>(y2),
-        static_cast<RSScalar>(radius));
+    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -1036,7 +1048,8 @@ void RosenRenderCustomPaint::Ellipse(const Offset& offset, const EllipseParam& p
         skPath_.transform(matrix);
     }
 #else
-    auto rect = RSRect(left, top, right, bottom);
+    RSPoint point1(left, top);
+    RSPoint point2(right, bottom);
     if (!NearZero(rotation)) {
         RSMatrix matrix;
         matrix.Rotate(-rotation, param.x + offset.GetX(), param.y + offset.GetY());
@@ -1044,10 +1057,10 @@ void RosenRenderCustomPaint::Ellipse(const Offset& offset, const EllipseParam& p
     }
     if (NearZero(sweepAngle) && !NearZero(param.endAngle - param.startAngle)) {
         // The entire ellipse needs to be drawn with two arcTo.
-        drawingPath_.ArcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
-        drawingPath_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+        drawingPath_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
+        drawingPath_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
     } else {
-        drawingPath_.ArcTo(rect, startAngle, sweepAngle, false);
+        drawingPath_.ArcTo(point1, point2, startAngle, sweepAngle);
     }
     if (!NearZero(rotation)) {
         RSMatrix matrix;
@@ -1090,7 +1103,7 @@ void RosenRenderCustomPaint::SetFillRuleForPath(const CanvasFillRule& rule)
     if (rule == CanvasFillRule::NONZERO) {
         drawingPath_.SetFillStyle(RSPathFillType::WINDING);
     } else if (rule == CanvasFillRule::EVENODD) {
-        drawingPath_.SetFillStyle(RSPathFillType::EVEN_ODD);
+        drawingPath_.SetFillStyle(RSPathFillType::EVENTODD);
     }
 #endif
 }
@@ -1115,7 +1128,7 @@ void RosenRenderCustomPaint::SetFillRuleForPath2D(const CanvasFillRule& rule)
     if (rule == CanvasFillRule::NONZERO) {
         drawingPath2d_.SetFillStyle(RSPathFillType::WINDING);
     } else if (rule == CanvasFillRule::EVENODD) {
-        drawingPath2d_.SetFillStyle(RSPathFillType::EVEN_ODD);
+        drawingPath2d_.SetFillStyle(RSPathFillType::EVENTODD);
     }
 #endif
 }
@@ -1211,13 +1224,13 @@ void RosenRenderCustomPaint::Fill(const Offset& offset)
     brush.SetAntiAlias(antiAlias_);
     brush.SetColor(fillState_.GetColor().GetValue());
     if (HasShadow()) {
-        RosenDecorationPainter::PaintShadow(drawingPath_, shadow_, drawingCanvas_);
+        RosenDecorationPainter::PaintShadow(drawingPath_, shadow_, drawingCanvas_.get());
     }
     if (fillState_.GetGradient().IsValid()) {
-        UpdatePaintShader(offset, brush, fillState_.GetGradient());
+        UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
     }
     if (fillState_.GetPattern().IsValid()) {
-        UpdatePaintShader(fillState_.GetPattern(), brush);
+        UpdatePaintShader(fillState_.GetPattern(), nullptr, &brush);
     }
     if (globalState_.HasGlobalAlpha()) {
         brush.SetAlphaF(globalState_.GetAlpha());
@@ -1227,11 +1240,13 @@ void RosenRenderCustomPaint::Fill(const Offset& offset)
         drawingCanvas_->DrawPath(drawingPath_);
         drawingCanvas_->DetachBrush();
     } else {
-        InitPaintBlend(cacheBrush_);
         cacheCanvas_->AttachBrush(brush);
         cacheCanvas_->DrawPath(drawingPath_);
         cacheCanvas_->DetachBrush();
+        InitPaintBlend(cacheBrush_);
+        drawingCanvas_->AttachBrush(cacheBrush_);
         drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        drawingCanvas_->DetachBrush();
         cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     }
 #endif
@@ -1282,24 +1297,26 @@ void RosenRenderCustomPaint::Stroke(const Offset& offset)
     RSPen pen = GetStrokePaint();
     pen.SetAntiAlias(antiAlias_);
     if (HasShadow()) {
-        RosenDecorationPainter::PaintShadow(drawingPath_, shadow_, drawingCanvas_);
+        RosenDecorationPainter::PaintShadow(drawingPath_, shadow_, drawingCanvas_.get());
     }
     if (strokeState_.GetGradient().IsValid()) {
-        UpdatePaintShader(offset, pen, strokeState_.GetGradient());
+        UpdatePaintShader(offset, &pen, nullptr, strokeState_.GetGradient());
     }
     if (strokeState_.GetPattern().IsValid()) {
-        UpdatePaintShader(strokeState_.GetPattern(), pen);
+        UpdatePaintShader(strokeState_.GetPattern(), &pen, nullptr);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         drawingCanvas_->AttachPen(pen);
         drawingCanvas_->DrawPath(drawingPath_);
         drawingCanvas_->DetachPen();
     } else {
-        InitPaintBlend(cacheBrush_);
         cacheCanvas_->AttachPen(pen);
         cacheCanvas_->DrawPath(drawingPath_);
         cacheCanvas_->DetachPen();
+        InitPaintBlend(cacheBrush_);
+        drawingCanvas_->AttachBrush(cacheBrush_);
         drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        drawingCanvas_->DetachBrush();
         cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     }
 #endif
@@ -1328,7 +1345,7 @@ void RosenRenderCustomPaint::Path2DAddPath(const Offset& offset, const PathArgs&
     skPath2d_.addPath(out);
 #else
     RSRecordingPath out;
-    out.FromSVGString(args.cmds.c_str());
+    out.BuildFromSVGString(args.cmds);
     drawingPath2d_.AddPath(out);
 #endif
 }
@@ -1389,8 +1406,8 @@ void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& arg
     auto rect =
         SkRect::MakeLTRB(x - r + offset.GetX(), y - r + offset.GetY(), x + r + offset.GetX(), y + r + offset.GetY());
 #else
-    RSRect rect(
-        x - r + offset.GetX(), y - r + offset.GetY(), x + r + offset.GetX(), y + r + offset.GetY());
+    RSPoint point1(x - r + offset.GetX(), y - r + offset.GetY());
+    RSPoint point2(x + r + offset.GetX(), y + r + offset.GetY());
 #endif
     double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
     double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
@@ -1415,29 +1432,29 @@ void RosenRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& arg
     }
 #else
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
-        drawingPath2d_.ArcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
-        drawingPath2d_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+        drawingPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
+        drawingPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
     } else if (!NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && abs(sweepAngle) > FULL_CIRCLE_ANGLE) {
-        drawingPath2d_.ArcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
-        drawingPath2d_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
-        drawingPath2d_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle, false);
+        drawingPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
+        drawingPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
+        drawingPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE + HALF_CIRCLE_ANGLE, sweepAngle);
     } else {
-        drawingPath2d_.ArcTo(rect, startAngle, sweepAngle, false);
+        drawingPath2d_.ArcTo(point1, point2, startAngle, sweepAngle);
     }
 #endif
 }
 
 void RosenRenderCustomPaint::Path2DArcTo(const Offset& offset, const PathArgs& args)
 {
+#ifndef USE_ROSEN_DRAWING
     double x1 = args.para1 + offset.GetX();
     double y1 = args.para2 + offset.GetY();
     double x2 = args.para3 + offset.GetX();
     double y2 = args.para4 + offset.GetY();
     double r = args.para5;
-#ifndef USE_ROSEN_DRAWING
     skPath2d_.arcTo(x1, y1, x2, y2, r);
 #else
-    drawingPath2d_.ArcTo(x1, y1, x2, y2, r);
+    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -1517,8 +1534,8 @@ void RosenRenderCustomPaint::Path2DEllipse(const Offset& offset, const PathArgs&
         skPath2d_.transform(matrix);
     }
 #else
-    RSRect rect(
-        x - rx + offset.GetX(), y - ry + offset.GetY(), x + rx + offset.GetX(), y + ry + offset.GetY());
+    RSPoint point1(x - rx + offset.GetX(), y - ry + offset.GetY());
+    RSPoint point2(x + rx + offset.GetX(), y + ry + offset.GetY());
 
     if (!NearZero(rotation)) {
         RSMatrix matrix;
@@ -1527,10 +1544,10 @@ void RosenRenderCustomPaint::Path2DEllipse(const Offset& offset, const PathArgs&
     }
     if (NearZero(sweepAngle) && !NearZero(args.para6 - args.para7)) {
         // The entire ellipse needs to be drawn with two arcTo.
-        drawingPath2d_.ArcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
-        drawingPath2d_.ArcTo(rect, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE, false);
+        drawingPath2d_.ArcTo(point1, point2, startAngle, HALF_CIRCLE_ANGLE);
+        drawingPath2d_.ArcTo(point1, point2, startAngle + HALF_CIRCLE_ANGLE, HALF_CIRCLE_ANGLE);
     } else {
-        drawingPath2d_.ArcTo(rect, startAngle, sweepAngle, false);
+        drawingPath2d_.ArcTo(point1, point2, startAngle, sweepAngle);
     }
     if (!NearZero(rotation)) {
         RSMatrix matrix;
@@ -1592,21 +1609,23 @@ void RosenRenderCustomPaint::Path2DStroke(const Offset& offset)
     RSPen pen = GetStrokePaint();
     pen.SetAntiAlias(antiAlias_);
     if (HasShadow()) {
-        RosenDecorationPainter::PaintShadow(drawingPath2d_, shadow_, drawingCanvas_);
+        RosenDecorationPainter::PaintShadow(drawingPath2d_, shadow_, drawingCanvas_.get());
     }
     if (strokeState_.GetGradient().IsValid()) {
-        UpdatePaintShader(offset, pen, strokeState_.GetGradient());
+        UpdatePaintShader(offset, &pen, nullptr, strokeState_.GetGradient());
     }
     if (strokeState_.GetPattern().IsValid()) {
-        UpdatePaintShader(strokeState_.GetPattern(), pen);
+        UpdatePaintShader(strokeState_.GetPattern(), &pen, nullptr);
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
-        drawingCanvas_->drawPath(skPath2d_, paint);
+        drawingCanvas_->AttachPen(pen);
+        drawingCanvas_->DrawPath(drawingPath2d_);
+        drawingCanvas_->DetachPen();
     } else {
-        InitPaintBlend(cacheBrush_);
         cacheCanvas_->AttachPen(pen);
         cacheCanvas_->DrawPath(drawingPath2d_);
         cacheCanvas_->DetachPen();
+        InitPaintBlend(cacheBrush_);
         drawingCanvas_->AttachBrush(cacheBrush_);
         drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
         drawingCanvas_->DetachBrush();
@@ -1651,27 +1670,29 @@ void RosenRenderCustomPaint::Path2DFill(const Offset& offset)
     brush.SetAntiAlias(antiAlias_);
     brush.SetColor(fillState_.GetColor().GetValue());
     if (HasShadow()) {
-        RosenDecorationPainter::PaintShadow(drawingPath2d_, shadow_, drawingCanvas_);
+        RosenDecorationPainter::PaintShadow(drawingPath2d_, shadow_, drawingCanvas_.get());
     }
     if (fillState_.GetGradient().IsValid()) {
-        UpdatePaintShader(offset, brush, fillState_.GetGradient());
+        UpdatePaintShader(offset, nullptr, &brush, fillState_.GetGradient());
     }
     if (fillState_.GetPattern().IsValid()) {
-        UpdatePaintShader(fillState_.GetPattern(), brush);
+        UpdatePaintShader(fillState_.GetPattern(), nullptr, &brush);
     }
     if (globalState_.HasGlobalAlpha()) {
-        paint.SetAlphaF(globalState_.GetAlpha());
+        brush.SetAlphaF(globalState_.GetAlpha());
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         drawingCanvas_->AttachBrush(brush);
         drawingCanvas_->DrawPath(drawingPath2d_);
         drawingCanvas_->DetachBrush();
     } else {
-        InitPaintBlend(cacheBrush_);
         cacheCanvas_->AttachBrush(brush);
         cacheCanvas_->DrawPath(drawingPath2d_);
         cacheCanvas_->DetachBrush();
+        InitPaintBlend(cacheBrush_);
+        drawingCanvas_->AttachBrush(cacheBrush_);
         drawingCanvas_->DrawBitmap(cacheBitmap_, 0, 0);
+        drawingCanvas_->DetachBrush();
         cacheBitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     }
 #endif
@@ -1690,7 +1711,7 @@ void RosenRenderCustomPaint::Clip()
 #else
 void RosenRenderCustomPaint::Path2DClip()
 {
-    drawingCanvas_->ClipPath(drawingPath2d_);
+    drawingCanvas_->ClipPath(drawingPath2d_, RSClipOp::INTERSECT);
 }
 
 void RosenRenderCustomPaint::Clip()
@@ -1795,21 +1816,25 @@ void RosenRenderCustomPaint::InitImagePaint()
     }
 #endif
 #else
-    RSFilter filter;
+    auto filter = imageBrush_.GetFilter();
     if (smoothingEnabled_) {
         if (smoothingQuality_ == "low") {
+            options_ = RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::NONE);
             filter.SetFilterQuality(RSFilter::FilterQuality::LOW);
             imageBrush_.SetFilter(filter);
         } else if (smoothingQuality_ == "medium") {
+            options_ = RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::LINEAR);
             filter.SetFilterQuality(RSFilter::FilterQuality::MEDIUM);
             imageBrush_.SetFilter(filter);
         } else if (smoothingQuality_ == "high") {
+            options_ = RSSamplingOptions(RSCubicResampler::Mitchell());
             filter.SetFilterQuality(RSFilter::FilterQuality::HIGH);
             imageBrush_.SetFilter(filter);
         } else {
             LOGE("Unsupported Quality type:%{public}s", smoothingQuality_.c_str());
         }
     } else {
+        options_ = RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NONE);
         filter.SetFilterQuality(RSFilter::FilterQuality::NONE);
         imageBrush_.SetFilter(filter);
     }
@@ -1823,9 +1848,9 @@ void RosenRenderCustomPaint::InitPaintBlend(SkPaint& paint)
         ConvertEnumToSkEnum(globalState_.GetType(), SK_BLEND_MODE_TABLE, BLEND_MODE_SIZE, SkBlendMode::kSrcOver));
 }
 #else
-void RosenRenderCustomPaint::InitPaintBlend(RSPen& pen)
+void RosenRenderCustomPaint::InitPaintBlend(RSBrush& brush)
 {
-    pen.SetBlendMode(ConvertEnumToDrawingEnum(
+    brush.SetBlendMode(ConvertEnumToDrawingEnum(
         globalState_.GetType(), DRAWING_BLEND_MODE_TABLE, BLEND_MODE_SIZE, RSBlendMode::SRC_OVER));
 }
 #endif
@@ -1914,7 +1939,7 @@ void RosenRenderCustomPaint::UpdateTextStyleForeground(
         txtStyle.has_foreground = true;
     }
 #else
-    // TODO Drawing : about txt
+    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -1966,7 +1991,7 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Offset& offset, SkPaint& pa
 }
 #else
 void RosenRenderCustomPaint::UpdatePaintShader(
-    const Offset& offset, RSBrush& brush, const Gradient& gradient)
+    const Offset& offset, RSPen* pen, RSBrush* brush, const Gradient& gradient)
 {
     RSPoint beginPoint =
         RSPoint(static_cast<RSScalar>(gradient.GetBeginOffset().GetX() + offset.GetX()),
@@ -2001,7 +2026,12 @@ void RosenRenderCustomPaint::UpdatePaintShader(
                 pts.at(0), gradient.GetInnerRadius(), pts.at(1), gradient.GetOuterRadius(), colors, pos, mode);
         }
     }
-    brush.SetShaderEffect(shaderEffect);
+    if (pen != nullptr) {
+        pen->SetShaderEffect(shaderEffect);
+    }
+    if (brush != nullptr) {
+        brush->SetShaderEffect(shaderEffect);
+    }
 }
 #endif
 
@@ -2124,11 +2154,7 @@ void RosenRenderCustomPaint::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
     imageObj_ = imageObj;
     if (imageObj_->IsSvg()) {
-#ifndef USE_ROSEN_DRAWING
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
-#else
-        drawingDom_ = AceType::DynamicCast<SvgDrawingImageObject>(imageObj_)->GetSvgDom();
-#endif
         currentSource_ = loadingSource_;
         CanvasImage canvasImage = canvasImage_;
         TaskFunc func = [canvasImage](RenderCustomPaint& iface, const Offset& offset) {
@@ -2151,6 +2177,7 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
 {
 #ifndef USE_ROSEN_DRAWING
     const auto skCanvas = skCanvas_.get();
+#endif
     // Make the ImageSourceInfo
     canvasImage_ = canvasImage;
     loadingSource_ = ImageSourceInfo(canvasImage.src);
@@ -2161,6 +2188,7 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
     }
 
     // draw the svg
+#ifndef USE_ROSEN_DRAWING
     if (skiaDom_) {
         SkRect srcRect;
         SkRect dstRect;
@@ -2197,19 +2225,7 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
         skCanvas->scale(scaleX, scaleY);
         skiaDom_->render(skCanvas);
         skCanvas->restore();
-    }
 #else
-    const auto drawingCanvas = drawingCanvas_;
-    // Make the ImageSourceInfo
-    canvasImage_ = canvasImage;
-    loadingSource_ = ImageSourceInfo(canvasImage.src);
-    // get the ImageObject
-    if (currentSource_ != loadingSource_) {
-        ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, GetContext(), true, true, true, renderTaskHolder_, onPostBackgroundTask_);
-    }
-
-    // draw the svg
     if (skiaDom_) {
         RSRect srcRect;
         RSRect dstRect;
@@ -2218,16 +2234,13 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
         double scaleY = 1.0f;
         switch (canvasImage.flag) {
             case 0:
-                srcRect = RSRect(0, 0,
-                    drawingDom_->GetContainerSize().Width(), drawingDom_->GetContainerSize().Height());
-                dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                    drawingDom_->GetContainerSize().Width() + canvasImage.dx,
-                    drawingDom_->GetContainerSize().Height() + canvasImage.dy);
+                srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                dstRect = RSRect(canvasImage.dx, canvasImage.dy, skiaDom_->containerSize().width() + canvasImage.dx,
+                    skiaDom_->containerSize().height() + canvasImage.dy);
                 break;
             case 1: {
-                srcRect = RSRect(0, 0,
-                    drawingDom_->GetContainerSize().Width(), drawingDom_->GetContainerSize().Height());
-                dstRect = RSRects(canvasImage.dx, canvasImage.dy,
+                srcRect = RSRect(0, 0, skiaDom_->containerSize().width(), skiaDom_->containerSize().height());
+                dstRect = RSRect(canvasImage.dx, canvasImage.dy,
                     canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
                 break;
             }
@@ -2243,17 +2256,17 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
         }
         scaleX = dstRect.GetWidth() / srcRect.GetWidth();
         scaleY = dstRect.GetHeight() / srcRect.GetHeight();
-        startPoint = offset  + Offset(dstRect.GetLeft(), dstRect.GetTop())
-            - Offset(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
+        startPoint = offset +
+            Offset(dstRect.GetLeft(), dstRect.GetTop()) - Offset(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
 
-        drawingCanvas->Save();
-        drawingCanvas->ClipRect(dstRect, false);
-        drawingCanvas->Translate(startPoint.GetX(), startPoint.GetY());
-        drawingCanvas->Scale(scaleX, scaleY);
-        skiaDom_->Render(*drawingCanvas);
-        drawingCanvas->Restore();
-    }
+        drawingCanvas_->Save();
+        drawingCanvas_->ClipRect(dstRect, RSClipOp::INTERSECT, false);
+        drawingCanvas_->Translate(startPoint.GetX(), startPoint.GetY());
+        drawingCanvas_->Scale(scaleX, scaleY);
+        drawingCanvas_->DrawSVGDOM(skiaDom_);
+        drawingCanvas_->Restore();
 #endif
+    }
 }
 
 void RosenRenderCustomPaint::DrawImage(
@@ -2302,33 +2315,29 @@ void RosenRenderCustomPaint::DrawImage(
             break;
     }
 #else
-    InitPaintBlend(imagePen_);
-
-    RSSamplingOptions sampling =
-        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
+    InitPaintBlend(imageBrush_);
 
     switch (canvasImage.flag) {
         case 0:
-            drawingCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampling);
+            drawingCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, RSSamplingOptions());
             break;
         case 1: {
             RSRect rect = RSRect(canvasImage.dx, canvasImage.dy,
                 canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
-            drawingCanvas_->AttachPen(imagePen_);
-            drawingCanvas_->DrawImageRect(*image, rect, sampling);
-            drawingCanvas_->DetachPen();
+            drawingCanvas_->AttachBrush(imageBrush_);
+            drawingCanvas_->DrawImageRect(*image, rect, options_);
+            drawingCanvas_->DetachBrush();
             break;
         }
         case 2: {
-            RSRect dstRect =
-                RSRect(canvasImage.dx, canvasImage.dy,
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
                     canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
-            RSRect srcRect =
-                RSRect(canvasImage.sx, canvasImage.sy,
+            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy,
                     canvasImage.sWidth + canvasImage.sx, canvasImage.sHeight + canvasImage.sy);
-            drawingCanvas_->AttachPen(imagePen_);
-            drawingCanvas_->DrawImageRect(*image, srcRect, dstRect, sampling);
-            drawingCanvas_->DetachPen();
+            drawingCanvas_->AttachBrush(imageBrush_);
+            drawingCanvas_->DrawImageRect(*image, srcRect, dstRect, options_,
+                RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+            drawingCanvas_->DetachBrush();
             break;
         }
         default:
@@ -2385,7 +2394,7 @@ void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Canva
             break;
     }
 #else
-    // TODO Drawing : Pixmap
+    LOGE("Drawing is not supported");
 #endif
 }
 
@@ -2454,7 +2463,7 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& 
     }
 }
 #else
-void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, RSBrush& brush)
+void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, RSPen* pen, RSBrush* brush)
 {
     auto context = GetContext().Upgrade();
     if (!context) {
@@ -2470,44 +2479,39 @@ void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, RSBrush& 
         LOGE("image is null");
         return;
     }
-    static const LinearMapNode<void (*)(std::shared_ptr<RSImage>, RSBrush&)>
+    static const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShaderEffect>&)>
         staticPattern[] = {
             { "no-repeat",
-                [](std::shared_ptr<RSImage> image, RSBrush& brush) {
-                    brush.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
-                        RSTileMode::DECAL, RSTileMode::DECAL,
-                        RSSamplingOptions(
-                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
-                        RSMatrix()));
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& rsShaderEffect) {
+                    rsShaderEffect = RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::DECAL, RSTileMode::DECAL, RSSamplingOptions(), RSMatrix());
                 } },
             { "repeat",
-                [](std::shared_ptr<RSImage> image, RSBrush& brush) {
-                    brush.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
-                        RSTileMode::REPEAT, RSTileMode::REPEAT,
-                        RSSamplingOptions(
-                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
-                        RSMatrix()));
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& rsShaderEffect) {
+                    rsShaderEffect = RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::REPEAT, RSTileMode::REPEAT, RSSamplingOptions(), RSMatrix());
                 } },
             { "repeat-x",
-                [](std::shared_ptr<RSImage> image, RSBrush& brush) {
-                    brush.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
-                        RSTileMode::REPEAT, RSTileMode::DECAL,
-                        RSSamplingOptions(
-                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
-                        RSMatrix()));
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& rsShaderEffect) {
+                    rsShaderEffect = RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::REPEAT, RSTileMode::DECAL, RSSamplingOptions(), RSMatrix());
                 } },
             { "repeat-y",
-                [](std::shared_ptr<RSImage> image, RSBrush& brush) {
-                    brush.SetShaderEffect(RSShaderEffect::CreateImageShader(*image,
-                        RSTileMode::DECAL, RSTileMode::REPEAT,
-                        RSSamplingOptions(
-                            RSFilterMode::NEAREST, RSMipmapMode::NEAREST),
-                        RSMatrix()));
+                [](std::shared_ptr<RSImage>& image, std::shared_ptr<RSShaderEffect>& rsShaderEffect) {
+                    rsShaderEffect = RSShaderEffect::CreateImageShader(*image,
+                        RSTileMode::DECAL, RSTileMode::REPEAT, RSSamplingOptions(), RSMatrix());
                 } },
         };
     auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
     if (operatorIter != -1) {
-        staticPattern[operatorIter].value(image, brush);
+        std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
+        staticPattern[operatorIter].value(image, shaderEffect);
+        if (pen) {
+            pen->SetShaderEffect(shaderEffect);
+        }
+        if (brush) {
+            brush->SetShaderEffect(shaderEffect);
+        }
     }
 }
 #endif
@@ -2582,7 +2586,25 @@ std::unique_ptr<ImageData> RosenRenderCustomPaint::GetImageData(double left, dou
     }
     pixels = tempCache.pixmap().addr8();
 #else
-    // TODO Drawing : Bitmap::pixmap()
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmap tempCache;
+    tempCache.Build(width, height, format);
+    double scaledLeft = left * viewScale;
+    double scaledTop = top * viewScale;
+    double dirtyWidth = width >= 0 ? width : 0;
+    double dirtyHeight = height >= 0 ? height : 0;
+    int32_t size = dirtyWidth * dirtyHeight;
+    bool isGpuEnable = false;
+    RSCanvas tempCanvas;
+    tempCanvas.Bind(tempCache);
+    auto srcRect = RSRect(scaledLeft, scaledTop, width * viewScale + scaledLeft, height * viewScale + scaledTop);
+    auto dstRect = RSRect(0.0, 0.0, dirtyWidth, dirtyHeight);
+    if (!isGpuEnable) {
+        RSImage rsImage;
+        rsImage.BuildFromBitmap(canvasCache_);
+        tempCanvas.DrawImageRect(rsImage, srcRect, dstRect, options_, RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
+    }
+    const uint8_t* pixels = static_cast<const uint8_t*>(tempCache.GetPixels());
 #endif
     if (pixels == nullptr) {
         return nullptr;
@@ -2629,9 +2651,8 @@ void RosenRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
         webGLContext_->SetBitMapPtr(
             reinterpret_cast<char*>(webglBitmap_.getPixels()), webglBitmap_.width(), webglBitmap_.height());
 #else
-        if (!webglBitmap_.ReadyToDraw()) {
-            RSBitmapFormat format { RSColorType::COLORTYPE_RGBA_8888,
-                RSAlphaType::ALPHATYPE_OPAQUE };
+        if (webglBitmap_.GetPixels() != nullptr) {
+            RSBitmapFormat format { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
             webglBitmap_.Build(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale, format);
         }
         webGLContext_->SetBitMapPtr(reinterpret_cast<char*>(webglBitmap_.GetPixels()),
@@ -2658,11 +2679,11 @@ void RosenRenderCustomPaint::WebGLUpdate()
         skCanvas_->restore();
     }
 #else
-    if (drawingCanvas_ && webglBitmap_.ReadyToDraw()) {
+    if (drawingCanvas_ && webglBitmap_.GetPixels() != nullptr) {
         drawingCanvas_->Save();
         /* Do mirror flip */
         RSMatrix matrix;
-        matrix.Scale(1.0, -1.0);
+        matrix.Scale(1.0, -1.0, 0.0, 0.0);
         drawingCanvas_->SetMatrix(matrix);
         drawingCanvas_->DrawBitmap(webglBitmap_, 0, -webglBitmap_.GetHeight());
         drawingCanvas_->Restore();
@@ -2722,6 +2743,10 @@ void RosenRenderCustomPaint::DrawBitmapMesh(
 #ifndef USE_ROSEN_DRAWING
 void RosenRenderCustomPaint::Mesh(
     SkBitmap& bitmap, int column, int row, const float* vertices, const int* colors, const SkPaint* paint)
+#else
+void RosenRenderCustomPaint::Mesh(RSBitmap& bitmap, int column, int row,
+    const float* vertices, const int* colors, const RSBrush* brush)
+#endif
 {
     const int vertCounts = (column + 1) * (row + 1);
     int32_t size = 6;
@@ -2741,8 +2766,13 @@ void RosenRenderCustomPaint::Mesh(
     }
     SkPoint* texsPoint = builder.texCoords();
     uint16_t* indices = builder.indices();
+#ifndef USE_ROSEN_DRAWING
     const SkScalar height = SkIntToScalar(bitmap.height());
     const SkScalar width = SkIntToScalar(bitmap.width());
+#else
+    const RSScalar height = static_cast<RSScalar>(bitmap.GetHeight());
+    const RSScalar width = static_cast<RSScalar>(bitmap.GetWidth());
+#endif
     if (row == 0) {
         LOGE("row is zero");
         return;
@@ -2788,6 +2818,7 @@ void RosenRenderCustomPaint::Mesh(
         index += 1;
     }
 
+#ifndef USE_ROSEN_DRAWING
     SkPaint tempPaint;
     if (paint) {
         tempPaint = *paint;
@@ -2807,96 +2838,21 @@ void RosenRenderCustomPaint::Mesh(
     }
     tempPaint.setShader(shader);
     skCanvas_->drawVertices(builder.detach(), SkBlendMode::kModulate, tempPaint);
-}
 #else
-void RosenRenderCustomPaint::Mesh(RSBitmap& bitmap, int column, int row,
-    const float* vertices, const int* colors, const RSPen* pen)
-{
-    const int vertCounts = (column + 1) * (row + 1);
-    int32_t size = 6;
-    const int indexCount = column * row * size;
-    uint32_t flags = RSVertices::BuilderFlags::BUILDERFLAGS_TEXCOORDS;
-    if (colors) {
-        flags |= RSVertices::BuilderFlags::BUILDERFLAGS_COLORS;
+    RSBrush tempBrush;
+    if (brush) {
+        tempBrush = *brush;
     }
-    RSVertices::Builder builder(
-        RSVertexMode::VERTEXMODE_TRIANGLES, vertCounts, indexCount, flags);
-    if (memcpy_s(builder.Positions(), vertCounts * sizeof(RSPoint), vertices,
-        vertCounts * sizeof(RSPoint)) != 0) {
-        return;
-    }
-    if (colors) {
-        if (memcpy_s(builder.Colors(), vertCounts * sizeof(RSColorQuad), colors,
-            vertCounts * sizeof(RSColorQuad)) != 0) {
-            return;
-        }
-    }
-    RSPoint* texsPoint = builder.TexCoords();
-    uint16_t* indices = builder.Indices();
-    const RSScalar height = static_cast<RSScalar>(bitmap.GetHeight());
-    const RSScalar width = static_cast<RSScalar>(bitmap.GetWidth());
-    if (row == 0) {
-        LOGE("row is zero");
-        return;
-    }
-    if (column == 0) {
-        LOGE("column is zero");
-        return;
-    }
-    const RSScalar dy = height / row;
-    const RSScalar dx = width / column;
-
-    RSPoint* texsPit = texsPoint;
-    RSScalar y = 0;
-    for (int i = 0; i <= row; i++) {
-        if (i == row) {
-            y = height; // to ensure numerically we hit h exactly
-        }
-        RSScalar x = 0;
-        for (int j = 0; j < column; j++) {
-            texsPit->Set(x, y);
-            texsPit += 1;
-            x += dx;
-        }
-        texsPit->Set(width, y);
-        texsPit += 1;
-        y += dy;
-    }
-
-    uint16_t* dexs = indices;
-    int index = 0;
-    for (int i = 0; i < row; i++) {
-        for (int j = 0; j < column; j++) {
-            *dexs++ = index;
-            *dexs++ = index + column + 1;
-            *dexs++ = index + column + 2;
-
-            *dexs++ = index;
-            *dexs++ = index + column + 2;
-            *dexs++ = index + 1;
-
-            index += 1;
-        }
-        index += 1;
-    }
-
-    RSPen tempPen;
-    if (pen) {
-        tempPen = *pen;
-    }
-    auto image = std::shared_ptr<RSImage>();
+    auto image = std::make_shared<RSImage>();
     image->BuildFromBitmap(bitmap);
-    RSSamplingOptions sampling =
-        RSSamplingOptions(RSFilterMode::NEAREST, RSMipmapMode::NEAREST);
-    RSMatrix matrix;
     auto shader = RSShaderEffect::CreateImageShader(
-        *image, RSTileMode::CLAMP, RSTileMode::CLAMP, sampling, matrix);
-    tempPen.SetShaderEffect(shader);
-    drawingCanvas_->AttachPen(tempPen);
-    drawingCanvas_->DrawVertices(builder, RSBlendMode::MODULATE);
-    drawingCanvas_->DetachPen();
-}
+        *image, RSTileMode::CLAMP, RSTileMode::CLAMP, RSSamplingOptions(), RSMatrix());
+    tempBrush.SetShaderEffect(shader);
+    drawingCanvas_->AttachBrush(tempBrush);
+    LOGE("Drawing is not supported");
+    drawingCanvas_->DetachBrush();
 #endif
+}
 
 #ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> RosenRenderCustomPaint::GetImage(const std::string& src)
@@ -2933,9 +2889,7 @@ std::shared_ptr<RSImage> RosenRenderCustomPaint::GetImage(const std::string& src
     }
     auto cacheImage = imageCache_->GetCacheImage(src);
     if (cacheImage && cacheImage->imagePtr) {
-        std::shared_ptr<RSImage> dImage =
-            std::make_shared<RSImage>(cacheImage->imagePtr->image());
-        return dImage;
+        return cacheImage->imagePtr;
     }
 
     auto context = GetContext().Upgrade();
@@ -2944,7 +2898,17 @@ std::shared_ptr<RSImage> RosenRenderCustomPaint::GetImage(const std::string& src
     }
 
     auto image = ImageProvider::GetDrawingImage(src, context);
-    // TODO Drawing : Image::makeRasterImage()
+    if (image) {
+        RSBitmapFormat rsBitmapFormat { image->GetColorType(), image->GetAlphaType() };
+        RSBitmap rsBitmap;
+        rsBitmap.Build(image->GetWidth(), image->GetHeight(), rsBitmapFormat);
+        if (image->ReadPixels(rsBitmap, 0, 0)) {
+            auto rasterizedImage = std::make_shared<RSImage>();
+            rasterizedImage->BuildFromBitmap(rsBitmap);
+            imageCache_->CacheImage(src, std::make_shared<CachedImage>(rasterizedImage));
+            return rasterizedImage;
+        }
+    }
 
     return image;
 }

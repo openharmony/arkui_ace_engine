@@ -93,6 +93,7 @@ public:
         float boundsRectHeight = size.Height() + 2 * verticalPadding;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         checkboxGroupModifier_->SetBoundsRect(boundsRect);
+        checkboxGroupModifier_->SetInactivePointColor(checkboxTheme->GetInactivePointColor());
     }
 
     void SetEnabled(bool enabled)

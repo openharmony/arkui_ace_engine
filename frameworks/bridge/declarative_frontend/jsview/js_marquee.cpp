@@ -91,7 +91,7 @@ void JSMarquee::Create(const JSCallbackInfo& info)
         int32_t loop = -1;
         if (GreatNotEqual(loopDouble, 0.0)) {
             loop = static_cast<int32_t>(loopDouble);
-            if (loop == std::numeric_limits<int32_t>::max()) {
+            if (loop == std::numeric_limits<int32_t>::max() || loop < 0) {
                 loop = -1;
             }
         }

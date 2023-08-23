@@ -20,10 +20,6 @@ ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEv
     : gestureEventHub_(gestureEventHub)
 {}
 
-void ScrollableActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
-{}
-
 void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect)
 {}
 
@@ -33,5 +29,9 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
 }
 
 void ScrollableActuator::InitializeScrollable(RefPtr<ScrollableEvent> event)
+{}
+
+void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint)
 {}
 } // namespace OHOS::Ace::NG

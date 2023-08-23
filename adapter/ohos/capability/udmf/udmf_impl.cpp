@@ -18,12 +18,14 @@
 #include <memory>
 #include <unordered_map>
 
+#include "html.h"
 #include "image.h"
 #include "link.h"
 #include "summary_napi.h"
 #include "system_defined_form.h"
 #include "system_defined_pixelmap.h"
 #include "text.h"
+#include "plain_text.h"
 #include "udmf_client.h"
 #include "unified_data.h"
 #include "unified_data_napi.h"
@@ -162,6 +164,7 @@ void UdmfClientImpl::AddFormRecord(
 
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
     udData->GetUnifiedData()->AddRecord(formRecord);
 }
 
@@ -172,7 +175,57 @@ void UdmfClientImpl::AddLinkRecord(
 
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
     udData->GetUnifiedData()->AddRecord(record);
+}
+
+void UdmfClientImpl::GetLinkRecord(
+    const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (auto record : records) {
+        UDMF::UDType type = record->GetType();
+        if (type == UDMF::UDType::HYPERLINK) {
+            UDMF::Link* link = reinterpret_cast<UDMF::Link*>(record.get());
+            url = link->GetUrl();
+            description = link->GetDescription();
+            return;
+        }
+    }
+}
+
+void UdmfClientImpl::AddHtmlRecord(
+    const RefPtr<UnifiedData>& unifiedData, const std::string& htmlContent, const std::string& plainContent)
+{
+    auto htmlRecord = std::make_shared<UDMF::Html>(htmlContent, plainContent);
+
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
+    if (!plainContent.empty() || !htmlContent.empty()) {
+        udData->GetUnifiedData()->AddRecord(htmlRecord);
+    }
+}
+
+void UdmfClientImpl::GetHtmlRecord(
+    const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (auto record : records) {
+        UDMF::UDType type = record->GetType();
+        if (type == UDMF::UDType::HTML) {
+            UDMF::Html* html = reinterpret_cast<UDMF::Html*>(record.get());
+            plainContent = html->GetPlainContent();
+            htmlContent = html->GetHtmlContent();
+            return;
+        }
+    }
 }
 
 void UdmfClientImpl::AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data)
@@ -181,6 +234,7 @@ void UdmfClientImpl::AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, s
 
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
     udData->GetUnifiedData()->AddRecord(record);
 }
 
@@ -190,41 +244,57 @@ void UdmfClientImpl::AddImageRecord(const RefPtr<UnifiedData>& unifiedData, cons
 
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
     udData->GetUnifiedData()->AddRecord(record);
 }
 
-void UdmfClientImpl::AddTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr)
+void UdmfClientImpl::AddPlainTextRecord(const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr)
 {
-    UDMF::UDVariant udmfValue(selectedStr);
-    UDMF::UDDetails udmfDetails = { { "value", udmfValue } };
-    auto record = std::make_shared<UDMF::Text>(udmfDetails);
+    auto record = std::make_shared<UDMF::PlainText>(selectedStr, "");
 
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
     udData->GetUnifiedData()->AddRecord(record);
 }
 
-std::string UdmfClientImpl::GetSingleTextRecord(const RefPtr<UnifiedData>& unifiedData)
+std::string UdmfClientImpl::GetSinglePlainTextRecord(const RefPtr<UnifiedData>& unifiedData)
 {
     std::string str = "";
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_RETURN(udData, str);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), str);
     auto records = udData->GetUnifiedData()->GetRecords();
-    if (records.size() == 1 && records[0]->GetType() == UDMF::UDType::TEXT) {
-        UDMF::Text* text = reinterpret_cast<UDMF::Text*>(records[0].get());
-        UDMF::UDDetails udmfDetails = text->GetDetails();
-        auto value = udmfDetails.find("value");
-        if (value != udmfDetails.end()) {
-            str = std::get<std::string>(value->second);
-        }
+    if (records.size() >= 1 && records[0]->GetType() == UDMF::UDType::PLAIN_TEXT) {
+        UDMF::PlainText* plainText = reinterpret_cast<UDMF::PlainText*>(records[0].get());
+        str = plainText->GetContent();
     }
     return str;
+}
+
+std::vector<std::string> UdmfClientImpl::GetPlainTextRecords(const RefPtr<UnifiedData>& unifiedData)
+{
+    std::vector<std::string> textRecords;
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, textRecords);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), textRecords);
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (const auto& record : records) {
+        UDMF::UDType type = record->GetType();
+        if (type == UDMF::UDType::PLAIN_TEXT) {
+            UDMF::PlainText* plainText = reinterpret_cast<UDMF::PlainText*>(record.get());
+            std::string str = plainText->GetContent();
+            textRecords.emplace_back(str);
+        }
+    }
+    return textRecords;
 }
 
 int32_t UdmfClientImpl::GetVideoRecordUri(const RefPtr<UnifiedData>& unifiedData, std::string& uri)
 {
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_RETURN(udData, UDMF::E_ERROR);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), UDMF::E_ERROR);
     auto records = udData->GetUnifiedData()->GetRecords();
     if (records.size() == 0) {
         return UDMF::E_ERROR;

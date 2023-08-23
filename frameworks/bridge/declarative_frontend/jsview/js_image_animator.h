@@ -46,8 +46,7 @@ public:
 
 private:
     static void ParseImages(const JSRef<JSVal>& image, ImageProperties& imageProperties);
-    static EventMarker GetEventMarker(const JSCallbackInfo& info);
-    static AnimatorEvent GetAnimatorEvent(const JSCallbackInfo& info);
+    static AnimatorEvent GetAnimatorEvent(const JSCallbackInfo& info, std::string&& eventName);
 };
 
 } // namespace OHOS::Ace::Framework

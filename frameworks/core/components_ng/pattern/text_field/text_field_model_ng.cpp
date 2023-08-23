@@ -29,10 +29,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr Dimension UNDERLINE_NORMAL_HEIGHT = 48.0_vp;
-constexpr Dimension UNDERLINE_NORMAL_PADDING = 12.0_vp;
-} // namespace
 void TextFieldModelNG::CreateNode(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
 {
@@ -46,6 +42,7 @@ void TextFieldModelNG::CreateNode(
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textEditingValue = pattern->GetTextEditingValue();
     if (value.has_value() && value.value() != textEditingValue.text) {
+        pattern->SetCaretUpdateType(CaretUpdateType::EVENT);
         pattern->InitEditingValueText(value.value());
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
@@ -81,39 +78,19 @@ void TextFieldModelNG::CreateNode(
     AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
+    SetDraggable(textFieldTheme->GetDraggable());
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
+}
+
+void TextFieldModelNG::SetDraggable(bool draggable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDraggable(draggable);
 }
 
 void TextFieldModelNG::SetShowUnderline(bool showUnderLine)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto rendercontext = frameNode->GetRenderContext();
-    auto pipeline = frameNode->GetContext();
-    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    textFieldLayoutProperty->UpdateShowUnderline(showUnderLine);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(textFieldTheme);
-    if (showUnderLine) {
-        rendercontext->UpdateBackgroundColor(Color::TRANSPARENT);
-        CalcSize idealSize;
-        PaddingProperty paddings;
-        ProcessDefaultPadding(paddings);
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
-        if (textFieldLayoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL) {
-            std::optional<CalcLength> height(UNDERLINE_NORMAL_HEIGHT);
-            idealSize.SetHeight(height);
-            textFieldLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
-        }
-        textFieldLayoutProperty->UpdateFontSize(textFieldTheme->GetUnderlineFontSize());
-        if (!textFieldLayoutProperty->HasTextColor()) {
-            textFieldLayoutProperty->UpdateTextColor(textFieldTheme->GetUnderlineTextColor());
-        }
-        Radius radius;
-        rendercontext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, showUnderLine);
 }
 
@@ -128,21 +105,10 @@ void TextFieldModelNG::ProcessDefaultPadding(PaddingProperty& paddings)
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto themePadding = textFieldTheme->GetPadding();
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (layoutProperty->GetShowUnderlineValue(false)) {
-        paddings.top = NG::CalcLength(UNDERLINE_NORMAL_PADDING);
-        paddings.bottom = NG::CalcLength(UNDERLINE_NORMAL_PADDING);
-        paddings.left = NG::CalcLength(0);
-        paddings.right = NG::CalcLength(0);
-    } else {
-        paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
-        paddings.bottom = NG::CalcLength(themePadding.Top().ConvertToPx());
-        paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
-        paddings.right = NG::CalcLength(themePadding.Left().ConvertToPx());
-    }
+    paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
+    paddings.bottom = NG::CalcLength(themePadding.Top().ConvertToPx());
+    paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
+    paddings.right = NG::CalcLength(themePadding.Left().ConvertToPx());
 }
 
 RefPtr<TextFieldControllerBase> TextFieldModelNG::CreateTextInput(
@@ -192,6 +158,9 @@ void TextFieldModelNG::SetType(TextInputType value)
         layoutProperty->UpdateTypeChanged(true);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->EditingValueFilterChange();
 }
 
 void TextFieldModelNG::SetPlaceholderColor(const Color& value)
@@ -345,6 +314,20 @@ void TextFieldModelNG::SetOnChange(std::function<void(const std::string&)>&& fun
     eventHub->SetOnChange(std::move(func));
 }
 
+void TextFieldModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
+}
+
+void TextFieldModelNG::SetOnContentScroll(std::function<void(float, float)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollChangeEvent(std::move(func));
+}
+
 void TextFieldModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
@@ -387,7 +370,7 @@ void TextFieldModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(dragDropManager);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    dragDropManager->AddTextFieldDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 void TextFieldModelNG::SetForegroundColor(const Color& value)
@@ -443,6 +426,16 @@ void TextFieldModelNG::SetShowError(const std::string& errorText, bool visible)
 void TextFieldModelNG::SetShowCounter(bool value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
+}
+
+void TextFieldModelNG::SetBarState(OHOS::Ace::DisplayMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value);
+}
+
+void TextFieldModelNG::SetMaxViewLines(uint32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value);
 }
 
 void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
@@ -524,5 +517,20 @@ void TextFieldModelNG::SetOnChangeEvent(std::function<void(const std::string&)>&
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChangeEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetSelectionMenuHidden(bool selectionMenuHidden)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectionMenuHidden, selectionMenuHidden);
+}
+
+void TextFieldModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    if (pattern) {
+        pattern->SetCustomKeyboard(std::move(buildFunc));
+    }
 }
 } // namespace OHOS::Ace::NG

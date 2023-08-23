@@ -124,11 +124,17 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
                 return;
             }
             CalcDimension titleHeight;
-            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() < 0) {
                 return;
             }
             NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
             return;
+        } else {
+            CalcDimension titleHeight;
+            if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight) || titleHeight.Value() <= 0) {
+                return;
+            }
+            NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
         }
     } else {
         LOGE("arg is not [String|Function].");
@@ -205,6 +211,9 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);
+    JSClass<JSNavDestination>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSNavDestination>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSNavDestination>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }

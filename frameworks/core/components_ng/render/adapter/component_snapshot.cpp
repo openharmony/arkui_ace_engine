@@ -71,7 +71,7 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback)));
 }
 
-void ComponentSnapshot::Create(const RefPtr<AceType>& customNode, JsCallback&& callback)
+void ComponentSnapshot::Create(const RefPtr<AceType>& customNode, JsCallback&& callback, const int32_t delayTime)
 {
     auto node = AceType::DynamicCast<FrameNode>(customNode);
     if (!node) {
@@ -83,9 +83,6 @@ void ComponentSnapshot::Create(const RefPtr<AceType>& customNode, JsCallback&& c
     FrameNode::ProcessOffscreenNode(node);
     LOGD("ProcessOffscreenNode finished, root size = %{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str());
-
-    // add delay to ensure Rosen has finished rendering
-    constexpr int32_t delayTime = 300;
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

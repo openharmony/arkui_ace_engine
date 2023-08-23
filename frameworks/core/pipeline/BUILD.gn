@@ -19,6 +19,8 @@ template("ace_core_pipeline_source_set") {
   forward_variables_from(invoker, "*")
 
   ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
     if (current_os == "ohos") {
       sanitize = {
         integer_overflow = true
@@ -77,7 +79,7 @@ template("ace_core_pipeline_source_set") {
     configs = [ "$ace_root:ace_config" ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
-
+    external_deps = []
     if (ace_use_new_skia) {
       deps += [
         "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
@@ -96,7 +98,10 @@ template("ace_core_pipeline_source_set") {
       if (is_cross_platform_build) {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
       } else {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+        external_deps += [ "graphic_2d:librender_service_client" ]
+        if (ace_use_rosen_drawing) {
+          external_deps += [ "graphic_2d:2d_graphics" ]
+        }
       }
     }
 

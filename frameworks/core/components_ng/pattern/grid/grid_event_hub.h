@@ -26,12 +26,13 @@
 namespace OHOS::Ace::NG {
 
 using ScrollToIndexFunc = std::function<void(const BaseEventInfo*)>;
-using ScrollBarUpdateFunc = std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, float)>;
+using ScrollBarUpdateFunc = std::function<std::pair<std::optional<float>, std::optional<float>>(int32_t, Dimension)>;
 using ItemDragStartFunc = std::function<RefPtr<UINode>(const ItemDragInfo&, int32_t)>;
 using ItemDragEnterFunc = std::function<void(const ItemDragInfo&)>;
 using ItemDragMoveFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t)>;
 using ItemDragLeaveFunc = std::function<void(const ItemDragInfo&, int32_t)>;
 using ItemDropFunc = std::function<void(const ItemDragInfo&, int32_t, int32_t, bool)>;
+using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 
 class GridEventHub : public EventHub {
     DECLARE_ACE_TYPE(GridEventHub, EventHub)
@@ -83,7 +84,77 @@ public:
         }
     }
 
-    std::pair<std::optional<float>, std::optional<float>> FireOnScrollBarUpdate(int32_t index, float offset)
+    void SetOnScroll(OnScrollEvent&& onScroll)
+    {
+        onScrollEvent_ = std::move(onScroll);
+    }
+
+    const OnScrollEvent& GetOnScroll() const
+    {
+        return onScrollEvent_;
+    }
+
+    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+    {
+        onScrollFrameBeginEvent_ = std::move(onScrollFrameBegin);
+    }
+
+    const OnScrollFrameBeginEvent& GetOnScrollFrameBegin() const
+    {
+        return onScrollFrameBeginEvent_;
+    }
+
+    void SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+    {
+        onScrollStartEvent_ = std::move(onScrollStart);
+    }
+
+    const OnScrollStartEvent& GetOnScrollStart() const
+    {
+        return onScrollStartEvent_;
+    }
+
+    void SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
+    {
+        onScrollStopEvent_ = std::move(onScrollStop);
+    }
+
+    const OnScrollStopEvent& GetOnScrollStop() const
+    {
+        return onScrollStopEvent_;
+    }
+
+    void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex)
+    {
+        onScrollIndexEvent_ = std::move(onScrollIndex);
+    }
+
+    const ScrollIndexFunc& GetOnScrollIndex() const
+    {
+        return onScrollIndexEvent_;
+    }
+
+    void SetOnReachStart(OnReachEvent&& onReachStart)
+    {
+        onReachStartEvent_ = std::move(onReachStart);
+    }
+
+    const OnReachEvent& GetOnReachStart() const
+    {
+        return onReachStartEvent_;
+    }
+
+    void SetOnReachEnd(OnReachEvent&& onReachEnd)
+    {
+        onReachEndEvent_ = std::move(onReachEnd);
+    }
+
+    const OnReachEvent& GetOnReachEnd() const
+    {
+        return onReachEndEvent_;
+    }
+
+    std::pair<std::optional<float>, std::optional<float>> FireOnScrollBarUpdate(int32_t index, const Dimension& offset)
     {
         if (onScrollBarUpdate_) {
             return onScrollBarUpdate_(index, offset);
@@ -107,7 +178,12 @@ public:
 
     bool FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess);
 
-    bool HasOnItemDrop() const
+    bool HasOnItemDragMove() override
+    {
+        return static_cast<bool>(onItemDragMove_);
+    }
+
+    bool HasOnItemDrop() override
     {
         return static_cast<bool>(onItemDrop_);
     }
@@ -136,6 +212,14 @@ private:
     RefPtr<DragDropProxy> dragDropProxy_;
     int32_t draggedIndex_ = 0;
     RefPtr<FrameNode> draggingItem_;
+
+    OnScrollEvent onScrollEvent_;
+    OnScrollStartEvent onScrollStartEvent_;
+    OnScrollStopEvent onScrollStopEvent_;
+    ScrollIndexFunc onScrollIndexEvent_;
+    OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
+    OnReachEvent onReachStartEvent_;
+    OnReachEvent onReachEndEvent_;
 };
 
 } // namespace OHOS::Ace::NG

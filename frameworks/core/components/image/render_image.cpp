@@ -99,11 +99,7 @@ void RenderImage::Update(const RefPtr<Component>& component)
     imageRenderMode_ = image->GetImageRenderMode();
     imageRepeat_ = image->GetImageRepeat();
 
-#ifndef USE_ROSEN_DRAWING
     useSkiaSvg_ = image->GetUseSkiaSvg();
-#else
-    useDrawingSvg_ = image->GetUseDrawingSvg();
-#endif
     autoResize_ = image->GetAutoResize();
     imageAlt_ = image->GetAlt();
     auto inComingSrc = image->GetSrc();
@@ -353,7 +349,11 @@ void RenderImage::HandleOnCopy()
             break;
         }
         default: {
+#ifndef USE_ROSEN_DRAWING
             clipboard_->SetPixelMapData(renderImage->GetPixmapFromSkImage(), copyOption_);
+#else
+            clipboard_->SetPixelMapData(renderImage->GetPixmapFromDrawingImage(), copyOption_);
+#endif
             break;
         }
     }

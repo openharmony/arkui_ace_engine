@@ -39,7 +39,9 @@ constexpr int32_t MAX_ALPHA = 255;
 constexpr int32_t FOCUS_ANIMATION_OFFSET = 3;
 constexpr int32_t PHONE_FOCUS_OFFSET = 3;
 constexpr int32_t PHONE_INDENTED_FOCUS_OFFSET = 1;
+#ifndef USE_ROSEN_DRAWING
 constexpr int32_t ARRAY_LENGTH = 6;
+#endif
 constexpr float RIGHT_ANGLE = 90.0f;
 constexpr float MAX_TRANSPARENCY = 153.0f;
 constexpr float MIN_TRANSPARENCY = 26.0f;
@@ -139,8 +141,7 @@ void RosenRenderFocusAnimation::PaintGlow(SkCanvas* skCanvas, SkPaint& paint, in
         paint);
 }
 #else
-void RosenRenderFocusAnimation::PaintGlow(
-    RSCanvas* canvas, RSBrush& brush, int32_t padding) const
+void RosenRenderFocusAnimation::PaintGlow(RSCanvas* canvas, RSBrush& brush, int32_t padding) const
 {
     int32_t maxHeight = sqrt(pow(width_ + MULTIPLE_FACTOR * padding, MULTIPLE_FACTOR) +
                              pow(height_ + MULTIPLE_FACTOR * padding, MULTIPLE_FACTOR));
@@ -154,7 +155,7 @@ void RosenRenderFocusAnimation::PaintGlow(
     // Calculate the angle that each frame moves based on the total number of frames
     canvas->Rotate(progress_);
 
-    std::vector<RSscalar> pos = { LEFTEDGE_START_PERCENT, LEFTGLOWEDGE_START_PERCENT,
+    std::vector<RSScalar> pos = { LEFTEDGE_START_PERCENT, LEFTGLOWEDGE_START_PERCENT,
         MIDGLOWEDGE_START_PERCENT, RIGHTGLOWEDGE_START_PERCENT, RIGHTEDGE_START_PERCENT, RIGHTEDGE_END_PERCENT };
 
     if (!NearZero(height_)) {
@@ -264,18 +265,20 @@ void RosenRenderFocusAnimation::PaintTVFocus(RSCanvas* canvas)
         PaintClipRect(canvas, offsetValue);
     }
 
-    std::unique_ptr<RSRect> rect = std::make_unique<RSRect>(
-		RSRect(0 - padding, 0 - padding,
-			width_ + MULTIPLE_FACTOR * padding - padding,
-            height_ + MULTIPLE_FACTOR * padding - padding));
+    std::unique_ptr<RSRect> rect = std::make_unique<RSRect>(RSRect(0 - padding, 0 - padding,
+		width_ + MULTIPLE_FACTOR * padding - padding, height_ + MULTIPLE_FACTOR * padding - padding));
     canvas->Translate(offset_.GetX() - offsetValue / MULTIPLE_FACTOR, offset_.GetY() - offsetValue / MULTIPLE_FACTOR);
-    int32_t depthOfSavedStack = canvas->SaveLayerAlpha(*rect, MAX_ALPHA);
+
+    int32_t depthOfSavedStack = canvas->GetSaveCount();
+    RSBrush layerBrush;
+    layerBrush.SetAlpha(MAX_ALPHA);
+    RSSaveLayerOps slo(rect.get(), &layerBrush);
+    canvas->SaveLayer(slo);
 
     RSRecordingPath path;
     path.AddRoundRect(RSRect(0, 0, width_, height_), radiusX, radiusY);
 
     RSPen pen;
-    RSBrush brush;
     pen.SetJoinStyle(RSPen::JoinStyle::ROUND_JOIN);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     pen.SetWidth(NormalizeToPx(Dimension(BOUNDARY_WIDTH, DimensionUnit::VP)));
@@ -284,23 +287,19 @@ void RosenRenderFocusAnimation::PaintTVFocus(RSCanvas* canvas)
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
         RSBlurType::SOLID, NormalizeToPx(blurMaskRadius_) * BLUR_SIGMA_FACTOR));
     pen.SetFilter(filter);
-
-    pen.SetColor(
-        RSColor(pathColor_.GetRed(), pathColor_.GetGreen(), pathColor_.GetBlue(), pathColor_.GetAlpha())
-    );
+    pen.SetColor(RSColor(pathColor_.GetRed(), pathColor_.GetGreen(), pathColor_.GetBlue(), pathColor_.GetAlpha()));
     pen.SetAlpha(MAX_ALPHA);
     pen.SetAntiAlias(true);
-
-    brush.SetFilter(filter);
-    brush.SetColor(RSColor(pathColor_.GetRed(),
-        pathColor_.GetGreen(), pathColor_.GetBlue(), pathColor_.GetAlpha()));
-    brush.SetAlpha(MAX_ALPHA);
-    brush.SetAntiAlias(true);
 
     canvas->AttachPen(pen);
     canvas->DrawPath(path);
     canvas->DetachPen();
 
+    RSBrush brush;
+    brush.SetFilter(filter);
+    brush.SetColor(RSColor(pathColor_.GetRed(), pathColor_.GetGreen(), pathColor_.GetBlue(), pathColor_.GetAlpha()));
+    brush.SetAlpha(MAX_ALPHA);
+    brush.SetAntiAlias(true);
     PaintGlow(canvas, brush, padding);
 
     canvas->RestoreToCount(depthOfSavedStack);

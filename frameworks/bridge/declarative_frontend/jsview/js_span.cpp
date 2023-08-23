@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/span_model_impl.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
@@ -107,7 +108,11 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        textColor = theme->GetTextStyle().GetTextColor();
     }
     SpanModel::GetInstance()->SetTextColor(textColor);
 }
@@ -192,6 +197,11 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
 void JSSpan::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+            LOGD("JsOnClick callback is undefined");
+            SpanModel::GetInstance()->ClearOnClick();
+            return;
+        }
         if (!info[0]->IsFunction()) {
             LOGW("the info is not click function");
             return;

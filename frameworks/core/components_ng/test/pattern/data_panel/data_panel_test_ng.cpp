@@ -209,11 +209,11 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest003, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. Create LayoutWrapper and set dataPanelLayoutAlgorithm.
+     * @tc.steps: step2. Create LayoutWrapperNode and set dataPanelLayoutAlgorithm.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto dataPanelPattern = frameNode->GetPattern<DataPanelPattern>();
     EXPECT_NE(dataPanelPattern, nullptr);
     auto dataPanelLayoutAlgorithm = dataPanelPattern->CreateLayoutAlgorithm();
@@ -298,11 +298,11 @@ HWTEST_F(DataPanelTestNg, DataPanelMeasureTest004, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. Create LayoutWrapper and set dataPanelLayoutAlgorithm.
+     * @tc.steps: step2. Create LayoutWrapperNode and set dataPanelLayoutAlgorithm.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto dataPanelPattern = frameNode->GetPattern<DataPanelPattern>();
     EXPECT_NE(dataPanelPattern, nullptr);
     auto dataPanelLayoutAlgorithm = dataPanelPattern->CreateLayoutAlgorithm();
@@ -475,11 +475,11 @@ HWTEST_F(DataPanelTestNg, DataPanelPatternTest007, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. Create LayoutWrapper and set dataPanelLayoutAlgorithm.
+     * @tc.steps: step2. Create LayoutWrapperNode and set dataPanelLayoutAlgorithm.
      */
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto dataPanelPattern = frameNode->GetPattern<DataPanelPattern>();
     EXPECT_NE(dataPanelPattern, nullptr);
     auto dataPanelLayoutAlgorithm = dataPanelPattern->CreateLayoutAlgorithm();
@@ -527,7 +527,8 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest005, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
 
     /**
@@ -545,13 +546,13 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest005, TestSize.Level1)
      */
 
     /**
-     *     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     *     case 1: LayoutWrapperNode::SkipMeasureContent = true , skipMeasure = true;
      */
     bool first_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(first_case);
 
     /**
-     *     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     *     case 2: LayoutWrapperNode::SkipMeasureContent = true , skipMeasure = true;
      */
     bool second_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(second_case);
@@ -560,13 +561,13 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintPropertyTest005, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     /**
-     *     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     *     case 3: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = true;
      */
     bool third_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(third_case);
 
     /**
-     *     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
+     *     case 4: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = false;
      */
     bool forth_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forth_case);
@@ -883,9 +884,10 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest003, TestSize.Level1)
 
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillOnce(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
-    dataPanelModifier.PaintBackground(rsCanvas, OFFSET, TOTAL_WIDTH, TOTAL_HEIGHT);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    dataPanelModifier.PaintBackground(rsCanvas, OFFSET, TOTAL_WIDTH, TOTAL_HEIGHT, SEGMENTWIDTH);
+    dataPanelModifier.PaintBackground(rsCanvas, OFFSET, TOTAL_WIDTH, TOTAL_HEIGHT * 4, SEGMENTWIDTH);
 }
 
 /**

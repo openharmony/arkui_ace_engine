@@ -26,6 +26,7 @@
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
+#include "frameworks/bridge/common/utils/componentInfo.h"
 #include "frameworks/bridge/js_frontend/engine/common/group_js_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 
@@ -92,6 +93,7 @@ public:
     {
         return "";
     }
+    virtual void GetRectangleById(const std::string& key, NG::Rectangle& rectangle);
 
     // distribute
     virtual std::string RestoreRouterStack(const std::string& contentInfo)
@@ -132,9 +134,14 @@ public:
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) = 0;
+    virtual void ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks) {};
     virtual void ShowDialog(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks, std::function<void(bool)>&& onStatusChanged) {};
+    virtual void ShowDialog(const PromptDialogAttr& dialogAttr, const std::vector<ButtonInfo>& buttons,
+        std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks,
+        std::function<void(bool)>&& onStatusChanged) {};
 
     virtual void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback) = 0;
     virtual void DisableAlertBeforeBackPage() = 0;
@@ -196,7 +203,7 @@ public:
 
     virtual const RefPtr<MediaQueryInfo>& GetMediaQueryInfoInstance() = 0;
 
-    virtual void OnMediaQueryUpdate() = 0;
+    virtual void OnMediaQueryUpdate(bool isSynchronous = false) = 0;
 
     virtual void RegisterFont(const std::string& familyName, const std::string& familySrc) = 0;
 

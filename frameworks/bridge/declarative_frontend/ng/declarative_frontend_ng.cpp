@@ -41,6 +41,7 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
 {
     LOGI("DeclarativeFrontendNG initialize begin.");
     type_ = type;
+    taskExecutor_ = taskExecutor;
     ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
     InitializeDelegate(taskExecutor);
     bool needPostJsTask = true;
@@ -61,7 +62,6 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
     } else {
         initJSEngineTask();
     }
-    taskExecutor_ = taskExecutor;
     LOGI("DeclarativeFrontendNG initialize end.");
     return true;
 }
@@ -110,6 +110,24 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
             return;
         }
         jsEngine->MediaQueryCallback(callbackId, args);
+    };
+
+    auto layoutInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                       const std::string& componentId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->LayoutInspectorCallback(componentId);
+    };
+
+    auto drawInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                     const std::string& componentId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->DrawInspectorCallback(componentId);
     };
 
     auto onStartContinuationCallBack = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)]() -> bool {
@@ -199,10 +217,22 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
         jsEngine->TimerCallback(callbackId, delay, isInterval);
     };
 
+    auto loadNamedRouterCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                       const std::string& namedRouter, bool isTriggeredByJs) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->LoadNamedRouterSource(namedRouter, isTriggeredByJs);
+    };
+
     pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
+    pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
 
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarativeNG>(taskExecutor);
     delegate_->SetMediaQueryCallback(std::move(mediaQueryCallback));
+    delegate_->SetLayoutInspectorCallback(std::move(layoutInspectorCallback));
+    delegate_->SetDrawInspectorCallback(std::move(drawInspectorCallback));
     delegate_->SetOnStartContinuationCallBack(std::move(onStartContinuationCallBack));
     delegate_->SetOnCompleteContinuationCallBack(std::move(onCompleteContinuationCallBack));
     delegate_->SetOnSaveDataCallBack(std::move(onSaveDataCallBack));
@@ -353,6 +383,12 @@ void DeclarativeFrontendNG::PushPage(const std::string& url, const std::string& 
     }
 }
 
+
+NativeValue* DeclarativeFrontendNG::GetContextValue()
+{
+    return jsEngine_->GetContextValue();
+}
+
 void DeclarativeFrontendNG::NavigatePage(uint8_t type, const PageTarget& target, const std::string& params)
 {
     if (delegate_) {
@@ -421,6 +457,20 @@ void DeclarativeFrontendNG::OnSurfaceChanged(int32_t width, int32_t height)
     // TODO: update media query infos
     if (delegate_) {
         delegate_->OnSurfaceChanged();
+    }
+}
+
+void DeclarativeFrontendNG::OnLayoutCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnLayoutCompleted(componentId);
+    }
+}
+
+void DeclarativeFrontendNG::OnDrawCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnDrawCompleted(componentId);
     }
 }
 

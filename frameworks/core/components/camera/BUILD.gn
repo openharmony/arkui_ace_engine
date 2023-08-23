@@ -44,11 +44,10 @@ build_component("camera") {
 
     sources += [ "standard_system/camera.cpp" ]
 
-    deps = [ "//foundation/graphic/graphic_2d:libsurface" ]
-
     external_deps = [
       "c_utils:utils",
       "camera_framework:camera_framework",
+      "graphic_2d:surface",
       "ipc:ipc_core",
       "player_framework:media_client",
     ]

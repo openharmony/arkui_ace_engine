@@ -84,7 +84,6 @@ HWTEST_F(ParseFeCompositeTestNg, ParseTest002, TestSize.Level1)
     ColorInterpolationType colorInterpolationType = ColorInterpolationType::LINEAR_RGB;
     ColorInterpolationType srcColor = ColorInterpolationType::SRGB;
     svgFe->GetImageFilter(imageFilter, colorInterpolationType);
-    
     EXPECT_EQ(colorInterpolationType, ColorInterpolationType::LINEAR_RGB);
     svgFe->ConverImageFilterColor(imageFilter, srcColor, colorInterpolationType);
     EXPECT_NE(imageFilter, nullptr);

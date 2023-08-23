@@ -17,100 +17,216 @@
 
 #include <algorithm>
 
-#include "base/log/ace_trace.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
+#include "base/log/ace_checker.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper_builder.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool addToRenderTree)
+
+bool LayoutWrapper::SkipMeasureContent() const
 {
-    if ((index >= currentChildCount_) || (index < 0)) {
-        LOGD("index is of out boundary, total count: %{public}d, target index: %{public}d", currentChildCount_, index);
-        return nullptr;
+    return skipMeasureContent_ == true;
+}
+
+void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraintF& constraint)
+{
+    constraint.MinusPadding(
+        insets.left_.Length(), insets.right_.Length(), insets.top_.Length(), insets.bottom_.Length());
+}
+
+void LayoutWrapper::OffsetNodeToSafeArea()
+{
+    auto&& insets = GetLayoutProperty()->GetSafeAreaInsets();
+    CHECK_NULL_VOID_NOLOG(insets);
+    auto geometryNode = GetGeometryNode();
+    auto offset = geometryNode->GetMarginFrameOffset();
+    if (offset.GetX() < insets->left_.end) {
+        offset.SetX(insets->left_.end);
     }
-    auto iter = childrenMap_.find(index);
-    if (iter != childrenMap_.end()) {
-        if (addToRenderTree) {
-            iter->second->BuildLazyItem();
-            iter->second->isActive_ = true;
+    if (offset.GetY() < insets->top_.end) {
+        offset.SetY(insets->top_.end);
+    }
+
+    auto right = offset.GetX() + geometryNode->GetMarginFrameSize().Width();
+    auto rightBound = insets->right_.IsValid() ? insets->right_.start : PipelineContext::GetCurrentRootWidth();
+    if (right > rightBound) {
+        offset.SetX(rightBound - geometryNode->GetMarginFrameSize().Width());
+    }
+    auto bottomBound = insets->bottom_.IsValid() ? insets->bottom_.start : PipelineContext::GetCurrentRootHeight();
+    auto bottom = offset.GetY() + geometryNode->GetMarginFrameSize().Height();
+    if (bottom > bottomBound) {
+        offset.SetY(bottomBound - geometryNode->GetMarginFrameSize().Height());
+    }
+    geometryNode->SetMarginFrameOffset(offset);
+}
+
+void LayoutWrapper::RestoreGeoState()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    auto&& restoreNodes = manager->GetGeoRestoreNodes();
+    if (restoreNodes.find(hostNode_) != restoreNodes.end()) {
+        GetGeometryNode()->Restore();
+        manager->RemoveRestoreNode(hostNode_);
+    }
+}
+
+void LayoutWrapper::AvoidKeyboard()
+{
+    // apply keyboard avoidance on Page
+    if (GetHostTag() == V2::PAGE_ETS_TAG) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetSafeAreaManager();
+        GetGeometryNode()->SetFrameOffset(
+            GetGeometryNode()->GetFrameOffset() + OffsetF(0, manager->GetKeyboardOffset()));
+    }
+}
+
+void LayoutWrapper::SaveGeoState()
+{
+    auto&& expandOpts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if ((expandOpts && expandOpts->Expansive()) || GetHostTag() == V2::PAGE_ETS_TAG) {
+        // save geometry state before SafeArea expansion / keyboard avoidance.
+        GetGeometryNode()->Save();
+        // record nodes whose geometry states need to be restored, to speed up RestoreGeoState
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetSafeAreaManager();
+        manager->AddGeoRestoreNode(GetHostNode());
+    }
+}
+
+void LayoutWrapper::ExpandSafeArea()
+{
+    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    CHECK_NULL_VOID_NOLOG(opts && opts->Expansive());
+
+    // children of Scrollable nodes don't support expandSafeArea
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    if (parent && parent->GetPattern<ScrollablePattern>()) {
+        return;
+    }
+
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+        ExpandIntoKeyboard();
+    }
+
+    if (!(opts->type & SAFE_AREA_TYPE_SYSTEM) && !(opts->type & SAFE_AREA_TYPE_CUTOUT)) {
+        return;
+    }
+    // expand System and Cutout safeArea
+    // get frame in global offset
+    auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
+    auto geometryNode = GetGeometryNode();
+    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
+    if ((opts->edges & SAFE_AREA_EDGE_START) && safeArea.left_.IsOverlapped(frame.Left())) {
+        frame.SetWidth(frame.Width() + frame.Left() - safeArea.left_.start);
+        frame.SetLeft(safeArea.left_.start);
+    }
+    if ((opts->edges & SAFE_AREA_EDGE_TOP) && safeArea.top_.IsOverlapped(frame.Top())) {
+        frame.SetHeight(frame.Height() + frame.Top() - safeArea.top_.start);
+        frame.SetTop(safeArea.top_.start);
+    }
+
+    if ((opts->edges & SAFE_AREA_EDGE_END) && safeArea.right_.IsOverlapped(frame.Right())) {
+        frame.SetWidth(frame.Width() + (safeArea.right_.end - frame.Right()));
+    }
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && safeArea.bottom_.IsOverlapped(frame.Bottom())) {
+        frame.SetHeight(frame.Height() + (safeArea.bottom_.end - frame.Bottom()));
+    }
+
+    // reset if User has fixed size
+    auto layoutProperty = GetLayoutProperty();
+    if (layoutProperty->HasFixedWidth()) {
+        frame.SetWidth(geometryNode->GetFrameRect().Width());
+    }
+    if (layoutProperty->HasFixedHeight()) {
+        frame.SetHeight(geometryNode->GetFrameRect().Height());
+    }
+    if (layoutProperty->HasAspectRatio()) {
+        frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
+    }
+    // restore to local offset
+    frame -= parentGlobalOffset;
+    geometryNode->SetFrameOffset(frame.GetOffset());
+    geometryNode->SetFrameSize(frame.GetSize());
+}
+
+void LayoutWrapper::ExpandIntoKeyboard()
+{
+    // if parent already expanded into keyboard, offset shouldn't be applied again
+    auto parent = GetHostNode()->GetAncestorNodeOfFrame();
+    while (parent) {
+        auto&& opts = parent->GetLayoutProperty()->GetSafeAreaExpandOpts();
+        if (opts && (opts->edges & SAFE_AREA_EDGE_BOTTOM) && opts->type & SAFE_AREA_TYPE_KEYBOARD) {
+            return;
         }
-        return iter->second;
+        parent = parent->GetAncestorNodeOfFrame();
     }
-    CHECK_NULL_RETURN(layoutWrapperBuilder_, nullptr);
-    auto wrapper = layoutWrapperBuilder_->GetOrCreateWrapperByIndex(index);
-    CHECK_NULL_RETURN(wrapper, nullptr);
-    if (addToRenderTree) {
-        wrapper->isActive_ = true;
-    }
-    return wrapper;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto geometryNode = GetGeometryNode();
+    geometryNode->SetFrameOffset(
+        geometryNode->GetFrameOffset() - OffsetF(0, pipeline->GetSafeAreaManager()->GetKeyboardOffset()));
 }
 
-void LayoutWrapper::SetCacheCount(int32_t cacheCount)
+void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
 {
-    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
-    layoutWrapperBuilder_->SetCacheCount(cacheCount);
-}
+    GetGeometryNode()->SetParentLayoutConstraint(constraint);
 
-const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(bool addToRenderTree)
-{
-    if (!cachedList_.empty()) {
-        return cachedList_;
-    }
-    cachedList_ = children_;
-    if (layoutWrapperBuilder_) {
-        auto buildItems = layoutWrapperBuilder_->ExpandAllChildWrappers();
-        auto index = layoutWrapperBuilder_->GetStartIndex();
-        auto insertIter = cachedList_.begin();
-        std::advance(insertIter, index);
-        cachedList_.splice(insertIter, buildItems);
-    }
-    if (addToRenderTree) {
-        for (const auto& child : cachedList_) {
-            child->BuildLazyItem();
-            if (!child->isActive_) {
-                child->isActive_ = true;
-            }
+    auto layoutProperty = GetLayoutProperty();
+    const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
+    if (magicItemProperty && magicItemProperty->HasAspectRatio()) {
+        std::optional<CalcSize> idealSize = std::nullopt;
+        if (layoutProperty->GetCalcLayoutConstraint()) {
+            idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
+        constraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(), idealSize);
     }
-    return cachedList_;
-}
 
-void LayoutWrapper::RemoveChildInRenderTree(const RefPtr<LayoutWrapper>& wrapper)
-{
-    CHECK_NULL_VOID(wrapper);
-    wrapper->isActive_ = false;
-}
-
-void LayoutWrapper::RemoveChildInRenderTree(int32_t index)
-{
-    auto wrapper = GetOrCreateChildByIndex(index, false);
-    CHECK_NULL_VOID(wrapper);
-    wrapper->isActive_ = false;
-}
-
-void LayoutWrapper::RemoveAllChildInRenderTree()
-{
-    for (auto& child : childrenMap_) {
-        child.second->isActive_ = false;
+    auto&& insets = layoutProperty->GetSafeAreaInsets();
+    if (insets) {
+        ApplySafeArea(*insets, constraint);
     }
-    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
-    layoutWrapperBuilder_->RemoveAllChildInRenderTree();
+
+    layoutProperty->UpdateLayoutConstraint(constraint);
 }
 
-void LayoutWrapper::ResetHostNode()
+void LayoutWrapper::CreateRootConstraint()
 {
-    hostNode_.Reset();
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
+    auto layoutProperty = GetLayoutProperty();
+    const auto& magicItemProperty = layoutProperty->GetMagicItemProperty();
+    auto hasAspectRatio = magicItemProperty && magicItemProperty->HasAspectRatio();
+    if (hasAspectRatio) {
+        auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+        if (Positive(aspectRatio)) {
+            auto height = PipelineContext::GetCurrentRootHeight() / aspectRatio;
+            layoutConstraint.percentReference.SetHeight(height);
+        }
+    } else {
+        layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+    }
+    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
 }
 
 RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
@@ -118,262 +234,9 @@ RefPtr<FrameNode> LayoutWrapper::GetHostNode() const
     return hostNode_.Upgrade();
 }
 
-WeakPtr<FrameNode> LayoutWrapper::GetWeakHostNode() const
-{
-    return hostNode_;
-}
-
-std::string LayoutWrapper::GetHostTag() const
-{
-    auto host = GetHostNode();
-    CHECK_NULL_RETURN_NOLOG(host, "");
-    return host->GetTag();
-}
-
-int32_t LayoutWrapper::GetHostDepth() const
-{
-    auto host = GetHostNode();
-    CHECK_NULL_RETURN_NOLOG(host, -1);
-    return host->GetDepth();
-}
-
-// This will call child and self measure process.
-void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
-{
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(layoutProperty_);
-    CHECK_NULL_VOID(geometryNode_);
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(layoutAlgorithm_);
-    if (layoutAlgorithm_->SkipMeasure()) {
-        LOGD("%{public}s, depth: %{public}d: the layoutAlgorithm skip measure", host->GetTag().c_str(),
-            host->GetDepth());
-        return;
-    }
-
-    const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
-        geometryTransition->WillLayout(Claim(this));
-    }
-
-    auto preConstraint = layoutProperty_->GetLayoutConstraint();
-    auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
-    layoutProperty_->BuildGridProperty(host);
-    const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
-    auto hasAspectRatio = magicItemProperty && magicItemProperty->HasAspectRatio();
-    if (parentConstraint) {
-        if (hasAspectRatio) {
-            auto useConstraint = parentConstraint.value();
-            useConstraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(),
-                layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize
-                                                           : std::nullopt);
-            geometryNode_->SetParentLayoutConstraint(useConstraint);
-            layoutProperty_->UpdateLayoutConstraint(useConstraint);
-        } else {
-            geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
-            layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
-        }
-    } else {
-        LayoutConstraintF layoutConstraint;
-        layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
-        if (hasAspectRatio) {
-            auto aspectRatio = magicItemProperty->GetAspectRatioValue();
-            if (Positive(aspectRatio)) {
-                auto height = PipelineContext::GetCurrentRootHeight() / aspectRatio;
-                layoutConstraint.percentReference.SetHeight(height);
-            }
-        } else {
-            layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
-        }
-        layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
-    }
-    layoutProperty_->UpdateContentConstraint();
-    geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
-    geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
-
-    isConstraintNotChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
-    if (!isConstraintNotChanged_) {
-        isConstraintNotChanged_ =
-            contentConstraint ? contentConstraint == layoutProperty_->GetContentLayoutConstraint() : false;
-    }
-
-    LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", host->GetTag().c_str(), host->GetDepth(),
-        layoutProperty_->GetLayoutConstraint()->ToString().c_str());
-
-    if (isConstraintNotChanged_ && !skipMeasureContent_) {
-        if (!CheckNeedForceMeasureAndLayout()) {
-            LOGD("%{public}s (depth: %{public}d) skip measure content", host->GetTag().c_str(), host->GetDepth());
-            skipMeasureContent_ = true;
-        }
-    }
-
-    if (!skipMeasureContent_.value_or(false)) {
-        skipMeasureContent_ = false;
-        auto size = layoutAlgorithm_->MeasureContent(layoutProperty_->CreateContentConstraint(), this);
-        if (size.has_value()) {
-            geometryNode_->SetContentSize(size.value());
-        }
-        layoutAlgorithm_->Measure(this);
-
-        // check aspect radio.
-        auto pattern = host->GetPattern();
-        if (pattern && pattern->IsNeedAdjustByAspectRatio()) {
-            auto aspectRatio = magicItemProperty->GetAspectRatioValue();
-            // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
-            // aspectRatio are all set, the height is not used.
-            auto width = geometryNode_->GetFrameSize().Width();
-            LOGD("aspect ratio affects, origin width: %{public}f, height: %{public}f", width,
-                geometryNode_->GetFrameSize().Height());
-            auto height = width / aspectRatio;
-            LOGD("aspect ratio affects, new width: %{public}f, height: %{public}f", width, height);
-            geometryNode_->SetFrameSize(SizeF({ width, height }));
-        }
-    }
-
-    LOGD("on Measure Done: type: %{public}s, depth: %{public}d, Size: %{public}s", host->GetTag().c_str(),
-        host->GetDepth(), geometryNode_->GetFrameSize().ToString().c_str());
-}
-
-// Called to perform layout children.
-void LayoutWrapper::Layout()
-{
-    int64_t time = GetSysTimestamp();
-    auto host = GetHostNode();
-    CHECK_NULL_VOID(layoutProperty_);
-    CHECK_NULL_VOID(geometryNode_);
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(layoutAlgorithm_);
-
-    if (layoutAlgorithm_->SkipLayout()) {
-        LOGD(
-            "%{public}s, depth: %{public}d: the layoutAlgorithm skip layout", host->GetTag().c_str(), host->GetDepth());
-        return;
-    }
-
-    LOGD("On Layout begin: type: %{public}s, depth: %{public}d", host->GetTag().c_str(), host->GetDepth());
-
-    if ((skipMeasureContent_ == true)) {
-        LOGD(
-            "%{public}s (depth: %{public}d) skip measure content and layout", host->GetTag().c_str(), host->GetDepth());
-        LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
-            host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
-        return;
-    }
-
-    if (!layoutProperty_->GetLayoutConstraint()) {
-        const auto& parentLayoutConstraint = geometryNode_->GetParentLayoutConstraint();
-        if (parentLayoutConstraint) {
-            layoutProperty_->UpdateLayoutConstraint(parentLayoutConstraint.value());
-        } else {
-            LayoutConstraintF layoutConstraint;
-            layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
-            layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
-            layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
-        }
-        layoutProperty_->UpdateContentConstraint();
-    }
-    layoutAlgorithm_->Layout(this);
-    time = GetSysTimestamp() - time;
-    AddNodeFlexLayouts();
-    AddNodeLayoutTime(time);
-    LOGD("On Layout Done: type: %{public}s, depth: %{public}d, Offset: %{public}s", host->GetTag().c_str(),
-        host->GetDepth(), geometryNode_->GetFrameOffset().ToString().c_str());
-}
-
-bool LayoutWrapper::SkipMeasureContent() const
-{
-    return (skipMeasureContent_ == true) || layoutAlgorithm_->SkipMeasure();
-}
-
-bool LayoutWrapper::CheckNeedForceMeasureAndLayout()
-{
-    if (needForceMeasureAndLayout_) {
-        return needForceMeasureAndLayout_.value();
-    }
-    PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
-    // Need to remove layout flag when measure and layout make independent in each pattern layoutAlgorithm like
-    // flex.
-    bool needForceMeasureAndLayout = CheckNeedMeasure(flag) || CheckNeedLayout(flag);
-    if (needForceMeasureAndLayout) {
-        needForceMeasureAndLayout_ = true;
-        return true;
-    }
-    // check child flag.
-    needForceMeasureAndLayout_ = std::any_of(
-        children_.begin(), children_.end(), [](const auto& item) { return item->CheckNeedForceMeasureAndLayout(); });
-    return needForceMeasureAndLayout_.value();
-}
-
-bool LayoutWrapper::CheckChildNeedForceMeasureAndLayout()
-{
-    return std::any_of(
-        children_.begin(), children_.end(), [](const auto& item) { return item->CheckNeedForceMeasureAndLayout(); });
-}
-
-void LayoutWrapper::MountToHostOnMainThread()
-{
-    SwapDirtyLayoutWrapperOnMainThread();
-}
-
-void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
-{
-    if (GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG || isActive_) {
-        for (const auto& child : children_) {
-            if (!child) {
-                continue;
-            }
-            auto node = child->GetHostNode();
-            if (node && node->GetLayoutProperty()) {
-                const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
-                if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
-                    continue;
-                }
-            }
-            child->SwapDirtyLayoutWrapperOnMainThread();
-        }
-
-        if (layoutWrapperBuilder_) {
-            layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
-        }
-    }
-
-    auto host = hostNode_.Upgrade();
-    CHECK_NULL_VOID(host);
-    host->SwapDirtyLayoutWrapperOnMainThread(Claim(this));
-
-    /* Adjust components' position which have been set grid properties */
-    for (const auto& child : children_) {
-        if (child && child->GetHostNode()) {
-            child->GetHostNode()->AdjustGridOffset();
-        }
-    }
-    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
-    layoutWrapperBuilder_->AdjustGridOffset();
-}
-
-void LayoutWrapper::BuildLazyItem()
-{
-    if (!lazyBuildFunction_) {
-        return;
-    }
-    ACE_FUNCTION_TRACE();
-    lazyBuildFunction_(Claim(this));
-    lazyBuildFunction_ = nullptr;
-}
-
-std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
-{
-    if (layoutWrapperBuilder_) {
-        auto start = layoutWrapperBuilder_->GetStartIndex();
-        auto end = start + layoutWrapperBuilder_->GetTotalCount();
-        return { start, end };
-    }
-    return { -1, 0 };
-}
-
 void LayoutWrapper::AddNodeFlexLayouts()
 {
-    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+    if (!AceChecker::IsPerformanceCheckEnabled()) {
         return;
     }
     auto host = GetHostNode();
@@ -399,11 +262,12 @@ void LayoutWrapper::AddNodeFlexLayouts()
 
 void LayoutWrapper::AddNodeLayoutTime(int64_t time)
 {
-    if (!SystemProperties::IsPerformanceCheckEnabled()) {
+    if (!AceChecker::IsPerformanceCheckEnabled()) {
         return;
     }
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
     host->SetLayoutTime(time);
 }
+
 } // namespace OHOS::Ace::NG

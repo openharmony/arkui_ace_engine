@@ -78,6 +78,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSSlider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -210,7 +211,7 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        return;
+        value = CalcDimension(0.0);
     }
     SliderModel::GetInstance()->SetThickness(value);
 }
@@ -294,12 +295,11 @@ void JSSlider::SetShowSteps(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-
-    if (!info[0]->IsBoolean()) {
-        LOGE("arg is not bool.");
-        return;
+    bool showSteps = false;
+    if (info[0]->IsBoolean()) {
+        showSteps = info[0]->ToBoolean();
     }
-    SliderModel::GetInstance()->SetShowSteps(info[0]->ToBoolean());
+    SliderModel::GetInstance()->SetShowSteps(showSteps);
 }
 
 void JSSlider::SetShowTips(const JSCallbackInfo& info)
@@ -308,10 +308,9 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
-
-    if (!info[0]->IsBoolean()) {
-        LOGE("arg is not bool.");
-        return;
+    bool showTips = false;
+    if (info[0]->IsBoolean()) {
+        showTips = info[0]->ToBoolean();
     }
 
     std::optional<std::string> content;
@@ -322,7 +321,7 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
         }
     }
 
-    SliderModel::GetInstance()->SetShowTips(info[0]->ToBoolean(), content);
+    SliderModel::GetInstance()->SetShowTips(showTips, content);
 }
 
 void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
@@ -400,7 +399,7 @@ void JSSlider::SetBlockSize(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject()) {
-        LOGW("arg is not object.");
+        SliderModel::GetInstance()->ResetBlockSize();
         return;
     }
     JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);

@@ -54,7 +54,7 @@ public:
         const float* vertices, const int* colors, const SkPaint* paint);
 #else
     void Mesh(RSBitmap& bitmap, int column, int row,
-        const float* vertices, const int* colors, const RSPen* pen);
+        const float* vertices, const int* colors, const RSBrush* brush);
 #endif
     std::string ToDataURL(const std::string& args) override;
     void SetAntiAlias(bool isEnabled) override;
@@ -131,8 +131,8 @@ private:
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void UpdateLineDash(SkPaint& paint);
 #else
-    void UpdatePaintShader(const Offset& offset, RSBrush& brush, const Gradient& gradient);
-    void UpdatePaintShader(const Pattern& pattern, RSBrush& brush);
+    void UpdatePaintShader(const Offset& offset, RSPen* pen, RSBrush* brush, const Gradient& gradient);
+    void UpdatePaintShader(const Pattern& pattern, RSPen* pen, RSBrush* brush);
     void UpdateLineDash(RSPen& paint);
 #endif
     void UpdateTextStyleForeground(const Offset& offset, bool isStroke, txt::TextStyle& style, bool hasShadow);
@@ -186,6 +186,7 @@ private:
     RSRecordingPath drawingPath2d_;
     RSBrush imageBrush_;
     RSBrush cacheBrush_;
+    RSSamplingOptions options_;
     RSBitmap cacheBitmap_;
     RSBitmap canvasCache_;
     RSBitmap webglBitmap_;
@@ -199,11 +200,7 @@ private:
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
     RefPtr<ImageObject> imageObj_ = nullptr;
-#ifndef USE_ROSEN_DRAWING
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
-#else
-	std::shared_ptr<RSSVGDOM> drawingDom_ = nullptr;
-#endif
     CanvasImage canvasImage_;
     Size lastLayoutSize_;
     RefPtr<ImageCache> imageCache_;

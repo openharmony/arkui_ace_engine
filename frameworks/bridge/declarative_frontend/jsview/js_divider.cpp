@@ -15,9 +15,11 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 
+#include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/jsview/models/divider_model_impl.h"
 #include "core/components/divider/divider_theme.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -93,6 +95,12 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
     auto theme = GetTheme<DividerTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension strokeWidth = theme->GetStokeWidth();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        strokeWidth = 1.0_px;
+    }
     ParseJsDimensionVp(info[0], strokeWidth);
     DividerModel::GetInstance()->StrokeWidth(strokeWidth);
 }

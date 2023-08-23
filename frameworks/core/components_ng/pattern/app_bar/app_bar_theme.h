@@ -94,6 +94,11 @@ public:
         return abilityName_;
     }
 
+    const std::string& GetStageAbilityName() const
+    {
+        return stageAbilityName_;
+    }
+
 private:
     AppBarTheme() = default;
     static void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<AppBarTheme>& theme)
@@ -115,6 +120,7 @@ private:
         theme->appBarBgColor_ = appBarPattern->GetAttr<Color>("app_bar_bg_color", Color());
         theme->bundleName_ = appBarPattern->GetAttr<std::string>("app_bar_bundle_name", "com.ohos.hag.famanager");
         theme->abilityName_ = appBarPattern->GetAttr<std::string>("app_bar_ability_name", "FaPanelAbility");
+        theme->stageAbilityName_ = appBarPattern->GetAttr<std::string>("app_bar_stage_ability_name", "PanelAbility");
     }
 
     Dimension appBarHeight_;
@@ -126,6 +132,7 @@ private:
     Color appBarBgColor_;
     std::string bundleName_;
     std::string abilityName_;
+    std::string stageAbilityName_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_APP_BAR_THEME_H

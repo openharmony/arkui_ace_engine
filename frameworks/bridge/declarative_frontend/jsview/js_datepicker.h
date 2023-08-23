@@ -31,6 +31,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetLunar(bool isLunar);
     static void OnChange(const JSCallbackInfo& info);
+    static void OnDateChange(const JSCallbackInfo& info);
     static void PickerBackgroundColor(const JSCallbackInfo& info);
     static void SetDisappearTextStyle(const JSCallbackInfo& info);
     static void SetTextStyle(const JSCallbackInfo& info);

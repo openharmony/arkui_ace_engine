@@ -39,6 +39,14 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
+namespace {
+const DimensionOffset DATEPICKER_OFFSET_DEFAULT_TOP = DimensionOffset(0.0_vp, 40.0_vp);
+const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
+    DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
+    DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
+    DialogAlignment::BOTTOM_END };
+}
+
 std::unique_ptr<DatePickerModel> DatePickerModel::datePickerInstance_ = nullptr;
 std::unique_ptr<DatePickerDialogModel> DatePickerDialogModel::datePickerDialogInstance_ = nullptr;
 std::unique_ptr<TimePickerModel> TimePickerModel::timePickerInstance_ = nullptr;
@@ -147,6 +155,41 @@ JSRef<JSVal> DatePickerChangeEventToJSValue(const DatePickerChangeEvent& eventIn
     }
     return JSRef<JSVal>::Cast(obj);
 }
+
+JSRef<JSVal> DatePickerDateChangeEventToJSValue(const DatePickerChangeEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(eventInfo.GetSelectedStr());
+    if (!argsPtr) {
+        LOGW("selectedStr is not exist.");
+        return JSRef<JSVal>::Cast(obj);
+    }
+    std::tm dateTime = { 0 };
+    auto year = argsPtr->GetValue("year");
+    if (year && year->IsNumber()) {
+        dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+    }
+    auto month = argsPtr->GetValue("month");
+    if (month && month->IsNumber()) {
+        dateTime.tm_mon = month->GetInt();
+    }
+    auto day = argsPtr->GetValue("day");
+    if (day && day->IsNumber()) {
+        dateTime.tm_mday = day->GetInt();
+    }
+    auto hour = argsPtr->GetValue("hour");
+    if (hour && hour->IsNumber()) {
+        dateTime.tm_hour = hour->GetInt();
+    }
+    auto minute = argsPtr->GetValue("minute");
+    if (minute && minute->IsNumber()) {
+        dateTime.tm_min = minute->GetInt();
+    }
+
+    auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+    auto dateObj = JSDate::New(milliseconds);
+    return JSRef<JSVal>::Cast(dateObj);
+}
 } // namespace
 
 void JSDatePicker::JSBind(BindingTarget globalObj)
@@ -156,6 +199,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("create", &JSDatePicker::Create, opt);
     JSClass<JSDatePicker>::StaticMethod("lunar", &JSDatePicker::SetLunar);
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
+    JSClass<JSDatePicker>::StaticMethod("onDateChange", &JSDatePicker::OnDateChange);
     JSClass<JSDatePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
     // keep compatible, need remove after
     JSClass<JSDatePicker>::StaticMethod("useMilitaryTime", &JSDatePicker::UseMilitaryTime);
@@ -233,19 +277,21 @@ void JSDatePicker::ParseTextProperties(const JSRef<JSObject>& paramObj, NG::Pick
 void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
 {
     auto fontColor = paramObj->GetProperty("color");
-    auto fontStyle = paramObj->GetProperty("font");
+    auto fontOptions = paramObj->GetProperty("font");
 
     Color textColor;
     if (JSViewAbstract::ParseJsColor(fontColor, textColor)) {
         textStyle.textColor = textColor;
     }
 
-    if (!fontStyle->IsObject()) {
+    if (!fontOptions->IsObject()) {
         return;
     }
-    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontStyle);
+    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontOptions);
     auto fontSize = fontObj->GetProperty("size");
     auto fontWeight = fontObj->GetProperty("weight");
+    auto fontFamily = fontObj->GetProperty("family");
+    auto fontStyle = fontObj->GetProperty("style");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         textStyle.fontSize = Dimension(-1);
     } else {
@@ -266,6 +312,22 @@ void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTex
             ParseJsString(fontWeight, weight);
         }
         textStyle.fontWeight = ConvertStrToFontWeight(weight);
+    }
+
+    if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
+        std::vector<std::string> families;
+        if (ParseJsFontFamilies(fontFamily, families)) {
+            textStyle.fontFamily = families;
+        }
+    }
+
+    if (fontStyle->IsNumber()) {
+        auto style = fontStyle->ToNumber<int32_t>();
+        if (style < 0 || style > 1) {
+            LOGE("Text fontStyle(%d) is invalid value", style);
+            return;
+        }
+        textStyle.fontStyle = static_cast<FontStyle>(style);
     }
 }
 
@@ -333,6 +395,23 @@ void JSDatePicker::OnChange(const JSCallbackInfo& info)
         func->Execute(*eventInfo);
     };
     DatePickerModel::GetInstance()->SetOnChange(std::move(onChange));
+}
+
+void JSDatePicker::OnDateChange(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGI("info not function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), DatePickerDateChangeEventToJSValue);
+    auto onDateChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("datePicker.onDateChange");
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    DatePickerModel::GetInstance()->SetOnDateChange(std::move(onDateChange));
 }
 
 void JSTimePicker::OnChange(const JSCallbackInfo& info)
@@ -475,6 +554,8 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
 
 void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
     JSRef<JSVal> startDate;
     JSRef<JSVal> endDate;
     JSRef<JSVal> selectedDate;
@@ -485,17 +566,17 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
     }
     auto parseStartDate = ParseDate(startDate);
     auto parseEndDate = ParseDate(endDate);
+    if (parseStartDate.GetYear() <= 0) {
+        parseStartDate = theme->GetDefaultStartDate();
+    }
+    if (parseEndDate.GetYear() <= 0) {
+        parseEndDate = theme->GetDefaultEndDate();
+    }
     auto startDays = parseStartDate.ToDays();
     auto endDays = parseEndDate.ToDays();
     if (startDays > endDays) {
-        LOGW("startDate and endDate error");
-        parseStartDate.SetYear(0);
-        parseEndDate.SetYear(0);
-    }
-    auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("datePicker Theme is null");
-        return;
+        parseStartDate = theme->GetDefaultStartDate();
+        parseEndDate = theme->GetDefaultEndDate();
     }
     DatePickerModel::GetInstance()->CreateDatePicker(theme);
     if (startDate->IsObject()) {
@@ -513,10 +594,6 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
             parseSelectedDate = ParseDate(selectedDateObj->GetProperty("value"));
         } else {
             parseSelectedDate = ParseDate(selectedDate);
-        }
-        auto selectedDays = parseSelectedDate.ToDays();
-        if (selectedDays < startDays || selectedDays > endDays) {
-            LOGW("selectedDate error");
         }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
@@ -592,7 +669,9 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         LOGE("DatePicker Show dialog error, info is non-valid");
         return;
     }
-
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     DatePickerType pickerType = DatePickerType::DATE;
     auto type = paramObject->GetProperty("type");
@@ -602,6 +681,8 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     std::function<void()> cancelEvent;
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;
+    std::function<void(const std::string&)> dateChangeEvent;
+    std::function<void(const std::string&)> dateAcceptEvent;
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
@@ -633,6 +714,82 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
             func->Execute();
         };
     }
+    auto onDateChange = paramObject->GetProperty("onDateChange");
+    if (!onDateChange->IsUndefined() && onDateChange->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDateChange));
+        dateChangeEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc)](
+                          const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onDateChange");
+            auto selectedJson = JsonUtil::ParseJsonString(info);
+            if (!selectedJson || selectedJson->IsNull()) {
+                return;
+            }
+            std::tm dateTime = { 0 };
+            auto year = selectedJson->GetValue("year");
+            if (year && year->IsNumber()) {
+                dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+            }
+            auto month = selectedJson->GetValue("month");
+            if (month && month->IsNumber()) {
+                dateTime.tm_mon = month->GetInt();
+            }
+            auto day = selectedJson->GetValue("day");
+            if (day && day->IsNumber()) {
+                dateTime.tm_mday = day->GetInt();
+            }
+            auto hour = selectedJson->GetValue("hour");
+            if (hour && hour->IsNumber()) {
+                dateTime.tm_hour = hour->GetInt();
+            }
+            auto minute = selectedJson->GetValue("minute");
+            if (minute && minute->IsNumber()) {
+                dateTime.tm_min = minute->GetInt();
+            }
+
+            auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+            auto dateObj = JSDate::New(milliseconds);
+            func->ExecuteJS(1, &dateObj);
+        };
+    }
+    auto onDateAccept = paramObject->GetProperty("onDateAccept");
+    if (!onDateAccept->IsUndefined() && onDateAccept->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDateAccept));
+        dateAcceptEvent = [execCtx = info.GetExecutionContext(), type = pickerType, func = std::move(jsFunc)](
+                          const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DatePickerDialog.onDateAccept");
+            auto selectedJson = JsonUtil::ParseJsonString(info);
+            if (!selectedJson || selectedJson->IsNull()) {
+                return;
+            }
+            std::tm dateTime = { 0 };
+            auto year = selectedJson->GetValue("year");
+            if (year && year->IsNumber()) {
+                dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+            }
+            auto month = selectedJson->GetValue("month");
+            if (month && month->IsNumber()) {
+                dateTime.tm_mon = month->GetInt();
+            }
+            auto day = selectedJson->GetValue("day");
+            if (day && day->IsNumber()) {
+                dateTime.tm_mday = day->GetInt();
+            }
+            auto hour = selectedJson->GetValue("hour");
+            if (hour && hour->IsNumber()) {
+                dateTime.tm_hour = hour->GetInt();
+            }
+            auto minute = selectedJson->GetValue("minute");
+            if (minute && minute->IsNumber()) {
+                dateTime.tm_min = minute->GetInt();
+            }
+
+            auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+            auto dateObj = JSDate::New(milliseconds);
+            func->ExecuteJS(1, &dateObj);
+        };
+    }
     NG::DatePickerSettingData settingData;
     PickerDialogInfo pickerDialog;
     auto startDate = paramObject->GetProperty("start");
@@ -648,18 +805,70 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
         pickerDialog.isSelectedDate = true;
     }
     auto lunar = paramObject->GetProperty("lunar");
+    auto lunarSwitch = paramObject->GetProperty("lunarSwitch");
     auto sTime = paramObject->GetProperty("showTime");
     auto useMilitary = paramObject->GetProperty("useMilitaryTime");
     settingData.isLunar = lunar->ToBoolean();
+    settingData.lunarswitch = lunarSwitch->ToBoolean();
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
-    pickerDialog.parseStartDate = ParseDate(startDate);
-    pickerDialog.parseEndDate = ParseDate(endDate);
+    auto parseStartDate = ParseDate(startDate);
+    auto parseEndDate = ParseDate(endDate);
+    if (parseStartDate.GetYear() <= 0) {
+        parseStartDate = theme->GetDefaultStartDate();
+    }
+    if (parseEndDate.GetYear() <= 0) {
+        parseEndDate = theme->GetDefaultEndDate();
+    }
+    auto startDays = parseStartDate.ToDays();
+    auto endDays = parseEndDate.ToDays();
+    if (startDays > endDays) {
+        parseStartDate = theme->GetDefaultStartDate();
+        parseEndDate = theme->GetDefaultEndDate();
+    }
+    pickerDialog.parseStartDate = parseStartDate;
+    pickerDialog.parseEndDate = parseEndDate;
     pickerDialog.parseSelectedDate = ParseDate(selectedDate);
     pickerDialog.pickerTime = ParseTime(selectedDate);
     JSDatePicker::ParseTextProperties(paramObject, settingData.properties);
+
+    // Parse alignment
+    auto alignmentValue = paramObject->GetProperty("alignment");
+    if (alignmentValue->IsNumber()) {
+        auto alignment = alignmentValue->ToNumber<int32_t>();
+        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
+        }
+        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+            pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+        }
+    }
+
+    // Parse offset
+    auto offsetValue = paramObject->GetProperty("offset");
+    if (offsetValue->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+        CalcDimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        ParseJsDimensionVp(dxValue, dx);
+        CalcDimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        ParseJsDimensionVp(dyValue, dy);
+        pickerDialog.offset = DimensionOffset(dx, dy);
+    }
+
+    // Parse maskRect.
+    auto maskRectValue = paramObject->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        pickerDialog.maskRect = maskRect;
+    }
+
     DatePickerDialogModel::GetInstance()->SetDatePickerDialogShow(
-        pickerDialog, settingData, std::move(cancelEvent), std::move(acceptEvent), std::move(changeEvent), pickerType);
+        pickerDialog, settingData, std::move(cancelEvent), std::move(acceptEvent), std::move(changeEvent),
+        std::move(dateAcceptEvent), std::move(dateChangeEvent), pickerType);
 }
 
 void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
@@ -953,8 +1162,8 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
     auto componentsValue = paramObj->GetProperty("displayedComponents");
     bool showSecond = false;
     if (componentsValue->IsNumber()) {
-        auto displayedComponents = static_cast<TimePickerDisplayedComponents>(componentsValue->ToNumber<int32_t>());
-        if (displayedComponents == TimePickerDisplayedComponents::HOUR_MINUTE_SECOND) {
+        auto displayedComponent = static_cast<TimePickerDisplayedComponents>(componentsValue->ToNumber<int32_t>());
+        if (displayedComponent == TimePickerDisplayedComponents::HOUR_MINUTE_SECOND) {
             showSecond = true;
         }
     }
@@ -1007,9 +1216,15 @@ PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal)
         return pickerTime;
     }
     auto timeObj = JSRef<JSObject>::Cast(timeVal);
-    auto hourFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getHours"));
-    auto minuteFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getMinutes"));
-    auto secondFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getSeconds"));
+    auto hourFuncJsVal = timeObj->GetProperty("getHours");
+    auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
+    auto secondFuncJsVal = timeObj->GetProperty("getSeconds");
+    if (!(hourFuncJsVal->IsFunction() && minuteFuncJsVal->IsFunction() && secondFuncJsVal->IsFunction())) {
+        return pickerTime;
+    }
+    auto hourFunc = JSRef<JSFunc>::Cast(hourFuncJsVal);
+    auto minuteFunc = JSRef<JSFunc>::Cast(minuteFuncJsVal);
+    auto secondFunc = JSRef<JSFunc>::Cast(secondFuncJsVal);
     JSRef<JSVal> hour = hourFunc->Call(timeObj);
     JSRef<JSVal> minute = minuteFunc->Call(timeObj);
     JSRef<JSVal> second = secondFunc->Call(timeObj);
@@ -1082,13 +1297,51 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     NG::TimePickerSettingData settingData;
     PickerDialogInfo pickerDialog;
     settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
-    pickerDialog.pickerTime = ParseTime(selectedTime);
     pickerDialog.isUseMilitaryTime = useMilitaryTime->ToBoolean();
     if (selectedTime->IsObject()) {
-        settingData.dialogTitleDate = ParseDate(selectedTime);
-        pickerDialog.isSelectedTime = true;
+        PickerDate dialogTitleDate = ParseDate(selectedTime);
+        if (dialogTitleDate.GetYear() != 0) {
+            settingData.dialogTitleDate = dialogTitleDate;
+            pickerDialog.isSelectedTime = true;
+            pickerDialog.pickerTime = ParseTime(selectedTime);
+        }
     }
     JSDatePicker::ParseTextProperties(paramObject, settingData.properties);
+
+    // Parse alignment
+    auto alignmentValue = paramObject->GetProperty("alignment");
+    if (alignmentValue->IsNumber()) {
+        auto alignment = alignmentValue->ToNumber<int32_t>();
+        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
+        }
+        if (alignment == static_cast<int32_t>(DialogAlignment::TOP) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_START) ||
+            alignment == static_cast<int32_t>(DialogAlignment::TOP_END)) {
+            pickerDialog.offset = DATEPICKER_OFFSET_DEFAULT_TOP;
+        }
+    }
+
+    // Parse offset
+    auto offsetValue = paramObject->GetProperty("offset");
+    if (offsetValue->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+        CalcDimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        JSAlertDialog::ParseJsDimensionVp(dxValue, dx);
+        CalcDimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        JSAlertDialog::ParseJsDimensionVp(dyValue, dy);
+        pickerDialog.offset = DimensionOffset(dx, dy);
+    }
+
+    // Parse maskRect.
+    auto maskRectValue = paramObject->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        pickerDialog.maskRect = maskRect;
+    }
+
     TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(
         pickerDialog, settingData, std::move(cancelEvent), std::move(acceptEvent), std::move(changeEvent));
 }
@@ -1173,9 +1426,15 @@ PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
         return pickerTime;
     }
     auto timeObj = JSRef<JSObject>::Cast(timeVal);
-    auto hourFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getHours"));
-    auto minuteFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getMinutes"));
-    auto secondFunc = JSRef<JSFunc>::Cast(timeObj->GetProperty("getSeconds"));
+    auto hourFuncJsVal = timeObj->GetProperty("getHours");
+    auto minuteFuncJsVal = timeObj->GetProperty("getMinutes");
+    auto secondFuncJsVal = timeObj->GetProperty("getSeconds");
+    if (!(hourFuncJsVal->IsFunction() && minuteFuncJsVal->IsFunction() && secondFuncJsVal->IsFunction())) {
+        return pickerTime;
+    }
+    auto hourFunc = JSRef<JSFunc>::Cast(hourFuncJsVal);
+    auto minuteFunc = JSRef<JSFunc>::Cast(minuteFuncJsVal);
+    auto secondFunc = JSRef<JSFunc>::Cast(secondFuncJsVal);
     JSRef<JSVal> hour = hourFunc->Call(timeObj);
     JSRef<JSVal> minute = minuteFunc->Call(timeObj);
     JSRef<JSVal> second = secondFunc->Call(timeObj);
@@ -1195,9 +1454,15 @@ PickerDate JSTimePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
         return pickerDate;
     }
     auto dateObj = JSRef<JSObject>::Cast(dateVal);
-    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
-    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
-    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
+    auto yearFuncJsVal = dateObj->GetProperty("getFullYear");
+    auto monthFuncJsVal = dateObj->GetProperty("getMonth");
+    auto dateFuncJsVal = dateObj->GetProperty("getDate");
+    if (!(yearFuncJsVal->IsFunction() && monthFuncJsVal->IsFunction() && dateFuncJsVal->IsFunction())) {
+        return pickerDate;
+    }
+    auto yearFunc = JSRef<JSFunc>::Cast(yearFuncJsVal);
+    auto monthFunc = JSRef<JSFunc>::Cast(monthFuncJsVal);
+    auto dateFunc = JSRef<JSFunc>::Cast(dateFuncJsVal);
     JSRef<JSVal> year = yearFunc->Call(dateObj);
     JSRef<JSVal> month = monthFunc->Call(dateObj);
     JSRef<JSVal> date = dateFunc->Call(dateObj);

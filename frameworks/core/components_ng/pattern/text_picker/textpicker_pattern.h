@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "core/components/picker/picker_theme.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_row_accessibility_property.h"
@@ -64,7 +65,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>();
+        auto textPickerPaintMethod = MakeRefPtr<TextPickerPaintMethod>(WeakClaim(this));
         textPickerPaintMethod->SetDefaultPickerItemHeight(CalculateHeight());
         textPickerPaintMethod->SetEnabled(enabled_);
         textPickerPaintMethod->SetBackgroundColor(backgroundColor_);
@@ -212,6 +213,18 @@ public:
         return isCascade_;
     }
 
+    void SetConfirmNode(WeakPtr<FrameNode> buttonConfirmNode)
+    {
+        weakButtonConfirm_ = buttonConfirmNode;
+    }
+
+    void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
+    {
+        weakButtonCancel_ = buttonCancelNode;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
+
     void SetValues(const std::vector<std::string>& values)
     {
         values_.clear();
@@ -225,6 +238,36 @@ public:
         isHasSelectAttr_ = value;
     }
 
+    void SetResizePickerItemHeight(double resizePickerItemHeight)
+    {
+        resizePickerItemHeight_ = resizePickerItemHeight;
+    }
+
+    double GetResizePickerItemHeight() const
+    {
+        return resizePickerItemHeight_;
+    }
+
+    void SetResizeFlag(bool resizeFlag)
+    {
+        resizeFlag_ = resizeFlag;
+    }
+
+    bool GetResizeFlag() const
+    {
+        return resizeFlag_;
+    }
+
+    void SetIsShowInDialog(bool isShowInDialog)
+    {
+        isShowInDialog_ = isShowInDialog;
+    }
+
+    bool GetIsShowInDialog() const
+    {
+        return isShowInDialog_;
+    }
+
     void SetSelecteds(const std::vector<uint32_t>& values);
 
     void HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify);
@@ -235,6 +278,18 @@ public:
         std::vector<NG::TextCascadePickerOptions>& reOptions, uint32_t index);
 
     size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
+
+    void OnColorConfigurationUpdate() override;
+
+    void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
+    {
+        contentRowNode_ = contentRowNode;
+    }
+
+    void SetPickerTag(bool isPicker)
+    {
+        isPicker_ = isPicker;
+    }
 
 private:
     void OnModifyDone() override;
@@ -268,6 +323,7 @@ private:
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_;
+    double resizePickerItemHeight_;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
@@ -277,14 +333,21 @@ private:
     std::vector<NG::TextCascadePickerOptions> cascadeOriginptions_;
     bool isCascade_ = false;
     bool isHasSelectAttr_ = false;
+    WeakPtr<FrameNode> weakButtonConfirm_;
+    WeakPtr<FrameNode> weakButtonCancel_;
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
     Color backgroundColor_ = Color::WHITE;
+    bool resizeFlag_ = false;
+    bool isShowInDialog_ = false;
 
     // inner focus switch
     bool operationOn_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
+
+    RefPtr<NG::FrameNode> contentRowNode_;
+    bool isPicker_ = true;
 };
 } // namespace OHOS::Ace::NG
 

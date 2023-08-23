@@ -34,21 +34,9 @@ enum class SecurityComponentDescription : int32_t {
     TEXT_NULL = -1,
 };
 
-enum class SecurityComponentBackgroundType : int32_t {
-    BACKGROUND_NULL = -1,
-    CAPSULE = 0,
-    CIRCLE = 1,
-    NORMAL = 2
-};
-
 enum class SecurityComponentLayoutDirection : int32_t {
     HORIZONTAL = 0,
     VERTICAL = 1,
-};
-
-enum class SecSecurityComponentLayoutOrder : int32_t {
-    ICON_FIRST = 0,
-    TEXT_FIRST = 1,
 };
 
 static int32_t BUTTON_TYPE_NULL = -1;

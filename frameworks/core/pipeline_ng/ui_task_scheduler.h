@@ -19,8 +19,8 @@
 #include <cstdint>
 #include <functional>
 #include <list>
+#include <map>
 #include <set>
-#include <unordered_map>
 
 #include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
@@ -68,7 +68,7 @@ private:
 
 class ACE_EXPORT UITaskScheduler final {
 public:
-    using PredictTask = std::function<void(int64_t)>;
+    using PredictTask = std::function<void(int64_t, bool)>;
     UITaskScheduler() = default;
     ~UITaskScheduler();
 
@@ -77,12 +77,14 @@ public:
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
     void AddAfterLayoutTask(std::function<void()>&& task);
+    void AddAfterRenderTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
-    void FlushPredictTask(int64_t deadline);
+    void FlushPredictTask(int64_t deadline, bool canUseLongPredictTask = false);
     void FlushAfterLayoutTask();
+    void FlushAfterRenderTask();
 
     void UpdateCurrentPageId(uint32_t id)
     {
@@ -101,6 +103,16 @@ public:
     void FinishRecordFrameInfo()
     {
         frameInfo_ = nullptr;
+    }
+
+    static uint64_t GetFrameId()
+    {
+        return frameId_;
+    }
+
+    bool IsLayouting() const
+    {
+        return isLayouting_;
     }
 
 private:
@@ -124,16 +136,20 @@ private:
     };
 
     using PageDirtySet = std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>>;
-    using RootDirtyMap = std::unordered_map<uint32_t, PageDirtySet>;
+    using RootDirtyMap = std::map<uint32_t, PageDirtySet>;
 
     RootDirtyMap dirtyLayoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
     std::list<PredictTask> predictTask_;
     std::list<std::function<void()>> afterLayoutTasks_;
+    std::list<std::function<void()>> afterRenderTasks_;
 
     uint32_t currentPageId_ = 0;
+    bool isLayouting_ = false;
 
     FrameInfo* frameInfo_ = nullptr;
+
+    static uint64_t frameId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UITaskScheduler);
 };

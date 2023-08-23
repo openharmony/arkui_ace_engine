@@ -37,8 +37,13 @@ SvgFeComposite::SvgFeComposite() : SvgFe()
     declaration_->InitializeStyle();
 }
 
+#ifndef USE_ROSEN_DRAWING
 void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+#else
+void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
+    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+#endif
 {
     auto declaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(declaration_);
     CHECK_NULL_VOID_NOLOG(declaration);
@@ -51,6 +56,7 @@ void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     auto backImageFilter = MakeImageFilter(declaration->GetIn2(), imageFilter);
     ConverImageFilterColor(foreImageFilter, srcColor, currentColor);
     ConverImageFilterColor(backImageFilter, srcColor, currentColor);
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     imageFilter = SkArithmeticImageFilter::Make(
         declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4(),
@@ -59,6 +65,12 @@ void SvgFeComposite::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
     imageFilter = SkImageFilters::Arithmetic(
         declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4(),
         true, backImageFilter, foreImageFilter, nullptr);
+#endif
+#else
+    std::vector<RSScalar> coefficients = {
+        declaration->GetK1(), declaration->GetK2(), declaration->GetK3(), declaration->GetK4() };
+    imageFilter = RSRecordingImageFilter::CreateArithmeticImageFilter(
+        coefficients, true, backImageFilter, foreImageFilter);
 #endif
 
     ConverImageFilterColor(imageFilter, srcColor, currentColor);

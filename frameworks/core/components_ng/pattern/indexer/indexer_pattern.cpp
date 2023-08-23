@@ -58,13 +58,15 @@ void IndexerPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto itemCountChanged = false;
     if (layoutProperty->GetArrayValue().has_value()) {
         arrayValue_ = layoutProperty->GetArrayValue().value();
+        itemCountChanged = (itemCount_ != static_cast<int32_t>(arrayValue_.size()));
         itemCount_ = static_cast<int32_t>(arrayValue_.size());
     } else {
+        itemCountChanged = (itemCount_ != 0);
         itemCount_ = 0;
     }
     auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
@@ -76,16 +78,17 @@ void IndexerPattern::OnModifyDone()
     }
     auto propSelect = layoutProperty->GetSelected().value();
     propSelect = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
-    auto selectChanged = false;
     if (propSelect != lastSelectProp_) {
         selected_ = propSelect;
         lastSelectProp_ = propSelect;
-        selectChanged = true;
+        selectChanged_ = true;
         ResetStatus();
     }
-    ApplyIndexChanged(initialized_ && selectChanged);
-    initialized_ = true;
-
+    auto itemSize =
+        layoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
+    auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
+    lastItemSize_ = itemSize;
+    ApplyIndexChanged(false, initialized_ && selectChanged_, false, indexerSizeChanged);
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
         InitPanEvent(gesture);
@@ -159,7 +162,7 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(onActionStart), std::move(onActionUpdate), std::move(onActionEnd), std::move(onActionCancel));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, 0.0);
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, 0.0_vp);
 }
 
 void IndexerPattern::OnHover(bool isHover)
@@ -178,13 +181,13 @@ void IndexerPattern::OnHover(bool isHover)
     } else {
         IndexerHoverOutAnimation();
     }
-    ApplyIndexChanged(false);
+    ApplyIndexChanged(true, false);
 }
 
 void IndexerPattern::OnChildHover(int32_t index, bool isHover)
 {
     childHoverIndex_ = isHover ? index : -1;
-    ApplyIndexChanged(childHoverIndex_ >= 0 && childHoverIndex_ < itemCount_);
+    ApplyIndexChanged(true, childHoverIndex_ >= 0 && childHoverIndex_ < itemCount_);
 }
 
 void IndexerPattern::InitInputEvent()
@@ -253,7 +256,7 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     selected_ = nextSelectIndex;
     refreshBubble = true;
     ResetStatus();
-    ApplyIndexChanged(refreshBubble, true);
+    ApplyIndexChanged(true, refreshBubble, true);
     OnSelect(refreshBubble);
 }
 
@@ -279,7 +282,7 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
     }
     childFocusIndex_ = -1;
     childHoverIndex_ = -1;
-    ApplyIndexChanged(true);
+    ApplyIndexChanged(true, true);
 }
 
 int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
@@ -288,14 +291,23 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
     CHECK_NULL_RETURN(host, -1);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, -1);
-
-    auto size = SizeF(itemSizeRender_, itemSizeRender_ * static_cast<float>(itemCount_));
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
-    auto top = padding.top.value_or(0.0f);
-    auto nextSelectIndex = static_cast<int32_t>((offset.GetY() - top) / itemSizeRender_);
-    nextSelectIndex = std::clamp(nextSelectIndex, 0, itemCount_ - 1);
-    return nextSelectIndex;
+    int32_t index = 0;
+    for (auto child : host->GetChildren()) {
+        auto childNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(childNode, -1);
+        auto geometryNode = childNode->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, -1);
+        auto childOffset = geometryNode->GetFrameOffset();
+        if (index == 0 && LessNotEqual(offset.GetY(), childOffset.GetY())) {
+            return 0;
+        }
+        if (GreatOrEqual(offset.GetY(), childOffset.GetY()) &&
+            LessNotEqual(offset.GetY(), childOffset.GetY() + itemSizeRender_)) {
+            break;
+        }
+        index++;
+    }
+    return std::clamp(index, 0, itemCount_ - 1);
 }
 
 bool IndexerPattern::KeyIndexByStep(int32_t step)
@@ -312,7 +324,7 @@ bool IndexerPattern::KeyIndexByStep(int32_t step)
     }
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
-    ApplyIndexChanged(refreshBubble);
+    ApplyIndexChanged(true, refreshBubble);
     return nextSected >= 0;
 }
 
@@ -333,7 +345,7 @@ bool IndexerPattern::MoveIndexByStep(int32_t step)
     }
     selected_ = nextSected;
     ResetStatus();
-    ApplyIndexChanged(true);
+    ApplyIndexChanged(true, true);
     return nextSected >= 0;
 }
 
@@ -347,7 +359,7 @@ bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
     childFocusIndex_ = nextSelectIndex;
     childHoverIndex_ = -1;
     childPressIndex_ = -1;
-    ApplyIndexChanged(true);
+    ApplyIndexChanged(true, true);
     return nextSelectIndex >= 0;
 }
 
@@ -410,14 +422,15 @@ void IndexerPattern::OnSelect(bool changed)
     lastSelected_ = selected_;
 }
 
-void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
+void IndexerPattern::ApplyIndexChanged(
+    bool isTextNodeInTree, bool selectChanged, bool fromTouchUp, bool indexerSizeChanged)
 {
+    initialized_ = true;
+    selectChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
-    CHECK_NULL_VOID(indexerEventHub);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
@@ -425,23 +438,20 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    auto currentRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(currentRenderContext);
-    auto paddingLeft = CalcLength(Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx());
-    auto paddingTop = CalcLength(Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx());
-    layoutProperty->UpdatePadding({ paddingLeft, paddingLeft, paddingTop, paddingTop });
     int32_t index = 0;
     auto childrenNode = host->GetChildren();
     for (auto& iter : childrenNode) {
         auto childNode = AceType::DynamicCast<FrameNode>(iter);
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
-        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         auto childRenderContext = childNode->GetRenderContext();
         if (index == childHoverIndex_ || index == childPressIndex_) {
             auto radiusSize = indexerTheme->GetHoverRadiusSize();
             childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
             childRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
         } else if (index == childFocusIndex_ || index == selected_) {
+            nodeLayoutProperty->UpdateContent(arrayValue_[index]);
+            nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+            nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
             if (index == childFocusIndex_) {
                 auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
@@ -470,6 +480,9 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
             nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
             childRenderContext->SetClipToBounds(true);
             childNode->MarkModifyDone();
+            if (isTextNodeInTree) {
+                childNode->MarkDirtyNode();
+            }
             index++;
 
             AccessibilityEventType type = AccessibilityEventType::SELECTED;
@@ -487,6 +500,9 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
             childRenderContext->UpdateBorderRadius({ radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
         }
         Dimension borderWidth;
+        nodeLayoutProperty->UpdateContent(arrayValue_[index]);
+        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
         auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
@@ -495,17 +511,22 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
         nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
         nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
-        childNode->MarkModifyDone();
         index++;
         auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
         if (textAccessibilityProperty) {
             textAccessibilityProperty->SetSelected(false);
         }
+        childNode->MarkModifyDone();
+        if (isTextNodeInTree) {
+            childNode->MarkDirtyNode();
+        }
     }
     if (selectChanged || NeedShowPopupView()) {
         ShowBubble();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (isTextNodeInTree && indexerSizeChanged) {
+        host->MarkDirtyNode();
+    }
 }
 
 void IndexerPattern::ShowBubble()
@@ -538,15 +559,9 @@ void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto indexerItemSize = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP);
-    auto itemSize = layoutProperty->GetItemSize().value_or(indexerItemSize);
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto indexerWidth = itemSize.ConvertToPx() + padding.left.value_or(0) + padding.right.value_or(0);
-    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
-    if (layoutConstraint.has_value() && layoutConstraint->selfIdealSize.Width().has_value() &&
-        (layoutConstraint->selfIdealSize.Width().value() > indexerWidth)) {
-        indexerWidth = layoutConstraint->selfIdealSize.Width().value();
-    }
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto indexerWidth = geometryNode->GetFrameSize().Width();
     auto alignMent = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
     auto userDefinePositionX =
         layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ConvertToPx();
@@ -658,6 +673,7 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
     letterLayoutProperty->UpdateItalicFontStyle(popupTextFont.GetFontStyle());
     letterLayoutProperty->UpdateTextColor(layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor()));
     letterLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    letterLayoutProperty->UpdateAlignment(Alignment::CENTER);
     auto textPadding = Dimension(IndexerTheme::TEXT_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdatePadding(
         { CalcLength(textPadding), CalcLength(textPadding), CalcLength(0), CalcLength(0) });
@@ -733,6 +749,7 @@ void IndexerPattern::CreateBubbleListView(std::vector<std::string>& currentListD
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         listItemNode->AddChild(textNode);
+        AddListItemClickListener(listItemNode, i);
         listNode->AddChild(listItemNode);
     }
 }
@@ -765,7 +782,6 @@ void IndexerPattern::UpdateBubbleListItem(
         listItemProperty->UpdateAlignment(Alignment::CENTER);
         auto listItemContext = listItemNode->GetRenderContext();
         CHECK_NULL_VOID(listItemContext);
-        AddListItemClickListener(listItemNode, i);
         auto textNode = DynamicCast<FrameNode>(listItemNode->GetFirstChild());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -802,8 +818,7 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto popupSelectedTextColor =
-        paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+    auto popupSelectedTextColor = paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
     auto popupUnselectedTextColor =
         paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
     auto popupItemBackground =
@@ -946,7 +961,7 @@ bool IndexerPattern::OnKeyEvent(const KeyEvent& event)
 void IndexerPattern::OnKeyEventDisapear()
 {
     ResetStatus();
-    ApplyIndexChanged(false);
+    ApplyIndexChanged(true, false);
 }
 
 void IndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
@@ -1197,7 +1212,7 @@ void IndexerPattern::SetAccessibilityAction()
                 }
                 indexerPattern->selected_ = index;
                 indexerPattern->ResetStatus();
-                indexerPattern->ApplyIndexChanged(true, true);
+                indexerPattern->ApplyIndexChanged(true, true, true);
                 indexerPattern->OnSelect(true);
             });
 
@@ -1220,7 +1235,7 @@ void IndexerPattern::SetAccessibilityAction()
                 }
                 indexerPattern->selected_ = 0;
                 indexerPattern->ResetStatus();
-                indexerPattern->ApplyIndexChanged(false);
+                indexerPattern->ApplyIndexChanged(true, false);
                 indexerPattern->OnSelect(false);
             });
     }

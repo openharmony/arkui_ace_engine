@@ -52,4 +52,12 @@ int32_t IfElseModelNG::GetBranchId()
     return node->GetBranchId();
 }
 
+bool IfElseModelNG::CanRetake(const std::string& id)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<IfElseNode>(stack->GetMainElementNode());
+    CHECK_NULL_RETURN(node, false);
+    return node->TryRetake(id);
+}
+
 } // namespace OHOS::Ace::NG

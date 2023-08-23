@@ -144,18 +144,21 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_ = std::move(layoutInfo);
     layoutInfo_.UpdateStartIndex();
 
-    SetScrollEnable(IsScrollable());
+    CheckScrollable();
 
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN_NOLOG(host, false);
     return property->GetPaddingProperty() != nullptr;
 }
 
-void WaterFlowPattern::OnAttachToFrameNode()
+void WaterFlowPattern::CheckScrollable()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
+    auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    SetScrollEnable(IsScrollable());
+    if (!layoutProperty->GetScrollEnabled().value_or(IsScrollable())) {
+        SetScrollEnable(false);
+    }
 }
 
 void WaterFlowPattern::SetPositionController(RefPtr<WaterFlowPositionController> control)
@@ -172,12 +175,9 @@ void WaterFlowPattern::InitScrollableEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<WaterFlowEventHub>();
-    auto onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
-    if (onScrollFrameBegin) {
-        auto scrollableEvent = GetScrollableEvent();
-        CHECK_NULL_VOID(scrollableEvent);
-        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
-    }
+    CHECK_NULL_VOID(eventHub);
+    auto scrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
+    SetScrollFrameBeginCallback(scrollFrameBeginEvent);
 }
 
 bool WaterFlowPattern::UpdateStartIndex(int32_t index)
@@ -243,5 +243,10 @@ void WaterFlowPattern::ScrollPage(bool reverse)
     UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
 
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+}
+
+void WaterFlowPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("friction", GetFriction());
 }
 } // namespace OHOS::Ace::NG

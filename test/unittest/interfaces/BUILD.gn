@@ -30,7 +30,32 @@ ohos_unittest("ui_content_test") {
     "ui_content_test.cpp",
   ]
 
-  external_deps = [ "multimedia_image_framework:image" ]
+  include_dirs = [
+    "$window_manager_path/interfaces/innerkits",
+    "$window_manager_path/interfaces/innerkits/wm",
+    "$window_manager_path/wm/include",
+  ]
+
+  deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
+    "$cjson_root:cjson",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [
+    "ability_runtime:abilitykit_native",
+    "image_framework:image",
+    "input:libmmi-client",
+    "ipc:ipc_single",
+    "window_manager:libdm",
+    "window_manager:libwm",
+    "window_manager:scene_session",
+    "window_manager:scene_session_manager",
+  ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
@@ -63,7 +88,7 @@ ohos_unittest("form_render_test") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
-    "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
@@ -75,17 +100,56 @@ ohos_unittest("form_render_test") {
     "ace_engine:ace_uicontent",
     "c_utils:utils",
     "form_fwk:form_manager",
-    "graphic_standard:surface",
-    "hiviewdfx_hilog_native:libhilog",
+    "graphic_2d:surface",
+    "hilog:libhilog",
     "input:libmmi-client",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
 }
 
+ohos_unittest("drawable_descriptor_test") {
+  module_out_path = "$interface_test_output_path/inner_api"
+
+  sources = [
+    "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/image_converter.cpp",
+    "drawable_descriptor_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  deps = [
+    "$cjson_root:cjson",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  if (ace_use_new_skia) {
+    deps += [ "$skia_root_new:skia_ohos" ]
+    defines = [ "NEW_SKIA" ]
+  } else {
+    deps += [ "$ace_flutter_engine_root/skia:ace_skia_ohos" ]
+  }
+
+  public_deps = [
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+  ]
+}
+
 group("interfaces_unittest") {
   testonly = true
   deps = [
+    ":drawable_descriptor_test",
     ":form_render_test",
     ":ui_content_test",
     ":viewport_config_test",

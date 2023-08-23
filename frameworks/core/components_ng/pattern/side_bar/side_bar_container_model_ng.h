@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SIDE_BAR_CONTAINER_MODEL_NG_H
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_model.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SideBarContainerModelNG : public SideBarContainerModel {
@@ -36,9 +37,12 @@ public:
     void SetControlButtonHeight(const Dimension& height) override;
     void SetControlButtonLeft(const Dimension& left) override;
     void SetControlButtonTop(const Dimension& top) override;
-    void SetControlButtonShowIconStr(const std::string& showIconStr) override;
-    void SetControlButtonHiddenIconStr(const std::string& hiddenIconStr) override;
-    void SetControlButtonSwitchingIconStr(const std::string& switchingIconStr) override;
+    void SetControlButtonShowIconInfo(
+        const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
+    void SetControlButtonHiddenIconInfo(
+        const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
+    void SetControlButtonSwitchingIconInfo(
+        const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
     void SetOnChange(std::function<void(const bool)>&& onChange) override;
     void SetDividerStrokeWidth(const Dimension& strokeWidth) override;
     void SetDividerColor(const Color& color) override;
@@ -50,9 +54,10 @@ public:
 private:
     void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode) override;
     void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode) override;
-    void InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
-        const RefPtr<NG::FrameNode>& sideBarContentFrameNode) override;
     void MarkNeedInitRealSideBarWidth() override;
+    RefPtr<FrameNode> CreateControlButton(const RefPtr<SideBarTheme>& sideBarTheme);
+    RefPtr<FrameNode> CreateControlImage(const RefPtr<SideBarTheme>& sideBarTheme,
+        const RefPtr<FrameNode>& parentNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SIDE_BAR_CONTAINER_MODEL_H

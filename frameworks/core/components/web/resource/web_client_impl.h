@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEBVIEW_CLIENT_IMPL_H
 
 #include "foundation/arkui/ace_engine/frameworks/base/memory/referenced.h"
+#include "nweb_drag_data.h"
 #include "nweb_handler.h"
 
 #include "base/log/log.h"
@@ -155,6 +156,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle) override;
     bool OnDragAndDropData(const void* data, size_t len, const NWeb::ImageOptions& opt) override;
+    bool OnDragAndDropDataUdmf(std::shared_ptr<NWeb::NWebDragData> dragData) override;
+    void UpdateDragCursor(NWeb::NWebDragData::DragOperation op) override;
     void OnWindowNewByJS(
         const std::string& targetUrl,
         bool isAlert,
@@ -174,7 +177,7 @@ public:
     void OnSelectPopupMenu(std::shared_ptr<NWeb::NWebSelectPopupMenuParam> params,
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
     void OnAudioStateChanged(bool playing) override;
-    void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs) override;
+    void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs) override;
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;
     void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
@@ -183,6 +186,8 @@ public:
         const std::vector<NWeb::DateTimeSuggestion>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback) override;
     void OnDateTimeChooserClose() override;
+    void OnOverScroll(float xOffset, float yOffset) override;
+    void OnScreenCaptureRequest(std::shared_ptr<NWeb::NWebScreenCaptureAccessRequest> request) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

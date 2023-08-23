@@ -453,7 +453,8 @@ private:
     bool CreateLinearAnimate(
         std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
     template<typename T>
-    bool LinearAnimate(std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
+    bool LinearAnimateFromTo(
+        std::function<void(T)>&& callback, const T& originalValue, const RefPtr<Animator>& animator);
     template<typename T>
     bool LinearAnimate(const RefPtr<KeyframeAnimation<T>>& animation);
     template<typename T>

@@ -165,7 +165,7 @@ private:
     void UpdateBorderImageProvider(const RefPtr<BorderImage>& bImage);
     SkRRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
 #else
-    RSVector GetRadii(const Radius& radius, double shrinkFactor, double borderWidth);
+    RSPoint GetRadii(const Radius& radius, double shrinkFactor, double borderWidth);
     void UpdateBackgroundImage(const RefPtr<BackgroundImage>& image);
     void UpdateBlurRRect(const RSRoundRect& rRect, const Offset& offset);
     void UpdateBorderImageProvider(const RefPtr<BorderImage>& bImage);

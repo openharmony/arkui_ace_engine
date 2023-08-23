@@ -45,6 +45,34 @@ struct TextProperties {
     Color downColor;
 };
 
+struct TimePickerOptionProperty {
+    float height = 0.0f;
+    float fontheight = 0.0f;
+    float prevDistance = 0.0f; // between the prev item and itself when scroll up
+    float nextDistance = 0.0f; // between the next item and itself when scroll down
+};
+
+class TimePickerEventParam : public virtual AceType {
+    DECLARE_ACE_TYPE(TimePickerEventParam, AceType)
+
+public:
+    RefPtr<FrameNode> instance_;
+    int32_t itemIndex_ = 0;
+    int32_t itemTotalCounts_ = 0;
+};
+
+enum class TimePickerScrollDirection {
+    UP = 0,
+    DOWN,
+};
+enum class TimePickerOptionIndex {
+    COLUMN_INDEX_0 = 0,
+    COLUMN_INDEX_1,
+    COLUMN_INDEX_2,
+    COLUMN_INDEX_3,
+    COLUMN_INDEX_4,
+};
+
 class TimePickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TimePickerColumnPattern, LinearLayoutPattern);
 
@@ -56,7 +84,10 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<TimePickerColumnLayoutAlgorithm>();
-        layoutAlgorithm->SetCurrentOffset(GetCurrentOffset());
+        if (algorithmOffset_.size() == 0) {
+            ResetAlgorithmOffset();
+        }
+        layoutAlgorithm->SetCurrentOffset(algorithmOffset_);
         return layoutAlgorithm;
     }
 
@@ -91,6 +122,8 @@ public:
 
     void SetCurrentIndex(uint32_t value)
     {
+        // minute : [0, 59];
+        // AM_PM hour : [0, 11]; 24 hour : [0, 23]
         currentIndex_ = value;
     }
 
@@ -104,14 +137,14 @@ public:
         deltaSize_ = deltaSize;
     }
 
-    const std::map<RefPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
+    const std::map<RefPtr<FrameNode>, uint32_t>& GetOptions() const
     {
-        return options_;
+        return optionsTotalCount_;
     }
 
-    void SetOptions(const std::map<RefPtr<FrameNode>, std::vector<std::string>>& value)
+    void SetOptions(const std::map<RefPtr<FrameNode>, uint32_t>& value)
     {
-        options_ = value;
+        optionsTotalCount_ = value;
     }
 
     uint32_t GetShowCount() const
@@ -192,7 +225,7 @@ public:
     {
         return tossAnimationController_;
     }
-      
+
     void SetLocalDownDistance(float value)
     {
         localDownDistance_ = value;
@@ -214,8 +247,7 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
-    void ChangeTextStyle(uint32_t index, uint32_t showOptionCount,
-        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    void ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const RefPtr<TextLayoutProperty>& textLayoutProperty,
         const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
     void ChangeAmPmTextStyle(uint32_t index, uint32_t showOptionCount,
         const RefPtr<TextLayoutProperty>& textLayoutProperty,
@@ -233,6 +265,17 @@ private:
     RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
     void HandleCurveStopped();
     void ScrollOption(double delta, bool isJump = false);
+
+    std::vector<TimePickerOptionProperty> optionProperties_;
+    RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<TimePickerEventParam> param);
+    void OnAroundButtonClick(RefPtr<TimePickerEventParam> param);
+    std::vector<int32_t> algorithmOffset_;
+    void ResetAlgorithmOffset();
+    void CalcAlgorithmOffset(TimePickerScrollDirection dir, double distancePercent);
+    void SetOptionShiftDistance();
+    float GetShiftDistanceForLandscape(uint32_t index, TimePickerScrollDirection dir);
+    float GetShiftDistance(uint32_t index, TimePickerScrollDirection dir);
+    void ShiftOptionProp(RefPtr<FrameNode> curNode, RefPtr<FrameNode> shiftNode);
 
     void OnTouchDown();
     void OnTouchUp();
@@ -252,8 +295,8 @@ private:
         const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
     void AddAnimationTextProperties(uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty);
     void UpdateTextPropertiesLinear(bool isDown, double scale);
-    void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        uint32_t index, uint32_t showCount, bool isDown, double scale);
+    void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index,
+        uint32_t showCount, bool isDown, double scale);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void SetAccessibilityAction();
@@ -261,10 +304,13 @@ private:
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
+    FontWeight SelectedWeight_;
+    FontWeight DisappearWeight_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
-    std::map<RefPtr<FrameNode>, std::vector<std::string>> options_;
+    // column options number
+    std::map<RefPtr<FrameNode>, uint32_t> optionsTotalCount_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
     uint32_t currentIndex_ = 0;
@@ -291,8 +337,7 @@ private:
     RefPtr<TimePickerTossAnimationController> tossAnimationController_ =
         AceType::MakeRefPtr<TimePickerTossAnimationController>();
     std::vector<TextProperties> animationProperties_;
-    bool isJump_ = false;
-
+    float dividerSpacing_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };
 } // namespace OHOS::Ace::NG

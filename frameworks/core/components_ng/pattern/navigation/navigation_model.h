@@ -48,6 +48,7 @@ public:
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual bool NeedSetItems() = 0;
     virtual void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) = 0;
     virtual void GetMenuItems(std::list<RefPtr<AceType>>& items) {};
@@ -57,6 +58,9 @@ public:
     virtual void SetUsrNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavBarPosition(NG::NavBarPosition mode) = 0;
     virtual void SetNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMinNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMaxNavBarWidth(const Dimension& value) = 0;
+    virtual void SetMinContentWidth(const Dimension& value) = 0;
     virtual void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) = 0;
     virtual void SetNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavDestination(std::function<void(std::string)>&& builder) = 0;

@@ -45,7 +45,23 @@ public:
             theme->qrcodeType_ = QrcodeType(themeConstants->GetInt(THEME_QRCODE_TYPE));
             theme->qrcodeWidth_ = themeConstants->GetDimension(THEME_QRCODE_SIZE);
             theme->qrcodeHeight_ = themeConstants->GetDimension(THEME_QRCODE_SIZE);
+
+            ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
+        }
+
+        void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<QrcodeTheme>& theme) const
+        {
+            if (!themeStyle) {
+                return;
+            }
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_QRCODE, nullptr);
+            if (!pattern) {
+                return;
+            }
+            theme->qrcodeColor_ = pattern->GetAttr<Color>("qrcode_foreground_color", Color::RED);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("qrcode_background_color", Color::RED);
+            theme->focusedColor_ = pattern->GetAttr<Color>("qrcode_focused_color", Color::RED);
         }
     };
 
@@ -59,6 +75,11 @@ public:
     const Color& GetBackgroundColor() const
     {
         return backgroundColor_;
+    }
+
+    const Color& GetFocusedColor() const
+    {
+        return focusedColor_;
     }
 
     QrcodeType GetQrcodeType() const
@@ -82,6 +103,7 @@ protected:
 private:
     Color qrcodeColor_;
     Color backgroundColor_;
+    Color focusedColor_;
     QrcodeType qrcodeType_ { QrcodeType::RECT };
     Dimension qrcodeWidth_;
     Dimension qrcodeHeight_;

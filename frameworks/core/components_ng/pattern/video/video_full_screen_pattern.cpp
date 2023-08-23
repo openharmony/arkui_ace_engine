@@ -39,9 +39,14 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     CHECK_NULL_VOID(fullScreenNode);
     fullScreenNode->InitVideoFullScreenNode(videoNode);
     // add node to root
-    int32_t rootId = videoNode->GetRootId();
-    auto rootNode = FrameNode::GetFrameNode(V2::ROOT_ETS_TAG, rootId);
-    
+    auto rootNode = PipelineContext::GetCurrentContext()->GetRootElement();
+    if (!rootNode) {
+        LOGI("rootNode is nullptr");
+        auto videoPattern = AceType::DynamicCast<VideoPattern>(videoNode->GetPattern());
+        videoPattern->UpdateMediaParam(mediaPlayer_, renderSurface_, renderContextForMediaPlayer_);
+        ResetMediaParam();
+        return;
+    }
     fullScreenNode->MountToParent(rootNode);
     // set video size all window
     LayoutConstraintF parentConstraint;
@@ -57,6 +62,7 @@ void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNod
     fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     rootNode->RebuildRenderContextTree();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    OnFullScreenChange(true);
 }
 
 void VideoFullScreenPattern::ExitFullScreen()
@@ -99,24 +105,29 @@ void VideoFullScreenPattern::UpdateState()
     CHECK_NULL_VOID(videoNode);
     auto videoLayout = videoNode->GetLayoutProperty<VideoLayoutProperty>();
     bool isChanged = false;
-    if (fullScreenLayout->GetObjectFit() != videoLayout->GetObjectFit()) {
+    if (videoLayout->HasObjectFit() &&
+        (fullScreenLayout->GetObjectFit() != videoLayout->GetObjectFit())) {
+        isChanged = true;
         fullScreenLayout->UpdateObjectFit(videoLayout->GetObjectFit().value());
     }
-    if (fullScreenLayout->GetVideoSource() != videoLayout->GetVideoSource()) {
+    if (videoLayout->HasVideoSource() &&
+        (fullScreenLayout->GetVideoSource() != videoLayout->GetVideoSource())) {
         isChanged = true;
         fullScreenLayout->UpdateVideoSource(videoLayout->GetVideoSource().value());
     }
-    if (fullScreenLayout->GetPosterImageInfo() != videoLayout->GetPosterImageInfo()) {
+    if (videoLayout->HasPosterImageInfo() &&
+        (fullScreenLayout->GetPosterImageInfo() != videoLayout->GetPosterImageInfo())) {
         isChanged = true;
         fullScreenLayout->UpdatePosterImageInfo(videoLayout->GetPosterImageInfo().value());
     }
-    if (fullScreenLayout->GetControls() != videoLayout->GetControls()) {
+    if (videoLayout->HasControls() && (
+        fullScreenLayout->GetControls() != videoLayout->GetControls())) {
         isChanged = true;
         fullScreenLayout->UpdateControls(videoLayout->GetControls().value());
     }
     if (isChanged) {
+        fullScreenNode->MarkModifyDone();
         fullScreenNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
-    fullScreenNode->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

@@ -63,6 +63,8 @@ public:
     void SetResourceId(InternalResource::ResourceId id, std::optional<Color> fillColor = std::nullopt);
     void SetPixMap(const RefPtr<PixelMap>& pixmap, std::optional<Color> fillColor = std::nullopt);
     void SetDimension(Dimension width, Dimension Height);
+
+    [[deprecated("use ImageRenderProperty::SetFillColor or SvgCanvasImage::SetFillColor")]]
     void SetFillColor(const Color& color);
     void SetBundleName(const std::string& bundleName);
     void SetModuleName(const std::string& moduleName);
@@ -104,7 +106,7 @@ private:
     bool isSvg_ = false;
     bool isPng_ = false;
 
-    // only Svg will set it.
+    [[deprecated("in NG")]]
     std::optional<Color> fillColor_;
 
     // image source type for example:FILE, ASSET, NETWORK, MEMORY, BASE64, INTERNAL, RESOURCE or DATA_ABILITY,

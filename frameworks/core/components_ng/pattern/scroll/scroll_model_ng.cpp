@@ -178,4 +178,34 @@ void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     CHECK_NULL_VOID(pattern);
     pattern->SetNestedScroll(nestedOpt);
 }
+
+void ScrollModelNG::SetScrollEnabled(bool scrollEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollEnabled, scrollEnabled);
+}
+
+void ScrollModelNG::SetFriction(double friction)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFriction(friction);
+}
+
+void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+    const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetScrollSnapAlign() != scrollSnapAlign) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
+        pattern->SetScrollSnapUpdate(true);
+    }
+    pattern->SetIntervalSize(intervalSize);
+    pattern->SetSnapPaginations(snapPaginations);
+    pattern->SetEnableSnapToSide(enableSnapToSide);
+}
 } // namespace OHOS::Ace::NG

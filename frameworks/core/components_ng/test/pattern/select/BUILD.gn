@@ -41,6 +41,8 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_layout_property.cpp",
@@ -49,6 +51,8 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/svg_canvas_image.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
@@ -57,6 +61,7 @@ ohos_unittest("select_pattern_test_ng") {
     # components_ng_base
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
 
     # components_ng_layout
@@ -69,11 +74,15 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
 
+    # components_ng_manager
+    "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+
     # components_ng_property
     "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
     "$ace_root/frameworks/core/components_ng/property/property.cpp",
+    "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
 
     # components_ng_pattern
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
@@ -140,6 +149,7 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_icon_theme.cpp",
     "$ace_root/frameworks/core/components_ng/test/event/mock/mock_long_press_event.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/event/scrollable_event/mock_scrollable.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
@@ -147,6 +157,7 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_fade_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/mock_scrollable_pattern.cpp",
@@ -155,12 +166,15 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/property/mock_grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_property.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # self
@@ -170,9 +184,7 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/select/select_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/utils.cpp",
-    "select_accessibility_property_test_ng.cpp",
     "select_pattern_test_ng.cpp",
-    "select_view_test_ng.cpp",
   ]
 
   deps = [

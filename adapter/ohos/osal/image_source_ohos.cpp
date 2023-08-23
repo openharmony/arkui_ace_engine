@@ -28,7 +28,7 @@ RefPtr<ImageSource> ImageSource::Create(int32_t fd)
     Media::SourceOptions options;
     auto src = Media::ImageSource::CreateImageSource(fd, options, errorCode);
     if (errorCode != Media::SUCCESS) {
-        LOGE("create image source failed, errorCode = %{public}u", errorCode);
+        LOGW("create image source failed, errorCode = %{public}u", errorCode);
         return nullptr;
     }
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
@@ -40,7 +40,7 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
     Media::SourceOptions options;
     auto src = Media::ImageSource::CreateImageSource(data, size, options, errorCode);
     if (errorCode != Media::SUCCESS) {
-        LOGE("create image source failed, errorCode = %{public}u", errorCode);
+        LOGW("create image source failed, errorCode = %{public}u", errorCode);
         return nullptr;
     }
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
@@ -51,27 +51,39 @@ std::string ImageSourceOhos::GetProperty(const std::string& key)
     std::string value;
     uint32_t res = imageSource_->GetImagePropertyString(0, key, value);
     if (res != Media::SUCCESS) {
-        LOGE("Get ImageSource property %{public}s failed, errorCode = %{public}u", key.c_str(), res);
+        LOGW("Get ImageSource property %{public}s failed, errorCode = %{public}u", key.c_str(), res);
     }
     return value;
 }
 
-RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(int32_t width, int32_t height)
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(const Size& size)
 {
-    return CreatePixelMap(0, width, height);
+    return CreatePixelMap(0, size);
 }
 
-RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(uint32_t index, int32_t width, int32_t height)
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(uint32_t index, const Size& size)
 {
-    Media::DecodeOptions options {
-        .desiredSize = { width, height },
-    };
+    Media::DecodeOptions options;
+    if (size.first > 0 && size.second > 0) {
+        options.desiredSize = { size.first, size.second };
+    }
     uint32_t errorCode;
     auto pixmap = imageSource_->CreatePixelMapEx(index, options, errorCode);
     if (errorCode != Media::SUCCESS) {
-        LOGE("create PixelMap from ImageSource failed, index = %{public}u, errorCode = %{public}u", index, errorCode);
+        LOGW("create PixelMap from ImageSource failed, index = %{public}u, errorCode = %{public}u", index, errorCode);
         return nullptr;
     }
     return PixelMap::Create(std::move(pixmap));
+}
+
+ImageSource::Size ImageSourceOhos::GetImageSize()
+{
+    Media::ImageInfo info;
+    auto errorCode = imageSource_->GetImageInfo(info);
+    if (errorCode != Media::SUCCESS) {
+        LOGW("Get ImageSource info failed, errorCode = %{public}u", errorCode);
+        return { 0, 0 };
+    }
+    return { info.size.width, info.size.height };
 }
 } // namespace OHOS::Ace

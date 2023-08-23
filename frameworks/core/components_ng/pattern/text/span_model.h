@@ -47,6 +47,7 @@ public:
     virtual void SetLetterSpacing(const Dimension& value) = 0;
     virtual void SetLineHeight(const Dimension& value) = 0;
     virtual void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) = 0;
+    virtual void ClearOnClick() = 0;
 
 private:
     static std::unique_ptr<SpanModel> instance_;

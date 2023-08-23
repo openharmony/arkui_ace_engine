@@ -27,6 +27,8 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/search/search_event_hub.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -55,21 +57,53 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
     OffsetF contentOffset = paintWrapper->GetContentOffset();
-    textFieldContentModifier_->SetContentOffset(contentOffset);
     SizeF contentSize = paintWrapper->GetContentSize();
-    textFieldContentModifier_->SetContentSize(contentSize);
-
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->GetContChange()) {
+        textFieldContentModifier_->ChangeDragStatus();
+        textFieldPattern->ResetContChange();
+    }
+
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textEditingValue = textFieldPattern->GetTextEditingValue();
-    std::string text = textEditingValue.text;
-    textFieldContentModifier_->SetTextValue(text);
+    auto isPasswordType =
+        textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
+    auto showPlaceHolder = textFieldLayoutProperty->GetValueValue("").empty();
+    auto needObscureText = isPasswordType && textFieldPattern->GetTextObscured() && !showPlaceHolder;
+    auto text = TextFieldPattern::CreateDisplayText(
+        textEditingValue.text, textFieldPattern->GetNakedCharPosition(), needObscureText);
+    auto displayText = StringUtils::Str16ToStr8(text);
+    textFieldContentModifier_->SetTextValue(displayText);
     textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
+
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto currentTextRectOffsetX = textFieldPattern->GetTextRect().GetX();
+    auto currentTextRectOffsetY =
+        textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY();
+    if (textFieldContentModifier_->GetTextRectX() != currentTextRectOffsetX ||
+        (textFieldPattern->IsTextArea() ? textFieldContentModifier_->GetTextRectY()
+                                        : textFieldContentModifier_->GetContentOffsetY()) != currentTextRectOffsetY) {
+        // If the parent node is a Search, the Search callback is executed.
+        if (textFieldPattern->IsSearchParentNode()) {
+            auto parentFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
+            auto searchPattern = parentFrameNode->GetPattern<SearchPattern>();
+            CHECK_NULL_VOID(searchPattern);
+            auto textFieldOffset = searchPattern->GetTextFieldOffset();
+            auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
+            currentTextRectOffsetX += textFieldOffset.GetX();
+            currentTextRectOffsetY += textFieldOffset.GetY();
+        }
+        auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+        eventHub->FireOnScrollChangeEvent(currentTextRectOffsetX, currentTextRectOffsetY);
+    }
+    textFieldContentModifier_->SetContentOffset(contentOffset);
+    textFieldContentModifier_->SetContentSize(contentSize);
     textFieldContentModifier_->SetTextRectY(textFieldPattern->GetTextRect().GetY());
     textFieldContentModifier_->SetTextRectX(textFieldPattern->GetTextRect().GetX());
     textFieldContentModifier_->SetTextAlign(textFieldPattern->GetTextAlign());
-    auto frameNode = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
@@ -104,7 +138,6 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetContentSize(contentSize);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     textFieldOverlayModifier_->SetFrameSize(frameSize);
-
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     auto cursorVisible = textFieldPattern->GetCursorVisible();
@@ -140,5 +173,27 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(layoutProperty);
     textFieldOverlayModifier_->SetShowCounter(
         layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
+    if (textFieldPattern->GetSelectMode() != SelectionMode::NONE) {
+        textFieldPattern->MarkRedrawOverlay();
+    }
+    UpdateScrollBar();
+}
+
+void TextFieldPaintMethod::UpdateScrollBar()
+{
+    auto scrollBar = scrollBar_.Upgrade();
+    if (!scrollBar || !scrollBar->NeedPaint()) {
+        LOGD("UpdateOverlayModifier no need paint scroll bar.");
+        return;
+    }
+    textFieldOverlayModifier_->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
+        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
+        OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
+        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()), scrollBar->GetHoverAnimationType());
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    textFieldOverlayModifier_->SetFgColor(scrollBar->GetForegroundColor());
+    textFieldOverlayModifier_->SetBgColor(scrollBar->GetBackgroundColor());
+    textFieldOverlayModifier_->StartOpacityAnimation(scrollBar->GetOpacityAnimationType());
+    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

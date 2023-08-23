@@ -30,8 +30,9 @@ build_component("remote_window") {
       "//foundation/multimedia/player_framework/interfaces/inner_api/native",
     ]
 
-    deps = [ "//foundation/graphic/graphic_2d:libsurface" ]
-
-    external_deps = [ "ipc:ipc_core" ]
+    external_deps = [
+      "graphic_2d:surface",
+      "ipc:ipc_core",
+    ]
   }
 }

@@ -26,7 +26,6 @@
 #include "core/components/common/painter/rosen_svg_painter.h"
 #endif
 #include "core/components/common/properties/decoration.h"
-#include "core/components/transform/render_transform.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
@@ -161,8 +160,13 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
         return;
     }
     // mask and filter create extra layers, need to record initial layer count
+#ifndef USE_ROSEN_DRAWING
     auto count = skCanvas_->getSaveCount();
     skCanvas_->save();
+#else
+    auto count = rsCanvas_->GetSaveCount();
+    rsCanvas_->Save();
+#endif
     if (!hrefClipPath_.empty()) {
         OnClipPath(canvas, viewPort);
     }
@@ -178,7 +182,11 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
 
     OnDraw(canvas, viewPort, color);
     OnDrawTraversed(canvas, viewPort, color);
+#ifndef USE_ROSEN_DRAWING
     skCanvas_->restoreToCount(count);
+#else
+    rsCanvas_->RestoreToCount(count);
+#endif
 }
 
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
@@ -192,11 +200,16 @@ void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std:
 
 bool SvgNode::OnCanvas(RSCanvas& canvas)
 {
+#ifndef USE_ROSEN_DRAWING
     // drawing.h api 不完善，直接取用SkCanvas，后续要重写
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_RETURN_NOLOG(rsCanvas, false);
     skCanvas_ = rsCanvas->ExportSkCanvas();
     return skCanvas_ != nullptr;
+#else
+    rsCanvas_ = &canvas;
+    return true;
+#endif
 }
 
 void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
@@ -206,11 +219,19 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
     auto refSvgNode = svgContext->GetSvgNodeById(hrefClipPath_);
     CHECK_NULL_VOID(refSvgNode);
     auto clipPath = refSvgNode->AsPath(viewPort);
+#ifndef USE_ROSEN_DRAWING
     if (clipPath.isEmpty()) {
         LOGW("OnClipPath abandon, clipPath is empty");
         return;
     }
     skCanvas_->clipPath(clipPath, SkClipOp::kIntersect);
+#else
+    if (!clipPath.IsValid()) {
+        LOGW("OnClipPath abandon, clipPath is empty");
+        return;
+    }
+    rsCanvas_->ClipPath(clipPath, RSClipOp::INTERSECT);
+#endif
     return;
 }
 
@@ -233,10 +254,14 @@ void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 {
     auto matrix = (animateTransform_.empty()) ? SvgTransform::CreateMatrix4(transform_)
                                               : SvgTransform::CreateMatrixFromMap(animateTransform_);
+#ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA
     skCanvas_->concat(FlutterSvgPainter::ToSkMatrix(matrix));
 #else
     skCanvas_->concat(RosenSvgPainter::ToSkMatrix(matrix));
+#endif
+#else
+    rsCanvas_->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
 #endif
 }
 
@@ -386,7 +411,7 @@ void SvgNode::AnimateTransform(const RefPtr<SvgAnimation>& animate, double origi
     if (!animate->GetValues().empty()) {
         AnimateFrameTransform(animate, originalValue);
     } else {
-        AnimateValueTransform(animate, originalValue);
+        AnimateFromToTransform(animate, originalValue);
     }
 }
 
@@ -403,20 +428,19 @@ void SvgNode::AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double 
         return;
     }
 
-    // set indices instead of frames
+    // change Values to frame indices to create an index-based animation
+    // property values of each frame are stored in [frames]
     std::vector<std::string> indices;
     uint32_t size = animate->GetValues().size();
     for (uint32_t i = 0; i < size; i++) {
         indices.emplace_back(std::to_string(i));
     }
-    auto instance = AceType::MakeRefPtr<SvgAnimate>();
-    animate->Copy(instance);
-    instance->SetValues(indices);
+    animate->SetValues(indices);
 
     std::function<void(double)> callback = [weak = WeakClaim(this), type, frames](double value) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        // use index and rate to locate frame and position
+        // use index and rate to locate frame and progress
         auto index = static_cast<uint32_t>(value);
         double rate = value - index;
         if (index >= frames.size() - 1) {
@@ -434,7 +458,7 @@ void SvgNode::AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double 
     animate->CreatePropertyAnimation(originalValue, std::move(callback));
 }
 
-void SvgNode::AnimateValueTransform(const RefPtr<SvgAnimation>& animate, double originalValue)
+void SvgNode::AnimateFromToTransform(const RefPtr<SvgAnimation>& animate, double originalValue)
 {
     std::vector<float> fromVec;
     std::vector<float> toVec;

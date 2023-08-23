@@ -34,6 +34,7 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
+    void SetFontFamilies(const std::vector<std::string>& value);
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetTextColor(const Color& value);
@@ -80,6 +81,8 @@ public:
 
     void SetClip(bool clip);
 
+    void SetFontReady(bool value);
+
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
@@ -124,7 +127,6 @@ private:
     RefPtr<AnimatablePropertyFloat> shadowOffsetYFloat_;
     RefPtr<AnimatablePropertyColor> shadowColor_;
 
-    TextDecoration oldTextDecoration_ = TextDecoration::NONE;
     float oldColorAlpha_ { 0.0f };
     std::optional<TextDecoration> textDecoration_;
     std::optional<Color> textDecorationColor_;
@@ -142,6 +144,8 @@ private:
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyBool> clip_;
+    RefPtr<PropertyString> fontFamilyString_;
+    RefPtr<PropertyBool> fontReady_;
 
     RefPtr<Paragraph> paragraph_;
     OffsetF paintOffset_;

@@ -115,20 +115,6 @@ public:
         return rect;
     }
 
-    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback)
-    {
-        viewSafeAreaImpl_ = std::move(callback);
-    }
-
-    SafeAreaEdgeInserts GetCurrentViewSafeArea() const
-    {
-        SafeAreaEdgeInserts viewSafeArea;
-        if (viewSafeAreaImpl_) {
-            viewSafeArea = viewSafeAreaImpl_();
-        }
-        return viewSafeArea;
-    }
-
     virtual void SetDrawTextAsBitmap(bool useBitmap) {}
 
     virtual float GetRefreshRate() const
@@ -139,44 +125,6 @@ public:
     uint64_t GetLastRequestVsyncTime() const
     {
         return lastRequestVsyncTime_;
-    }
-
-    SafeAreaEdgeInserts GetSafeArea() const
-    {
-        return viewSafeArea_;
-    }
-
-    void SetSafeArea(const SafeAreaEdgeInserts& viewSafeArea)
-    {
-        viewSafeArea_ = viewSafeArea;
-    }
-
-    SafeAreaEdgeInserts viewSafeArea_;
-
-    void SetSystemSafeArea(const SafeAreaEdgeInserts& safeArea)
-    {
-        if (systemSafeArea_ == safeArea) {
-            return;
-        }
-        systemSafeArea_ = safeArea;
-    }
-
-    SafeAreaEdgeInserts GetSystemSafeArea() const
-    {
-        return systemSafeArea_;
-    }
-
-    void SetCutoutSafeArea(const SafeAreaEdgeInserts& safeArea)
-    {
-        if (cutoutSafeArea_ == safeArea) {
-            return;
-        }
-        cutoutSafeArea_ = safeArea;
-    }
-
-    SafeAreaEdgeInserts GetCutoutSafeArea() const
-    {
-        return cutoutSafeArea_;
     }
 
     virtual void SetKeepScreenOn(bool keepScreenOn) {};
@@ -195,12 +143,8 @@ protected:
     uint64_t lastRequestVsyncTime_ = 0;
     uint32_t windowId_ = 0;
 
-    SafeAreaEdgeInserts systemSafeArea_;
-    SafeAreaEdgeInserts cutoutSafeArea_;
-
 private:
     std::function<Rect()> windowRectImpl_;
-    std::function<SafeAreaEdgeInserts()> viewSafeAreaImpl_;
     std::unique_ptr<PlatformWindow> platformWindow_;
 
     ACE_DISALLOW_COPY_AND_MOVE(Window);

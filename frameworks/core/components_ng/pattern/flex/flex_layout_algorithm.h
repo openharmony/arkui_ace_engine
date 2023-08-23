@@ -86,7 +86,7 @@ private:
     void UpdateLayoutConstraintOnMainAxis(LayoutConstraintF& layoutConstraint, float size);
     void UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& layoutConstraint, float size);
     void AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper);
-    void getFlexFunc(std::function<float(const RefPtr<LayoutWrapper>&)>& getFlex, float remainSpace,
+    void CheckIsGrowOrShrink(std::function<float(const RefPtr<LayoutWrapper>&)>& getFlex, float remainSpace,
         float& spacePerFlex, FlexItemProperties& flexItemProperties, RefPtr<LayoutWrapper>& lastChild);
     void CheckBlankAndKeepMin(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
 
@@ -112,6 +112,7 @@ private:
     BaselineProperties baselineProperties_;
     bool isLinearLayoutFeature_ = false;
     bool isInfiniteLayout_ = false;
+    bool selfAdaptive_ = false;
     TextDirection textDir_ = TextDirection::LTR;
     bool childrenHasAlignSelfBaseLine_ = false;
 

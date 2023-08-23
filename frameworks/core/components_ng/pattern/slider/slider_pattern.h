@@ -36,11 +36,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto visibility = GetLayoutProperty<LayoutProperty>()->GetVisibility().value_or(VisibleType::VISIBLE);
-        if (visibility != VisibleType::VISIBLE) {
-            return MakeRefPtr<NodePaintMethod>();
+        if (!IsSliderVisible()) {
+            return nullptr;
         }
-
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
             sliderContentModifier_ =
@@ -56,7 +54,7 @@ public:
             sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, OffsetF());
-                auto blockCenter = pattern->sliderContentModifier_->GetBlockCenter();
+                auto blockCenter = pattern->GetBlockCenter();
                 auto trackThickness = pattern->sliderContentModifier_->GetTrackThickness();
                 auto blockSize = pattern->sliderContentModifier_->GetBlockSize();
                 return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
@@ -115,7 +113,9 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
 
     void UpdateValue(float value);
+    void OnVisibleChange(bool isVisible) override;
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -143,6 +143,7 @@ private:
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
 
@@ -156,6 +157,13 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
+
+    bool IsSliderVisible();
+    void RegisterVisibleAreaChange();
+    void OnWindowHide() override;
+    void OnWindowShow() override;
+    void StartAnimation();
+    void StopAnimation();
 
     void OpenTranslateAnimation();
     void CloseTranslateAnimation();
@@ -172,12 +180,17 @@ private:
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
     bool showTips_ = false;
-    bool hotFlag_ = false;
+    bool hotFlag_ = false; // whether the mouse is hovering over the slider
     bool valueChangeFlag_ = false;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
+    bool axisFlag_ = false; // Wheel operation flag
     bool focusFlag_ = false;
     bool panMoveFlag_ = false;
+    bool hasVisibleChangeRegistered_ = false;
+    bool isVisibleArea_ = true;
+    bool isVisible_ = true;
+    bool isShow_ = true;
 
     float stepRatio_ = 1.0f / 100.0f;
     float valueRatio_ = 0.0f;
@@ -187,7 +200,7 @@ private:
     OffsetF circleCenter_ = { 0.0f, 0.0f }; // Relative to the content area
 
     float trackThickness_ = 0.0f;
-    float blockHotSize_ = 0.0f;
+    SizeF blockHotSize_;
     SizeF blockSize_;
 
     RefPtr<TouchEventImpl> touchEvent_;

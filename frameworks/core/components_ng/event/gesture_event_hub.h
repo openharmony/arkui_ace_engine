@@ -108,6 +108,8 @@ using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
+constexpr float PIXELMAP_DRAG_WGR_TEXT_SCALE = 2.0f;
+constexpr float PIXELMAP_DRAG_WGR_SCALE = 3.0f;
 #endif
 class EventHub;
 
@@ -213,6 +215,14 @@ public:
         clickEventActuator_->RemoveClickEvent(clickEvent);
     }
 
+    bool IsClickEventsEmpty() const
+    {
+        if (!clickEventActuator_) {
+            return true;
+        }
+        return clickEventActuator_->IsClickEventsEmpty();
+    }
+
     void BindMenu(GestureEventFunc&& showMenu);
 
     bool IsLongClickable() const
@@ -234,18 +244,20 @@ public:
     }
 
     // Set by user define, which will replace old one.
-    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, float distance)
+    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
     {
         if (!panEventActuator_) {
-            panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance);
+            panEventActuator_ =
+                MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
         }
         panEventActuator_->ReplacePanEvent(panEvent);
     }
 
-    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, float distance)
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
     {
         if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
-            panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance);
+            panEventActuator_ =
+                MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
         }
         panEventActuator_->AddPanEvent(panEvent);
     }
@@ -259,25 +271,28 @@ public:
     }
 
     // Set by user define, which will replace old one.
-    void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
+    void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance)
     {
         if (!dragEventActuator_) {
-            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
+            dragEventActuator_ =
+                MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
         }
         dragEventActuator_->ReplaceDragEvent(dragEvent);
     }
 
-    void SetCustomDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, float distance)
+    void SetCustomDragEvent(
+        const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance)
     {
         if (!dragEventActuator_) {
-            dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance);
+            dragEventActuator_ =
+                MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
         }
         dragEventActuator_->SetCustomDragEvent(dragEvent);
     }
 
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId);
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint);
 
     RefPtr<FrameNode> GetFrameNode() const;
 
@@ -312,10 +327,23 @@ public:
         return responseRegion_;
     }
 
+    const std::vector<DimensionRect>& GetMouseResponseRegion() const
+    {
+        return mouseResponseRegion_;
+    }
+
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
     {
         responseRegion_ = responseRegion;
         if (!responseRegion_.empty()) {
+            isResponseRegion_ = true;
+        }
+    }
+
+    void SetMouseResponseRegion(const std::vector<DimensionRect>& mouseResponseRegion)
+    {
+        mouseResponseRegion_ = mouseResponseRegion;
+        if (!mouseResponseRegion_.empty()) {
             isResponseRegion_ = true;
         }
     }
@@ -365,6 +393,26 @@ public:
     {
         textDraggable_ = draggable;
     }
+
+    void SetIsTextDraggable(bool isTextDraggable)
+    {
+        isTextDraggable_ = isTextDraggable;
+    }
+
+    bool GetIsTextDraggable()
+    {
+        return isTextDraggable_;
+    }
+
+    bool IsTextField() const
+    {
+        return isTextField_;
+    }
+
+    void SetTextField(bool isTextField)
+    {
+        isTextField_ = isTextField;
+    }
 #endif // ENABLE_DRAG_FRAMEWORK
 
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
@@ -377,9 +425,28 @@ public:
         return pixelMap_;
     }
 
+    RefPtr<LongPressRecognizer> GetLongPressRecognizer() const
+    {
+        CHECK_NULL_RETURN(longPressEventActuator_, nullptr);
+        return longPressEventActuator_->GetLongPressRecognizer();
+    }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
-    OnDragCallback GetDragCallback();
+    OnDragCallback GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
+
+    void SetThumbnailPixelMapCallback(std::function<void()>&& callback)
+    {
+        callback_ = std::move(callback);
+    }
+
+    bool HasThumbnailCallback() const
+    {
+        return static_cast<bool>(callback_);
+    }
+
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f) const;
+    float GetPixelMapScale(const int32_t height, const int32_t width) const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
@@ -387,11 +454,15 @@ public:
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
 
+    void StartLongPressActionForWeb();
+    void CancelDragForWeb();
     void StartDragTaskForWeb();
+    void ResetDragActionForWeb();
 
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
     bool IsAllowedDrag(RefPtr<EventHub> eventHub);
+    void HandleNotallowDrag(const GestureEvent& info);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -403,6 +474,9 @@ private:
     void UpdateExternalNGGestureRecognizer();
 
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
+
+    void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
+        const DragDropInfo& dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -429,12 +503,17 @@ private:
     bool recreateGesture_ = true;
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
+    std::vector<DimensionRect> mouseResponseRegion_;
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
     GestureEvent gestureInfoForWeb_;
+    bool isReceivedDragGestureInfo_ = false;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;
+    bool isTextField_ = false;
+    bool isTextDraggable_ = false;
+    std::function<void()> callback_;
 #endif
 };
 

@@ -24,9 +24,9 @@
 #include "core/components_ng/render/image_painter.h"
 
 namespace OHOS::Ace::NG {
-TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
-    WeakPtr<ScrollBar>&& scrollBar, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
-    : pattern_(pattern), scrollBar_(scrollBar), edgeEffect_(edgeEffect)
+TextFieldOverlayModifier::TextFieldOverlayModifier(
+    const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
+    : pattern_(pattern), edgeEffect_(edgeEffect)
 {
     cursorColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color()));
     cursorWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
@@ -63,7 +63,7 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
 {
     PaintCursor(context);
     PaintSelection(context);
-    PaintScrollBar(context.canvas);
+    PaintScrollBar(context);
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
 }
@@ -74,7 +74,8 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     CHECK_NULL_VOID(textFieldPattern);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetShowUnderlineValue(false)) {
+    if (!layoutProperty->GetShowUnderlineValue(false) ||
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::UNSPECIFIED) {
         return;
     }
     auto textRect = textFieldPattern->GetContentRect();
@@ -123,9 +124,10 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
     }
     RSRect clipInnerRect;
-    if (inputStyle_ == InputStyle::DEFAULT) {
+    if (inputStyle_ == InputStyle::DEFAULT || isTextArea) {
         clipInnerRect = RSRect(
-            paintOffset.GetX(), paintOffset.GetY(), paintOffset.GetX() + contentSize_->Get().Width(), clipRectHeight);
+            paintOffset.GetX(), paintOffset.GetY(), paintOffset.GetX() + contentSize_->Get().Width() +
+            textFieldPattern->GetInlinePadding(), clipRectHeight);
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     } else {
         clipInnerRect = RSRect(paintOffset.GetX(), 0.0f, paintOffset.GetX() + contentSize_->Get().Width(),
@@ -135,11 +137,11 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     // for default style, selection height is equal to the content height
     for (const auto& textBox : textBoxes) {
         canvas.DrawRect(RSRect(textBox.rect_.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-            inputStyle_ == InputStyle::DEFAULT
+            inputStyle_ == InputStyle::DEFAULT || isTextArea
                 ? (textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
                 : 0.0f,
             textBox.rect_.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-            inputStyle_ == InputStyle::DEFAULT
+            inputStyle_ == InputStyle::DEFAULT || isTextArea
                 ? (textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
                 : textFieldPattern->GetFrameRect().Height()));
     }
@@ -183,23 +185,20 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     canvas.Restore();
 }
 
-void TextFieldOverlayModifier::PaintScrollBar(RSCanvas& canvas)
-{
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBar);
-    textFieldPattern->CheckScrollable();
-    if (scrollBar->NeedPaint() && textFieldPattern->IsScrollable()) {
-        ScrollBarPainter::PaintRectBar(canvas, scrollBar);
-    }
-}
-
 void TextFieldOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas)
 {
     auto edgeEffect = edgeEffect_.Upgrade();
     CHECK_NULL_VOID_NOLOG(edgeEffect);
     edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
+}
+
+void TextFieldOverlayModifier::PaintScrollBar(DrawingContext& context)
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->GetScrollBarVisible()) {
+        ScrollBarOverlayModifier::onDraw(context);
+    }
 }
 
 void TextFieldOverlayModifier::SetCursorColor(Color& value)
@@ -270,5 +269,10 @@ void TextFieldOverlayModifier::SetUnderlineColor(const Color& value)
 void TextFieldOverlayModifier::SetShowCounter(bool value)
 {
     showCounter_->Set(value);
+}
+
+void TextFieldOverlayModifier::SetScrollBar(const RefPtr<ScrollBar>& scrollBar)
+{
+    scrollBar_ = scrollBar;
 }
 } // namespace OHOS::Ace::NG

@@ -132,6 +132,11 @@ void SkPainter::SetBrush(SkPaint& skPaint, const ShapePaintProperty& shapePaintP
         curOpacity = shapePaintProperty.GetFillOpacityValue();
     }
     skPaint.setColor(fillColor.BlendOpacity(curOpacity).GetValue());
+    if (shapePaintProperty.HasAntiAlias()) {
+        skPaint.setAntiAlias(shapePaintProperty.GetAntiAliasValue());
+    } else {
+        skPaint.setAntiAlias(shapePaintProperty.ANTIALIAS_DEFAULT);
+    }
 }
 
 void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset)
@@ -148,5 +153,17 @@ void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const Of
     rsSkPath->SetPath(skPath);
     rsSkPath->Offset(offset.GetX(), offset.GetY());
     canvas.DrawPath(rsPath);
+}
+
+SizeF SkPainter::GetPathSize(const std::string& commands)
+{
+    SkPath skPath;
+    if (!SkParsePath::FromSVGString(commands.c_str(), &skPath)) {
+        LOGE("Invalid path value.");
+        return SizeF();
+    }
+
+    auto skRect = skPath.getBounds();
+    return SizeF(skRect.right(), skRect.bottom());
 }
 } // namespace OHOS::Ace::NG

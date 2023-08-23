@@ -15,10 +15,12 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_pattern.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkImage.h"
 #include "include/core/SkPicture.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkShader.h"
+#endif
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -33,6 +35,7 @@ void RosenRenderSvgPattern::Paint(RenderContext& context, const Offset& offset)
     return;
 }
 
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderSvgPattern::OnAsPaint(const Offset& offset, const Rect& paintRect, SkPaint& skPaint)
 {
     Rect tileRect;
@@ -70,8 +73,44 @@ bool RosenRenderSvgPattern::OnAsPaint(const Offset& offset, const Rect& paintRec
 #endif
     return true;
 }
+#else
+bool RosenRenderSvgPattern::OnAsPaint(const Offset& offset, const Rect& paintRect, RSPen* rsPen, RSBrush* rsBrush)
+{
+    Rect tileRect;
+    RSMatrix matrix4;
+    if (!FitAttribute(paintRect, tileRect, matrix4)) {
+        LOGW("fit attribute fail.");
+        return false;
+    }
 
+    RosenRenderContext rosenContext;
+    FitRenderContext(rosenContext, tileRect);
+    PaintDirectly(rosenContext, offset);
+
+    auto rsPicture = rosenContext.FinishRecordingAsPicture();
+    if (!rsPicture) {
+        return false;
+    }
+
+    RSRect rect = RSRect(tileRect.Left(), tileRect.Top(), tileRect.Right(), tileRect.Bottom());
+    auto shaderEffect = RSRecordingShaderEffect::CreatePictureShader(*rsPicture,
+        RSTileMode::REPEAT, RSTileMode::REPEAT, RSFilterMode::NEAREST, matrix4, rect);
+
+    if (rsPen != nullptr) {
+        rsPen->SetShaderEffect(shaderEffect);
+    }
+    if (rsBrush != nullptr) {
+        rsBrush->SetShaderEffect(shaderEffect);
+    }
+    return true;
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 bool RosenRenderSvgPattern::FitAttribute(const Rect& paintRect, Rect& tileRect, SkMatrix& skMatrix4)
+#else
+bool RosenRenderSvgPattern::FitAttribute(const Rect& paintRect, Rect& tileRect, RSMatrix& matrix4)
+#endif
 {
     if (LessOrEqual(width_.Value(), 0.0) || LessOrEqual(height_.Value(), 0.0)) {
         return false;
@@ -89,7 +128,11 @@ bool RosenRenderSvgPattern::FitAttribute(const Rect& paintRect, Rect& tileRect, 
     tx_ = tileRect.Width() * 0.5 - (viewBox_.Width() * 0.5 + viewBox_.Left()) * scale_;
     ty_ = tileRect.Height() * 0.5 - (viewBox_.Height() * 0.5 + viewBox_.Top()) * scale_;
 
+#ifndef USE_ROSEN_DRAWING
     skMatrix4 = RosenSvgPainter::ToSkMatrix(GetTransform(tileRect));
+#else
+    matrix4 = RosenSvgPainter::ToDrawingMatrix(GetTransform(tileRect));
+#endif
     return true;
 }
 
@@ -122,7 +165,11 @@ void RosenRenderSvgPattern::FitRenderContext(RosenRenderContext& context, const 
         LOGE("Paint canvas is null");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     canvas->scale(SkDoubleToScalar(scale_), SkDoubleToScalar(scale_));
+#else
+    canvas->Scale(SkDoubleToScalar(scale_), SkDoubleToScalar(scale_));
+#endif
 }
 
 void RosenRenderSvgPattern::ResetAttrOffset()

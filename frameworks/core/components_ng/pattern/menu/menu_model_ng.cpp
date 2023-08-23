@@ -57,4 +57,38 @@ void MenuModelNG::SetFontColor(const std::optional<Color>& color)
         ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
     }
 }
+
+void MenuModelNG::SetBorderRadius(const Dimension& radius)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = radius;
+    borderRadius.radiusTopRight = radius;
+    borderRadius.radiusBottomLeft = radius;
+    borderRadius.radiusBottomRight = radius;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius);
+}
+
+void MenuModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+    const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+    const std::optional<Dimension>& radiusBottomRight)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = radiusTopLeft;
+    borderRadius.radiusTopRight = radiusTopRight;
+    borderRadius.radiusBottomLeft = radiusBottomLeft;
+    borderRadius.radiusBottomRight = radiusBottomRight;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius);
+}
+
+void MenuModelNG::SetWidth(const Dimension& width)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width);
+}
+
+void MenuModelNG::SetFontFamily(const std::vector<std::string> &families)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families);
+}
 } // namespace OHOS::Ace::NG

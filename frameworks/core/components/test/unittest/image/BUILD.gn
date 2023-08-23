@@ -73,6 +73,7 @@ ohos_unittest("RenderImageTest") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/focus_animation_manager.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
@@ -206,7 +207,7 @@ ohos_unittest("RenderImageTest") {
       "resmgr:resourcemanager",
     ]
   } else {
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   }
   external_deps += [ "c_utils:utils" ]
   part_name = ace_engine_part

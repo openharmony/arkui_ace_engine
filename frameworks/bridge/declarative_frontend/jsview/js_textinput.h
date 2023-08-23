@@ -41,12 +41,18 @@ public:
     static void Destructor(JSTextInputController* scroller);
     void CaretPosition(int32_t caretPosition);
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
+    void StopEditing();
     void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controllerWeak_ = controller;
     }
 
+    void GetTextContentRect(const JSCallbackInfo& info);
+    void GetTextContentLinesNum(const JSCallbackInfo& info);
+
 private:
+    JSRef<JSObject> CreateRectangle(const Rect& info);
+
     WeakPtr<TextFieldControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSTextInputController);
 };

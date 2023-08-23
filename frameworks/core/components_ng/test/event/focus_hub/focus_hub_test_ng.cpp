@@ -1356,7 +1356,7 @@ HWTEST_F(FocusHubTestNg, FocusHubGoToNextFocusLinear001, TestSize.Level1)
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
 
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
-    EXPECT_FALSE(focusHub->GoToNextFocusLinear(true));
+    EXPECT_TRUE(focusHub->GoToNextFocusLinear(FocusStep::TAB));
 }
 
 /**

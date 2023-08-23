@@ -429,8 +429,8 @@ HWTEST_F(ToggleTestNg, TogglePatternTest009, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = switchFrameNode->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(switchFrameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(switchFrameNode, geometryNode, layoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
 
     /**
@@ -551,8 +551,8 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0010, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = switchFrameNode->GetLayoutProperty();
     EXPECT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(switchFrameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(switchFrameNode, geometryNode, layoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
     auto switchLayoutAlgorithm = AceType::MakeRefPtr<SwitchLayoutAlgorithm>();
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
@@ -766,7 +766,8 @@ HWTEST_F(ToggleTestNg, ToggleLayoutTest001, TestSize.Level1)
     EXPECT_NE(switchPattern, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(switchFrameNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(switchFrameNode, geometryNode, switchFrameNode->GetLayoutProperty());
     auto switchLayoutAlgorithm = AceType::DynamicCast<SwitchLayoutAlgorithm>(switchPattern->CreateLayoutAlgorithm());
     EXPECT_NE(switchLayoutAlgorithm, nullptr);
     layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm));
@@ -992,8 +993,8 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0017, TestSize.Level1)
     auto layoutProperty = switchFrameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
 
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(switchFrameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(switchFrameNode, geometryNode, layoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto switchLayoutAlgorithm = AceType::MakeRefPtr<SwitchLayoutAlgorithm>();
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
@@ -1078,17 +1079,17 @@ HWTEST_F(ToggleTestNg, TogglePatternTest0015, TestSize.Level1)
      * test event.action != KeyAction::DOWN
      */
     KeyEvent keyEventOne(KeyCode::KEY_A, KeyAction::UP);
-    eventHub->onKeyEventInternal_(keyEventOne);
+    eventHub->ProcessOnKeyEventInternal(keyEventOne);
     /**
      * test event.action == KeyAction::DOWN and event.code == KeyCode::KEY_ENTER
      */
     KeyEvent keyEventTwo(KeyCode::KEY_A, KeyAction::DOWN);
-    eventHub->onKeyEventInternal_(keyEventTwo);
+    eventHub->ProcessOnKeyEventInternal(keyEventTwo);
     /**
      * test event.action == KeyAction::DOWN and event.code != KeyCode::KEY_ENTER
      */
     KeyEvent keyEventThr(KeyCode::KEY_ENTER, KeyAction::DOWN);
-    eventHub->onKeyEventInternal_(keyEventThr);
+    eventHub->ProcessOnKeyEventInternal(keyEventThr);
 }
 
 /**

@@ -36,6 +36,10 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     }
     return image_;
 }
+bool ImagePattern::BetweenSelectedPosition(const Offset& globalOffset)
+{
+    return false;
+}
 void ImagePattern::OnModifyDone() {}
 void ImagePattern::OnAttachToFrameNode() {}
 
@@ -49,4 +53,5 @@ void ImagePattern::OnVisibleChange(bool isVisible) {}
 
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void ImagePattern::DumpInfo() {}
+void ImagePattern::OnLanguageConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG

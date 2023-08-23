@@ -15,7 +15,6 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
-
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
@@ -99,8 +98,9 @@ public:
         return loop_;
     }
 
-    bool IsFullScreen() const;
+    virtual bool IsFullScreen();
 
+    void OnColorConfigurationUpdate() override;
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
@@ -149,6 +149,9 @@ public:
     void OnAreaChangedInner() override;
 
     void UpdateMediaPlayer();
+
+    // It is used to init mediaplayer on background.
+    void UpdateMediaPlayerOnBg();
     void ResetMediaPlayer();
 
     void EnableDrag();
@@ -207,6 +210,13 @@ public:
 
     void OnResolutionChange() const;
 
+    void ResetLastBoundsRect()
+    {
+        lastBoundsRect_.SetRect(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+
+    RefPtr<VideoPattern> GetTargetVideoPattern();
+
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
     void RegisterMediaPlayerEvent();
@@ -256,7 +266,7 @@ private:
     void UpdateVideoProperty();
     
     static RefPtr<FrameNode> CreateSVG();
-    static RefPtr<FrameNode> CreateText(uint32_t time);
+    RefPtr<FrameNode> CreateText(uint32_t time);
     RefPtr<FrameNode> CreateSlider();
     void ChangePlayButtonTag();
     void ChangePlayButtonTag(RefPtr<FrameNode>& playBtn);
@@ -280,6 +290,7 @@ private:
     }
 
     RefPtr<VideoControllerV2> videoControllerV2_;
+    RefPtr<FrameNode> controlBar_;
 
     GestureEventFunc playBtnCallBack_;
     GestureEventFunc pauseBtnCallBack_;

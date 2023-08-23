@@ -14,50 +14,62 @@
  */
 
 #include "core/components_ng/animation/geometry_transition.h"
+#include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
-    void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
-    void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
-    void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
-    void GeometryTransition::OnReSync() {}
+GeometryTransition::GeometryTransition(const std::string& id, const WeakPtr<FrameNode>& frameNode,
+    bool followWithoutTransition) : id_(id), inNode_(frameNode), followWithoutTransition_(followWithoutTransition)
+{
+    layoutProperty_ = nullptr;
+}
 
-    bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
-    {
-        return false;
-    }
+void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
+void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
+void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
+void GeometryTransition::OnReSync() {}
 
-    bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value)
-    {
-        return false;
-    }
+bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
+{
+    return false;
+}
 
-    bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
-    {
-        return false;
-    }
+bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction)
+{
+    return false;
+}
 
-    bool GeometryTransition::IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const
-    {
-        return false;
-    }
+bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value)
+{
+    return false;
+}
 
-    bool GeometryTransition::IsRunning() const
-    {
-        return false;
-    }
+bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
+{
+    return false;
+}
 
-    bool GeometryTransition::IsInAndOutEmpty() const
-    {
-        return true;
-    }
+bool GeometryTransition::IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const
+{
+    return false;
+}
 
-    bool GeometryTransition::IsInAndOutValid() const
-    {
-        return false;
-    }
+bool GeometryTransition::IsRunning() const
+{
+    return false;
+}
 
-    std::string GeometryTransition::ToString() const
-    {
-        return std::string("");
-    }
+bool GeometryTransition::IsInAndOutEmpty() const
+{
+    return true;
+}
+
+bool GeometryTransition::IsInAndOutValid() const
+{
+    return false;
+}
+
+std::string GeometryTransition::ToString() const
+{
+    return std::string("");
+}
 } // namespace OHOS::Ace::NG

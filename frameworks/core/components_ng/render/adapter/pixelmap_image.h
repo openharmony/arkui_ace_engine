@@ -41,8 +41,11 @@ public:
 
     void Cache(const std::string& key) override;
 
+    RefPtr<CanvasImage> Clone() override;
+
     void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
+    void DrawRect(RSCanvas& canvas, const RSRect& dstRect);
 
     static RefPtr<CanvasImage> QueryFromCache(const std::string& key);
 

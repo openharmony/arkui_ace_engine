@@ -21,28 +21,34 @@ ohos_unittest("radio_test_ng") {
     # inner
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
+
+    # animation
+    "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/base/utils/string_expression.cpp",
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/base/utils/time_util.cpp",
+    "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
+    "$ace_root/frameworks/core/animation/cubic_curve.cpp",
+    "$ace_root/frameworks/core/animation/curves.cpp",
+    "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/property/safe_area_insets.cpp",
+    "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
-
-    # animation
-    "$ace_root/frameworks/base/utils/base_id.cpp",
-    "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
-    "$ace_root/frameworks/core/animation/cubic_curve.cpp",
-    "$ace_root/frameworks/core/animation/curves.cpp",
-    "$ace_root/frameworks/core/animation/scheduler.cpp",
 
     # components_ng_base
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
     "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
@@ -52,6 +58,9 @@ ohos_unittest("radio_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
+
+    # components_ng_manager
+    "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
 
     # components_ng_property
     "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
@@ -89,9 +98,11 @@ ohos_unittest("radio_test_ng") {
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/multi_fingers_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/parallel_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/gestures/recognizers/recognizer_group.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_scrollable_event.cpp",
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_ressched_report.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
@@ -104,6 +115,7 @@ ohos_unittest("radio_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_accessibility_property.cpp",

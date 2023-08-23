@@ -35,4 +35,9 @@ std::optional<SizeF> CustomPaintLayoutAlgorithm::MeasureContent(
     pattern->SetCanvasSize(canvasSize);
     return canvasSize;
 }
+
+void CustomPaintLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    BoxLayoutAlgorithm::Layout(layoutWrapper);
+}
 } // namespace OHOS::Ace::NG

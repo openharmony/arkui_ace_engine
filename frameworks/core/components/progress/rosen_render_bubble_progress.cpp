@@ -15,7 +15,11 @@
 
 #include "core/components/progress/rosen_render_bubble_progress.h"
 
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
+#else
+#include "core/components_ng/render/drawing.h"
+#endif
 
 #include "base/geometry/offset.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -33,9 +37,15 @@ void RosenRenderBubbleProgress::Paint(RenderContext& context, const Offset& offs
         LOGE("canvas is null ptr");
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     SkPaint subCirclePaint;
     subCirclePaint.setAntiAlias(true);
     subCirclePaint.setColor(Color(0xFF8A8A8A).GetValue());
+#else
+    RSBrush subCircleBrush;
+    subCircleBrush.SetAntiAlias(true);
+    subCircleBrush.SetColor(Color(0xFF8A8A8A).GetValue());
+#endif
 
     int32_t index = 0;
     static const int32_t threshold = 7;
@@ -48,6 +58,7 @@ void RosenRenderBubbleProgress::Paint(RenderContext& context, const Offset& offs
     int32_t darkToLightIndex =
         lightToDarkIndex + 3 > threshold ? (lightToDarkIndex + 3) % maxBubbleCount : lightToDarkIndex + 3;
     for (auto& center : subCircleCenter_) {
+#ifndef USE_ROSEN_DRAWING
         if (index == lightToDarkIndex) {
             subCirclePaint.setColor(lightToDark_.GetValue());
         } else if (index == darkToLightIndex) {
@@ -59,6 +70,20 @@ void RosenRenderBubbleProgress::Paint(RenderContext& context, const Offset& offs
         }
         canvas->drawCircle(
             (offset + center).GetX(), (offset + center).GetY(), maxCircleRadius_, subCirclePaint);
+#else
+        if (index == lightToDarkIndex) {
+            subCircleBrush.SetColor(lightToDark_.GetValue());
+        } else if (index == darkToLightIndex) {
+            subCircleBrush.SetColor(darkToLight_.GetValue());
+        } else if (index == darkIndex_1 || index == darkIndex_2) {
+            subCircleBrush.SetColor(DARK_COLOR.GetValue());
+        } else {
+            subCircleBrush.SetColor(LIGHT_COLOR.GetValue());
+        }
+        canvas->AttachBrush(subCircleBrush);
+        canvas->DrawCircle(RSPoint((offset + center).GetX(), (offset + center).GetY()), maxCircleRadius_);
+        canvas->DetachBrush();
+#endif
         index++;
     }
 }

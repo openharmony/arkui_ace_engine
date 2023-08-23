@@ -20,6 +20,8 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkPaint.h"
 #include "include/effects/SkGradientShader.h"
+#else
+#include "core/components_ng/render/drawing.h"
 #endif
 
 #include "core/pipeline/base/rosen_render_context.h"
@@ -28,7 +30,9 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr double COLOR_STOP = 0.4;
+#ifndef USE_ROSEN_DRAWING
 constexpr int32_t COLOR_NUM = 3;
+#endif
 
 void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
 {
@@ -86,9 +90,7 @@ void DrawArc(RenderContext& context, const RenderRingInfo& trackInfo)
         std::vector<RSColorQuad> vecColor(colors, colors + sizeof(colors) / sizeof(RSColorQuad));
         std::vector<RSScalar> vecPos(position, position + sizeof(position) / sizeof(RSScalar));
 
-        pen.SetShaderEffect(RSShaderEffect::CreateSweepGradientByMatrix(
-            RSPoint(trackInfo.center.GetX(), trackInfo.center.GetY()), vecColor, vecPos,
-            RSTileMode::CLAMP, trackInfo.startDegree, trackInfo.startDegree + 360, true, nullptr));
+        LOGE("Drawing is not supported");
     } else {
         pen.SetColor(trackInfo.color.GetValue());
     }

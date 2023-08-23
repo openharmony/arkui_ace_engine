@@ -71,6 +71,7 @@ ohos_fuzztest("ImageApiFuzzTest") {
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/frontend.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
 
@@ -121,7 +122,7 @@ ohos_fuzztest("ImageApiFuzzTest") {
 
   if (is_ohos_standard_system) {
     external_deps = [
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
       "init:libbegetutil",
     ]
     deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]

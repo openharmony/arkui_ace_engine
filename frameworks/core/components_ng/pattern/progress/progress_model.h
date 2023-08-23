@@ -54,6 +54,9 @@ public:
     virtual void SetShowText(bool value) = 0;
     virtual void SetRingSweepingEffect(bool value) = 0;
     virtual void SetLinearSweepingEffect(bool value) = 0;
+    virtual void SetSmoothEffect(bool value) = 0;
+    virtual void SetStrokeRadius(const Dimension& value) {}
+    virtual void ResetStrokeRadius() {}
 
 private:
     static std::unique_ptr<ProgressModel> instance_;

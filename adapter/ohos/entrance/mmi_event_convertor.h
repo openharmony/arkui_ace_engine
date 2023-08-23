@@ -73,7 +73,11 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 void CalculatePointerEvent(
     const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale);
 
-void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events);
+void CalculateWindowCoordinate(
+    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale);
+
+void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    MouseEvent& events, bool isScenceBoardWindow);
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event);
 

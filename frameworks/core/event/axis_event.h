@@ -59,6 +59,8 @@ struct AxisEvent final {
     int32_t id = 0;
     float x = 0.0;
     float y = 0.0;
+    float screenX = 0.0;
+    float screenY = 0.0;
     double verticalAxis = 0.0;
     double horizontalAxis = 0.0;
     double pinchAxisScale = 0.0;
@@ -75,6 +77,8 @@ struct AxisEvent final {
             return { .id = id,
                 .x = x,
                 .y = y,
+                .screenX = screenX,
+                .screenY = screenY,
                 .verticalAxis = verticalAxis,
                 .horizontalAxis = horizontalAxis,
                 .pinchAxisScale = pinchAxisScale,
@@ -88,6 +92,8 @@ struct AxisEvent final {
         return { .id = id,
             .x = x / scale,
             .y = y / scale,
+            .screenX = screenX / scale,
+            .screenY = screenY / scale,
             .verticalAxis = verticalAxis,
             .horizontalAxis = horizontalAxis,
             .pinchAxisScale = pinchAxisScale,
@@ -102,6 +108,11 @@ struct AxisEvent final {
     Offset GetOffset() const
     {
         return Offset(x, y);
+    }
+
+    Offset GetScreenOffset() const
+    {
+        return Offset(screenX, screenY);
     }
 
     AxisDirection GetDirection() const

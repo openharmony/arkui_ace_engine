@@ -407,7 +407,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     // preload uiContext
-    uint8_t* tsCodeStart = (uint8_t*)_binary_jsUIContext_abc_start;
+    uint8_t* tsCodeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
     int32_t tsCodeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
     bool jsUIContextResult = arkRuntime->EvaluateJsCode(tsCodeStart, tsCodeLength);
     if (!jsUIContextResult) {
@@ -894,7 +894,6 @@ void JsiDeclarativeEngine::Destroy()
 #if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
 #endif
-        nativeEngine_->DeleteEngine();
         delete nativeEngine_;
         nativeEngine_ = nullptr;
     }
@@ -1850,6 +1849,10 @@ void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName
     }
     switch (state) {
         case Frontend::State::ON_SHOW:
+            if (isFirstCallShow_) {
+                isFirstCallShow_ = false;
+                break;
+            }
             CallAppFunc("onShow");
             break;
         case Frontend::State::ON_HIDE:

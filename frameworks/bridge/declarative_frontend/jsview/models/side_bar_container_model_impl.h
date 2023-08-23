@@ -38,9 +38,12 @@ public:
     void SetControlButtonHeight(const Dimension& height) override;
     void SetControlButtonLeft(const Dimension& left) override;
     void SetControlButtonTop(const Dimension& top) override;
-    void SetControlButtonShowIconStr(const std::string& showIconStr) override;
-    void SetControlButtonHiddenIconStr(const std::string& hiddenIconStr) override;
-    void SetControlButtonSwitchingIconStr(const std::string& switchingIconStr) override;
+    void SetControlButtonShowIconInfo(
+        const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
+    void SetControlButtonHiddenIconInfo(
+        const std::string& hiddenIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
+    void SetControlButtonSwitchingIconInfo(
+        const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;
     void SetOnChange(std::function<void(const bool)>&& onChange) override;
     void SetDividerStrokeWidth(const Dimension& strokeWidth) override;
     void SetDividerColor(const Color& color) override;
@@ -52,8 +55,6 @@ public:
 private:
     void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode) override;
     void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode) override;
-    void InitSideBarContentEvent(const RefPtr<NG::FrameNode>& parentNode,
-        const RefPtr<NG::FrameNode>& sideBarContentFrameNode) override;
     void MarkNeedInitRealSideBarWidth() override;
 };
 } // namespace OHOS::Ace::Framework

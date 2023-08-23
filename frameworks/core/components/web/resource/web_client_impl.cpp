@@ -580,6 +580,15 @@ void WebClientImpl::OnPermissionRequest(std::shared_ptr<NWeb::NWebAccessRequest>
     delegate->OnPermissionRequestPrompt(request);
 }
 
+void WebClientImpl::OnScreenCaptureRequest(std::shared_ptr<NWeb::NWebScreenCaptureAccessRequest> request)
+{
+    LOGI("OnScreenCaptureRequest");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnScreenCaptureRequest(request);
+}
+
 bool WebClientImpl::RunContextMenu(
     std::shared_ptr<NWeb::NWebContextMenuParams> params,
     std::shared_ptr<NWeb::NWebContextMenuCallback> callback)
@@ -668,6 +677,24 @@ bool WebClientImpl::OnDragAndDropData(const void* data, size_t len, const NWeb::
         return false;
     }
     return delegate->OnDragAndDropData(data, len, opt.width, opt.height);
+}
+
+bool WebClientImpl::OnDragAndDropDataUdmf(std::shared_ptr<NWeb::NWebDragData> dragData)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    return delegate->OnDragAndDropDataUdmf(dragData);
+}
+
+void WebClientImpl::UpdateDragCursor(NWeb::NWebDragData::DragOperation op)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->UpdateDragCursor(op);
 }
 
 void WebClientImpl::OnWindowNewByJS(
@@ -772,7 +799,7 @@ void WebClientImpl::OnAudioStateChanged(bool playing)
     delegate->OnAudioStateChanged(playing);
 }
 
-void WebClientImpl::OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs)
+void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs)
 {
     LOGI("OnFirstContentfulPaint");
     ContainerScope scope(instanceId_);
@@ -822,5 +849,13 @@ void WebClientImpl::OnDateTimeChooserClose()
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnDateTimeChooserClose();
+}
+
+void WebClientImpl::OnOverScroll(float xOffset, float yOffset)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnOverScroll(xOffset, yOffset);
 }
 } // namespace OHOS::Ace

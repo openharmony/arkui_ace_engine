@@ -61,11 +61,19 @@ void ModifierAdapter::RemoveModifier(int32_t modifierId)
 void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 {
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
+#else
+    CHECK_NULL_VOID_NOLOG(context.canvas);
+#endif
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID_NOLOG(modifier);
+#ifndef USE_ROSEN_DRAWING
     DrawingContext context_ = { canvas, context.width, context.height };
+#else
+    DrawingContext context_ = { *context.canvas, context.width, context.height };
+#endif
     modifier->onDraw(context_);
 }
 
@@ -98,7 +106,9 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_PROP(property, PropertyFloat, float);
     CONVERT_PROP(property, PropertyString, std::string);
     CONVERT_PROP(property, PropertyColor, Color);
+    CONVERT_PROP(property, PropertyRectF, RectF);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyOffsetF, OffsetF);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyUint8, uint8_t);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyFloat, float);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyColor, LinearColor);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorColor, GradientArithmetic);
@@ -142,11 +152,19 @@ void ContentModifierAdapter::AttachProperties()
 void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
 {
     // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
+#ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
+#else
+    CHECK_NULL_VOID_NOLOG(context.canvas);
+#endif
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID_NOLOG(modifier);
+#ifndef USE_ROSEN_DRAWING
     DrawingContext context_ = { canvas, context.width, context.height };
+#else
+    DrawingContext context_ = { *context.canvas, context.width, context.height };
+#endif
     modifier->onDraw(context_);
 }
 

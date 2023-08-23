@@ -47,6 +47,7 @@ const float DEFAULT_SPLIT_HEIGHT = 2.0f;
 const int32_t FIVE_ITEM_SIZE = 5;
 const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
+constexpr int32_t PLATFORM_VERSION_10 = 10;
 } // namespace
 
 class LinearSplitPatternTestNg : public testing::Test {
@@ -126,13 +127,14 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
     frameNode->SetGeometryNode(geometryNode);
     auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
     EXPECT_NE(linearSplitLayoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, linearSplitLayoutProperty);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, linearSplitLayoutProperty);
     EXPECT_NE(layoutWrapper, nullptr);
     layoutWrapper->skipMeasureContent_ = false;
     std::vector<float> dragSplitOffset;
-    RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
-        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::COLUMN_SPLIT, dragSplitOffset, false);
+    std::vector<float> childrenDragPos;
+    RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm = AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(
+            SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
 
     /**
      * @tc.steps: step3. call linearSplitPattern OnDirtyLayoutWrapperSwap function, compare result.
@@ -140,7 +142,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
      */
 
     /**
-     *     case 1: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     *     case 1: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = true;
      */
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, true);
@@ -149,7 +151,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest001, TestSize.Level1)
     EXPECT_FALSE(firstCase);
 
     /**
-     *     case 2: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
+     *     case 2: LayoutWrapperNode::SkipMeasureContent = false , skipMeasure = false;
      */
 
     layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
@@ -218,7 +220,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest003, TestSize.Level1)
      * @tc.steps: step3. call linearSplitPattern OnDirtyLayoutWrapperSwap function, compare result.
      * @tc.expected: the properties of linearSplitPattern are updated rightly
      */
-    RefPtr<LayoutWrapper> linearLayoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    RefPtr<LayoutWrapperNode> linearLayoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     linearSplitPattern->OnDirtyLayoutWrapperSwap(linearLayoutWrapper, true, true);
     EXPECT_EQ(linearSplitPattern->splitLength_, 0.0f);
     EXPECT_EQ(linearSplitPattern->isOverParent_, false);
@@ -330,11 +332,12 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest006, TestSize.Level1)
         frameNode->SetGeometryNode(geometryNode);
         auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
         ASSERT_NE(linearSplitLayoutProperty, nullptr);
-        LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, linearSplitLayoutProperty);
+        LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
         ASSERT_NE(layoutWrapper, nullptr);
         std::vector<float> dragSplitOffset = { 0.0f, 2.0f };
+        std::vector<float> childrenDragPos;
         RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
-            AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType[turn], dragSplitOffset, false);
+            AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(splitType[turn], dragSplitOffset, childrenDragPos, false);
         RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
             AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
         layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
@@ -362,6 +365,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
      */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
     model.SetResizeable(SplitType::COLUMN_SPLIT, true);
@@ -377,11 +381,12 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     frameNode->SetGeometryNode(geometryNode);
     auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
     ASSERT_NE(linearSplitLayoutProperty, nullptr);
-    LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, linearSplitLayoutProperty);
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     std::vector<float> dragSplitOffset;
-    RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
-        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::COLUMN_SPLIT, dragSplitOffset, false);
+    std::vector<float> childrenDragPos;
+    RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm = AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(
+            SplitType::COLUMN_SPLIT, dragSplitOffset, childrenDragPos, false);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
@@ -424,8 +429,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, i + 1, AceType::MakeRefPtr<Pattern>());
         RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
         itemGeometryNode->Reset();
-        RefPtr<LayoutWrapper> itemLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
+        RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
         itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
         itemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(RK356_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
@@ -446,7 +451,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, RK356_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 
-    auto verticalRemaining = RK356_HEIGHT - SMALL_ITEM_HEIGHT * FIVE_ITEM_SIZE;
+    auto verticalRemaining = RK356_HEIGHT - SMALL_ITEM_HEIGHT * FIVE_ITEM_SIZE
+                             - DEFAULT_SPLIT_HEIGHT * (FIVE_ITEM_SIZE - 1);
     for (int32_t i = 0; i < FIVE_ITEM_SIZE; i++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
@@ -455,6 +461,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         EXPECT_EQ(childOffset, OffsetF(ZERO, verticalRemaining / 2 + i * (SMALL_ITEM_HEIGHT + DEFAULT_SPLIT_HEIGHT)));
     }
     linearSplitPattern->splitRects_ = linearLayoutAlgorithm->GetSplitRects();
+    linearSplitPattern->childrenDragPos_ = linearLayoutAlgorithm->GetChildrenDragPos();
+    linearSplitPattern->childrenConstrains_ = linearLayoutAlgorithm->GetChildrenConstrains();
 
     /**
      * @tc.steps: step5. Construct GestureEvent and Call HandlePanEvent function.
@@ -480,10 +488,9 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step7. Update GestureEvent info and Start dragging.
      */
-    Offset globalLocation2(10, 543);
-    info.SetGlobalLocation(globalLocation2);
+    Offset localLocation2(10, 541);
+    info.SetLocalLocation(localLocation2);
     info.SetOffsetY(2);
-    linearSplitPattern->dragSplitOffset_ = { ZERO, ZERO, ZERO, ZERO, ZERO };
 
     /**
      * @tc.steps: step8. Set IsOverParent and Call HandlePanEvent function.
@@ -508,7 +515,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         EXPECT_FALSE(linearSplitPattern->isDraged_);
         EXPECT_TRUE(linearSplitPattern->isDragedMoving_);
         MouseInfo mouseInfo2;
-        mouseInfo2.SetGlobalLocation(globalLocation2);
+        mouseInfo2.SetLocalLocation(localLocation2);
         linearSplitPattern->HandleMouseEvent(mouseInfo2);
         EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
         mouseInfo2.SetButton(MouseButton::LEFT_BUTTON);
@@ -528,7 +535,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
         info.SetOffsetY(-3);
         linearSplitPattern->HandlePanUpdate(info);
-        EXPECT_EQ(linearSplitPattern->dragSplitOffset_[1], 0.0f);
+        EXPECT_EQ(linearSplitPattern->childrenDragPos_[1], 491.0f);
 
         /**
          * @tc.steps: step11. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
@@ -537,7 +544,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest007, TestSize.Level1)
         linearSplitPattern->HandlePanEnd(info);
         EXPECT_FALSE(linearSplitPattern->isDraged_);
         MouseInfo mouseInfo2;
-        mouseInfo2.SetGlobalLocation(globalLocation2);
+        mouseInfo2.SetLocalLocation(localLocation2);
         linearSplitPattern->HandleMouseEvent(mouseInfo2);
         EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
     }
@@ -552,6 +559,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. Create rowSplit and initialize related properties.
      */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
     LinearSplitModelNG model;
     model.Create(SplitType::ROW_SPLIT);
     model.SetResizeable(SplitType::ROW_SPLIT, true);
@@ -567,11 +575,12 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     frameNode->SetGeometryNode(geometryNode);
     auto linearSplitLayoutProperty = frameNode->GetLayoutProperty<LinearSplitLayoutProperty>();
     ASSERT_NE(linearSplitLayoutProperty, nullptr);
-    LayoutWrapper* layoutWrapper = new LayoutWrapper(frameNode, geometryNode, linearSplitLayoutProperty);
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, linearSplitLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     std::vector<float> dragSplitOffset;
+    std::vector<float> childrenDragPos;
     RefPtr<LinearSplitLayoutAlgorithm> linearLayoutAlgorithm =
-        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::ROW_SPLIT, dragSplitOffset, false);
+        AceType::MakeRefPtr<LinearSplitLayoutAlgorithm>(SplitType::ROW_SPLIT, dragSplitOffset, childrenDragPos, false);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(linearLayoutAlgorithm, false);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
@@ -614,8 +623,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         auto itemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, i + 1, AceType::MakeRefPtr<Pattern>());
         RefPtr<GeometryNode> itemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
         itemGeometryNode->Reset();
-        RefPtr<LayoutWrapper> itemLayoutWrapper =
-            AceType::MakeRefPtr<LayoutWrapper>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
+        RefPtr<LayoutWrapperNode> itemLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(itemFrameNode, itemGeometryNode, itemFrameNode->GetLayoutProperty());
         itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
         itemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(COLUMN_HEIGHT)));
@@ -636,7 +645,8 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(RK356_WIDTH, COLUMN_HEIGHT));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
 
-    auto horizontalRemaining = RK356_WIDTH - FIVE_ITEM_SIZE * SMALL_ITEM_WIDTH;
+    auto horizontalRemaining = RK356_WIDTH - FIVE_ITEM_SIZE * SMALL_ITEM_WIDTH
+                               - DEFAULT_SPLIT_HEIGHT * (FIVE_ITEM_SIZE - 1);
     for (int32_t i = 0; i < FIVE_ITEM_SIZE; i++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(i);
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
@@ -646,14 +656,15 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
     }
 
     linearSplitPattern->splitRects_ = linearLayoutAlgorithm->GetSplitRects();
+    linearSplitPattern->childrenDragPos_ = linearLayoutAlgorithm->GetChildrenDragPos();
+    linearSplitPattern->childrenConstrains_ = linearLayoutAlgorithm->GetChildrenConstrains();
     /**
      * @tc.steps: step5. Construct GestureEvent info and Start dragging.
      */
     GestureEvent info;
-    Offset globalLocation(335, 10);
-    info.SetGlobalLocation(globalLocation);
+    Offset localLocation(333, 10);
+    info.SetLocalLocation(localLocation);
     info.SetOffsetX(2);
-    linearSplitPattern->dragSplitOffset_ = { ZERO, ZERO, ZERO, ZERO, ZERO };
     /**
      * @tc.steps: step6. Set IsOverParent and Call HandlePanEvent function.
      * @tc.expected: PanStart and PanUpdate return normally when IsOverParent is true
@@ -677,7 +688,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         EXPECT_FALSE(linearSplitPattern->isDraged_);
         EXPECT_TRUE(linearSplitPattern->isDragedMoving_);
         MouseInfo mouseInfo2;
-        mouseInfo2.SetGlobalLocation(globalLocation);
+        mouseInfo2.SetLocalLocation(localLocation);
         linearSplitPattern->HandleMouseEvent(mouseInfo2);
         EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
         mouseInfo2.SetButton(MouseButton::LEFT_BUTTON);
@@ -697,7 +708,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         EXPECT_EQ(linearSplitPattern->dragedSplitIndex_, 1);
         info.SetOffsetX(-3);
         linearSplitPattern->HandlePanUpdate(info);
-        EXPECT_EQ(linearSplitPattern->dragSplitOffset_[1], 0.0f);
+        EXPECT_EQ(linearSplitPattern->childrenDragPos_[1], 283.0f);
 
         /**
          * @tc.steps: step9. Stop Dragging and Call HandlePanEnd, HandleMouseEvent.
@@ -706,7 +717,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest008, TestSize.Level1)
         linearSplitPattern->HandlePanEnd(info);
         EXPECT_FALSE(linearSplitPattern->isDraged_);
         MouseInfo mouseInfo2;
-        mouseInfo2.SetGlobalLocation(globalLocation);
+        mouseInfo2.SetLocalLocation(localLocation);
         linearSplitPattern->HandleMouseEvent(mouseInfo2);
         EXPECT_EQ(linearSplitPattern->mouseDragedSplitIndex_, 1);
     }
@@ -731,6 +742,7 @@ HWTEST_F(LinearSplitPatternTestNg, LinearSplitPatternTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. Create columnSplit and initialize related properties.
      */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_10);
     LinearSplitModelNG model;
     model.Create(SplitType::COLUMN_SPLIT);
     model.SetResizeable(SplitType::COLUMN_SPLIT, true);

@@ -36,6 +36,9 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
 
+    auto layoutProps = menuItem->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
+    layoutProps->UpdateAlignment(Alignment::CENTER_LEFT);
     // set border radius
     auto renderContext = menuItem->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -168,6 +171,11 @@ void MenuItemModelNG::SetFontColor(const std::optional<Color>& color)
     }
 }
 
+void MenuItemModelNG::SetFontFamily(const std::vector<std::string> &families)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontFamily, families);
+}
+
 void MenuItemModelNG::SetLabelFontSize(const Dimension& fontSize)
 {
     if (fontSize.IsValid()) {
@@ -195,6 +203,11 @@ void MenuItemModelNG::SetLabelFontColor(const std::optional<Color>& color)
     } else {
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor);
     }
+}
+
+void MenuItemModelNG::SetLabelFontFamily(const std::vector<std::string> &families)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontFamily, families);
 }
 
 void MenuItemModelNG::SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent)

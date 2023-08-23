@@ -14,9 +14,11 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_canvas_renderer.h"
+#include <cstdint>
 
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -572,6 +574,11 @@ void JSCanvasRenderer::ParseFillGradient(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ParseFillPattern(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
+            "and the first argument must be a object.");
+        return;
+    }
     auto* jSCanvasPattern = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasPattern>();
     CHECK_NULL_VOID(jSCanvasPattern);
     int32_t id = jSCanvasPattern->GetId();
@@ -605,6 +612,10 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
         CanvasRendererModel::GetInstance()->SetFillColor(baseInfo, color, true);
         return;
     }
+    if (!info[0]->IsObject()) {
+        LOGE("The arg is not Object.");
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeValue = obj->GetProperty("__type");
     std::string type = "";
@@ -624,6 +635,11 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ParseStorkeGradient(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
+            "and the first argument must be a object.");
+        return;
+    }
     auto* jSCanvasGradient = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasGradient>();
     if (!jSCanvasGradient) {
         return;
@@ -643,6 +659,11 @@ void JSCanvasRenderer::ParseStorkeGradient(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ParseStrokePattern(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The argument is wrong, it is supposed to have at least 1 arguments"
+            "and the first argument must be a object.");
+        return;
+    }
     auto* jSCanvasPattern = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasPattern>();
     CHECK_NULL_VOID(jSCanvasPattern);
     int32_t id = jSCanvasPattern->GetId();
@@ -673,6 +694,10 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
             return;
         }
         CanvasRendererModel::GetInstance()->SetStrokeColor(baseInfo, color, true);
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("The arg is not Object.");
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -859,23 +884,15 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
         JSViewAbstract::ParseJsDouble(heightValue, height);
     }
 
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return;
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(width * height * 4);
+    // return the black image
+    auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
+    for (uint32_t idx = 0; idx < width * height; ++idx) {
+        buffer[idx] = 0xffffffff;
     }
 
-    JSRef<JSArray> colorArray = JSRef<JSArray>::New();
-    uint32_t count = 0;
-    for (auto i = 0; i < width; i++) {
-        for (auto j = 0; j < height; j++) {
-            colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(255)));
-            colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(255)));
-            colorArray->SetValueAt(count + 2, JSRef<JSVal>::Make(ToJSValue(255)));
-            colorArray->SetValueAt(count + 3, JSRef<JSVal>::Make(ToJSValue(255)));
-            count += 4;
-        }
-    }
+    JSRef<JSUint8ClampedArray> colorArray =
+        JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
 
     auto retObj = JSRef<JSObject>::New();
     retObj->SetProperty("width", width);
@@ -899,25 +916,15 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     ParseJsInt(heightValue, height);
 
     ImageData imageData;
-    std::vector<uint32_t> array;
+    std::vector<uint8_t> array;
     ParseImageData(info, imageData, array);
 
-    int64_t num = 0;
-    for (int32_t i = 0; i < height; ++i) {
-        for (int32_t j = 0; j < width; ++j) {
-            if ((i >= imageData.dirtyY) && (i - imageData.dirtyY < imageData.dirtyHeight) && (j >= imageData.dirtyX) &&
-                (j - imageData.dirtyX < imageData.dirtyWidth)) {
-                int32_t flag = j + width * i;
-                if (array.size() > static_cast<uint32_t>(4 * flag + 3)) {
-                    auto red = array[4 * flag];
-                    auto green = array[4 * flag + 1];
-                    auto blue = array[4 * flag + 2];
-                    auto alpha = array[4 * flag + 3];
-                    if (num < imageData.dirtyWidth * imageData.dirtyHeight) {
-                        imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue));
-                    }
-                    num++;
-                }
+    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+            uint32_t idx = 4 * (j + width * i);
+            if (array.size() > idx + 3) {
+                imageData.data.emplace_back(
+                    Color::FromARGB(array[idx + 3], array[idx], array[idx + 1], array[idx + 2]));
             }
         }
     }
@@ -930,7 +937,7 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     CanvasRendererModel::GetInstance()->PutImageData(baseInfo, imageData);
 }
 
-void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint32_t>& array)
+void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData, std::vector<uint8_t>& array)
 {
     int32_t width = 0;
     int32_t height = 0;
@@ -942,38 +949,41 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
         JSRef<JSVal> dataValue = obj->GetProperty("data");
         ParseJsInt(widthValue, width);
         ParseJsInt(heightValue, height);
-        JSViewAbstract::ParseJsIntegerArray(dataValue, array);
+        if (dataValue->IsUint8ClampedArray()) {
+            JSRef<JSUint8ClampedArray> colorArray = JSRef<JSUint8ClampedArray>::Cast(dataValue);
+            auto arrayBuffer = colorArray->GetArrayBuffer();
+            auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+            for (auto idx = 0; idx < arrayBuffer->ByteLength(); ++idx) {
+                array.emplace_back(buffer[idx]);
+            }
+        }
     }
 
     Dimension value;
     if (info[1]->IsString()) {
         std::string imageDataXStr = "";
         JSViewAbstract::ParseJsString(info[1], imageDataXStr);
-        value = Dimension(StringToDimension(imageDataXStr).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataXStr).ConvertToPx());
         imageData.x = value.Value();
     } else {
         ParseJsInt(info[1], imageData.x);
+        imageData.x = SystemProperties::Vp2Px(imageData.x);
     }
     if (info[2]->IsString()) {
         std::string imageDataYStr = "";
         JSViewAbstract::ParseJsString(info[2], imageDataYStr);
-        value = Dimension(StringToDimension(imageDataYStr).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataYStr).ConvertToPx());
         imageData.y = value.Value();
     } else {
         ParseJsInt(info[2], imageData.y);
+        imageData.y = SystemProperties::Vp2Px(imageData.y);
     }
-    imageData.x = SystemProperties::Vp2Px(imageData.x);
-    imageData.y = SystemProperties::Vp2Px(imageData.y);
 
     imageData.dirtyWidth = width;
     imageData.dirtyHeight = height;
 
     if (info.Length() == 7) {
         ParseImageDataAsStr(info, imageData);
-        imageData.dirtyX = SystemProperties::Vp2Px(imageData.dirtyX);
-        imageData.dirtyY = SystemProperties::Vp2Px(imageData.dirtyY);
-        imageData.dirtyWidth = SystemProperties::Vp2Px(imageData.dirtyWidth);
-        imageData.dirtyHeight = SystemProperties::Vp2Px(imageData.dirtyHeight);
     }
 
     imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, width)
@@ -988,34 +998,38 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[3]->IsString()) {
         std::string imageDataDirtyXStr = "";
         JSViewAbstract::ParseJsString(info[3], imageDataDirtyXStr);
-        value = Dimension(StringToDimension(imageDataDirtyXStr).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataDirtyXStr).ConvertToPx());
         imageData.dirtyX = value.Value();
     } else {
         ParseJsInt(info[3], imageData.dirtyX);
+        imageData.dirtyX = SystemProperties::Vp2Px(imageData.dirtyX);
     }
     if (info[4]->IsString()) {
         std::string imageDataDirtyYStr = "";
         JSViewAbstract::ParseJsString(info[4], imageDataDirtyYStr);
-        value = Dimension(StringToDimension(imageDataDirtyYStr).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataDirtyYStr).ConvertToPx());
         imageData.dirtyY = value.Value();
     } else {
         ParseJsInt(info[4], imageData.dirtyY);
+        imageData.dirtyY = SystemProperties::Vp2Px(imageData.dirtyY);
     }
     if (info[5]->IsString()) {
         std::string imageDataDirtWidth = "";
         JSViewAbstract::ParseJsString(info[5], imageDataDirtWidth);
-        value = Dimension(StringToDimension(imageDataDirtWidth).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataDirtWidth).ConvertToPx());
         imageData.dirtyWidth = value.Value();
     } else {
         ParseJsInt(info[5], imageData.dirtyWidth);
+        imageData.dirtyWidth = SystemProperties::Vp2Px(imageData.dirtyWidth);
     }
     if (info[6]->IsString()) {
         std::string imageDataDirtyHeight = "";
         JSViewAbstract::ParseJsString(info[6], imageDataDirtyHeight);
-        value = Dimension(StringToDimension(imageDataDirtyHeight).ConvertToVp());
+        value = Dimension(StringToDimension(imageDataDirtyHeight).ConvertToPx());
         imageData.dirtyHeight = value.Value();
     } else {
         ParseJsInt(info[6], imageData.dirtyHeight);
+        imageData.dirtyHeight = SystemProperties::Vp2Px(imageData.dirtyHeight);
     }
 }
 
@@ -1059,24 +1073,22 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
     std::unique_ptr<ImageData> data;
     data = GetImageDataFromCanvas(left, top, width, height);
-
+    if (data == nullptr) {
+        return;
+    }
     final_height = static_cast<uint32_t>(data->dirtyHeight);
     final_width = static_cast<uint32_t>(data->dirtyWidth);
-
-    JSRef<JSArray> colorArray = JSRef<JSArray>::New();
-    uint32_t count = 0;
-    for (uint32_t i = 0; i < final_height; i++) {
-        for (uint32_t j = 0; j < final_width; j++) {
-            int32_t idx = i * data->dirtyWidth + j;
-            auto pixel = data->data[idx];
-
-            colorArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(pixel.GetRed())));
-            colorArray->SetValueAt(count + 1, JSRef<JSVal>::Make(ToJSValue(pixel.GetGreen())));
-            colorArray->SetValueAt(count + 2, JSRef<JSVal>::Make(ToJSValue(pixel.GetBlue())));
-            colorArray->SetValueAt(count + 3, JSRef<JSVal>::Make(ToJSValue(pixel.GetAlpha())));
-            count += 4;
-        }
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(final_height * final_width * 4);
+    auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+    for (uint32_t idx = 0; idx < final_height * final_width; ++idx) {
+        buffer[4 * idx] = data->data[idx].GetRed();
+        buffer[4 * idx + 1] = data->data[idx].GetGreen();
+        buffer[4 * idx + 2] = data->data[idx].GetBlue();
+        buffer[4 * idx + 3] = data->data[idx].GetAlpha();
     }
+
+    JSRef<JSUint8ClampedArray> colorArray =
+        JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
 
     auto retObj = JSRef<JSObject>::New();
     retObj->SetProperty("width", final_width);
@@ -1140,6 +1152,9 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     std::unique_ptr<ImageData> canvasData;
     canvasData = GetImageDataFromCanvas(left, top, width, height);
 
+    if (canvasData == nullptr) {
+        return;
+    }
     final_height = static_cast<uint32_t>(canvasData->dirtyHeight);
     final_width = static_cast<uint32_t>(canvasData->dirtyWidth);
     if (final_height > 0 && final_width > (UINT32_MAX / final_height)) {
@@ -1188,7 +1203,8 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     napi_create_int32(env, 0, &temp);
     napi_set_named_property(env, napiValue, "index", temp);
 #endif
-
+#else
+    LOGW("[Engine Log] The function 'getPixelMap' is not supported on the current platform.");
 #endif
 }
 
@@ -1274,12 +1290,11 @@ void JSCanvasRenderer::JsGetFilter(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsSetFilter(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsString()) {
+    if (!info[0]->IsString() || info[0]->IsUndefined() || info[0]->IsNull()) {
         return;
     }
-    std::string filterStr;
+    std::string filterStr = "none";
     JSViewAbstract::ParseJsString(info[0], filterStr);
-    // null and undefined are the same.
     if (filterStr == "") {
         LOGE("invalid filter string");
         return;

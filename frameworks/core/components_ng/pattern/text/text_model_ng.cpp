@@ -34,11 +34,6 @@ void TextModelNG::Create(const std::string& content)
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_LEFT);
-    CHECK_NULL_VOID(frameNode);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    textPattern->InitSurfaceChangedCallback();
 }
 
 void TextModelNG::SetFont(const Font& value)
@@ -163,7 +158,21 @@ void TextModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
 
 void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
 {
-    LOGE("no support OnClick");
+    auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnClickEvent(std::move(clickFunc));
+}
+
+void TextModelNG::ClearOnClick()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetOnClickEvent(nullptr);
 }
 
 void TextModelNG::SetRemoteMessage(std::function<void()>&& event)

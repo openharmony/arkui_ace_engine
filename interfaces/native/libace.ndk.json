@@ -74,5 +74,9 @@
     {
         "first_introduced": "10",
         "name": "OH_NativeXComponent_GetKeyEventTimestamp"
+    },
+    {
+        "first_introduced": "10",
+        "name": "OH_NativeXComponent_GetHistoricalPoints"
     }
 ]

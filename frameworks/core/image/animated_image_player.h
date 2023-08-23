@@ -102,7 +102,11 @@ public:
     }
 
 private:
+#ifndef USE_ROSEN_DRAWING
     sk_sp<SkImage> DecodeFrameImage(const int32_t& index);
+#else
+    std::shared_ptr<RSImage> DecodeFrameImage(const int32_t& index);
+#endif
     static bool CopyTo(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src);
 
     ImageSourceInfo imageSource_;
@@ -123,7 +127,9 @@ private:
 
     // used to cache last required frame. this will be reset during looping.
     std::unique_ptr<SkBitmap> lastRequiredBitmap_;
+#ifndef USE_ROSEN_DRAWING
     int32_t lastRequiredFrameIndex_ = -1;
+#endif
 };
 
 } // namespace OHOS::Ace

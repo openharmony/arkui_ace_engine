@@ -112,6 +112,18 @@ ACE_FORCE_EXPORT OptionalSizeF CreateIdealSize(
     const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType);
 
 /**
+ * @brief Create node IdealSize by percent reference.
+ *
+ * @param layoutConstraint the constraint of current node.
+ * @param axis the axis of this node.
+ * @param measureType the measure info.
+ * @param needToConstrain constraint the result idealSize or not by min and max size in layoutConstraint.
+ * @return SizeF the node size info.
+ */
+OptionalSizeF CreateIdealSizeByPercentRef(
+    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain = false);
+
+/**
  * @brief Create max size for children which is parent's max size minus margin and padding.
  *
  * @param size the max size of parent node.

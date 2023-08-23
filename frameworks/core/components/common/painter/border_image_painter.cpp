@@ -672,12 +672,12 @@ void BorderImagePainter::PaintBorderImageSpace(const Offset& offset, RSCanvas* c
         RSRect desRectTopRound =
             RSRect(roundStartHorizontal, offsetTopY,
                 imageCenterWidth_ + roundStartHorizontal, topWidth_ + offsetTopY);
-        canvas->DrawImageRect(*image_, srcRectTop_, desRectTopRound, samplingOpetions);
+        canvas->DrawImageRect(*image_, srcRectTop_, desRectTopRound, RSSamplingOptions());
         // bottom
         RSRect desRectBottomRound =
             RSRect(roundStartHorizontal, offsetBottomY - bottomWidth_,
                 imageCenterWidth_ + roundStartHorizontal, offsetBottomY);
-        canvas->DrawImageRect(*image_, srcRectBottom_, desRectBottomRound, samplingOpetions);
+        canvas->DrawImageRect(*image_, srcRectBottom_, desRectBottomRound, RSSamplingOptions());
 #endif
         roundStartHorizontal += imageCenterWidth_ + blankHorizontalSize;
     }
@@ -706,12 +706,12 @@ void BorderImagePainter::PaintBorderImageSpace(const Offset& offset, RSCanvas* c
         RSRect desRectLeftRound =
             RSRect(offsetLeftX, roundStartVertical,
                 leftWidth_ + offsetLeftX, imageCenterHeight_ + roundStartVertical);
-        canvas->DrawImageRect(*image_, srcRectLeft_, desRectLeftRound, samplingOpetions);
+        canvas->DrawImageRect(*image_, srcRectLeft_, desRectLeftRound, RSSamplingOptions());
         // right
         RSRect desRectRightRound =
             RSRect(offsetRightX - rightWidth_, roundStartVertical,
                 offsetRightX, imageCenterHeight_ + roundStartVertical);
-        canvas->DrawImageRect(*image_, srcRectRight_, desRectRightRound, samplingOpetions);
+        canvas->DrawImageRect(*image_, srcRectRight_, desRectRightRound, RSSamplingOptions());
 #endif
         roundStartVertical += imageCenterHeight_ + blankVerticalSize;
     }
@@ -894,7 +894,7 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, SkCanvas* 
             canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottomEnd, &paint);
 #else
             canvas->drawImageRect(image_, srcRectRightBottom, desRectRightBottomEnd, SkSamplingOptions(), &paint, SkCanvas::kStrict_SrcRectConstraint);
-#endif       
+#endif
 
             double repeatVerticalStart = destTopOffsetY + halfSurplusVerticalLength;
             for (int32_t i = 0; i < static_cast<int32_t>(heightFactor); i++) {
@@ -943,7 +943,7 @@ void BorderImagePainter::PaintBorderImageRepeat(const Offset& offset, RSCanvas* 
                 RSRect(halfSurplusImageCenterWidth + leftSlice_, 0,
                     borderCenterWidth_ + halfSurplusImageCenterWidth + leftSlice_, topSlice_);
             RSRect desRectTop =
-                RSRect::MakeXYWH(offsetLeftX + leftWidth_, offsetTopY,
+                RSRect(offsetLeftX + leftWidth_, offsetTopY,
                     borderCenterWidth_ + offsetLeftX + leftWidth_, topWidth_ + offsetTopY);
             canvas->DrawImageRect(*image_, srcRectTop, desRectTop, samplingOpetions);
 
