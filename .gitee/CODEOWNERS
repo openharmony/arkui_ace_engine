@@ -7,6 +7,7 @@ adapter/ohos/capability/clipboard/  @xiexiyun
 adapter/ohos/capability/distributed/  @lightningHo
 adapter/ohos/capability/environment/  @liwenzhen3
 adapter/ohos/capability/preference/  @liwenzhen3
+adapter/ohos/capability/udmf/  @echoorchid @LongLie
 adapter/ohos/capability/window_connection/  @lushi1202
 adapter/ohos/capability/window_connection_ng/  @lushi1202
 adapter/ohos/entrance/pa_engine/  @jayleehw
@@ -251,7 +252,9 @@ frameworks/core/components_ng/animation/  @hehongyang9
 frameworks/core/event/  @zhaojian2021 @catpoison
 frameworks/core/focus/  @catpoison
 frameworks/core/components_ng/event/  @zhaojian2021 @catpoison
-
+frameworks/core/components_ng/event/drag_event.cpp  @echoorchid @LongLie
+frameworks/core/components_ng/event/gesture_event_hub.cpp  @echoorchid @LongLie
+frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp  @echoorchid @LongLie
 
 [Gestures source]
 frameworks/core/gestures/  @zheng-qiyi
