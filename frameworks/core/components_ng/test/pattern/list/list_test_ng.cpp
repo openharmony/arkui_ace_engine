@@ -188,7 +188,7 @@ void ListTestNg::GetInstance()
     paintProperty_ = frameNode_->GetPaintProperty<ListPaintProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ListAccessibilityProperty>();
     EXPECT_CALL(
-        *(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_))),
+        *AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_),
         GetPaintRectWithTransform())
         .WillRepeatedly(Return(RectF()));
 }

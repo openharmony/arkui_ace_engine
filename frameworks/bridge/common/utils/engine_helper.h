@@ -30,12 +30,12 @@ class ContainerScope;
 
 class ACE_FORCE_EXPORT ScopedDelegate final {
 public:
-    ScopedDelegate(Framework::FrontendDelegate* delegate, int32_t id);
+    ScopedDelegate(const RefPtr<Framework::FrontendDelegate>& delegate, int32_t id);
     ~ScopedDelegate();
 
     Framework::FrontendDelegate* operator->() const
     {
-        return delegate_;
+        return AceType::RawPtr(delegate_);
     }
 
     bool operator==(std::nullptr_t) const
@@ -49,7 +49,7 @@ public:
     }
 
 private:
-    Framework::FrontendDelegate* delegate_;
+    RefPtr<Framework::FrontendDelegate> delegate_;
     ContainerScope* scope_;
 };
 

@@ -64,7 +64,8 @@ public:
     template<class T, class O>
     static WeakPtr<T> DynamicCast(const WeakPtr<O>& weak)
     {
-        return WeakClaim(DynamicCast<T>(RawPtr(weak.Upgrade())));
+        auto ptr = weak.Upgrade();
+        return WeakClaim(DynamicCast<T>(RawPtr(ptr)));
     }
 
     // Get type info by instance.

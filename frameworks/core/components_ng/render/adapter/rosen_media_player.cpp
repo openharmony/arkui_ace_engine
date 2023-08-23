@@ -282,7 +282,7 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& 
 
 void RosenMediaPlayer::SetRenderSurface(const RefPtr<RenderSurface>& renderSurface)
 {
-    renderSurface_ = WeakClaim(RawPtr(DynamicCast<RosenRenderSurface>(renderSurface)));
+    renderSurface_ = DynamicCast<RosenRenderSurface>(renderSurface);
 }
 
 void RosenMediaPlayer::RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,

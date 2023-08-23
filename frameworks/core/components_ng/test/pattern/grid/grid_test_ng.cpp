@@ -128,7 +128,7 @@ void GridTestNg::GetInstance()
     layoutProperty_ = frameNode_->GetLayoutProperty<GridLayoutProperty>();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<GridAccessibilityProperty>();
     EXPECT_CALL(
-        *(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_))),
+        *AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_),
         GetPaintRectWithTransform())
         .WillRepeatedly(Return(RectF()));
 }
@@ -1872,7 +1872,7 @@ HWTEST_F(GridTestNg, EventHub001, TestSize.Level1)
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, GRID_HEIGHT);
     EXPECT_CALL(
-        *(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_))),
+        *AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_),
         GetPaintRectWithTransform())
         .WillRepeatedly(Return(gridRect));
 
@@ -3207,7 +3207,7 @@ HWTEST_F(GridTestNg, ScrollLayout001, TestSize.Level1)
     const float smallerHeight = GRID_HEIGHT - ITEM_HEIGHT;
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, smallerHeight);
     EXPECT_CALL(
-        *(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_))),
+        *AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_),
         GetPaintRectWithTransform())
         .WillRepeatedly(Return(gridRect));
 

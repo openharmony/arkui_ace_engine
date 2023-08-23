@@ -972,7 +972,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGI("SetPostTask");
-    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
     auto&& postTask = [weakDelegate, weakEngine = AceType::WeakClaim(this), id = instanceId_](bool needSync) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -1070,7 +1070,7 @@ void JsiDeclarativeEngine::RegisterOffWorkerFunc()
 
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
-    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
+    auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
     auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
