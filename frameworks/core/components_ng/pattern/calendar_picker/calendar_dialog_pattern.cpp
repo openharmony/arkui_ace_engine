@@ -142,7 +142,7 @@ void CalendarDialogPattern::InitHoverEvent()
     auto inputHub = host->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
 
-    auto mouseCallback = [weak = WeakClaim(this)](MouseInfo& info) {
+    auto mouseCallback = [weak = WeakClaim(this)](const MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID_NOLOG(pattern->GetHoverState());
@@ -195,7 +195,7 @@ void CalendarDialogPattern::InitClickEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+    auto clickCallback = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleClickEvent(info);
@@ -284,9 +284,8 @@ void CalendarDialogPattern::InitOnKeyEvent()
 
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
-        if (pattern) {
-            pattern->GetInnerFocusPaintRect(paintRect);
-        }
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->GetInnerFocusPaintRect(paintRect);
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
 }
@@ -380,7 +379,9 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
 {
     auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_RETURN(swiperPattern, false);
-    swiperPattern->GetSwiperController()->FinishAnimation();
+    auto swiperController = swiperPattern->GetSwiperController();
+    CHECK_NULL_RETURN(swiperController, false);
+    swiperController->FinishAnimation();
     auto calendarPattern = GetCalendarPattern();
     CHECK_NULL_RETURN(calendarPattern, false);
     ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
@@ -427,7 +428,7 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
         }
         case KeyCode::KEY_MOVE_HOME: {
             auto it = std::find_if(currentMonthData.days.begin(), currentMonthData.days.end(),
-                [currentMonthData](CalendarDay day) {
+                [currentMonthData](const CalendarDay& day) {
                     return day.month.year == currentMonthData.year && day.month.month == currentMonthData.month;
                 });
             if (it != currentMonthData.days.end()) {
@@ -439,7 +440,7 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
         }
         case KeyCode::KEY_MOVE_END: {
             auto it = std::find_if(currentMonthData.days.rbegin(), currentMonthData.days.rend(),
-                [currentMonthData](CalendarDay day) {
+                [currentMonthData](const CalendarDay& day) {
                     return day.month.year == currentMonthData.year && day.month.month == currentMonthData.month;
                 });
             if (it != currentMonthData.days.rend()) {
@@ -610,12 +611,9 @@ void CalendarDialogPattern::PaintCurrentMonthFocusState()
     CHECK_NULL_VOID(calendarPattern);
     ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
     for (auto& day : currentMonthData.days) {
-        if (currentMonthData.year == focusedDay_.month.year && currentMonthData.month == focusedDay_.month.month &&
-            day.month == focusedDay_.month && day.day == focusedDay_.day) {
-            day.isKeyFocused = true;
-        } else {
-            day.isKeyFocused = false;
-        }
+        day.isKeyFocused = currentMonthData.year == focusedDay_.month.year &&
+            currentMonthData.month == focusedDay_.month.month &&
+            day.month == focusedDay_.month && day.day == focusedDay_.day;
     }
     calendarPattern->SetCurrentMonthData(currentMonthData);
     calendarFrameNode->MarkModifyDone();
@@ -688,7 +686,9 @@ void CalendarDialogPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(host);
     auto focusArea = DynamicCast<FrameNode>(host->GetChildAtIndex(focusAreaID_));
     CHECK_NULL_VOID(focusArea);
-    auto focusAreaOffset = focusArea->GetGeometryNode()->GetFrameOffset();
+    auto focusGeometryNode = focusArea->GetGeometryNode();
+    CHECK_NULL_VOID(focusGeometryNode);
+    auto focusAreaOffset = focusGeometryNode->GetFrameOffset();
     auto child = DynamicCast<FrameNode>(focusArea->GetChildAtIndex(focusAreaChildID_));
     CHECK_NULL_VOID(child);
     auto childOffset = child->GetGeometryNode()->GetFrameOffset() + focusAreaOffset;
@@ -903,6 +903,7 @@ void CalendarDialogPattern::FireChangeByKeyEvent(PickerDate& selectedDay)
     auto monthNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperPattern->GetCurrentIndex()));
     CHECK_NULL_VOID(monthNode);
     auto eventHub = monthNode->GetEventHub<CalendarEventHub>();
+    CHECK_NULL_VOID(eventHub);
     eventHub->UpdateSelectedChangeEvent(selectedDay.ToString(true));
 }
 
