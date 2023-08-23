@@ -627,8 +627,6 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
 
     if (isControlButtonClick_) {
         isControlButtonClick_ = false;
-    } else {
-        sideBarStatus_ = layoutAlgorithm->GetSideBarStatus();
     }
 
     adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();
