@@ -158,4 +158,5 @@ bool TextFieldPattern::CloseCustomKeyboard()
     return true;
 }
 void TextFieldPattern::DumpInfo() {}
+void TextFieldPattern::OnColorConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG
