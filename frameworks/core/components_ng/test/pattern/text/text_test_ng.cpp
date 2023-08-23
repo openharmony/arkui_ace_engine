@@ -17,6 +17,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 
 #define private public
 #define protected public
@@ -3936,5 +3937,114 @@ HWTEST_F(TextTestNg, TextModelGetFont001, TestSize.Level1)
     font.fontStyle = ITALIC_FONT_STYLE_VALUE;
     textModelNG.SetFont(font);
     EXPECT_EQ(textLayoutProperty->GetFont(), TEXT_EQUALS_VALUE);
+}
+
+/**
+ * @tc.name: BetweenSelectedPosition001
+ * @tc.desc: test text_pattern.cpp BetweenSelectedPosition function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, BetweenSelectedPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    pattern->copyOption_ = CopyOptions::Distributed;
+    pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
+    host->draggable_ = true;
+    host->eventHub_->SetOnDragStart(
+        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
+    
+    /**
+     * @tc.steps: step2. set selected rect to [0, 0] - [20, 20]
+     */
+    pattern->textSelector_.Update(0, 20);
+    
+    /**
+     * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
+     * @tc.expected: Running the BetweenSelectedPosition function and check the result with expected results. 
+     */
+    std::vector<Offset> cases = {
+        Offset(1, 1), Offset(21, 21), 
+    };
+    std::vector<bool> exceptResults = {
+        true, false
+    };
+    for (uint32_t turn = 0; turn < cases.size(); ++turn) {
+        EXPECT_EQ(pattern->BetweenSelectedPosition(cases[turn]), exceptResults[turn]);
+    }
+}
+
+/**
+ * @tc.name: OnHandleMove002
+ * @tc.desc: test text_pattern.cpp OnHandleMove function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnHandleMove002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    auto pipeline = host->GetContext();
+    pattern->paragraph_ = AceType::MakeRefPtr<TxtParagraph>(ParagraphStyle {}, nullptr);
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    pattern->selectOverlayProxy_ = proxy;
+    pipeline->rootNode_->GetGeometryNode()->SetFrameOffset({3.0, 5.0});
+    
+    /**
+     * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
+     * @tc.expected: Running the OnHandleMove function and check the result with expected results. 
+     */
+    std::vector<RectF> handleRects = {
+        {1.0, 2.0, 3.0, 4.0}, {5.0, 6.0, 7.0, 8.0}, {-9.0, -10.0, 11.0, 12.0}
+    };
+    std::vector<vector<TextSelector>> expectResults = {
+        {TextSelector(0, -1), TextSelector(0, 0)},
+        {TextSelector(0, 0), TextSelector(0, 0)},
+        {TextSelector(0, 0), TextSelector(0, 0)}
+    };
+    for (uint32_t turn = 0; turn < handleRects.size(); ++turn) {
+        pattern->OnHandleMove(handleRects[turn], true);
+        EXPECT_EQ(pattern->textSelector_, expectResults[turn][0]);
+        pattern->OnHandleMove(handleRects[turn], false);
+        EXPECT_EQ(pattern->textSelector_, expectResults[turn][1]);
+    }
+}
+
+/**
+ * @tc.name: GetGlobalOffset001
+ * @tc.desc: test text_pattern.cpp GetGlobalOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetGlobalOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    auto pipeline = host->GetContext();
+    
+    /**
+     * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
+     * @tc.expected: Running GetGlobalOffset function and check the result with expected results. 
+     */
+    std::vector<OffsetF> offsetCases = {
+    {3.0, 5.0}, {4.0, 5.0}, {6.0, 7.0}
+    };
+    std::vector<Offset> expectResults = {
+    {-3.0, -5.0}, {-4.0, -5.0}, {-6.0, -7.0}
+    };
+    for (uint32_t turn = 0; turn < offsetCases.size(); ++turn) {
+        pipeline->rootNode_->GetGeometryNode()->SetFrameOffset(offsetCases[turn]);
+        Offset tmp;
+        pattern->GetGlobalOffset(tmp);
+        EXPECT_EQ(tmp, expectResults[turn]);
+    }
 }
 } // namespace OHOS::Ace::NG
