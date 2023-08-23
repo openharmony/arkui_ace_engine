@@ -77,7 +77,9 @@ public:
     void CreateScroll(Axis axis, NG::ScrollEdgeEvent&& event);
     void CreateScroll(Axis axis, OnScrollStartEvent&& event);
     void CreateScroll(bool isScrollEnabled);
-    void CreateContent(Axis axis = Axis::VERTICAL);
+    void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+    const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
+    void CreateContent(Axis axis = Axis::VERTICAL, int32_t childNumber = CHILD_NUMBER);
     RefPtr<FrameNode> GetContentChild(int32_t index);
     void Touch(TouchLocationInfo locationInfo, SourceType sourceType);
     void Touch(TouchType touchType, Offset offset, SourceType sourceType);
@@ -227,14 +229,25 @@ void ScrollTestNg::CreateScroll(bool isScrollEnabled)
     RunMeasureAndLayout(frameNode_);
 }
 
-void ScrollTestNg::CreateContent(Axis axis)
+void ScrollTestNg::CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
+    const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide)
+{
+    ScrollModelNG scrollModel;
+    scrollModel.Create();
+    scrollModel.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent();
+    GetInstance();
+    RunMeasureAndLayout(frameNode_);
+}
+
+void ScrollTestNg::CreateContent(Axis axis, int32_t childNumber)
 {
     if (axis == Axis::HORIZONTAL) {
         RowModelNG rowModelNG;
         rowModelNG.Create(Dimension(0), nullptr, "");
         SetWidth(Dimension(CONTENT_WIDTH));
         SetHeight(FILL_LENGTH);
-        for (int32_t index = 0; index < CHILD_NUMBER; index++) {
+        for (int32_t index = 0; index < childNumber; index++) {
             RowModelNG rowModelNG;
             rowModelNG.Create(Dimension(0), nullptr, "");
             SetWidth(Dimension(CONTENT_CHILD_WIDTH));
@@ -246,7 +259,7 @@ void ScrollTestNg::CreateContent(Axis axis)
         columnModel.Create(Dimension(0), nullptr, "");
         SetWidth(FILL_LENGTH);
         SetHeight(Dimension(CONTENT_HEIGHT));
-        for (int32_t index = 0; index < CHILD_NUMBER; index++) {
+        for (int32_t index = 0; index < childNumber; index++) {
             ColumnModelNG columnModel;
             columnModel.Create(Dimension(0), nullptr, "");
             SetWidth(FILL_LENGTH);
@@ -683,10 +696,10 @@ HWTEST_F(ScrollTestNg, ScrollPositionControlle002, TestSize.Level1)
 HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Do not SetScrollBarWidth
+     * @tc.steps: step1. Axis::NONE
      * @tc.expected: scrollBar->NeedPaint() is false
      */
-    CreateScroll();
+    CreateScroll(Axis::NONE);
     auto paint_1 = pattern_->CreateNodePaintMethod();
     auto scrollPaint_1 = AceType::DynamicCast<ScrollPaintMethod>(paint_1);
     RSCanvas canvas_1;
@@ -696,10 +709,10 @@ HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
     EXPECT_FALSE(scrollPaint_1->scrollBar_.Upgrade()->NeedPaint());
 
     /**
-     * @tc.steps: step1. SetScrollBarWidth
+     * @tc.steps: step1. Axis::Vertical
      * @tc.expected: scrollBar->NeedPaint() is true
      */
-    CreateScroll(Dimension(10.f));
+    CreateScroll();
     auto paint_2 = pattern_->CreateNodePaintMethod();
     auto scrollPaint_2 = AceType::DynamicCast<ScrollPaintMethod>(paint_2);
     RSCanvas canvas_2;
@@ -1758,29 +1771,36 @@ HWTEST_F(ScrollTestNg, ScrollToNode001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Pattern001
+ * @tc.name: OnModifyDone001
  * @tc.desc: Test OnModifyDone
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollTestNg, Pattern001, TestSize.Level1)
+HWTEST_F(ScrollTestNg, OnModifyDone001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Trigger OnModifyDone
-     * @tc.expected: Has ScrollableEvent, has AccessibilityAction
+     * @tc.steps: step1. CreateScroll to trigger OnModifyDone
+     * @tc.expected: Has ScrollableEvent, has AccessibilityAction, set Axis::VERTICAL
      */
     CreateScroll();
     ASSERT_NE(pattern_->GetScrollableEvent(), nullptr);
     ASSERT_NE(accessibilityProperty_->actionScrollForwardImpl_, nullptr);
     ASSERT_NE(accessibilityProperty_->actionScrollBackwardImpl_, nullptr);
+    EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
 
     /**
-     * @tc.steps: step1. Change axis and trigger OnModifyDone
-     * @tc.expected: Axis would be changed and Would not RegisterScrollEventTask again
+     * @tc.steps: step2. Change axis and trigger OnModifyDone
+     * @tc.expected: Axis would be changed
      */
     layoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     pattern_->OnModifyDone();
     EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
-    ASSERT_NE(pattern_->GetScrollableEvent(), nullptr);
+
+    /**
+     * @tc.steps: step3. Change scrollSnapUpdate_ to true
+     * @tc.expected: Will MarkDirtyNode
+     */
+    pattern_->scrollSnapUpdate_ = true;
+    pattern_->OnModifyDone();
 }
 
 /**
@@ -2057,5 +2077,88 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
     GetInstance();
     RunMeasureAndLayout(frameNode_);
     EXPECT_DOUBLE_EQ(pattern_->GetFriction(), friction);
+}
+
+/**
+ * @tc.name: Snap001
+ * @tc.desc: Test snap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Snap001, TestSize.Level1)
+{
+    Dimension intervalSize = Dimension(10.f);
+    std::vector<Dimension> snapPaginations = {
+        Dimension(10.f),
+        Dimension(20.f),
+        Dimension(30.f),
+    };
+    std::pair<bool, bool> enableSnapToSide = {false, false};
+    CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    auto predictSnapOffset = pattern_->CalePredictSnapOffset(0.0);
+    EXPECT_FALSE(predictSnapOffset.has_value());
+
+    bool needScrollSnapToSide = pattern_->NeedScrollSnapToSide(0.0);
+    EXPECT_FALSE(needScrollSnapToSide);
+
+    enableSnapToSide = {true, true};
+    CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    predictSnapOffset = pattern_->CalePredictSnapOffset(0.0);
+    EXPECT_FALSE(predictSnapOffset.has_value());
+
+    enableSnapToSide = {true, false};
+    CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    predictSnapOffset = pattern_->CalePredictSnapOffset(0.0);
+    EXPECT_FALSE(predictSnapOffset.has_value());
+
+    enableSnapToSide = {true, true};
+    CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    predictSnapOffset = pattern_->CalePredictSnapOffset(-1.f);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_EQ(predictSnapOffset.value(), 0.0);
+
+    enableSnapToSide = {true, true};
+    CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    predictSnapOffset = pattern_->CalePredictSnapOffset(201.f);
+    EXPECT_FALSE(predictSnapOffset.has_value());
+
+    snapPaginations = {};
+
+    enableSnapToSide = {true, true};
+    CreateSnapScroll(ScrollSnapAlign::CENTER, intervalSize, snapPaginations, enableSnapToSide);
+    predictSnapOffset = pattern_->CalePredictSnapOffset(0.0);
+    EXPECT_FALSE(predictSnapOffset.has_value());
+
+    enableSnapToSide = {true, true};
+    CreateSnapScroll(ScrollSnapAlign::END, intervalSize, snapPaginations, enableSnapToSide);
+    predictSnapOffset = pattern_->CalePredictSnapOffset(0.0);
+    EXPECT_FALSE(predictSnapOffset.has_value());
+
+    needScrollSnapToSide = pattern_->NeedScrollSnapToSide(0.0);
+    EXPECT_FALSE(needScrollSnapToSide);
+
+    enableSnapToSide = {false, false};
+    CreateSnapScroll(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    predictSnapOffset = pattern_->CalePredictSnapOffset(0.0);
+    EXPECT_FALSE(predictSnapOffset.has_value());
+}
+
+/**
+ * @tc.name: Drag001
+ * @tc.desc: Test snap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Drag001, TestSize.Level1)
+{
+    CreateScroll();
+    auto scrollBar = pattern_->GetScrollBar();
+    GestureEvent info;
+    scrollBar->HandleDragStart(info);
+    EXPECT_TRUE(scrollBar->isDriving_);
+    scrollBar->HandleDragUpdate(info);
+    info.SetMainVelocity(0.0);
+    scrollBar->HandleDragEnd(info);
+    EXPECT_FALSE(scrollBar->isDriving_);
+    info.SetMainVelocity(1000.0);
+    scrollBar->HandleDragEnd(info);
 }
 } // namespace OHOS::Ace::NG
