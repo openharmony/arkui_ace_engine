@@ -517,7 +517,7 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
             optionsTotalCount_[hourColumn]++;
         }
         hourColumnPattern->SetOptions(GetOptionsCount());
-        hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);  
+        hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
         hourColumn->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else if (amPmColumn) {
         CHECK_NULL_VOID(amPmColumn);
@@ -543,9 +543,9 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
             optionsTotalCount_[hourColumn]++;
         }
         amPmColumnPattern->SetOptions(GetOptionsCount());
-        hourColumnPattern->SetOptions(GetOptionsCount());    
+        hourColumnPattern->SetOptions(GetOptionsCount());
         amPmColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
-        hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);    
+        hourColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
     } else {
         LOGE("AM PM column is null.");
     }
