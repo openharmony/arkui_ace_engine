@@ -2097,6 +2097,7 @@ void TextFieldPattern::InitDragDropEvent()
                 pattern->InsertValue(str);
             }
             pattern->dragStatus_ = DragStatus::NONE;
+            pattern->MarkContentChange();
         }
     };
     eventHub->SetOnDrop(std::move(onDrop));
