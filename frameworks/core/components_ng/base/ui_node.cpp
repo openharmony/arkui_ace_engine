@@ -129,22 +129,24 @@ int32_t UINode::RemoveChildAndReturnIndex(const RefPtr<UINode>& child)
 
 void UINode::RemoveChildAtIndex(int32_t index)
 {
-    if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
+    auto children = GetChildren();
+    if ((index < 0) || (index >= static_cast<int32_t>(children.size()))) {
         return;
     }
-    auto iter = children_.begin();
+    auto iter = children.begin();
     std::advance(iter, index);
     RemoveChild(*iter);
 }
 
 RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 {
-    if ((index < 0) || (index >= static_cast<int32_t>(children_.size()))) {
+    auto children = GetChildren();
+    if ((index < 0) || (index >= static_cast<int32_t>(children.size()))) {
         return nullptr;
     }
-    auto iter = children_.begin();
+    auto iter = children.begin();
     std::advance(iter, index);
-    if (iter != children_.end()) {
+    if (iter != children.end()) {
         return *iter;
     }
     return nullptr;
@@ -153,7 +155,7 @@ RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
 int32_t UINode::GetChildIndex(const RefPtr<UINode>& child) const
 {
     int32_t index = 0;
-    for (const auto& iter : children_) {
+    for (const auto& iter : GetChildren()) {
         if (iter == child) {
             return index;
         }
@@ -321,7 +323,7 @@ void UINode::AttachToMainTree(bool recursive)
     OnAttachToMainTree(recursive);
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive);
     }
 }
@@ -336,7 +338,7 @@ void UINode::DetachFromMainTree(bool recursive)
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->DetachFromMainTree(isRecursive);
     }
 }
@@ -350,7 +352,7 @@ void UINode::ProcessOffscreenTask(bool recursive)
     OnOffscreenProcess(recursive);
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->ProcessOffscreenTask(isRecursive);
     }
 }
@@ -388,21 +390,21 @@ void UINode::MovePosition(int32_t slot)
 
 void UINode::UpdateLayoutPropertyFlag()
 {
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->UpdateLayoutPropertyFlag();
     }
 }
 
 void UINode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 {
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->AdjustParentLayoutFlag(flag);
     }
 }
 
 void UINode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->MarkDirtyNode(extraFlag);
     }
 }
@@ -449,7 +451,7 @@ void UINode::DumpTree(int32_t depth)
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
         DumpInfo();
-        DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(children_.size()));
+        DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
     }
 
     for (const auto& item : GetChildren()) {
@@ -514,8 +516,9 @@ RefPtr<PipelineContext> UINode::GetContext()
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
+    auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
-    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, touchId);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
@@ -531,8 +534,9 @@ HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentL
 HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
 {
+    auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
-    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         auto hitResult = child->MouseTest(globalPoint, parentLocalPoint, onMouseResult, onHoverResult, hoverNode);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
@@ -547,8 +551,9 @@ HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentL
 
 HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
 {
+    auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
-    for (auto iter = children_.rbegin(); iter != children_.rend(); ++iter) {
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
@@ -578,8 +583,9 @@ int32_t UINode::TotalChildCount() const
 int32_t UINode::GetChildIndexById(int32_t id)
 {
     int32_t pos = 0;
-    auto iter = children_.begin();
-    while (iter != GetChildren().end()) {
+    auto children = GetChildren();
+    auto iter = children.begin();
+    while (iter != children.end()) {
         if (id == (*iter)->GetId()) {
             return pos;
         }
@@ -611,21 +617,21 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
 
 void UINode::Build()
 {
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->Build();
     }
 }
 
 void UINode::SetActive(bool active)
 {
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->SetActive(active);
     }
 }
 
 void UINode::SetJSViewActive(bool active)
 {
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         child->SetJSViewActive(active);
     }
 }
@@ -695,11 +701,12 @@ bool UINode::MarkRemoving()
 
 void UINode::SetChildrenInDestroying()
 {
-    if (children_.empty()) {
+    auto children = GetChildren();
+    if (children.empty()) {
         return;
     }
 
-    for (const auto& child : children_) {
+    for (const auto& child : children) {
         if (!child) {
             continue;
         }
@@ -747,21 +754,23 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
 
 bool UINode::RemoveImmediately() const
 {
+    auto children = GetChildren();
     return std::all_of(
-        children_.begin(), children_.end(), [](const auto& child) { return child->RemoveImmediately(); });
+        children.begin(), children.end(), [](const auto& child) { return child->RemoveImmediately(); });
 }
 
 void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
 {
     auto parent = GetParent();
+    auto children = GetChildren();
     if (parent && parent->GetTag() == V2::JS_FOR_EACH_ETS_TAG) {
         // At this point, all of the children_
         // belong to the child nodes of syntaxItem
-        for (const auto& child : GetChildren()) {
+        for (const auto& child : children) {
             if (child->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
-                auto children = child->GetChildren();
-                if (!children.empty()) {
-                    auto begin = children.begin();
+                auto grandChildren = child->GetChildren();
+                if (!grandChildren.empty()) {
+                    auto begin = grandChildren.begin();
                     (*begin)->SetForeachItem();
                 }
             } else {
@@ -771,8 +780,8 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
     }
 
     if (tag_ == V2::COMMON_VIEW_ETS_TAG) {
-        if (!children_.empty()) {
-            auto begin = children_.begin();
+        if (!children.empty()) {
+            auto begin = children.begin();
             nodeInfo_->nodeTag = (*begin)->GetCustomTag();
         }
     } else {
@@ -780,11 +789,11 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
     }
 
     nodeInfo_->pageDepth = depth_;
-    nodeInfo_->childrenSize = children_.size();
+    nodeInfo_->childrenSize = children.size();
     if (isBuildByJS_) {
         nodeMap.insert({ GetId(), *(nodeInfo_) });
     }
-    for (const auto& child : children_) {
+    for (const auto& child : children) {
         // Recursively traverse the child nodes of each node
         child->GetPerformanceCheckData(nodeMap);
     }
@@ -805,7 +814,7 @@ RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
 
 RefPtr<UINode> UINode::GetFrameChildByIndex(uint32_t index, bool needBuild)
 {
-    for (const auto& child : children_) {
+    for (const auto& child : GetChildren()) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
         if (count > index) {
             return child->GetFrameChildByIndex(index, needBuild);
