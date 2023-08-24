@@ -106,6 +106,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             contentMainSize_ =
                 GetMainAxisSize(parentPercentReference, axis) - paddingBeforeContent_ - paddingAfterContent_;
             mainSizeIsDefined_ = false;
+            contentIdealSize.SetMainSize(contentMainSize_, axis);
         }
     } else {
         contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis);
