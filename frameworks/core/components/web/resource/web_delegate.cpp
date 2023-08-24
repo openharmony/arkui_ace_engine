@@ -44,9 +44,12 @@
 #include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "application_env.h"
+#include "frameworks/base/utils/system_properties.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
 #include "parameters.h"
+#include "screen_manager/screen_types.h"
+#include "transaction/rs_interfaces.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
@@ -621,6 +624,9 @@ void WebDelegateObserver::NotifyDestory()
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
+    if (OHOS::system::GetDeviceType() == "tablet" || OHOS::system::GetDeviceType() == "2in1") {
+        OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
+    }
     if (nweb_) {
         nweb_->UnRegisterScreenLockFunction(GetRosenWindowId());
         nweb_->OnDestroy();
@@ -2498,6 +2504,57 @@ std::string WebDelegate::GetCustomScheme()
     return customScheme;
 }
 
+void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
+{
+    LOGI("SurfaceOcclusion changed, occlusion:%{public}d, surfacenode id: %{public}" PRIu64 "", occlusion,
+         surfaceNodeId_);
+    if (surfaceOcclusion_ == occlusion) {
+        return;
+    }
+    surfaceOcclusion_ = occlusion;
+    if (surfaceOcclusion_) {
+        nweb_->OnUnoccluded();
+    } else {
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostDelayedTask(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                CHECK_NULL_VOID(delegate);
+                if (!delegate->surfaceOcclusion_) {
+                    LOGD("the surface is still unvisual.");
+                    delegate->nweb_->OnOccluded();
+                }
+            },
+            TaskExecutor::TaskType::UI, delayTime_);
+    }
+}
+
+void WebDelegate::RegisterSurfaceOcclusionChangeFun()
+{
+    if (OHOS::system::GetDeviceType() != "tablet" && OHOS::system::GetDeviceType() != "2in1") {
+        LOGD("only pad and pc will RegisterSurfaceOcclusionChangeCallback");
+        return;
+    }
+    auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
+        surfaceNodeId_,
+        [weak = WeakClaim(this), weakContext = context_](bool occlusion) {
+            auto context = weakContext.Upgrade();
+            CHECK_NULL_VOID(context);
+            context->GetTaskExecutor()->PostTask(
+                [weakDelegate = weak, surfaceOcclusion = occlusion]() {
+                    auto delegate = weakDelegate.Upgrade();
+                    CHECK_NULL_VOID(delegate);
+                    delegate->SurfaceOcclusionCallback(surfaceOcclusion);
+                },
+                TaskExecutor::TaskType::UI);
+        });
+    if (ret != Rosen::StatusCode::SUCCESS) {
+        LOGE("RegisterSurfaceOcclusionChangeCallback failed, surfacenode id:%{public}" PRIu64 ""
+             ", ret: %{public}" PRIu32 "", surfaceNodeId_, ret);
+    }
+}
+
 void WebDelegate::InitWebViewWithSurface()
 {
     auto context = context_.Upgrade();
@@ -2585,6 +2642,7 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(upgradeContext);
             auto window_id = upgradeContext->GetWindowId();
             delegate->nweb_->SetWindowId(window_id);
+            delegate->RegisterSurfaceOcclusionChangeFun();
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -5162,6 +5220,7 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(rosenRenderContext);
     rsNode_ = rosenRenderContext->GetRSNode();
+    surfaceNodeId_ = rsNode_->GetId();
 }
 #endif
 
