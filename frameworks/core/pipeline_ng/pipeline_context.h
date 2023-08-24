@@ -187,6 +187,8 @@ public:
 
     RefPtr<FrameNode> GetNavDestinationBackButtonNode();
 
+    RefPtr<FrameNode> FindNavDestinationNodeToHandleBack(const RefPtr<UINode>& node);
+
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
