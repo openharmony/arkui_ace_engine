@@ -2315,7 +2315,8 @@ void TextFieldPattern::OnModifyDone()
     if (layoutProperty->GetShowUnderlineValue(false) &&
         layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         underlineWidth_ = UNDERLINE_WIDTH;
-        underlineColor_ = textFieldTheme->GetUnderlineColor();
+        underlineColor_ = IsDisabled() ? textFieldTheme->GetDisableUnderlineColor()
+                                       : textFieldTheme->GetUnderlineColor();
         SaveUnderlineStates();
     }
     auto renderContext = host->GetRenderContext();
@@ -2413,7 +2414,7 @@ void TextFieldPattern::OnModifyDone()
             SetScrollEnable(false);
         }
     }
-    if (!IsNormalInlineState()) {
+    if (!IsNormalInlineState() && !IsDisabled()) {
         SetShowError();
     }
     if (IsTextArea() && layoutProperty->HasMaxLength()) {

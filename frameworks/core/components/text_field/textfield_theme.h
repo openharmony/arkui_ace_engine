@@ -126,6 +126,7 @@ public:
             }
             const double defaultErrorAlpha = 0.6;
             const double defaultUnderlineAlpha = 0.6;
+            const double defaultDisableUnderlineAlpha = 0.4;
             const Color defaultUnderlineColor = Color(0x33182431);
             const Color defaultUnderlineTextColor = Color(0x99182431);
             const Dimension defaultHeight = 48.0_vp;
@@ -141,6 +142,8 @@ public:
                 .BlendOpacity(pattern->GetAttr<double>("error_text_border_color_alpha", defaultErrorAlpha));
             theme->errorUnderlineColor_ = pattern->GetAttr<Color>(ERROR_UNDERLINE_COLOR, Color());
             theme->underlineColor_ = pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor);
+            theme->disableUnderlineColor_ = pattern->GetAttr<Color>(UNDERLINE_COLOR, defaultUnderlineColor)
+                .BlendOpacity(pattern->GetAttr<double>(DISABLE_UNDERLINE_ALPHA, defaultDisableUnderlineAlpha));
             theme->underlineTextColor_ = pattern->GetAttr<Color>(UNDERLINE_TEXT_COLOR, defaultUnderlineTextColor);
             theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
@@ -371,6 +374,11 @@ public:
         return underlineColor_;
     }
 
+    const Color& GetDisableUnderlineColor() const
+    {
+        return disableUnderlineColor_;
+    }
+
     const Color& GetUnderlineTextColor() const
     {
         return underlineTextColor_;
@@ -499,6 +507,7 @@ private:
     Color overCountBorderColor_;
     Color errorUnderlineColor_;
     Color underlineColor_;
+    Color disableUnderlineColor_;
     Color underlineTextColor_;
     Color passwordErrorTextColor_;
     Color passwordErrorInputColor_;
