@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +28,11 @@ void MenuModelNG::Create()
         []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
+
+    auto layoutProps = menuNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
+    // default min width
+    layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
 }
 
 void MenuModelNG::SetFontSize(const Dimension& fontSize)
@@ -85,9 +91,10 @@ void MenuModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
 void MenuModelNG::SetWidth(const Dimension& width)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width);
+    ViewAbstract::SetWidth(NG::CalcLength(width));
 }
 
-void MenuModelNG::SetFontFamily(const std::vector<std::string> &families)
+void MenuModelNG::SetFontFamily(const std::vector<std::string>& families)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families);
 }
