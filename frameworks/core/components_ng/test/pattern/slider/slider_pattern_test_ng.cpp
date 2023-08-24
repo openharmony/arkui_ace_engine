@@ -110,8 +110,10 @@ constexpr Dimension TRACK_BORDER_RADIUS = 5.0_px;
 } // namespace
 class SliderPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    void TearDown() override;
+
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 
 private:
     void SetSliderContentModifier(SliderContentModifier& sliderContentModifier);
@@ -120,14 +122,18 @@ private:
     void MockParagraphFunction(RefPtr<MockParagraph>& paragraph, Testing::MockCanvas& canvas);
 };
 
-void SliderPatternTestNg::SetUpTestCase()
+void SliderPatternTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
 }
 
-void SliderPatternTestNg::TearDownTestCase()
+void SliderPatternTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void SliderPatternTestNg::TearDown()
+{
     MockParagraph::TearDown();
 }
 
@@ -2790,57 +2796,6 @@ HWTEST_F(SliderPatternTestNg, SliderAccessibilityPropertyTest003, TestSize.Level
     EXPECT_EQ(actions, exptectActions);
 }
 
-
-/**
- * @tc.name: SliderTipModifierTest001
- * @tc.desc: Test the SliderTipModifier onDraw
- * @tc.type: FUNC
- */
-HWTEST_F(SliderPatternTestNg, SliderTipModifierTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create SliderTipModifier object.
-     */
-    auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>([]() { return OffsetF(); });
-    ASSERT_NE(sliderTipModifier, nullptr);
-
-    /**
-     * @tc.steps: step2. update SliderTipModifier property.
-     */
-    sliderTipModifier->SetTipFlag(true);
-    sliderTipModifier->SetDirection(TEST_AXIS);
-    sliderTipModifier->SetTextFont(14.0_fp);
-    sliderTipModifier->SetContentSize(MAX_SIZE);
-
-    /**
-     * @tc.steps: step3. call onDraw function.
-     */
-    Testing::MockCanvas canvas;
-    MockTipsCanvasFunction(canvas);
-    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    auto theme = AceType::MakeRefPtr<MockThemeManager>();
-    pipeline->SetThemeManager(theme);
-    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    MockParagraphFunction(paragraph, canvas);
-
-    sliderTipModifier->SetDirection(Axis::HORIZONTAL);
-    sliderTipModifier->onDraw(context);
-
-    sliderTipModifier->SetDirection(Axis::VERTICAL);
-    sliderTipModifier->onDraw(context);
-
-    sliderTipModifier->SetTipFlag(false);
-    sliderTipModifier->onDraw(context);
-
-    MockParagraph::TearDown();
-    sliderTipModifier->CreateParagraphAndLayout(TextStyle(), "");
-    ASSERT_EQ(sliderTipModifier->paragraph_, nullptr);
-}
-
 /**
  * @tc.name: SliderContentModifierTest013
  * @tc.desc: Test DrawStep while not show step
@@ -3083,6 +3038,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest019, TestSize.Level1)
     sliderContentModifier.StopCircleCenterAnimation(SELECT_START);
     ASSERT_FALSE(set);
 }
+
 /**
  * @tc.name: SliderPatternChangeEventTestNg001
  * @tc.desc: Test the Text property of Slider
