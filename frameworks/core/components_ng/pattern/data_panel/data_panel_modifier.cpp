@@ -559,19 +559,19 @@ void DataPanelModifier::PaintProgress(
     canvas.Restore();
 
     canvas.Save();
-    canvas.Rotate(drawAngle, center.GetX(), center.GetY());
-    canvas.AttachBrush(endCirclePaint);
-    canvas.DrawArc(edgeRect, -QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
-    canvas.DetachBrush();
-    canvas.Restore();
-
-    canvas.Save();
     canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
     canvas.AttachPen(gradientPaint);
     canvas.DrawPath(path);
     canvas.DetachPen();
+    canvas.Restore();
+
+    canvas.Save();
+    canvas.Rotate(drawAngle, center.GetX(), center.GetY());
+    canvas.AttachBrush(endCirclePaint);
+    canvas.DrawArc(edgeRect, -QUARTER_CIRCLE - FIXED_ANGLE, HALF_CIRCLE + FIXED_DRAW_ANGLE);
+    canvas.DetachBrush();
     canvas.Restore();
 }
 
