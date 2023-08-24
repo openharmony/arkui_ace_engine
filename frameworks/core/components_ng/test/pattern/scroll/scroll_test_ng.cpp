@@ -58,7 +58,6 @@ constexpr float CONTENT_CHILD_WIDTH = DEVICE_WIDTH / VIEWPORT_CHILD_NUMBER;
 constexpr float CONTENT_CHILD_HEIGHT = DEVICE_HEIGHT / VIEWPORT_CHILD_NUMBER;
 constexpr float CONTENT_WIDTH = CONTENT_CHILD_WIDTH * CHILD_NUMBER;
 constexpr float CONTENT_HEIGHT = CONTENT_CHILD_HEIGHT * CHILD_NUMBER;
-constexpr double DEFAULT_FRICTION = 0.6;
 } // namespace
 
 class ScrollTestNg : public testing::Test, public TestNG {

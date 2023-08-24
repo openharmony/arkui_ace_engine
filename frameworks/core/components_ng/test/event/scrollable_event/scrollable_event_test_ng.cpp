@@ -52,6 +52,7 @@ constexpr bool SCROLLABLE_EVENT_DISENABLED = false;
 const PanDirection SCROLLABLE_EVENT_DIRECTION = { PanDirection::LEFT };
 constexpr int32_t FINGERS_NUMBER = 2;
 constexpr float DISTANCE = 10.5f;
+const PointF LOCAL_POINT { 15.0f, 15.0f };
 } // namespace
 
 class ScrollableEventTestNg : public testing::Test {
@@ -187,12 +188,12 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
     EXPECT_NE(scrollableActuator, nullptr);
 
     /**
-     * @tc.steps: step2. OnCollectTouchTarget when initialized_ is false.
+     * @tc.steps: step2. CollectTouchTarget when initialized_ is false.
      * @tc.expected: Invoke InitializeScrollable. when scrollableEvents_ is empty return directly.
      */
     TouchTestResult result;
-    scrollableActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+    scrollableActuator->CollectTouchTarget(
+        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, LOCAL_POINT);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE);
     EXPECT_EQ(scrollableActuator->scrollableEvents_.size(), SCROLLABLE_EVENT_SIZE);
 
@@ -209,13 +210,16 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
     EXPECT_EQ(scrollableActuator->scrollableEvents_.size(), SCROLLABLE_EVENT_SIZE_1);
 
     /**
-     * @tc.steps: step4. OnCollectTouchTarget when initialized_ is false and scrollableEvents_ is not empty.
+     * @tc.steps: step4. CollectTouchTarget when initialized_ is false and scrollableEvents_ is not empty.
      * @tc.expected: gestureEventHub cannot GetFrameNode, InitializeScrollable fuction will return directly.
      */
-    scrollableActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+    scrollableActuator->CollectTouchTarget(
+        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, LOCAL_POINT);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE_1);
-    EXPECT_EQ(scrollableEvent->GetScrollable()->panRecognizerNG_->GetCoordinateOffset(), Offset(WIDTH, HEIGHT));
+    auto coordinateOffset = scrollableEvent->GetScrollable()->panRecognizerNG_->GetCoordinateOffset();
+    EXPECT_EQ(coordinateOffset, Offset(WIDTH, HEIGHT)) <<
+        "coordinateOffset: " << coordinateOffset.ToString() <<
+        "Offset(WIDTH, HEIGHT)" << Offset(WIDTH, HEIGHT).ToString();
 
     /**
      * @tc.steps: step5. Add frameNode to gestureEventHub, and Add ScrollEdgeEffect whose axis is same with the
@@ -228,13 +232,13 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
     EXPECT_EQ(scrollableActuator->scrollEffects_.size(), SCROLL_EFFECTS_SIZE_1);
 
     /**
-     * @tc.steps: step6. OnCollectTouchTarget when initialized_ is false, scrollableEvents_ is not empty,
+     * @tc.steps: step6. CollectTouchTarget when initialized_ is false, scrollableEvents_ is not empty,
      * gestureEventHub has frameNode and scrollEffects_ shares the same axis with scrollableEvent.
      * @tc.expected: The loop will be continued when scrollableEvent is not enabled.
      */
     scrollableEvent->SetEnabled(SCROLLABLE_EVENT_DISENABLED);
-    scrollableActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result);
+    scrollableActuator->CollectTouchTarget(
+        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, LOCAL_POINT);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE_1);
 }
 } // namespace OHOS::Ace::NG
