@@ -17,6 +17,7 @@
 #define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVDESTINATION_NAVDESTINATION_MODEL_NG_H
 
 #include "core/components_ng/pattern/navrouter/navdestination_model.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationModel {
@@ -33,6 +34,9 @@ public:
     void SetOnHidden(std::function<void()>&& onHidden) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     RefPtr<AceType> CreateEmpty() override;
+
+private:
+    void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
 };
 } // namespace OHOS::Ace::NG
 
