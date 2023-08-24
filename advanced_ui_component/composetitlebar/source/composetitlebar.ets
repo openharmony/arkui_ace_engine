@@ -67,9 +67,6 @@ export struct ComposeTitleBar {
   menuItems: Array<ComposeTitleBarMenuItem>
 
   @State titleMaxWidth: number = 0
-  @State isItemOnFocus: boolean = false
-  @State isItemOnHover: boolean = false
-  @State isItemOnClick: boolean = false
   @State backActive: boolean = false
 
   private static readonly totalHeight = 56
@@ -78,6 +75,7 @@ export struct ComposeTitleBar {
   private static readonly portraitImageSize = 40
   private static readonly portraitImageLeftPadding = 4
   private static readonly portraitImageRightPadding = 16
+  private static instanceCount = 0
 
   build() {
     Flex({
@@ -92,7 +90,7 @@ export struct ComposeTitleBar {
           value: PUBLIC_BACK,
           isEnabled: true,
           action: () => this.backActive = true
-        } })
+        }, index: -1 })
 
         if (this.item !== undefined) {
           Image(this.item.value)
@@ -102,48 +100,8 @@ export struct ComposeTitleBar {
               left: $r('sys.float.ohos_id_text_paragraph_margin_xs'),
               right: $r('sys.float.ohos_id_text_paragraph_margin_m')
             })
-            .focusable(this.item.isEnabled)
+            .focusable(false)
             .borderRadius(ImageMenuItem.buttonBorderRadius)
-            .onFocus(() => this.isItemOnFocus = true)
-            .onBlur(() => this.isItemOnFocus = false)
-            .onHover((isOn) => this.isItemOnHover = isOn)
-            .hoverEffect(HoverEffect.Scale)
-            .stateStyles({
-              focused: {
-                .border({
-                  radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-                  width: ImageMenuItem.focusBorderWidth,
-                  color: $r('sys.color.ohos_id_color_focused_outline'),
-                  style: BorderStyle.Solid
-                })
-              },
-              normal: {
-                .border({
-                  radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-                  width: 0
-                })
-              }
-            })
-            .onKeyEvent((event) => {
-              if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-                return
-              }
-              if (event.type === KeyType.Down) {
-                this.isItemOnClick = true
-              }
-              if (event.type === KeyType.Up) {
-                this.isItemOnClick = false
-              }
-            })
-            .onTouch((event) => {
-              if (event.type === TouchType.Down) {
-                this.isItemOnClick = true
-              }
-              if (event.type === TouchType.Up) {
-                this.isItemOnClick = false
-              }
-            })
-            .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
         }
 
         Column() {
@@ -178,7 +136,7 @@ export struct ComposeTitleBar {
       .margin({ left: $r('sys.float.ohos_id_default_padding_start') })
 
       if (this.menuItems !== undefined && this.menuItems.length > 0) {
-        CollapsibleMenuSection({ menuItems: this.menuItems })
+        CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ })
       }
     }
     .width('100%')
@@ -210,10 +168,12 @@ export struct ComposeTitleBar {
 @Component
 struct CollapsibleMenuSection {
   menuItems: Array<ComposeTitleBarMenuItem>
+  index: number
 
   static readonly maxCountOfVisibleItems = 3
   private static readonly focusPadding = 4
   private static readonly marginsNum = 2
+  private firstFocusableIndex = -1
 
   @State isPopupShown: boolean = false
 
@@ -237,16 +197,24 @@ struct CollapsibleMenuSection {
     }
   }
 
+  aboutToAppear() {
+    this.menuItems.forEach((item, index) => {
+      if (item.isEnabled && this.firstFocusableIndex == -1 && index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+        this.firstFocusableIndex = this.index * 1000 + index + 1
+      }
+    })
+  }
+
   build() {
     Column() {
       Row() {
         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
-          ForEach(this.menuItems, (item) => {
-            ImageMenuItem({ item: item })
+          ForEach(this.menuItems, (item, index) => {
+            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
         } else {
-          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item) => {
-            ImageMenuItem({ item: item })
+          ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), (item, index) => {
+            ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
           })
 
           Row() {
@@ -305,7 +273,12 @@ struct CollapsibleMenuSection {
             placement: Placement.Bottom,
             popupColor: Color.White,
             enableArrow: false,
-            onStateChange: (e) => this.isPopupShown = e.isVisible
+            onStateChange: (e) => {
+              this.isPopupShown = e.isVisible
+              if (!e.isVisible) {
+                this.isMoreIconOnClick = false
+              }
+            }
           })
         }
       }
@@ -315,26 +288,32 @@ struct CollapsibleMenuSection {
     .justifyContent(FlexAlign.Center)
   }
 
-  @Builder popupBuilder() {
+  @Builder
+  popupBuilder() {
     Column() {
-      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item, _index?) => {
-        ImageMenuItem({ item: item })
+      ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), (item, index) => {
+        ImageMenuItem({ item: item, index: this.index * 1000 + CollapsibleMenuSection.maxCountOfVisibleItems + index })
       })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
+    .onAppear(() => {
+      focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+    })
   }
 }
 
 @Component
 struct ImageMenuItem {
   item: ComposeTitleBarMenuItem
+  index: number
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
   static readonly buttonBorderRadius = 8
   static readonly focusBorderWidth = 2
   static readonly disabledImageOpacity = 0.4
+  static readonly focusablePrefix = "Id-ComposeTitleBar-ImageMenuItem-"
 
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
@@ -362,6 +341,7 @@ struct ImageMenuItem {
         .width(ImageMenuItem.imageSize)
         .height(ImageMenuItem.imageSize)
         .focusable(this.item.isEnabled)
+        .key(ImageMenuItem.focusablePrefix + this.index)
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)

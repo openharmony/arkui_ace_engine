@@ -3534,7 +3534,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
       and also notify with this.aboutToChange();
     */
     setValueInternal(newValue) {
-        if (newValue == this.wrappedValue_) {
+        if (newValue === this.wrappedValue_) {
             
             return false;
         }
@@ -3574,7 +3574,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         return this.wrappedValue_;
     }
     set(newValue) {
-        if (this.wrappedValue_ == newValue) {
+        if (this.wrappedValue_ === newValue) {
             
             return;
         }
@@ -3744,7 +3744,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
     // assignment to local variable in the form of this.aProp = <object value>
     // set 'writes through` to the ObservedObject
     set(newValue) {
-        if (this.localCopyObservedObject_ == newValue) {
+        if (this.localCopyObservedObject_ === newValue) {
             
             return;
         }
@@ -3990,7 +3990,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
             throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject (assign a new value), \
             @Link/@Consume: no source variable in parent/ancestor @Component. Application error.`);
         }
-        if (this.getUnmonitored() == newValue) {
+        if (this.getUnmonitored() === newValue) {
             
             return;
         }
@@ -4038,7 +4038,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
-        if (this.getUnmonitored() == newValue) {
+        if (this.getUnmonitored() === newValue) {
             
             return;
         }
@@ -4121,7 +4121,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
     }
     // set 'writes through` to the ObservedProperty
     set(newValue) {
-        if (this.obsObject_ == newValue) {
+        if (this.obsObject_ === newValue) {
             
             return;
         }

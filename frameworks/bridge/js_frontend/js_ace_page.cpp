@@ -74,8 +74,8 @@ JsAcePage::~JsAcePage()
     std::shared_ptr<JsPageRadioGroups> radioGroups;
     radioGroups.swap(radioGroups_);
 
-    taskExecutor->PostSyncTask(
-        [&domDoc, &pageTransition, &component, &radioGroups]() {
+    taskExecutor->PostTask(
+        [domDoc, pageTransition, component, radioGroups]() mutable {
             LOGI("release Dom and Components on UI thread");
             domDoc.Reset();
             pageTransition.Reset();

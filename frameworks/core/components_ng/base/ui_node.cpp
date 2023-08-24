@@ -448,11 +448,15 @@ void UINode::DumpTree(int32_t depth)
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+        DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
         DumpInfo();
         DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(children_.size()));
     }
 
     for (const auto& item : GetChildren()) {
+        item->DumpTree(depth + 1);
+    }
+    for (const auto& [item, index] : disappearingChildren_) {
         item->DumpTree(depth + 1);
     }
 }
@@ -483,7 +487,7 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
         return;
     }
     // generate the merged list of children_ and disappearingChildren_
-    auto allChildren = children_;
+    auto allChildren = GetChildren();
     for (auto iter = disappearingChildren_.rbegin(); iter != disappearingChildren_.rend(); ++iter) {
         auto& [disappearingChild, index] = *iter;
         if (index >= allChildren.size()) {

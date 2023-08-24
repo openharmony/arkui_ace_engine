@@ -838,7 +838,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     auto end = currentPos_ + predictSnapOffset;
     scrollSnapMotion_ = AceType::MakeRefPtr<SpringMotion>(start, end, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
 
-    scrollSnapMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
+    scrollSnapMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->ProcessScrollSnapMotion(position);

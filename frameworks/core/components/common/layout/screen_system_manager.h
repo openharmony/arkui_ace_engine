@@ -19,9 +19,11 @@
 #include <array>
 #include <map>
 #include <string>
+
 #include "base/geometry/dimension.h"
 #include "base/log/log.h"
 #include "base/utils/noncopyable.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 enum class ScreenSizeType {
@@ -61,8 +63,11 @@ public:
 
     void OnSurfaceChanged(double width);
 
-    double GetScreenWidth() const
+    double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const
     {
+        if (pipeline) {
+            return pipeline->GetRootWidth();
+        }
         return screenWidth_;
     }
 

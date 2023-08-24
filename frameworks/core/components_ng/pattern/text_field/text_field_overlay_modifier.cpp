@@ -167,8 +167,6 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     if (!cursorVisible_->Get() || textFieldPattern->GetSelectMode() == SelectionMode::SELECT_ALL) {
         return;
     }
-    auto paragraph = textFieldPattern->GetParagraph();
-    CHECK_NULL_VOID(paragraph);
     canvas.Save();
     RSBrush brush;
     brush.SetAntiAlias(true);

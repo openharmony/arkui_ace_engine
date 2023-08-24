@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/interfaces/napi/kits/napi_lib.gni")
 
 # Build libace static library
 template("libace_static") {
@@ -29,11 +30,38 @@ template("libace_static") {
 
     deps = [ "$ace_root/frameworks/base:ace_base_$platform" ]
 
-    if (enable_ng_build) {
+    if (platform == "ohos_ng") {
       deps += [
         "$ace_root/frameworks/bridge:framework_bridge_ng_$platform",
         "$ace_root/frameworks/core:ace_core_ng_$platform",
       ]
+    } else if (platform == "ohos") {
+      deps += [
+        "$ace_root/frameworks/bridge:framework_bridge_$platform",
+        "$ace_root/frameworks/core:ace_core_$platform",
+      ]
+
+      # add napi lib to libace.z.so for auto load in old generation mode
+      foreach(module, common_napi_libs) {
+        target_names = []
+        prefix_dir = []
+        module_path = []
+        module_name = []
+
+        target_names = string_split(module, "/")
+        prefix_dir = target_names[0]
+        if (prefix_dir != module) {
+          module_path = target_names[1]
+        } else {
+          module_path = prefix_dir
+        }
+        module_name = string_replace(module_path, "_", "")
+
+        # prompt and promptaction uses same sourcefile, remove it in static compile
+        if (module_name != "prompt") {
+          deps += [ "$ace_root/interfaces/napi/kits/${module_path}:${module_name}_static_${platform}" ]
+        }
+      }
     } else {
       deps += [
         "$ace_root/frameworks/bridge:framework_bridge_$platform",
@@ -48,7 +76,7 @@ template("libace_static") {
     # build-in ark js engine for preview
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine && defined(config.ark_engine)) {
-      if (enable_ng_build) {
+      if (platform == "ohos_ng") {
         deps += [ "$ace_root/frameworks/bridge/declarative_frontend:declarative_js_engine_ng_ark_$platform" ]
       } else {
         deps += [
@@ -71,7 +99,7 @@ template("ace_bridge_engine") {
     configs = [ "$ace_root:ace_coverage_config" ]
     deps = []
 
-    assert(defined(platform) && platform == "ohos",
+    assert(defined(platform) && (platform == "ohos" || platform == "ohos_ng"),
            "Only ohos need separated engine lib")
 
     if (build_type == "engine") {

@@ -36,13 +36,13 @@ foreach(item, ace_platforms) {
   }
 
   # generate separated libace_engine lib
-  if (platform == "ohos") {
+  if (current_os == "ohos") {
     build_in_engine = defined(engine_config.use_build_in_js_engine) &&
                       engine_config.use_build_in_js_engine
     foreach(engine, support_engines) {
       if (!build_in_engine) {
         # generate libace_engine
-        ace_bridge_engine("libace_engine_${engine.engine_name}") {
+        ace_bridge_engine("libace_engine_${engine.engine_name}_${platform}") {
           platform = item.name
           engine_name = engine.engine_name
           build_type = "engine"
@@ -51,7 +51,8 @@ foreach(item, ace_platforms) {
 
         # generate libace_engine_debug
         if (defined(engine.have_debug) && engine.have_debug) {
-          ace_bridge_engine("libace_engine_${engine.engine_name}_debug") {
+          ace_bridge_engine(
+              "libace_engine_${engine.engine_name}_debug_${platform}") {
             platform = item.name
             engine_name = engine.engine_name
             build_type = "engine"
@@ -60,7 +61,8 @@ foreach(item, ace_platforms) {
         }
 
         # generate libace_engine_declarative
-        ace_bridge_engine("libace_engine_declarative_${engine.engine_name}") {
+        ace_bridge_engine(
+            "libace_engine_declarative_${engine.engine_name}_${platform}") {
           platform = item.name
           engine_name = engine.engine_name
           build_type = "engine_declarative"
@@ -69,7 +71,8 @@ foreach(item, ace_platforms) {
 
       # generate libace_engine_pa
       if (defined(engine_config.js_pa_support) && engine_config.js_pa_support) {
-        ace_bridge_engine("libace_engine_pa_${engine.engine_name}") {
+        ace_bridge_engine(
+            "libace_engine_pa_${engine.engine_name}_${platform}") {
           platform = item.name
           engine_name = engine.engine_name
           build_type = "engine_pa"
@@ -109,7 +112,7 @@ foreach(item, ace_platforms) {
       ]
 
       deps = [
-        "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+        "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
         "$ace_root/frameworks/base:ace_base_ohos",
         "$ace_root/frameworks/base/resource:ace_resource",
         "$ace_root/frameworks/bridge:framework_bridge_ohos",
@@ -138,7 +141,7 @@ config("reduce_eh_frame_config") {
   }
 }
 
-ohos_shared_library("libace") {
+ohos_shared_library("libace_compatible") {
   if (is_ohos) {
     sanitize = {
       integer_overflow = true
@@ -146,6 +149,29 @@ ohos_shared_library("libace") {
       debug = ace_sanitize_debug
     }
     deps = [ "$ace_root/build:libace_static_ohos" ]
+    version_script = "libace.map"
+    innerapi_tags = [ "platformsdk" ]
+    configs = [ "$ace_root:ace_coverage_config" ]
+  } else if (use_mingw_win) {
+    deps = [ "$ace_root/build:libace_static_windows" ]
+  } else if (use_mac) {
+    deps = [ "$ace_root/build:libace_static_mac" ]
+  } else if (use_linux) {
+    deps = [ "$ace_root/build:libace_static_linux" ]
+  }
+
+  part_name = ace_engine_part
+  subsystem_name = ace_engine_subsystem
+}
+
+ohos_shared_library("libace") {
+  if (is_ohos) {
+    sanitize = {
+      integer_overflow = true
+      boundary_sanitize = true
+      debug = ace_sanitize_debug
+    }
+    deps = [ "$ace_root/build:libace_static_ohos_ng" ]
     version_script = "libace.map"
     innerapi_tags = [ "platformsdk" ]
     configs = [ "$ace_root:ace_coverage_config" ]

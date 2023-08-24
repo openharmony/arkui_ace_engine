@@ -25,7 +25,6 @@
 #include "napi_common_ability.h"
 #include "napi_common_want.h"
 #include "napi_remote_object.h"
-#include "source_map_operator.h"
 
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"

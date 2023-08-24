@@ -351,6 +351,59 @@ Rosen::TextDecoration ConvertTxtTextDecoration(TextDecoration textDecoration)
     return convertValue;
 }
 #endif
+#ifndef USE_GRAPHIC_TEXT_GINE
+txt::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle)
+{
+    txt::TextDecorationStyle convertValue = txt::TextDecorationStyle::kSolid;
+    switch (textDecorationStyle) {
+        case TextDecorationStyle::SOLID:
+            convertValue = txt::TextDecorationStyle::kSolid;
+            break;
+        case TextDecorationStyle::DOUBLE:
+            convertValue = txt::TextDecorationStyle::kDouble;
+            break;
+        case TextDecorationStyle::DOTTED:
+            convertValue = txt::TextDecorationStyle::kDotted;
+            break;
+        case TextDecorationStyle::DASHED:
+            convertValue = txt::TextDecorationStyle::kDashed;
+            break;
+        case TextDecorationStyle::WAVY:
+            convertValue = txt::TextDecorationStyle::kWavy;
+            break;
+        default:
+            LOGW("TextDecorationStyle setting error! Now using default TextDecorationStyle");
+            break;
+    }
+    return convertValue;
+}
+#else
+Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle)
+{
+    Rosen::TextDecorationStyle convertValue = Rosen::TextDecorationStyle::SOLID;
+    switch (textDecorationStyle) {
+        case TextDecorationStyle::SOLID:
+            convertValue = Rosen::TextDecorationStyle::SOLID;
+            break;
+        case TextDecorationStyle::DOUBLE:
+            convertValue = Rosen::TextDecorationStyle::DOUBLE;
+            break;
+        case TextDecorationStyle::DOTTED:
+            convertValue = Rosen::TextDecorationStyle::DOTTED;
+            break;
+        case TextDecorationStyle::DASHED:
+            convertValue = Rosen::TextDecorationStyle::DASHED;
+            break;
+        case TextDecorationStyle::WAVY:
+            convertValue = Rosen::TextDecorationStyle::WAVY;
+            break;
+        default:
+            LOGW("TextDecorationStyle setting error! Now using default TextDecorationStyle");
+            break;
+    }
+    return convertValue;
+}
+#endif
 
 #ifndef USE_GRAPHIC_TEXT_GINE
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle)
@@ -384,6 +437,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     txtStyle.text_baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
+    txtStyle.decoration_style = ConvertTxtTextDecorationStyle(textStyle.GetTextDecorationStyle());
     txtStyle.decoration_color = ConvertSkColor(textStyle.GetTextDecorationColor());
     txtStyle.font_families = textStyle.GetFontFamilies();
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();

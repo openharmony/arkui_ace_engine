@@ -36,7 +36,9 @@ constexpr int32_t FONT_STYLE_DEFAULT = 0;
 constexpr int32_t TEXT_BASE_LINE_JSON = 1;
 constexpr int32_t TEXT_BASE_LINE_DEFAULT = 0;
 constexpr int32_t TEXT_DECORATION_JSON = 1;
+constexpr int32_t TEXT_DECORATION_STYLE_JSON = 2;
 constexpr int32_t TEXT_DECORATION_DEFAULT = 0;
+constexpr int32_t TEXT_DECORATION_STYLE_DEFAULT = 0;
 constexpr Dimension WORD_SPACING = 10.0_px;
 constexpr Dimension WORD_SPACING_DEFAULT = 0.0_px;
 constexpr Dimension LETTER_SPACING = 10.0_px;
@@ -1599,5 +1601,90 @@ HWTEST_F(TextStyleCreatorTest, TextStyleCreator037, TestSize.Level1)
     EXPECT_TRUE(text2 != nullptr);
     const auto& textStyle2 = text2->GetTextStyle();
     EXPECT_EQ(textStyle2.GetTextCase(), TextCase::NORMAL);
+}
+
+/**
+ * @tc.name: TextStyleCreator038
+ * @tc.desc: Test TextDecorationStyle of text style.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create component based on json string.
+     */
+    const std::string jsonText = "{                               "
+                                 "  \"className\": \"Text\",      "
+                                 "  \"textStyle\":                "
+                                 "{                               "
+                                 "  \"className\": \"TextStyle\", "
+                                 "  \"textDecoration\": 1,        "
+                                 "  \"textDecorationStyle\": 2    "
+                                 "}"
+                                 "}";
+    RefPtr<TextComponent> text = CreateComponent(jsonText);
+    /**
+     * @tc.steps: step2. Check all the properties matched.
+     * @tc.expected: step2. All the properties are matched.
+     */
+    EXPECT_TRUE(text != nullptr);
+    const auto& textStyle = text->GetTextStyle();
+    EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecoration()), TEXT_DECORATION_JSON);
+    EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecorationStyle()), TEXT_DECORATION_STYLE_JSON);
+}
+
+/**
+ * @tc.name: TextStyleCreator039
+ * @tc.desc: Test TextDecorationStyle set by default value when value is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create component based on json string.
+     */
+    const std::string jsonText = "{                               "
+                                 "  \"className\": \"Text\",      "
+                                 "  \"textStyle\":                "
+                                 "{                               "
+                                 "  \"className\": \"TextStyle\", "
+                                 "  \"textDecorationStyle\": 10   "
+                                 "}"
+                                 "}";
+    RefPtr<TextComponent> text = CreateComponent(jsonText);
+    /**
+     * @tc.steps: step2. Check TextDecorationStyle matched.
+     * @tc.expected: step2. TextDecorationStyle is matched.
+     */
+    EXPECT_TRUE(text != nullptr);
+    const auto& textStyle = text->GetTextStyle();
+    EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecorationStyle()), TEXT_DECORATION_STYLE_DEFAULT);
+}
+
+/**
+ * @tc.name: TextStyleCreator040
+ * @tc.desc: Test TextDecorationStyle when initialized by default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextStyleCreatorTest, TextStyleCreator040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create component based on json string.
+     */
+    const std::string jsonText = "{                               "
+                                 "  \"className\": \"Text\",      "
+                                 "  \"textStyle\":                "
+                                 "{                               "
+                                 "  \"className\": \"TextStyle\"  "
+                                 "}"
+                                 "}";
+    RefPtr<TextComponent> text = CreateComponent(jsonText);
+    /**
+     * @tc.steps: step2. Check TextDecorationStyle matched.
+     * @tc.expected: step2. TextDecorationStyle is matched.
+     */
+    EXPECT_TRUE(text != nullptr);
+    const auto& textStyle = text->GetTextStyle();
+    EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecorationStyle()), TEXT_DECORATION_STYLE_DEFAULT);
 }
 } // namespace OHOS::Ace

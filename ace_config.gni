@@ -35,9 +35,6 @@ declare_args() {
   # Enable when build for cross platform
   is_cross_platform_build = false
 
-  # Enable build for new ng pipeline, also will use new flutter
-  enable_ng_build = false
-
   # Enable metal in iOS or MacOS
   shell_enable_metal = false
 
@@ -187,10 +184,6 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
 
 if (enable_graphic_text_gine) {
   ace_common_defines += [ "USE_GRAPHIC_TEXT_GINE" ]
-}
-
-if (enable_ng_build) {
-  ace_common_defines += [ "NG_BUILD" ]
 }
 
 if (!defined(global_parts_info) ||

@@ -800,18 +800,17 @@ HWTEST_F(NavBarTestNg, NavBarPattern005, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call OnWindowSizeChanged func when PrevMenuIsCustom is true
-     * @tc.expected: Set isItemActionFired is false
+     * @tc.expected: Set isItemActionFired is true
      */
     navBarNode_->UpdatePrevMenuIsCustom(true);
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
-    EXPECT_FALSE(isItemActionFired);
+    EXPECT_TRUE(isItemActionFired);
 
     /**
      * @tc.steps: step4. call OnWindowSizeChanged func when PrevMenuIsCustom is false
-     * @tc.expected: GetTheme function is called and isItemActionFired is true
+     * @tc.expected: isItemActionFired is true
      */
     navBarNode_->UpdatePrevMenuIsCustom(false);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     EXPECT_TRUE(isItemActionFired);
 }
@@ -874,7 +873,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     ASSERT_NE(theme, nullptr);
     theme->toolbarLimitGridCount_ = 1;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(theme));
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
 
     /**
@@ -882,7 +880,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
      * @tc.expected:GetTheme function is called
      */
     SystemProperties::SetDeviceType(DeviceType::TABLET);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(theme));
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     SystemProperties::SetDeviceType(DeviceType::PHONE);
 }
@@ -987,8 +984,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern009, TestSize.Level1)
     navBarNode_->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
     ASSERT_TRUE(navBarNode_->GetMenuNodeOperation().has_value());
     navBarpattern_->OnModifyDone();
-    ASSERT_NE(titleBarNode_->GetLastChild(), nullptr);
-    EXPECT_EQ(titleBarNode_->GetLastChild()->GetTag(), NAV_BAR_NODE_MENU);
+    ASSERT_EQ(titleBarNode_->GetLastChild(), nullptr);
 
     /**
      * @tc.steps: step6. Call OnModifyDone when EventHub is not enabled, DeviceOrientation is ORIENTATION_UNDEFINED,
@@ -1008,8 +1004,8 @@ HWTEST_F(NavBarTestNg, NavBarPattern009, TestSize.Level1)
     testParameters.menuItems.push_back(testParameters.menuItem);
     navBarpattern_->SetTitleBarMenuItems(testParameters.menuItems);
     navBarpattern_->OnModifyDone();
-    ASSERT_NE(titleBarNode_->GetLastChild(), nullptr);
-    EXPECT_EQ(titleBarNode_->GetLastChild()->GetTag(), V2::NAVIGATION_MENU_ETS_TAG);
+    ASSERT_EQ(titleBarNode_->GetLastChild(), nullptr);
+    EXPECT_NE(navBarNode_->GetLandscapeMenu(), nullptr);
 
     /**
      * @tc.steps: step9. Call OnModifyDone when MostMenuItemCountInBar is 1.
@@ -1017,8 +1013,8 @@ HWTEST_F(NavBarTestNg, NavBarPattern009, TestSize.Level1)
      */
     testParameters.theme->mostMenuItemCountInBar_ = 1;
     navBarpattern_->OnModifyDone();
-    ASSERT_NE(titleBarNode_->GetLastChild(), nullptr);
-    EXPECT_EQ(titleBarNode_->GetLastChild()->GetTag(), V2::NAVIGATION_MENU_ETS_TAG);
+    ASSERT_EQ(titleBarNode_->GetLastChild(), nullptr);
+    EXPECT_NE(navBarNode_->GetLandscapeMenu(), nullptr);
 }
 
 /**

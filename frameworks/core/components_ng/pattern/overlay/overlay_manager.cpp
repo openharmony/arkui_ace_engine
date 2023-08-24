@@ -73,7 +73,7 @@ constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
-constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
+constexpr int32_t PIXELMAP_ANIMATION_DURATION = 100;
 constexpr float PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE = 0.5f;
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -1091,6 +1091,10 @@ bool OverlayManager::RemoveModalInOverlay()
     auto topModalNode = modalStack_.top().Upgrade();
     CHECK_NULL_RETURN(topModalNode, false);
     ModalPageLostFocus(topModalNode);
+    auto pattern = topModalNode->GetPattern<PopupBasePattern>();
+    if (isProhibitBack_ && pattern->GetTargetId() < 0) {
+        return true;
+    }
     if (!ModalExitProcess(topModalNode)) {
         return false;
     }
@@ -2106,8 +2110,10 @@ void OverlayManager::RemoveEventColumn()
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
-int32_t OverlayManager::CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+int32_t OverlayManager::CreateModalUIExtension(
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack)
 {
+    isProhibitBack_ = isProhibitBack;
     ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
     auto uiExtNode = ModalUIExtension::Create(want, callbacks);

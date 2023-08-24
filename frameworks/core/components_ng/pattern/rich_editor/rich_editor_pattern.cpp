@@ -60,10 +60,10 @@ RichEditorPattern::~RichEditorPattern()
 void RichEditorPattern::OnModifyDone()
 {
     TextPattern::OnModifyDone();
-    copyOption_ = CopyOptions::Distributed;
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    copyOption_ = layoutProperty->GetCopyOption().value_or(CopyOptions::Distributed);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     context->AddOnAreaChangeNode(host->GetId());
@@ -2274,6 +2274,11 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         CHECK_NULL_VOID_NOLOG(host);
 
         pattern->UpdateSelectMenuInfo(hasData, selectInfo);
+        if (pattern->copyOption_ == CopyOptions::None) {
+            selectInfo.menuInfo.showCopy = false;
+            selectInfo.menuInfo.showCut = false;
+        }
+
         selectInfo.menuCallback.onCopy = [weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);

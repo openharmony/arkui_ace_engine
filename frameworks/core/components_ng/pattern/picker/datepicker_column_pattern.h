@@ -251,6 +251,26 @@ public:
         return isTossStatus_;
     }
 
+    void SetYOffset(double value)
+    {
+        yOffset_ = value;
+    }
+
+    bool GetTouchBreakStatus()
+    {
+        return touchBreak_;
+    }
+
+    bool GetClickBreakStatus()
+    {
+        return clickBreak_;
+    }
+
+    void SetclickBreak(bool value)
+    {
+        clickBreak_ = value;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -266,6 +286,7 @@ private:
 
     std::vector<DatePickerOptionProperty> optionProperties_;
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<DatePickerEventParam> param);
+    RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void OnAroundButtonClick(RefPtr<DatePickerEventParam> param);
     std::vector<int32_t> algorithmOffset_;
     void ResetAlgorithmOffset();
@@ -324,9 +345,13 @@ private:
     FontWeight SelectedWeight_;
     FontWeight CandidateWeight_;
     double offsetCurSet_ = 0.0;
+    double distancePercent_ = 0.0;
     Color pressColor_;
     Color hoverColor_;
     bool isTossStatus_ = false;
+    bool clickBreak_ = false;
+    bool touchBreak_ = false;
+    bool animationBreak_ = false;
     double deltaSize_ = 0.0;
     RefPtr<PanEvent> panEvent_;
     bool pressed_ = false;

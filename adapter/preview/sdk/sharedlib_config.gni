@@ -146,7 +146,12 @@ common_bin = [
     part_name = "hilog"
   },
   {
-    label = "//foundation/arkui/ace_engine/build:libace"
+    label = "//foundation/arkui/ace_engine/build:libace_compatible"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_forward_compatibility"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },

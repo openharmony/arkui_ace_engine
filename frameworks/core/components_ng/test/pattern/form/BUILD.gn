@@ -67,6 +67,7 @@ ace_unittest("form_test_ng") {
       "c_utils:utils",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "graphic_2d:librender_service_client",
       "input:libmmi-client",
     ]
   }

@@ -31,7 +31,7 @@ class ClickRecognizer : public MultiFingersRecognizer {
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(int32_t fingers, int32_t count) : MultiFingersRecognizer(fingers), count_(count) {}
+    ClickRecognizer(int32_t fingers, int32_t count);
 
     ~ClickRecognizer() override = default;
 

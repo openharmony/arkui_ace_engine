@@ -32,10 +32,10 @@ template("napi_componentutils_static") {
       "$root_out_dir/arkui/framework",
     ]
 
-    sources = [
-      "$ace_root/frameworks/base/geometry/matrix4.cpp",
-      "js_component_utils.cpp",
-    ]
+    sources = [ "js_component_utils.cpp" ]
+    if (platform != "ohos") {
+      sources += [ "$ace_root/frameworks/base/geometry/matrix4.cpp" ]
+    }
     deps = []
     if (platform != "" && is_cross_platform_build) {
       deps += [ "${crossplatform_plugin_root}/libs/napi:napi_$platform" ]

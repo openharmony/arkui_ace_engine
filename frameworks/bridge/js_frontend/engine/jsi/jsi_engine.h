@@ -161,9 +161,9 @@ public:
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
-    FrontendDelegate* GetFrontend() override
+    RefPtr<FrontendDelegate> GetFrontend() override
     {
-        return AceType::RawPtr(engineInstance_->GetDelegate());
+        return engineInstance_->GetDelegate();
     }
 
 private:

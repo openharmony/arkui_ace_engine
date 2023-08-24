@@ -272,7 +272,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textLayoutProperty->UpdateFlexShrink(1.0f);
+    if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
+        textLayoutProperty->UpdateFlexShrink(1.0f);
+    }
 
     // Update property of image.
     auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();

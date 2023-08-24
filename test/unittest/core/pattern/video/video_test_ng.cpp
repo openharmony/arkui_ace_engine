@@ -1267,7 +1267,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest017, TestSize.Level1)
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     videoPattern->renderContextForMediaPlayer_ = mockRenderContext;
-    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(videoPattern->renderContextForMediaPlayer_))),
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(videoPattern->renderContextForMediaPlayer_),
         SetBounds(0.0f, 0.0f, SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL))
         .WillOnce(Return());
 

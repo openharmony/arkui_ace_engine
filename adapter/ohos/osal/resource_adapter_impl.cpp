@@ -227,8 +227,19 @@ Color ResourceAdapterImpl::GetColorByName(const std::string& resName)
 
 Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
 {
+    float dimensionFloat = 0.0f;
+#ifdef NG_BUILD
+    std::string unit;
+    auto manager = GetResourceManager();
+    if (manager) {
+        auto state = manager->GetFloatById(resId, dimensionFloat, unit);
+        if (state != Global::Resource::SUCCESS) {
+            LOGE("NG: GetDimension error, id=%{public}u", resId);
+        }
+    }
+    return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
+#else
     if (Container::IsCurrentUseNewPipeline()) {
-        float dimensionFloat = 0.0f;
         std::string unit;
         auto manager = GetResourceManager();
         if (manager) {
@@ -240,8 +251,6 @@ Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
         return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
     }
 
-    float dimensionFloat = 0.0f;
-
     auto manager = GetResourceManager();
     CHECK_NULL_RETURN_NOLOG(manager, Dimension(static_cast<double>(dimensionFloat)));
     auto state = manager->GetFloatById(resId, dimensionFloat);
@@ -249,6 +258,7 @@ Dimension ResourceAdapterImpl::GetDimension(uint32_t resId)
         LOGE("GetDimension error, id=%{public}u", resId);
     }
     return Dimension(static_cast<double>(dimensionFloat));
+#endif
 }
 
 Dimension ResourceAdapterImpl::GetDimensionByName(const std::string& resName)

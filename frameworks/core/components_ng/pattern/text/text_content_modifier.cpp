@@ -149,6 +149,7 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
 void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 {
     textDecoration_ = textStyle.GetTextDecoration();
+    textDecorationStyle_ = textStyle.GetTextDecorationStyle();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
     textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(
         textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha());
@@ -327,6 +328,9 @@ void TextContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
             textStyle.SetTextDecorationColor(textDecorationColor_.value());
         }
     }
+    if (textDecorationStyle_.has_value()) {
+        textStyle.SetTextDecorationStyle(textDecorationStyle_.value());
+    }
 }
 
 void TextContentModifier::ModifyBaselineOffsetInTextStyle(TextStyle& textStyle)
@@ -489,6 +493,11 @@ void TextContentModifier::SetTextDecoration(const TextDecoration& type)
     } else {
         textDecorationColorAlpha_->Set(static_cast<float>(textDecorationColor_.value().GetAlpha()));
     }
+}
+
+void TextContentModifier::SetTextDecorationStyle(const TextDecorationStyle textDecorationStyle)
+{
+    textDecorationStyle_ = textDecorationStyle;
 }
 
 void TextContentModifier::SetTextDecorationColor(const Color& color)

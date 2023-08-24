@@ -26,6 +26,7 @@
 #include "core/components_ng/test/mock/rosen/testing_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_font_collection.h"
 #include "core/components_ng/test/mock/rosen/testing_image.h"
+#include "core/components_ng/test/mock/rosen/testing_image_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_mask_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_path.h"
 #include "core/components_ng/test/mock/rosen/testing_path_effect.h"
@@ -56,6 +57,7 @@ using RSPathEffect = Testing::TestingPathEffect;
 using RSFilter = Testing::TestingFilter;
 using RSColor = Testing::TestingColor;
 using RSMaskFilter = Testing::TestingMaskFilter;
+using RSImageFilter = Testing::TestingImageFilter;
 using RSBlurType = Testing::BlurType;
 using RSTileMode = Testing::TileMode;
 using RSRRect = Testing::TestingRect;

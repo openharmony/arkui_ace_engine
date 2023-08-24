@@ -86,4 +86,8 @@ build_component_ng("render_ng") {
     ]
     rosen_sources += [ "adapter/rosen_render_surface_mingw.cpp" ]
   }
+
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+    external_deps = [ "player_framework:media_client" ]
+  }
 }

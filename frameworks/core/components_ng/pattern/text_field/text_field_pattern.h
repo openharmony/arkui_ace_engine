@@ -278,6 +278,7 @@ public:
 
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void UpdateInputFilterErrorText(const std::string& errorText) override;
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
@@ -686,6 +687,7 @@ public:
     }
 
     void UpdateEditingValueToRecord();
+    void UpdateEditingValueCaretPositionToRecord();
     void UpdateScrollBarOffset() override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override
@@ -1003,6 +1005,12 @@ public:
     }
 
     void DumpInfo() override;
+    void OnColorConfigurationUpdate() override;
+
+    void ShowPasswordIconChange()
+    {
+        caretUpdateType_ = CaretUpdateType::VISIBLE_PASSWORD_ICON;
+    }
 
 private:
     bool HasFocus() const;
@@ -1063,9 +1071,10 @@ private:
     void UpdateSelection(int32_t start, int32_t end);
     void FireOnSelectionChange(int32_t start, int32_t end);
     void UpdateDestinationToCaretByEvent();
-    void UpdateCaretOffsetByLastTouchOffset();
+    void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
+    bool UpdateCaretRect();
     bool CharLineChanged(int32_t caretPosition);
 
     void ScheduleCursorTwinkling();
@@ -1082,6 +1091,7 @@ private:
 
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void BeforeCreateLayoutWrapper() override;
 
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
@@ -1192,11 +1202,7 @@ private:
     bool focusEventInitialized_ = false;
     bool isMousePressed_ = false;
     bool needCloseOverlay_ = true;
-#if defined(ENABLE_STANDARD_INPUT) || defined(PREVIEW)
     bool textObscured_ = true;
-#else
-    bool textObscured_ = false;
-#endif
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;

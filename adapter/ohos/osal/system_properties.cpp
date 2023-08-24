@@ -419,7 +419,12 @@ std::string SystemProperties::GetPartialUpdatePkg()
 
 int32_t SystemProperties::GetSvgMode()
 {
+#ifdef NG_BUILD
+    // disable ace svg before updated to new pipeline
+    return system::GetIntParameter<int>("persist.ace.svg.mode", 0);
+#else
     return system::GetIntParameter<int>("persist.ace.svg.mode", 1);
+#endif
 }
 
 bool SystemProperties::GetAllowWindowOpenMethodEnabled()

@@ -167,6 +167,8 @@
 #endif
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_richtext.h"
+#include "bridge/declarative_frontend/jsview/js_web.h"
+#include "bridge/declarative_frontend/jsview/js_web_controller.h"
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -182,6 +184,16 @@
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_screen.h"
 #include "frameworks/bridge/declarative_frontend/jsview/window_scene/js_window_scene.h"
+#endif
+#include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
+#include "bridge/declarative_frontend/jsview/js_location_button.h"
+#include "bridge/declarative_frontend/jsview/js_paste_button.h"
+#include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
+#include "bridge/declarative_frontend/jsview/js_richeditor.h"
+#include "bridge/declarative_frontend/jsview/js_save_button.h"
+#include "bridge/declarative_frontend/sharedata/js_share_data.h"
+#ifdef EFFECT_COMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -462,6 +474,25 @@ void JsBindViews(BindingTarget globalObj)
     JSRelativeContainer::JSBind(globalObj);
     JSPatternLock::JSBind(globalObj);
     JSPatternLockController::JSBind(globalObj);
+#endif
+    // add missing binds to ng build
+    JsDragFunction::JSBind(globalObj);
+    JSCalendarPicker::JSBind(globalObj);
+    JSContextMenu::JSBind(globalObj);
+#ifdef EFFECT_COMPONENT_SUPPORTED
+    JSEffectComponent::JSBind(globalObj);
+#endif
+    JSFormLink::JSBind(globalObj);
+    JSLocationButton::JSBind(globalObj);
+    JSPasteButton::JSBind(globalObj);
+    JSProfiler::JSBind(globalObj);
+    JSRichEditor::JSBind(globalObj);
+    JSRichEditorController::JSBind(globalObj);
+    JSSaveButton::JSBind(globalObj);
+    JSShareData::JSBind(globalObj);
+#ifdef WEB_SUPPORTED
+    JSWeb::JSBind(globalObj);
+    JSWebController::JSBind(globalObj);
 #endif
 }
 

@@ -59,7 +59,7 @@ void SimpleSpringNode::NotifyNext(double endValue, double initVelocity)
         LOGE("Notify next failed. Adapter is null. index: %{public}d", index_);
         return;
     }
-    if (this != AceType::RawPtr(adapter_->GetControlNode())) {
+    if (Claim(this) != adapter_->GetControlNode()) {
         return;
     }
     auto currentNode = adapter_->GetNext(AceType::WeakClaim(this).Upgrade());

@@ -63,6 +63,11 @@ public:
 
     void StopTossAnimation();
 
+    double GetTossEndPosition()
+    {
+        return end_;
+    }
+
 private:
     double GetCurrentTime() const;
 
@@ -72,6 +77,7 @@ private:
     double timeEnd_ = 0.0;
     double speed_ = 0.0;
     int32_t showCount_ = 0;
+    double end_ = 0.0;
     RefPtr<PickerAnimation> toss_;
     WeakPtr<TimePickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;
@@ -80,7 +86,7 @@ private:
     RefPtr<SpringMotion> springMotion_;
     RefPtr<SpringProperty> spring_;
     RefPtr<Animator> springController_;
-    
+
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerTossAnimationController);
 };
 } // namespace OHOS::Ace::NG

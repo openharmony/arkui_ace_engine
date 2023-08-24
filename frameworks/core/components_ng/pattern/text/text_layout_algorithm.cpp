@@ -628,6 +628,10 @@ void TextLayoutAlgorithm::SetPropertyToModifier(
     if (textDecorationColor.has_value()) {
         modifier->SetTextDecorationColor(textDecorationColor.value());
     }
+    auto textDecorationStyle = layoutProperty->GetTextDecorationStyle();
+    if (textDecorationStyle.has_value()) {
+        modifier->SetTextDecorationStyle(textDecorationStyle.value());
+    }
     auto textDecoration = layoutProperty->GetTextDecoration();
     if (textDecoration.has_value()) {
         modifier->SetTextDecoration(textDecoration.value());

@@ -439,6 +439,7 @@ void DragWindowOhos::DrawText(
     std::shared_ptr<Rosen::Typography> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText)
 #endif
 {
+#ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(paragraph);
     auto surfaceNode = dragWindow_->GetSurfaceNode();
@@ -530,6 +531,9 @@ void DragWindowOhos::DrawText(
 #endif
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
+#endif
+#else
+    LOGE("not supported in new pipeline");
 #endif
 }
 

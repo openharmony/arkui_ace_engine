@@ -90,7 +90,7 @@ ohos_unittest("ThemeManagerTest") {
   ]
 
   deps = [
-    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$cjson_root:cjson",
     "//third_party/googletest:gtest_main",

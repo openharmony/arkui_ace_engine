@@ -57,7 +57,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    auto customSize = dialogProp->GetUseCustomStyle().value_or(false);
+    customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
@@ -68,12 +68,13 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto inset = pipeline->GetSafeArea();
-    auto maxSize = layoutConstraint->maxSize;
-    maxSize.MinusPadding(0, 0, inset.top_.Length(), 0);
-    childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
+
     // constraint child size unless developer is using customStyle
-    if (!customSize) {
+    if (!customSize_) {
+        auto inset = pipeline->GetSafeArea();
+        auto maxSize = layoutConstraint->maxSize;
+        maxSize.MinusPadding(0, 0, inset.top_.Length(), 0);
+        childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
         ComputeInnerLayoutParam(childLayoutConstraint);
     }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -406,7 +407,7 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
     auto systemInset = pipelineContext->GetSafeArea();
-    if (topLeftPoint.GetY() < systemInset.top_.end) {
+    if (!customSize_ && topLeftPoint.GetY() < systemInset.top_.end) {
         topLeftPoint.SetY(systemInset.top_.end);
     }
     auto childOffset = topLeftPoint + dialogOffset;

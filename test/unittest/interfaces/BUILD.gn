@@ -43,6 +43,7 @@ ohos_unittest("ui_content_test") {
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
     "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
+    "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility",
     "//third_party/googletest:gmock_main",
   ]
 

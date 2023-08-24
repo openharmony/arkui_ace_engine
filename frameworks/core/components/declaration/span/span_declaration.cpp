@@ -134,6 +134,22 @@ bool SpanDeclaration::SetSpecializedStyle(const std::pair<std::string, std::stri
                 }
                 declaration.isSetTextDecoration_ = true;
             } },
+        { DOM_TEXT_DECORATION_COLOR,
+            [](const std::string& val, SpanDeclaration& declaration) {
+                auto& specializedStyle = declaration.MaybeResetStyle<SpanStyle>(StyleTag::SPECIALIZED_STYLE);
+                if (specializedStyle.IsValid()) {
+                    specializedStyle.spanStyle.SetTextDecorationColor(declaration.ParseColor(val));
+                }
+                declaration.isSetTextDecorationColor_ = true;
+            } },
+        { DOM_TEXT_DECORATION_STYLE,
+            [](const std::string& val, SpanDeclaration& declaration) {
+                auto& specializedStyle = declaration.MaybeResetStyle<SpanStyle>(StyleTag::SPECIALIZED_STYLE);
+                if (specializedStyle.IsValid()) {
+                    specializedStyle.spanStyle.SetTextDecorationStyle(ConvertStrToTextDecorationStyle(val));
+                }
+                declaration.isSetTextDecorationStyle_ = true;
+            } },
     };
     auto spanStyleIter = BinarySearchFindIndex(spanStyleOperators, ArraySize(spanStyleOperators), style.first.c_str());
     if (spanStyleIter != -1) {

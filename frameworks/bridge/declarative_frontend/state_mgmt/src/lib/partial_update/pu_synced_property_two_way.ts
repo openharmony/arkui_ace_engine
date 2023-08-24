@@ -64,7 +64,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
             @Link/@Consume: no source variable in parent/ancestor @Component. Application error.`);
     }
 
-    if (this.getUnmonitored() == newValue) {
+    if (this.getUnmonitored() === newValue) {
       stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
       return;
     }
@@ -123,7 +123,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
-    if (this.getUnmonitored() == newValue) {
+    if (this.getUnmonitored() === newValue) {
       stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value  - nothing to do.`);
       return;
     }

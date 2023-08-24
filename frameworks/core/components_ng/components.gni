@@ -140,7 +140,7 @@ template("build_component_ng") {
         ]
       }
 
-      if (platform == "ohos") {
+      if (platform == "ohos" || platform == "ohos_ng") {
         deps += [
           "//third_party/EGL:libEGL",
           "//third_party/openGLES:libGLES",

@@ -214,7 +214,7 @@ template("ace_core_source_set") {
       sources += [ "common/flutter/flutter_window.cpp" ]
     }
 
-    if (platform == "ohos") {
+    if (platform == "ohos" || platform == "ohos_ng") {
       sources -= [ "common/anr_thread.cpp" ]
     }
 
@@ -613,7 +613,6 @@ template("ace_core_ng_source_set") {
       "animation/anticipate_curve.cpp",
       "animation/bilateral_spring_adapter.cpp",
       "animation/bilateral_spring_node.cpp",
-      "animation/card_transition_controller.cpp",
       "animation/chain_animation.cpp",
       "animation/cubic_curve.cpp",
       "animation/curves.cpp",
@@ -722,19 +721,13 @@ template("ace_core_ng_source_set") {
       # properties
       "components/common/painter/rosen_decoration_painter.cpp",
       "components/common/properties/alignment.cpp",
-      "components/common/properties/animatable_path.cpp",
       "components/common/properties/border.cpp",
       "components/common/properties/border_edge.cpp",
       "components/common/properties/border_image.cpp",
-      "components/common/properties/border_image_edge.cpp",
       "components/common/properties/clip_path.cpp",
       "components/common/properties/color.cpp",
-      "components/common/properties/color_factory.cpp",
       "components/common/properties/decoration.cpp",
-      "components/common/properties/edge.cpp",
       "components/common/properties/motion_path_evaluator.cpp",
-      "components/common/properties/page_transition_option.cpp",
-      "components/common/properties/scroll_bar.cpp",
       "components/common/properties/shadow.cpp",
       "components/common/properties/shadow_config.cpp",
       "components/common/properties/text_style.cpp",
@@ -749,15 +742,11 @@ template("ace_core_ng_source_set") {
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
-      "components/common/painter/flutter_decoration_painter.cpp",
-      "components/common/painter/flutter_svg_painter.cpp",
+      "components/common/painter/rosen_svg_painter.cpp",
       "components/custom_paint/render_custom_paint_creator.cpp",
       "components/custom_paint/render_offscreen_canvas_creator.cpp",
       "components/custom_paint/rosen_render_custom_paint.cpp",
-      "components/custom_paint/rosen_render_offscreen_canvas.cpp",
-      "components/declaration/common/event.cpp",
       "components/font/constants_converter.cpp",
-      "components/font/flutter_font_collection.cpp",
       "components/font/font_loader_creator.cpp",
       "components/font/font_manager_creator.cpp",
       "components/font/rosen_font_collection.cpp",
@@ -767,16 +756,13 @@ template("ace_core_ng_source_set") {
       "components/picker/picker_animation.cpp",
       "components/picker/picker_data.cpp",
       "components/scroll/scrollable.cpp",
-      "components/svg/svg_transform.cpp",
       "components/theme/app_theme.cpp",
       "components/theme/icon_theme.cpp",
       "components/theme/theme_attributes.cpp",
       "components/theme/theme_constants.cpp",
       "components/theme/theme_manager_impl.cpp",
       "components/theme/theme_utils.cpp",
-      "components/video/resource/ext_surface.cpp",
       "components/video/resource/player.cpp",
-      "components/video/resource/resource.cpp",
 
       # v2 inspector
       "components_v2/grid/grid_event.cpp",
@@ -788,6 +774,9 @@ template("ace_core_ng_source_set") {
       "common/flutter/flutter_asset_manager.cpp",
       "common/flutter/flutter_task_executor.cpp",
       "common/flutter/flutter_thread_model.cpp",
+
+      #declaration
+      "components/declaration/common/declaration.cpp",
     ]
     include_dirs = []
     if (is_cross_platform_build) {
@@ -797,7 +786,7 @@ template("ace_core_ng_source_set") {
       ]
     }
 
-    if (platform == "ohos") {
+    if (platform == "ohos" || platform == "ohos_ng") {
       sources -= [ "common/anr_thread.cpp" ]
     }
 
@@ -823,10 +812,18 @@ template("ace_core_ng_source_set") {
         deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
       }
 
-      deps += [
-        "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
-        "$skia_root_new:skia_$platform",
-      ]
+      deps += [ "$skia_root_new:skia_$platform" ]
+      if (is_ohos) {
+        sources += [
+          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
+          "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
+        ]
+      } else {
+        sources += [
+          "$flutter_root/engine/flutter/common/task_runners.cc",
+          "$flutter_root/engine/flutter/shell/common/thread_host.cc",
+        ]
+      }
     } else {
       deps += [
         "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
@@ -834,8 +831,15 @@ template("ace_core_ng_source_set") {
       ]
     }
 
+    external_deps = []
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
       sources += [ "gestures/gesture_info.cpp" ]
+    }
+
+    if (defined(config.remote_window_support) && config.remote_window_support) {
+      if (!use_mingw_win && !use_mac && !use_linux) {
+        deps += [ "$ace_root/frameworks/core/components_ng/pattern/remote_window:ace_core_components_remote_window_pattern_ng_$platform" ]
+      }
     }
 
     if (defined(config.build_container_scope_lib) &&
@@ -859,6 +863,7 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
 
@@ -877,8 +882,35 @@ template("ace_core_ng_source_set") {
     }
     if (defined(config.web_components_support) &&
         config.web_components_support) {
+      include_dirs += [
+        "$ability_runtime_path/interfaces/kits/native/appkit/app",
+        "//foundation/window/window_manager/interfaces/innerkits/wm",
+        "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+      ]
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
+      sources += [
+        "components/web/resource/web_client_impl.cpp",
+        "components/web/resource/web_configuration_observer.cpp",
+        "components/web/resource/web_delegate.cpp",
+        "components/web/resource/web_javascript_result_callback.cpp",
+        "components/web/resource/web_resource.cpp",
+        "components/web/web_component.cpp",
+      ]
+
+      external_deps += [
+        "ability_base:base",
+        "ability_base:configuration",
+        "ability_runtime:app_manager",
+        "ability_runtime:appkit_native",
+        "c_utils:utils",
+        "graphic_2d:surface",
+        "init:libbegetutil",
+        "ipc:ipc_core",
+        "webview:libnweb",
+        "window_manager:libwm",
+      ]
     }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       if (!use_mingw_win && !use_mac && !use_linux) {
@@ -912,6 +944,43 @@ template("ace_core_ng_source_set") {
         }
       }
     }
+    if (defined(config.window_scene_support) && config.window_scene_support) {
+      deps += [
+        "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern/window_scene:ace_core_components_window_scene_$platform",
+      ]
+    }
+
+    # add sources needed by phone, tv and wearable. previews do not need them
+    if (defined(config.connect_server_support) &&
+        config.connect_server_support) {
+      if (use_ios) {
+        include_dirs += [ "$ark_toolchain_path" ]
+      }
+      sources += [ "common/connect_server_manager.cpp" ]
+    }
+
+    if (defined(config.hdc_register_support) && config.hdc_register_support) {
+      sources += [ "common/hdc_register.cpp" ]
+    }
+
+    if (defined(config.plugin_components_support) &&
+        config.plugin_components_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/plugin:ace_core_components_plugin_pattern_ng_$platform" ]
+      sources += [ "common/plugin_manager.cpp" ]
+      external_deps += [ "c_utils:utils" ]
+    }
+
+    deps += [ "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform" ]
+
+    if (defined(config.model_component_support) &&
+        config.model_component_support) {
+      deps += [
+        "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_model_component_ng_$platform",
+      ]
+    }
+
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
   }

@@ -457,16 +457,22 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
      * @tc.steps: step4. Change the sheetStyle.
      * @tc.expected: the sheetStyle is updated successfully
      */
-    sheetStyle.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetMode = SheetMode::AUTO;
     sheetStyle.showDragBar = false;
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->InitialLayoutProps();
+    sheetStyle.sheetMode = SheetMode::MEDIUM;
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->InitialLayoutProps();
     EXPECT_EQ(sheetPattern->GetTargetId(), topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId());
     sheetNodeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     style = sheetNodeLayoutProperty->GetSheetStyle();
-    EXPECT_EQ(style->sheetMode.value(), SheetMode::LARGE);
+    EXPECT_EQ(style->sheetMode.value(), SheetMode::MEDIUM);
     EXPECT_EQ(style->showDragBar.value(), false);
 
     /**
@@ -1177,49 +1183,78 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
+
 /**
- * @tc.name: PopupTest005
- * @tc.desc: Test OverlayManager::HideCustomPopups when useCustom is true.
+ * @tc.name: SheetPresentationPattern1
+ * @tc.desc: Test SheetPresentationPattern create sheet page.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestNg, PopupTest005, TestSize.Level1)
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern1, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create target node and popupInfo.
+     * @tc.steps: step1. create target node.
      */
     auto targetNode = CreateTargetNode();
     auto targetId = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
-    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto popupNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
-    PopupInfo popupInfo;
-    popupInfo.popupId = popupId;
-    popupInfo.popupNode = popupNode;
-    popupInfo.target = targetNode;
-    popupInfo.markNeedUpdate = true;
-    auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
-    ASSERT_NE(layoutProp, nullptr);
-    layoutProp->UpdateUseCustom(true);
-
-    /**
-     * @tc.steps: step2. create overlayManager and call HideCustomPopups when ShowInSubwindow is false.
-     * @tc.expected: popupMap's data is updated successfully
-     */
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->UpdatePopupNode(targetId, popupInfo);
-    overlayManager->HideCustomPopups();
-    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
-    EXPECT_EQ(rootNode->GetChildren().size(), 0);
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
     /**
-     * @tc.steps: step3. update ShowInSubwindow and call HideCustomPopups again.
-     * @tc.expected: popupMap's data is updated successfully
+     * @tc.steps: step2. create builder.
      */
-    layoutProp->UpdateShowInSubWindow(true);
-    overlayManager->UpdatePopupNode(targetId, popupInfo);
-    overlayManager->HideCustomPopups();
-    EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    bool isShow = true;
+    auto onAppear = []() {};
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, onAppear, nullptr, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    auto sheetNodeLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    auto style = sheetNodeLayoutProperty->GetSheetStyle();
+    EXPECT_EQ(style->sheetMode.value(), SheetMode::MEDIUM);
+    EXPECT_EQ(style->showDragBar.value(), true);
+
+    sheetStyle.sheetMode = SheetMode::LARGE;
+    sheetStyle.showDragBar = false;
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    EXPECT_EQ(sheetPattern->GetTargetId(), topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId());
+    sheetPattern->InitPanEvent();
+    GestureEvent info;
+    sheetPattern->HandleDragUpdate(info);
+    sheetPattern->HandleDragEnd({});
+    sheetNodeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    style = sheetNodeLayoutProperty->GetSheetStyle();
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(sheetNode)), geometryNode->Clone(), sheetNodeLayoutProperty->Clone());
+    DirtySwapConfig dirtySwapConfig;
+    EXPECT_TRUE(sheetPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    sheetPattern->InitPanEvent();
+    EXPECT_EQ(style->sheetMode.value(), SheetMode::LARGE);
+    EXPECT_EQ(style->showDragBar.value(), false);
 }
 
 /**

@@ -22,7 +22,7 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {
-using OnCoordinatingScrollEvent = std::function<void(double)>;
+using OnCoordinatingScrollEvent = std::function<bool(double)>;
 using OnCoordinatingScrollStartEvent = std::function<void()>;
 using OnCoordinatingScrollEndEvent = std::function<void()>;
 

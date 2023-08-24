@@ -23,12 +23,13 @@
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+#include "core/animation/scheduler.h"
 #include "core/components/declaration/common/attribute.h"
 #include "core/components/declaration/common/event.h"
 #include "core/components/declaration/common/method.h"
 #include "core/components/declaration/common/style.h"
 #include "core/components/scroll/scroll_position_controller.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 #include "frameworks/core/components/transform/click_spring_effect.h"
 #include "base/geometry/calc_dimension.h"
 
@@ -115,7 +116,7 @@ public:
 
     void Init();
     void SetCurrentStyle(const std::pair<std::string, std::string>& style);
-    void BindPipelineContext(const WeakPtr<PipelineContext>& pipelineContext);
+    void BindPipelineContext(const WeakPtr<PipelineBase>& pipelineContext);
     void ResetDefaultStyles();
     void SetClickEvent(const EventMarker& onClick);
     void SetRemoteMessageEvent(const EventMarker& remoteMessage);
@@ -574,7 +575,7 @@ protected:
      */
     std::string ParseImageSrc(const std::string& imgSrc) const;
 
-    WeakPtr<PipelineContext> pipelineContext_;
+    WeakPtr<PipelineBase> pipelineContext_;
 
 private:
     std::unordered_map<AttributeTag, std::shared_ptr<Attribute>> attributes_;
