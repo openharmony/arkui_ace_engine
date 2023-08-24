@@ -1210,7 +1210,8 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (IsNormalInlineState() && !textEditingValue_.GetWideText().empty()) {
+    if (IsNormalInlineState() && (!textEditingValue_.GetWideText().empty() ||
+        !layoutProperty->GetPlaceholderValue("").empty())) {
         ApplyInlineStates(true);
         inlineSelectAllFlag_ = true;
         inlineFocusState_ = true;
