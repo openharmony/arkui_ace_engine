@@ -166,7 +166,7 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
         }
 
         auto crossSpan = options.getSizeByIndex(index).GetCorssSize(gridLayoutInfo_.axis_);
-        if (crossSpan > crossCount_ || crossSpan <= 0) {
+        if (crossSpan > static_cast<int32_t>(crossCount_) || crossSpan <= 0) {
             LOGI("crossSpan invalid, use 1");
             crossSpan = 1;
         }
@@ -183,7 +183,7 @@ std::pair<int32_t, int32_t> GridScrollWithOptionsLayoutAlgorithm::GetCrossStartA
     auto crossStart = sum % crossCount_;
     bool isRegularItem = (options.irregularIndexes.find(itemIndex) == options.irregularIndexes.end());
     auto crossSpan = isRegularItem ? 1 : options.getSizeByIndex(itemIndex).GetCorssSize(gridLayoutInfo_.axis_);
-    if (crossSpan > crossCount_ || crossSpan <= 0) {
+    if (crossSpan > static_cast<int32_t>(crossCount_) || crossSpan <= 0) {
         LOGI("crossSpan invalid, use 1");
         crossSpan = 1;
     }
