@@ -51,12 +51,12 @@ public:
     }
 
     static LayoutConstraintF CreateChildConstraint(
-        const RefPtr<SwiperLayoutProperty>& property, const OptionalSizeF& idealSize)
+        const RefPtr<SwiperLayoutProperty>& property, const OptionalSizeF& idealSize, bool getAutoFill)
     {
         auto layoutConstraint = property->CreateChildConstraint();
         layoutConstraint.parentIdealSize = idealSize;
         auto displayCount = property->GetDisplayCount().value_or(1);
-        if (!IsStretch(property) || NonPositive(static_cast<double>(displayCount))) {
+        if ((!getAutoFill && !IsStretch(property)) || NonPositive(static_cast<double>(displayCount))) {
             return layoutConstraint;
         }
         auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);

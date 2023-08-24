@@ -423,7 +423,7 @@ public:
     void OnWindowHide() override;
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
-
+    bool IsAutoFill() const;
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
     void SwipeToWithoutAnimationAutoPlay();
@@ -502,8 +502,7 @@ private:
     int32_t GetDisplayCount() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
-        float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
-    bool IsAutoFill() const;
+    float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;

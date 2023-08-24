@@ -2101,13 +2101,12 @@ int32_t SwiperPattern::CalculateDisplayCount() const
     bool isAutoFill = IsAutoFill();
     if (isAutoFill) {
         auto minSize = swiperLayoutProperty->GetMinSize()->ConvertToPx();
-        if (LessOrEqual(minSize, 0)) {
-            return 1;
-        }
         float contentWidth = GetMainContentSize();
         auto displayCount =
             CalculateCount(contentWidth, minSize, SWIPER_MARGIN.ConvertToPx(), SWIPER_GUTTER.ConvertToPx());
-
+        if (LessOrEqual(minSize, 0)) {
+            displayCount = 1;
+        }
         displayCount = displayCount > 0 ? displayCount : 1;
         auto totalCount = TotalCount();
         displayCount = displayCount > totalCount ? totalCount : displayCount;
@@ -2135,8 +2134,7 @@ bool SwiperPattern::IsAutoFill() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
-    return swiperLayoutProperty->GetMinSize().has_value() &&
-           !LessOrEqual(swiperLayoutProperty->GetMinSize()->ConvertToPx(), 0);
+    return swiperLayoutProperty->GetMinSize().has_value();
 }
 
 bool SwiperPattern::IsAutoPlay() const
