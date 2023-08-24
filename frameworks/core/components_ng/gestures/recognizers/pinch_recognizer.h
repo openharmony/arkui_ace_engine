@@ -28,7 +28,7 @@ class PinchRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PinchRecognizer, MultiFingersRecognizer);
 
 public:
-    PinchRecognizer(int32_t fingers, double distance) : MultiFingersRecognizer(fingers), distance_(distance) {}
+    PinchRecognizer(int32_t fingers, double distance);
     ~PinchRecognizer() override = default;
 
     void OnAccepted() override;
