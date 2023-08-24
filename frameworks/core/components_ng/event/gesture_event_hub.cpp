@@ -694,6 +694,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
     pixelMap->scale(scale, scale);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    if (!overlayManager->GetIsOnAnimation()) {
+        dragEventActuator_->SetIsNotInPreviewState(true);
+    }
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
