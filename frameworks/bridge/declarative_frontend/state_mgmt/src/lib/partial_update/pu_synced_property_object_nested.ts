@@ -80,7 +80,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
 
   // set 'writes through` to the ObservedProperty
   public set(newValue: C): void {
-    if (this.obsObject_ == newValue) {
+    if (this.obsObject_ === newValue) {
       stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}IP, '${this.info() || "unknown"}']: set @ObjectLink with unchanged value - nothing to do.`);
       return;
     }

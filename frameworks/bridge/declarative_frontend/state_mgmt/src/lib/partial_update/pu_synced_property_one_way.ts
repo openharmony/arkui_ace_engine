@@ -184,7 +184,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   // assignment to local variable in the form of this.aProp = <object value>
   // set 'writes through` to the ObservedObject
   public set(newValue: C): void {
-    if (this.localCopyObservedObject_ == newValue) {
+    if (this.localCopyObservedObject_ === newValue) {
       stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value  - nothing to do.`);
       return;
     }
