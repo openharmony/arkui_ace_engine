@@ -137,6 +137,7 @@ public:
         for (auto& [key, child] : expiringItem_) {
             if (static_cast<size_t>(child.first) > index) {
                 child.first--;
+                continue;
             }
             if (static_cast<size_t>(child.first) == index) {
                 child.first = -1;
