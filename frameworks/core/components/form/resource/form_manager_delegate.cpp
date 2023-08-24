@@ -698,7 +698,7 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         default:
             LOGE("OnFormError, not RENDER_DEAD condition");
             if (onFormErrorCallback_) {
-                onFormErrorCallback_(code, msg);
+                onFormErrorCallback_(std::to_string(externalErrorCode), errorMsg);
             }
     }
 }
