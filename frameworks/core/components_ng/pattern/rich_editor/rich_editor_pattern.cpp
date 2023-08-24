@@ -1105,6 +1105,7 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
     if (dragResultObjects_.empty()) {
         return itemInfo;
     }
+    UpdateSpanItemDragStatus(dragResultObjects_, true);
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     auto resultProcesser = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
         auto pattern = weak.Upgrade();
@@ -1135,7 +1136,6 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
 
     AceEngineExt::GetInstance().DragStartExt();
 
-    isDragMoving = false;
     StopTwinkling();
     CloseKeyboard(true);
     CloseSelectOverlay();
@@ -1146,7 +1146,6 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
 
 void RichEditorPattern::OnDragEnd()
 {
-    isDragMoving = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (dragResultObjects_.empty()) {
@@ -1160,18 +1159,15 @@ void RichEditorPattern::OnDragEnd()
 
 void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
-    if (!isDragMoving && !dragResultObjects_.empty()) {
-        UpdateSpanItemDragStatus(dragResultObjects_, true);
-    }
-    isDragMoving = true;
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
-    auto touchX = Dimension(event->GetX(), DimensionUnit::VP).ConvertToPx();
-    auto touchY = Dimension(event->GetY(), DimensionUnit::VP).ConvertToPx();
+    auto touchX = event->GetX();
+    auto touchY = event->GetY();
     auto contentRect = GetTextRect();
     contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { touchX - contentRect.GetX(), touchY - contentRect.GetY() };
+    Offset textOffset = { touchX - contentRect.GetX() - GetParentGlobalOffset().GetX(),
+        touchY - contentRect.GetY() - GetParentGlobalOffset().GetY() };
     CHECK_NULL_VOID(paragraph_);
     auto position = paragraph_->GetHandlePositionForClick(textOffset);
     float caretHeight = 0.0f;
@@ -1425,8 +1421,8 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
-        const auto&  contentSize = geometryNode->GetContent()->GetRect().GetSize();
-        if (caretOffset.GetX() >=  contentSize.Width()) {
+        const auto& contentSize = geometryNode->GetContent()->GetRect().GetSize();
+        if (caretOffset.GetX() >= contentSize.Width()) {
             LOGD("replace space with newline character");
             insertValueTemp = std::string("\n ");
         }
@@ -1973,7 +1969,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
-        if (blockPress_) {
+        if (blockPress_ || !leftMousePress_) {
             return;
         }
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
@@ -2001,12 +1997,12 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
             blockPress_ = true;
             return;
         }
+        leftMousePress_ = true;
         mouseStatus_ = MouseStatus::PRESSED;
         blockPress_ = false;
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-        if (blockPress_) {
-            blockPress_ = false;
-        }
+        blockPress_ = false;
+        leftMousePress_ = false;
         mouseStatus_ = MouseStatus::RELEASED;
         isMouseSelect_ = false;
         isMousePressed_ = false;

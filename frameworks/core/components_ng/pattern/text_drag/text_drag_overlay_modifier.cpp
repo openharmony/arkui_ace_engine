@@ -49,6 +49,7 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     } else {
         canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
     }
+    canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
 #else
     if (!isAnimating_) {
         canvas.DrawPath(*pattern->GetBackgroundPath());
