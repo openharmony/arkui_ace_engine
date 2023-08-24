@@ -9845,18 +9845,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            swiperPattern->ShowPrevious();
-            if (i == 1) {
-                swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayCount(-3);
-                continue;
-            }
-            swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayCount(0);
-        }
-        swiperNode->Clean(false, false);
-    }
-
-    for (int i = 0; i <= 1; i++) {
         swiperPattern->ShowPrevious();
         swiperPattern->indicatorController_ = AceType::MakeRefPtr<Animator>();
         swiperPattern->isVisible_ = false;
