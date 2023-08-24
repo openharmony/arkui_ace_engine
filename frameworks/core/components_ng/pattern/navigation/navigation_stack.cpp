@@ -60,11 +60,24 @@ int32_t NavigationStack::RemoveInNavPathList(const std::string& name, const RefP
 {
     int32_t index = NOT_EXIST;
     if (!navPathList_.empty()) {
-        index = FindIndex(name, navDestinationNode);
+        index = FindIndex(name, navDestinationNode, true);
     }
     if (index != NOT_EXIST) {
         auto it = navPathList_.begin() + index;
         navPathList_.erase(it);
+    }
+    return index;
+}
+
+int32_t NavigationStack::RemoveInPreNavPathList(const std::string& name, const RefPtr<UINode>& navDestinationNode)
+{
+    int32_t index = NOT_EXIST;
+    if (!preNavPathList_.empty()) {
+        index = FindIndex(name, navDestinationNode, false);
+    }
+    if (index != NOT_EXIST) {
+        auto it = preNavPathList_.begin() + index;
+        preNavPathList_.erase(it);
     }
     return index;
 }
@@ -89,7 +102,7 @@ void NavigationStack::Add(
     const std::string& name, const RefPtr<UINode>& navDestinationNode, const RefPtr<RouteInfo>& routeInfo)
 {
     // for the old page: keep the UINode, and keep in the stack
-    auto index = FindIndex(name, navDestinationNode);
+    auto index = FindIndex(name, navDestinationNode, true);
     if (index != NOT_EXIST) {
         LOGW("This navDestination node already exists");
         Remove(name, navDestinationNode);
@@ -106,7 +119,7 @@ void NavigationStack::AddForDefault(
     const std::string& name, const RefPtr<UINode>& navDestinationNode, const RefPtr<RouteInfo>& routeInfo)
 {
     // for the old page: destroy the UINode, but keep in the stack
-    auto index = FindIndex(name, navDestinationNode);
+    auto index = FindIndex(name, navDestinationNode, true);
     auto top = static_cast<int32_t>(navPathList_.size()) - 1;
     if (top != NOT_EXIST) {
         auto oldName = navPathList_[top].first;
@@ -134,7 +147,7 @@ void NavigationStack::AddForReplace(
         Add(name, navDestinationNode);
         return;
     }
-    auto index = FindIndex(name, navDestinationNode);
+    auto index = FindIndex(name, navDestinationNode, true);
     if (index != NOT_EXIST) {
         navPathList_.pop_back(); // move the old page
         Remove(name, navDestinationNode);
@@ -157,14 +170,16 @@ void NavigationStack::RemoveAll()
     Clear();
 }
 
-int32_t NavigationStack::FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode)
+int32_t NavigationStack::FindIndex(
+    const std::string& name, const RefPtr<UINode>& navDestinationNode, bool isNavPathList)
 {
-    if (navPathList_.empty()) {
+    NavPathList navPathList = isNavPathList ? navPathList_ : preNavPathList_;
+    if (navPathList.empty()) {
         return NOT_EXIST;
     }
-    int32_t index = navPathList_.size() - 1;
+    int32_t index = navPathList.size() - 1;
     // find from top to bottom
-    for (auto it = navPathList_.rbegin(); it != navPathList_.rend(); ++it) {
+    for (auto it = navPathList.rbegin(); it != navPathList.rend(); ++it) {
         if ((*it).first == name && (*it).second == navDestinationNode) {
             return index;
         }
@@ -215,7 +230,7 @@ RefPtr<UINode> NavigationStack::GetPre(const std::string& name, const RefPtr<UIN
     if (navPathList_.empty() || navPathList_.size() == 1) {
         return nullptr;
     }
-    auto index = FindIndex(name, navDestinationNode);
+    auto index = FindIndex(name, navDestinationNode, true);
     if (index == 0 || index == NOT_EXIST) {
         // no more navDestinationNode in front or no this navDestinationNode
         return nullptr;
