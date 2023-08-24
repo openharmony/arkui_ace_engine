@@ -291,7 +291,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
     if (paragraph) {
-        if (inlineFocusState_) {
+        if (inlineFocusState_ && needApplyInlineSize_) {
             CalcSize idealSize;
 #ifndef USE_GRAPHIC_TEXT_GINE
             auto paragraphWidth = paragraph_->GetLongestLine();
@@ -5653,6 +5653,7 @@ void TextFieldPattern::ApplyUnderlineStates()
     }
     Radius radius;
     renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
+    needApplyInlineSize_ = true;
 }
 
 float TextFieldPattern::GetMarginBottom() const
