@@ -161,6 +161,7 @@ void SliderPatternTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)
     EXPECT_CALL(canvas, Translate(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
     EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
 }
 
 void SliderPatternTestNg::MockTipsCanvasFunction(Testing::MockCanvas& canvas)
@@ -1069,6 +1070,40 @@ HWTEST_F(SliderPatternTestNg, SliderModelNgTest001, TestSize.Level1)
     EXPECT_FALSE(sliderPaintProperty->GetBlockType().has_value());
     EXPECT_FALSE(sliderPaintProperty->GetBlockImage().has_value());
     EXPECT_FALSE(sliderPaintProperty->GetBlockShape().has_value());
+}
+
+/**
+ * @tc.name: SliderModelNgTest002
+ * @tc.desc: TEST slider_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderModelNgTest002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. create slider.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetBlockSize with invalid parameters.
+     * @tc.expected: step2. check the BlockSize property not be set.
+     */
+    sliderModelNG.SetBlockSize(Dimension(0.0), Dimension(0.0));
+    EXPECT_FALSE(sliderLayoutProperty->GetBlockSize().has_value());
+
+    /**
+     * @tc.steps: step3. call SetBlockSize with invalid parameters while BlockSize property has been set.
+     * @tc.expected: step3. check the BlockSize property has reset.
+     */
+    sliderModelNG.SetBlockSize(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
+    EXPECT_TRUE(sliderLayoutProperty->GetBlockSize().has_value());
+    sliderModelNG.SetBlockSize(Dimension(0.0), Dimension(0.0));
+    EXPECT_FALSE(sliderLayoutProperty->GetBlockSize().has_value());
 }
 
 /**
