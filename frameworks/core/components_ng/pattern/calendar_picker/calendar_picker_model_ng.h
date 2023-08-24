@@ -28,6 +28,7 @@ public:
     void SetTextStyle(const PickerTextStyle& textStyle) override;
     void SetOnChange(SelectedChangeEvent&& onChange) override;
     void SetChangeEvent(SelectedChangeEvent&& onChange) override;
+    void SetPadding(const PaddingProperty& padding) override;
 
 private:
     void LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern, RefPtr<FrameNode>& pickerNode,
