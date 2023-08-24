@@ -590,7 +590,6 @@ private:
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
-    int32_t autoPlayCurrentIndex_ = 0;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
