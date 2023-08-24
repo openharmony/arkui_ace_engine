@@ -36,7 +36,7 @@ public:
     bool SetSource(const std::string& src) override;
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;
     void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
-        CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent) override;
+        CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent, CommonEvent&& startRenderFrameEvent) override;
     int32_t GetDuration(int32_t& duration) override;
     int32_t GetVideoWidth() override;
     int32_t GetVideoHeight() override;
@@ -64,6 +64,7 @@ private:
     StateChangedEvent stateChangeCallback_;
     CommonEvent errorCallback_;
     CommonEvent resolutionChangeCallback_;
+    CommonEvent startRenderFrameCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MediaPlayerImpl);
 };
