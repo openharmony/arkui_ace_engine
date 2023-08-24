@@ -118,6 +118,10 @@ public:
     }
 
 private:
+    bool ShouldAvoidKeyboard() const override
+    {
+        return false;
+    }
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
