@@ -186,10 +186,12 @@ void TextFieldPaintMethod::UpdateScrollBar()
         LOGD("UpdateOverlayModifier no need paint scroll bar.");
         return;
     }
+    OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
+    OffsetF bgOffset(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top());
     textFieldOverlayModifier_->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
-        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()),
-        OffsetF(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top()),
-        OffsetF(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top()), scrollBar->GetHoverAnimationType());
+        SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()), fgOffset, bgOffset,
+        scrollBar->GetHoverAnimationType());
+    textFieldOverlayModifier_->SetOffset(fgOffset, bgOffset);
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     textFieldOverlayModifier_->SetFgColor(scrollBar->GetForegroundColor());
     textFieldOverlayModifier_->SetBgColor(scrollBar->GetBackgroundColor());
