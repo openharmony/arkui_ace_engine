@@ -72,11 +72,11 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     if (layoutProperty->GetPanelType() != PanelType::CUSTOM) {
-        childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+        childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height()));
     }
-    childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height()));
     childLayoutConstraint.parentIdealSize =
-        OptionalSizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+        OptionalSizeF(width, static_cast<float>(idealSize.Height()));
     childLayoutConstraint.percentReference = childLayoutConstraint.maxSize;
     layoutConstraint->percentReference = childLayoutConstraint.maxSize;
     auto colunmNodeWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::COLUMN_ETS_TAG);
