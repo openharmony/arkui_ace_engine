@@ -13,11 +13,19 @@
 # limitations under the License.
 */
 
+#include <memory>
+#include <string>
+
 #include "gtest/gtest.h"
+
+#define protected public
+#define private public
 
 #include "base/log/log.h"
 #include "core/common/register/hdc_connect.h"
 #include "core/common/register/hdc_jdwp.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -144,5 +152,89 @@ HWTEST_F(RegisterTest, CastToRegisterTest005, TestSize.Level1)
     g_hdcJdwpSimulator = nullptr;
     sleep(2);
     EXPECT_FALSE(g_threadRunning);
+}
+
+/**
+ * @tc.name: CastToRegisterTest006
+ * @tc.desc: Test cast to ConnectJpid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RegisterTest, CastToRegisterTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. new a ConnectManagement and start the connect thread
+     * @tc.expected: step1. connect ok, the thread is runed.
+     */
+    auto hdcJdwpSimulator = std::make_unique<HdcJdwpSimulator>("test_pkt_name");
+    auto retFlag = hdcJdwpSimulator->ConnectJpid((void*)hdcJdwpSimulator.get());
+
+    EXPECT_FALSE(retFlag);
+}
+
+bool g_isCtxPointNull = false;
+void* ConnectJpidTest(void* pkgName)
+{
+    g_threadRunning = true;
+
+    std::string name = (char*)pkgName;
+    g_hdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(name);
+    if (g_isCtxPointNull) {
+        delete g_hdcJdwpSimulator->ctxPoint_;
+        g_hdcJdwpSimulator->ctxPoint_ = nullptr;
+    } else {
+        g_hdcJdwpSimulator->ctxPoint_->cfd = 1;
+    }
+
+    if (!g_hdcJdwpSimulator->Connect()) {
+        LOGE("Connect fail.");
+    }
+    g_threadRunning = false;
+    return nullptr;
+}
+
+/**
+ * @tc.name: CastToRegisterTest006
+ * @tc.desc: Test cast to Connect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RegisterTest, CastToRegisterTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. new a ConnectManagement and start the connect thread
+     * @tc.expected: step1. connect ok, the thread is runed.
+     */
+    pthread_t tid;
+    g_hdcJdwpSimulator = nullptr;
+    g_threadRunning = false;
+    string pkgName = "test_pkt_name";
+    ASSERT_EQ(pthread_create(&tid, nullptr, &ConnectJpidTest, (void*)pkgName.c_str()), 0);
+    sleep(3);
+    EXPECT_TRUE(g_threadRunning);
+
+    /**
+     * @tc.steps: step2. Call  disconnect and delete the  HdcJdwpSimulator
+     * @tc.expected: step2. Disconnect ok, the thread is stopped.
+     */
+    g_hdcJdwpSimulator->Disconnect();
+    delete g_hdcJdwpSimulator;
+    g_hdcJdwpSimulator = nullptr;
+    sleep(2);
+    EXPECT_FALSE(g_threadRunning);
+
+    /**
+     * @tc.steps: step3. new a HdcJdwpSimulator and start the connect thread
+     * @tc.expected: step3. connect failed
+     */
+    pthread_t tid2;
+    g_hdcJdwpSimulator = nullptr;
+    g_threadRunning = false;
+    g_isCtxPointNull = true;
+    ASSERT_EQ(pthread_create(&tid2, nullptr, &ConnectJpidTest, (void*)pkgName.c_str()), 0);
+    sleep(3);
+    EXPECT_FALSE(g_threadRunning);
+
+    g_hdcJdwpSimulator->Disconnect();
+    delete g_hdcJdwpSimulator;
+    g_hdcJdwpSimulator = nullptr;
 }
 } // namespace OHOS::Ace
