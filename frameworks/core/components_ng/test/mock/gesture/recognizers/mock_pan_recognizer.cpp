@@ -44,6 +44,8 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& /* event */) {}
 
 void PanRecognizer::OnResetStatus() {}
 
+void PanRecognizer::OnSucceedCancel() {}
+
 void PanRecognizer::SetDirection(OHOS::Ace::PanDirection const& direction) {}
 
 bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>&  /* recognizer */)

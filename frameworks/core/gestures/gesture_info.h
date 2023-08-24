@@ -430,6 +430,8 @@ struct FingerInfo {
     // Different from global location, The local location refers to the location of the contact point relative to the
     // current node which has the recognizer.
     Offset localLocation_;
+    SourceType sourceType_ = SourceType::NONE;
+    SourceTool sourceTool_ = SourceTool::UNKNOWN;
 };
 
 class ItemDragInfo : public BaseEventInfo {
