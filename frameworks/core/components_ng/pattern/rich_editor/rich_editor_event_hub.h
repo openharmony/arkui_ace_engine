@@ -181,6 +181,7 @@ public:
     bool FireAboutToDelete(const RichEditorDeleteValue& info);
     void SetOnDeleteComplete(std::function<void()>&& func);
     void FireOndeleteComplete();
+
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type) override;
 
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
@@ -200,8 +201,22 @@ public:
         timestamp_ = timestamp;
     }
 
+    void SetOnPaste(std::function<bool()>&& func)
+    {
+        onPaste_ = std::move(func);
+    }
+
+    bool FireOnPaste()
+    {
+        if (onPaste_) {
+            return onPaste_();
+        }
+        return false;
+    }
+
 private:
     long long timestamp_;
+    std::function<bool()> onPaste_;
     std::function<void()> onReady_;
     std::function<void(const BaseEventInfo*)> onSelect_;
     std::function<bool(const RichEditorInsertValue&)> aboutToIMEInput_;

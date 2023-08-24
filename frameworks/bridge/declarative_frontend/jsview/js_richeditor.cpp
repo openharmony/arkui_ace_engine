@@ -496,6 +496,19 @@ void JSRichEditor::ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObje
     }
 }
 
+void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    auto onPasteCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(onPasteCallback)]() -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        ACE_SCORING_EVENT("RichEditor.onPaste");
+        return (func->ExecuteJS())->ToBoolean();
+    };
+    RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
+    info.ReturnSelf();
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -516,6 +529,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("focusable", &JSRichEditor::JsFocusable);
     JSClass<JSRichEditor>::StaticMethod("copyOptions", &JSRichEditor::SetCopyOptions);
     JSClass<JSRichEditor>::StaticMethod("bindSelectionMenu", &JSRichEditor::BindSelectionMenu);
+    JSClass<JSRichEditor>::StaticMethod("onPaste", &JSRichEditor::SetOnPaste);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

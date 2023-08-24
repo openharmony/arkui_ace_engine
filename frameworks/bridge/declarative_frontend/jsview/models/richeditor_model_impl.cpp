@@ -41,4 +41,6 @@ void RichEditorModelImpl::SetCopyOption(CopyOptions& copyOptions) {}
 
 void RichEditorModelImpl::BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
     std::function<void()>& buildFunc, NG::MenuParam& menuParam) {}
+
+void RichEditorModelImpl::SetOnPaste(std::function<bool()>&& func) {}
 } // namespace OHOS::Ace::Framework

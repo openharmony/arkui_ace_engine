@@ -41,6 +41,7 @@ public:
     static void JsFocusable(const JSCallbackInfo& info);
     static void SetCopyOptions(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
+    static void SetOnPaste(const JSCallbackInfo& info);
 
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);

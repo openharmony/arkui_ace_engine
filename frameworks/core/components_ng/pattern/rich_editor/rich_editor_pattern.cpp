@@ -22,6 +22,7 @@
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -2362,6 +2363,16 @@ void RichEditorPattern::ResetAfterPaste()
 
 void RichEditorPattern::HandleOnPaste()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto overridePaste = eventHub->FireOnPaste();
+    LOGE("jyj overridePaste %d", overridePaste);
+    if (overridePaste) {
+        return;
+    }
+
     CHECK_NULL_VOID(clipboard_);
     auto textCallback = [weak = WeakClaim(this), textSelector = textSelector_](
                             const std::string& data, bool isLastRecord) {

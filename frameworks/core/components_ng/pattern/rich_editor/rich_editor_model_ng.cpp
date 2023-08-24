@@ -130,4 +130,11 @@ void RichEditorModelNG::BindSelectionMenu(
         pattern->BindSelectionMenu(type, editorType, buildFunc, menuParam.onAppear, menuParam.onDisappear);
     }
 }
+
+void RichEditorModelNG::SetOnPaste(std::function<bool()>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPaste(std::move(func));
+}
 } // namespace OHOS::Ace::NG
