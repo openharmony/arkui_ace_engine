@@ -4491,6 +4491,122 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleHoverEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabBarPatternHandleHoverOnEvent001
+ * @tc.desc: test HandleHoverOnEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternHandleHoverOnEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    std::optional<int32_t> hoverIndex_test(0);
+    OffsetF c1(0.1f, 0.1f);
+    OffsetF c2(0.2f, 0.2f);
+    tabBarPattern->tabItemOffsets_.emplace_back(c1);
+    tabBarPattern->tabItemOffsets_.emplace_back(c2);
+    tabBarPattern->hoverIndex_ = hoverIndex_test;
+    tabBarPattern->touchingIndex_ = hoverIndex_test;
+
+    /**
+     * @tc.steps: step2. Test function HandleHoverOnEvent.
+     * @tc.expected: Related functions run ok.
+     */
+    IndicatorStyle style;
+    style.color = Color::BLACK;
+    tabBarPattern->hoverIndex_ = hoverIndex_test;
+    tabBarPattern->touchingIndex_ = {};
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
+    tabBarPattern->SetSelectedMode(SelectedMode::BOARD, 0);
+    tabBarPattern->SetIndicatorStyle(style, 0);
+
+    for (int i = 0; i <= 1; i++) {
+        tabBarPattern->HandleHoverOnEvent(0);
+        tabBarPattern->AddTabBarItemType(1, true);
+    }
+}
+
+/**
+ * @tc.name: TabsModelSetOnChange001
+ * @tc.desc: test SetOnChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetOnChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetOnChange.
+     * @tc.expected: Related function runs ok.
+     */
+    tabsModel.SetOnChange(nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(tabsNode, nullptr);
+}
+
+/**
+ * @tc.name: TabsModelSetScrollable001
+ * @tc.desc: test SetScrollable
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetScrollable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetScrollable.
+     * @tc.expected: Related function runs ok.
+     */
+    tabsModel.SetScrollable(true);
+    tabsModel.SetScrollable(false);
+}
+
+/**
+ * @tc.name: TabsModelSetClipEdge001
+ * @tc.desc: test SetClipEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetClipEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function SetClipEdge.
+     * @tc.expected: Related function runs ok.
+     */
+    tabsModel.SetClipEdge(true);
+    tabsModel.SetClipEdge(false);
+}
+/**
  * @tc.name: TabBarPatternOnKeyEvent002
  * @tc.desc: test OnKeyEvent
  * @tc.type: FUNC

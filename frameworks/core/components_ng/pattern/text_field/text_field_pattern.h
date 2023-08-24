@@ -278,6 +278,7 @@ public:
 
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void UpdateInputFilterErrorText(const std::string& errorText) override;
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
@@ -1004,6 +1005,7 @@ public:
     }
 
     void DumpInfo() override;
+    void OnColorConfigurationUpdate() override;
 
     void ShowPasswordIconChange()
     {
@@ -1200,11 +1202,7 @@ private:
     bool focusEventInitialized_ = false;
     bool isMousePressed_ = false;
     bool needCloseOverlay_ = true;
-#if defined(ENABLE_STANDARD_INPUT) || defined(PREVIEW)
     bool textObscured_ = true;
-#else
-    bool textObscured_ = false;
-#endif
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;

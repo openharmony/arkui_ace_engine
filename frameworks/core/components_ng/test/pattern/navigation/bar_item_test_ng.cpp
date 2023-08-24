@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -266,6 +267,54 @@ HWTEST_F(BarItemTestNg, BarItemAccessibilityPropertyGetText001, TestSize.Level1)
     textLayoutProperty->UpdateContent(BAR_ITEM_TEXT);
     frameNode_->SetTextNode(textNode);
     EXPECT_EQ(barItemAccessibilityProperty_->GetText(), BAR_ITEM_TEXT);
+    DestroyBarItemObject();
+}
+
+/**
+ * @tc.name: BarItemPattern001
+ * @tc.desc: Test barItem pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarItemTestNg, BarItemPattern001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialization.
+     */
+    InitBarItemTestNg();
+    auto iconNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(iconNode, nullptr);
+    frameNode_->SetIconNode(iconNode);
+
+    /**
+     * @tc.steps: step2. test whether active icon can be set successful.
+     * @tc.expected: active icon getting from Get function is equal to icon by setting function.
+     */
+    ImageSourceInfo activeIconInfo("");
+    barItemPattern_->SetActiveIconImageSourceInfo(activeIconInfo);
+    EXPECT_EQ(barItemPattern_->GetActiveIconImageSourceInfo(), activeIconInfo);
+
+    /**
+     * @tc.steps: step3. test whether initial icon can be set successful.
+     * @tc.expected: initial icon getting from Get function is equal to icon by Set function.
+     */
+    ImageSourceInfo initialIconInfo("");
+    barItemPattern_->SetInitialIconImageSourceInfo(initialIconInfo);
+    EXPECT_EQ(barItemPattern_->GetInitialIconImageSourceInfo(), initialIconInfo);
+
+    /**
+     * @tc.steps: step4. test whether toolbar item status is active.
+     * @tc.expected: toolbar item status is active.
+     */
+    barItemPattern_->SetToolbarItemStatus(NavToolbarItemStatus::ACTIVE);
+    EXPECT_EQ(barItemPattern_->GetToolbarItemStatus(), NavToolbarItemStatus::ACTIVE);
+
+    /**
+     * @tc.steps: step5. test whether toolbar icon status is initial.
+     * @tc.expected: toolbar icon status is initial.
+     */
+    barItemPattern_->SetCurrentIconStatus(ToolbarIconStatus::INITIAL);
+    EXPECT_EQ(barItemPattern_->GetCurrentIconStatus(), ToolbarIconStatus::INITIAL);
     DestroyBarItemObject();
 }
 } // namespace OHOS::Ace::NG

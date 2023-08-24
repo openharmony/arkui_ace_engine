@@ -2099,6 +2099,7 @@ void TextFieldPattern::InitDragDropEvent()
                 pattern->InsertValue(str);
             }
             pattern->dragStatus_ = DragStatus::NONE;
+            pattern->MarkContentChange();
         }
     };
     eventHub->SetOnDrop(std::move(onDrop));
@@ -3342,7 +3343,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             config.action = GetTextInputActionValue(GetDefaultTextInputAction());
             config.inputFilter = GetInputFilter();
             config.maxLength = GetMaxLength();
-            config.obscureText = textObscured_;
+            if (keyboard_ == TextInputType::VISIBLE_PASSWORD) {
+                config.obscureText = textObscured_;
+            }
             LOGI("Request keyboard configuration: type=%{private}d action=%{private}d obscureText=%{private}d",
                 keyboard_, config.action, textObscured_);
             connection_ = TextInputProxy::GetInstance().Attach(
@@ -4485,6 +4488,15 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
     CHECK_NULL_VOID(layoutProperty);
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::UpdateInputFilterErrorText(const std::string& errorText)
+{
+    if (!errorText.empty()) {
+        auto textFieldEventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_VOID(textFieldEventHub);
+        textFieldEventHub->FireOnInputFilterError(errorText);
+    }
 }
 
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
@@ -6223,5 +6235,19 @@ void TextFieldPattern::DumpInfo()
 bool TextFieldPattern::IsTouchAtLeftOffset(float currentOffsetX)
 {
     return LessNotEqual(currentOffsetX, contentRect_.GetX() + contentRect_.Width() * 0.5) ? true : false;
+}
+
+void TextFieldPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

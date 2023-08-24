@@ -102,11 +102,16 @@ public:
     {
         return landscapeMenuNodeId_.has_value();
     }
-    
+
     void OnCoordScrollStart();
     void OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
     bool GetDraggedDown();
+
+    bool GetToolbarHideStatus()
+    {
+        return isHideToolbar_;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

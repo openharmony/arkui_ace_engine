@@ -96,6 +96,10 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("sepia", &JSXComponent::OmitAttribute);
     JSClass<JSXComponent>::StaticMethod("hueRotate", &JSXComponent::OmitAttribute);
     JSClass<JSXComponent>::StaticMethod("colorBlend", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("sphericalEffect", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("lightUpEffect", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("pixelStretchEffect", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::OmitAttribute);
 
     JSClass<JSXComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }

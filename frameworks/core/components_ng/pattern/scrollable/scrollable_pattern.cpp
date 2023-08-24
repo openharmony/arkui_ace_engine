@@ -139,11 +139,12 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
         bool needMove = ProcessNavBarReactOnUpdate(isDraggedDown, offset);
         if (coordinationEvent_) {
             auto onScroll = coordinationEvent_->GetOnScroll();
-            if (onScroll) {
-                onScroll(offset);
-                needMove &= scrollEffect_ && scrollEffect_->IsSpringEffect();
+            CHECK_NULL_RETURN(onScroll, needMove);
+            if (!onScroll(offset)) {
+                isReactInParentMovement_ = false;
+                return true;
             }
-            return needMove;
+            return needMove || (scrollEffect_ && scrollEffect_->IsSpringEffect());
         }
     }
     if (source == SCROLL_FROM_START) {

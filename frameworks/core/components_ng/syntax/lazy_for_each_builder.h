@@ -126,7 +126,7 @@ public:
             decltype(cachedItems_) temp(std::move(cachedItems_));
 
             for (auto& [oldindex, child] : temp) {
-                if (oldindex == index) {
+                if (static_cast<size_t>(oldindex) == index) {
                     node = child.second;
                 } else {
                     cachedItems_.try_emplace(

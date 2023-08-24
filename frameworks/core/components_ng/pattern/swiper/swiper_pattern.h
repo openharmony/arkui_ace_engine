@@ -428,7 +428,7 @@ public:
     void OnWindowHide() override;
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
-
+    bool IsAutoFill() const;
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
     void StopAutoPlay();
@@ -506,8 +506,7 @@ private:
     int32_t GetDisplayCount() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
-        float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
-    bool IsAutoFill() const;
+    float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
@@ -521,7 +520,6 @@ private:
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
-    bool IsOutOfIndicatorZone(const PointF& dragPoint);
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
