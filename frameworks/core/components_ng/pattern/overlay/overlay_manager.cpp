@@ -997,7 +997,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
 }
 
-bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed)
+bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
 {
     if (overlay->IsRemoving()) {
         return false;
@@ -1006,7 +1006,7 @@ bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackP
         return true;
     }
     auto hub = overlay->GetEventHub<DialogEventHub>();
-    if (hub) {
+    if (!isPageRouter && hub) {
         hub->FireCancelEvent();
     }
     CloseDialog(overlay);
@@ -1057,7 +1057,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (InstanceOf<DialogPattern>(pattern)) {
-            return RemoveDialog(overlay, isBackPressed);
+            return RemoveDialog(overlay, isBackPressed, isPageRouter);
         }
         if (InstanceOf<BubblePattern>(pattern)) {
             return RemoveBubble(overlay);
@@ -1173,7 +1173,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     // close dialog with animation
     auto pattern = overlay->GetPattern();
     if (InstanceOf<DialogPattern>(pattern)) {
-        return RemoveDialog(overlay, false);
+        return RemoveDialog(overlay, false, false);
     }
     if (InstanceOf<BubblePattern>(pattern)) {
         overlay->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
