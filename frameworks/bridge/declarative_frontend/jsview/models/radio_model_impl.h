@@ -29,6 +29,7 @@ public:
     void SetHeight(const Dimension& height) override;
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
     void SetOnClickEvent(std::function<void()>&& onClick) override;
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
 };
 
 } // namespace OHOS::Ace::Framework
