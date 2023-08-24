@@ -102,6 +102,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         return nullptr;
     }
     size_t ret = 0;
+    ResourceInfo recv;
     napi_typeof(env, messageNApi, &valueType);
     if (valueType == napi_string) {
         size_t messageLen = GetParamLen(messageNApi) + 1;
@@ -109,15 +110,12 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         napi_get_value_string_utf8(env, messageNApi, message.get(), messageLen, &ret);
         messageString = message.get();
     } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (!ParseResourceParam(env, messageNApi, id, type, params)) {
+        if (!ParseResourceParam(env, messageNApi, recv)) {
             LOGE("can not parse resource info from input params.");
             NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
-        if (!ParseString(id, type, params, messageString)) {
+        if (!ParseString(recv, messageString)) {
             LOGE("can not get message from resource manager.");
             NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
@@ -134,15 +132,13 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
     if (valueType == napi_number) {
         napi_get_value_int32(env, durationNApi, &duration);
     } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (!ParseResourceParam(env, durationNApi, id, type, params)) {
+        recv = {};
+        if (!ParseResourceParam(env, durationNApi, recv)) {
             LOGE("can not parse resource info from input params.");
             NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
-        if (!ParseString(id, type, params, durationStr)) {
+        if (!ParseString(recv, durationStr)) {
             LOGE("can not get message from resource manager.");
             NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
@@ -161,15 +157,13 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         napi_get_value_double(env, bottomNApi, &bottom);
         bottomString = std::to_string(bottom);
     } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (!ParseResourceParam(env, bottomNApi, id, type, params)) {
+        recv = {};
+        if (!ParseResourceParam(env, bottomNApi, recv)) {
             LOGE("can not parse resource info from input params.");
             NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
-        if (!ParseString(id, type, params, bottomString)) {
+        if (!ParseString(recv, bottomString)) {
             LOGE("can not get message from resource manager.");
             NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
@@ -306,15 +300,13 @@ bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValu
         result = StringUtils::StringToCalcDimension(valueString, false, defaultUnit);
         return true;
     } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
+        ResourceInfo recv;
         std::string parameterStr;
-        if (!ParseResourceParam(env, napiValue, id, type, params)) {
+        if (!ParseResourceParam(env, napiValue, recv)) {
             LOGE("can not parse resource info from inout params.");
             return false;
         }
-        if (!ParseString(id, type, params, parameterStr)) {
+        if (!ParseString(recv, parameterStr)) {
             LOGE("can not get message from resource manager.");
             return false;
         }
