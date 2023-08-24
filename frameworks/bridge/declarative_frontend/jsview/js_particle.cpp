@@ -241,7 +241,10 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
         auto objectFitJsValue = configJsObject->GetProperty("objectFit");
         NG::ImageParticleParameter imageParameter;
         std::string src;
-        if (!JSParticle::ParseJsMedia(srcJsValue, src)) {
+        if (srcJsValue->IsString()) {
+            src = srcJsValue->ToString();
+        } else if (!JSParticle::ParseJsMedia(srcJsValue, src)) {
+            LOGD("can not parse image src.");
             return false;
         }
         imageParameter.SetImageSource(src);
