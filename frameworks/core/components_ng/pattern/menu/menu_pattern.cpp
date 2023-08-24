@@ -121,18 +121,6 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
         label->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
-
-void UpdateMenuItemAttrNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty)
-{
-    if (menuProperty->GetMenuWidth().has_value()) {
-        auto rootWidth = PipelineContext::GetCurrentRootWidth();
-        auto menuWidth = menuProperty->GetMenuWidthValue().ConvertToPxWithSize(rootWidth);
-        bool isOK = LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth) && LessNotEqual(menuWidth, rootWidth);
-        if (isOK && !itemProperty->GetMenuWidth().has_value()) {
-            itemProperty->UpdateMenuWidth(Dimension(menuWidth, DimensionUnit::PX));
-        }
-    }
-}
 } // namespace
 
 void MenuPattern::OnAttachToFrameNode()
@@ -292,7 +280,6 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
             auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(itemPattern);
             UpdateMenuItemTextNode(layoutProperty, itemProperty, itemPattern);
-            UpdateMenuItemAttrNode(layoutProperty, itemProperty);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
             auto itemGroupNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(itemGroupNode);
