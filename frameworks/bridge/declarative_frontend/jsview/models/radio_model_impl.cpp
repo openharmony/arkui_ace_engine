@@ -125,4 +125,26 @@ void RadioModelImpl::SetOnClickEvent(std::function<void()>&& onClick)
     component->SetOnClick(std::move(onClick));
 }
 
+void RadioModelImpl::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+{
+    auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
+    auto renderComponent = AceType::DynamicCast<RenderComponent>(component);
+    if (renderComponent) {
+        renderComponent->SetResponseRegion(responseRegion);
+        renderComponent->MarkResponseRegion(true);
+    }
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetResponseRegion(responseRegion);
+    box->MarkResponseRegion(true);
+    if (ViewStackProcessor::GetInstance()->HasClickGestureListenerComponent()) {
+        auto click = ViewStackProcessor::GetInstance()->GetClickGestureListenerComponent();
+        click->SetResponseRegion(responseRegion);
+        click->MarkResponseRegion(true);
+    }
+    if (ViewStackProcessor::GetInstance()->HasTouchListenerComponent()) {
+        auto touch = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
+        touch->SetResponseRegion(responseRegion);
+        touch->MarkResponseRegion(true);
+    }
+}
 } // namespace OHOS::Ace::Framework
