@@ -381,7 +381,7 @@ void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
     }
 
     CalcDimension trackBorderRadius;
-    if (!ParseJsDimensionVp(info[0], trackBorderRadius)) {
+    if (!ParseJsDimensionVpNG(info[0], trackBorderRadius, true)) {
         SliderModel::GetInstance()->ResetTrackBorderRadius();
         return;
     }
