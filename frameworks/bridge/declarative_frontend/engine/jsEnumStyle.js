@@ -1055,12 +1055,12 @@ var ShadowStyle;
   ShadowStyle[ShadowStyle["OuterDefaultLG"] = 3] = "OuterDefaultLG";
   ShadowStyle[ShadowStyle["OuterFloatingSM"] = 4] = "OuterFloatingSM";
   ShadowStyle[ShadowStyle["OuterFloatingMD"] = 5] = "OuterFloatingMD";
-  ShadowStyle[ShadowStyle["OUTERDEFAULT_XS"] = 0] = "OUTERDEFAULT_XS";
-  ShadowStyle[ShadowStyle["OUTERDEFAULT_SM"] = 1] = "OUTERDEFAULT_SM";
-  ShadowStyle[ShadowStyle["OUTERDEFAULT_MD"] = 2] = "OuterDefault_MD";
-  ShadowStyle[ShadowStyle["OUTERDEFAULT_LG"] = 3] = "OUTERDEFAULT_LG";
-  ShadowStyle[ShadowStyle["OUTERFLOATING_SM"] = 4] = "OUTERFLOATING_SM";
-  ShadowStyle[ShadowStyle["OUTERFLOATING_MD"] = 5] = "OUTERFLOATING_MD";
+  ShadowStyle[ShadowStyle["OUTER_DEFAULT_XS"] = 0] = "OUTER_DEFAULT_XS";
+  ShadowStyle[ShadowStyle["OUTER_DEFAULT_SM"] = 1] = "OUTER_DEFAULT_SM";
+  ShadowStyle[ShadowStyle["OUTER_DEFAULT_MD"] = 2] = "OUTER_DEFAULT_MD";
+  ShadowStyle[ShadowStyle["OUTER_DEFAULT_LG"] = 3] = "OUTER_DEFAULT_LG";
+  ShadowStyle[ShadowStyle["OUTER_FLOATING_SM"] = 4] = "OUTER_FLOATING_SM";
+  ShadowStyle[ShadowStyle["OUTER_FLOATING_MD"] = 5] = "OUTER_FLOATING_MD";
 })(ShadowStyle || (ShadowStyle = {}));
 
 var ShadowType;
