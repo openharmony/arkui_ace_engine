@@ -1280,7 +1280,7 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_START));
     callback_2();
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
-    auto event1 = [](double) {};
+    auto event1 = [](double) { return true; };
     auto event2 = []() {};
     coordinationEvent->SetOnScrollEvent(event1);
     coordinationEvent->SetOnScrollStartEvent(event2);
