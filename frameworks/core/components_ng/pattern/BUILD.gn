@@ -353,7 +353,6 @@ build_component_ng("pattern_ng") {
     "shape/shape_abstract_model_ng.cpp",
     "shape/shape_container_layout_algorithm.cpp",
     "shape/shape_container_pattern.cpp",
-    "shape/shape_layout_algorithm.cpp",
     "shape/shape_model_ng.cpp",
     "shape/shape_overlay_modifier.cpp",
     "shape/shape_paint_property.cpp",
