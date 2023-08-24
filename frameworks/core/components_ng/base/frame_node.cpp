@@ -1507,8 +1507,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto tmp = parentLocalPoint - paintRect.GetOffset();
     auto preLocation = tmp;
     renderContext_->GetPointWithTransform(tmp);
-    auto localTransformOffset = preLocation - localPoint;
     const auto localPoint = tmp;
+    auto localTransformOffset = preLocation - localPoint;
     bool consumed = false;
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
