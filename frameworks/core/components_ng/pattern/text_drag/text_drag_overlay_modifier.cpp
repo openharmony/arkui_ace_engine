@@ -43,12 +43,12 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 #ifdef NEW_SKIA
-    canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     if (!isAnimating_) {
         canvas.DrawPath(*pattern->GetBackgroundPath());
     } else {
         canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
     }
+    canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
 #else
     if (!isAnimating_) {
         canvas.DrawPath(*pattern->GetBackgroundPath());
