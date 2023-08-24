@@ -1049,8 +1049,8 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     double fTop = 0.0;
     double fWidth = 0.0;
     double fHeight = 0.0;
-    uint32_t final_width = 0.0;
-    uint32_t final_height = 0.0;
+    uint32_t finalWidth = 0.0;
+    uint32_t finalHeight = 0.0;
     int32_t left = 0;
     int32_t top = 0;
     int32_t width = 0;
@@ -1073,26 +1073,25 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 
     std::unique_ptr<ImageData> data;
     data = GetImageDataFromCanvas(left, top, width, height);
-    if (data == nullptr) {
-        return;
-    }
-    final_height = static_cast<uint32_t>(data->dirtyHeight);
-    final_width = static_cast<uint32_t>(data->dirtyWidth);
-    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(final_height * final_width * 4);
+    finalHeight = (data == nullptr) ? static_cast<uint32_t>(height) : static_cast<uint32_t>(data->dirtyHeight);
+    finalWidth = (data == nullptr) ? static_cast<uint32_t>(width) : static_cast<uint32_t>(data->dirtyWidth);
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(finalHeight * finalWidth * 4);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
-    for (uint32_t idx = 0; idx < final_height * final_width; ++idx) {
-        buffer[4 * idx] = data->data[idx].GetRed();
-        buffer[4 * idx + 1] = data->data[idx].GetGreen();
-        buffer[4 * idx + 2] = data->data[idx].GetBlue();
-        buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+    if (data != nullptr) {
+        for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
+            buffer[4 * idx] = data->data[idx].GetRed();
+            buffer[4 * idx + 1] = data->data[idx].GetGreen();
+            buffer[4 * idx + 2] = data->data[idx].GetBlue();
+            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+        }
     }
 
     JSRef<JSUint8ClampedArray> colorArray =
         JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
 
     auto retObj = JSRef<JSObject>::New();
-    retObj->SetProperty("width", final_width);
-    retObj->SetProperty("height", final_height);
+    retObj->SetProperty("width", finalWidth);
+    retObj->SetProperty("height", finalHeight);
     retObj->SetPropertyObject("data", colorArray);
     info.SetReturnValue(retObj);
 }
