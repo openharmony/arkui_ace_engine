@@ -4075,6 +4075,221 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorUpdateContentModifier002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperIndicatorUpdateContentModifier003
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorUpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorUpdateContentModifier003, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper and GetContentModifier.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    paintMethod->isHover_ = true;
+    paintMethod->touchBottomType_ = TouchBottomType::START;
+
+    /**
+     * @tc.steps: step3. call GetContentModifier.
+     * @tc.expected: dotIndicatorModifier_->isHover_ is true.
+     */
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsHover());
+}
+
+/**
+ * @tc.name: SwiperIndicatorCalculateNormalMargin001
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorCalculateNormalMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorCalculateNormalMargin001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateItemWidth(Dimension(ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(ITEM_HEIGHT, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemWidth(Dimension(SELECTED_ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemHeight(Dimension(SELECTED_ITEM_HEIGHT, DimensionUnit::PX));
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->IsCustomSizeValue_ = true;
+    /**
+     * @tc.steps: step3. call PaintNormalIndicator.
+     * @tc.expected: paintMethod->normalMargin_.X is 342.0
+     *               paintMethod->normalMargin_.Y is 548.5
+     */
+    paintMethod->PaintNormalIndicator(&paintWrapper);
+
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 342.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 548.5);
+}
+
+/**
+ * @tc.name: SwiperIndicatorCalculatePointCenterX001
+ * @tc.desc: Test DotIndicatorPaintMethod CalculatePointCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorCalculatePointCenterX001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateItemWidth(Dimension(ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(ITEM_HEIGHT, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemWidth(Dimension(SELECTED_ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemHeight(Dimension(SELECTED_ITEM_HEIGHT, DimensionUnit::PX));
+    LinearVector<float> vectorBlackPointCenterX;
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->IsCustomSizeValue_ = true;
+    paintMethod->turnPageRate_ = 1.0;
+    /**
+     * @tc.steps: step3. call CalculatePointCenterX.
+     * @tc.expected: run success
+     */
+    paintMethod->CalculatePointCenterX(vectorBlackPointCenterX, 0.0, 0.0, 0.0, 0);
+    paintMethod->turnPageRate_ = 1.0;
+    paintMethod->CalculatePointCenterX(vectorBlackPointCenterX, 0.0, 0.0, 0.0, 0);
+
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 342.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 548.5);
+}
+
+/**
+ * @tc.name: SwiperIndicatorUpdateBackgroundX001
+ * @tc.desc: Test DotIndicatorPaintMethod UpdateBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorUpdateBackgroundX001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateItemWidth(Dimension(ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(ITEM_HEIGHT, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemWidth(Dimension(SELECTED_ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemHeight(Dimension(SELECTED_ITEM_HEIGHT, DimensionUnit::PX));
+    LinearVector<float> vectorBlackPointCenterX;
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->IsCustomSizeValue_ = true;
+    paintMethod->turnPageRate_ = 1.0;
+    paintMethod->touchBottomType_ = TouchBottomType::START;
+    /**
+     * @tc.steps: step3. call UpdateBackground.
+     * @tc.expected: run success
+     */
+    paintMethod->UpdateBackground(&paintWrapper);
+}
+
+/**
  * @tc.name: SwiperIndicatorPaintNormalIndicator001
  * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintNormalIndicator
  * @tc.type: FUNC
