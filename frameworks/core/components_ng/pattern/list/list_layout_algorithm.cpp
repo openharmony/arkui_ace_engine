@@ -93,6 +93,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     if (totalItemCount_ > 0) {
         OnSurfaceChanged(layoutWrapper);
+        CheckJumpToIndex();
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
@@ -375,6 +376,34 @@ float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper
     wrapper->Measure(childLayoutConstraint_);
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     return mainLen;
+}
+
+void ListLayoutAlgorithm::CheckJumpToIndex()
+{
+    if (jumpIndex_.has_value()) {
+        return;
+    }
+    if (LessOrEqual(std::abs(currentDelta_), contentMainSize_ * 2.0f) || itemPosition_.empty()) {
+        return;
+    }
+    for (const auto& pos : itemPosition_) {
+        if (pos.second.isGroup) {
+            return;
+        }
+    }
+    float totalHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
+    float averageHeight = totalHeight / itemPosition_.size();
+    int32_t targetIndex = itemPosition_.begin()->first;
+    if (NonNegative(currentDelta_)) {
+        int32_t items = currentDelta_ / averageHeight;
+        targetIndex += items;
+        currentDelta_ -= items * averageHeight;
+    } else {
+        int32_t items = -currentDelta_ / averageHeight;
+        targetIndex -= items;
+        currentDelta_ += items * averageHeight;
+    }
+    jumpIndex_ = std::clamp(targetIndex, 0, totalItemCount_ - 1);
 }
 
 void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
