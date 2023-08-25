@@ -35,7 +35,10 @@ bool FocusHub::RequestFocusImmediately()
     return true;
 }
 
-void FocusHub::OnClick(const KeyEvent& event) {}
+bool FocusHub::OnClick(const KeyEvent& event)
+{
+    return false;
+}
 
 void FocusHub::MarkRootFocusNeedUpdate() {}
 
