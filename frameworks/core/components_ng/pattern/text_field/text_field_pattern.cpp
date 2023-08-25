@@ -2435,7 +2435,8 @@ void TextFieldPattern::OnModifyDone()
     }
     auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
     if ((!HasFocus() && IsNormalInlineState()) || ((inputStyle == InputStyle::DEFAULT) &&
-            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED &&
+            (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
+            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT) &&
             preInputStyle_ != InputStyle::INLINE)) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
@@ -2444,10 +2445,13 @@ void TextFieldPattern::OnModifyDone()
         preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
     if (layoutProperty->GetShowUnderlineValue(false) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+        (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT)) {
         ApplyUnderlineStates();
     }
-    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
+    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT &&
+        (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT)) {
         RestorePreInlineStates();
     }
     preInputStyle_ = inputStyle;
@@ -5929,7 +5933,8 @@ bool TextFieldPattern::IsNormalInlineState() const
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
-           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
+           (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
+           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT);
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
