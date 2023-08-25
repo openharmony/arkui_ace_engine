@@ -32,6 +32,7 @@ public:
     void SetStrokeWidth(const Dimension& strokeWidth) override;
     void SetLabelMarkedText(std::string labelTextString) override;
     void SetMarkedTextColor(const Color color) override;
+    void SetShadowOptions(const GaugeShadowOptions& shadowOptions) override;
 };
 } // namespace OHOS::Ace::NG
 
