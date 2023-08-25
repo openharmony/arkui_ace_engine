@@ -362,7 +362,12 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
 bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
     Axis axis, int32_t& currentIndex, float endPos, float& startPos)
 {
-    if ((currentIndex - 1 < 0 && !isLoop_) || static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_) {
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
+    int32_t displayCount = swiperLayoutProperty->GetDisplayCount().has_value() ?
+        swiperLayoutProperty->GetDisplayCount().value() : 1;
+    if ((currentIndex - 1 < 0 && !isLoop_) ||
+        static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_ + displayCount - 1) {
         return false;
     }
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(GetLoopIndex(currentIndex - 1));
@@ -378,8 +383,6 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
         wrapper->Measure(layoutConstraint);
     }
     float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
-    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
 
     if (SwiperUtils::IsStretch(swiperLayoutProperty)) {
         auto layoutProperty = wrapper->GetLayoutProperty();
@@ -534,6 +537,8 @@ void SwiperLayoutAlgorithm::LayoutBackward(
 
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
+    int32_t displayCount = swiperLayoutProperty->GetDisplayCount().has_value() ?
+        swiperLayoutProperty->GetDisplayCount().value() : 1;
     do {
         currentEndPos = currentStartPos;
         auto result =
@@ -552,7 +557,7 @@ void SwiperLayoutAlgorithm::LayoutBackward(
             currentTargetIndex_ = targetIndex_.value();
             targetIndex_.reset();
         }
-        if (static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_) {
+        if (static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_ + displayCount - 1) {
             break;
         }
     } while (
