@@ -88,6 +88,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("size", &JSRadio::JsSize);
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
     JSClass<JSRadio>::StaticMethod("radioStyle", &JSRadio::JsRadioStyle);
+    JSClass<JSRadio>::StaticMethod("responseRegion", &JSRadio::JsResponseRegion);
     JSClass<JSRadio>::StaticMethod("onChange", &JSRadio::OnChange);
     JSClass<JSRadio>::StaticMethod("onClick", &JSRadio::JsOnClick);
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -354,6 +355,21 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         }
         RadioModel::GetInstance()->SetIndicatorColor(indicatorColorVal);
     }
+}
+
+void JSRadio::JsResponseRegion(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    std::vector<DimensionRect> result;
+    if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        return;
+    }
+
+    RadioModel::GetInstance()->SetResponseRegion(result);
 }
 
 void JSRadio::OnChange(const JSCallbackInfo& args)
