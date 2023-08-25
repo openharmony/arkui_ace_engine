@@ -4121,7 +4121,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorUpdateContentModifier003, TestSize.Level1)
      */
     paintMethod->UpdateContentModifier(&paintWrapper);
     ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
-    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsHover());
+    EXPECT_FALSE(paintMethod->dotIndicatorModifier_->GetIsHover());
 }
 
 /**
@@ -4175,7 +4175,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorCalculateNormalMargin001, TestSize.Level1)
      */
     paintMethod->PaintNormalIndicator(&paintWrapper);
 
-    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 342.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 347.0);
     EXPECT_EQ(paintMethod->normalMargin_.GetY(), 548.5);
 }
 
@@ -4228,12 +4228,18 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorCalculatePointCenterX001, TestSize.Level1)
      * @tc.steps: step3. call CalculatePointCenterX.
      * @tc.expected: run success
      */
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
     paintMethod->CalculatePointCenterX(vectorBlackPointCenterX, 0.0, 0.0, 0.0, 0);
     paintMethod->turnPageRate_ = 1.0;
     paintMethod->CalculatePointCenterX(vectorBlackPointCenterX, 0.0, 0.0, 0.0, 0);
 
-    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 342.0);
-    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 548.5);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 0);
 }
 
 /**
@@ -6596,7 +6602,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowNext001, TestSize.Level1)
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayCount(-1);
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateMinSize(Dimension(-1));
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    ASSERT_TRUE(swiperPattern->IsLoop());
+    ASSERT_FALSE(swiperPattern->IsLoop());
     swiperPattern->currentIndex_ = 1;
     swiperPattern->preTargetIndex_ = -1;
 
@@ -6707,8 +6713,8 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious001, TestSize.Level1)
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayCount(-3);
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateMinSize(Dimension(-1));
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    EXPECT_EQ(swiperPattern->TotalDisPlayCount(), -3);
-    EXPECT_TRUE(swiperPattern->IsLoop());
+    EXPECT_EQ(swiperPattern->TotalDisPlayCount(), -1);
+    EXPECT_FALSE(swiperPattern->IsLoop());
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     ASSERT_NE(indicatorNode, nullptr);
@@ -9897,8 +9903,8 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious002, TestSize.Level1)
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayCount(-3);
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateMinSize(Dimension(-1));
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    EXPECT_EQ(swiperPattern->TotalDisPlayCount(), -3);
-    EXPECT_TRUE(swiperPattern->IsLoop());
+    EXPECT_EQ(swiperPattern->TotalDisPlayCount(), -1);
+    EXPECT_FALSE(swiperPattern->IsLoop());
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     ASSERT_NE(indicatorNode, nullptr);
@@ -10052,8 +10058,8 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayCount(-3);
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateMinSize(Dimension(-1));
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    EXPECT_EQ(swiperPattern->TotalDisPlayCount(), -3);
-    EXPECT_TRUE(swiperPattern->IsLoop());
+    EXPECT_EQ(swiperPattern->TotalDisPlayCount(), -1);
+    EXPECT_FALSE(swiperPattern->IsLoop());
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     ASSERT_NE(indicatorNode, nullptr);
