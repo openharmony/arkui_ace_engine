@@ -64,7 +64,7 @@ public:
     void ApplyIndents(const TextStyle& textStyle, double width);
 
 private:
-    void FontRegisterCallback(RefPtr<FrameNode> frameNode, const TextStyle& textStyle);
+    void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);

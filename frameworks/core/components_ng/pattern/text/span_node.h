@@ -158,10 +158,10 @@ public:
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
 #endif // ENABLE_DRAG_FRAMEWORK
-    virtual int32_t UpdateParagraph(const RefPtr<Paragraph>& builder, double width = 0.0f, double height = 0.0f,
-        VerticalAlign verticalAlign = VerticalAlign::BASELINE);
+    virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
+        double width = 0.0f, double height = 0.0f, VerticalAlign verticalAlign = VerticalAlign::BASELINE);
     virtual void UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
-
+    virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
     std::string GetFont() const;
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -177,7 +177,7 @@ struct ImageSpanItem : public SpanItem {
 public:
     ImageSpanItem() = default;
     ~ImageSpanItem() override = default;
-    int32_t UpdateParagraph(
+    int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
 

@@ -391,7 +391,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph001, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
     ASSERT_NE(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -416,7 +416,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph002, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -433,7 +433,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph003, TestSize.Level1)
     auto json = std::make_unique<JsonValue>();
     spanNode->spanItem_->content = "";
     spanNode->spanItem_->fontStyle = nullptr;
-    spanNode->spanItem_->UpdateParagraph(nullptr);
+    spanNode->spanItem_->UpdateParagraph(nullptr, nullptr);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -460,7 +460,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -482,11 +482,11 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    auto index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::TOP);
-    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::CENTER);
-    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::BOTTOM);
-    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::BASELINE);
-    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::NONE);
+    auto index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::TOP);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::CENTER);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BOTTOM);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BASELINE);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::NONE);
     EXPECT_EQ(index, -1);
 }
 
