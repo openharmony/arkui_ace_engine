@@ -18,6 +18,16 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+// Whether the system is Mac or not determines which key code is selected.
+#if defined(MAC_PLATFORM)
+#define KEY_META_OR_CTRL_LEFT KeyCode::KEY_META_LEFT
+#define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_META_RIGHT
+#else
+#define KEY_META_OR_CTRL_LEFT KeyCode::KEY_CTRL_LEFT
+#define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_CTRL_RIGHT
+#endif
+}
 bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     LOGD("HandleKeyEvent event, key code %{public}d", keyEvent.enableCapsLock, keyEvent.code);
@@ -51,27 +61,27 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
                 pattern->HandleOnCopy();
             }
         } else if (keyEvent.IsLetterKey()) {
-            if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Y }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Y })) {
+            if (keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
+                keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
+                keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
+                keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
+                keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_Y }) ||
+                keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_Y })) {
                 pattern->HandleOnRedoAction();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Z }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Z })) {
+            } else if (keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_Z }) ||
+                       keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_Z })) {
                 pattern->HandleOnUndoAction();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
+            } else if (keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_A }) ||
+                       keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_A })) {
                 pattern->HandleOnSelectAll();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
+            } else if (keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_C }) ||
+                       keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_C })) {
                 pattern->HandleOnCopy();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
+            } else if (keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_V }) ||
+                       keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_V })) {
                 pattern->HandleOnPaste();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
+            } else if (keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_X }) ||
+                       keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_X })) {
                 pattern->HandleOnCut();
             } else if (!keyEvent.IsCombinationKey()) {
                 appendElement = keyEvent.ConvertCodeToString();
