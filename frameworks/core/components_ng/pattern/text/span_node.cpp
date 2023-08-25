@@ -128,7 +128,7 @@ void SpanNode::RequestTextFlushDirty()
     LOGD("fail to find Text or Parent Span");
 }
 
-int32_t SpanItem::UpdateParagraph(
+int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     const RefPtr<Paragraph>& builder, double /* width */, double /* height */, VerticalAlign /* verticalAlign */)
 {
     CHECK_NULL_RETURN(builder, -1);
@@ -138,6 +138,9 @@ int32_t SpanItem::UpdateParagraph(
         CHECK_NULL_RETURN(pipelineContext, -1);
         TextStyle themeTextStyle =
             CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
+        if (frameNode) {
+            FontRegisterCallback(frameNode, themeTextStyle);
+        }
         if (NearZero(themeTextStyle.GetFontSize().Value())) {
             return -1;
         }
@@ -147,13 +150,47 @@ int32_t SpanItem::UpdateParagraph(
     UpdateTextStyle(builder, textStyle);
     for (const auto& child : children) {
         if (child) {
-            child->UpdateParagraph(builder);
+            child->UpdateParagraph(frameNode, builder);
         }
     }
     if (fontStyle || textLineStyle) {
         builder->PopStyle();
     }
     return -1;
+}
+
+void SpanItem::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle)
+{
+    auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto pattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+        CHECK_NULL_VOID(modifier);
+        modifier->SetFontReady(true);
+    };
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager) {
+        bool isCustomFont = false;
+        for (const auto& familyName : textStyle.GetFontFamilies()) {
+            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (customFont) {
+                isCustomFont = true;
+            }
+        }
+        if (isCustomFont) {
+            auto pattern = frameNode->GetPattern<TextPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsCustomFont(true);
+            auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+            CHECK_NULL_VOID(modifier);
+            modifier->SetIsCustomFont(true);
+        }
+    }
 }
 
 void SpanItem::UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
@@ -227,7 +264,7 @@ bool SpanItem::IsDragging()
 }
 #endif // ENABLE_DRAG_FRAMEWORK
 
-int32_t ImageSpanItem::UpdateParagraph(
+int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)
 {
     LOGD("ImageSpanItem::UpdateParagraph imageWidth = %{public}f, imageHeight = %{public}f verticalAlign = "

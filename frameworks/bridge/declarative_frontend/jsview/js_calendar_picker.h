@@ -27,11 +27,17 @@ public:
     static void SetEdgeAlign(const JSCallbackInfo& info);
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetBorder(const JSCallbackInfo& info);
+    static void JsPadding(const JSCallbackInfo& info);
 
 private:
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
     static void ParseSelectedDateObject(const JSCallbackInfo& info, const JSRef<JSObject>& selectedObject);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    static void ParseCalendarPickerBorderColor(const JSRef<JSVal>& args);
+    static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,
+        const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+        const std::optional<CalcDimension>& right);
 };
 
 class JSCalendarPickerDialog : JSAlertDialog {

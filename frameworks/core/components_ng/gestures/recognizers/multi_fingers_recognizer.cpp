@@ -33,9 +33,11 @@ MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers)
 
 void MultiFingersRecognizer::UpdateFingerListInfo(const Offset& coordinateOffset)
 {
+    fingerList_.clear();
     for (const auto& point : touchPoints_) {
         Offset localLocation = point.second.GetOffset() - coordinateOffset;
-        FingerInfo fingerInfo = { point.first, point.second.GetOffset(), localLocation };
+        FingerInfo fingerInfo = { point.first, point.second.GetOffset(), localLocation, point.second.sourceType,
+            point.second.sourceTool };
         fingerList_.emplace_back(fingerInfo);
     }
 }

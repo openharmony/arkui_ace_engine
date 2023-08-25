@@ -110,7 +110,7 @@ public:
                                                                  bool followWithoutTransition = false);
     void DumpGeometryTransition();
 
-    void ReSyncGeometryTransition();
+    void ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger = nullptr);
 
     void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
     void ClearPendingRemoveNodes();

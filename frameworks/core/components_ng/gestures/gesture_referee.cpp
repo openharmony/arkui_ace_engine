@@ -207,10 +207,11 @@ bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
     if (type != lastSourceType_) {
         ret = true;
         lastSourceType_ = type;
-    } else if (isAxis_ && !lastIsAxis_) {
-        ret = true;
     }
-    lastIsAxis_ = isAxis_;
+    if (isAxis_ != lastIsAxis_) {
+        ret = true;
+        lastIsAxis_ = isAxis_;
+    }
     return ret;
 }
 

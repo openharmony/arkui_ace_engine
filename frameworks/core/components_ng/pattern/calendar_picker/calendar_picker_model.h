@@ -35,6 +35,7 @@ public:
     virtual void SetTextStyle(const NG::PickerTextStyle& textStyle) = 0;
     virtual void SetOnChange(NG::SelectedChangeEvent&& onChange) = 0;
     virtual void SetChangeEvent(NG::SelectedChangeEvent&& onChange) = 0;
+    virtual void SetPadding(const NG::PaddingProperty& padding) = 0;
 
 private:
     static std::unique_ptr<CalendarPickerModel> instance_;

@@ -22,7 +22,6 @@
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
@@ -216,12 +215,17 @@ void GaugePaintMethod::NewPaint(RSCanvas& canvas, PaintWrapper* paintWrapper) co
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto offset = paintWrapper->GetContentOffset();
-    auto contentSize = paintWrapper->GetContentSize();
+
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto paddingSize = geometryNode->GetPaddingSize();
+    auto left = geometryNode->GetPadding()->left.value_or(0.0f);
+    auto top = geometryNode->GetPadding()->top.value_or(0.0f);
+    auto radius = std::min(paddingSize.Width(), paddingSize.Height()) / 2.0f;
     RenderRingInfo data;
-    data.contentSize = contentSize;
-    data.radius = std::min(contentSize.Width(), contentSize.Height()) * PERCENT_HALF;
-    data.center =
-        Offset(contentSize.Width() * PERCENT_HALF + offset.GetX(), contentSize.Height() * PERCENT_HALF + offset.GetY());
+    data.contentSize = paddingSize;
+    data.radius = radius;
+    data.center = Offset(offset.GetX() + left + radius, offset.GetY() + top + radius);
     auto theme = pipelineContext->GetTheme<ProgressTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
     CalculateStartAndSweepDegree(paintProperty, data);
@@ -249,64 +253,108 @@ void GaugePaintMethod::PaintMonochromeCircular(
     RSCanvas& canvas, RenderRingInfo data, const RefPtr<GaugePaintProperty>& paintProperty) const
 {
     CHECK_NULL_VOID(paintProperty);
-    float startDegree = data.startDegree;
-    float sweepDegree = data.sweepDegree;
+    Color color(Color::BLACK);
+    if (paintProperty->HasGradientColors()) {
+        color = paintProperty->GetGradientColorsValue().at(0).at(0).first;
+    }
 
-    Color color = paintProperty->GetGradientColorsValue().at(0).at(0).first;
     Color backgroundColor = color.ChangeOpacity(MONOCHROME_CIRCULAR_BACKGROUND_COLOR_OPACITY);
     float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
     auto ratio = GetValueRatio(paintProperty);
     RSPen pen;
     pen.SetAntiAlias(true);
-    pen.SetColor(backgroundColor.GetValue());
     pen.SetWidth(data.thickness);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-
-    canvas.AttachPen(pen);
-    RSPath path;
     RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
                  data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
                  data.center.GetX() + data.radius - data.thickness * PERCENT_HALF,
                  data.center.GetY() + data.radius - data.thickness * PERCENT_HALF);
-    path.AddArc(rRect, startDegree - QUARTER_CIRCLE + offsetDegree, sweepDegree - 2.0f * offsetDegree);
-    canvas.DrawPath(path);
-    canvas.DetachPen();
+    RSPath path;
+    path.AddArc(rRect, data.startDegree - QUARTER_CIRCLE + offsetDegree, data.sweepDegree - 2.0f * offsetDegree);
 
-    pen.SetColor(color.GetValue());
+    auto tempSweepDegree = GreatNotEqual(data.sweepDegree * ratio, 2.0f * offsetDegree)
+                               ? data.sweepDegree * ratio - 2.0f * offsetDegree
+                               : 0.0f;
+
+    PaintMonochromeCircularShadow(canvas, data, color, paintProperty, tempSweepDegree);
+    pen.SetColor(backgroundColor.GetValue());
     canvas.AttachPen(pen);
-    path.Reset();
-    auto tempSweepDegree =
-        GreatNotEqual(sweepDegree * ratio, 2.0f * offsetDegree) ? sweepDegree * ratio - 2.0f * offsetDegree : 0.0f;
-    path.AddArc(rRect, startDegree - QUARTER_CIRCLE + offsetDegree, tempSweepDegree);
     canvas.DrawPath(path);
     canvas.DetachPen();
 
-    data.sweepDegree = sweepDegree * ratio;
+    path.Reset();
+    path.AddArc(rRect, data.startDegree - QUARTER_CIRCLE + offsetDegree, tempSweepDegree);
+    pen.SetColor(color.GetValue());
+
+    canvas.AttachPen(pen);
+    canvas.DrawPath(path);
+    canvas.DetachPen();
+
+    data.sweepDegree = data.sweepDegree * ratio;
     NewDrawIndicator(canvas, data);
+}
+
+void GaugePaintMethod::PaintMonochromeCircularShadow(RSCanvas& canvas, const RenderRingInfo& data, const Color& color,
+    const RefPtr<GaugePaintProperty>& paintProperty, const float sweepDegree) const
+{
+    CHECK_NULL_VOID(paintProperty);
+    GaugeShadowOptions shadowOptons;
+    if (paintProperty->HasShadowOptions()) {
+        shadowOptons = paintProperty->GetShadowOptionsValue();
+    }
+    if (!shadowOptons.isShadowVisible) {
+        return;
+    }
+    float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
+    RSFilter filter;
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowOptons.radius));
+    RSPen shadowPen;
+    shadowPen.SetAntiAlias(true);
+    shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    shadowPen.SetColor(color.GetValue());
+    shadowPen.SetFilter(filter);
+    shadowPen.SetWidth(data.thickness);
+
+    RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
+                 data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
+                 data.center.GetX() + data.radius - data.thickness * PERCENT_HALF,
+                 data.center.GetY() + data.radius - data.thickness * PERCENT_HALF);
+    RSPath shadowPath;
+    shadowPath.AddArc(rRect, data.startDegree - QUARTER_CIRCLE + offsetDegree, sweepDegree);
+
+    canvas.Save();
+    canvas.Translate(shadowOptons.offsetX, shadowOptons.offsetY);
+    canvas.AttachPen(shadowPen);
+    canvas.DrawPath(shadowPath);
+    canvas.DetachPen();
+    canvas.Restore();
 }
 
 void GaugePaintMethod::PaintSingleSegmentGradientCircular(
     RSCanvas& canvas, RenderRingInfo data, const RefPtr<GaugePaintProperty>& paintProperty) const
 {
     CHECK_NULL_VOID(paintProperty);
-    float startDegree = data.startDegree;
-    float sweepDegree = data.sweepDegree;
-
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
-    auto colorsArray = paintProperty->GetGradientColorsValue().at(0);
-    for (const auto& colorStop : colorsArray) {
-        colors.emplace_back(colorStop.first.GetValue());
-        pos.emplace_back(colorStop.second.Value());
+    if (paintProperty->HasGradientColors()) {
+        auto colorsArray = paintProperty->GetGradientColorsValue().at(0);
+        for (const auto& colorStop : colorsArray) {
+            colors.emplace_back(colorStop.first.GetValue());
+            pos.emplace_back(colorStop.second.Value());
+        }
+    } else {
+        colors.emplace_back((Color::BLACK).GetValue());
+        pos.emplace_back(1.0f);
     }
 
+    PaintSingleSegmentGradientCircularShadow(canvas, data, paintProperty, colors, pos);
     float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
     RSPen pen;
     pen.SetAntiAlias(true);
     pen.SetWidth(data.thickness);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(data.center.GetX(), data.center.GetY())),
-        colors, pos, RSTileMode::CLAMP, offsetDegree, sweepDegree - offsetDegree));
+        colors, pos, RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree));
 
     RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
                  data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
@@ -314,16 +362,58 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircular(
                  data.center.GetY() + data.radius - data.thickness * PERCENT_HALF);
 
     RSPath path;
-    path.AddArc(rRect, offsetDegree, sweepDegree - 2.0f * offsetDegree);
-    canvas.Rotate(startDegree - QUARTER_CIRCLE, data.center.GetX(), data.center.GetY());
+    path.AddArc(rRect, offsetDegree, data.sweepDegree - 2.0f * offsetDegree);
+    canvas.Rotate(data.startDegree - QUARTER_CIRCLE, data.center.GetX(), data.center.GetY());
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
     canvas.DetachPen();
 
     auto ratio = GetValueRatio(paintProperty);
     data.startDegree = QUARTER_CIRCLE;
-    data.sweepDegree = sweepDegree * ratio;
+    data.sweepDegree = data.sweepDegree * ratio;
     NewDrawIndicator(canvas, data);
+}
+
+void GaugePaintMethod::PaintSingleSegmentGradientCircularShadow(RSCanvas& canvas, const RenderRingInfo& data,
+    const RefPtr<GaugePaintProperty>& paintProperty, const std::vector<RSColorQuad>& colors,
+    const std::vector<float>& pos) const
+{
+    CHECK_NULL_VOID(paintProperty);
+    GaugeShadowOptions shadowOptons;
+    if (paintProperty->HasShadowOptions()) {
+        shadowOptons = paintProperty->GetShadowOptionsValue();
+    }
+    if (!shadowOptons.isShadowVisible) {
+        return;
+    }
+
+    float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
+    RSFilter filter;
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowOptons.radius));
+    RSPen shadowPen;
+    shadowPen.SetAntiAlias(true);
+    shadowPen.SetWidth(data.thickness);
+    shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    shadowPen.SetFilter(filter);
+    shadowPen.SetShaderEffect(
+        RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colors, pos,
+            RSTileMode::CLAMP, offsetDegree, data.sweepDegree - offsetDegree));
+
+    RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
+                 data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
+                 data.center.GetX() + data.radius - data.thickness * PERCENT_HALF,
+                 data.center.GetY() + data.radius - data.thickness * PERCENT_HALF);
+
+    RSPath path;
+    path.AddArc(rRect, offsetDegree, data.sweepDegree - 2.0f * offsetDegree);
+
+    canvas.Save();
+    canvas.Translate(shadowOptons.offsetX, shadowOptons.offsetY);
+    canvas.Rotate(data.startDegree - QUARTER_CIRCLE, data.center.GetX(), data.center.GetY());
+    canvas.AttachPen(shadowPen);
+    canvas.DrawPath(path);
+    canvas.DetachPen();
+    canvas.Restore();
 }
 
 void GaugePaintMethod::PaintMultiSegmentGradientCircular(
@@ -333,13 +423,13 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircular(
     float startDegree = data.startDegree;
     float sweepDegree = data.sweepDegree;
     std::vector<float> weights;
-    if (paintProperty->GetValues().has_value()) {
+    if (paintProperty->HasValues()) {
         weights = paintProperty->GetValuesValue();
     } else {
         weights.push_back(1);
     }
     std::vector<ColorStopArray> colors;
-    if (paintProperty->GetGradientColors().has_value()) {
+    if (paintProperty->HasGradientColors()) {
         colors = paintProperty->GetGradientColorsValue();
     } else {
         ColorStopArray colorStopArray;
@@ -360,54 +450,107 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircular(
         return;
     }
 
+    PaintMultiSegmentGradientCircularShadow(canvas, data, paintProperty, colors, weights);
+
     auto ratio = GetValueRatio(paintProperty);
     data.startDegree = QUARTER_CIRCLE;
     data.sweepDegree = sweepDegree * ratio;
-    float drawStartDegree = 0.0f;
-    float drawSweepDegree = 0.0f;
+    SingleSegmentGradientInfo info;
+    info.isDrawShadow = false;
     canvas.Rotate(startDegree - QUARTER_CIRCLE, data.center.GetX(), data.center.GetY());
     for (size_t index = 0; index < colors.size(); index++) {
-        std::vector<RSColorQuad> colorValues;
-        std::vector<float> pos;
-        auto colorsArray = colors.at(index);
-        for (const auto& colorStop : colorsArray) {
-            colorValues.emplace_back(colorStop.first.GetValue());
-            pos.emplace_back(colorStop.second.Value());
-        }
-
-        drawStartDegree = drawStartDegree + drawSweepDegree;
-        drawSweepDegree = (weights[index] / totalWeight) * sweepDegree;
-        float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
-
-        RSPen pen;
-        RSPath path;
-        pen.SetAntiAlias(true);
-        pen.SetWidth(data.thickness);
-        pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-        RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
-                     data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
-                     data.center.GetX() + data.radius - data.thickness * PERCENT_HALF,
-                     data.center.GetY() + data.radius - data.thickness * PERCENT_HALF);
-
-        NewDrawIndicator(canvas, data);
-        if (index != 0) {
-            DrawHighLight(canvas, data, drawStartDegree);
-            pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-                ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
-                drawStartDegree - offsetDegree, drawStartDegree + drawSweepDegree - offsetDegree));
-            path.AddArc(rRect, drawStartDegree - offsetDegree, drawSweepDegree);
-        } else {
-            pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-                ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
-                drawStartDegree + offsetDegree, drawStartDegree + drawSweepDegree + offsetDegree));
-            path.AddArc(rRect, drawStartDegree + offsetDegree, drawSweepDegree - 2.0f * offsetDegree);
-        }
-
-        canvas.AttachPen(pen);
-        canvas.DrawPath(path);
-        canvas.DetachPen();
+        info.drawStartDegree = info.drawStartDegree + info.drawSweepDegree;
+        info.drawSweepDegree = (weights[index] / totalWeight) * sweepDegree;
+        info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
+        info.colorStopArray = colors.at(index);
+        DrawSingleSegmentGradient(canvas, data, info, index);
     }
     NewDrawIndicator(canvas, data);
+}
+
+void GaugePaintMethod::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas, const RenderRingInfo& data,
+    const RefPtr<GaugePaintProperty>& paintProperty, const std::vector<ColorStopArray>& colors,
+    const std::vector<float>& weights) const
+{
+    CHECK_NULL_VOID(paintProperty);
+    GaugeShadowOptions shadowOptons;
+    if (paintProperty->HasShadowOptions()) {
+        shadowOptons = paintProperty->GetShadowOptionsValue();
+    }
+
+    if (!shadowOptons.isShadowVisible) {
+        return;
+    }
+    float totalWeight = 0.0f;
+    for (const auto& weight : weights) {
+        totalWeight += weight;
+    }
+    canvas.Save();
+    canvas.Translate(shadowOptons.offsetX, shadowOptons.offsetY);
+    canvas.Rotate(data.startDegree - QUARTER_CIRCLE, data.center.GetX(), data.center.GetY());
+
+    SingleSegmentGradientInfo info;
+    info.isDrawShadow = true;
+    info.shadowRadius = shadowOptons.radius;
+    for (size_t index = 0; index < colors.size(); index++) {
+        info.drawStartDegree = info.drawStartDegree + info.drawSweepDegree;
+        info.drawSweepDegree = (weights[index] / totalWeight) * data.sweepDegree;
+        info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
+        info.colorStopArray = colors.at(index);
+        DrawSingleSegmentGradient(canvas, data, info, index);
+    }
+    canvas.Restore();
+}
+
+void GaugePaintMethod::DrawSingleSegmentGradient(
+    RSCanvas& canvas, const RenderRingInfo& data, const SingleSegmentGradientInfo& info, const size_t index) const
+{
+    auto drawStartDegree = info.drawStartDegree;
+    auto drawSweepDegree = info.drawSweepDegree;
+    auto offsetDegree = info.offsetDegree;
+    std::vector<RSColorQuad> colorValues;
+    std::vector<float> pos;
+    for (const auto& colorStop : info.colorStopArray) {
+        colorValues.emplace_back(colorStop.first.GetValue());
+        pos.emplace_back(colorStop.second.Value());
+    }
+
+    RSPen pen;
+    RSPath path;
+    pen.SetAntiAlias(true);
+    pen.SetWidth(data.thickness);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    RSRect rRect(data.center.GetX() - data.radius + data.thickness * PERCENT_HALF,
+                 data.center.GetY() - data.radius + data.thickness * PERCENT_HALF,
+                 data.center.GetX() + data.radius - data.thickness * PERCENT_HALF,
+                 data.center.GetY() + data.radius - data.thickness * PERCENT_HALF);
+
+    if (info.isDrawShadow) {
+        RSFilter filter;
+        filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, info.shadowRadius));
+        pen.SetFilter(filter);
+    } else {
+        NewDrawIndicator(canvas, data);
+    }
+
+    if (index != 0) {
+        if (!info.isDrawShadow) {
+            DrawHighLight(canvas, data, drawStartDegree);
+        }
+        pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+            ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
+            drawStartDegree - offsetDegree, drawStartDegree + drawSweepDegree - offsetDegree));
+        path.AddArc(rRect, drawStartDegree - offsetDegree, drawSweepDegree);
+    } else {
+        pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+            ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
+            drawStartDegree + offsetDegree, drawStartDegree + drawSweepDegree + offsetDegree));
+        path.AddArc(rRect, drawStartDegree + offsetDegree, drawSweepDegree - 2.0f * offsetDegree);
+    }
+
+    canvas.AttachPen(pen);
+    canvas.DrawPath(path);
+    canvas.DetachPen();
 }
 
 void GaugePaintMethod::CalculateStartAndSweepDegree(
@@ -417,15 +560,15 @@ void GaugePaintMethod::CalculateStartAndSweepDegree(
     float startAngle = DEFAULT_START_DEGREE;
     float endAngle = DEFAULT_END_DEGREE;
 
-    if (paintProperty->GetStartAngle().has_value() && !std::isnan(paintProperty->GetStartAngle().value())) {
-        startAngle = paintProperty->GetStartAngle().value();
+    if (paintProperty->HasStartAngle() && !std::isnan(paintProperty->GetStartAngleValue())) {
+        startAngle = paintProperty->GetStartAngleValue();
     }
 
-    if (paintProperty->GetEndAngle().has_value() && !std::isnan(paintProperty->GetEndAngle().value())) {
-        endAngle = paintProperty->GetEndAngle().value();
+    if (paintProperty->HasEndAngle() && !std::isnan(paintProperty->GetEndAngleValue())) {
+        endAngle = paintProperty->GetEndAngleValue();
     }
 
-    if (paintProperty->GetStrokeWidth().has_value() && paintProperty->GetStrokeWidth()->Value() > 0) {
+    if (paintProperty->HasStrokeWidth() && (paintProperty->GetStrokeWidth()->Value() > 0)) {
         data.thickness = std::min(static_cast<float>(paintProperty->GetStrokeWidth()->ConvertToPx()),
             data.contentSize.Width() * PERCENT_HALF);
     }
@@ -462,9 +605,8 @@ void GaugePaintMethod::DrawHighLight(RSCanvas& canvas, const RenderRingInfo& dat
 
     float tempDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF + space);
     RSPath path4;
-    path4.MoveTo(
-        data.center.GetX() + (data.radius) * std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
-        data.center.GetY() + (data.radius) * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE));
+    path4.MoveTo(data.center.GetX() + (data.radius) * std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
+                 data.center.GetY() + (data.radius) * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE));
     path4.LineTo(
         data.center.GetX() + (data.radius - data.thickness) *
             std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
@@ -521,26 +663,26 @@ void GaugePaintMethod::NewDrawIndicator(RSCanvas& canvas, const RenderRingInfo& 
     float pathStartVertexX = data.center.GetX();
     float pathStartVertexY = data.center.GetY() - data.radius + INDICATOR_DISTANCE_TO_TOP.ConvertToPx();
     path.MoveTo(pathStartVertexX - CALC_INDICATOR_POINT_TOP_LEFT * data.radius,
-        pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
+                pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
     path.LineTo(pathStartVertexX - CALC_INDICATOR_POINT_BOTTOM_LEFT_X * data.radius,
-        pathStartVertexY + CALC_INDICATOR_POINT_BOTTOM_LEFT_Y * data.radius);
+                pathStartVertexY + CALC_INDICATOR_POINT_BOTTOM_LEFT_Y * data.radius);
 
     path.QuadTo(pathStartVertexX - CALC_INDICATOR_CONTROL_POINT_LEFT_X * data.radius,
-        pathStartVertexY + CALC_INDICATOR_CONTROL_POINT_LEFT_Y * data.radius,
-        pathStartVertexX - CALC_INDICATOR_POINT_RIGHT_X * data.radius,
-        pathStartVertexY + CALC_INDICATOR_POINT_RIGHT_Y * data.radius);
+                pathStartVertexY + CALC_INDICATOR_CONTROL_POINT_LEFT_Y * data.radius,
+                pathStartVertexX - CALC_INDICATOR_POINT_RIGHT_X * data.radius,
+                pathStartVertexY + CALC_INDICATOR_POINT_RIGHT_Y * data.radius);
     path.LineTo(pathStartVertexX + CALC_INDICATOR_POINT_RIGHT_X * data.radius,
-        pathStartVertexY + CALC_INDICATOR_POINT_RIGHT_Y * data.radius);
+                pathStartVertexY + CALC_INDICATOR_POINT_RIGHT_Y * data.radius);
 
     path.QuadTo(pathStartVertexX + CALC_INDICATOR_CONTROL_POINT_LEFT_X * data.radius,
-        pathStartVertexY + CALC_INDICATOR_CONTROL_POINT_RIGHT_X * data.radius,
-        pathStartVertexX + CALC_INDICATOR_POINT_BOTTOM_LEFT_X * data.radius,
-        pathStartVertexY + CALC_INDICATOR_POINT_BOTTOM_LEFT_Y * data.radius);
+                pathStartVertexY + CALC_INDICATOR_CONTROL_POINT_RIGHT_X * data.radius,
+                pathStartVertexX + CALC_INDICATOR_POINT_BOTTOM_LEFT_X * data.radius,
+                pathStartVertexY + CALC_INDICATOR_POINT_BOTTOM_LEFT_Y * data.radius);
     path.LineTo(pathStartVertexX + CALC_INDICATOR_POINT_TOP_LEFT * data.radius,
-        pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
+                pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
     path.QuadTo(pathStartVertexX, pathStartVertexY + CALC_INDICATOR_CONTROL_POINT_RIGHT_Y * data.radius,
-        pathStartVertexX - CALC_INDICATOR_POINT_TOP_LEFT * data.radius,
-        pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
+                pathStartVertexX - CALC_INDICATOR_POINT_TOP_LEFT * data.radius,
+                pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
 
     canvas.Save();
     canvas.Rotate(data.startDegree + data.sweepDegree, data.center.GetX(), data.center.GetY());

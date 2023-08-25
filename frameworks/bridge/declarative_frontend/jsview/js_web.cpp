@@ -1910,7 +1910,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         LOGE("Web component failed to parse src");
         return;
     }
-    LOGI("JSWeb::Create src:%{public}s", dstSrc->c_str());
+    LOGD("JSWeb::Create src:%{public}s", dstSrc->c_str());
 
     auto controllerObj = paramObject->GetProperty("controller");
     if (!controllerObj->IsObject()) {

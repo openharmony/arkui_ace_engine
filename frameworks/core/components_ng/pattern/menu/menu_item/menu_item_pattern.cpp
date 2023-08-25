@@ -133,6 +133,7 @@ void MenuItemPattern::OnAttachToFrameNode()
 
 void CustomMenuItemPattern::OnAttachToFrameNode()
 {
+    RegisterOnKeyEvent();
     RegisterOnTouch();
 }
 

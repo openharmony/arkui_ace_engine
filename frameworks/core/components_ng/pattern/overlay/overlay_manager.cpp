@@ -1001,7 +1001,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     CallOnHideDialogCallback();
 }
 
-bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed)
+bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
 {
     if (overlay->IsRemoving()) {
         return false;
@@ -1010,7 +1010,7 @@ bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackP
         return true;
     }
     auto hub = overlay->GetEventHub<DialogEventHub>();
-    if (hub) {
+    if (!isPageRouter && hub) {
         hub->FireCancelEvent();
     }
     CloseDialog(overlay);
@@ -1060,7 +1060,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (InstanceOf<DialogPattern>(pattern)) {
-            return RemoveDialog(overlay, isBackPressed);
+            return RemoveDialog(overlay, isBackPressed, isPageRouter);
         }
         if (InstanceOf<BubblePattern>(pattern)) {
             return RemoveBubble(overlay);
@@ -1140,24 +1140,24 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
         CHECK_NULL_RETURN(builder, false);
         auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
         if (builder->GetRenderContext()->HasTransition()) {
-            topModalNode->Clean();
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            topModalNode->Clean(false, true);
+            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(topModalNode, false);
         } else if (modalTransition == ModalTransition::ALPHA) {
             PlayAlphaModalTransition(topModalNode, false);
-        } else {
+        } else if (!builder->GetRenderContext()->HasTransition()) {
             rootNode->RemoveChild(topModalNode);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
     } else if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         topModalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
         auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetLastChild());
         CHECK_NULL_RETURN(builder, false);
         if (builder->GetRenderContext()->HasTransition()) {
-            topModalNode->Clean();
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            topModalNode->Clean(false, true);
+            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         PlaySheetTransition(topModalNode, false);
     }
@@ -1180,7 +1180,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     // close dialog with animation
     auto pattern = overlay->GetPattern();
     if (InstanceOf<DialogPattern>(pattern)) {
-        return RemoveDialog(overlay, false);
+        return RemoveDialog(overlay, false, false);
     }
     if (InstanceOf<BubblePattern>(pattern)) {
         overlay->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
@@ -1490,12 +1490,13 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
     option.SetFillMode(FillMode::FORWARDS);
     auto context = modalNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+
+    auto rootHeight = GetRootHeight();
+    auto modalPositionY = modalNode->GetGeometryNode()->GetFrameRect().GetY();
+    auto showHeight = rootHeight - modalPositionY;
+
     if (isTransitionIn) {
-        context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+        context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
         AnimationUtils::Animate(option, [context]() {
             if (context) {
                 context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
@@ -1527,9 +1528,9 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
         context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
         AnimationUtils::Animate(
             option,
-            [context, pageHeight]() {
+            [context, showHeight]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+                    context->OnTransformTranslateUpdate({ 0.0f, showHeight, 0.0f });
                 }
             },
             option.GetOnFinishEvent());
@@ -1588,6 +1589,8 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     LOGI("BindSheet isShow: %{public}d, targetId: %{public}d", isShow, targetId);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     if (isShow) {
         if (!modalStack_.empty()) {
             auto topModalNode = modalStack_.top().Upgrade();
@@ -1603,7 +1606,6 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
                     bool isModeChangeToAuto = false;
                     if (sheetStyle.sheetMode.has_value() && sheetStyle.sheetMode == SheetMode::AUTO) {
                         layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-                        auto pipeline = PipelineContext::GetCurrentContext();
                         pipeline->FlushUITasks();
                         isModeChangeToAuto = true;
                     } else {
@@ -1638,10 +1640,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         modalList_.emplace_back(WeakClaim(RawPtr(sheetNode)));
         FireModalPageShow();
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        if (sheetStyle.sheetMode.has_value() && sheetStyle.sheetMode == SheetMode::AUTO) {
-            auto pipeline = PipelineContext::GetCurrentContext();
-            pipeline->FlushUITasks();
-        }
+        pipeline->FlushUITasks();
         ComputeSheetOffset(sheetStyle, sheetNode);
         if (onAppear != nullptr) {
             onAppear();
@@ -1668,7 +1667,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         auto builder = AceType::DynamicCast<FrameNode>(topSheetNode->GetLastChild());
         CHECK_NULL_VOID(builder);
         if (builder->GetRenderContext()->HasTransition()) {
-            topSheetNode->Clean();
+            topSheetNode->Clean(false, true);
             topSheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         ModalPageLostFocus(topSheetNode);
@@ -1695,19 +1694,11 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
     option.SetFillMode(FillMode::FORWARDS);
     auto context = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto stageManager = pipeline->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto geometryNode = pageNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto pageHeight = geometryNode->GetFrameSize().Height();
+    auto rootHeight = GetRootHeight();
     if (isTransitionIn) {
-        auto offset = pageHeight - sheetHeight_;
+        auto offset = rootHeight - sheetHeight_;
         if (isFirstTransition) {
-            context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+            context->OnTransformTranslateUpdate({ 0.0f, rootHeight, 0.0f });
         }
         if (isModeChangeToAuto) {
             option.SetDuration(0);
@@ -1741,9 +1732,9 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
             });
         AnimationUtils::Animate(
             option,
-            [context, pageHeight]() {
+            [context, rootHeight]() {
                 if (context) {
-                    context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
+                    context->OnTransformTranslateUpdate({ 0.0f, rootHeight, 0.0f });
                 }
             }, option.GetOnFinishEvent());
     }
@@ -1751,28 +1742,20 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
 
 void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto stageManager = pipeline->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto pageNode = stageManager->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
-    auto geometryNode = pageNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto pageHeight = geometryNode->GetFrameSize().Height();
-    auto largeHeight = pageHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
+    auto sheetHeight = sheetNode->GetGeometryNode()->GetFrameSize().Height();
+    auto largeHeight = sheetHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight_ = pageHeight / 2; // 2 : half
+            sheetHeight_ = sheetHeight / 2; // 2 : half
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
             sheetHeight_ = largeHeight;
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
-            sheetHeight_ = sheetNode->GetGeometryNode()->GetFrameSize().Height();
+            sheetHeight_ = sheetHeight;
         }
     } else {
         double height = 0.0;
         if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
-            height = sheetStyle.height->ConvertToPxWithSize(pageHeight);
+            height = sheetStyle.height->ConvertToPxWithSize(sheetHeight);
         } else {
             height = sheetStyle.height->ConvertToPx();
         }
@@ -2150,5 +2133,15 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
             child->MarkDirtyNode(flag);
         }
     }
+}
+
+float OverlayManager::GetRootHeight() const
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, 0.0);
+    auto rootGeometryNode = AceType::DynamicCast<FrameNode>(rootNode)->GetGeometryNode();
+    CHECK_NULL_RETURN(rootGeometryNode, 0.0);
+    auto rootHeight = rootGeometryNode->GetFrameSize().Height();
+    return rootHeight;
 }
 } // namespace OHOS::Ace::NG

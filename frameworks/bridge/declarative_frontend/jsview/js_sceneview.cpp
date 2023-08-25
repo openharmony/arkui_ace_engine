@@ -17,10 +17,8 @@
 
 #include "base/geometry/quaternion.h"
 #include "base/geometry/vec3.h"
-#include "bridge/declarative_frontend/jsview/models/model_view_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/model/model_view_ng.h"
-#include "core/components/scene_viewer/scene_viewer_component.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/custom/custom_render_descriptor.h"
@@ -46,8 +44,7 @@ ModelView* ModelView::GetInstance()
                 LOGD("ModelView::GetInstance() NG Pipeline");
                 instance_.reset(new NG::ModelViewNG());
             } else {
-                LOGD("ModelView::GetInstance() NOT NG Pipeline");
-                instance_.reset(new Framework::ModelViewImpl());
+                LOGE("ModelView::GetInstance() NOT NG Pipeline");
             }
 #endif
         }
@@ -61,24 +58,7 @@ namespace OHOS::Ace::Framework {
 
 void JSSceneView::JsOnClick(const JSCallbackInfo& info)
 {
-    LOGD("JSSceneView JsOnClick");
-    if (info[0]->IsFunction()) {
-        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-        auto onClickId = EventMarker(
-            [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)]() {
-                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-                LOGD("About to call onclick method on js");
-                func->Execute();
-            });
-        auto top = ViewStackProcessor::GetInstance()->GetMainComponent();
-        auto component = AceType::DynamicCast<OHOS::Ace::SceneViewerComponent>(top);
-
-        if (!component) {
-            LOGE("Cannot assign click handler. Component is not SceneViewComponent");
-            return;
-        }
-        component->SetClickedEventId(onClickId);
-    }
+    LOGW("JSSceneView JsOnClick To be implemented for NG pipeline");
 }
 
 void JSSceneView::JsSetHandleCameraMove(const JSCallbackInfo& info)

@@ -623,7 +623,7 @@ void JSWebController::LoadUrl(const JSCallbackInfo& args)
     if (webController_) {
         webController_->LoadUrl(url, httpHeaders);
     }
-    LOGI("JSWebController load url:%{public}s, httpHeaders:%{public}d", url.c_str(), (int)httpHeaders.size());
+    LOGD("JSWebController load url:%{public}s, httpHeaders:%{public}d", url.c_str(), (int)httpHeaders.size());
 }
 
 void JSWebController::ExecuteTypeScript(const JSCallbackInfo& args)

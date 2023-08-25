@@ -1616,7 +1616,8 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
 
     preNavDestinationPattern->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
         []() { return FrameNode::CreateFrameNode("child1", 102, AceType::MakeRefPtr<ButtonPattern>()); });
-    preTopNavDestination->contentNode_ =FrameNode::CreateFrameNode("child1", 103, AceType::MakeRefPtr<ButtonPattern>());
+    preTopNavDestination->contentNode_ =
+        FrameNode::CreateFrameNode("child1", 103, AceType::MakeRefPtr<ButtonPattern>());
     preTopNavDestination->parent_ = AceType::WeakClaim(AceType::RawPtr(navigation));
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
     preNavDestinationPattern->isOnShow_ = true;
@@ -2263,5 +2264,115 @@ HWTEST_F(NavigationTestNg, NavigationModelNG009, TestSize.Level1)
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
     navigationPattern->UpdateContextRect(preTopNavDestination, navigation);
     ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: NavigationModelNG0010
+ * @tc.desc: Test NavigationModelNG::SetSubtitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    ASSERT_EQ(navBarNode->subtitle_, nullptr);
+    navBarNode->subtitle_ =
+        TitleBarNode::GetOrCreateTitleBarNode("subTitle", 111, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    model.SetSubtitle("mySubTitle");
+    ASSERT_EQ(navBarNode->GetSubtitleNodeOperationValue(), ChildNodeOperation::REPLACE);
+
+    auto customNode = CustomNode::CreateCustomNode(112, "customNode");
+    navBarNode->subtitle_ = customNode;
+    model.SetSubtitle("mySubTitle");
+    ASSERT_EQ(navBarNode->GetSubtitleNodeOperationValue(), ChildNodeOperation::REPLACE);
+
+    auto textNode = FrameNode::CreateFrameNode("text", 3, AceType::MakeRefPtr<TextPattern>());
+    navBarNode->subtitle_ = textNode;
+    auto subtitleProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    subtitleProperty->propContent_ = "title";
+    model.SetSubtitle("mySubTitle");
+    ASSERT_EQ(navBarNode->GetSubtitleNodeOperationValue(), ChildNodeOperation::NONE);
+
+    subtitleProperty->propContent_ = "mySubTitle";
+    model.SetSubtitle("mySubTitle");
+    ASSERT_EQ(navBarNode->GetSubtitleNodeOperationValue(), ChildNodeOperation::NONE);
+}
+
+/**
+ * @tc.name: NavigationModelNG0011
+ * @tc.desc: Test NavigationModelNG::SetCustomToolBar && SetToolBarItems
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    auto customNode = FrameNode::CreateFrameNode("text", 113, AceType::MakeRefPtr<TextPattern>());
+    model.SetCustomToolBar(customNode);
+    ASSERT_EQ(navBarNode->GetToolBarNodeOperationValue(), ChildNodeOperation::REPLACE);
+
+    navBarNode->propPrevToolBarIsCustom_ = true;
+    model.SetCustomToolBar(customNode);
+    ASSERT_EQ(navBarNode->GetToolBarNodeOperationValue(), ChildNodeOperation::REPLACE);
+
+    customNode =
+        FrameNode::CreateFrameNode("text", navBarNode->GetToolBarNode()->GetId(), AceType::MakeRefPtr<TextPattern>());
+    model.SetCustomToolBar(customNode);
+    ASSERT_EQ(navBarNode->GetToolBarNodeOperationValue(), ChildNodeOperation::NONE);
+
+    std::vector<NG::BarItem> toolBarItems;
+    model.SetToolBarItems(std::move(toolBarItems));
+    ASSERT_EQ(navBarNode->GetToolBarNodeOperationValue(), ChildNodeOperation::REPLACE);
+
+    navBarNode->preToolBarNode_ = nullptr;
+    model.SetToolBarItems(std::move(toolBarItems));
+    ASSERT_EQ(navBarNode->GetToolBarNodeOperationValue(), ChildNodeOperation::REPLACE);
+}
+
+/**
+ * @tc.name: NavigationModelNG0012
+ * @tc.desc: Test NavigationModelNG::SetToolbarConfiguration
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    navBarNode->propPrevToolBarIsCustom_ = true;
+    std::vector<NG::BarItem> toolBarItems;
+    model.SetToolbarConfiguration(std::move(toolBarItems));
+    ASSERT_EQ(navBarNode->GetToolBarNodeOperationValue(), ChildNodeOperation::REPLACE);
 }
 } // namespace OHOS::Ace::NG

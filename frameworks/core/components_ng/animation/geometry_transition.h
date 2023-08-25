@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/geometry/ng/rect_t.h"
+#include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -35,7 +36,7 @@ public:
 
     bool IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const;
     bool IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const;
-    bool IsRunning() const;
+    bool IsRunning(const WeakPtr<FrameNode>& frameNode) const;
     bool IsInAndOutEmpty() const;
     bool IsInAndOutValid() const;
     std::string ToString() const;
@@ -45,7 +46,7 @@ public:
     }
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);
-    void OnReSync();
+    void OnReSync(const WeakPtr<FrameNode>& trigger = nullptr);
     bool OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode);
     bool OnFollowWithoutTransition(std::optional<bool> direction = std::nullopt);
     void WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
@@ -65,6 +66,9 @@ private:
     void MarkLayoutDirty(const RefPtr<FrameNode>& node, int32_t layoutPriority = 0);
     void ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& layoutWrapper, bool isNodeIn);
     void SyncGeometry(bool isNodeIn);
+    bool IsParent(const WeakPtr<FrameNode>& parent, const WeakPtr<FrameNode>& child) const;
+    void RecordAnimationOption(const WeakPtr<FrameNode>& trigger);
+    RectF GetNodeAbsFrameRect(const RefPtr<FrameNode>& node, std::optional<OffsetF> parentPos = std::nullopt) const;
 
     std::string id_;
     WeakPtr<FrameNode> inNode_;
@@ -77,10 +81,11 @@ private:
     OffsetF outNodePos_;
     SizeF outNodeSize_;
     OffsetF outNodeParentPos_;
-    WeakPtr<FrameNode> holder_;
+    RefPtr<FrameNode> holder_;
     bool followWithoutTransition_ = false;
     RefPtr<LayoutProperty> layoutPropertyIn_;
     RefPtr<LayoutProperty> layoutPropertyOut_;
+    AnimationOption animationOption_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GeometryTransition);
 };

@@ -63,7 +63,7 @@ public:
 
     void SyncGeometryProperties(const RectF& paintRect) override;
 
-    void SetSandBox(const std::optional<OffsetF>& parentPosition) override;
+    void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 

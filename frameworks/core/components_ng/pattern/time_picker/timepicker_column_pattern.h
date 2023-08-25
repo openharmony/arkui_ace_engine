@@ -230,6 +230,8 @@ public:
 
     void UpdateToss(double offsetY);
 
+    void UpdateFinishToss(double offsetY);
+
     void TossStoped();
 
     void UpdateScrollDelta(double delta);
