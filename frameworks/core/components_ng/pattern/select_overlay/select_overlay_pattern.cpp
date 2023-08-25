@@ -104,6 +104,36 @@ void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
     }
 }
 
+void SelectOverlayPattern::AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion)
+{
+    auto layoutProps = GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    float safeAreaInsetsLeft = 0.0f;
+    float safeAreaInsetsTop = 0.0f;
+    auto&& safeAreaInsets = layoutProps->GetSafeAreaInsets();
+    if (safeAreaInsets) {
+        safeAreaInsetsLeft = static_cast<float>(safeAreaInsets->left_.end);
+        safeAreaInsetsTop = static_cast<float>(safeAreaInsets->top_.end);
+    }
+    const auto& children = GetHost()->GetChildren();
+    for (const auto& it : children) {
+        auto child = DynamicCast<FrameNode>(it);
+        if (child == nullptr) {
+            continue;
+        }
+        auto frameRect = child->GetGeometryNode()->GetFrameRect();
+        // rect is relative to window
+        auto rect = Rect(frameRect.GetX() + safeAreaInsetsLeft, frameRect.GetY() + safeAreaInsetsTop, frameRect.Width(),
+            frameRect.Height());
+
+        DimensionRect region;
+        region.SetSize({ Dimension(rect.GetSize().Width()), Dimension(rect.GetSize().Height()) });
+        region.SetOffset(DimensionOffset(Offset(rect.GetOffset().GetX(), rect.GetOffset().GetY())));
+
+        responseRegion.emplace_back(region);
+    }
+}
+
 void SelectOverlayPattern::UpdateHandleHotZone()
 {
     auto host = GetHost();
@@ -170,6 +200,10 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     secondHandleRegion.SetOffset(
         DimensionOffset(Offset(secondHandleRegion_.GetOffset().GetX(), secondHandleRegion_.GetOffset().GetY())));
     responseRegion.emplace_back(secondHandleRegion);
+    if (IsCustomMenu()) {
+        AddMenuResponseRegion(responseRegion);
+    }
+
     host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
 }
 
@@ -203,6 +237,9 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
         info_->onTouchUp(info);
     } else if (info_->onTouchMove && changedPoint.GetTouchType() == TouchType::MOVE) {
         info_->onTouchMove(info);
+    }
+    if (IsCustomMenu()) {
+        MenuWrapperPattern::OnTouchEvent(info);
     }
 }
 
@@ -430,10 +467,10 @@ void SelectOverlayPattern::DisableMenu(bool isDisabled)
 
 bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    UpdateHandleHotZone();
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto selectOverlayLayoutAlgorithm =
@@ -445,6 +482,9 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
         menuWidth_ = menuWidth.value();
     }
     hasExtensionMenu_ = selectOverlayLayoutAlgorithm->GetHasExtensionMenu();
+    if (IsCustomMenu()) {
+        MenuWrapperPattern::CheckAndShowAnimation();
+    }
     return true;
 }
 

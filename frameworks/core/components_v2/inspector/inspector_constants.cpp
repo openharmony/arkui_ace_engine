@@ -539,4 +539,7 @@ const char KEYBOARD_ETS_TAG[] = "Keyboard";
 // Particle
 const char PARTICLE_COMPONENT_TAG[] = "ParticleComponent";
 const char PARTICLE_ETS_TAG[] = "Particle";
+
+// SelectOverlay
+const char SELECT_OVERLAY_ETS_TAG[] = "SelectOverlay";
 } // namespace OHOS::Ace::V2

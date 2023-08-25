@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -151,6 +152,7 @@ public:
     }
 
     RefPtr<FrameNode> GetMenu(bool needTopMenu = false);
+    RefPtr<MenuPattern> GetMenuPattern(bool needTopMenu = false);
     void UpdateTextNodes();
 
     void OnAttachToFrameNode() override;
@@ -195,6 +197,7 @@ private:
 
     void AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode);
     void SetAccessibilityAction();
+    bool IsSelectOverlayMenu();
 
     std::list<TouchRegion> hoverRegions_;
 

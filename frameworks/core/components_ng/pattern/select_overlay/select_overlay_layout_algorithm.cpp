@@ -41,8 +41,15 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
     menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
-    menu->Layout();
+    // custom menu need to layout all menu and submenu
+    if (info_->menuInfo.menuBuilder) {
+        for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+            child->Layout();
+        }
+        return;
+    }
 
+    menu->Layout();
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(button);
     auto menuNode = menu->GetHostNode();

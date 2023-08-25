@@ -25,6 +25,9 @@
 namespace OHOS::Ace::NG {
 void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
+    if (GetHost()->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
+        return;
+    }
     isHided_ = true;
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
@@ -99,6 +102,11 @@ void MenuWrapperPattern::HideSubMenu()
     auto menuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
     if (menuPattern) {
         menuPattern->RemoveParentHoverStyle();
+        auto frameNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+        auto menuItem = frameNode->GetPattern<MenuItemPattern>();
+        if (menuItem) {
+            menuItem->SetIsSubMenuShowed(false);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
@@ -151,11 +159,20 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
         // if DOWN-touched outside the menu region, then hide menu
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
-        if (menuPattern->IsSubMenu()) {
+        if (menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu()) {
             HideSubMenu();
         } else {
             HideMenu(menuNode);
         }
+    }
+}
+
+void MenuWrapperPattern::CheckAndShowAnimation()
+{
+    if (isFirstShow_) {
+        // only start animation when menu wrapper mount on.
+        StartShowAnimation();
+        isFirstShow_ = false;
     }
 }
 
@@ -164,11 +181,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if (IsContextMenu()) {
         SetHotAreas(dirty);
     }
-    if (isFirstShow_) {
-        // only start animation when menu wrapper mount on.
-        StartShowAnimation();
-        isFirstShow_ = false;
-    }
+    CheckAndShowAnimation();
     return false;
 }
 

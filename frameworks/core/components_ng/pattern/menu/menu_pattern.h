@@ -49,6 +49,7 @@ enum class MenuType {
                                    // also used in custom long press menu
     SELECT_OVERLAY_CUSTOM_MENU,    // menu used in SelectOverlay for right click
                                    // click menu item whill not trigger close menu
+    SELECT_OVERLAY_SUB_MENU,       // menu type used for select overlay sub menu
 };
 
 class MenuPattern : public Pattern {
@@ -132,6 +133,11 @@ public:
         return type_ == MenuType::SELECT_OVERLAY_CUSTOM_MENU;
     }
 
+    bool IsSelectOverlaySubMenu() const
+    {
+        return type_ == MenuType::SELECT_OVERLAY_SUB_MENU;
+    }
+
     void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)
     {
         parentMenuItem_ = parentMenuItem;
@@ -211,6 +217,7 @@ public:
 
     RefPtr<FrameNode> GetMenuWrapper() const;
     RefPtr<FrameNode> GetFirstInnerMenu() const;
+    void DumpInfo() override;
 
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
