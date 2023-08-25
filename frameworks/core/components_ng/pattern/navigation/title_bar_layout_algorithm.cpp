@@ -208,8 +208,10 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     if (isCustomTitle) {
         constraint.selfIdealSize.SetWidth(maxWidth);
         constraint.maxSize.SetWidth(maxWidth);
-        constraint.selfIdealSize.SetHeight(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
-        constraint.maxSize.SetHeight(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+        // if has menu, max height is single line height
+        auto maxHeight = NearZero(menuWidth_) ? titleBarSize.Height() : SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx();
+        constraint.selfIdealSize.SetHeight(maxHeight);
+        constraint.maxSize.SetHeight(maxHeight);
         titleWrapper->Measure(constraint);
         return;
     }
@@ -379,7 +381,8 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         // full mode
         if (isCustom) {
             // custom title margin is (0.0f, menuHeight_)
-            geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, menuHeight_.ConvertToPx()});
+            auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_.ConvertToPx();
+            geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
             titleWrapper->Layout();
         } else {
             // fixed white space menuHeight
@@ -394,7 +397,8 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         // free mode
         if (isCustom) {
             // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
-            geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, menuHeight_.ConvertToPx()});
+            auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_.ConvertToPx();
+            geometryNode->SetMarginFrameOffset(OffsetF { 0.0f, customOffsetY});
             titleWrapper->Layout();
             return;
         }
