@@ -152,10 +152,6 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     distance_ = newDistance_;
     direction_ = newDirection_;
 
-    if (IsRefereeFinished()) {
-        LOGD("referee has already receives the result");
-        return;
-    }
     if (fingers_ != AXIS_PAN_FINGERS) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
@@ -167,6 +163,12 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
         return;
     }
 
+    touchPoints_[event.id] = TouchEvent();
+    touchPoints_[event.id].id = event.id;
+    touchPoints_[event.id].x = event.x;
+    touchPoints_[event.id].y = event.y;
+    touchPoints_[event.id].sourceType = event.sourceType;
+    touchPoints_[event.id].sourceTool = event.sourceTool;
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
     lastAxisEvent_ = event;
@@ -428,6 +430,11 @@ void PanRecognizer::OnResetStatus()
     touchPoints_.clear();
     averageDistance_.Reset();
     touchPointsDistance_.clear();
+}
+
+void PanRecognizer::OnSucceedCancel()
+{
+    SendCancelMsg();
 }
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
