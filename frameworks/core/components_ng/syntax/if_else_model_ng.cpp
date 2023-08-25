@@ -36,12 +36,12 @@ void IfElseModelNG::Pop()
     ViewStackProcessor::GetInstance()->PopContainer();
 }
 
-void IfElseModelNG::SetBranchId(int32_t value)
+void IfElseModelNG::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto node = AceType::DynamicCast<IfElseNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(node);
-    node->SetBranchId(value);
+    node->SetBranchId(value, removedElmtId);
 }
 
 int32_t IfElseModelNG::GetBranchId()
