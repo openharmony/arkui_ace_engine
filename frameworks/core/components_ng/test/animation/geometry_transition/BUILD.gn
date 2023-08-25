@@ -15,9 +15,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("geometry_transition_test_ng") {
   sources = [
-    "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
-    "$ace_root/frameworks/core/animation/cubic_curve.cpp",
-    "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",

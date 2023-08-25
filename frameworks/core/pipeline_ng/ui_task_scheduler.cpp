@@ -127,7 +127,7 @@ bool UITaskScheduler::NeedAdditionalLayout()
 
     for (auto&& pageNodes : dirtyLayoutNodesMap) {
         for (auto&& node : pageNodes.second) {
-            if (!node || node->IsInDestroying() || !node->GetLayoutProperty()) {
+            if (!node || !node->GetLayoutProperty()) {
                 continue;
             }
             const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();

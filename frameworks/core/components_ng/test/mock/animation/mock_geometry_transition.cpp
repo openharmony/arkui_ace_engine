@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/animation/geometry_transition.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -25,7 +24,7 @@ GeometryTransition::GeometryTransition(const std::string& id, const WeakPtr<Fram
 void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
 void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
 void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
-void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger) {}
+void GeometryTransition::OnReSync() {}
 
 bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
 {
@@ -52,7 +51,7 @@ bool GeometryTransition::IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode)
     return false;
 }
 
-bool GeometryTransition::IsRunning(const WeakPtr<FrameNode>& frameNode) const
+bool GeometryTransition::IsRunning() const
 {
     return false;
 }

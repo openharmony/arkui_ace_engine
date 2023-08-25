@@ -172,7 +172,7 @@ void LayoutWrapperNode::Measure(const std::optional<LayoutConstraintF>& parentCo
     }
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr && geometryTransition->IsRunning(GetHostNode())) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
         geometryTransition->WillLayout(Claim(this));
     }
 
