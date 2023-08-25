@@ -1248,6 +1248,7 @@ private:
     InputStyle preInputStyle_ = InputStyle::DEFAULT;
     bool preErrorState_ = false;
     float preErrorMargin_ = 0.0f;
+    bool restoreMarginState_ = false;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
