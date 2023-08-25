@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components/close_icon/close_icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
 #include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
@@ -45,6 +46,7 @@ constexpr bool SLIDING_PANEL_LAYOUT_PROPERTY_HAS_DRAG_BAR = false;
 constexpr bool SLIDING_PANEL_HAS_DRAG_BAR_FALSE = false;
 constexpr bool SLIDING_PANEL_HAS_DRAG_BAR_TRUE = true;
 constexpr bool SLIDING_PANEL_SHOW_CLOSE_ICON_FALSE = false;
+constexpr bool SLIDING_PANEL_SHOW_CLOSE_ICON_TRUE = true;
 
 constexpr float ZERO = 0.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
@@ -123,6 +125,9 @@ public:
 
 protected:
     static RefPtr<FrameNode> CreateSlidingPanel(const TestProperty& testProperty);
+    static RefPtr<FrameNode> CreateSlidingPanelwithCloseIcon();
+    static RefPtr<LayoutWrapperNode> CreatChildLayoutWrapperNode(
+        const std::string& tagName, const RefPtr<FrameNode>& panelFrameNode);
 };
 
 void PanelTestNg::SetUp()
@@ -164,6 +169,31 @@ RefPtr<FrameNode> PanelTestNg::CreateSlidingPanel(const TestProperty& testProper
     }
 
     return ViewStackProcessor::GetInstance()->GetMainFrameNode();
+}
+
+RefPtr<FrameNode> PanelTestNg::CreateSlidingPanelwithCloseIcon()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto closeIconTheme = AceType::MakeRefPtr<CloseIconTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetShowCloseIcon(SLIDING_PANEL_SHOW_CLOSE_ICON_TRUE);
+    slidingPanelModelNG.SetPanelMode(PanelMode::FULL);
+    return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+}
+
+RefPtr<LayoutWrapperNode> PanelTestNg::CreatChildLayoutWrapperNode(
+    const std::string& tagName, const RefPtr<FrameNode>& panelFrameNode)
+{
+    auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
+    auto childNode = AceType::DynamicCast<FrameNode>(panelPattern->GetChildNodeByTag(tagName));
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childNode->GetGeometryNode(), childLayoutProperty);
+    return childLayoutWrapper;
 }
 
 /**
@@ -2021,30 +2051,45 @@ HWTEST_F(PanelTestNg, PanelTestNg0033, TestSize.Level1)
 HWTEST_F(PanelTestNg, PanelTestNg0034, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create slidingPanel and get frameNode.
+     * @tc.steps: step1. create mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto closeIconTheme = AceType::MakeRefPtr<CloseIconTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
+    /**
+     * @tc.steps: step2. create slidingPanel and get frameNode.
      */
     SlidingPanelModelNG slidingPanelModelNG;
     slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
     slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
-    slidingPanelModelNG.Pop();
+    slidingPanelModelNG.SetShowCloseIcon(SLIDING_PANEL_SHOW_CLOSE_ICON_TRUE);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
-    /**
-     * @tc.steps: step2. add closeIcon to slidingPanel.
-     */
-    auto closeIcon = FrameNode::GetOrCreateFrameNode(V2::PANEL_CLOSE_ICON_ETS_TAG,
-    ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CloseIconPattern>(); });
-    closeIcon->MountToParent(frameNode, 1);
     /**
      * @tc.steps: step3. get pattern.
      * @tc.expected: step3. check closeIconNode is not nullptr.
      */
     auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(slidingPanelPattern == nullptr);
+    slidingPanelPattern->OnModifyDone();
     auto closeIconNode = slidingPanelPattern->GetChildNodeByTag(V2::PANEL_CLOSE_ICON_ETS_TAG);
     ASSERT_NE(closeIconNode, nullptr);
+    closeIconNode->MarkDirtyNode();
     closeIconNode = slidingPanelPattern->GetCloseIconNode();
     ASSERT_NE(closeIconNode, nullptr);
+    /**
+     * @tc.steps: step4. get panelLayoutProperty.
+     * @tc.expected: step4. check closeIconNode is nullptr.
+     */
+    auto panelLayoutProperty = slidingPanelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    panelLayoutProperty->UpdateHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_FALSE);
+    panelLayoutProperty->UpdateShowCloseIcon(SLIDING_PANEL_SHOW_CLOSE_ICON_FALSE);
+    slidingPanelPattern->OnModifyDone();
+    closeIconNode = slidingPanelPattern->GetChildNodeByTag(V2::PANEL_CLOSE_ICON_ETS_TAG);
+    auto dragBarNode = slidingPanelPattern->GetChildNodeByTag(V2::DRAG_BAR_ETS_TAG);
+    ASSERT_EQ(closeIconNode, nullptr);
+    ASSERT_EQ(dragBarNode, nullptr);
 }
 
 /**
@@ -2055,7 +2100,14 @@ HWTEST_F(PanelTestNg, PanelTestNg0034, TestSize.Level1)
 HWTEST_F(PanelTestNg, PanelTestNg0035, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create slidingPanel and get frameNode.
+     * @tc.steps: step1. create mock theme manager
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto closeIconTheme = AceType::MakeRefPtr<CloseIconTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(closeIconTheme));
+    /**
+     * @tc.steps: step2. create slidingPanel and get frameNode.
      */
     SlidingPanelModelNG slidingPanelModelNG;
     slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
@@ -2063,6 +2115,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0035, TestSize.Level1)
     slidingPanelModelNG.SetPanelMode(PANEL_MODE_VALUE);
     slidingPanelModelNG.SetBackgroundColor(BACKGROUND_COLOR_VALUE);
     slidingPanelModelNG.SetHasDragBar(SLIDING_PANEL_HAS_DRAG_BAR_TRUE);
+    slidingPanelModelNG.SetShowCloseIcon(true);
     slidingPanelModelNG.SetIsShow(SLIDING_PANEL_SHOW);
     slidingPanelModelNG.SetBorderColor(BORDER_COLOR);
     slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
@@ -2074,12 +2127,6 @@ HWTEST_F(PanelTestNg, PanelTestNg0035, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
     ASSERT_NE(slidingPanelPattern, nullptr);
-    /**
-     * @tc.steps: step2. add closeIcon to slidingPanel.
-     */
-    auto closeIcon = FrameNode::GetOrCreateFrameNode(V2::PANEL_CLOSE_ICON_ETS_TAG,
-    ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CloseIconPattern>(); });
-    closeIcon->MountToParent(frameNode, 1);
     /**
      * @tc.steps: step3. get closeIcon node and get dragBar node.
      * @tc.expected: node is not nullptr.
@@ -2746,5 +2793,104 @@ HWTEST_F(PanelTestNg, PanelTestNg0052, TestSize.Level1)
     layoutWrapper->childrenMap_.emplace(std::make_pair(1, layoutWrapper2));
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
+}
+
+/**
+ * @tc.name: PanelTestNg0053
+ * @tc.desc: test panel Node Layout and Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0053, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create mock theme manager and slidingPanel, Update Padding
+     */
+    auto panelFrameNode = CreateSlidingPanelwithCloseIcon();
+    ASSERT_NE(panelFrameNode, nullptr);
+    auto geometryNode = panelFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    PaddingPropertyF padding;
+    padding.left = ZERO;
+    padding.right = ZERO;
+    padding.top = ZERO;
+    padding.bottom = ZERO;
+    geometryNode->UpdatePaddingWithBorder(padding);
+    /**
+     * @tc.steps: step2. get childLayoutWrapper and append to panelLayoutWrapper
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        panelFrameNode, panelFrameNode->GetGeometryNode(), panelFrameNode->GetLayoutProperty());
+    auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(panelPattern, nullptr);
+    auto columnLayoutWrapper = CreatChildLayoutWrapperNode(V2::COLUMN_ETS_TAG, panelFrameNode);
+    auto closeIconLayoutWrapper = CreatChildLayoutWrapperNode(V2::PANEL_CLOSE_ICON_ETS_TAG, panelFrameNode);
+    layoutWrapper->AppendChild(std::move(columnLayoutWrapper));
+    layoutWrapper->AppendChild(std::move(closeIconLayoutWrapper));
+    /**
+     * @tc.steps: step3. update layoutWrapper.
+     */
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(PANEL_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    /**
+     * @tc.steps: step4. use layoutAlgorithm to measure and layout.
+     * @tc.expected: step4. check whether the value of geometry's frameSize and frameOffset is correct.
+     */
+    auto panelLayoutAlgorithm = panelPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(panelLayoutAlgorithm, nullptr);
+    panelLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    panelLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), PANEL_SIZE);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
+}
+
+/**
+ * @tc.name: PanelTestNg0054
+ * @tc.desc: test closeIcon Node Layout and Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create mock theme manager and slidingPanel
+     */
+    auto panelFrameNode = CreateSlidingPanelwithCloseIcon();
+    ASSERT_NE(panelFrameNode, nullptr);
+    /**
+     * @tc.steps: step2. get childLayoutWrapper and append to closeIconLayoutWrapper
+     */
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        panelFrameNode, panelFrameNode->GetGeometryNode(), panelFrameNode->GetLayoutProperty());
+    auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(panelPattern, nullptr);
+    auto closeIconLayoutWrapper = CreatChildLayoutWrapperNode(V2::PANEL_CLOSE_ICON_ETS_TAG, panelFrameNode);
+    auto closeIconNode = AceType::DynamicCast<FrameNode>(panelPattern->GetChildNodeByTag(V2::PANEL_CLOSE_ICON_ETS_TAG));
+    auto buttonNode = AceType::DynamicCast<FrameNode>(closeIconNode->GetChildAtIndex(0));
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
+    RefPtr<LayoutWrapperNode> buttonLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(buttonNode, buttonNode->GetGeometryNode(), buttonLayoutProperty);
+    closeIconLayoutWrapper->AppendChild(std::move(buttonLayoutWrapper));
+    /**
+     * @tc.steps: step3. use layoutAlgorithm to measure and layout.
+     * @tc.expected: step3. check measure and layout execute correct.
+     */
+    auto closeIconLayoutAlgorithm = closeIconNode->GetLayoutAlgorithm();
+    ASSERT_NE(closeIconLayoutAlgorithm, nullptr);
+    closeIconLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(closeIconLayoutWrapper));
+    closeIconLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(closeIconLayoutWrapper));
+    auto buttonGeometryNode = buttonLayoutWrapper->GetGeometryNode();
+    ASSERT_NE(buttonGeometryNode, nullptr);
+    auto closeIconLayoutProperty = closeIconNode->GetLayoutProperty<CloseIconLayoutProperty>();
+    ASSERT_NE(closeIconLayoutProperty, nullptr);
+    EXPECT_EQ(
+        buttonGeometryNode->GetFrameSize().Width(), closeIconLayoutProperty->GetCloseIconWidthValue().ConvertToPx());
+    EXPECT_EQ(
+        buttonGeometryNode->GetFrameSize().Height(), closeIconLayoutProperty->GetCloseIconHeightValue().ConvertToPx());
 }
 } // namespace OHOS::Ace::NG
