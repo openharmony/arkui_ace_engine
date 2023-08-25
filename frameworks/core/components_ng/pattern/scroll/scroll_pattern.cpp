@@ -308,7 +308,11 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     float overScrollPast = 0.0f;
     // TODO: not consider rowReverse or colReverse
     overScrollPastStart = std::max(currentOffset_, 0.0f);
-    overScrollPastEnd = std::max(-scrollableDistance_ - currentOffset_, 0.0f);
+    if (Positive(scrollableDistance_)) {
+        overScrollPastEnd = std::max(-scrollableDistance_ - currentOffset_, 0.0f);
+    } else {
+        overScrollPastEnd = std::abs(std::min(currentOffset_, 0.0f));
+    }
     // do not adjust offset if direction opposite from the overScroll direction when out of boundary
     if ((overScrollPastStart > 0.0f && delta < 0.0f) || (overScrollPastEnd > 0.0f && delta > 0.0f)) {
         return;
