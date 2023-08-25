@@ -665,6 +665,7 @@ void DialogPattern::AddButtonAndDivider(
         CHECK_NULL_VOID(buttonPattern);
         buttonPattern->SetSkipColorConfigurationUpdate();
         buttonNode->MountToParent(container);
+        buttonNode->MarkModifyDone();
     }
 }
 
