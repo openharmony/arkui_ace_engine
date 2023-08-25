@@ -331,12 +331,20 @@ void TitleBarPattern::ProcessTittleDragUpdate(float offset)
         return;
     }
     SetTitleStyleByOffset(offset);
-    overDragOffset_ = offset + defaultTitleBarHeight_ - maxTitleBarHeight_;
-    overDragOffset_ = std::clamp(overDragOffset_, 0.0f, static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx()));
+    if (CanOverDrag_) {
+        overDragOffset_ = offset + defaultTitleBarHeight_ - maxTitleBarHeight_;
+        overDragOffset_ = std::clamp(overDragOffset_, 0.0f, static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx()));
+    } else {
+        overDragOffset_ = 0.0f;
+    }
+
     if (Positive(overDragOffset_)) {
         UpdateScaleByDragOverDragOffset(overDragOffset_);
+    } else {
+        overDragOffset_ = 0.0f;
     }
 }
+
 void TitleBarPattern::SetTitleStyleByOffset(float offset)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());

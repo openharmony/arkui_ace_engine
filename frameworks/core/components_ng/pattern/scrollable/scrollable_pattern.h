@@ -173,11 +173,6 @@ public:
         return scrollEffect_->IsSpringEffect();
     }
 
-    void SetParentDraggedDown(bool isDraggedDown)
-    {
-        isDraggedDown_ = isDraggedDown;
-    }
-
     void SetCoordEventNeedSpringEffect(bool IsCoordEventNeedSpring)
     {
         isCoordEventNeedSpring_ = IsCoordEventNeedSpring;
@@ -352,6 +347,7 @@ private:
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
+    void SetNavBarVelocity();
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -365,7 +361,6 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     double scrollBarOutBoundaryExtent_ = 0.0;
-    bool isDraggedDown_ = false;
     bool isCoordEventNeedSpring_ = true;
     double friction_ = FRICTION;
     // scroller

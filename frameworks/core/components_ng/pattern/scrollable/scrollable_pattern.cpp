@@ -101,7 +101,7 @@ bool ScrollablePattern::ProcessNavBarReactOnUpdate(bool isDraggedDown, float off
     if (isDraggedDown && Negative(offset) && !OutBoundaryCallback()) {
         return false;
     }
-    return true;
+    return scrollEffect_ && scrollEffect_->IsSpringEffect();
 }
 
 void ScrollablePattern::ProcessNavBarReactOnEnd()
@@ -114,6 +114,10 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
     auto isAtTop = (IsAtTop() && Positive(offset));
     auto isDraggedDown = navBarPattern_ ? navBarPattern_->GetDraggedDown() : false;
+    auto isFullStatus = navBarPattern_ ? navBarPattern_->GetFullStatus() : false;
+    if (isAtTop && (source == SCROLL_FROM_ANIMATION_SPRING) && !isFullStatus) {
+        SetNavBarVelocity();
+    }
     if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
         (axis_ == Axis::VERTICAL)) {
         isReactInParentMovement_ = true;
@@ -145,6 +149,7 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
             }
             return needMove;
         }
+        return needMove;
     }
     if (source == SCROLL_FROM_START) {
         SetParentScrollable();
@@ -565,6 +570,18 @@ void ScrollablePattern::GetParentNavigition()
     }
     navBarPattern_ = nullptr;
     return;
+}
+
+void ScrollablePattern::SetNavBarVelocity()
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    auto currVelocity = scrollable->GetCurrentVelocity();
+    if (Positive(currVelocity)) {
+        CHECK_NULL_VOID(navBarPattern_);
+        navBarPattern_->NavBarMotion(currVelocity, FRICTION);
+    }
 }
 
 void ScrollablePattern::SetParentScrollable()
