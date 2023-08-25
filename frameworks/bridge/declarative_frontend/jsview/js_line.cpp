@@ -47,6 +47,9 @@ LineModel* LineModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
+} // namespace
 
 void JSLine::JSBind(BindingTarget globalObj)
 {
@@ -102,21 +105,38 @@ void JSLine::SetPoint(const JSRef<JSArray>& array, ShapePoint& point)
     if (array->Length() < 1) {
         LOGE("The starting point is one");
         return;
-    } else {
-        if (array->GetValueAt(0)->IsNumber()) {
-            point.first = Dimension(array->GetValueAt(0)->ToNumber<double>(), DimensionUnit::VP);
-        } else if (array->GetValueAt(0)->IsString()) {
+    }
+    if (array->GetValueAt(0)->IsNumber()) {
+        point.first = Dimension(array->GetValueAt(0)->ToNumber<double>(), DimensionUnit::VP);
+    } else if (array->GetValueAt(0)->IsString()) {
+        if (PipelineBase::GetCurrentContext() &&
+            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            if (!StringUtils::StringToDimensionWithUnitNG(
+                array->GetValueAt(0)->ToString(), point.first, DimensionUnit::VP, 0.0)) {
+                // unit is invalid, use default value(0.0vp) instead.
+                point.first = 0.0_vp;
+            }
+        } else {
             point.first = StringUtils::StringToDimension(array->GetValueAt(0)->ToString(), true);
-        } else {
-            LOGE("Line point should be Number or String");
         }
-        if (array->GetValueAt(1)->IsNumber()) {
-            point.second = Dimension(array->GetValueAt(1)->ToNumber<double>(), DimensionUnit::VP);
-        } else if (array->GetValueAt(0)->IsString()) {
+    } else {
+        LOGE("Line point should be Number or String");
+    }
+    if (array->GetValueAt(1)->IsNumber()) {
+        point.second = Dimension(array->GetValueAt(1)->ToNumber<double>(), DimensionUnit::VP);
+    } else if (array->GetValueAt(1)->IsString()) {
+        if (PipelineBase::GetCurrentContext() &&
+            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+            if (!StringUtils::StringToDimensionWithUnitNG(
+                array->GetValueAt(1)->ToString(), point.second, DimensionUnit::VP, 0.0)) {
+                // unit is invalid, use default value(0.0vp) instead.
+                point.second = 0.0_vp;
+            }
+        } else {
             point.second = StringUtils::StringToDimension(array->GetValueAt(1)->ToString(), true);
-        } else {
-            LOGE("Line point should be Number or String");
         }
+    } else {
+        LOGE("Line point should be Number or String");
     }
 }
 
