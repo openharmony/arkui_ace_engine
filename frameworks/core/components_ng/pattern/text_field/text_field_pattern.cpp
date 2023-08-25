@@ -2322,9 +2322,7 @@ void TextFieldPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     isTransparent_ = renderContext->GetOpacityValue(1.0f) == 0.0f;
-    if (!preErrorState_) {
-        SavePasswordModeStates();
-    }
+    SavePasswordModeStates();
     InitClickEvent();
     InitLongPressEvent();
     InitFocusEvent();
@@ -5521,54 +5519,45 @@ void TextFieldPattern::SetShowError()
     auto renderContext = GetHost()->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
-    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
 
-    if (visible && layoutProperty->GetShowUnderlineValue(false) && inputType == TextInputType::UNSPECIFIED) {
+    if (visible && layoutProperty->GetShowUnderlineValue(false) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
         underlineWidth_ = ERROR_UNDERLINE_WIDTH;
-        preErrorState_ = true;
     }
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) && inputType == TextInputType::UNSPECIFIED) {
+    if (!visible && layoutProperty->GetShowUnderlineValue(false) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         underlineColor_ = textFieldTheme->GetUnderlineColor();
         underlineWidth_ = UNDERLINE_WIDTH;
-        preErrorState_ = false;
     }
+
     if (visible && passWordMode) {
         BorderWidthProperty borderWidth;
         BorderColorProperty borderColor;
-        preErrorState_ = true;
         borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
         layoutProperty->UpdateBorderWidth(borderWidth);
         borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
         renderContext->UpdateBorderColor(borderColor);
+        layoutProperty->UpdatePadding({ CalcLength(0.0), CalcLength(0.0), CalcLength(0.0), CalcLength(0.0) });
         renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
         layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
     }
     if (!visible && passWordMode) {
         layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
         renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
+        layoutProperty->UpdatePadding(passwordModeStyle_.padding);
         renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
-        preErrorState_ = false;
+        underlineColor_ = textFieldTheme->GetUnderlineColor();
+        underlineWidth_ = UNDERLINE_WIDTH;
     }
-    UpdateErrorTextMargin();
-}
 
-void TextFieldPattern::UpdateErrorTextMargin()
-{
-    auto renderContext = GetHost()->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto frameBottom = GetMarginBottom();
     MarginProperty errorMargin;
-    if (layoutProperty->GetShowErrorTextValue(false) && (preErrorMargin_ < ERROR_TEXT_CAPSULE_MARGIN)) {
+    if (layoutProperty->GetShowErrorTextValue(false) && (frameBottom < ERROR_TEXT_CAPSULE_MARGIN) &&
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
         errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
         layoutProperty->UpdateMargin(errorMargin);
-        preErrorState_ = true;
-    } else {
-        errorMargin.bottom = CalcLength(preErrorMargin_);
-        layoutProperty->UpdateMargin(errorMargin);
-        preErrorState_ = false;
     }
 }
 
@@ -5584,7 +5573,6 @@ void TextFieldPattern::SavePasswordModeStates()
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
-    preErrorMargin_ = GetMarginBottom();
     bool passWordMode =
         layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
     if (!passWordMode) {
