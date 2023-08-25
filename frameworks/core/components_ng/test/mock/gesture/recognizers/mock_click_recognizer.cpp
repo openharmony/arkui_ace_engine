@@ -16,8 +16,6 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 namespace OHOS::Ace::NG {
-ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count) {}
-
 void ClickRecognizer::OnAccepted() {}
 
 void ClickRecognizer::OnRejected() {}
