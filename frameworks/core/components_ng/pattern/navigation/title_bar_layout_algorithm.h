@@ -110,6 +110,8 @@ private:
     void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
 
+    bool GetNavigationBackButtonState(const RefPtr<TitleBarNode>& titleBarNode);
+
     // set variables from theme
     void InitializeTheme();
 
