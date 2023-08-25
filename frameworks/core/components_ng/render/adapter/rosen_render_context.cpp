@@ -295,12 +295,9 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     }
 }
 
-void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
+void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (force && !parentPosition.has_value()) {
-        rsNode_->SetSandBox(std::nullopt);
-    }
     if (parentPosition.has_value()) {
         sandBoxCount_++;
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
@@ -1122,7 +1119,6 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
     // translateZ doesn't support percentage
     float zValue = translate.z.ConvertToPx();
     rsNode_->SetTranslate(xValue, yValue, zValue);
-    ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
     RequestNextFrame();
 }
 
@@ -1337,7 +1333,6 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
         translateXY_ = std::make_shared<Rosen::RSTranslateModifier>(propertyXY);
         rsNode_->AddModifier(translateXY_);
     }
-    ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
@@ -1899,7 +1894,6 @@ void RosenRenderContext::SetPositionToRSNode()
     } else {
         rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     }
-    ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
 }
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)

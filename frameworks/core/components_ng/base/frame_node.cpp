@@ -677,7 +677,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     SetGeometryNode(dirty->GetGeometryNode());
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this))) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
         geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
@@ -2341,7 +2341,7 @@ void FrameNode::Layout()
 void FrameNode::SyncGeometryNode()
 {
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
+    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning();
 
     if (!isActive_ && !hasTransition) {
         LOGD("current node is inactive, don't need to render");
