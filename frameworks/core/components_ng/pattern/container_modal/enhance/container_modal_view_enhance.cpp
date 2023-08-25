@@ -123,26 +123,24 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildTitle(RefPtr<FrameNode>& conta
     CHECK_NULL_RETURN(windowManager, nullptr);
     auto titleContainer = BuildTitleContainer(containerNode, isFloatingTitle);
     CHECK_NULL_RETURN(titleContainer, nullptr);
-    if (!isFloatingTitle) {
-        auto eventHub = titleContainer->GetOrCreateGestureEventHub();
-        auto tapGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
-        tapGesture->SetOnActionId([containerNode, windowManager](GestureEvent& info) {
-            LOGD("container window double click.");
-            auto mode = windowManager->GetWindowMode();
-            if (mode == WindowMode::WINDOW_MODE_FLOATING) {
-                if (windowManager->GetCurrentWindowMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
-                    LOGD("double click to recover");
-                    windowManager->WindowRecover();
-                } else {
-                    LOGD("double click to maximize");
-                    windowManager->WindowMaximize(true);
-                }
-                containerNode->OnWindowFocused();
-            }
-        });
-        eventHub->AddGesture(tapGesture);
-        eventHub->OnModifyDone();
-    }
+    auto eventHub = titleContainer->GetOrCreateGestureEventHub();
+    auto tapGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
+    tapGesture->SetOnActionId([containerNode, windowManager](GestureEvent& info) {
+        LOGI("container window double click.");
+        auto windowMode = windowManager->GetWindowMode();
+        auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
+        if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
+            windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            LOGD("double click to recover");
+            windowManager->WindowRecover();
+        } else if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
+            LOGD("double click to maximize");
+            windowManager->WindowMaximize(true);
+        }
+        containerNode->OnWindowFocused();
+    });
+    eventHub->AddGesture(tapGesture);
+    eventHub->OnModifyDone();
     return AddControlButtons(containerNode, titleContainer);
 }
 
@@ -282,7 +280,7 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
 
 RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition)
 {
-    LOGD("ShowMaxMenu called");
+    LOGI("ShowMaxMenu called");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
