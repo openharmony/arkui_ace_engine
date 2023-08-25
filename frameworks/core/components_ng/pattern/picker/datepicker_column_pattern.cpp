@@ -344,7 +344,6 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(index, showOptionCount, textLayoutProperty, dataPickerRowLayoutProperty);
         }
@@ -490,6 +489,14 @@ void DatePickerColumnPattern::AddAnimationTextProperties(
 {
     DateTextProperties properties;
     if (textLayoutProperty->HasFontSize()) {
+        MeasureContext measureContext;
+        measureContext.textContent = MEASURE_SIZE_STRING;
+        measureContext.fontSize = textLayoutProperty->GetFontSize().value();
+        auto size = MeasureUtil::MeasureTextSize(measureContext);
+        if (!optionProperties_.empty()) {
+            optionProperties_[currentIndex].fontheight = size.Height();
+        }
+        SetOptionShiftDistance();
         properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
     }
     if (textLayoutProperty->HasTextColor()) {
@@ -891,16 +898,26 @@ void DatePickerColumnPattern::CalcAlgorithmOffset(DatePickerScrollDirection dir,
     for (uint32_t i = 0; i < counts; i++) {
         auto distance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[i].prevDistance
                                                                : optionProperties_[i].nextDistance;
-        algorithmOffset_.emplace_back(distance * distancePercent);
+        algorithmOffset_.emplace_back(static_cast<int32_t>(distance * distancePercent));
     }
 }
 
 void DatePickerColumnPattern::UpdateToss(double offsetY)
 {
-    if (offsetY == 0.0) {
+    UpdateColumnChildPosition(offsetY);
+}
+
+void DatePickerColumnPattern::UpdateFinishToss(double offsetY)
+{
+    int32_t dragDelta = offsetY - yLast_;
+    if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
     }
-    UpdateColumnChildPosition(offsetY);
+    auto midIndex = GetShowCount() / 2;
+    TimePickerScrollDirection dir = dragDelta > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
+    auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
+                                                                : optionProperties_[midIndex].nextDistance;
+    ScrollOption(shiftDistance);
 }
 
 void DatePickerColumnPattern::TossStoped()
@@ -975,9 +992,10 @@ float DatePickerColumnPattern::GetShiftDistance(uint32_t index, DatePickerScroll
             }
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_3:
-            val = optionProperties_[index].height / MINDDLE_CHILD_INDEX + optionProperties_[nextIndex].height -
-                  optionProperties_[nextIndex].fontheight / MINDDLE_CHILD_INDEX;
+            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MINDDLE_CHILD_INDEX +
+                  optionProperties_[nextIndex].height;
             distance = (dir == DatePickerScrollDirection::DOWN) ? val : (0.0f - val);
+            distance = std::floor(distance);
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_4:
             if (dir == DatePickerScrollDirection::DOWN) {
@@ -1035,9 +1053,10 @@ float DatePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, Date
             }
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_1:
-            val = optionProperties_[index].height / MINDDLE_CHILD_INDEX + optionProperties_[nextIndex].height -
-                  optionProperties_[nextIndex].fontheight / MINDDLE_CHILD_INDEX;
+            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MINDDLE_CHILD_INDEX +
+                  optionProperties_[nextIndex].height;
             distance = (dir == DatePickerScrollDirection::DOWN) ? val : (0.0f - val);
+            distance = std::floor(distance);
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_2: // last
             if (dir == DatePickerScrollDirection::DOWN) {

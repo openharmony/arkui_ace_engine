@@ -70,6 +70,7 @@ public:
 
 private:
     double GetCurrentTime() const;
+    void CreatePropertyCallback();
 
     double yStart_ = 0.0;
     double yEnd_ = 0.0;
