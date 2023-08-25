@@ -217,8 +217,7 @@ private:
     void SetAccessibilityAction();
 
     GridLayoutInfo gridLayoutInfo_;
-    void ProcessEvent(bool indexChanged, float finalOffset, float currentOffset, bool offsetEnd,
-                      bool prevReachEnd, bool reachStart);
+    void ProcessEvent(bool indexChanged, float finalOffset);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
     void OnScrollStartCallback() override;
@@ -231,7 +230,6 @@ private:
     bool initialIndex_ = false;
     float prevHeight_ = 0;
     float currentHeight_ = 0;
-    float prevFinalOffset_ = 0;
 
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
@@ -239,6 +237,7 @@ private:
     bool scrollable_ = true;
 
     bool firstShow_ = true;
+    float endHeight_ = 0.0f;
 
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
 
