@@ -74,6 +74,8 @@ namespace OHOS::Ace::Platform {
 namespace {
 
 
+constexpr uint32_t DIRECTION_OR_DPI_KEY = 0b1100;
+
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
@@ -1447,10 +1449,9 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     return context->CreateModuleContext(bundle, module);
 }
 
-void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::string& deviceAccess,
-    const std::string& languageTag, const std::string& configuration)
+void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
 {
-    if (colorMode.empty() && deviceAccess.empty() && languageTag.empty()) {
+    if (!parsedConfig.IsValid()) {
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
         return;
     }
@@ -1459,9 +1460,9 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
     auto themeManager = pipelineContext_->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto resConfig = GetResourceConfiguration();
-    if (!colorMode.empty()) {
+    if (!parsedConfig.colorMode.empty()) {
         configurationChange.colorModeUpdate = true;
-        if (colorMode == "dark") {
+        if (parsedConfig.colorMode == "dark") {
             SystemProperties::SetColorMode(ColorMode::DARK);
             SetColorScheme(ColorScheme::SCHEME_DARK);
             resConfig.SetColorMode(ColorMode::DARK);
@@ -1471,20 +1472,23 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
             resConfig.SetColorMode(ColorMode::LIGHT);
         }
     }
-    if (!deviceAccess.empty()) {
+    if (!parsedConfig.deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
-        SystemProperties::SetDeviceAccess(deviceAccess == "true");
-        resConfig.SetDeviceAccess(deviceAccess == "true");
+        SystemProperties::SetDeviceAccess(parsedConfig.deviceAccess == "true");
+        resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
-    if (!languageTag.empty()) {
+    if (!parsedConfig.languageTag.empty()) {
         std::string language;
         std::string script;
         std::string region;
-        Localization::ParseLocaleTag(languageTag, language, script, region, false);
+        Localization::ParseLocaleTag(parsedConfig.languageTag, language, script, region, false);
         if (!language.empty() || !script.empty() || !region.empty()) {
             configurationChange.languageUpdate = true;
             AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
         }
+    }
+    if (!parsedConfig.direction.empty() || !parsedConfig.densitydpi.empty()) {
+        configurationChange.DirectionOrDpiUpdate = true;
     }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
@@ -1495,7 +1499,7 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
 #endif
-    NotifyConfigurationChange(!deviceAccess.empty(), configurationChange);
+    NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
 }
 
 void AceContainer::NotifyConfigurationChange(
@@ -1522,8 +1526,15 @@ void AceContainer::NotifyConfigurationChange(
                     CHECK_NULL_VOID(container);
                     auto pipeline = container->GetPipelineContext();
                     CHECK_NULL_VOID(pipeline);
-                    pipeline->NotifyConfigurationChange(configurationChange);
-                    pipeline->FlushReload();
+                    auto themeManager = pipeline->GetThemeManager();
+                    CHECK_NULL_VOID(themeManager);
+                    if (configurationChange.DirectionOrDpiUpdate &&
+                        (themeManager->GetResourceLimitKeys() & DIRECTION_OR_DPI_KEY) == 0) {
+                        LOGI("resource limit: will not flush reload by direction or dpi changed");
+                        return;
+                    }
+                    pipeline->NotifyConfigurationChange();
+                    pipeline->FlushReload(configurationChange);
                     if (needReloadTransition) {
                         // reload transition animation
                         pipeline->FlushReloadTransition();
@@ -1550,7 +1561,7 @@ void AceContainer::HotReload()
 
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->FlushReload();
+            pipeline->FlushReload(OnConfigurationChange());
         },
         TaskExecutor::TaskType::UI);
 }

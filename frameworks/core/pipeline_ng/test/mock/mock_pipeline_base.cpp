@@ -153,7 +153,7 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
-void PipelineContext::FlushReload() {}
+void PipelineContext::FlushReload(const OnConfigurationChange& configurationChange) {}
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
@@ -262,8 +262,6 @@ void PipelineContext::AddPredictTask(PredictTask&& task) {}
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task) {}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task) {}
-
-void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange) {}
 
 void PipelineContext::FlushPipelineImmediately() {}
 

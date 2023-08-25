@@ -364,6 +364,7 @@ public:
 
     virtual void OnLanguageConfigurationUpdate() {}
     virtual void OnColorConfigurationUpdate() {}
+    virtual void OnDirectionOrDpiConfigurationUpdate() {}
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

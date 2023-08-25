@@ -330,6 +330,12 @@ public:
         }
     }
 
+    uint32_t GetResourceLimitKeys() const
+    {
+        CHECK_NULL_RETURN(resAdapter_, 0);
+        return resAdapter_->GetResourceLimitKeys();
+    }
+
 private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];

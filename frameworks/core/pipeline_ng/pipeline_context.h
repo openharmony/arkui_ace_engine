@@ -137,8 +137,6 @@ public:
 
     void HandleOnAreaChangeEvent();
 
-    void NotifyConfigurationChange(const OnConfigurationChange& configurationChange) override;
-
     void AddVisibleAreaChangeNode(
         const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
@@ -322,7 +320,7 @@ public:
         return geometryNode->GetFrameRect();
     }
 
-    void FlushReload() override;
+    void FlushReload(const OnConfigurationChange& configurationChange) override;
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
