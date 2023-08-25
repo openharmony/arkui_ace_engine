@@ -469,7 +469,9 @@ RefPtr<FrameNode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     info->menuInfo.menuBuilder();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    auto menuNode = MenuView::Create(customNode, -1);
+    // long press no need menuwrapper
+    auto type = info->isUsingMouse ? MenuType::SELECT_OVERLAY_CUSTOM_MENU : MenuType::SELECT_OVERLAY_EXTENSION_MENU;
+    auto menuNode = MenuView::Create(customNode, -1, "", type, MenuParam(), info->isUsingMouse);
     auto eventHub = menuNode->GetEventHub<EventHub>();
     if (eventHub && info->menuCallback.onAppear) {
         eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));
@@ -968,10 +970,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
 void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
-    if (info->menuInfo.menuBuilder) {
-        return;
-    }
-    if (menuItemChanged) {
+    if (menuItemChanged && info->menuInfo.menuBuilder == nullptr) {
         selectMenuInner_->Clean();
         selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         if (isExtensionMenu_) {
