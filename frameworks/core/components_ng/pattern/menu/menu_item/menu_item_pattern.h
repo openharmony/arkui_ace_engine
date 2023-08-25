@@ -150,7 +150,7 @@ public:
         return bgBlendColor_;
     }
 
-    RefPtr<FrameNode> GetMenu();
+    RefPtr<FrameNode> GetMenu(bool needTopMenu = false);
     void UpdateTextNodes();
 
     void OnAttachToFrameNode() override;
