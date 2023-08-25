@@ -905,9 +905,6 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
-    if (quickMenuCallback_) {
-        quickMenuCallback_->Cancel();
-    }
     for (auto keyCode : KeyCodeSet_) {
         delegate_->OnKeyEvent(static_cast<int32_t>(keyCode), static_cast<int32_t>(OHOS::Ace::KeyAction::UP));
     }
