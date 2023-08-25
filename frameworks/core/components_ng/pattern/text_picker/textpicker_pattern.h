@@ -156,7 +156,13 @@ public:
 
     void SetBackgroundColor(const Color& color)
     {
+        if (backgroundColor_ == color) {
+            return;
+        }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         backgroundColor_ = color;
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 
     FocusPattern GetFocusPattern() const override
