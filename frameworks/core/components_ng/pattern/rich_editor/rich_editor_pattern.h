@@ -97,6 +97,9 @@ public:
         if (!richEditorOverlayModifier_) {
             richEditorOverlayModifier_ = MakeRefPtr<RichEditorOverlayModifier>();
         }
+        if (isCustomFont_) {
+            richEditorContentModifier_->SetIsCustomFont(true);
+        }
         return MakeRefPtr<RichEditorPaintMethod>(
             WeakClaim(this), paragraph_, baselineOffset_, richEditorContentModifier_, richEditorOverlayModifier_);
     }

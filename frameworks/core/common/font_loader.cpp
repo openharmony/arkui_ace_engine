@@ -56,7 +56,7 @@ void FontLoader::SetOnLoadedNG(const WeakPtr<NG::UINode>& node, const std::funct
 {
     CHECK_NULL_VOID_NOLOG(callback);
     if (isLoaded_) {
-        callback();
+        return;
     } else {
         callbacksNG_.emplace(node, callback);
     }

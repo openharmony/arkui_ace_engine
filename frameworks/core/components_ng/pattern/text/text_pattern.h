@@ -56,6 +56,9 @@ public:
         if (!textOverlayModifier_) {
             textOverlayModifier_ = MakeRefPtr<TextOverlayModifier>();
         }
+        if (isCustomFont_) {
+            textContentModifier_->SetIsCustomFont(true);
+        }
         auto paintMethod = MakeRefPtr<TextPaintMethod>(
             WeakClaim(this), paragraph_, baselineOffset_, textContentModifier_, textOverlayModifier_);
         auto host = GetHost();
@@ -278,6 +281,16 @@ public:
         isMeasureBoundary_ = isMeasureBoundary;
     }
 
+    void SetIsCustomFont(bool isCustomFont)
+    {
+        isCustomFont_ = isCustomFont;
+    }
+
+    bool GetIsCustomFont()
+    {
+        return isCustomFont_;
+    }
+
 protected:
     virtual void HandleOnCopy();
     void InitMouseEvent();
@@ -322,6 +335,7 @@ protected:
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
     bool isMeasureBoundary_ = false;
+    bool isCustomFont_ = false;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -344,7 +358,6 @@ private:
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
-    void FontRegisterCallback(RefPtr<SpanNode> spanNode);
     // to check if drag is in progress
 
     OffsetF contentOffset_;
