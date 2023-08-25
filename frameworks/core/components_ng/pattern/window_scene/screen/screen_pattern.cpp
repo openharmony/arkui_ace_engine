@@ -31,6 +31,7 @@ constexpr float DIRECTION0 = 0;
 constexpr float DIRECTION90 = 90;
 constexpr float DIRECTION180 = 180;
 constexpr float DIRECTION270 = 270;
+constexpr uint32_t DOT_PER_INCH = 160;
 
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
@@ -87,7 +88,7 @@ void ScreenPattern::UpdateDisplayInfo()
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
     auto screenProperty = screenSession_->GetScreenProperty();
-    auto dpi = screenProperty.GetDensity();
+    auto dpi = screenProperty.GetDensity() * DOT_PER_INCH;
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
