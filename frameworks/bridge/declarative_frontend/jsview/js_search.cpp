@@ -357,14 +357,10 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         CHECK_NULL_VOID_NOLOG(textFieldTheme);
 
         // set caret width
-        CalcDimension caretWidth;
+        CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
         auto caretWidthProp = param->GetProperty("width");
-        if (!caretWidthProp->IsUndefined() && !caretWidthProp->IsNull() &&
-            ParseJsDimensionVp(caretWidthProp, caretWidth)) {
-            if (LessNotEqual(caretWidth.Value(), 0.0)) {
-                caretWidth = textFieldTheme->GetCursorWidth();
-            }
-        } else {
+        ParseJsDimensionVpNG(caretWidthProp, caretWidth, false);
+        if (LessNotEqual(caretWidth.Value(), 0.0)) {
             caretWidth = textFieldTheme->GetCursorWidth();
         }
         SearchModel::GetInstance()->SetCaretWidth(caretWidth);
