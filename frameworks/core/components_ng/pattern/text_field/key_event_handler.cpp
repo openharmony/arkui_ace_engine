@@ -30,7 +30,7 @@ namespace {
 }
 bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    LOGD("HandleKeyEvent event, key code %{public}d", keyEvent.enableCapsLock, keyEvent.code);
+    LOGD("HandleKeyEvent event, caps lock %{public}d, key code %{public}d", keyEvent.enableCapsLock, keyEvent.code);
     auto pattern = DynamicCast<TextFieldPattern>(weakPattern_.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
