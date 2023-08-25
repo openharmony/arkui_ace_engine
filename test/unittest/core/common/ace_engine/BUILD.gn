@@ -19,10 +19,12 @@ ace_unittest("ace_engine_special_test") {
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
+    "$ace_root/frameworks/core/common/window.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
     "$ace_root/test/mock/base/mock_background_task_executor.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "ace_engine_special_test.cpp",
+    "window_test.cpp",
   ]
   external_deps = [
     "c_utils:utils",
