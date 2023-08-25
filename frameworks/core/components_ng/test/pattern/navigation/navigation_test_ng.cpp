@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
@@ -80,6 +81,10 @@ constexpr float DEFAULT_ROOT_WIDTH = 480.f;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH_PER = Dimension(0.2, DimensionUnit::PERCENT);
 constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH_PER = Dimension(0.5, DimensionUnit::PERCENT);
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH_PER = Dimension(0.3, DimensionUnit::PERCENT);
+constexpr Dimension TOOL_BAR_HEIGHT = 56.0_vp;
+constexpr Dimension TOOL_BAR_ITEM_SAFE_INTERVAL = 8.0_vp;
+constexpr Dimension TOOL_BAR_ITEM_VERTICAL_PADDING = 12.0_vp;
+constexpr Dimension ICON_SIZE = 24.0_vp;
 } // namespace
 
 class NavigationTestNg : public testing::Test {
@@ -1621,5 +1626,479 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
     navigationPattern->navigationStack_->Add("preTopNavDestination", preTopNavDestination);
     navigationPattern->CheckTopNavPathChange(preTopNavPath, newTopNavPath, false);
     ASSERT_FALSE(preNavDestinationPattern->isOnShow_);
+}
+
+/**
+ * @tc.name: NavigationToolbarTest001
+ * @tc.desc: Test the old toolBar function with the new toolbar measure algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationToolbarTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation theme to set toolbar specifications.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    navigationTheme->toolbarIconSize_ = ICON_SIZE;
+    navigationTheme->menuIconSize_ = ICON_SIZE;
+
+    /**
+     * @tc.steps: step2. initialize navigation with old toolBar.
+     */
+    NavigationModelNG navigationModel;
+    NG::BarItem bar;
+    bar.text = "text";
+    bar.icon = "icon";
+    bar.action = []() {};
+    std::vector<NG::BarItem> toolBarItems;
+    toolBarItems.push_back(bar);
+    navigationModel.Create();
+    navigationModel.SetToolBarItems(std::move(toolBarItems));
+
+    /**
+     * @tc.steps: step3. obtain navigation nodes.
+     * @tc.expected: nodes are not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    /**
+     * @tc.steps: step4. measure and layout toolbar.
+     * @tc.expected: layoutWrapper is not nullptr.
+     */
+    navigationModel.SetNavBarPosition(NavBarPosition::START);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SizeF value(static_cast<float>(SPLIT_WIDTH.ConvertToPx()), HEIGHT);
+    navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
+    navigationLayoutProperty->UpdateContentConstraint();
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+
+    /**
+     * @tc.steps: step5. test whether the node of the toolbar is created after calling SetToolBarItems function.
+     * @tc.expected: toolbar node and preToolbar node are not nullptr.
+     */
+    EXPECT_NE(navBarNode->GetToolBarNode(), nullptr);
+    EXPECT_NE(navBarNode->GetPreToolBarNode(), nullptr);
+}
+
+/**
+ * @tc.name: NavigationToolbarConfigurationTest001
+ * @tc.desc: Test the SetToolbarConfiguration function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize navigation with BarItem number less than five.
+     */
+    NavigationModelNG navigationModel;
+    NG::BarItem bar;
+    bar.text = "text";
+    bar.icon = "icon";
+    bar.action = []() {};
+    bar.status = NG::NavToolbarItemStatus::NORMAL;
+    std::vector<NG::BarItem> toolBarItems;
+    for (int i = 0; i < 4; i++) {
+        toolBarItems.push_back(bar);
+    }
+    navigationModel.Create();
+    navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
+
+    /**
+     * @tc.steps: step2. obtain navigation nodes.
+     * @tc.expected: nodes are not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test whether the node of the toolbar is created after calling the SetToolbarConfiguration
+     * function.
+     * @tc.expected: toolbar node and preToolbar node are not nullptr.
+     */
+    EXPECT_NE(navBarNode->GetToolBarNode(), nullptr);
+    EXPECT_NE(navBarNode->GetPreToolBarNode(), nullptr);
+
+    /**
+     * @tc.steps: step4. test whether the container size is four.
+     * @tc.expected: barItemSize is four.
+     */
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    EXPECT_NE(toolbarNode, nullptr);
+    auto containerNode = toolbarNode->GetToolbarContainerNode();
+    EXPECT_NE(containerNode, nullptr);
+    auto barItemSize = static_cast<int32_t>(containerNode->GetChildren().size());
+    EXPECT_EQ(barItemSize, 4);
+}
+
+/**
+ * @tc.name: NavigationToolbarConfigurationTest002
+ * @tc.desc: Test the SetToolbarConfiguration function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize navigation with BarItem in disable status.
+     */
+    NavigationModelNG navigationModel;
+    std::vector<NG::BarItem> toolBarItems;
+    NG::BarItem disableBar;
+    disableBar.text = "disableText";
+    disableBar.icon = "disableIcon";
+    disableBar.status = NG::NavToolbarItemStatus::DISABLED;
+    toolBarItems.push_back(disableBar);
+
+    navigationModel.Create();
+    navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
+
+    /**
+     * @tc.steps: step2. obtain navigation nodes.
+     * @tc.expected: nodes are not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test whether the node of the toolbar is created after calling the SetToolbarConfiguration
+     * function.
+     * @tc.expected: toolbar node and preToolbar node are not nullptr.
+     */
+    EXPECT_NE(navBarNode->GetToolBarNode(), nullptr);
+    EXPECT_NE(navBarNode->GetPreToolBarNode(), nullptr);
+
+    /**
+     * @tc.steps: step4. obtain barItem node.
+     * @tc.expected: barItem node is not nullptr.
+     */
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    EXPECT_NE(toolbarNode, nullptr);
+    auto containerNode = toolbarNode->GetToolbarContainerNode();
+    EXPECT_NE(containerNode, nullptr);
+    auto buttonNode = containerNode->GetChildren().front();
+    EXPECT_NE(buttonNode, nullptr);
+    auto barItemNode = AceType::DynamicCast<BarItemNode>(buttonNode->GetChildren().front());
+    EXPECT_NE(barItemNode, nullptr);
+
+    /**
+     * @tc.steps: step5. barItem is disable.
+     * @tc.expected: IsEnabled function return false.
+     */
+    auto itemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
+    EXPECT_NE(itemEventHub, nullptr);
+    EXPECT_FALSE(itemEventHub->IsEnabled());
+}
+
+/**
+ * @tc.name: NavigationToolbarConfigurationTest003
+ * @tc.desc: Test the SetToolbarConfiguration function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize navigation with BarItem in active status.
+     */
+    NavigationModelNG navigationModel;
+    NG::BarItem bar;
+    bar.text = "text";
+    bar.icon = "icon";
+    bar.action = []() {};
+    bar.activeIcon = "activeIcon";
+    bar.status = NG::NavToolbarItemStatus::ACTIVE;
+    std::vector<NG::BarItem> toolBarItems;
+    toolBarItems.push_back(bar);
+    navigationModel.Create();
+    navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
+
+    /**
+     * @tc.steps: step2. obtain navigation nodes.
+     * @tc.expected: nodes are not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test whether the node of the toolbar is created after calling the SetToolbarConfiguration
+     * function.
+     * @tc.expected: toolbar node and preToolbar node are not nullptr.
+     */
+    EXPECT_NE(navBarNode->GetToolBarNode(), nullptr);
+    EXPECT_NE(navBarNode->GetPreToolBarNode(), nullptr);
+
+    /**
+     * @tc.steps: step4. obtain barItem node.
+     * @tc.expected: barItem node is not nullptr.
+     */
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    EXPECT_NE(toolbarNode, nullptr);
+    auto containerNode = toolbarNode->GetToolbarContainerNode();
+    EXPECT_NE(containerNode, nullptr);
+    auto buttonNode = containerNode->GetChildren().front();
+    EXPECT_NE(buttonNode, nullptr);
+    auto barItemNode = AceType::DynamicCast<BarItemNode>(buttonNode->GetChildren().front());
+    EXPECT_NE(barItemNode, nullptr);
+
+    /**
+     * @tc.steps: step5. barItem is active.
+     * @tc.expected: icon status is initial and barItem status is active.
+     */
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    EXPECT_EQ(barItemPattern->GetToolbarItemStatus(), NavToolbarItemStatus::ACTIVE);
+    EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::INITIAL);
+}
+
+/**
+ * @tc.name: NavigationToolbarConfigurationTest004
+ * @tc.desc: Test the SetToolbarConfiguration function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize navigation with an empty toolbarItem array.
+     */
+    NavigationModelNG navigationModel;
+    std::vector<NG::BarItem> toolBarItems;
+    navigationModel.Create();
+    navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
+
+    /**
+     * @tc.steps: step2. obtain navigation nodes.
+     * @tc.expected: nodes are not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    /**
+     * @tc.steps: step3. create layoutWrapper and layout toolbar.
+     * @tc.expected: layoutWrapper is not nullptr.
+     */
+    navigationModel.SetNavBarPosition(NavBarPosition::START);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SizeF value(static_cast<float>(SPLIT_WIDTH.ConvertToPx()), HEIGHT);
+    navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
+    navigationLayoutProperty->UpdateContentConstraint();
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+
+    /**
+     * @tc.steps: step4. test whether the container size is zero.
+     * @tc.expected:  barItemSize is zero.
+     */
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    EXPECT_NE(toolbarNode, nullptr);
+    auto containerNode = toolbarNode->GetToolbarContainerNode();
+    EXPECT_NE(containerNode, nullptr);
+    auto barItemSize = static_cast<int32_t>(containerNode->GetChildren().size());
+    EXPECT_EQ(barItemSize, 0);
+}
+
+/**
+ * @tc.name: NavigationToolbarConfigurationTest005
+ * @tc.desc: Test the SetToolbarConfiguration function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation theme to set toolbar specifications.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    navigationTheme->height_ = TOOL_BAR_HEIGHT;
+    navigationTheme->toolbarItemSafeInterval_ = TOOL_BAR_ITEM_SAFE_INTERVAL;
+    navigationTheme->toolbarItemHorizontalPadding_ = TOOL_BAR_ITEM_SAFE_INTERVAL;
+    navigationTheme->toolbarItemVerticalPadding_ = TOOL_BAR_ITEM_VERTICAL_PADDING;
+
+    /**
+     * @tc.steps: step2. initialize navigation with BarItem number less than five to test.
+     */
+    NavigationModelNG navigationModel;
+    NG::BarItem bar;
+    std::vector<NG::BarItem> toolBarItems;
+    for (int i = 0; i < 4; i++) {
+        toolBarItems.push_back(bar);
+    }
+    navigationModel.Create();
+    navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
+
+    /**
+     * @tc.steps: step2. obtain navigation nodes.
+     * @tc.expected: nodes are not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    /**
+     * @tc.steps: step3. create layoutWrapper and layout toolbar.
+     * @tc.expected: layoutWrapper is not nullptr.
+     */
+    auto navigationLayoutProperty = frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SizeF value(static_cast<float>(SPLIT_WIDTH.ConvertToPx()), HEIGHT);
+    navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
+    navigationLayoutProperty->UpdateContentConstraint();
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+
+    /**
+     * @tc.steps: step4. test whether the container size is four.
+     * @tc.expected:  barItemSize is four.
+     */
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    EXPECT_NE(toolbarNode, nullptr);
+    auto containerNode = toolbarNode->GetToolbarContainerNode();
+    EXPECT_NE(containerNode, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(containerNode->GetChildren().size()), 4);
+
+    /**
+     * @tc.steps: step5. modify toolbar item parameters.
+     */
+    NG::BarItem newBar;
+    std::vector<NG::BarItem> newToolBarItems;
+    newToolBarItems.push_back(newBar);
+    navigationModel.SetToolbarConfiguration(std::move(newToolBarItems));
+
+    /**
+     * @tc.steps: step6. test whether the container size is one after modify.
+     * @tc.expected: barItemSize is one.
+     */
+    auto newToolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    EXPECT_NE(newToolbarNode, nullptr);
+    auto newTontainerNode = newToolbarNode->GetToolbarContainerNode();
+    EXPECT_NE(newTontainerNode, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(newTontainerNode->GetChildren().size()), 1);
+}
+
+/**
+ * @tc.name: NavigationToolbarConfigurationTest006
+ * @tc.desc: Test the SetToolbarConfiguration function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationToolbarConfigurationTest006, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    /**
+     * @tc.steps: step1. initialize navigation with only one active BarItem.
+     */
+    NavigationModelNG navigationModel;
+    NG::BarItem bar;
+    bar.text = "text";
+    bar.icon = "icon";
+    bar.action = []() {};
+    bar.activeIcon = "activeIcon";
+    bar.status = NG::NavToolbarItemStatus::ACTIVE;
+    std::vector<NG::BarItem> toolBarItems;
+    toolBarItems.push_back(bar);
+    navigationModel.Create();
+    navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
+
+    /**
+     * @tc.steps: step2. obtain navigation nodes.
+     * @tc.expected: nodes are not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+
+    /**
+     * @tc.steps: step3. create layoutWrapper and layout toolbar.
+     * @tc.expected: layoutWrapper is not nullptr.
+     */
+    navigationModel.SetNavBarPosition(NavBarPosition::START);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SizeF value(static_cast<float>(SPLIT_WIDTH.ConvertToPx()), HEIGHT);
+    navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
+    navigationLayoutProperty->UpdateContentConstraint();
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+
+    /**
+     * @tc.steps: step4. obtain barItem nodes.
+     * @tc.expected: barItem node is not nullptr.
+     */
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    EXPECT_NE(toolbarNode, nullptr);
+    auto containerNode = toolbarNode->GetToolbarContainerNode();
+    EXPECT_NE(containerNode, nullptr);
+    auto buttonNode = containerNode->GetChildren().front();
+    EXPECT_NE(buttonNode, nullptr);
+    auto barItemNode = AceType::DynamicCast<BarItemNode>(buttonNode->GetChildren().front());
+    EXPECT_NE(barItemNode, nullptr);
+
+    /**
+     * @tc.steps: step5. barItem status can be change after UpdateBarItemActiveStatusResource.
+     * @tc.expected: barItem status is changed.
+     */
+    auto barItemPattern = barItemNode->GetPattern<BarItemPattern>();
+    barItemPattern->UpdateBarItemActiveStatusResource();
+    EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::ACTIVE);
+    barItemPattern->UpdateBarItemActiveStatusResource();
+    EXPECT_EQ(barItemPattern->GetCurrentIconStatus(), ToolbarIconStatus::INITIAL);
 }
 } // namespace OHOS::Ace::NG
