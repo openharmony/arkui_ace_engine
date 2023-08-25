@@ -2323,7 +2323,7 @@ void TextFieldPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     isTransparent_ = renderContext->GetOpacityValue(1.0f) == 0.0f;
-    if (!preErrorState_) {
+    if (!preErrorState_ && !restoreMarginState_) {
         SavePasswordModeStates();
     }
     InitClickEvent();
@@ -5569,11 +5569,11 @@ void TextFieldPattern::UpdateErrorTextMargin()
     if (layoutProperty->GetShowErrorTextValue(false) && (preErrorMargin_ < ERROR_TEXT_CAPSULE_MARGIN)) {
         errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
         layoutProperty->UpdateMargin(errorMargin);
-        preErrorState_ = true;
-    } else {
+        restoreMarginState_ = true;
+    } else if (restoreMarginState_ == true) {
         errorMargin.bottom = CalcLength(preErrorMargin_);
         layoutProperty->UpdateMargin(errorMargin);
-        preErrorState_ = false;
+        restoreMarginState_ = false;
     }
 }
 
