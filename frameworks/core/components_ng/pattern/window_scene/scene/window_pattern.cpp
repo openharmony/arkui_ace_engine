@@ -102,7 +102,7 @@ bool WindowPattern::IsMainWindow() const
     return session_->GetWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
 
-void WindowPattern::InitContent()
+void WindowPattern::OnAttachToFrameNode()
 {
     contentNode_ = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
@@ -204,15 +204,6 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
     }
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
-}
-
-void WindowPattern::OnAttachToFrameNode()
-{
-    InitContent();
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
