@@ -361,13 +361,9 @@ void TextFieldPattern::UpdateCaretInfoToController() const
 {
     CHECK_NULL_VOID_NOLOG(HasFocus());
 #if defined(ENABLE_STANDARD_INPUT)
-    auto pipeline = GetHost()->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowRect = pipeline->GetCurrentWindowRect();
-    MiscServices::CursorInfo cursorInfo { .left = caretRect_.Left() + windowRect.Left() + parentGlobalOffset_.GetX(),
-        .top = caretRect_.Top() + windowRect.Top() + parentGlobalOffset_.GetY(),
-        .width = CURSOR_WIDTH.ConvertToPx(),
-        .height = caretRect_.Height() };
+    auto miscTextConfig = GetMiscTextConfig();
+    CHECK_NULL_VOID(miscTextConfig.has_value());
+    MiscServices::CursorInfo cursorInfo = miscTextConfig.value().cursorInfo;
     LOGD("UpdateCaretInfoToController, left %{public}f, top %{public}f, width %{public}f, height %{public}f",
         cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height);
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
@@ -3215,10 +3211,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             LOGE("Request open soft keyboard failed because input method is null.");
             return false;
         }
-        MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
-            .enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE) };
-        MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
-            .windowId = context->GetFocusWindowId() };
+        auto optionalTextConfig = GetMiscTextConfig();
+        CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
+        MiscServices::TextConfig textConfig = optionalTextConfig.value();
         LOGI("RequestKeyboard set calling window id is : %{public}u", textConfig.windowId);
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -3254,6 +3249,27 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
     return true;
 }
+
+#if defined(ENABLE_STANDARD_INPUT)
+std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() const
+{
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto windowRect = pipeline->GetCurrentWindowRect();
+    MiscServices::CursorInfo cursorInfo { .left = caretRect_.Left() + windowRect.Left() + parentGlobalOffset_.GetX(),
+        .top = caretRect_.Top() + windowRect.Top() + parentGlobalOffset_.GetY(),
+        .width = CURSOR_WIDTH.ConvertToPx(),
+        .height = caretRect_.Height() };
+    MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
+        .enterKeyType = (int32_t)GetTextInputActionValue(TextInputAction::DONE) };
+    MiscServices::TextConfig textConfig = {
+        .inputAttribute = inputAttribute,
+        .cursorInfo = cursorInfo,
+        .range = { .start = textSelector_.GetStart(), .end = textSelector_.GetEnd() },
+        .windowId = pipeline->GetFocusWindowId()};
+    return textConfig;
+}
+#endif
 
 bool TextFieldPattern::CloseKeyboard(bool forceClose)
 {

@@ -114,6 +114,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         isRichEditorInit_ = true;
     }
     MoveCaretAfterTextChange();
+    UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
     auto context = host->GetRenderContext();
@@ -1319,10 +1320,9 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     }
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     CHECK_NULL_RETURN(inputMethod, false);
-    MiscServices::InputAttribute inputAttribute;
-    inputAttribute.inputPattern = (int32_t)(TextInputType::UNSPECIFIED);
-    inputAttribute.enterKeyType = (int32_t)(TextInputAction::DONE);
-    inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, inputAttribute);
+    auto miscTextConfig = GetMiscTextConfig();
+    CHECK_NULL_RETURN(miscTextConfig.has_value(), false);
+    inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, miscTextConfig.value());
     if (context) {
         inputMethod->SetCallingWindow(context->GetWindowId());
     }
@@ -1330,6 +1330,26 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     imeAttached_ = true;
 #endif
     return true;
+}
+
+std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
+{
+    auto pipeline = GetHost()->GetContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    auto windowRect = pipeline->GetCurrentWindowRect();
+    float caretHeight = 0.0f;
+    OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+    MiscServices::CursorInfo cursorInfo { .left = caretOffset.GetX() + windowRect.Left() + parentGlobalOffset_.GetX(),
+        .top = caretOffset.GetY() + windowRect.Top() + parentGlobalOffset_.GetY(),
+        .width = CARET_WIDTH,
+        .height = caretHeight };
+    MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)TextInputType::UNSPECIFIED,
+        .enterKeyType = (int32_t)TextInputAction::DONE };
+    MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
+        .cursorInfo = cursorInfo,
+        .range = { .start = textSelector_.GetStart(), .end = textSelector_.GetEnd() },
+        .windowId = pipeline->GetFocusWindowId() };
+    return textConfig;
 }
 #else
 bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
@@ -1368,6 +1388,42 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
     return true;
 }
 #endif
+
+void RichEditorPattern::UpdateCaretInfoToController()
+{
+    CHECK_NULL_VOID_NOLOG(HasFocus());
+    auto caretPosition = GetCaretPosition();
+    auto selectionResult = GetSpansInfo(caretPosition, caretPosition, GetSpansMethod::GETSPANS);
+    auto resultObjects = selectionResult.GetSelection().resultObjects;
+    std::string text = "";
+    if (!resultObjects.empty()) {
+        for (const auto& resultObj : resultObjects) {
+            if (resultObj.type == RichEditorSpanType::TYPESPAN) {
+                text.append(resultObj.valueString);
+            }
+        }
+    }
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = GetMiscTextConfig();
+    CHECK_NULL_VOID(miscTextConfig.has_value());
+    MiscServices::CursorInfo cursorInfo = miscTextConfig.value().cursorInfo;
+    LOGD("UpdateCaretInfoToController, left %{public}f, top %{public}f, width %{public}f, height %{public}f",
+        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height);
+    MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
+    LOGD("Start %{public}d, end %{public}d", textSelector_.GetStart(), textSelector_.GetEnd());
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        StringUtils::Str8ToStr16(text), textSelector_.GetStart(), textSelector_.GetEnd());
+
+#else
+    if (HasConnection()) {
+        TextEditingValue editingValue;
+        editingValue.text = text;
+        editingValue.hint = "";
+        editingValue.selection.Update(textSelector_.baseOffset, textSelector_.destinationOffset);
+        connection_->SetEditingState(editingValue, GetInstanceId());
+    }
+#endif
+}
 
 bool RichEditorPattern::HasConnection() const
 {
@@ -2638,6 +2694,12 @@ void RichEditorPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight
     if (newWidth != prevWidth || newHeight != prevHeight) {
         TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     }
+    UpdateCaretInfoToController();
+}
+
+void RichEditorPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY)
+{
+    UpdateCaretInfoToController();
 }
 
 void RichEditorPattern::DumpInfo()
