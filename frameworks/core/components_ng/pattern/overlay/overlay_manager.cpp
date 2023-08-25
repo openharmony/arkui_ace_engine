@@ -190,7 +190,9 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(ctx);
     option.SetOnFinishEvent(nullptr);
     option.SetCurve(SHOW_SCALE_ANIMATION_CURVE);
-    option.SetDuration(theme->GetAnimationDurationIn());
+    option.SetDuration(dialogPattern->GetOpenAnimation().has_value()
+                           ? dialogPattern->GetOpenAnimation().value().GetDuration()
+                           : theme->GetAnimationDurationIn());
     ctx->ScaleAnimation(option, theme->GetScaleStart(), theme->GetScaleEnd());
     node->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
@@ -803,8 +805,7 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
     }
     PopMenuAnimation(menu);
-    menu->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 #ifdef ENABLE_DRAG_FRAMEWORK
     RemoveEventColumn();
     if (isMenuOnTouch) {
@@ -1510,14 +1511,16 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
                 auto taskExecutor = context->GetTaskExecutor();
                 CHECK_NULL_VOID_NOLOG(taskExecutor);
                 // animation finish event should be posted to UI thread.
-                taskExecutor->PostTask([rootWeak, modalWK, id]() {
+                taskExecutor->PostTask(
+                    [rootWeak, modalWK, id]() {
                         auto modal = modalWK.Upgrade();
                         auto root = rootWeak.Upgrade();
                         CHECK_NULL_VOID_NOLOG(modal && root);
                         ContainerScope scope(id);
                         root->RemoveChild(modal);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                    }, TaskExecutor::TaskType::UI);
+                    },
+                    TaskExecutor::TaskType::UI);
             });
         context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
         AnimationUtils::Animate(
@@ -1563,14 +1566,16 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
                 auto taskExecutor = context->GetTaskExecutor();
                 CHECK_NULL_VOID_NOLOG(taskExecutor);
                 // animation finish event should be posted to UI thread.
-                taskExecutor->PostTask([rootWeak, modalWK, id]() {
+                taskExecutor->PostTask(
+                    [rootWeak, modalWK, id]() {
                         auto modal = modalWK.Upgrade();
                         auto root = rootWeak.Upgrade();
                         CHECK_NULL_VOID_NOLOG(modal && root);
                         ContainerScope scope(id);
                         root->RemoveChild(modal);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                    }, TaskExecutor::TaskType::UI);
+                    },
+                    TaskExecutor::TaskType::UI);
             });
         context->OpacityAnimation(option, 1, 0);
     }
@@ -1624,8 +1629,8 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         SaveLastModalNode();
         // create maskColor node
         if (sheetStyle.maskColor.has_value()) {
-            auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_MASK_TAG,
-                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+            auto maskNode = FrameNode::CreateFrameNode(
+                V2::SHEET_MASK_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
             maskNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
             maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.maskColor.value());
             maskNode->MountToParent(rootNode);
@@ -1678,8 +1683,8 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     }
 }
 
-void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition,
-    bool isModeChangeToAuto)
+void OverlayManager::PlaySheetTransition(
+    RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition, bool isModeChangeToAuto)
 {
     // current sheet animation
     AnimationOption option;
@@ -1698,23 +1703,22 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
-        AnimationUtils::Animate(
-            option,
-            [context, offset]() {
+        AnimationUtils::Animate(option, [context, offset]() {
             if (context) {
                 context->OnTransformTranslateUpdate({ 0.0f, offset, 0.0f });
             }
         });
     } else {
-        option.SetOnFinishEvent([rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)),
-            id = Container::CurrentId()] {
+        option.SetOnFinishEvent(
+            [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID_NOLOG(context);
                 auto taskExecutor = context->GetTaskExecutor();
                 CHECK_NULL_VOID_NOLOG(taskExecutor);
                 // animation finish event should be posted to UI thread.
-                taskExecutor->PostTask([rootWeak, sheetWK, id]() {
+                taskExecutor->PostTask(
+                    [rootWeak, sheetWK, id]() {
                         auto sheet = sheetWK.Upgrade();
                         auto root = rootWeak.Upgrade();
                         CHECK_NULL_VOID_NOLOG(sheet && root);
@@ -1722,7 +1726,8 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
                         OverlayManager::DestroySheetMask(sheet);
                         root->RemoveChild(sheet);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                    }, TaskExecutor::TaskType::UI);
+                    },
+                    TaskExecutor::TaskType::UI);
             });
         AnimationUtils::Animate(
             option,
@@ -1730,7 +1735,8 @@ void OverlayManager::PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTra
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, rootHeight, 0.0f });
                 }
-            }, option.GetOnFinishEvent());
+            },
+            option.GetOnFinishEvent());
     }
 }
 
