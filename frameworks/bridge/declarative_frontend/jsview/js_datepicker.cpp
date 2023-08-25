@@ -1054,6 +1054,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("create", &JSTimePicker::Create, opt);
     JSClass<JSTimePicker>::StaticMethod("onChange", &JSTimePicker::OnChange);
     JSClass<JSTimePicker>::StaticMethod("backgroundColor", &JSTimePicker::PickerBackgroundColor);
+    JSClass<JSTimePicker>::StaticMethod("loop", &JSTimePicker::Loop);
     JSClass<JSTimePicker>::StaticMethod("useMilitaryTime", &JSTimePicker::UseMilitaryTime);
     JSClass<JSTimePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -1074,6 +1075,11 @@ void JSTimePicker::Create(const JSCallbackInfo& info)
         paramObject = JSRef<JSObject>::Cast(info[0]);
     }
     CreateTimePicker(info, paramObject);
+}
+
+void JSTimePicker::Loop(bool isLoop)
+{
+    TimePickerModel::GetInstance()->SetWheelModeEnabled(isLoop);
 }
 
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
@@ -1153,7 +1159,15 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
         LOGE("timePicker Theme is null");
         return;
     }
-    TimePickerModel::GetInstance()->CreateTimePicker(theme);
+    auto componentsValue = paramObj->GetProperty("displayedComponent");
+    bool showSecond = false;
+    if (componentsValue->IsNumber()) {
+        auto displayedComponent = static_cast<TimePickerDisplayedComponents>(componentsValue->ToNumber<int32_t>());
+        if (displayedComponent == TimePickerDisplayedComponents::HOUR_MINUTE_SECOND) {
+            showSecond = true;
+        }
+    }
+    TimePickerModel::GetInstance()->CreateTimePicker(theme, showSecond);
     if (selectedTime->IsObject()) {
         JSRef<JSObject> selectedTimeObj = JSRef<JSObject>::Cast(selectedTime);
         JSRef<JSVal> changeEventVal = selectedTimeObj->GetProperty("changeEvent");

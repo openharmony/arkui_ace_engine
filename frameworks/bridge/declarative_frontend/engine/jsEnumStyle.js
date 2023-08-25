@@ -747,6 +747,12 @@ var DatePickerType;
   DatePickerType[DatePickerType["Date"] = 1] = "Date";
 })(DatePickerType || (DatePickerType = {}));
 
+var DisplayedComponentType;
+(function (DisplayedComponentType) {
+  DisplayedComponentType[DisplayedComponentType["HOUR_MINUTE"] = 0] = "HOUR_MINUTE";
+  DisplayedComponentType[DisplayedComponentType["HOUR_MINUTE_SECOND"] = 1] = "HOUR_MINUTE_SECOND";
+})(DisplayedComponentType || (DisplayedComponentType = {}));
+
 var InputType;
 (function (InputType) {
   InputType[InputType["Normal"] = 0] = "Normal";
