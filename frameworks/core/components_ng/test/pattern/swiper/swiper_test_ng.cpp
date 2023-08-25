@@ -9710,11 +9710,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperLayoutAlgorithmMeasureSwiper001
+ * @tc.name: SwiperLayoutAlgorithmMeasureSwiper002
  * @tc.desc: MeasureSwiper
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmMeasureSwiper002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create swipernode.
@@ -9754,11 +9754,11 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmMeasureSwiper001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperLayoutAlgorithmLayoutBackward002
+ * @tc.name: SwiperLayoutAlgorithmLayoutBackward003
  * @tc.desc: LayoutBackward
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutBackward002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutBackward003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create swipernode.
@@ -9818,7 +9818,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
     swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
     ASSERT_NE(swiperNode->paintProperty_, nullptr);
     swiperPattern->currentIndex_ = 0;
-    swiperPattern->preTargetIndex_ = -1;
+    swiperPattern->preTargetIndex_ = 1;
 
     swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
