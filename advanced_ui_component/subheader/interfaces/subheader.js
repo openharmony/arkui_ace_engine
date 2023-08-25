@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
+import { KeyCode } from "@ohos.multimodalInput.keyCode";
+
 const SPACE_MARGIN = 8;
 const MARGIN_NUM = 4;
 const IMAGE_WIDTH_NUM = 16;
@@ -132,36 +133,50 @@ class IconGroup extends ViewPU {
       }));
       Row.onHover((e => {
         this.bgColor = e ? {
-                             id: -1,
-                             type: 10001,
-                             params: ["sys.color.ohos_id_color_hover"],
-                             bundleName: "",
-                             moduleName: ""
-                           } : {
-                                 id: -1,
-                                 type: 10001,
-                                 params: ["sys.color.ohos_id_color_background"],
-                                 bundleName: "",
-                                 moduleName: ""
-                               }
+          id: -1,
+          type: 10001,
+          params: ["sys.color.ohos_id_color_hover"],
+          bundleName: "",
+          moduleName: ""
+        } : {
+          id: -1,
+          type: 10001,
+          params: ["sys.color.ohos_id_color_background"],
+          bundleName: "",
+          moduleName: ""
+        }
       }));
-      Row.border(this.isFocus ? {
-                                  width: this.focusBorderWidth,
-                                  color: {
-                                    id: -1,
-                                    type: 10001,
-                                    params: ["sys.color.ohos_id_color_emphasize"],
-                                    bundleName: "",
-                                    moduleName: ""
-                                  },
-                                  style: BorderStyle.Solid
-                                } : { width: 0 });
-      Row.onFocus((() => {
-        this.isFocus = !0
-      }));
-      Row.onBlur((() => {
-        this.isFocus = !1
-      }));
+      ViewStackProcessor.visualState("focused");
+      Row.border({
+        radius: {
+          id: -1,
+          type: 10002,
+          params: ["sys.float.ohos_id_corner_radius_clicked"],
+          bundleName: "",
+          moduleName: ""
+        },
+        width: this.focusBorderWidth,
+        color: {
+          id: -1,
+          type: 10001,
+          params: ["sys.color.ohos_id_color_focused_outline"],
+          bundleName: "",
+          moduleName: ""
+        },
+        style: BorderStyle.Solid
+      });
+      ViewStackProcessor.visualState("normal");
+      Row.border({
+        radius: {
+          id: -1,
+          type: 10002,
+          params: ["sys.float.ohos_id_corner_radius_clicked"],
+          bundleName: "",
+          moduleName: ""
+        },
+        width: 0
+      });
+      ViewStackProcessor.visualState();
       Row.onKeyEvent((e => {
         e.keyCode !== KeyCode.KEYCODE_ENTER && e.keyCode !== KeyCode.KEYCODE_SPACE || this.item.action && this.item.action()
       }));
@@ -736,18 +751,18 @@ export class SubHeader extends ViewPU {
       }));
       Row.onHover((e => {
         this.textArrowBgColor = e ? {
-                                      id: -1,
-                                      type: 10001,
-                                      params: ["sys.color.ohos_id_color_hover"],
-                                      bundleName: "",
-                                      moduleName: ""
-                                    } : {
-                                          id: -1,
-                                          type: 10001,
-                                          params: ["sys.color.ohos_id_color_background"],
-                                          bundleName: "",
-                                          moduleName: ""
-                                        }
+          id: -1,
+          type: 10001,
+          params: ["sys.color.ohos_id_color_hover"],
+          bundleName: "",
+          moduleName: ""
+        } : {
+          id: -1,
+          type: 10001,
+          params: ["sys.color.ohos_id_color_background"],
+          bundleName: "",
+          moduleName: ""
+        }
       }));
       Row.onKeyEvent((t => {
         t.keyCode !== KeyCode.KEYCODE_ENTER && t.keyCode !== KeyCode.KEYCODE_SPACE || e.action && e.action()
@@ -911,18 +926,18 @@ export class SubHeader extends ViewPU {
       }));
       Row.onHover((e => {
         this.buttonBgColor = e ? {
-                                   id: -1,
-                                   type: 10001,
-                                   params: ["sys.color.ohos_id_color_hover"],
-                                   bundleName: "",
-                                   moduleName: ""
-                                 } : {
-                                       id: -1,
-                                       type: 10001,
-                                       params: ["sys.color.ohos_id_color_background"],
-                                       bundleName: "",
-                                       moduleName: ""
-                                     }
+          id: -1,
+          type: 10001,
+          params: ["sys.color.ohos_id_color_hover"],
+          bundleName: "",
+          moduleName: ""
+        } : {
+          id: -1,
+          type: 10001,
+          params: ["sys.color.ohos_id_color_background"],
+          bundleName: "",
+          moduleName: ""
+        }
       }));
       Row.onKeyEvent((t => {
         t.keyCode !== KeyCode.KEYCODE_ENTER && t.keyCode !== KeyCode.KEYCODE_SPACE || e.action && e.action()
