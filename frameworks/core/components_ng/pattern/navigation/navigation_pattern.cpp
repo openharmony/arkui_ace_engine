@@ -145,14 +145,16 @@ void NavigationPattern::OnModifyDone()
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
-        navigationStack_->RemoveInNavPathList(pathName, uiNode);
         if (uiNode) {
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            navigationStack_->RemoveInNavPathList(pathName, uiNode);
+            navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             continue;
         }
         uiNode = navigationStack_->GetFromPreBackup(pathName);
         if (uiNode) {
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             continue;
         }
         uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
@@ -199,7 +201,7 @@ void NavigationPattern::CheckTopNavPathChange(
     RefPtr<NavDestinationGroupNode> preTopNavDestination;
     if (preTopNavPath.has_value()) {
         // pre page is not in the current stack
-        isPopPage |= navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second) == -1;
+        isPopPage |= navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second, true) == -1;
         preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preTopNavDestination) {
