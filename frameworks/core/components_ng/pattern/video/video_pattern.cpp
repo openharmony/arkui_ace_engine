@@ -1305,7 +1305,7 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
     if (!mediaPlayer_->IsMediaPlayerValid()) {
         return;
     }
-    if (GreatOrEqual(currentPos, 0.0) && LessOrEqual(currentPos, duration_)) {
+    if (GreatOrEqual(currentPos, 0.0)) {
         LOGD("Video Seek");
         mediaPlayer_->Seek(static_cast<int32_t>(currentPos * MILLISECONDS_TO_SECONDS), seekMode);
     }
