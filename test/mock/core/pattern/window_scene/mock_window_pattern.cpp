@@ -20,8 +20,6 @@ void WindowPattern::RegisterLifecycleListener() {}
 
 void WindowPattern::UnregisterLifecycleListener() {}
 
-void WindowPattern::InitContent() {}
-
 void WindowPattern::CreateStartingNode() {}
 
 void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot) {}
