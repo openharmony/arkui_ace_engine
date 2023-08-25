@@ -114,6 +114,22 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         isRichEditorInit_ = true;
     }
     MoveCaretAfterTextChange();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, ret);
+    auto context = host->GetRenderContext();
+    CHECK_NULL_RETURN(context, ret);
+    if (context->GetClipEdge().has_value()) {
+        auto geometryNode = host->GetGeometryNode();
+        auto frameOffset = geometryNode->GetFrameOffset();
+        auto frameSize = geometryNode->GetFrameSize();
+        CHECK_NULL_RETURN(paragraph_, ret);
+        CHECK_NULL_RETURN(richEditorOverlayModifier_, ret);
+        auto height = static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
+        if (context->GetClipEdge().value() == false && LessNotEqual(frameSize.Height(), height)) {
+            RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
+            richEditorOverlayModifier_->SetBoundsRect(boundsRect);
+        }
+    }
     return ret;
 }
 
