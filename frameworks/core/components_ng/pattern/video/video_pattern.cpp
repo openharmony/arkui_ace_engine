@@ -1314,7 +1314,7 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
 void VideoPattern::OnSliderChange(float posTime, int32_t mode)
 {
     LOGD("posTime: %{public}lf, mode: %{public}d", posTime, mode);
-    SetCurrentTime(posTime, OHOS::Ace::SeekMode::SEEK_CLOSEST);
+    SetCurrentTime(posTime, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
