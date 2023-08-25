@@ -135,9 +135,23 @@ public:
             true : false;
     }
 
+    bool IsTitleFullStatus()
+    {
+        if (NearZero(tempTitleBarHeight_)) {
+            return true;
+        }
+        GetMaxTitleBarHeight();
+        return GreatOrEqual(tempTitleBarHeight_, maxTitleBarHeight_) ? true : false;
+    }
+
     NavigationTitleMode GetNavigationTitleMode() const
     {
         return titleMode_;
+    }
+
+    void SetCanOverDrag(bool CanOverDrag)
+    {
+        CanOverDrag_ = CanOverDrag;
     }
 
 private:
@@ -207,6 +221,7 @@ private:
     float initialSubtitleOffsetY_ = 0.0f;
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
+    bool CanOverDrag_ = true;
 
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 };
