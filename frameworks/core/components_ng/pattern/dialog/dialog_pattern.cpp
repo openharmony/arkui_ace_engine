@@ -117,6 +117,9 @@ void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void DialogPattern::HandleClick(const GestureEvent& info)
 {
+    if (info.GetSourceDevice() == SourceType::KEYBOARD) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto props = host->GetLayoutProperty<DialogLayoutProperty>();

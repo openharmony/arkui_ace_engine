@@ -718,7 +718,7 @@ public:
     void DumpFocusNodeTree(int32_t depth);
     void DumpFocusScopeTree(int32_t depth);
 
-    void OnClick(const KeyEvent& event);
+    bool OnClick(const KeyEvent& event);
 
     void SetFocusType(FocusType type)
     {
@@ -817,6 +817,11 @@ public:
         return lastWeakFocusNode_;
     }
 
+    void SetIsFocusUnit(bool isFocusUnit)
+    {
+        isFocusUnit_ = isFocusUnit;
+    }
+
     static inline bool IsFocusStepVertical(FocusStep step)
     {
         return (static_cast<uint32_t>(step) & 0x1) == 0;
@@ -899,6 +904,7 @@ private:
     bool parentFocusable_ { true };
     bool currentFocus_ { false };
     bool isFirstFocusInPage_ { true };
+    bool isFocusUnit_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
