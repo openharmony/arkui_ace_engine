@@ -179,18 +179,22 @@ RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
     return nullptr;
 }
 
-RefPtr<FrameNode> MenuItemPattern::GetMenu()
+RefPtr<FrameNode> MenuItemPattern::GetMenu(bool needTopMenu)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto parent = host->GetParent();
+    RefPtr<FrameNode> menuNode = nullptr;
     while (parent) {
         if (parent->GetTag() == V2::MENU_ETS_TAG) {
-            return AceType::DynamicCast<FrameNode>(parent);
+            menuNode = AceType::DynamicCast<FrameNode>(parent);
+            if (!needTopMenu) {
+                return menuNode;
+            }
         }
         parent = parent->GetParent();
     }
-    return nullptr;
+    return menuNode;
 }
 
 void MenuItemPattern::ShowSubMenu()
@@ -288,8 +292,9 @@ void MenuItemPattern::RegisterOnClick()
         }
 
         // no need close menu
-        if (pattern->GetMenu() && pattern->GetMenu()->GetPattern()) {
-            auto menuPattern = DynamicCast<MenuPattern>(pattern->GetMenu()->GetPattern());
+        auto topMenu = pattern->GetMenu(true);
+        if (topMenu && topMenu->GetPattern()) {
+            auto menuPattern = DynamicCast<MenuPattern>(topMenu->GetPattern());
             if (menuPattern && menuPattern->IsSelectOverlayCustomMenu()) {
                 return;
             }
