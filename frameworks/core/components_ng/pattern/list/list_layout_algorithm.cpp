@@ -594,7 +594,11 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
 
     currentEndPos += chainOffset;
     // adjust offset.
-    if (LessNotEqual(currentEndPos, endMainPos_) && !itemPosition_.empty()) {
+    if (IsScrollSnapAlignCenter(layoutWrapper) && currentIndex == totalItemCount_ - 1) {
+        float itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
+        contentEndOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+    }
+    if (LessNotEqual(currentEndPos, endMainPos_ - contentEndOffset_) && !itemPosition_.empty()) {
         auto firstItemTop = itemPosition_.begin()->second.startPos;
         auto itemTotalSize = currentEndPos - firstItemTop;
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
@@ -674,7 +678,11 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
 
     currentStartPos += chainOffset;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
-    if (GreatNotEqual(currentStartPos, startMainPos_)) {
+    if (IsScrollSnapAlignCenter(layoutWrapper) && currentIndex == 0) {
+        float itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        contentStartOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
+    }
+    if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_)) {
         bool overBottom = LessNotEqual(GetEndPosition(), endMainPos_);
         if (((!canOverScroll_ || overBottom) && !IsScrollSnapAlignCenter(layoutWrapper)) || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos;
