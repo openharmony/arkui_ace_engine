@@ -5148,15 +5148,19 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest006, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto columnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
     auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<StackPattern>(); });
+    auto geometryNode = stackNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
     buttonNode->MountToParent(stackNode);
+    columnNode->MountToParent(stackNode);
     stackNode->MountToParent(frameNode);
     SizeF frameSize(FONT_SIZE_20, FONT_SIZE_20);
     geometryNode->SetFrameSize(frameSize);
