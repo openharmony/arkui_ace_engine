@@ -98,7 +98,7 @@ napi_value CircleRadius(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
 
     CalcDimension radius = CommonNapiUtils::GetDimensionResult(env, argv[0]);
-    if (radius.IsNonNegative()) {
+    if (radius.IsValid()) {
         PatternLockModel::GetInstance()->SetCircleRadius(radius);
     }
     return CommonNapiUtils::CreateNull(env);

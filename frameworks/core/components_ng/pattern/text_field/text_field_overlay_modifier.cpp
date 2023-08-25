@@ -101,7 +101,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     canvas.Save();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (!textFieldPattern->InSelectMode()) {
+    if (!textFieldPattern->IsSelected()) {
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -167,8 +167,6 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     if (!cursorVisible_->Get() || textFieldPattern->GetSelectMode() == SelectionMode::SELECT_ALL) {
         return;
     }
-    auto paragraph = textFieldPattern->GetParagraph();
-    CHECK_NULL_VOID(paragraph);
     canvas.Save();
     RSBrush brush;
     brush.SetAntiAlias(true);

@@ -161,10 +161,11 @@ void RefreshPattern::CheckCoordinationEvent()
     auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollablePattern);
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
-    auto onScrollEvent = [weak = WeakClaim(this)](double offset) {
+    auto onScrollEvent = [weak = WeakClaim(this)](double offset) -> bool {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_RETURN(pattern, false);
         pattern->HandleDragUpdate(static_cast<float>(offset));
+        return Positive(pattern->scrollOffset_.GetY()) || NonNegative(offset);
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
     auto onScrollStartEvent = [weak = WeakClaim(this)]() {

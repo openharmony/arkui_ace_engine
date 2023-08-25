@@ -546,11 +546,11 @@ HWTEST_F(TextFieldPatternTestNg, GetTextOrPlaceHolderFontSize001, TestSize.Level
 }
 
 /**
- * @tc.name: UpdateCaretPosition
- * @tc.desc: test UpdateCaretPosition
+ * @tc.name: UpdateCaretRect
+ * @tc.desc: test UpdateCaretRect
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretRect, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create TextFieldPattern.
@@ -565,7 +565,7 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
     frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
 
     /**
-     * @tc.steps: step2. set clipboard avoid nullptr and call UpdateCaretPosition.
+     * @tc.steps: step2. set clipboard avoid nullptr and call UpdateCaretRect.
      * @tc.expected: Check it is not nullptr.
      */
     auto pipeline = MockPipelineBase::GetCurrent();
@@ -577,26 +577,26 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
         CaretUpdateType::RIGHT_CLICK, CaretUpdateType::HANDLE_MOVE };
     for (auto caretType : exptectFalseTypes) {
         textFieldPattern->caretUpdateType_ = caretType;
-        EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+        EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
     }
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     textFieldPattern->isMousePressed_ = true;
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
     textFieldPattern->selectionMode_ = SelectionMode::SELECT;
     textFieldPattern->textSelector_.baseOffset = 0;
     textFieldPattern->textSelector_.destinationOffset = 5;
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
     textFieldPattern->UpdateEditingValue("", 0);
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::NONE;
     textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_TRUE(textFieldPattern->UpdateCaretRect());
     textFieldPattern->UpdateEditingValue("", 0);
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_TRUE(textFieldPattern->UpdateCaretRect());
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::EVENT;
     layoutProperty->UpdateShowPasswordIcon(false);
@@ -604,15 +604,15 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
     textFieldPattern->cursorVisible_ = true;
     textFieldPattern->isMousePressed_ = true;
     textFieldPattern->UpdateEditingValue(TEXT_VALUE, 0);
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     textFieldPattern->isMousePressed_ = false;
     textFieldPattern->isFocusedBeforeClick_ = true;
-    EXPECT_FALSE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
 
     /**
-     * @tc.steps: step3. set in search node and call UpdateCaretPosition.
+     * @tc.steps: step3. set in search node and call UpdateCaretRect.
      * @tc.expected: Check it is not nullptr.
      */
     auto* stack = ViewStackProcessor::GetInstance();
@@ -620,7 +620,7 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretPosition, TestSize.Level1)
     auto searchNode = AceType::MakeRefPtr<FrameNode>(V2::SEARCH_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>(), false);
     frameNode->MountToParent(searchNode);
     textFieldPattern->caretUpdateType_ = CaretUpdateType::HANDLE_MOVE;
-    EXPECT_TRUE(textFieldPattern->UpdateCaretPosition());
+    EXPECT_TRUE(textFieldPattern->UpdateCaretRect());
 }
 
 /**
@@ -713,11 +713,11 @@ HWTEST_F(TextFieldPatternTestNg, UpdateDestinationToCaretByEvent001, TestSize.Le
 }
 
 /**
- * @tc.name: UpdateCaretOffsetByLastTouchOffset001
- * @tc.desc: test UpdateCaretOffsetByLastTouchOffset
+ * @tc.name: UpdateCaretPositionByLastTouchOffset001
+ * @tc.desc: test UpdateCaretPositionByLastTouchOffset
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset001, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPositionByLastTouchOffset001, TestSize.Level1)
 {
     auto textFieldPattern = GetPattern();
     ASSERT_NE(textFieldPattern, nullptr);
@@ -730,17 +730,17 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset001, TestSize
     textFieldPattern->textRect_.SetSize(textSize);
     textFieldPattern->InitEditingValueText(TEXT_VALUE);
     textFieldPattern->lastTouchOffset_ = Offset(725.0, 0.0);
-    textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
+    textFieldPattern->UpdateCaretPositionByLastTouchOffset();
     EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, 0);
     EXPECT_EQ(textFieldPattern->GetCaretOffsetX(), 0);
 }
 
 /**
- * @tc.name: UpdateCaretOffsetByLastTouchOffset002
- * @tc.desc: test UpdateCaretOffsetByLastTouchOffset
+ * @tc.name: UpdateCaretPositionByLastTouchOffset002
+ * @tc.desc: test UpdateCaretPositionByLastTouchOffset
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset002, TestSize.Level1)
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPositionByLastTouchOffset002, TestSize.Level1)
 {
     auto textFieldPattern = GetPattern();
     ASSERT_NE(textFieldPattern, nullptr);
@@ -754,16 +754,16 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset002, TestSize
     textFieldPattern->textRect_.SetSize(textSize);
     textFieldPattern->textRect_.SetOffset(textOffset);
     textFieldPattern->InitEditingValueText(TEXT_VALUE);
-    textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
+    textFieldPattern->UpdateCaretPositionByLastTouchOffset();
     EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, 0);
 }
 
 /**
- * @tc.name: UpdateCaretOffsetByLastTouchOffset003
- * @tc.desc: test UpdateCaretOffsetByLastTouchOffset
+ * @tc.name: UpdateCaretPositionByLastTouchOffset003
+ * @tc.desc: test UpdateCaretPositionByLastTouchOffset
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset003, TestSize.Level2)
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretPositionByLastTouchOffset003, TestSize.Level2)
 {
     auto textFieldPattern = GetPattern();
     ASSERT_NE(textFieldPattern, nullptr);
@@ -775,7 +775,7 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset003, TestSize
     textFieldPattern->contentRect_.SetSize(contentSize);
     textFieldPattern->textRect_.SetSize(textSize);
     textFieldPattern->InitEditingValueText(TEXT_VALUE);
-    textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
+    textFieldPattern->UpdateCaretPositionByLastTouchOffset();
     EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, 0);
     EXPECT_EQ(textFieldPattern->GetCaretOffsetX(), 0.0);
 }
@@ -6038,7 +6038,7 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
     int32_t charPosition[3] = {-1, 0, 2};
     auto content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[1], true);;
-    for (int i=0; i<3; i++) {
+    for (int i = 0; i < 3; i++) {
         content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], true);
         content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], false);
         content = pattern->CreateDisplayText(EMPTY_TEXT_VALUE, charPosition[i], true);

@@ -322,6 +322,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
     }
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
+#ifndef NG_BUILD
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         auto surfaceNode = window->GetSurfaceNode();
@@ -329,6 +330,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         rsUiDirector->SetCacheDir(cacheDir);
         rsUiDirector->Init();
     }
+#endif
 #endif
     AceApplicationInfo::GetInstance().SetAbilityName(info ? info->name : "");
     std::string moduleName = info ? info->moduleName : "";
@@ -361,10 +363,14 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 
     AceApplicationInfo::GetInstance().SetDebug(appInfo->debug, want.GetBoolParam("debugApp", false));
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(this, pluginUtils);
+#endif
+#ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
+#endif
     // create container
     Platform::AceContainer::CreateContainer(abilityId_, frontendType, srcPath, shared_from_this(),
         std::make_unique<AcePlatformEventCallback>([this]() { TerminateAbility(); },
@@ -410,6 +416,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
 
+#ifndef NG_BUILD
     if (!useNewPipe) {
         Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
@@ -436,6 +443,9 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
     } else {
         Platform::AceContainer::SetViewNew(aceView, density_, 0, 0, window);
     }
+#else
+    Platform::AceContainer::SetViewNew(aceView, density_, 0, 0, window);
+#endif
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
 
@@ -606,10 +616,15 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
         [weakContainer = WeakPtr<Platform::AceContainer>(container), configuration]() {
             auto container = weakContainer.Upgrade();
             CHECK_NULL_VOID_NOLOG(container);
-            auto colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            auto deviceAccess = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-            auto languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-            container->UpdateConfiguration(colorMode, deviceAccess, languageTag, configuration.GetName());
+            Platform::ParsedConfig parsedConfig;
+            parsedConfig.colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+            parsedConfig.deviceAccess =
+                configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+            parsedConfig.languageTag = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            parsedConfig.direction = configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
+            parsedConfig.densitydpi =
+                configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            container->UpdateConfiguration(parsedConfig, configuration.GetName());
         },
         TaskExecutor::TaskType::UI);
     LOGI("AceAbility::OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());

@@ -18,21 +18,13 @@
 #include <vector>
 
 #include "utils.h"
+#include "ace_forward_compatibility.h"
+
 #ifdef UICAST_COMPONENT_SUPPORTED
 #include "interfaces/inner_api/ace/uicast/uicast_subscriber.h"
 #endif
 
 namespace OHOS::Ace {
-
-#if defined(WINDOWS_PLATFORM)
-constexpr char ACE_LIB_NAME[] = "libace.dll";
-#elif defined(MAC_PLATFORM)
-constexpr char ACE_LIB_NAME[] = "libace.dylib";
-#elif defined(LINUX_PLATFORM)
-constexpr char ACE_LIB_NAME[] = "libace.so";
-#else
-constexpr char ACE_LIB_NAME[] = "libace.z.so";
-#endif
 
 using CreateCardFunc = UIContent* (*)(void*, void*, bool);
 using CreateFunc = UIContent* (*)(void*, void*);
@@ -45,7 +37,7 @@ OHOS::AbilityRuntime::Context* context_ = nullptr;
 
 UIContent* CreateUIContent(void* context, void* runtime, bool isFormRender)
 {
-    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
     if (handle == nullptr) {
         return nullptr;
     }
@@ -62,7 +54,7 @@ UIContent* CreateUIContent(void* context, void* runtime, bool isFormRender)
 
 UIContent* CreateUIContent(void* context, void* runtime)
 {
-    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
     if (handle == nullptr) {
         return nullptr;
     }
@@ -83,7 +75,7 @@ UIContent* CreateUIContent(void* context, void* runtime)
 
 UIContent* CreateUIContent(void* ability)
 {
-    LIBHANDLE handle = LOADLIB(ACE_LIB_NAME);
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
     if (handle == nullptr) {
         return nullptr;
     }

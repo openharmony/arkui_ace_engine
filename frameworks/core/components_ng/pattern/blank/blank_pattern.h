@@ -30,7 +30,7 @@ public:
     ~BlankPattern() override = default;
     std::string GetColorString() const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
-
+    void DumpInfo() override;
     void BeforeCreateLayoutWrapper() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

@@ -86,6 +86,9 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     std::string type = V2::ConvertWrapTextDecorationToStirng(GetTextDecoration().value_or(TextDecoration::NONE));
     jsonDecoration->Put("type", type.c_str());
     jsonDecoration->Put("color", GetTextDecorationColor().value_or(Color::BLACK).ColorToString().c_str());
+    std::string style =
+        V2::ConvertWrapTextDecorationStyleToString(GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
+    jsonDecoration->Put("style", style.c_str());
     json->Put("decoration", jsonDecoration->ToString().c_str());
 
     json->Put("textCase", V2::ConvertWrapTextCaseToStirng(GetTextCase().value_or(TextCase::NORMAL)).c_str());

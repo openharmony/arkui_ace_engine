@@ -684,7 +684,7 @@ public:
 
     void PostSyncEvent(const TaskExecutor::Task& task, TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
-    virtual void FlushReload() {}
+    virtual void FlushReload(const OnConfigurationChange& configurationChange) {}
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
@@ -731,7 +731,7 @@ public:
         configChangedCallback_.push_back(std::move(listener));
     }
 
-    virtual void NotifyConfigurationChange(const OnConfigurationChange& configurationChange)
+    void NotifyConfigurationChange()
     {
         for (const auto& callback : configChangedCallback_) {
             if (callback) {

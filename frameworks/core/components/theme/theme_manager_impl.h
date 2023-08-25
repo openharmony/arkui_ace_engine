@@ -93,6 +93,11 @@ public:
 
     void LoadResourceThemes() override;
 
+    uint32_t GetResourceLimitKeys() const override
+    {
+        return themeConstants_->GetResourceLimitKeys();
+    }
+
 private:
     std::unordered_map<ThemeType, RefPtr<Theme>> themes_;
     RefPtr<ThemeConstants> themeConstants_;

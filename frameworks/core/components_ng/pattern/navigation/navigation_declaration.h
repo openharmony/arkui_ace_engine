@@ -90,6 +90,7 @@ constexpr Dimension FULL_DOUBLE_LINE_TITLEBAR_HEIGHT = 138.0_vp;
 constexpr Dimension NAV_HORIZONTAL_MARGIN_L = 16.0_vp; // ohos_id_elements_margin_horizontal_l
 constexpr Dimension NAV_HORIZONTAL_MARGIN_M = 8.0_vp;  // ohos_id_elements_margin_horizontal_m
 constexpr Dimension MENU_ITEM_PADDING = 24.0_vp;
+constexpr Dimension MENU_ITEM_SIZE = 48.0_vp;
 constexpr Dimension BUTTON_PADDING = 12.0_vp;
 constexpr Dimension BUTTON_RADIUS = 5.0_vp;
 constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;
@@ -103,6 +104,10 @@ constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
 // maximum number of toolbar items
 constexpr uint32_t MAXIMUM_TOOLBAR_ITEMS_IN_BAR = 5;
 constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
+
+// navigation mask color
+const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
+const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 
 enum class NavToolbarItemStatus {
     NORMAL = 0,

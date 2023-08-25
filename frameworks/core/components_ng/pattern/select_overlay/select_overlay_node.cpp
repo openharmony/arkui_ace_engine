@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <securec.h>
 
@@ -31,6 +32,8 @@
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -459,6 +462,26 @@ void SelectOverlayNode::DispatchGoneToVisibleState(FrameNodeType type, FrameNode
     }
 }
 
+RefPtr<FrameNode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    CHECK_NULL_RETURN(info, nullptr);
+    CHECK_NULL_RETURN(info->menuInfo.menuBuilder, nullptr);
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    info->menuInfo.menuBuilder();
+    auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    // long press no need menuwrapper
+    auto type = info->isUsingMouse ? MenuType::SELECT_OVERLAY_CUSTOM_MENU : MenuType::SELECT_OVERLAY_EXTENSION_MENU;
+    auto menuNode = MenuView::Create(customNode, -1, "", type, MenuParam(), info->isUsingMouse);
+    auto eventHub = menuNode->GetEventHub<EventHub>();
+    if (eventHub && info->menuCallback.onAppear) {
+        eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));
+    }
+    if (eventHub && info->menuCallback.onDisappear) {
+        eventHub->SetOnDisappear(std::move(info->menuCallback.onDisappear));
+    }
+    return menuNode;
+}
+
 RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     if (info->isUsingMouse) {
@@ -760,6 +783,13 @@ void SelectOverlayNode::AddExtensionMenuOptions(const std::vector<MenuOptionsPar
 void SelectOverlayNode::CreateToolBar()
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
+    if (info->menuInfo.menuBuilder) {
+        selectMenu_ = CreateCustomSelectMenu(info);
+        selectMenu_->MountToParent(Claim(this));
+        selectMenu_->MarkModifyDone();
+        return;
+    }
+
     selectMenu_ = FrameNode::GetOrCreateFrameNode("SelectMenu", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     selectMenu_->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_END);
@@ -940,7 +970,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
 void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
-    if (menuItemChanged) {
+    if (menuItemChanged && info->menuInfo.menuBuilder == nullptr) {
         selectMenuInner_->Clean();
         selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         if (isExtensionMenu_) {
@@ -1029,8 +1059,13 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
 
 RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
-    std::vector<OptionParam> params = GetOptionsParams(info);
-    auto menuWrapper = MenuView::Create(std::move(params), -1);
+    RefPtr<FrameNode> menuWrapper;
+    if (info->menuInfo.menuBuilder) {
+        menuWrapper = CreateCustomSelectMenu(info);
+    } else {
+        std::vector<OptionParam> params = GetOptionsParams(info);
+        menuWrapper = MenuView::Create(std::move(params), -1);
+    }
     CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     // set click position to menu

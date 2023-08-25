@@ -32,8 +32,10 @@ constexpr int32_t TEXT_ALIGN_JSON = 3;
 constexpr int32_t TEXT_ALIGN_DEFAULT = 4;
 constexpr uint32_t TEXT_MAX_LINES_JSON = 10;
 constexpr uint32_t TEXT_MAX_LINES_DEFAULT = UINT32_MAX;
-constexpr int32_t TEXT_OVERFLOW_JSON = 1;
-constexpr int32_t TEXT_OVERFLOW_DEFAULT = 0;
+constexpr int32_t TEXT_OVERFLOW_JSON = 2;
+constexpr int32_t TEXT_OVERFLOW_DEFAULT = 1;
+constexpr int32_t TEXT_DECORATION_JSON = 1;
+constexpr int32_t TEXT_DECORATION_STYLE_JSON = 2;
 constexpr TextDirection TEXT_DIRECTION_JSON = TextDirection::RTL;
 constexpr TextDirection TEXT_DIRECTION_DEFAULT = TextDirection::LTR;
 
@@ -82,7 +84,7 @@ HWTEST_F(TextCreatorTest, TextComponentCreator001, TestSize.Level1)
                                     "  \"textAlign\": 3,               "
                                     "  \"textDirection\": 1,           "
                                     "  \"textMaxLines\": 10,           "
-                                    "  \"textOverflow\": 1             "
+                                    "  \"textOverflow\": 2             "
                                     "}";
     /**
      * @tc.steps: step2. Check all the properties matched.
@@ -149,6 +151,36 @@ HWTEST_F(TextCreatorTest, TextComponentCreator003, TestSize.Level1)
     EXPECT_EQ(text->GetTextDirection(), TEXT_DIRECTION_DEFAULT);
     EXPECT_EQ(text->GetTextStyle().GetMaxLines(), TEXT_MAX_LINES_DEFAULT);
     EXPECT_EQ(static_cast<int32_t>(text->GetTextStyle().GetTextOverflow()), TEXT_OVERFLOW_DEFAULT);
+}
+
+/**
+ * @tc.name: TextComponentCreator004
+ * @tc.desc: Test TextDecorationStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextCreatorTest, TextComponentCreator004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create component based on json string.
+     */
+    const std::string jsonText = "{                               "
+                                 "  \"className\": \"Text\",  "
+                                 "  \"textStyle\":                "
+                                 "{                               "
+                                 "  \"className\": \"TextStyle\", "
+                                 "  \"textDecoration\": 1,        "
+                                 "  \"textDecorationStyle\": 2    "
+                                 "}"
+                                 "}";
+    RefPtr<TextComponent> text = CreateComponent(jsonText);
+    /**
+     * @tc.steps: step2. Check all the properties matched.
+     * @tc.expected: step2. All the properties are matched.
+     */
+    EXPECT_TRUE(text != nullptr);
+    const auto& textStyle = text->GetTextStyle();
+    EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecoration()), TEXT_DECORATION_JSON);
+    EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecorationStyle()), TEXT_DECORATION_STYLE_JSON);
 }
 
 } // namespace OHOS::Ace

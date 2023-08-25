@@ -230,6 +230,8 @@ public:
 
     void UpdateToss(double offsetY);
 
+    void UpdateFinishToss(double offsetY);
+
     void TossStoped();
 
     void UpdateScrollDelta(double delta);
@@ -271,6 +273,26 @@ public:
         return isTossStatus_;
     }
 
+    void SetYOffset(double value)
+    {
+        yOffset_ = value;
+    }
+
+    bool GetTouchBreakStatus()
+    {
+        return touchBreak_;
+    }
+
+    bool GetClickBreakStatus()
+    {
+        return clickBreak_;
+    }
+
+    void SetclickBreak(bool value)
+    {
+        clickBreak_ = value;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -285,7 +307,7 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-
+    RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
@@ -352,10 +374,12 @@ private:
     float gradientHeight_ = 0.0f;
     float dividerHeight_ = 0.0f;
     float dividerSpacingWidth_ = 0.0f;
-
+    double distancePercent_ = 0.0;
     double offsetCurSet_ = 0.0;
     bool isTossStatus_ = false;
-
+    bool clickBreak_ = false;
+    bool touchBreak_ = false;
+    bool animationBreak_ = false;
     float deltaSize_ = 0.0f;
     RefPtr<PanEvent> panEvent_;
     bool pressed_ = false;

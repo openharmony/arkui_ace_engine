@@ -31,6 +31,7 @@ public:
     static void SetColors(const JSCallbackInfo& info);
     static void SetStrokeWidth(const JSCallbackInfo& info);
     static void SetLabelConfig(const JSCallbackInfo& info);
+    static void SetShadowOptions(const JSCallbackInfo& info);
 
 private:
     static void SetGradientColors(const JSCallbackInfo& info);

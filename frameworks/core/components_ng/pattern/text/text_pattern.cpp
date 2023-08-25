@@ -96,7 +96,6 @@ void TextPattern::CloseSelectOverlay(bool animation)
 
 void TextPattern::ResetSelection()
 {
-    showSelectOverlay_ = false;
     if (textSelector_.IsValid()) {
         textSelector_.Update(-1, -1);
         auto host = GetHost();
@@ -188,7 +187,7 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
-    if (copyOption_ == CopyOptions::None) {
+    if (copyOption_ == CopyOptions::None || isMousePressed_) {
         return;
     }
     auto host = GetHost();
@@ -210,7 +209,6 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-    showSelectOverlay_ = true;
     InitSelection(textOffset);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
@@ -310,11 +308,6 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
     return StringUtils::ToString(wideText.substr(min, max - min));
 }
 
-bool TextPattern::IsSelected() const
-{
-    return textSelector_.IsValid() && !textSelector_.StartEqualToDest();
-}
-
 void TextPattern::HandleOnCopy()
 {
     CHECK_NULL_VOID(clipboard_);
@@ -373,8 +366,6 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         if (closedByGlobalEvent) {
             pattern->ResetSelection();
-        } else {
-            pattern->showSelectOverlay_ = false;
         }
     };
 
@@ -539,7 +530,54 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        return;
     }
+    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        if (info.GetAction() == MouseAction::PRESS) {
+            isMousePressed_ = true;
+            if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+                blockPress_ = true;
+                return;
+            }
+            mouseStatus_ = MouseStatus::PRESSED;
+            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+            Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+                info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+            CHECK_NULL_VOID(paragraph_);
+            auto start = paragraph_->GetHandlePositionForClick(textOffset);
+            textSelector_.Update(start, start);
+        }
+
+        if (info.GetAction() == MouseAction::MOVE) {
+            if (blockPress_) {
+                return;
+            }
+            mouseStatus_ = MouseStatus::MOVE;
+            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+            Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+                info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+            CHECK_NULL_VOID(paragraph_);
+            auto end = paragraph_->GetHandlePositionForClick(textOffset);
+            textSelector_.Update(textSelector_.baseOffset, end);
+        }
+
+        if (info.GetAction() == MouseAction::RELEASE) {
+            if (blockPress_) {
+                blockPress_ = false;
+            }
+            mouseStatus_ = MouseStatus::RELEASED;
+            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+            Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+                info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+            CHECK_NULL_VOID(paragraph_);
+            auto end = paragraph_->GetHandlePositionForClick(textOffset);
+            textSelector_.Update(textSelector_.baseOffset, end);
+            isMousePressed_ = false;
+        }
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextPattern::InitTouchEvent()
@@ -903,7 +941,7 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
 
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (showSelectOverlay_) {
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
@@ -995,9 +1033,6 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
-
-            // Register callback for fonts.
-            FontRegisterCallback(spanNode);
         } else if (current->GetTag() == V2::IMAGE_ETS_TAG) {
             imageCount_++;
             AddChildSpanItem(current);
@@ -1009,26 +1044,6 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
     }
 }
 
-void TextPattern::FontRegisterCallback(RefPtr<SpanNode> spanNode)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto callback = [span = AceType::WeakClaim(AceType::RawPtr(spanNode))] {
-        auto node = span.Upgrade();
-        if (node) {
-            node->RequestTextFlushDirty();
-        }
-    };
-    auto fontManager = pipelineContext->GetFontManager();
-    auto fontFamilies = spanNode->GetFontFamily();
-    if (fontManager && fontFamilies.has_value()) {
-        for (const auto& familyName : fontFamilies.value()) {
-            fontManager->RegisterCallbackNG(spanNode, familyName, callback);
-        }
-    }
-}
 
 void TextPattern::GetGlobalOffset(Offset& offset)
 {
@@ -1156,6 +1171,10 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
                     if (textLayoutProp->HasTextDecorationColor()) {
                         child->UpdateTextDecorationColorWithoutFlushDirty(
                             textLayoutProp->GetTextDecorationColor().value());
+                    }
+                    if (textLayoutProp->HasTextDecorationStyle()) {
+                        child->UpdateTextDecorationStyleWithoutFlushDirty(
+                            textLayoutProp->GetTextDecorationStyle().value());
                     }
                 }
                 break;

@@ -59,17 +59,12 @@ public:
 
     void HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItem);
 
-    int32_t GetTargetId() const
+    int32_t GetTargetId() const override
     {
         return targetId_;
     }
 
     void HideMenu();
-
-    void AddSubMenuId(int32_t subMenuId)
-    {
-        subMenuIds_.emplace_back(subMenuId);
-    }
 
     bool IsHided() const
     {
@@ -83,15 +78,6 @@ public:
         auto menuPattern = menu->GetPattern<MenuPattern>();
         CHECK_NULL_RETURN(menuPattern, false);
         return menuPattern->IsContextMenu();
-    }
-
-    bool IsRichEditorSelectMenu() const
-    {
-        auto menu = GetMenu();
-        CHECK_NULL_RETURN(menu, false);
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        CHECK_NULL_RETURN(menuPattern, false);
-        return menuPattern->IsRichEditorSelectMenu();
     }
 
     bool IsSelectMenu() const
@@ -149,8 +135,6 @@ private:
     Placement menuPlacement_ = Placement::NONE;
     bool isFirstShow_ = true;
     bool isHided_ = false;
-
-    std::list<int32_t> subMenuIds_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };

@@ -144,10 +144,14 @@ void JSFlex::JsSize(const JSCallbackInfo& info)
         return;
     }
 
-    if (!info[0]->IsObject()) {
-        LOGE("arg is not Object or String.");
+    if (info[0]->IsUndefined()) {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not Object or String.");
         return;
     }
 

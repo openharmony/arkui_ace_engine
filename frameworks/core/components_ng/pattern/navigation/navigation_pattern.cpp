@@ -145,14 +145,16 @@ void NavigationPattern::OnModifyDone()
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
-        navigationStack_->RemoveInNavPathList(pathName, uiNode);
         if (uiNode) {
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            navigationStack_->RemoveInNavPathList(pathName, uiNode);
+            navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             continue;
         }
         uiNode = navigationStack_->GetFromPreBackup(pathName);
         if (uiNode) {
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             continue;
         }
         uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
@@ -170,14 +172,12 @@ void NavigationPattern::OnModifyDone()
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
 
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+        auto dividerNode = GetDividerNode();
+        CHECK_NULL_VOID(dividerNode);
+        auto gestureHub = dividerNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         InitDragEvent(gestureHub);
-        auto inputHub = eventHub->GetOrCreateInputEventHub();
+        auto inputHub = dividerNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
     }
@@ -185,8 +185,7 @@ void NavigationPattern::OnModifyDone()
 
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
-    bool isPopPage)
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage)
 {
     if (preTopNavPath == newTopNavPath) {
         return;
@@ -201,7 +200,7 @@ void NavigationPattern::CheckTopNavPathChange(
     RefPtr<NavDestinationGroupNode> preTopNavDestination;
     if (preTopNavPath.has_value()) {
         // pre page is not in the current stack
-        isPopPage |= navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second) == -1;
+        isPopPage |= navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second, true) == -1;
         preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preTopNavDestination) {
@@ -414,6 +413,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     } else {
                         hostNode->SetBackButtonVisible(curTopNavDestination, true);
                     }
+                    pattern->UpdateContextRect(curTopNavDestination, hostNode);
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -422,13 +422,39 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
 
     UpdateTitleModeChangeEventHub(hostNode);
-    UpdateResponseRegion(navigationLayoutAlgorithm->GetRealDividerWidth(),
-        navigationLayoutAlgorithm->GetRealNavBarWidth(), navigationLayoutAlgorithm->GetRealNavBarHeight(),
-        navigationLayoutAlgorithm->GetNavBarOffset());
-
     AddDividerHotZoneRect(navigationLayoutAlgorithm);
     ifNeedInit_ = false;
     return false;
+}
+
+void NavigationPattern::UpdateContextRect(
+    const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& hostNode)
+{
+    CHECK_NULL_VOID_NOLOG(curDestination);
+    CHECK_NULL_VOID_NOLOG(hostNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID_NOLOG(hostNode);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
+    auto size = curDestination->GetGeometryNode()->GetFrameSize();
+    curDestination->GetRenderContext()->ClipWithRRect(
+        RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
+    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+    if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
+        auto navBarProperty = navBarNode->GetLayoutProperty();
+        navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
+        curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+        curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+        auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
+        CHECK_NULL_VOID_NOLOG(titleNode);
+        titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+        return;
+    }
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+    navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
 }
 
 bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode)
@@ -584,45 +610,21 @@ void NavigationPattern::OnHover(bool isHover)
     }
 }
 
-void NavigationPattern::UpdateResponseRegion(
-    float realDividerWidth, float realNavBarWidth, float dragRegionHeight, OffsetF dragRectOffset)
+RefPtr<FrameNode> NavigationPattern::GetDividerNode() const
 {
-    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    auto scaleProperty = constraint->scaleProperty;
-    auto halfDragRegionWidth = ConvertToPx(DEFAULT_DRAG_REGION, scaleProperty).value_or(0);
-    auto dragRegionWidth = halfDragRegionWidth * 2;
-    realDividerWidth_ = realDividerWidth;
-    auto halfRealDividerWidth = 0.0f;
-    if (realDividerWidth_ > 0.0f) {
-        halfRealDividerWidth = realDividerWidth_ / DEFAULT_HALF;
+    RefPtr<FrameNode> dividerFrameNode;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto children = host->GetChildren();
+    for (auto begin = children.begin(); begin != children.end(); begin++) {
+        auto dividerNode = *begin;
+        if (dividerNode->GetTag() == V2::DIVIDER_ETS_TAG) {
+            dividerFrameNode = AceType::DynamicCast<FrameNode>(dividerNode);
+            CHECK_NULL_RETURN(dividerFrameNode, nullptr);
+            break;
+        }
     }
-    halfDragRegionWidth += halfRealDividerWidth;
-    dragRegionWidth += realDividerWidth_;
-    realNavBarWidth_ = realNavBarWidth;
-
-    auto navBarPosition = layoutProperty->GetNavBarPosition().value_or(NavBarPosition::START);
-    if (navBarPosition == NavBarPosition::START) {
-        dragRectOffset.SetX(dragRectOffset.GetX() + halfRealDividerWidth + realNavBarWidth_ - halfDragRegionWidth);
-    } else {
-        dragRectOffset.SetX(dragRectOffset.GetX() - halfDragRegionWidth);
-    }
-
-    dragRect_.SetOffset(dragRectOffset);
-    dragRect_.SetSize(SizeF(dragRegionWidth, dragRegionHeight));
-
-    auto eventHub = GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    gestureEventHub->MarkResponseRegion(true);
-    std::vector<DimensionRect> responseRegion;
-    DimensionOffset responseOffset(dragRectOffset);
-    DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
-        Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
-    responseRegion.emplace_back(responseRect);
-    gestureEventHub->SetResponseRegion(responseRegion);
+    return dividerFrameNode;
 }
 
 void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgorithm>& layoutAlgorithm)
@@ -632,8 +634,7 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
         return;
     }
     OffsetF hotZoneOffset;
-    hotZoneOffset.SetX(
-        layoutAlgorithm->GetRealNavBarWidth() - DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
+    hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneOffset.SetY(DEFAULT_DIVIDER_START_MARGIN.ConvertToPx());
     SizeF hotZoneSize;
     hotZoneSize.SetWidth(realDividerWidth_ + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
@@ -642,18 +643,29 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto children = host->GetChildren();
-    for (auto begin = children.begin(); begin != children.end(); begin++) {
-        auto dividerNode = *begin;
-        if (dividerNode->GetTag() == V2::DIVIDER_ETS_TAG) {
-            auto dividerFrameNode = AceType::DynamicCast<FrameNode>(dividerNode);
-            CHECK_NULL_VOID(dividerFrameNode);
-            dividerFrameNode->AddHotZoneRect(hotZoneRegion);
-            break;
-        }
-    }
+
+    std::vector<DimensionRect> mouseRegion;
+    mouseRegion.emplace_back(hotZoneRegion);
+
+    auto dividerFrameNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto dividerGestureHub = dividerFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dividerGestureHub);
+    dividerGestureHub->SetMouseResponseRegion(mouseRegion);
+
+    auto dragRectOffset = layoutAlgorithm->GetNavBarOffset();
+    dragRectOffset.SetX(-DEFAULT_DRAG_REGION.ConvertToPx());
+    dragRect_.SetOffset(dragRectOffset);
+    dragRect_.SetSize(SizeF(
+        DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_HALF + realDividerWidth_, layoutAlgorithm->GetRealNavBarHeight()));
+
+    std::vector<DimensionRect> responseRegion;
+    DimensionOffset responseOffset(dragRectOffset);
+    DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
+        Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
+    responseRegion.emplace_back(responseRect);
+    dividerGestureHub->MarkResponseRegion(true);
+    dividerGestureHub->SetResponseRegion(responseRegion);
 }
 
 void NavigationPattern::OnWindowHide()

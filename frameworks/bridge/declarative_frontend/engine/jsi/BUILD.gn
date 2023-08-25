@@ -109,6 +109,7 @@ if (!is_cross_platform_build) {
 
 template("declarative_js_engine_ark") {
   forward_variables_from(invoker, "*")
+  platform = invoker.platform
 
   ohos_source_set(target_name) {
     subsystem_name = ace_engine_subsystem
@@ -139,16 +140,18 @@ template("declarative_js_engine_ark") {
       "modules/jsi_timer_module.cpp",
     ]
 
+    include_dirs = []
     if (defined(vendor_configs.extra_view_register_sources)) {
-      include_dirs = vendor_configs.ace_advance_dirs
+      include_dirs += vendor_configs.ace_advance_dirs
       sources += vendor_configs.extra_view_register_sources
     } else {
       sources += [ "jsi_extra_view_register.cpp" ]
     }
 
-    deps = []
+    include_dirs += [ "${ace_root}/interfaces/inner_api/ace" ]
+    deps = [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]
 
-    if (enable_ng_build) {
+    if (platform == "ohos_ng") {
       sources += [
         "jsi_animator_model_ng_build_impl.cpp",
         "jsi_view_register_impl_ng.cpp",
@@ -176,7 +179,6 @@ template("declarative_js_engine_ark") {
       ]
     }
 
-    deps = []
     if (is_cross_platform_build) {
       deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
     }
@@ -186,7 +188,7 @@ template("declarative_js_engine_ark") {
       sources += [ "utils/jsi_module_searcher.cpp" ]
     } else if (defined(config.use_build_in_js_engine) &&
                config.use_build_in_js_engine) {
-      if (enable_ng_build) {
+      if (platform == "ohos_ng") {
         sources += [
           "$ace_root/frameworks/bridge/js_frontend/engine/common/js_api_perf.cpp",
           "$ace_root/frameworks/bridge/js_frontend/engine/jsi/ark_js_runtime.cpp",

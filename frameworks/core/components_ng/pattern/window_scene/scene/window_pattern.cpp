@@ -137,7 +137,7 @@ void WindowPattern::InitContent()
         return;
     }
 
-    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetBufferAvailable()) {
+    if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetBufferAvailable() && session_->GetShowRecent()) {
         CreateSnapshotNode();
         host->AddChild(snapshotNode_);
         return;
@@ -174,7 +174,7 @@ void WindowPattern::CreateStartingNode()
     startingNode_->MarkModifyDone();
 }
 
-void WindowPattern::CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot)
+void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
 {
     snapshotNode_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -186,7 +186,7 @@ void WindowPattern::CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot
     snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     CHECK_NULL_VOID(session_);
     if (snapshot) {
-        auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
+        auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
         CHECK_NULL_VOID(pixelMap);
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {

@@ -260,6 +260,20 @@ inline FlexAlign ConvertStringToItemAlign(const std::string& str)
         return index < 0 ? "TextDecorationType.None" : decorationTable[index].value;
     }
 
+    inline std::string ConvertWrapTextDecorationStyleToString(TextDecorationStyle decorationStyle)
+    {
+        static const LinearEnumMapNode<TextDecorationStyle, std::string> decorationStyleTable[] = {
+            { TextDecorationStyle::SOLID, "TextDecorationStyle.SOLID" },
+            { TextDecorationStyle::DOUBLE, "TextDecorationStyle.DOUBLE" },
+            { TextDecorationStyle::DOTTED, "TextDecorationStyle.DOTTED" },
+            { TextDecorationStyle::DASHED, "TextDecorationStyle.DASHED" },
+            { TextDecorationStyle::WAVY, "TextDecorationStyle.WAVY" },
+        };
+
+        auto index = BinarySearchFindIndex(decorationStyleTable, ArraySize(decorationStyleTable), decorationStyle);
+        return index < 0 ? "TextDecorationStyle.SOLID" : decorationStyleTable[index].value;
+    }
+
     inline std::string ConvertWrapTextCaseToStirng(TextCase textCase)
     {
         static const LinearEnumMapNode<TextCase, std::string> textCaseTable[] = {

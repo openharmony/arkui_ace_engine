@@ -33,7 +33,7 @@ ohos_shared_library("plugincomponent") {
     "js_plugin_want.cpp",
   ]
 
-  deps = [ "$ace_root/build:libace" ]
+  deps = [ "$ace_root/build:libace_compatible" ]
 
   external_deps = [
     "ability_base:base",

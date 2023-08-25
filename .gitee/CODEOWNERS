@@ -65,7 +65,7 @@ frameworks/core/components_ng/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_row/  @xiexiyun
 frameworks/core/components_ng/pattern/hyperlink/  @jinweiliu
 frameworks/core/components_ng/pattern/image/  @zhoutianer
-frameworks/core/components_ng/pattern/image_animator/  @zhoutianer
+frameworks/core/components_ng/pattern/image_animator/  @hehongyang9
 frameworks/core/components_ng/pattern/indexer/  @aryawang
 frameworks/core/components_ng/pattern/linear_layout/  @xiexiyun
 frameworks/core/components_ng/pattern/linear_split/  @xiexiyun
@@ -323,7 +323,7 @@ frameworks/core/components_ng/test/pattern/container_modal/  @suiwuyue
 frameworks/core/components_ng/test/pattern/counter/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/custom/  @yan-shuifeng
 frameworks/core/components_ng/test/pattern/custom_paint/  @zhangbingce
-frameworks/core/components_ng/test/pattern/data_panel/  @zcdqs
+frameworks/core/components_ng/test/pattern/data_panel/  @jinweiliu
 frameworks/core/components_ng/test/pattern/dialog/  @zhao-xinyu007
 frameworks/core/components_ng/test/pattern/divider/  @zhang-xiao150
 frameworks/core/components_ng/test/pattern/effect_component/  @liuchao92

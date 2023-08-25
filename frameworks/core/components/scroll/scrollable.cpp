@@ -611,6 +611,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     if (RelatedScrollEventPrepare(Offset(0.0, mainDelta))) {
         return;
     }
+    JankFrameReport::RecordFrameUpdate();
     auto source = info.GetInputEventType() == InputEventType::AXIS ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
     HandleScroll(mainDelta, source, NestedState::GESTURE);
 }
@@ -838,7 +839,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     auto end = currentPos_ + predictSnapOffset;
     scrollSnapMotion_ = AceType::MakeRefPtr<SpringMotion>(start, end, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
 
-    scrollSnapMotion_->AddListener([weakScroll = AceType::WeakClaim(this), start, end](double position) {
+    scrollSnapMotion_->AddListener([weakScroll = AceType::WeakClaim(this)](double position) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->ProcessScrollSnapMotion(position);

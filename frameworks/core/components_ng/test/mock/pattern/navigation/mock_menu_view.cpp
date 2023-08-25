@@ -22,4 +22,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
 {
     return nullptr;
 }
+
+RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, const std::string& targetTag,
+    MenuType type, const MenuParam& menuParam, bool withWrapper)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

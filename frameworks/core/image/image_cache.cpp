@@ -331,10 +331,22 @@ void ImageCache::SetCacheFileInfo()
 
 void ImageCache::Clear()
 {
-    std::scoped_lock clearLock(imageCacheMutex_, dataCacheMutex_);
-    cacheList_.clear();
-    imageCache_.clear();
-    dataCacheList_.clear();
-    imageDataCache_.clear();
+    {
+        std::scoped_lock lock(imageCacheMutex_);
+        cacheList_.clear();
+        imageCache_.clear();
+    }
+    {
+        std::scoped_lock lock(dataCacheMutex_);
+        dataCacheList_.clear();
+        imageDataCache_.clear();
+    }
+    {
+        std::scoped_lock lock(imgObjMutex_);
+        cacheImgObjListNG_.clear();
+        imgObjCacheNG_.clear();
+        cacheImgObjList_.clear();
+        imgObjCache_.clear();
+    }
 }
 } // namespace OHOS::Ace

@@ -155,10 +155,137 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg003, TestSize.Level1)
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeTestNg004, TestSize.Level1)
 {
-    auto node = FrameNode::CreateFrameNode("main", 10, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
     node->AttachToMainTree();
     node->GetRenderContext()->RequestNextFrame();
     EXPECT_TRUE(node->IsOnMainTree());
+
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> parentNode =
+        FrameNode::CreateFrameNode("RelativeContainer", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    node->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+
+    /**
+     * @tc.steps: step2. call OnInspectorIdUpdate .
+     * @tc.expect: this parentNode is MarkDirtyNode, but this Tag() != "RelativeContainer"
+     * this parentNode is not MarkDirtyNode
+     */
+    node->OnInspectorIdUpdate("RelativeContainer");
+    EXPECT_EQ(parentNode->GetTag(), "RelativeContainer");
+}
+
+/**
+ * @tc.name: FrameNodeTestNg007
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step 1. create framenode and initialize the params used in Test.
+     */
+    auto node = FrameNode::CreateFrameNode("childNode", 10, AceType::MakeRefPtr<Pattern>(), true);
+
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> parentNode =
+        FrameNode::CreateFrameNode("parent", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    node->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+
+    const RefPtr<FrameNode> overlayNode =
+        FrameNode::CreateFrameNode("overlayNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step 2. call OnInspectorIdUpdate .
+     * @tc.expect: this parentNode is MarkDirtyNode, but this Tag() != "RelativeContainer"
+     * this parentNode is not MarkDirtyNode
+     */
+
+    node->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+    node->OnInspectorIdUpdate("RelativeContainer");
+    EXPECT_EQ(parentNode->GetTag(), "parent");
+
+    /**
+     * @tc.steps: step 3. call LayoutOverlay .
+     * @tc.expect: FrameRect of overlayNode is 0.
+     */
+    node->SetOverlayNode(overlayNode);
+    node->LayoutOverlay();
+
+    auto layoutProperty = overlayNode->GetLayoutProperty();
+    layoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
+    node->LayoutOverlay();
+    EXPECT_EQ(overlayNode->GetGeometryNode()->GetFrameRect().GetX(), 0);
+
+    /**
+     * @tc.steps: step 4. call GetFrameChildByIndex .
+     * @tc.expect: index == 0 return uiNode, index != 0 return null
+     */
+    EXPECT_TRUE(node->GetFrameChildByIndex(0, false));
+    EXPECT_FALSE(node->GetFrameChildByIndex(1, false));
+
+    /**
+     * @tc.steps: step 5. call GetBaselineDistance .
+     * @tc.expect: node has not child return 0. if node has child return  childBaseline of child
+     */
+    EXPECT_EQ(node->GetBaselineDistance(), 0);
+    node->AddChild(FRAME_NODE);
+    EXPECT_EQ(node->GetBaselineDistance(), 0);
+    auto nodeLayoutProperty = node->GetLayoutProperty();
+    nodeLayoutProperty->geometryTransition_ =
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", overlayNode, false);
+    node->Layout();
+    EXPECT_FALSE(node->IsRootMeasureNode());
+    node->SetRootMeasureNode();
+    node->Layout();
+    EXPECT_TRUE(node->IsRootMeasureNode());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg008
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step 1. create framenode and initialize the params used in Test.
+     */
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode("node", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+
+    auto parentNode = FrameNode::CreateFrameNode("LocationButton", nodeId + 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step 2. call AddFRCSceneInfo .
+     * @tc.expect: rosenContext set scene and speed, no expect
+     */
+    node->AddFRCSceneInfo("test", 0, SelectOverlayNode::SceneStatus::START);
+    node->AddFRCSceneInfo("test", 0, SelectOverlayNode::SceneStatus::RUNNING);
+
+    /**
+     * @tc.steps: step 3. call CheckSecurityComponentStatus .
+     * @tc.expect: rect.size ++
+     */
+    EXPECT_FALSE(node->HaveSecurityComponent());
+    std::list<RefPtr<FrameNode>> nodeList;
+    nodeList.push_back(parentNode);
+    node->frameChildren_ = { nodeList.begin(), nodeList.end() };
+    std::vector<RectF> rect;
+    node->CheckSecurityComponentStatus(rect);
+    EXPECT_EQ(rect.size(), 2);
+    rect.clear();
+    rect.emplace_back(RectF(0, 0, 0, 0));
+    parentNode->CheckSecurityComponentStatus(rect);
+    EXPECT_EQ(rect.size(), 2);
+
+    /**
+     * @tc.steps: step 3. call HaveSecurityComponent.
+     * @tc.expect: Different GetTag() return false or true.
+     */
+    EXPECT_TRUE(parentNode->HaveSecurityComponent());
+    EXPECT_TRUE(node->HaveSecurityComponent());
 }
 
 /**

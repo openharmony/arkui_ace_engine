@@ -35,6 +35,7 @@ public:
 
 protected:
     void OnAttachToFrameNode() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig) override;
 
 private:
     void UpdateDisplayInfo();

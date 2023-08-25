@@ -391,7 +391,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph001, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
     ASSERT_NE(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -416,7 +416,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph002, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -433,7 +433,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph003, TestSize.Level1)
     auto json = std::make_unique<JsonValue>();
     spanNode->spanItem_->content = "";
     spanNode->spanItem_->fontStyle = nullptr;
-    spanNode->spanItem_->UpdateParagraph(nullptr);
+    spanNode->spanItem_->UpdateParagraph(nullptr, nullptr);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -460,7 +460,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    spanNode->spanItem_->UpdateParagraph(paragraph);
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 
@@ -482,11 +482,11 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     ASSERT_NE(paragraph, nullptr);
-    auto index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::TOP);
-    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::CENTER);
-    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::BOTTOM);
-    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::BASELINE);
-    index = spanItem->UpdateParagraph(paragraph, 9.0, 10.0, VerticalAlign::NONE);
+    auto index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::TOP);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::CENTER);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BOTTOM);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BASELINE);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::NONE);
     EXPECT_EQ(index, -1);
 }
 
@@ -578,5 +578,101 @@ HWTEST_F(SpanTestNg, SpanItemGetFont001, TestSize.Level1)
     spanModelNG.SetFontFamily(FONT_FAMILY_VALUE);
     spanModelNG.SetItalicFontStyle(ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(spanNode->spanItem_->GetFont(), FONT_EQUALS_VALUE);
+}
+
+/**
+ * @tc.name: SpanDecorationStyleTest001
+ * @tc.desc: test span_model_ng.cpp SetTextDecorationStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDecorationStyleTest001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.SetTextDecorationStyle(Ace::TextDecorationStyle::WAVY);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_EQ(spanNode->GetTextDecorationStyle(), Ace::TextDecorationStyle::WAVY);
+}
+
+/**
+ * @tc.name: SpanDecorationToJsonValue001
+ * @tc.desc: Test Span Decoration ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDecorationToJsonValue001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.SetTextDecoration(TextDecoration::LINE_THROUGH);
+    spanModelNG.SetTextDecorationStyle(Ace::TextDecorationStyle::DOUBLE);
+    spanModelNG.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(spanNode, nullptr);
+    auto json = JsonUtil::Create(true);
+    spanNode->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("content"));
+    EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
+    EXPECT_TRUE(json->Contains("decoration"));
+    std::string decorationStr = json->GetValue("decoration")->GetString();
+    auto decorationJson = JsonUtil::ParseJsonString(decorationStr);
+    ASSERT_NE(decorationJson, nullptr);
+    EXPECT_TRUE(decorationJson->Contains("type"));
+    EXPECT_TRUE(decorationJson->GetValue("type")->GetString() ==
+                V2::ConvertWrapTextDecorationToStirng(Ace::TextDecoration::LINE_THROUGH));
+    EXPECT_TRUE(decorationJson->Contains("color"));
+    EXPECT_TRUE(decorationJson->GetValue("color")->GetString() == TEXT_DECORATION_COLOR_VALUE.ColorToString());
+    EXPECT_TRUE(decorationJson->Contains("style"));
+    EXPECT_TRUE(decorationJson->GetValue("style")->GetString() ==
+                V2::ConvertWrapTextDecorationStyleToString(Ace::TextDecorationStyle::DOUBLE));
+}
+
+/**
+ * @tc.name: SpanDecorationToJsonValue002
+ * @tc.desc: Test Span Decoration ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDecorationToJsonValue002, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    spanModelNG.SetFontSize(FONT_SIZE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(spanNode, nullptr);
+    auto json = JsonUtil::Create(true);
+    spanNode->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("content"));
+    EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
+    EXPECT_TRUE(json->Contains("fontSize"));
+    EXPECT_TRUE(json->GetValue("fontSize")->GetString() == FONT_SIZE_VALUE.ToString());
+    EXPECT_TRUE(json->Contains("decoration"));
+    std::string decorationStr = json->GetValue("decoration")->GetString();
+    auto decorationJson = JsonUtil::ParseJsonString(decorationStr);
+    ASSERT_NE(decorationJson, nullptr);
+    EXPECT_TRUE(decorationJson->Contains("type"));
+    EXPECT_TRUE(decorationJson->GetValue("type")->GetString() ==
+                V2::ConvertWrapTextDecorationToStirng(Ace::TextDecoration::NONE));
+    EXPECT_TRUE(decorationJson->Contains("color"));
+    EXPECT_TRUE(decorationJson->GetValue("color")->GetString() == Color::BLACK.ColorToString());
+    EXPECT_TRUE(decorationJson->Contains("style"));
+    EXPECT_TRUE(decorationJson->GetValue("style")->GetString() ==
+                V2::ConvertWrapTextDecorationStyleToString(Ace::TextDecorationStyle::SOLID));
+}
+
+/**
+ * @tc.name: SpanDecorationToJsonValue003
+ * @tc.desc: Test Span Decoration ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanDecorationToJsonValue003, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(spanNode, nullptr);
+    auto json = JsonUtil::Create(true);
+    spanNode->ToJsonValue(json);
+    EXPECT_TRUE(json->Contains("content"));
+    EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
+    EXPECT_FALSE(json->Contains("decoration"));
 }
 } // namespace OHOS::Ace::NG

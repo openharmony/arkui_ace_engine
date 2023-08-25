@@ -229,6 +229,16 @@ enum class TextDecoration {
     INHERIT,
 };
 
+enum class TextDecorationStyle {
+    SOLID,
+    DOUBLE,
+    DOTTED,
+    DASHED,
+    WAVY,
+    INITIAL,
+    INHERIT,
+};
+
 enum class TextHeightAdaptivePolicy {
     MAX_LINES_FIRST,
     MIN_FONT_SIZE_FIRST,

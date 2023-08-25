@@ -53,6 +53,7 @@ ohos_shared_library("ace_uicontent") {
       debug = ace_sanitize_debug
     }
   }
+  include_dirs = [ "//base/startup/init/interfaces/innerkits/include/syspara" ]
 
   public_configs = [ ":uicontent_public_config" ]
 
@@ -77,6 +78,32 @@ ohos_shared_library("ace_uicontent") {
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
       "hilog:libhilog",
+    ]
+  }
+  deps = [ ":ace_forward_compatibility" ]
+
+  subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk_indirect" ]
+  part_name = ace_engine_part
+}
+
+ohos_shared_library("ace_forward_compatibility") {
+  include_dirs = [
+    "//base/startup/init/interfaces/innerkits/include/syspara",
+    "${ace_root}/frameworks",
+  ]
+
+  public_configs = [ ":uicontent_public_config" ]
+
+  sources =
+      [ "${ace_root}/interfaces/inner_api/ace/ace_forward_compatibility.cpp" ]
+
+  if (current_os == "ohos") {
+    defines = [ "OHOS_PLATFORM" ]
+    sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
+    external_deps = [
+      "hilog:libhilog",
+      "init:libbegetutil",
     ]
   }
 

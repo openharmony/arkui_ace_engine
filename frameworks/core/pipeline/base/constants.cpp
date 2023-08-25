@@ -59,6 +59,7 @@ const char TEXT_DATA[] = "value";
 const char TEXT_DIRECTION[] = "textDirection";
 const char TEXT_COLOR[] = "color";
 const char TEXT_DECORATION[] = "textDecoration";
+const char TEXT_DECORATION_STYLE[] = "textDecorationStyle";
 const char TEXT_FONT_WEIGHT[] = "fontWeight";
 const char TEXT_FONT_SIZE[] = "fontSize";
 const char TEXT_FONT_STYLE[] = "fontStyle";

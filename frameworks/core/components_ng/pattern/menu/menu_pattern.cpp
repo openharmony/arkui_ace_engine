@@ -121,18 +121,6 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
         label->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
-
-void UpdateMenuItemAttrNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty)
-{
-    if (menuProperty->GetMenuWidth().has_value()) {
-        auto rootWidth = PipelineContext::GetCurrentRootWidth();
-        auto menuWidth = menuProperty->GetMenuWidthValue().ConvertToPxWithSize(rootWidth);
-        bool isOK = LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth) && LessNotEqual(menuWidth, rootWidth);
-        if (isOK && !itemProperty->GetMenuWidth().has_value()) {
-            itemProperty->UpdateMenuWidth(Dimension(menuWidth, DimensionUnit::PX));
-        }
-    }
-}
 } // namespace
 
 void MenuPattern::OnAttachToFrameNode()
@@ -144,9 +132,6 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(focusHub);
     RegisterOnKeyEvent(focusHub);
     DisableTabInMenu();
-    if (IsRichEditorSelectMenu()) {
-        return;
-    }
     InitTheme(host);
 }
 
@@ -294,7 +279,6 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
             auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(itemPattern);
             UpdateMenuItemTextNode(layoutProperty, itemProperty, itemPattern);
-            UpdateMenuItemAttrNode(layoutProperty, itemProperty);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
             auto itemGroupNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(itemGroupNode);
@@ -351,18 +335,15 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 
 void MenuPattern::HideMenu(bool isMenuOnTouch) const
 {
-    if (IsRichEditorSelectMenu()) {
-        return;
-    }
     if (IsContextMenu()) {
-        SubwindowManager::GetInstance()->HideMenuNG(targetId_);
+        SubwindowManager::GetInstance()->HideMenuNG(GetMenuWrapper(), targetId_);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->HideMenu(targetId_, isMenuOnTouch);
+    overlayManager->HideMenu(GetMenuWrapper(), targetId_, isMenuOnTouch);
     LOGI("MenuPattern closing menu %{public}d", targetId_);
 }
 
@@ -476,7 +457,7 @@ void MenuPattern::MountOption(const RefPtr<FrameNode>& option)
     CHECK_NULL_VOID(column);
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetMenu(WeakClaim(RawPtr(GetHost())));
+    pattern->SetMenu(GetHost());
     AddOptionNode(option);
     option->MountToParent(column);
 }

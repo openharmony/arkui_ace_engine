@@ -28,6 +28,18 @@ enum class GaugeType : int32_t {
     TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT = 1,
     TYPE_CIRCULAR_MONOCHROME = 2,
 };
+
+struct GaugeShadowOptions {
+    bool isShadowVisible = true;
+    float radius = DEFAULT_GAUGE_SHADOW_RADIUS;
+    float offsetX = DEFAULT_GAUGE_SHADOW_OFFSETX;
+    float offsetY = DEFAULT_GAUGE_SHADOW_OFFSETY;
+    bool operator==(const GaugeShadowOptions& rhs) const
+    {
+        return radius == rhs.radius && offsetX == rhs.offsetX && offsetY == rhs.offsetY &&
+               isShadowVisible == rhs.isShadowVisible;
+    }
+};
 class GaugePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(GaugePaintProperty, PaintProperty)
 
@@ -49,6 +61,7 @@ public:
         paintProperty->propValues_ = CloneValues();
         paintProperty->propStrokeWidth_ = CloneStrokeWidth();
         paintProperty->propGaugeType_ = CloneGaugeType();
+        paintProperty->propShadowOptions_ = CloneShadowOptions();
         return paintProperty;
     }
 
@@ -65,6 +78,7 @@ public:
         ResetValues();
         ResetStrokeWidth();
         ResetGaugeType();
+        ResetShadowOptions();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -124,6 +138,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientColors, std::vector<ColorStopArray>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Values, std::vector<float>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShadowOptions, GaugeShadowOptions, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(GaugePaintProperty);
 };
 

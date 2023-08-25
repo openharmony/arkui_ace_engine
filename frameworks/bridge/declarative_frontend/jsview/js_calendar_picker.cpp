@@ -22,7 +22,9 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/calendar_picker_model_impl.h"
+#include "core/components/calendar/calendar_theme.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -50,6 +52,35 @@ CalendarPickerModel* CalendarPickerModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+double GetMSByDate(const std::string& date)
+{
+    auto json = JsonUtil::ParseJsonString(date);
+    if (!json || json->IsNull()) {
+        return 0.0f;
+    }
+
+    std::tm dateTime = { 0 };
+    auto year = json->GetValue("year");
+    if (year && year->IsNumber()) {
+        dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
+    }
+    auto month = json->GetValue("month");
+    if (month && month->IsNumber()) {
+        dateTime.tm_mon = month->GetInt() - 1;
+    }
+    auto day = json->GetValue("day");
+    if (day && day->IsNumber()) {
+        dateTime.tm_mday = day->GetInt();
+    }
+    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto local = std::localtime(&now);
+    CHECK_NULL_RETURN_NOLOG(local, 0.0f);
+    dateTime.tm_hour = local->tm_hour;
+    dateTime.tm_min = local->tm_min;
+    dateTime.tm_sec = local->tm_sec;
+    return Date::GetMilliSecondsByDateTime(dateTime);
+}
+
 void JSCalendarPicker::JSBind(BindingTarget globalObj)
 {
     JSClass<JSCalendarPicker>::Declare("CalendarPicker");
@@ -57,7 +88,46 @@ void JSCalendarPicker::JSBind(BindingTarget globalObj)
     JSClass<JSCalendarPicker>::StaticMethod("edgeAlign", &JSCalendarPicker::SetEdgeAlign);
     JSClass<JSCalendarPicker>::StaticMethod("textStyle", &JSCalendarPicker::SetTextStyle);
     JSClass<JSCalendarPicker>::StaticMethod("onChange", &JSCalendarPicker::SetOnChange);
+    JSClass<JSCalendarPicker>::StaticMethod("border", &JSCalendarPicker::SetBorder);
+    JSClass<JSCalendarPicker>::StaticMethod("padding", &JSCalendarPicker::JsPadding);
     JSClass<JSCalendarPicker>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSCalendarPicker::SetBorder(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    auto valueWidth = object->GetProperty("width");
+    if (!valueWidth->IsUndefined()) {
+        ParseBorderWidth(valueWidth);
+    }
+
+    // use default value when undefined.
+    ParseCalendarPickerBorderColor(object->GetProperty("color"));
+
+    auto valueRadius = object->GetProperty("radius");
+    if (!valueRadius->IsUndefined()) {
+        ParseBorderRadius(valueRadius);
+    }
+    // use default value when undefined.
+    ParseBorderStyle(object->GetProperty("style"));
+
+    info.ReturnSelf();
+}
+
+void JSCalendarPicker::ParseCalendarPickerBorderColor(const JSRef<JSVal>& args)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        ViewAbstractModel::GetInstance()->SetBorderColor(theme->GetEntryBorderColor());
+    } else {
+        JSViewAbstract::ParseBorderColor(args);
+    }
 }
 
 void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
@@ -113,11 +183,93 @@ void JSCalendarPicker::SetOnChange(const JSCallbackInfo& info)
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        std::vector<std::string> keys = { "year", "month", "day" };
         ACE_SCORING_EVENT("CalendarPicker.onChange");
-        func->Execute(keys, info);
+        auto dateObj = JSDate::New(GetMSByDate(info));
+        func->ExecuteJS(1, &dateObj);
     };
     CalendarPickerModel::GetInstance()->SetOnChange(std::move(onChange));
+}
+
+void JSCalendarPicker::JsPadding(const JSCallbackInfo& info)
+{
+    NG::PaddingProperty padding;
+    if (info[0]->IsObject()) {
+        std::optional<CalcDimension> left;
+        std::optional<CalcDimension> right;
+        std::optional<CalcDimension> top;
+        std::optional<CalcDimension> bottom;
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension leftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
+            left = leftDimen;
+        }
+        CalcDimension rightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
+            right = rightDimen;
+        }
+        CalcDimension topDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
+            top = topDimen;
+        }
+        CalcDimension bottomDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
+            bottom = bottomDimen;
+        }
+        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
+            padding = SetPaddings(top, bottom, left, right);
+            CalendarPickerModel::GetInstance()->SetPadding(padding);
+            return;
+        }
+    }
+
+    CalcDimension length(-1);
+    ParseJsDimensionVp(info[0], length);
+    if (length.IsNonNegative()) {
+        padding.SetEdges(NG::CalcLength(length));
+    }
+    CalendarPickerModel::GetInstance()->SetPadding(padding);
+}
+
+NG::PaddingProperty JSCalendarPicker::SetPaddings(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+    const std::optional<CalcDimension>& right)
+{
+    NG::PaddingProperty paddings;
+    if (top.has_value()) {
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            paddings.top =
+                NG::CalcLength(top.value().IsNonNegative() ? top.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(top.value().IsNonNegative() ? top.value() : CalcDimension());
+        }
+    }
+    if (bottom.has_value()) {
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(
+                bottom.value().IsNonNegative() ? bottom.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(bottom.value().IsNonNegative() ? bottom.value() : CalcDimension());
+        }
+    }
+    if (left.has_value()) {
+        if (left.value().Unit() == DimensionUnit::CALC) {
+            paddings.left =
+                NG::CalcLength(left.value().IsNonNegative() ? left.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.left = NG::CalcLength(left.value().IsNonNegative() ? left.value() : CalcDimension());
+        }
+    }
+    if (right.has_value()) {
+        if (right.value().Unit() == DimensionUnit::CALC) {
+            paddings.right =
+                NG::CalcLength(right.value().IsNonNegative() ? right.value().CalcValue() : CalcDimension().CalcValue());
+        } else {
+            paddings.right = NG::CalcLength(right.value().IsNonNegative() ? right.value() : CalcDimension());
+        }
+    }
+
+    return paddings;
 }
 
 void JSCalendarPicker::ParseSelectedDateObject(const JSCallbackInfo& info, const JSRef<JSObject>& selectedObject)
@@ -130,27 +282,7 @@ void JSCalendarPicker::ParseSelectedDateObject(const JSCallbackInfo& info, const
     auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
-        auto selectedJson = JsonUtil::ParseJsonString(info);
-        if (!selectedJson || selectedJson->IsNull()) {
-            return;
-        }
-
-        std::tm dateTime = { 0 };
-        auto year = selectedJson->GetValue("year");
-        if (year && year->IsNumber()) {
-            dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
-        }
-        auto month = selectedJson->GetValue("month");
-        if (month && month->IsNumber()) {
-            dateTime.tm_mon = month->GetInt();
-        }
-        auto day = selectedJson->GetValue("day");
-        if (day && day->IsNumber()) {
-            dateTime.tm_mday = day->GetInt();
-        }
-
-        auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
-        auto dateObj = JSDate::New(milliseconds);
+        auto dateObj = JSDate::New(GetMSByDate(info));
         func->ExecuteJS(1, &dateObj);
     };
     CalendarPickerModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
@@ -286,9 +418,9 @@ std::map<std::string, NG::DialogEvent> JSCalendarPickerDialog::ChangeDialogEvent
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onChange));
         auto changeId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "year", "month", "day" };
             ACE_SCORING_EVENT("CalendarDialog.onChange");
-            func->Execute(keys, info);
+            auto dateObj = JSDate::New(GetMSByDate(info));
+            func->ExecuteJS(1, &dateObj);
         };
         dialogEvent["changeId"] = changeId;
     }
@@ -297,9 +429,9 @@ std::map<std::string, NG::DialogEvent> JSCalendarPickerDialog::ChangeDialogEvent
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAccept));
         auto acceptId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            std::vector<std::string> keys = { "year", "month", "day" };
             ACE_SCORING_EVENT("CalendarDialog.onAccept");
-            func->Execute(keys, info);
+            auto dateObj = JSDate::New(GetMSByDate(info));
+            func->ExecuteJS(1, &dateObj);
         };
         dialogEvent["acceptId"] = acceptId;
     }

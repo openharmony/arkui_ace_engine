@@ -45,8 +45,10 @@ enum class MenuType {
 
     // ----- special menu used in other components ------
     NAVIGATION_MENU,               // menu used in a Navigation component
-    SELECT_OVERLAY_EXTENSION_MENU, // menu used in SelectOverlay Extension of text component
-    RICH_EDIT_SELECT_MENU,         // menu used in Rich Editor component
+    SELECT_OVERLAY_EXTENSION_MENU, // menu used in SelectOverlay Extension of text component,skip menu layout algorithm
+                                   // also used in custom long press menu
+    SELECT_OVERLAY_CUSTOM_MENU,    // menu used in SelectOverlay for right click
+                                   // click menu item whill not trigger close menu
 };
 
 class MenuPattern : public Pattern {
@@ -125,9 +127,9 @@ public:
         return type_ == MenuType::SELECT_OVERLAY_EXTENSION_MENU;
     }
 
-    bool IsRichEditorSelectMenu() const
+    bool IsSelectOverlayCustomMenu() const
     {
-        return type_ == MenuType::RICH_EDIT_SELECT_MENU;
+        return type_ == MenuType::SELECT_OVERLAY_CUSTOM_MENU;
     }
 
     void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)

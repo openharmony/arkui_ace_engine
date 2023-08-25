@@ -27,15 +27,6 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
     isHided_ = true;
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    for (auto subMenuId : subMenuIds_) {
-        LOGI("MenuWrapperPattern::HideMenu subMenu id is %{public}d", subMenuId);
-        overlayManager->HideMenu(subMenuId);
-    }
-
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     LOGI("MenuWrapperPattern closing menu %{public}d", targetId_);
@@ -170,7 +161,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
 
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (IsContextMenu() || IsRichEditorSelectMenu()) {
+    if (IsContextMenu()) {
         SetHotAreas(dirty);
     }
     if (isFirstShow_) {
@@ -183,7 +174,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    if (layoutWrapper->GetAllChildrenWithBuild().empty() || (!IsContextMenu() && !IsRichEditorSelectMenu())) {
+    if (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) {
         return;
     }
     auto layoutProps = layoutWrapper->GetLayoutProperty();

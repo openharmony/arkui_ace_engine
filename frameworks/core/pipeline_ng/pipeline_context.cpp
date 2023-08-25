@@ -338,14 +338,6 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
     needRenderNode_.insert(node);
 }
 
-void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange)
-{
-    LOGI("NotifyConfigurationChange");
-    auto rootNode = GetRootElement();
-    rootNode->UpdateConfigurationUpdate(configurationChange);
-    PipelineBase::NotifyConfigurationChange(configurationChange);
-}
-
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
@@ -773,37 +765,17 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    AnimationOption option;
-    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
-    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), systemSafeArea]() {
-        auto pipeline = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pipeline);
-        auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID_NOLOG(safeAreaManager);
-        if (safeAreaManager->UpdateSystemSafeArea(systemSafeArea)) {
-            pipeline->SyncSafeArea();
-            pipeline->FlushUITasks();
-        }
-    });
+    if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
+        AnimateOnSafeAreaUpdate();
+    }
 }
 
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 {
     CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
-    AnimationOption option;
-    CHECK_NULL_VOID_NOLOG(safeAreaManager_);
-    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
-    AnimationUtils::Animate(option, [weak = WeakClaim(this), cutoutSafeArea]() {
-        auto pipeline = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pipeline);
-        auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID_NOLOG(safeAreaManager);
-        if (safeAreaManager->UpdateCutoutSafeArea(cutoutSafeArea)) {
-            pipeline->SyncSafeArea();
-            pipeline->FlushUITasks();
-        }
-    });
+    if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
+        AnimateOnSafeAreaUpdate();
+    }
 }
 
 void PipelineContext::SetIgnoreViewSafeArea(bool value)
@@ -1690,16 +1662,20 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     containerPattern->SetAppIcon(icon);
 }
 
-void PipelineContext::FlushReload()
+void PipelineContext::FlushReload(const OnConfigurationChange& configurationChange)
 {
     LOGI("PipelineContext::FlushReload.");
     AnimationOption option;
     const int32_t duration = 400;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        if (configurationChange.IsNeedUpdate()) {
+            auto rootNode = pipeline->GetRootElement();
+            rootNode->UpdateConfigurationUpdate(configurationChange);
+        }
         CHECK_NULL_VOID(pipeline->stageManager_);
         pipeline->SetIsReloading(true);
         pipeline->stageManager_->ReloadStage();
@@ -2035,5 +2011,19 @@ void PipelineContext::SetCloseButtonStatus(bool isEnabled)
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SetCloseButtonStatus(isEnabled);
+}
+
+void PipelineContext::AnimateOnSafeAreaUpdate()
+{
+    // complete other layout tasks before animation
+    FlushUITasks();
+    AnimationOption option;
+    option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(self);
+        self->SyncSafeArea();
+        self->FlushUITasks();
+    });
 }
 } // namespace OHOS::Ace::NG

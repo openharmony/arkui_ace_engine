@@ -74,7 +74,7 @@ ohos_unittest("ImageCacheTest") {
   deps = [
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",
@@ -149,7 +149,7 @@ ohos_unittest("ImageProviderTest") {
   deps = [
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",
@@ -194,7 +194,7 @@ ohos_unittest("ImageCompressorTest") {
   deps = [
     "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
+    "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "$ace_root/frameworks/base/resource:ace_resource",
     "//third_party/googletest:gtest_main",

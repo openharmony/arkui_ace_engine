@@ -131,6 +131,13 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto columnEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(columnEventHub);
+    RefPtr<TouchEventImpl> touchListener = CreateItemTouchEventListener();
+    CHECK_NULL_VOID(touchListener);
+    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(columnGesture);
+    columnGesture->AddTouchEvent(touchListener);
     CHECK_NULL_VOID_NOLOG(GetToss());
     auto toss = GetToss();
     auto childSize = static_cast<int32_t>(host->GetChildren().size());
@@ -156,24 +163,15 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
             pattern->OnTouchDown();
-            if (toss->GetTossNodeAnimation()) {
-                toss->StopTossAnimation();
-            }
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
             pattern->OnTouchUp();
             pattern->SetLocalDownDistance(0.0f);
-            auto isToss = pattern->GetTossStatus();
-            if (isToss == true) {
-                pattern->PlayRestAnimation();
-                pattern->SetTossStatus(false);
-            }
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
             if (std::abs(info.GetTouches().front().GetLocalLocation().GetDistance() - pattern->GetLocalDownDistance()) >
                 MOVE_DISTANCE) {
                 pattern->OnTouchUp();
-                pattern->SetTossStatus(false);
             }
         }
     };
@@ -196,6 +194,39 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
             gesture->AddClickEvent(clickListener);
         }
     }
+}
+
+RefPtr<TouchEventImpl> DatePickerColumnPattern::CreateItemTouchEventListener()
+{
+    auto toss = GetToss();
+    CHECK_NULL_RETURN(toss, nullptr);
+    auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto isToss = pattern->GetTossStatus();
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            if (isToss == true) {
+                pattern->touchBreak_ = true;
+                pattern->animationBreak_ = true;
+                pattern->clickBreak_ = true;
+                auto TossEndPosition = toss->GetTossEndPosition();
+                pattern->SetYLast(TossEndPosition);
+                toss->StopTossAnimation();
+            } else {
+                pattern->animationBreak_ = false;
+                pattern->clickBreak_ = false;
+            }
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            pattern->touchBreak_ = false;
+            if (pattern->animationBreak_ == true) {
+                pattern->PlayRestAnimation();
+                pattern->yOffset_ = 0.0;
+            }
+        }
+    };
+    auto listener = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    return listener;
 }
 
 void DatePickerColumnPattern::HandleMouseEvent(bool isHover)
@@ -313,7 +344,6 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(index, showOptionCount, textLayoutProperty, dataPickerRowLayoutProperty);
         }
@@ -459,6 +489,14 @@ void DatePickerColumnPattern::AddAnimationTextProperties(
 {
     DateTextProperties properties;
     if (textLayoutProperty->HasFontSize()) {
+        MeasureContext measureContext;
+        measureContext.textContent = MEASURE_SIZE_STRING;
+        measureContext.fontSize = textLayoutProperty->GetFontSize().value();
+        auto size = MeasureUtil::MeasureTextSize(measureContext);
+        if (!optionProperties_.empty()) {
+            optionProperties_[currentIndex].fontheight = size.Height();
+        }
+        SetOptionShiftDistance();
         properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
     }
     if (textLayoutProperty->HasTextColor()) {
@@ -565,10 +603,10 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
             textLayoutProperty->UpdateFontWeight(CandidateWeight_);
         }
     }
-    Dimension updateSize = LinearFontSize(startFontSize, endFontSize, scale);
+    Dimension updateSize = LinearFontSize(startFontSize, endFontSize, distancePercent_);
     textLayoutProperty->UpdateFontSize(updateSize);
     auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
-    Color updateColor = colorEvaluator->Evaluate(startColor, endColor, scale);
+    Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
         if (index == midIndex) {
@@ -675,6 +713,7 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             return;
         }
+        pattern->SetMainVelocity(info.GetMainVelocity());
         pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
@@ -706,6 +745,7 @@ void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 
 void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
+    animationBreak_ = false;
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
@@ -828,14 +868,14 @@ void DatePickerColumnPattern::ScrollOption(double delta, bool isJump)
     DatePickerScrollDirection dir = delta > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
     auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
                                                                 : optionProperties_[midIndex].nextDistance;
-    auto distancePercent = delta / shiftDistance;
+    distancePercent_ = delta / shiftDistance;
     auto textThresHold = optionProperties_[midIndex].height / 4; // ux required
     auto textLinearPercent = 0.0;
     if (std::abs(delta) > textThresHold) {
         textLinearPercent = (std::abs(delta) - textThresHold) / (std::abs(shiftDistance) - textThresHold);
     }
     UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), textLinearPercent);
-    CalcAlgorithmOffset(dir, distancePercent);
+    CalcAlgorithmOffset(dir, distancePercent_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -858,13 +898,26 @@ void DatePickerColumnPattern::CalcAlgorithmOffset(DatePickerScrollDirection dir,
     for (uint32_t i = 0; i < counts; i++) {
         auto distance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[i].prevDistance
                                                                : optionProperties_[i].nextDistance;
-        algorithmOffset_.emplace_back(distance * distancePercent);
+        algorithmOffset_.emplace_back(static_cast<int32_t>(distance * distancePercent));
     }
 }
 
 void DatePickerColumnPattern::UpdateToss(double offsetY)
 {
     UpdateColumnChildPosition(offsetY);
+}
+
+void DatePickerColumnPattern::UpdateFinishToss(double offsetY)
+{
+    int32_t dragDelta = offsetY - yLast_;
+    if (!CanMove(LessNotEqual(dragDelta, 0))) {
+        return;
+    }
+    auto midIndex = GetShowCount() / 2;
+    TimePickerScrollDirection dir = dragDelta > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
+    auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
+                                                                : optionProperties_[midIndex].nextDistance;
+    ScrollOption(shiftDistance);
 }
 
 void DatePickerColumnPattern::TossStoped()
@@ -876,7 +929,6 @@ void DatePickerColumnPattern::TossStoped()
 
 void DatePickerColumnPattern::TossAnimationStoped()
 {
-    yOffset_ = 0.0;
     yLast_ = 0.0;
 }
 
@@ -940,9 +992,10 @@ float DatePickerColumnPattern::GetShiftDistance(uint32_t index, DatePickerScroll
             }
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_3:
-            val = optionProperties_[index].height / MINDDLE_CHILD_INDEX + optionProperties_[nextIndex].height -
-                  optionProperties_[nextIndex].fontheight / MINDDLE_CHILD_INDEX;
+            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MINDDLE_CHILD_INDEX +
+                  optionProperties_[nextIndex].height;
             distance = (dir == DatePickerScrollDirection::DOWN) ? val : (0.0f - val);
+            distance = std::floor(distance);
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_4:
             if (dir == DatePickerScrollDirection::DOWN) {
@@ -1000,9 +1053,10 @@ float DatePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, Date
             }
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_1:
-            val = optionProperties_[index].height / MINDDLE_CHILD_INDEX + optionProperties_[nextIndex].height -
-                  optionProperties_[nextIndex].fontheight / MINDDLE_CHILD_INDEX;
+            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MINDDLE_CHILD_INDEX +
+                  optionProperties_[nextIndex].height;
             distance = (dir == DatePickerScrollDirection::DOWN) ? val : (0.0f - val);
+            distance = std::floor(distance);
             break;
         case DatePickerOptionIndex::COLUMN_INDEX_2: // last
             if (dir == DatePickerScrollDirection::DOWN) {
@@ -1043,6 +1097,7 @@ void DatePickerColumnPattern::SetOptionShiftDistance()
 void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
+    yLast_ = offsetY;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
     }
@@ -1059,7 +1114,6 @@ void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     }
     // update selected option
     ScrollOption(dragDelta);
-    yLast_ = offsetY;
     offsetCurSet_ = dragDelta;
     yOffset_ = dragDelta;
 }
@@ -1144,10 +1198,8 @@ RefPtr<ClickEvent> DatePickerColumnPattern::CreateItemClickEventListener(RefPtr<
 
 void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> param)
 {
-    CHECK_NULL_VOID_NOLOG(GetToss());
-    auto toss = GetToss();
-    if (toss->GetTossNodeAnimation()) {
-        toss->StopTossAnimation();
+    if (clickBreak_) {
+        return;
     }
     int32_t middleIndex = GetShowCount() / 2;
     int32_t step = param->itemIndex_ - middleIndex;

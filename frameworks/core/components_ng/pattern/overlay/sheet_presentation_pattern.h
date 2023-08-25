@@ -60,7 +60,7 @@ public:
         return MakeRefPtr<SheetPresentationProperty>();
     }
 
-    int32_t GetTargetId() const
+    int32_t GetTargetId() const override
     {
         return targetId_;
     }

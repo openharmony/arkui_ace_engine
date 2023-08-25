@@ -41,6 +41,7 @@ public:
     void SetTextColor(const Color& value);
     void SetTextShadow(const std::vector<Shadow>& value);
     void SetTextDecoration(const TextDecoration& value);
+    void SetTextDecorationStyle(const TextDecorationStyle value);
     void SetTextDecorationColor(const Color& value);
     void SetBaselineOffset(const Dimension& value);
     void SetContentOffset(OffsetF& value);
@@ -134,6 +135,7 @@ private:
 
     float oldColorAlpha_ { 0.0f };
     std::optional<TextDecoration> textDecoration_;
+    std::optional<TextDecorationStyle> textDecorationStyle_;
     std::optional<Color> textDecorationColor_;
     RefPtr<AnimatablePropertyFloat> textDecorationColorAlpha_;
     bool textDecorationAnimatable_ { false };

@@ -521,7 +521,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      * @tc.expected: step2. IsMediaPlayerValid will be called two times
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(2)
+        .Times(3)
         .WillRepeatedly(Return(false));
     pattern->UpdateMediaPlayerOnBg();
 
@@ -531,7 +531,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      * @tc.expected: step3. IsMediaPlayerValid will be called 4 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(4)
+        .Times(3)
         .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayerOnBg();
 
@@ -554,7 +554,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      * @tc.expected: step5. IsMediaPlayerValid will be called 4 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(5)
+        .Times(3)
         .WillRepeatedly(Return(true));
     pattern->UpdateMediaPlayerOnBg();
 
@@ -741,7 +741,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     auto flag = playBtnGestureEventHub->ActClick();
     EXPECT_TRUE(flag);
     // case2: MediaPlayer is valid & isPlaying = true
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Pause()).Times(1).WillOnce(Return(0));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Pause()).Times(2).WillOnce(Return(0));
     flag = playBtnGestureEventHub->ActClick();
     EXPECT_TRUE(flag);
     // case3: MediaPlayer is valid & isPlaying = false
@@ -1267,7 +1267,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest017, TestSize.Level1)
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     videoPattern->renderContextForMediaPlayer_ = mockRenderContext;
-    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(videoPattern->renderContextForMediaPlayer_))),
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(videoPattern->renderContextForMediaPlayer_),
         SetBounds(0.0f, 0.0f, SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL))
         .WillOnce(Return());
 

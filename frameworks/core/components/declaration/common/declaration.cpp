@@ -3082,7 +3082,7 @@ void Declaration::SetBackgroundImagePosition(const std::string& value, Declarati
     declaration.hasDecorationStyle_ = true;
 }
 
-void Declaration::BindPipelineContext(const WeakPtr<PipelineContext>& pipelineContext)
+void Declaration::BindPipelineContext(const WeakPtr<PipelineBase>& pipelineContext)
 {
     pipelineContext_ = pipelineContext;
 }

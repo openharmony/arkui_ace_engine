@@ -19,6 +19,7 @@ import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 # declarative frontend source
 template("declarative_frontend") {
   forward_variables_from(invoker, "*")
+  platform = invoker.platform
 
   ohos_source_set(target_name) {
     subsystem_name = ace_engine_subsystem
@@ -26,7 +27,7 @@ template("declarative_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
 
-    if (enable_ng_build) {
+    if (platform == "ohos_ng") {
       sources = [
         "ng/declarative_frontend_ng.cpp",
         "ng/frontend_delegate_declarative_ng.cpp",
@@ -45,6 +46,7 @@ template("declarative_frontend") {
 }
 
 foreach(item, ace_platforms) {
+  platform = item.name
   declarative_frontend("declarative_frontend_" + item.name) {
     defines = []
     config = {
@@ -381,11 +383,6 @@ template("declarative_js_engine") {
       "jsview/models/water_flow_model_impl.cpp",
     ]
 
-    if (defined(config.model_component_support) &&
-        config.model_component_support) {
-      sources += [ "jsview/models/model_view_impl.cpp" ]
-    }
-
     external_deps = []
     if (defined(config.enable_drag_framework) && config.enable_drag_framework &&
         defined(global_parts_info.distributeddatamgr_udmf)) {
@@ -504,7 +501,7 @@ template("declarative_js_engine") {
       sources += [
         "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
       ]
-      deps += [ "$ace_root/build:libace" ]
+      deps += [ "$ace_root/build:libace_compatible" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
         if (is_cross_platform_build) {
@@ -617,8 +614,10 @@ template("declarative_js_engine_ng") {
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
       "sharedata/js_share_data.cpp",
+      "view_stack_processor.cpp",
 
       # jsviews
+      "interfaces/profiler/js_profiler.cpp",
       "jsview/action_sheet/js_action_sheet.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
@@ -673,6 +672,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
       "jsview/js_loading_progress.cpp",
+      "jsview/js_location_button.cpp",
       "jsview/js_marquee.cpp",
       "jsview/js_matrix2d.cpp",
       "jsview/js_menu.cpp",
@@ -686,6 +686,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_offscreen_canvas.cpp",
       "jsview/js_offscreen_rendering_context.cpp",
       "jsview/js_page_transition.cpp",
+      "jsview/js_paste_button.cpp",
       "jsview/js_path.cpp",
       "jsview/js_path2d.cpp",
       "jsview/js_polygon.cpp",
@@ -699,12 +700,15 @@ template("declarative_js_engine_ng") {
       "jsview/js_render_image.cpp",
       "jsview/js_rendering_context.cpp",
       "jsview/js_rendering_context_settings.cpp",
+      "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
+      "jsview/js_save_button.cpp",
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
+      "jsview/js_sec_button_base.cpp",
       "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
@@ -733,12 +737,14 @@ template("declarative_js_engine_ng") {
       "jsview/js_view_context.cpp",
       "jsview/js_water_flow.cpp",
       "jsview/js_water_flow_item.cpp",
+      "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
     ]
 
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
+    external_deps = []
 
     if (!defined(config.use_components_lib) || !config.use_components_lib) {
       sources += [
@@ -754,6 +760,10 @@ template("declarative_js_engine_ng") {
         "jsview/js_video.cpp",
         "jsview/js_video_controller.cpp",
       ]
+      if (defined(config.video_support_jsstack) &&
+          config.video_support_jsstack) {
+        external_deps += [ "hiview:libxpower_event_js" ]
+      }
     }
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
@@ -771,6 +781,11 @@ template("declarative_js_engine_ng") {
         "jsview/js_ability_component.cpp",
         "jsview/js_ability_component_controller.cpp",
       ]
+
+      external_deps += [
+        "input:libmmi-client",
+        "window_manager:scene_session",
+      ]
     }
 
     if (defined(config.form_components_support) &&
@@ -785,7 +800,11 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      sources += [ "jsview/js_richtext.cpp" ]
+      sources += [
+        "jsview/js_richtext.cpp",
+        "jsview/js_web.cpp",
+        "jsview/js_web_controller.cpp",
+      ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -797,6 +816,14 @@ template("declarative_js_engine_ng") {
       sources += [
         "jsview/js_xcomponent.cpp",
         "jsview/js_xcomponent_controller.cpp",
+      ]
+    }
+
+    if (defined(config.effect_component_support) &&
+        config.effect_component_support) {
+      sources += [
+        "jsview/js_effect_component.cpp",
+        #"jsview/models/effect_component_model_impl.cpp",
       ]
     }
 
@@ -818,7 +845,6 @@ template("declarative_js_engine_ng") {
     }
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
-    external_deps = []
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
@@ -845,6 +871,13 @@ template("declarative_js_engine_ng") {
       external_deps += [
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
+      ]
+    }
+
+    if (!use_mingw_win && !use_mac && !use_linux) {
+      external_deps += [
+        "image_framework:image",
+        "image_framework:image_native",
       ]
     }
   }

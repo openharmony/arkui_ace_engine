@@ -23,7 +23,6 @@
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -34,6 +33,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -50,7 +50,7 @@ namespace {
 constexpr int32_t PAN_FINGER = 1;
 constexpr double PAN_DISTANCE = 5.0;
 constexpr int32_t LONG_PRESS_DURATION = 500;
-constexpr int32_t PREVIEW_LONG_PRESS_RECONGNIZER = 780;
+constexpr int32_t PREVIEW_LONG_PRESS_RECONGNIZER = 800;
 #ifdef ENABLE_DRAG_FRAMEWORK
 constexpr Dimension FILTER_VALUE(0.0f);
 constexpr Dimension FILTER_RADIUS(100.0f);
@@ -129,6 +129,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto renderContext = frameNode->GetRenderContext();
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
+                auto pattern = frameNode->GetPattern<TextBase>();
+                CHECK_NULL_VOID(pattern);
+                frameNode->SetDraggable(isTextReceivedLongPress_);
                 if (gestureHub->GetIsTextDraggable()) {
                     HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 }
@@ -147,9 +150,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
 
         if (info.GetSourceDevice() == SourceType::MOUSE) {
-            auto pattern = frameNode->GetPattern<TextFieldPattern>();
+            auto pattern = frameNode->GetPattern<TextBase>();
             if (gestureHub->GetTextDraggable() && pattern) {
-                if (!pattern->InSelectMode() || pattern->GetMouseStatus() == MouseStatus::MOVE) {
+                if (!pattern->IsSelected() || pattern->GetMouseStatus() == MouseStatus::MOVE) {
                     frameNode->SetDraggable(false);
                     return;
                 }
@@ -182,16 +185,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto&& callback = [weakPtr = gestureEventHub_, weak = WeakClaim(this)]() {
             auto gestureHub = weakPtr.Upgrade();
             CHECK_NULL_VOID(gestureHub);
-            if (gestureHub->GetTextDraggable() && !gestureHub->IsTextField()) {
-                auto actuator = weak.Upgrade();
-                CHECK_NULL_VOID(actuator);
-                actuator->GetTextPixelMap(true);
-                return;
-            }
             std::shared_ptr<Media::PixelMap> pixelMap;
             auto frameNode = gestureHub->GetFrameNode();
             CHECK_NULL_VOID(frameNode);
-            if (gestureHub->GetTextDraggable() && gestureHub->IsTextField()) {
+            if (gestureHub->GetTextDraggable()) {
                 auto pattern = frameNode->GetPattern<TextDragBase>();
                 CHECK_NULL_VOID(pattern);
                 auto dragNode = pattern->MoveDragNode();
@@ -347,8 +344,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
 #ifdef ENABLE_DRAG_FRAMEWORK
-    auto isText = gestureHub->GetTextDraggable() && !gestureHub->IsTextField();
-    if (touchRestrict.sourceType == SourceType::MOUSE && !isText) {
+    if (touchRestrict.sourceType == SourceType::MOUSE) {
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
         SequencedRecognizer_->RemainChildOnResetStatus();
@@ -372,12 +368,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
-        bool isAllowedDrag = actuator->IsAllowedDrag();
-        if (!isAllowedDrag) {
-            actuator->longPressInfo_ = info;
-            actuator->isReceivedLongPress_ = true;
-            return;
-        }
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         if (gestureHub->GetTextDraggable()) {
@@ -385,33 +375,41 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             if (gestureHub->GetIsTextDraggable()) {
                 actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
             }
-        } else {
-            actuator->SetFilter(actuator);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto manager = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID(manager);
-            actuator->SetIsNotInPreviewState(false);
-            actuator->SetPixelMap(actuator);
-            auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_RESPONSE, SPRING_DAMPING_FRACTION, 0);
-            auto column = manager->GetPixelMapNode();
-            CHECK_NULL_VOID(column);
-
-            auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
-            CHECK_NULL_VOID(imageNode);
-            auto imageContext = imageNode->GetRenderContext();
-            CHECK_NULL_VOID(imageContext);
-            AnimationOption option;
-            option.SetDuration(PIXELMAP_ANIMATION_TIME);
-            option.SetCurve(motion);
-            AnimationUtils::Animate(
-                option,
-                [imageContext]() {
-                    imageContext->UpdateTransformScale({ PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE });
-                },
-                option.GetOnFinishEvent());
-            actuator->SetEventColumn(actuator);
+            return;
         }
+
+        bool isAllowedDrag = actuator->IsAllowedDrag();
+        if (!isAllowedDrag) {
+            actuator->longPressInfo_ = info;
+            actuator->isReceivedLongPress_ = true;
+            return;
+        }
+
+        actuator->SetFilter(actuator);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto manager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(manager);
+        actuator->SetIsNotInPreviewState(false);
+        actuator->SetPixelMap(actuator);
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_RESPONSE, SPRING_DAMPING_FRACTION, 0);
+        auto column = manager->GetPixelMapNode();
+        CHECK_NULL_VOID(column);
+
+        auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
+        CHECK_NULL_VOID(imageNode);
+        auto imageContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageContext);
+        AnimationOption option;
+        option.SetDuration(PIXELMAP_ANIMATION_TIME);
+        option.SetCurve(motion);
+        AnimationUtils::Animate(
+            option,
+            [imageContext]() {
+                imageContext->UpdateTransformScale({ PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE });
+            },
+            option.GetOnFinishEvent());
+        actuator->SetEventColumn(actuator);
     };
     longPressUpdate_ = longPressUpdate;
     previewLongPressRecognizer_->SetOnAction(longPressUpdate);
@@ -777,8 +775,10 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextDragBase>();
+    auto textBase = frameNode->GetPattern<TextBase>();
     CHECK_NULL_VOID(pattern);
-    if (!pattern->BetweenSelectedPosition(globalLocation)) {
+    CHECK_NULL_VOID(textBase);
+    if (!textBase->BetweenSelectedPosition(globalLocation)) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGW("Position is between selected position, stop set text animation.");
         }
@@ -799,6 +799,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
     manager->MountPixelMapToRootNode(columnNode);
     auto modifier = dragNode->GetPattern<TextDragPattern>()->GetOverlayModifier();
     modifier->StartAnimate();
+    isTextReceivedLongPress_ = true;
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("DragEvent set text animation success.");
     }

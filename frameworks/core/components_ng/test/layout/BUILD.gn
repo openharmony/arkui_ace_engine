@@ -18,5 +18,6 @@ group("layout_unittest") {
     "layout_property:layout_property_test_ng",
     "layout_wrapper:layout_wrapper_test_ng",
     "layout_wrapper_builder:layout_wrapper_build_test_ng",
+    "layout_wrapper_node:layout_wrapper_node_test_ng",
   ]
 }

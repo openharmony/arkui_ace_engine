@@ -22,6 +22,7 @@
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
@@ -129,7 +130,8 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto searchPattern = AceType::DynamicCast<SearchPattern>(frameNode->GetPattern());
     ASSERT_NE(searchPattern, nullptr);
-    auto searchLayoutAlgorithm = searchPattern->CreateLayoutAlgorithm();
+    auto searchLayoutAlgorithm =
+        AccessibilityManager::DynamicCast<SearchLayoutAlgorithm>(searchPattern->CreateLayoutAlgorithm());
     ASSERT_NE(searchLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(searchLayoutAlgorithm));
 
@@ -222,6 +224,18 @@ HWTEST_F(SearchTestNg, Measure001, TestSize.Level1)
     searchLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_LT(geometryNode->GetFrameSize().Height(), searchButtonHeight);
     EXPECT_GE(geometryNode->GetFrameSize().Height(), cancelButtonSize);
+
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
+    searchTheme->iconHeight_ = 24.0_px;
+    searchTheme->height_ = 60.0_px;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(searchTheme));
+    searchLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(
+        PaddingProperty({ CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(20.0f) }));
+    searchLayoutAlgorithm->searchIconSizeMeasure_ = SizeF(24.0f, 24.0f);
+    searchLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
     double searchHeight = 100;
     LayoutConstraintVaildSize.selfIdealSize.SetHeight(searchHeight);
@@ -1176,6 +1190,76 @@ HWTEST_F(SearchTestNg, PaintMethodTest002, TestSize.Level1)
     auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), false);
     auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
     canvasDrawFunction(rsCanvas);
+}
+
+/**
+ * @tc.name: PaintMethodTest003
+ * @tc.desc: GetContentDrawFunction, PaintSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, PaintMethodTest003, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 10.0f, 0.0f }));
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    Testing::MockCanvas rsCanvas;
+    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
+    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
+
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    canvasDrawFunction(rsCanvas);
+}
+
+/**
+ * @tc.name: PaintMethodTest004
+ * @tc.desc: GetContentDrawFunction, PaintSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, PaintMethodTest004, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
+    searchTheme->iconHeight_ = 24.0_px;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(searchTheme));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 0.0f, 20.0f }));
+    geometryNode->SetFrameSize(SizeF(200.0f, 60.0f));
+    auto paintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    Testing::MockCanvas rsCanvas;
+    auto searchPaintMethod = AceType::MakeRefPtr<SearchPaintMethod>(SizeF(80, 20), std::string("search"), true);
+    auto canvasDrawFunction = searchPaintMethod->GetContentDrawFunction(paintWrapper);
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    canvasDrawFunction(rsCanvas);
+
+    paintWrapper->GetGeometryNode()->UpdatePaddingWithBorder(PaddingPropertyF({ 0.0f, 0.0f, 20.0f, 0.0f }));
+    auto canvasDrawFunction2 = searchPaintMethod->GetContentDrawFunction(paintWrapper);
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    canvasDrawFunction2(rsCanvas);
 }
 
 /**

@@ -39,6 +39,8 @@ void TextFieldPattern::InitEditingValueText(std::string content)
 
 void TextFieldPattern::SearchRequestKeyboard() {}
 
+void TextFieldPattern::BeforeCreateLayoutWrapper() {}
+
 void TextFieldPattern::InitCaretPosition(std::string content)
 {
     textEditingValue_.caretPosition = static_cast<int32_t>(StringUtils::ToWstring(content).length());
@@ -128,6 +130,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info) {}
 
 void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard) {}
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent) {}
+void TextFieldPattern::UpdateInputFilterErrorText(const std::string& errorText) {}
 int32_t TextFieldPattern::ConvertTouchOffsetToCaretPosition(const Offset& localOffset)
 {
     return {};
@@ -156,4 +159,5 @@ bool TextFieldPattern::CloseCustomKeyboard()
     return true;
 }
 void TextFieldPattern::DumpInfo() {}
+void TextFieldPattern::OnColorConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG

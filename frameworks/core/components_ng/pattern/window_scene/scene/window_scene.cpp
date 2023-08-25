@@ -127,28 +127,28 @@ void WindowScene::OnBoundsSizeChanged(const Rosen::Vector4f& bounds)
 
 void WindowScene::BufferAvailableCallback()
 {
-    const auto& config =
-        Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
-    if (config.enabled_) {
-        CHECK_NULL_VOID(startingNode_);
-        auto context = AceType::DynamicCast<RosenRenderContext>(startingNode_->GetRenderContext());
-        CHECK_NULL_VOID(context);
-        auto rsNode = context->GetRSNode();
-        CHECK_NULL_VOID(rsNode);
-        auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
-        rsNode->SetTransitionEffect(effect);
-        Rosen::RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(config.duration_);
-        auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
-            Rosen::RSAnimationTimingCurve::DEFAULT;
-        Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
-            rsNode->NotifyTransition(effect, false);
-        });
-    }
-
     auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
+
+        const auto& config =
+            Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
+        if (config.enabled_) {
+            CHECK_NULL_VOID(self->startingNode_);
+            auto context = AceType::DynamicCast<RosenRenderContext>(self->startingNode_->GetRenderContext());
+            CHECK_NULL_VOID(context);
+            auto rsNode = context->GetRSNode();
+            CHECK_NULL_VOID(rsNode);
+            auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
+            rsNode->SetTransitionEffect(effect);
+            Rosen::RSAnimationTimingProtocol protocol;
+            protocol.SetDuration(config.duration_);
+            auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
+                Rosen::RSAnimationTimingCurve::DEFAULT;
+            Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
+                rsNode->NotifyTransition(effect, false);
+            });
+        }
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
@@ -180,6 +180,18 @@ void WindowScene::OnActivation()
             self->contentNode_.Reset();
             self->snapshotNode_.Reset();
             self->OnAttachToFrameNode();
+            return;
+        }
+
+        if (self->session_ && self->session_->GetShowRecent() &&
+            self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotNode_) {
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->RemoveChild(self->snapshotNode_);
+            self->snapshotNode_.Reset();
+            self->CreateStartingNode();
+            host->AddChild(self->startingNode_);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
 

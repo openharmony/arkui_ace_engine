@@ -834,6 +834,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest019, TestSize.Level1)
     ViewAbstract::SetSharedTransition("", nullptr);
     ViewAbstract::SetSphericalEffect(RATIO);
     ViewAbstract::SetLightUpEffect(RATIO);
+    ViewAbstract::SetUseEffect(false);
+    ViewAbstract::SetRenderGroup(false);
+    ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
 
     /**
      * @tc.expected: Return expected results.
@@ -871,6 +874,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest020, TestSize.Level1)
     ViewAbstract::SetSphericalEffect(RATIO);
     ViewAbstract::SetLightUpEffect(RATIO);
     ViewAbstract::SetDraggable(false);
+    ViewAbstract::SetUseEffect(false);
+    ViewAbstract::SetRenderGroup(false);
+    ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
 
     /**
      * @tc.expected: Return expected results.
@@ -1618,7 +1624,17 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest039, TestSize.Level1)
      */
     bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
     viewAbstract.SetClickEffectLevel(ClickEffectLevel::LIGHT, 1.0f);
+    ViewAbstract::ResetMinSize(true);
     EXPECT_FALSE(result);
+    /**
+     * @tc.steps: step3. visualState_ is null.
+     * @tc.expected: result is true.
+     */
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
+    viewAbstract.SetClickEffectLevel(ClickEffectLevel::LIGHT, 1.0f);
+    ViewAbstract::ResetMinSize(true);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -1685,6 +1701,89 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     mouseInfo.SetAction(MouseAction::RELEASE);
     inputHub->showMenu_->onMouseCallback_(mouseInfo);
     EXPECT_TRUE(mouseInfo.IsStopPropagation());
+
+    /**
+     * @tc.steps: step5. create mouseInfo, set right param and call BindMenuWithCustomNode;
+     * @tc.expected: StopPropagation in mouseInfo is true.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    PipelineBase::GetCurrentContext()->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> targetNode =
+        FrameNode::CreateFrameNode("targetNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    std::vector<OptionParam> param;
+    ViewAbstract::BindMenuWithItems(std::move(param), targetNode, OFFSETF, menuParam);
+    ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, MenuType::MULTI_MENU, OFFSETF, menuParam);
+    EXPECT_TRUE(mouseInfo.IsStopPropagation());
+    param.push_back(OptionParam());
+    ViewAbstract::BindMenuWithItems(std::move(param), targetNode, OFFSETF, menuParam);
+    ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, MenuType::CONTEXT_MENU, OFFSETF, menuParam);
+    EXPECT_TRUE(mouseInfo.IsStopPropagation());
+}
+
+/**
+ * @tc.name: ViewAbstractTest041
+ * @tc.desc: Test the BindMenu and BindContextMenu of ViewAbstractModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat frameNode and other creat.
+     */
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> frameNode =
+        FrameNode::CreateFrameNode("frameNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CalcSize idealSize = { CalcLength(ZERO), CalcLength(ZERO) };
+    layoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutProperty->calcLayoutConstraint_->minSize = idealSize;
+    layoutProperty->calcLayoutConstraint_->maxSize = idealSize;
+    EffectOption option;
+    Color color = Color::TRANSPARENT;
+    option.color = color;
+
+    std::vector<std::pair<float, float>> fractionStops;
+    fractionStops.push_back(std::pair<float, float>(0.0f, 1.0f));
+    CalcDimension dimensionRadius(0.0);
+    LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, GradientDirection::LEFT);
+    /**
+     * @tc.steps: step2. ResetMinSize test, IsCurrentVisualStateProcess() == false
+     * @tc.expected:call ResetMinSize(),calcLayoutConstraint_ not change
+     */
+    ViewStackProcessor::GetInstance()->SetVisualState(VisualState::DISABLED);
+    ViewAbstract::ResetMinSize(true);
+    ViewAbstract::ResetMaxSize(true);
+    ViewAbstract::SetBackgroundAlign(Alignment::TOP_LEFT);
+    ViewAbstract::SetBackgroundEffect(option);
+    ViewAbstract::SetDynamicLightUp(0, 0);
+    ViewAbstract::SetLinearGradientBlur(blurPara);
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->minSize.has_value());
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->maxSize.has_value());
+
+    /**
+     * @tc.steps: step3. ResetMinSize test, IsCurrentVisualStateProcess() == true
+     * @tc.expected:call ResetMinSize(),calcLayoutConstraint_->minSize.Width not change
+     */
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    ViewAbstract::ResetMinSize(true);
+    ViewAbstract::ResetMaxSize(true);
+    ViewAbstract::SetBackgroundAlign(Alignment::BOTTOM_RIGHT);
+    ViewAbstract::SetBackgroundEffect(option);
+    ViewAbstract::SetDynamicLightUp(0, 0);
+    ViewAbstract::SetLinearGradientBlur(blurPara);
+    ViewAbstract::DisableOnAppear();
+    ViewAbstract::DisableOnAreaChange();
+    ViewAbstract::DisableOnDisAppear();
+    std::vector<DimensionRect> responseRegion;
+    DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
+    responseRegion.emplace_back(responseRect);
+    ViewAbstract::SetMouseResponseRegion(responseRegion);
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->minSize.value().Width().has_value());
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->maxSize.value().Width().has_value());
 }
 
 /**

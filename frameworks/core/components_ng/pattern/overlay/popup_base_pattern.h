@@ -38,6 +38,11 @@ public:
         return containerId_;
     }
 
+    virtual int32_t GetTargetId() const
+    {
+        return -1;
+    }
+
 protected:
     virtual bool ShouldAvoidKeyboard() const
     {

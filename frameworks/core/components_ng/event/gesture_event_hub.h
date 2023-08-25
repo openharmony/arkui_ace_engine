@@ -310,6 +310,14 @@ public:
         hitTestMode_ = hitTestMode;
     }
 
+    void RemoveDragEvent()
+    {
+        if (!dragEventActuator_) {
+            return;
+        }
+        dragEventActuator_->ClearDragEvent();
+    }
+
     void CombineIntoExclusiveRecognizer(
         const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
 
@@ -402,16 +410,6 @@ public:
     bool GetIsTextDraggable()
     {
         return isTextDraggable_;
-    }
-
-    bool IsTextField() const
-    {
-        return isTextField_;
-    }
-
-    void SetTextField(bool isTextField)
-    {
-        isTextField_ = isTextField;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 
@@ -511,7 +509,6 @@ private:
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool textDraggable_ = false;
-    bool isTextField_ = false;
     bool isTextDraggable_ = false;
     std::function<void()> callback_;
 #endif

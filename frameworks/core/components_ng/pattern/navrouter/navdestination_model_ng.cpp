@@ -22,6 +22,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -42,36 +44,9 @@ void NavDestinationModelNG::Create()
     int32_t nodeId = stack->ClaimNodeId();
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-
-    // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {
-        int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-            V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-        navDestinationNode->AddChild(titleBarNode);
-        navDestinationNode->SetTitleBarNode(titleBarNode);
-
-        int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto backButtonNode =
-            FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ImagePattern>());
-        titleBarNode->AddChild(backButtonNode);
-        titleBarNode->SetBackButton(backButtonNode);
-
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
-        ImageSourceInfo imageSourceInfo;
-        imageSourceInfo.SetResourceId(theme->GetBackResourceId());
-        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(backButtonLayoutProperty);
-        backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        backButtonNode->MarkModifyDone();
-
-        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-        CHECK_NULL_VOID(titleBarLayoutProperty);
-        titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+        CreateBackButton(navDestinationNode);
     }
-
     // content node
     if (!navDestinationNode->GetTitleBarNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -83,6 +58,64 @@ void NavDestinationModelNG::Create()
 
     stack->Push(navDestinationNode);
 }
+
+void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
+{
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->AddChild(titleBarNode);
+    navDestinationNode->SetTitleBarNode(titleBarNode);
+
+    int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto backButtonNode =
+        FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ButtonPattern>());
+    titleBarNode->AddChild(backButtonNode);
+    titleBarNode->SetBackButton(backButtonNode);
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(backButtonLayoutProperty);
+    backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
+    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto renderContext = backButtonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+    PaddingProperty padding;
+    padding.SetEdges(CalcLength(BUTTON_PADDING.ConvertToPx()));
+    backButtonLayoutProperty->UpdatePadding(padding);
+
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_VOID(backButtonImageNode);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonImageLayoutProperty);
+
+    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    if (!navDestinationEventHub->IsEnabled()) {
+        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    } else {
+        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
+    }
+    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    backButtonNode->AddChild(backButtonImageNode);
+    backButtonImageNode->MarkModifyDone();
+    backButtonNode->MarkModifyDone();
+
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+}
+
 void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -108,30 +141,8 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         });
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
-    // titleBar node
     if (!navDestinationNode->GetTitleBarNode()) {
-        int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-            V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-        navDestinationNode->AddChild(titleBarNode);
-        navDestinationNode->SetTitleBarNode(titleBarNode);
-        int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto backButtonNode =
-            FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ImagePattern>());
-        titleBarNode->AddChild(backButtonNode);
-        titleBarNode->SetBackButton(backButtonNode);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
-        ImageSourceInfo imageSourceInfo;
-        imageSourceInfo.SetResourceId(theme->GetBackResourceId());
-        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(backButtonLayoutProperty);
-        backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        backButtonNode->MarkModifyDone();
-        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-        CHECK_NULL_VOID(titleBarLayoutProperty);
-        titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
+        CreateBackButton(navDestinationNode);
     }
     // content node
     if (!navDestinationNode->GetContentNode()) {

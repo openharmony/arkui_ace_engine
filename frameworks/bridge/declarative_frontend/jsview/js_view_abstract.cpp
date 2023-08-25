@@ -61,7 +61,6 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
-#include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_source_info.h"
@@ -4857,10 +4856,10 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::BOOLEAN };
-    if (!CheckJSCallbackInfo("Clip", info, checkList)) {
+    if (info[0]->IsUndefined()) {
         auto shape = AceType::MakeRefPtr<BasicShape>();
         shape->SetColor(Color::TRANSPARENT);
+        // const RefPtr<BasicShape> shape;
         ViewAbstractModel::GetInstance()->SetClipShape(shape);
         ViewAbstractModel::GetInstance()->SetClipEdge(false);
         return;

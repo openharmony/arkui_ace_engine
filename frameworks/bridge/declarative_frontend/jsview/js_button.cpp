@@ -70,7 +70,8 @@ void JSButton::SetFontSize(const JSCallbackInfo& info)
     auto buttonTheme = GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     CalcDimension fontSize = buttonTheme->GetTextStyle().GetFontSize();
-    if (ParseJsDimensionVpNG(info[0], fontSize) && fontSize.Unit() != DimensionUnit::PERCENT) {
+    if (ParseJsDimensionVpNG(info[0], fontSize) && fontSize.Unit() != DimensionUnit::PERCENT &&
+        GreatOrEqual(fontSize.Value(), 0.0)) {
         ParseJsDimensionFp(info[0], fontSize);
     } else {
         fontSize = buttonTheme->GetTextStyle().GetFontSize();

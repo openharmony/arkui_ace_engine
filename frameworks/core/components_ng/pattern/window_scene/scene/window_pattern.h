@@ -52,7 +52,7 @@ protected:
 
     void InitContent();
     void CreateStartingNode();
-    void CreateSnapshotNode(std::shared_ptr<Media::PixelMap> snapshot = nullptr);
+    void CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}

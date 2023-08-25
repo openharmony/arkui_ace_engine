@@ -106,7 +106,7 @@ void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 {
     CHECK_NULL_VOID_NOLOG(image);
     // set animation flush function for svg / gif
-    image->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+    image->SetRedrawCallback([weak = WeakPtr(GetHost())] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkNeedRenderOnly();

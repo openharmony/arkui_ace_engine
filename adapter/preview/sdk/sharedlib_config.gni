@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/ohos_var.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
 
 # Avoid conditional judgment branches caused by dynamic library suffixes.
@@ -145,7 +146,12 @@ common_bin = [
     part_name = "hilog"
   },
   {
-    label = "//foundation/arkui/ace_engine/build:libace"
+    label = "//foundation/arkui/ace_engine/build:libace_compatible"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_forward_compatibility"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
@@ -161,6 +167,21 @@ common_bin = [
     part_name = "ace_engine"
   },
 ]
+
+if (enable_graphic_text_gine) {
+  common_bin += [
+    {
+      label = "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_new"
+      subsystem_name = "graphic"
+      part_name = "graphic_2d"
+    },
+    {
+      label = "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text"
+      subsystem_name = "graphic"
+      part_name = "graphic_2d"
+    },
+  ]
+}
 
 if (defined(use_new_skia) && use_new_skia) {
   common_bin += [

@@ -35,6 +35,7 @@ constexpr Dimension SWIPER_INDICATOR_DIGIT_PADDING_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DIGIT_VERTICAL_PADDING_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DIGIT_HEIGHT = 32.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 12.0_vp;
+constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
 } // namespace
 class SwiperIndicatorTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SwiperIndicatorTheme, Theme);
@@ -127,6 +128,7 @@ public:
             theme->indicatorDigitVerticalPadding_ = SWIPER_INDICATOR_DIGIT_VERTICAL_PADDING_DEFAULT;
             theme->indicatorDotPadding_ = SWIPER_INDICATOR_DOT_PADDING_DEFAULT;
             theme->indicatorDigitHeight_ = SWIPER_INDICATOR_DIGIT_HEIGHT;
+            theme->indicatorDotItemSpace_ = SWIPER_INDICATOR_DOT_ITEM_SPACE;
         }
     };
 
@@ -348,6 +350,11 @@ public:
     {
         return indicatorDigitVerticalPadding_;
     }
+
+    const Dimension& GetIndicatorDotItemSpace() const
+    {
+        return indicatorDotItemSpace_;
+    }
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -396,6 +403,7 @@ private:
     Dimension indicatorDigitVerticalPadding_;
     Dimension indicatorDotPadding_;
     Dimension indicatorDigitHeight_;
+    Dimension indicatorDotItemSpace_;
 };
 
 } // namespace OHOS::Ace

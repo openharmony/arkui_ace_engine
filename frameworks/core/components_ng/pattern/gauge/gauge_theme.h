@@ -38,14 +38,24 @@ inline constexpr float CALC_INDICATOR_POINT_RIGHT_Y = 0.19f;
 inline constexpr float CALC_INDICATOR_CONTROL_POINT_RIGHT_X = 0.182f;
 inline constexpr float CALC_INDICATOR_CONTROL_POINT_RIGHT_Y = 0.002f;
 inline constexpr float INDICATOR_BORDER_WIDTH_RATIO = 0.03f;
-inline constexpr float LIMIT_VALUE_WIDTH_RATIO = 0.278f;
-inline constexpr float LIMIT_VALUE_HEIGHT_RATIO = 0.222f;
-inline constexpr float LIMIT_VALUE_MIN_X = 0.19f;
-inline constexpr float LIMIT_VALUE_Y = 0.666f;
+inline constexpr float LIMIT_VALUE_WIDTH_RATIO = 0.4444f;
+inline constexpr float LIMIT_VALUE_HEIGHT_RATIO = 0.254f;
+
+inline constexpr float LIMIT_VALUE_MIN_OR_MAX_WIDTH_RATIO = 0.247f;
+inline constexpr float LIMIT_VALUE_MIN_OR_MAX_HEIGHT_RATIO = 0.2222f;
+inline constexpr float LIMIT_VALUE_MIN_X = 0.221f;
+inline constexpr float LIMIT_VALUE_Y = 0.722f;
 inline constexpr float LIMIT_VALUE_MAX_X = 0.532f;
+
+inline constexpr float DESCRIPTION_X = 0.2778f;
+inline constexpr float DESCRIPTION_Y = 0.746f;
+inline constexpr float DEFAULT_GAUGE_SHADOW_RADIUS = 5.0f;
+inline constexpr float DEFAULT_GAUGE_SHADOW_OFFSETX = 5.0f;
+inline constexpr float DEFAULT_GAUGE_SHADOW_OFFSETY = 5.0f;
 inline constexpr Dimension INDICATOR_DISTANCE_TO_TOP = 8.0_vp;
-inline constexpr Dimension LIMIT_VALUE_MAX_FONTSIZE = 48.0_vp;
+inline constexpr Dimension LIMIT_VALUE_MAX_FONTSIZE = 40.0_vp;
 inline constexpr Dimension LIMIT_VALUE_MIN_FONTSIZE = 10.0_vp;
 inline constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
+inline constexpr int32_t COLORS_MAX_COUNT = 9;
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GAUGE_GAUGE_THEME_H

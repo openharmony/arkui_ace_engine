@@ -69,6 +69,11 @@ public:
         return 1.0;
     }
 
+    virtual size_t GetLineCount()
+    {
+        return 1;
+    }
+
     virtual void Paint(TestingCanvas* canvas, double x, double y) {}
 
 #ifndef USE_GRAPHIC_TEXT_GINE

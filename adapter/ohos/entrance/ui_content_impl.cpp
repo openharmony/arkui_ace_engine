@@ -61,9 +61,13 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
+#endif
 #include "core/common/layout_inspector.h"
+#ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
+#endif
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -315,6 +319,7 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 
 void UIContentImpl::DestroyUIDirector()
 {
+#ifndef NG_BUILD
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID_NOLOG(container);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
@@ -324,6 +329,9 @@ void UIContentImpl::DestroyUIDirector()
     CHECK_NULL_VOID_NOLOG(rsUIDirector);
     LOGI("Destroying old rsUIDirectory");
     rsUIDirector->Destroy();
+#endif
+#else
+    LOGE("Destroy RSUIDirector not supported in new pipeline");
 #endif
 }
 
@@ -455,21 +463,6 @@ void UIContentImpl::CommonInitializeForm(
     }
 
     bool useNewPipe = true;
-#ifdef ENABLE_ROSEN_BACKEND
-    if (isFormRender_ && !window && !useNewPipe) {
-        useNewPipe = true;
-    }
-
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
-    if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe && isFormRender_) {
-        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
-        if (rsUiDirector) {
-            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
-            rsUiDirector->SetCacheDir(context->GetCacheDir());
-            rsUiDirector->Init();
-        }
-    }
-#endif
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
     float density = 1.0f;
@@ -645,16 +638,20 @@ void UIContentImpl::CommonInitializeForm(
         }
     }
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
+#endif
     // create container
     if (runtime_) {
         instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     } else {
         instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
     }
+#ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
+#endif
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
@@ -751,42 +748,19 @@ void UIContentImpl::CommonInitializeForm(
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     }
 
-    if (!useNewPipe) {
-        Ace::Platform::UIEnvCallback callback = nullptr;
-#ifdef ENABLE_ROSEN_BACKEND
-        callback = [window, id = instanceId_, container, aceView, rsUiDirector](
-                       const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
-            if (rsUiDirector) {
-                ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
-                rsUiDirector->SetUITaskRunner(
-                    [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
-                        ContainerScope scope(id);
-                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-                    });
-                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-                if (context != nullptr) {
-                    context->SetRSUIDirector(rsUiDirector);
-                }
-                LOGD("UIContent Init Rosen Backend");
-            }
-        };
-#endif
-        // set view
-        Platform::AceContainer::SetView(aceView, density, 0, 0, window_, callback);
+
+    if (isFormRender_) {
+        LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
+            formHeight_);
+        Platform::AceContainer::SetViewNew(aceView, density, formWidth_, formHeight_, window_);
+        auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
+        CHECK_NULL_VOID(frontend);
+        frontend->SetBundleName(bundleName_);
+        frontend->SetModuleName(moduleName_);
+        // arkTSCard only support "esModule" compile mode
+        frontend->SetIsBundle(false);
     } else {
-        if (isFormRender_) {
-            LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
-                formHeight_);
-            Platform::AceContainer::SetViewNew(aceView, density, formWidth_, formHeight_, window_);
-            auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
-            CHECK_NULL_VOID(frontend);
-            frontend->SetBundleName(bundleName_);
-            frontend->SetModuleName(moduleName_);
-            // arkTSCard only support "esModule" compile mode
-            frontend->SetIsBundle(false);
-        } else {
-            Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
-        }
+        Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
     }
 
     // after frontend initialize
@@ -937,6 +911,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     LOGI("UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
          "useNewPipe: %{public}d",
         apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
+#ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
@@ -947,6 +922,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             rsUiDirector->Init();
         }
     }
+#endif
 #endif
     int32_t deviceWidth = 0;
     int32_t deviceHeight = 0;
@@ -1107,16 +1083,20 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     }
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
     auto pluginUtils = std::make_shared<PluginUtilsImpl>();
     PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
+#endif
     // create container
     if (runtime_) {
         instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
     } else {
         instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
     }
+#ifdef FORM_SUPPORTED
     auto formUtils = std::make_shared<FormUtilsImpl>();
     FormManager::GetInstance().SetFormUtils(formUtils);
+#endif
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
@@ -1209,6 +1189,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     auto aceView =
         Platform::AceViewOhos::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
     Platform::AceViewOhos::SurfaceCreated(aceView, window_);
+#ifndef NG_BUILD
     if (!useNewPipe) {
         Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1234,6 +1215,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     } else {
         Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
     }
+#else
+    Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
+#endif
 
     // after frontend initialize
     if (window_->IsFocused()) {
@@ -1456,10 +1440,13 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         [weakContainer = WeakPtr<Platform::AceContainer>(container), config]() {
             auto container = weakContainer.Upgrade();
             CHECK_NULL_VOID_NOLOG(container);
-            auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            auto deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-            auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-            container->UpdateConfiguration(colorMode, deviceAccess, languageTag, (*config).GetName());
+            Platform::ParsedConfig parsedConfig;
+            parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+            parsedConfig.deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+            parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
+            parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            container->UpdateConfiguration(parsedConfig, config->GetName());
         },
         TaskExecutor::TaskType::UI);
     LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
@@ -1585,6 +1572,14 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     if (isDialog) {
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
     } else {
+#ifdef NG_BUILD
+        container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
+            runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
+                // Sub-window ,just return.
+                LOGI("Content event callback");
+            }),
+            false, true, true);
+#else
         if (Container::IsCurrentUseNewPipeline()) {
             container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS,
                 runtimeContext, abilityInfo, std::make_unique<ContentEventCallback>([] {
@@ -1600,6 +1595,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
                 }),
                 false, true);
         }
+#endif
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -1794,7 +1790,8 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
         TaskExecutor::TaskType::UI);
 }
 
-int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+int32_t UIContentImpl::CreateModalUIExtension(
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config)
 {
     LOGI("UIExtension create modal page start");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1804,12 +1801,12 @@ int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const Mod
     CHECK_NULL_RETURN_NOLOG(taskExecutor, 0);
     int32_t sessionId = 0;
     taskExecutor->PostSyncTask(
-        [container, &sessionId, want, callbacks = callbacks]() {
+        [container, &sessionId, want, callbacks = callbacks, config = config]() {
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID_NOLOG(pipeline);
             auto overlay = pipeline->GetOverlayManager();
             CHECK_NULL_VOID_NOLOG(overlay);
-            sessionId = overlay->CreateModalUIExtension(want, callbacks);
+            sessionId = overlay->CreateModalUIExtension(want, callbacks, config.isProhibitBack);
         },
         TaskExecutor::TaskType::UI);
     LOGI("UIExtension create modal page end, sessionId=%{public}d", sessionId);

@@ -852,10 +852,14 @@ void ViewAbstract::SetDraggable(bool draggable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (draggable && !frameNode->IsDraggable()) {
-        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (draggable) {
+        if (!frameNode->IsDraggable()) {
+            gestureHub->InitDragDropEvent();
+        }
+    } else {
+        gestureHub->RemoveDragEvent();
     }
     frameNode->SetDraggable(draggable);
 }
@@ -1219,7 +1223,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     type = MenuType::MENU;
 #endif
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
-    if (type == MenuType::CONTEXT_MENU || type == MenuType::RICH_EDIT_SELECT_MENU) {
+    if (type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }

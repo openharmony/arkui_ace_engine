@@ -444,7 +444,8 @@ void UIContentImpl::NotifyMemoryLevel(int32_t level)
     pipelineContext->NotifyMemoryLevel(level);
 }
 
-int32_t UIContentImpl::CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+int32_t UIContentImpl::CreateModalUIExtension(
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config)
 {
     return 0;
 }

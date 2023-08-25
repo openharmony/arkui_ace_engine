@@ -100,7 +100,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 
     // When the extended menu is displayed, the default menu becomes circular, but the position of the circle is aligned
     // with the end of the original menu.
-    if (GreatNotEqual(menuWidth, menuHeight)) {
+    if (GreatNotEqual(menuWidth, menuHeight) || info_->menuInfo.menuBuilder) {
         menuWidth_ = menuWidth;
     } else {
         return defaultMenuEndOffset_ - OffsetF(menuWidth, 0.0f);

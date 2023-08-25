@@ -27,6 +27,7 @@
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -40,8 +41,8 @@
 
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public Pattern, public TextDragBase {
-    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase);
+class TextPattern : public Pattern, public TextDragBase, public TextBase {
+    DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase);
 
 public:
     TextPattern() = default;
@@ -54,6 +55,9 @@ public:
         }
         if (!textOverlayModifier_) {
             textOverlayModifier_ = MakeRefPtr<TextOverlayModifier>();
+        }
+        if (isCustomFont_) {
+            textContentModifier_->SetIsCustomFont(true);
         }
         auto paintMethod = MakeRefPtr<TextPaintMethod>(
             WeakClaim(this), paragraph_, baselineOffset_, textContentModifier_, textOverlayModifier_);
@@ -277,6 +281,16 @@ public:
         isMeasureBoundary_ = isMeasureBoundary;
     }
 
+    void SetIsCustomFont(bool isCustomFont)
+    {
+        isCustomFont_ = isCustomFont;
+    }
+
+    bool GetIsCustomFont()
+    {
+        return isCustomFont_;
+    }
+
 protected:
     virtual void HandleOnCopy();
     void InitMouseEvent();
@@ -292,7 +306,6 @@ protected:
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    bool IsSelected() const;
     bool IsSelectAll();
     virtual void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
     virtual void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
@@ -314,9 +327,7 @@ protected:
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeHolderIndex_;
-    TextSelector textSelector_;
     float baselineOffset_ = 0.0f;
-    bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool touchEventInitialized_ = false;
@@ -324,6 +335,7 @@ protected:
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
     bool isMeasureBoundary_ = false;
+    bool isCustomFont_ = false;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -346,12 +358,13 @@ private:
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
-    void FontRegisterCallback(RefPtr<SpanNode> spanNode);
     // to check if drag is in progress
 
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
     bool panEventInitialized_ = false;
+    bool isMousePressed_ = false;
+    bool blockPress_ = false;
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     RefPtr<TextContentModifier> textContentModifier_;

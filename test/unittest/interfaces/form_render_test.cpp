@@ -33,6 +33,7 @@ constexpr char FORM_RENDERER_COMP_ID[] = "ohos.extra.param.key.form_comp_id";
 constexpr char FORM_WIDTH_KEY[] = "ohos.extra.param.key.form_width";
 constexpr char FORM_HEIGHT_KEY[] = "ohos.extra.param.key.form_height";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
+constexpr char FORM_RENDER_STATE[] = "ohos.extra.param.key.form_render_state";
 const std::string FORM_COMPONENT_ID_1 = "111111";
 const std::string FORM_COMPONENT_ID_2 = "222222";
 const std::string FORM_COMPONENT_ID_3 = "333333";
@@ -75,6 +76,7 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
     want.SetParam(FORM_HEIGHT_KEY, FORM_HEIGHT);
     want.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_1);
     want.SetParam(FORM_RENDERER_ALLOW_UPDATE, true);
+    want.SetParam(FORM_RENDER_STATE, true);
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
 
     /**
@@ -121,6 +123,7 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
     want2.SetParam(FORM_HEIGHT_KEY, FORM_HEIGHT);
     want2.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_2);
     want2.SetParam(FORM_RENDERER_ALLOW_UPDATE, true);
+    want2.SetParam(FORM_RENDER_STATE, true);
     formRendererGroup->AddForm(want2, formJsInfo);
     auto formRenderer2 = formRendererGroup->formRenderer_;
     formRenderer2->OnActionEvent("");
@@ -180,6 +183,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     OHOS::AAFwk::Want want;
     want.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_1);
     want.SetParam(FORM_RENDERER_ALLOW_UPDATE, false);
+    want.SetParam(FORM_RENDER_STATE, true);
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
     want.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate->AsObject());
     OHOS::AppExecFwk::FormJsInfo formJsInfo;

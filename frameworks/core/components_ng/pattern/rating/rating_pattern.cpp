@@ -838,7 +838,7 @@ void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 {
     CHECK_NULL_VOID_NOLOG(image);
     // set animation flush function for svg / gif
-    image->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+    image->SetRedrawCallback([weak = WeakPtr(GetHost())] {
         auto ratingNode = weak.Upgrade();
         CHECK_NULL_VOID(ratingNode);
         ratingNode->MarkNeedRenderOnly();

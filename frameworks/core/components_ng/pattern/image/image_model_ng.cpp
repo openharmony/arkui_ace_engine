@@ -158,10 +158,15 @@ void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 void ImageModelNG::SetDraggable(bool draggable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (draggable && !frameNode->IsDraggable()) {
-        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (draggable) {
+        if (!frameNode->IsDraggable()) {
+            gestureHub->InitDragDropEvent();
+        }
+    } else {
+        gestureHub->RemoveDragEvent();
     }
     CHECK_NULL_VOID(frameNode);
     frameNode->SetDraggable(draggable);

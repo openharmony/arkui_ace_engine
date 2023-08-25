@@ -39,6 +39,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr int32_t PLATFORM_VERSION_TEN = 10;
 /**
  * Get the main axis direction based on direction.
  */
@@ -314,7 +315,8 @@ void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrappe
     }
 }
 
-void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItemProperties)
+void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
+    LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties)
 {
     if (GreatNotEqual(totalFlexWeight_, 0.0f) && !isInfiniteLayout_) {
         auto newTotalFlexWeight = totalFlexWeight_;
@@ -503,31 +505,44 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
             auto childList = iter->second;
             for (auto& child : childList) {
                 const auto& childLayoutWrapper = child.layoutWrapper;
+                if (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && PipelineBase::GetCurrentContext() &&
+                    PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+                    auto mainAxisSize = 0.0f;
+                    auto crossAxisSize = 0.0f;
+                    auto blankLayoutProperty = childLayoutWrapper->GetLayoutProperty();
+                    if (blankLayoutProperty) {
+                        const auto& calcConstraint = blankLayoutProperty->GetCalcLayoutConstraint();
+                        if (calcConstraint && calcConstraint->selfIdealSize.has_value()) {
+                            auto size = ConvertToSize(calcConstraint->selfIdealSize.value(),
+                                child.layoutConstraint.scaleProperty, child.layoutConstraint.percentReference);
+                            mainAxisSize = std::max(IsHorizontal(direction_) ? size.Width() : size.Height(), 0.0f);
+                            crossAxisSize = std::max(IsHorizontal(direction_) ? size.Height() : size.Width(), 0.0f);
+                        }
+                    }
+                    childLayoutWrapper->GetHostNode()->GetPattern()->BeforeCreateLayoutWrapper();
+                    childLayoutWrapper->GetGeometryNode()->SetFrameSize(IsHorizontal(direction_)
+                                                                            ? SizeF(mainAxisSize, crossAxisSize)
+                                                                            : SizeF(crossAxisSize, mainAxisSize));
+                    secondaryMeasureList_.emplace_back(child);
+                    UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
+                    CheckSizeValidity(childLayoutWrapper);
+                    UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
+                    CheckSizeValidity(childLayoutWrapper);
+                    continue;
+                }
                 UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
                 childLayoutWrapper->Measure(child.layoutConstraint);
-                UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
                 if (child.layoutWrapper && child.layoutWrapper->GetHostNode() &&
                     child.layoutWrapper->GetHostNode()->GetLayoutProperty() &&
                     child.layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
                         VisibleType::GONE) {
                     continue;
                 }
+                UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
                 CheckSizeValidity(childLayoutWrapper);
                 CheckBaselineProperties(childLayoutWrapper);
-                if (!isInfiniteLayout_ || (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
-                                              PipelineBase::GetCurrentContext() &&
-                                              PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9)) {
-                    const auto& flexItemProperty = childLayoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-                    float flexShrink = isLinearLayoutFeature_ ? 0.0f : 1.0f;
-                    float flexGrow = 0.0f;
-                    if (flexItemProperty) {
-                        flexShrink = flexItemProperty->GetFlexShrink().value_or(flexShrink);
-                        flexGrow = flexItemProperty->GetFlexGrow().value_or(flexGrow);
-                    }
-                    flexItemProperties.totalGrow += flexGrow;
-                    flexItemProperties.totalShrink +=
-                        (flexShrink * (GetChildMainAxisSize(childLayoutWrapper) -
-                                          GetMainAxisMargin(childLayoutWrapper, direction_)));
+                if (!isInfiniteLayout_) {
+                    UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
                 }
                 secondaryMeasureList_.emplace_back(child);
             }
@@ -535,6 +550,21 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
         }
         allocatedSize_ -= space_;
     }
+}
+
+void FlexLayoutAlgorithm::UpdateFlexProperties(
+    FlexItemProperties& flexItemProperties, const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+    float flexShrink = isLinearLayoutFeature_ ? 0.0f : 1.0f;
+    float flexGrow = 0.0f;
+    if (flexItemProperty) {
+        flexShrink = flexItemProperty->GetFlexShrink().value_or(flexShrink);
+        flexGrow = flexItemProperty->GetFlexGrow().value_or(flexGrow);
+    }
+    flexItemProperties.totalGrow += flexGrow;
+    flexItemProperties.totalShrink +=
+        (flexShrink * (GetChildMainAxisSize(layoutWrapper) - GetMainAxisMargin(layoutWrapper, direction_)));
 }
 
 void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
@@ -592,9 +622,10 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
                 (*iter).needSecondMeasure = true;
             }
             if (LessOrEqual(totalFlexWeight_, 0.0f) &&
-                (!isInfiniteLayout_ || (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
-                                           PipelineBase::GetCurrentContext() &&
-                                           PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9))) {
+                (!isInfiniteLayout_ ||
+                    (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
+                        PipelineBase::GetCurrentContext() &&
+                        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN))) {
                 float childMainAxisMargin = GetMainAxisMargin(childLayoutWrapper, direction_);
                 float itemFlex = getFlex(child.layoutWrapper);
                 float flexSize =
@@ -740,9 +771,11 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     bool mainAxisInf =
         GreaterOrEqualToInfinity(direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                      ? layoutConstraint->maxSize.Width()
-                                     : layoutConstraint->maxSize.Height()) && NearEqual(mainAxisSize_, -1.0f);
+                                     : layoutConstraint->maxSize.Height()) &&
+        NearEqual(mainAxisSize_, -1.0f);
     if (NearEqual(mainAxisSize_, -1.0f)) {
-        if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+        if (PipelineBase::GetCurrentContext() &&
+            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
             mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                 ? layoutConstraint->maxSize.Width()
                                 : layoutConstraint->maxSize.Height();
@@ -788,7 +821,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     /**
      * first measure
      */
-    MeasureAndCleanMagicNodes(flexItemProperties);
+    MeasureAndCleanMagicNodes(layoutWrapper, flexItemProperties);
 
     /**
      * secondary measure

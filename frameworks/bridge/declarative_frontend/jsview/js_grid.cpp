@@ -80,7 +80,7 @@ void ParseGridItemSize(const JSRef<JSVal>& value, GridItemSize& gridItemSize)
         if (columns->IsNumber()) {
             gridItemSize.columns = columns->ToNumber<int32_t>();
         }
-        LOGI("regularSize type: rows:%{public}d, columns:%{public}d", gridItemSize.rows, gridItemSize.columns);
+        LOGD("regularSize type: rows:%{public}d, columns:%{public}d", gridItemSize.rows, gridItemSize.columns);
     }
 }
 
@@ -104,10 +104,14 @@ void SetGridLayoutOptions(const JSCallbackInfo& info)
         auto length = array->Length();
         for (size_t i = 0; i < length; i++) {
             JSRef<JSVal> index = array->GetValueAt(i);
-            if (index->IsNumber()) {
-                option.irregularIndexes.emplace(index->ToNumber<int32_t>());
-                LOGI("irregularIndexes emplace_back:%{public}d", index->ToNumber<int32_t>());
+            if (!index->IsNumber()) {
+                continue;
             }
+            auto indexNum = index->ToNumber<int32_t>();
+            if (indexNum >= 0) {
+                option.irregularIndexes.emplace(indexNum);
+            }
+            LOGD("irregularIndexes emplace_back:%{public}d", indexNum);
         }
     }
     auto getSizeByIndex = obj->GetProperty("onGetIrregularSizeByIndex");

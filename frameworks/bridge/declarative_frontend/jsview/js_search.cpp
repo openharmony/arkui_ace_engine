@@ -198,7 +198,8 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         // set button font size, unit FP
         auto fontSize = param->GetProperty("fontSize");
         CalcDimension size = theme->GetFontSize();
-        if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
+            GreatOrEqual(size.Value(), 0.0)) {
             ParseJsDimensionFp(fontSize, size);
         } else {
             size = theme->GetFontSize();
@@ -355,14 +356,10 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         CHECK_NULL_VOID_NOLOG(textFieldTheme);
 
         // set caret width
-        CalcDimension caretWidth;
+        CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
         auto caretWidthProp = param->GetProperty("width");
-        if (!caretWidthProp->IsUndefined() && !caretWidthProp->IsNull() &&
-            ParseJsDimensionVp(caretWidthProp, caretWidth)) {
-            if (LessNotEqual(caretWidth.Value(), 0.0)) {
-                caretWidth = textFieldTheme->GetCursorWidth();
-            }
-        } else {
+        ParseJsDimensionVpNG(caretWidthProp, caretWidth, false);
+        if (LessNotEqual(caretWidth.Value(), 0.0)) {
             caretWidth = textFieldTheme->GetCursorWidth();
         }
         SearchModel::GetInstance()->SetCaretWidth(caretWidth);
@@ -439,7 +436,8 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     Font font;
     auto fontSize = param->GetProperty("size");
     CalcDimension size = Dimension(-1);
-    if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
+    if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
+        GreatOrEqual(size.Value(), 0.0)) {
         ParseJsDimensionFp(fontSize, size);
     } else {
         size = Dimension(-1);

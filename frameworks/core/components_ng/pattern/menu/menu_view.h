@@ -35,7 +35,8 @@ public:
 
     // create menu with custom node from a builder
     static RefPtr<FrameNode> Create(const RefPtr<UINode>& customNode, int32_t targetId,
-        const std::string& targetTag = "", MenuType type = MenuType::MENU, const MenuParam& menuParam = MenuParam());
+        const std::string& targetTag = "", MenuType type = MenuType::MENU, const MenuParam& menuParam = MenuParam(),
+        bool withWrapper = true);
 
     // create select's popup menu
     static RefPtr<FrameNode> Create(const std::vector<SelectParam>& params, int32_t targetId);

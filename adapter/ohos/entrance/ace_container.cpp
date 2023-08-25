@@ -38,6 +38,7 @@
 #include "base/log/frame_report.h"
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "bridge/card_frontend/card_frontend.h"
@@ -72,8 +73,8 @@
 namespace OHOS::Ace::Platform {
 namespace {
 
-constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
-constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
+
+constexpr uint32_t DIRECTION_OR_DPI_KEY = 0b1100;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -81,11 +82,15 @@ const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 const std::string ASSET_LIBARCH_PATH = "/lib/arm";
 #endif
 
+#ifndef NG_BUILD
+constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
 const char* GetEngineSharedLibrary()
 {
     return ARK_ENGINE_SHARED_LIB;
 }
+#endif
 
+constexpr char DECLARATIVE_ARK_ENGINE_SHARED_LIB[] = "libace_engine_declarative_ark.z.so";
 const char* GetDeclarativeSharedLibrary()
 {
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
@@ -208,6 +213,7 @@ void AceContainer::InitializeFrontend()
 {
     auto aceAbility = aceAbility_.lock();
     if (type_ == FrontendType::JS) {
+#ifndef NG_BUILD
         frontend_ = Frontend::Create();
         auto jsFrontend = AceType::DynamicCast<JsFrontend>(frontend_);
         auto& loader = Framework::JsEngineLoader::Get(GetEngineSharedLibrary());
@@ -217,11 +223,19 @@ void AceContainer::InitializeFrontend()
         jsFrontend->SetJsEngine(jsEngine);
         jsFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
         jsFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+#else
+        LOGE("JS_FRONTEND not supported in new pipeline mode");
+#endif
     } else if (type_ == FrontendType::JS_CARD) {
+#ifndef NG_BUILD
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
+#else
+        LOGE("JS_CARD not supported in new pipeline mode");
+#endif
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
         if (isFormRender_) {
+#ifdef FORM_SUPPORTED
             LOGI("Init Form Frontend");
             frontend_ = AceType::MakeRefPtr<FormFrontendDeclarative>();
             auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
@@ -241,9 +255,15 @@ void AceContainer::InitializeFrontend()
             // Card front
             cardFrontend->SetRunningCardId(0); // ArkTsCard : nodeId, Host->FMS->FRS->innersdk
             cardFrontend->SetIsFormRender(true);
+#endif
         } else if (!isSubContainer_) {
+#ifdef NG_BUILD
+            frontend_ = AceType::MakeRefPtr<DeclarativeFrontendNG>();
+            auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
             frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
             auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
             RefPtr<Framework::JsEngine> jsEngine;
             if (GetSettings().usingSharedRuntime) {
@@ -289,6 +309,15 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
     CHECK_NULL_RETURN_NOLOG(container, false);
     // When the container is for overlay, it need close the overlay first.
     if (container->IsSubContainer()) {
+#ifdef NG_BUILD
+        LOGI("back press for remove overlay node");
+        ContainerScope scope(instanceId);
+        auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_RETURN_NOLOG(subPipelineContext, false);
+        auto overlayManager = subPipelineContext->GetOverlayManager();
+        CHECK_NULL_RETURN_NOLOG(overlayManager, false);
+        return overlayManager->RemoveOverlayInSubwindow();
+#else
         if (container->IsUseNewPipeline()) {
             LOGI("back press for remove overlay node");
             ContainerScope scope(instanceId);
@@ -300,6 +329,7 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
         }
         SubwindowManager::GetInstance()->CloseMenu();
         return true;
+#endif
     }
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
@@ -991,7 +1021,11 @@ void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* co
         [frontend = WeakPtr<Frontend>(frontend_), storage, context, id = instanceId_] {
             auto sp = frontend.Upgrade();
             CHECK_NULL_VOID_NOLOG(sp);
+#ifdef NG_BUILD
+            auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(sp);
+#else
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(sp);
+#endif
             CHECK_NULL_VOID(declarativeFrontend);
             auto jsEngine = declarativeFrontend->GetJsEngine();
             CHECK_NULL_VOID(jsEngine);
@@ -1081,6 +1115,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
+#ifndef NG_BUILD
     if (useNewPipeline_) {
         LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
@@ -1091,7 +1126,14 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
+#else
+    LOGI("New pipeline version creating...");
+    pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
+        window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+    pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
+#endif
 
+#ifdef FORM_SUPPORTED
     if (isFormRender_) {
         pipelineContext_->SetIsFormRender(isFormRender_);
         auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
@@ -1100,6 +1142,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
             cardFrontend->SetLoadCardCallBack(WeakPtr<PipelineBase>(pipelineContext_));
         }
     }
+#endif
 
     pipelineContext_->SetRootSize(density, width, height);
     if (isFormRender_) {
@@ -1223,7 +1266,11 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
         }
         frontend_->AttachPipelineContext(pipelineContext_);
     } else {
+#ifdef NG_BUILD
+        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
         if (declarativeFrontend) {
             declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
         }
@@ -1402,10 +1449,9 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
     return context->CreateModuleContext(bundle, module);
 }
 
-void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::string& deviceAccess,
-    const std::string& languageTag, const std::string& configuration)
+void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
 {
-    if (colorMode.empty() && deviceAccess.empty() && languageTag.empty()) {
+    if (!parsedConfig.IsValid()) {
         LOGW("AceContainer::OnConfigurationUpdated param is empty");
         return;
     }
@@ -1414,9 +1460,9 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
     auto themeManager = pipelineContext_->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto resConfig = GetResourceConfiguration();
-    if (!colorMode.empty()) {
+    if (!parsedConfig.colorMode.empty()) {
         configurationChange.colorModeUpdate = true;
-        if (colorMode == "dark") {
+        if (parsedConfig.colorMode == "dark") {
             SystemProperties::SetColorMode(ColorMode::DARK);
             SetColorScheme(ColorScheme::SCHEME_DARK);
             resConfig.SetColorMode(ColorMode::DARK);
@@ -1426,20 +1472,23 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
             resConfig.SetColorMode(ColorMode::LIGHT);
         }
     }
-    if (!deviceAccess.empty()) {
+    if (!parsedConfig.deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
-        SystemProperties::SetDeviceAccess(deviceAccess == "true");
-        resConfig.SetDeviceAccess(deviceAccess == "true");
+        SystemProperties::SetDeviceAccess(parsedConfig.deviceAccess == "true");
+        resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
-    if (!languageTag.empty()) {
+    if (!parsedConfig.languageTag.empty()) {
         std::string language;
         std::string script;
         std::string region;
-        Localization::ParseLocaleTag(languageTag, language, script, region, false);
+        Localization::ParseLocaleTag(parsedConfig.languageTag, language, script, region, false);
         if (!language.empty() || !script.empty() || !region.empty()) {
             configurationChange.languageUpdate = true;
             AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
         }
+    }
+    if (!parsedConfig.direction.empty() || !parsedConfig.densitydpi.empty()) {
+        configurationChange.DirectionOrDpiUpdate = true;
     }
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
@@ -1447,8 +1496,10 @@ void AceContainer::UpdateConfiguration(const std::string& colorMode, const std::
     auto front = GetFrontend();
     CHECK_NULL_VOID(front);
     front->OnConfigurationUpdated(configuration);
+#ifdef PLUGIN_COMPONENT_SUPPORTED
     OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
-    NotifyConfigurationChange(!deviceAccess.empty(), configurationChange);
+#endif
+    NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
 }
 
 void AceContainer::NotifyConfigurationChange(
@@ -1475,8 +1526,15 @@ void AceContainer::NotifyConfigurationChange(
                     CHECK_NULL_VOID(container);
                     auto pipeline = container->GetPipelineContext();
                     CHECK_NULL_VOID(pipeline);
-                    pipeline->NotifyConfigurationChange(configurationChange);
-                    pipeline->FlushReload();
+                    auto themeManager = pipeline->GetThemeManager();
+                    CHECK_NULL_VOID(themeManager);
+                    if (configurationChange.DirectionOrDpiUpdate &&
+                        (themeManager->GetResourceLimitKeys() & DIRECTION_OR_DPI_KEY) == 0) {
+                        LOGI("resource limit: will not flush reload by direction or dpi changed");
+                        return;
+                    }
+                    pipeline->NotifyConfigurationChange();
+                    pipeline->FlushReload(configurationChange);
                     if (needReloadTransition) {
                         // reload transition animation
                         pipeline->FlushReloadTransition();
@@ -1503,7 +1561,7 @@ void AceContainer::HotReload()
 
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->FlushReload();
+            pipeline->FlushReload(OnConfigurationChange());
         },
         TaskExecutor::TaskType::UI);
 }
@@ -1540,9 +1598,11 @@ std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t i
 
 void AceContainer::UpdateFormData(const std::string& data)
 {
+#ifdef FORM_SUPPORTED
     auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
     CHECK_NULL_VOID(frontend);
     frontend->UpdateData(data);
+#endif
 }
 
 void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap)
@@ -1571,6 +1631,11 @@ void AceContainer::ReloadForm()
     themeManager->SetColorScheme(colorScheme_);
     themeManager->LoadCustomTheme(assetManager_);
     themeManager->LoadResourceThemes();
+
+    auto cache = pipelineContext_->GetImageCache();
+    if (cache) {
+        cache->Clear();
+    }
 }
 
 void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
@@ -1735,11 +1800,15 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         LOGI("starting hotReload");
+#ifndef NG_BUILD
         if (Container::IsCurrentUseNewPipeline()) {
             container->HotReload();
         } else {
             container->NotifyConfigurationChange(true);
         }
+#else
+        container->HotReload();
+#endif
     });
 }
 

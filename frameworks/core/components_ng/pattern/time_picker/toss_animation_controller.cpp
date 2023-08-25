@@ -37,6 +37,14 @@ constexpr double VMAX = 5.0;
 
 void TimePickerTossAnimationController::SetStart(double y)
 {
+    auto weak = AceType::WeakClaim(this);
+    auto ref = weak.Upgrade();
+    auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
+    CHECK_NULL_VOID(column);
+    auto isTouchBreak = column->GetTouchBreakStatus();
+    if (isTouchBreak == false) {
+        column->SetYOffset(0.0);
+    }
     if (property_) {
         StopTossAnimation();
     }
@@ -93,32 +101,29 @@ void TimePickerTossAnimationController::StartSpringMotion()
     auto midShiftDistance =
         (speed) < 0.0 ? optionProperties[midIndex].prevDistance : optionProperties[midIndex].nextDistance;
     column->SetYLast(0.0);
-    double end = midShiftDistance * showCount_ - offset;
-    double start = 0.0;
+    end_ = midShiftDistance * showCount_ - offset;
     AnimationOption option = AnimationOption();
     option.SetCurve(springCurve);
-    auto propertyCallback = [weak, column](float position) {
-        column->UpdateToss(static_cast<int>(position));
-        column->SetTossStatus(true);
-    };
-    if (!property_) {
-        property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(start, std::move(propertyCallback));
-        CHECK_NULL_VOID(property_);
-        renderContext->AttachNodeAnimatableProperty(property_);
-    }
-    auto finishCallback = [weak, column, end]() {
+    CreatePropertyCallback();
+    CHECK_NULL_VOID(property_);
+    renderContext->AttachNodeAnimatableProperty(property_);
+    auto finishCallback = [weak, column]() {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
-        column->UpdateToss(static_cast<int>(end));
+        column->UpdateToss(static_cast<int>(ref->end_));
         column->TossAnimationStoped();
-        column->SetTossStatus(false);
+        auto isTouchBreak = column->GetTouchBreakStatus();
+        if (isTouchBreak == false) {
+            column->SetTossStatus(false);
+            column->SetYOffset(0.0);
+        }
     };
     AnimationUtils::Animate(
         option,
-        [weak, end]() {
+        [weak]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
-            ref->property_->Set(end);
+            ref->property_->Set(ref->end_);
         },
         finishCallback);
 }
@@ -126,6 +131,11 @@ void TimePickerTossAnimationController::StartSpringMotion()
 void TimePickerTossAnimationController::StopTossAnimation()
 {
     auto weak = AceType::WeakClaim(this);
+    auto ref = weak.Upgrade();
+    CHECK_NULL_VOID(ref);
+    auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
+    CHECK_NULL_VOID(column);
+    column->SetTossStatus(false);
     AnimationOption option;
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(0);
@@ -160,5 +170,41 @@ double TimePickerTossAnimationController::GetCurrentTime() const
     double sec = static_cast<double>(tv.tv_sec);
     double msec = static_cast<double>(tv.tv_usec / 1000.0); // usec / 1000 is msec
     return (sec * 1000 + msec);                             // sec * 1000 is msec
+}
+
+void TimePickerTossAnimationController::CreatePropertyCallback()
+{
+    auto weak = AceType::WeakClaim(this);
+    auto ref = weak.Upgrade();
+    auto column = AceType::DynamicCast<TimePickerColumnPattern>(ref->column_.Upgrade());
+    CHECK_NULL_VOID(column);
+    auto propertyCallback = [weak, column](float position) {
+        auto isTouchBreak = column->GetTouchBreakStatus();
+        if ((isTouchBreak) || (static_cast<int32_t>(position) == DISMIN)) {
+            return;
+        }
+        column->UpdateToss(static_cast<int>(position));
+        auto ref = weak.Upgrade();
+        CHECK_NULL_VOID(ref);
+        if (position > 0.0f) {
+            if (static_cast<int>(ref->end_) == std::ceil(position)) {
+                column->UpdateFinishToss(std::ceil(position));
+            } else if (static_cast<int>(ref->end_) < std::ceil(position)) {
+                return;
+            } else {
+                column->UpdateToss(std::ceil(position));
+            }
+        } else {
+            if (static_cast<int>(ref->end_) == std::floor(position)) {
+                column->UpdateFinishToss(std::floor(position));
+            } else if (static_cast<int>(ref->end_) > std::floor(position)) {
+                return;
+            } else {
+                column->UpdateToss(std::floor(position));
+            }
+        }
+        column->SetTossStatus(true);
+    };
+    property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
 }
 } // namespace OHOS::Ace::NG

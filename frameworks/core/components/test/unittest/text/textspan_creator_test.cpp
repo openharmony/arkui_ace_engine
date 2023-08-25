@@ -33,6 +33,7 @@ constexpr int32_t FONT_WEIGHT = 1;
 constexpr int32_t FONT_STYLE = 1;
 constexpr int32_t TEXT_BASE_LINE_JSON = 1;
 constexpr int32_t TEXT_DECORATION_JSON = 1;
+constexpr int32_t TEXT_DECORATION_STYLE_JSON = 2;
 constexpr double WORD_SPACING = 10.0;
 constexpr double LETTER_SPACING = 10.0;
 constexpr double LINE_HEIGHT = 10.0;
@@ -258,6 +259,36 @@ HWTEST_F(TextSpanCreatorTest, TextSpanCreator002, TestSize.Level1)
         EXPECT_EQ(spanShadowColor.GetBlue(), TEXT_COLOR_BLUE);
         EXPECT_TRUE(textStyle.GetFontFamilies() == FONT_FAMILIES);
     }
+}
+
+/**
+ * @tc.name: TextSpanCreator003
+ * @tc.desc: Test TextDecorationStyle of text span.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextSpanCreatorTest, TextSpanCreator003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create component based on json string.
+     */
+    const std::string jsonSpan = "{                               "
+                                 "  \"className\": \"TextSpan\",  "
+                                 "  \"textStyle\":                "
+                                 "{                               "
+                                 "  \"className\": \"TextStyle\", "
+                                 "  \"textDecoration\": 1,        "
+                                 "  \"textDecorationStyle\": 2    "
+                                 "}"
+                                 "}";
+    RefPtr<TextSpanComponent> span = CreateComponent(jsonSpan);
+    /**
+     * @tc.steps: step2. Check all the properties matched.
+     * @tc.expected: step2. All the properties are matched.
+     */
+    EXPECT_TRUE(span != nullptr);
+    const auto& textStyle = span->GetTextStyle();
+    EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecoration()), TEXT_DECORATION_JSON);
+    EXPECT_EQ(static_cast<int32_t>(textStyle.GetTextDecorationStyle()), TEXT_DECORATION_STYLE_JSON);
 }
 
 } // namespace OHOS::Ace

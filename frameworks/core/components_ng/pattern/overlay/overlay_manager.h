@@ -95,10 +95,10 @@ public:
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenu(int32_t targetId, bool isMenuOnTouch = false);
+    void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenuInSubWindow(int32_t targetId);
+    void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);
     void HideMenuInSubWindow();
     void CleanMenuInSubWindow();
     void HideAllMenus();
@@ -129,6 +129,9 @@ public:
      *   @return    true if popup was removed, false if no overlay exists
      */
     bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
+    bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter);
+    bool RemoveBubble(const RefPtr<FrameNode>& overlay);
+    bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
     bool RemoveOverlayInSubwindow();
@@ -263,10 +266,12 @@ public:
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
     // ui extension
-    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
+    int32_t CreateModalUIExtension(
+        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack);
     void CloseModalUIExtension(int32_t sessionId);
 
     void MarkDirty(PropertyChangeFlag flag);
+    float GetRootHeight() const;
 
 private:
     void PopToast(int32_t targetId);
@@ -280,7 +285,7 @@ private:
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
 
-    // The focus logic of overlay node (menu and dialog): 
+    // The focus logic of overlay node (menu and dialog):
     // 1. before start show animation: lower level node set unfocusabel and lost focus;
     // 2. end show animation: overlay node get focus;
     // 3. before start hide animation: lower level node set focusable;
@@ -346,6 +351,9 @@ private:
     std::function<bool()> backPressEvent_ = nullptr;
 
     std::set<WeakPtr<UINode>> windowSceneSet_;
+
+    // native modal ui extension
+    bool isProhibitBack_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };

@@ -36,6 +36,7 @@ public:
     void SetControlButtonWidth(const Dimension& width) override;
     void SetControlButtonHeight(const Dimension& height) override;
     void SetControlButtonLeft(const Dimension& left) override;
+    void ResetControlButtonLeft() override;
     void SetControlButtonTop(const Dimension& top) override;
     void SetControlButtonShowIconInfo(
         const std::string& showIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap) override;

@@ -36,6 +36,7 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(int32_t width, int32_t height)
 
 bool OffscreenCanvasPattern::IsSucceed()
 {
+    CHECK_NULL_RETURN(offscreenPaintMethod_, false);
     return offscreenPaintMethod_->IsSucceed();
 }
 

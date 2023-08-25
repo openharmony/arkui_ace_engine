@@ -295,9 +295,12 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     }
 }
 
-void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition)
+void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
 {
     CHECK_NULL_VOID(rsNode_);
+    if (force && !parentPosition.has_value()) {
+        rsNode_->SetSandBox(std::nullopt);
+    }
     if (parentPosition.has_value()) {
         sandBoxCount_++;
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
@@ -796,13 +799,11 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
         auto imageSize = imageParameter.GetSize();
         auto imageWidth = Dimension(ConvertDimensionToPx(imageSize.first, rect.Width()), DimensionUnit::PX);
         auto imageHeight = Dimension(ConvertDimensionToPx(imageSize.second, rect.Height()), DimensionUnit::PX);
-        ImageSourceInfo imageSourceInfo(imageParameter.GetImageSource(), imageWidth, imageHeight);
-        LoadNotifier loadNotifier(nullptr, nullptr, nullptr);
-        auto loadingManager = AceType::MakeRefPtr<ImageLoadingContext>(imageSourceInfo, std::move(loadNotifier));
-        loadingManager->LoadImageData();
         auto rsImagePtr = std::make_shared<Rosen::RSImage>();
-        if (imageSourceInfo.GetPixmap()) {
-            rsImagePtr->SetPixelMap(imageSourceInfo.GetPixmap()->GetPixelMapSharedPtr());
+        if (particleImageMap_.find(imageSource) != particleImageMap_.end()) {
+            SetRsParticleImage(rsImagePtr, imageSource);
+        } else {
+            LoadParticleImage(imageParameter.GetImageSource(), imageWidth, imageHeight);
         }
         rsImagePtr->SetImageFit(static_cast<int32_t>(imageParameter.GetImageFit().value_or(ImageFit::COVER)));
         OHOS::Rosen::Vector2f rsImageSize(imageWidth.ConvertToPx(), imageHeight.ConvertToPx());
@@ -817,6 +818,63 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
             static_cast<OHOS::Rosen::ShapeType>(shapeInt), rsPoint, rsSize, particleCount,
             lifeTimeOpt.value_or(PARTICLE_DEFAULT_LIFETIME), OHOS::Rosen::ParticleType::POINTS, radius,
             std::make_shared<OHOS::Rosen::RSImage>(), OHOS::Rosen::Vector2f());
+    }
+}
+
+void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource)
+{
+    if (particleImageMap_.find(imageSource) != particleImageMap_.end()) {
+        auto image = DynamicCast<NG::PixelMapImage>(particleImageMap_[imageSource]);
+        CHECK_NULL_VOID_NOLOG(image);
+        auto pixmap = image->GetPixelMap();
+        CHECK_NULL_VOID_NOLOG(pixmap);
+        rsImagePtr->SetPixelMap(pixmap->GetPixelMapSharedPtr());
+    }
+}
+
+void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& width, Dimension& height)
+{
+    if (particleImageContextMap_.find(src) != particleImageContextMap_.end()) {
+        return;
+    }
+    ImageSourceInfo imageSourceInfo(src, width, height);
+    auto preLoadCallback = [weak = WeakClaim(this), imageSrc = src](const ImageSourceInfo& sourceInfo) {
+        auto renderContent = weak.Upgrade();
+        CHECK_NULL_VOID(renderContent);
+        auto& imageContext = renderContent->particleImageContextMap_[imageSrc];
+        CHECK_NULL_VOID(imageContext);
+        imageContext->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
+    };
+    auto loadingSuccessCallback = [weak = WeakClaim(this), imageSrc = src](const ImageSourceInfo& sourceInfo) {
+        auto renderContent = weak.Upgrade();
+        CHECK_NULL_VOID(renderContent);
+        auto& imageContext = renderContent->particleImageContextMap_[imageSrc];
+        CHECK_NULL_VOID(imageContext);
+        auto imagePtr = imageContext->MoveCanvasImage();
+        renderContent->OnParticleImageLoaded(imageSrc, imagePtr);
+    };
+    auto loadingErrorCallback = [weak = WeakClaim(this), imageSrc = src](
+                                    const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+        auto renderContent = weak.Upgrade();
+        CHECK_NULL_VOID(renderContent);
+        renderContent->OnParticleImageLoaded(imageSrc, nullptr);
+    };
+    LoadNotifier loadNotifier(preLoadCallback, loadingSuccessCallback, loadingErrorCallback);
+    auto particleImageLoadingCtx =
+        AceType::MakeRefPtr<ImageLoadingContext>(imageSourceInfo, std::move(loadNotifier));
+    imageSourceInfo.SetSrc(src, Color(0x00000000));
+    particleImageLoadingCtx->LoadImageData();
+    particleImageContextMap_.try_emplace(src, particleImageLoadingCtx);
+}
+
+void RosenRenderContext::OnParticleImageLoaded(const std::string& src, RefPtr<CanvasImage> canvasImage)
+{
+    particleImageMap_.try_emplace(src, canvasImage);
+    if (particleImageContextMap_.find(src) != particleImageContextMap_.end()) {
+        particleImageContextMap_.erase(src);
+    }
+    if (particleImageContextMap_.empty() && propParticleOptionArray_.has_value()) {
+        OnParticleOptionArrayUpdate(propParticleOptionArray_.value());
     }
 }
 
@@ -1064,6 +1122,7 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
     // translateZ doesn't support percentage
     float zValue = translate.z.ConvertToPx();
     rsNode_->SetTranslate(xValue, yValue, zValue);
+    ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
     RequestNextFrame();
 }
 
@@ -1278,6 +1337,7 @@ void RosenRenderContext::UpdateTranslateInXY(const OffsetF& offset)
         translateXY_ = std::make_shared<Rosen::RSTranslateModifier>(propertyXY);
         rsNode_->AddModifier(translateXY_);
     }
+    ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
 }
 
 OffsetF RosenRenderContext::GetShowingTranslateProperty()
@@ -1590,7 +1650,7 @@ void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixe
 
 void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)
 {
-    NG::ComponentSnapshot::JsCallback callback = [weak = WeakClaim(RawPtr(GetHost())),
+    NG::ComponentSnapshot::JsCallback callback = [weak = WeakPtr(GetHost()),
                                                      containerId = Container::CurrentId()](
                                                      std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode) {
         CHECK_NULL_VOID(pixmap);
@@ -1839,6 +1899,7 @@ void RosenRenderContext::SetPositionToRSNode()
     } else {
         rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     }
+    ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
 }
 
 void RosenRenderContext::OnPositionUpdate(const OffsetT<Dimension>& /*value*/)

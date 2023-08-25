@@ -62,8 +62,14 @@ public:
 
     void StopTossAnimation();
 
+    double GetTossEndPosition()
+    {
+        return end_;
+    }
+
 private:
     double GetCurrentTime() const;
+    void CreatePropertyCallback();
 
     double yStart_ = 0.0;
     double yEnd_ = 0.0;
@@ -71,7 +77,7 @@ private:
     double timeEnd_ = 0.0;
     double speed_ = 0.0;
     int32_t showCount_ = 0;
-
+    double end_ = 0.0;
     RefPtr<PickerAnimation> toss_;
     WeakPtr<DatePickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;

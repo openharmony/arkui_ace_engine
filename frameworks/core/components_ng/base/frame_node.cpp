@@ -633,6 +633,11 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    if (configurationChange.DirectionOrDpiUpdate) {
+        pattern_->OnDirectionOrDpiConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void FrameNode::OnVisibleChange(bool isVisible)
@@ -672,7 +677,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     SetGeometryNode(dirty->GetGeometryNode());
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this))) {
         geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
@@ -1469,12 +1474,14 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto name = GetInspectorId().value_or("");
     auto param = renderContext_->GetTrans();
-    TransformConfig cfg = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7], param[8],
-        GetId() };
+    if (param.empty()) {
+        translateCfg[GetId()] = { .id = GetId() };
+    } else {
+        translateCfg[GetId()] = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7],
+            param[8], GetId() };
+    }
     auto parent = GetAncestorNodeOfFrame();
-    translateCfg[GetId()] = cfg;
     if (parent) {
         AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
         translateIds[GetId()] = ancestorNodeInfo;
@@ -2334,7 +2341,7 @@ void FrameNode::Layout()
 void FrameNode::SyncGeometryNode()
 {
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning();
+    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
 
     if (!isActive_ && !hasTransition) {
         LOGD("current node is inactive, don't need to render");

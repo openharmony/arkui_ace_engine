@@ -57,6 +57,11 @@ public:
     {
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()));
     }
+
+    virtual uint32_t GetResourceLimitKeys() const
+    {
+        return 0;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H

@@ -71,7 +71,10 @@ template("ace_osal_ohos_source_set") {
       "want_wrap_ohos.cpp",
     ]
 
-    external_deps += [ "init:libbegetutil" ]
+    external_deps += [
+      "ability_runtime:app_manager",
+      "init:libbegetutil",
+    ]
 
     if (is_ohos_standard_system) {
       sources += [
@@ -99,12 +102,13 @@ template("ace_osal_ohos_source_set") {
         "image_framework:image",
         "input:libmmi-client",
         "napi:ace_napi",
+        "netmanager_base:net_conn_manager_if",
         "resource_management:global_resmgr",
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
         sources += [ "js_accessibility_manager.cpp" ]
-        deps += [ "$ace_root/frameworks/bridge/common/accessibility:bridge_accessibility_ohos" ]
+        deps += [ "$ace_root/frameworks/bridge/common/accessibility:bridge_accessibility_$platform" ]
         external_deps += [
           "ability_runtime:ability_manager",
           "accessibility:accessibilityclient",
@@ -124,6 +128,7 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [
+      "download_manager_ohos.cpp",
       "file_uri_helper_ohos.cpp",
       "image_source_ohos.cpp",
       "mouse_style_ohos.cpp",
@@ -160,8 +165,10 @@ template("ace_osal_ohos_source_set") {
 
 foreach(item, ace_platforms) {
   platform = item.name
-  if (platform == "ohos") {
-    ace_osal_ohos_source_set("ace_osal_ohos") {
+  if (platform == "ohos" || platform == "ohos_ng") {
+    ace_osal_ohos_source_set("ace_osal_ohos_${platform}") {
+      platform = item.name
+      assert(defined(platform) && platform != "", "platform must be defined")
       defines = []
       config = {
       }

@@ -56,7 +56,8 @@ public:
     virtual void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) {}
 
     virtual void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent,
-        StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent)
+        StateChangedEvent&& stateChangedEvent, CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
+        CommonEvent&& startRenderFrameEvent)
     {}
 
     virtual int32_t GetDuration(int32_t& /*duration*/)

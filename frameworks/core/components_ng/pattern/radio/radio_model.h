@@ -39,6 +39,7 @@ public:
     virtual void SetIndicatorColor(const Color& color) {}
     virtual void SetOnChangeEvent(NG::ChangeEvent&& onChangeEvent) {};
     virtual void SetOnClickEvent(std::function<void()>&& onClick) {};
+    virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
 
 private:
     static std::unique_ptr<RadioModel> instance_;

@@ -181,6 +181,9 @@ public:
     // called when gesture scope is closed.
     void ResetStatusOnFinish()
     {
+        if (refereeState_ == RefereeState::SUCCEED) {
+            OnSucceedCancel();
+        }
         refereeState_ = RefereeState::READY;
         OnResetStatus();
     }
@@ -229,6 +232,8 @@ protected:
     virtual void HandleTouchCancelEvent(const AxisEvent& event) {}
 
     virtual void OnResetStatus() = 0;
+
+    virtual void OnSucceedCancel() {}
 
     RefereeState refereeState_ = RefereeState::READY;
 

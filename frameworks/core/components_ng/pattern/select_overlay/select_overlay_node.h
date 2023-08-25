@@ -126,6 +126,15 @@ private:
                     -selectMenuInner_
                 -backButton_
                 -extensionMenu_
+       Attention:
+        If the user-defined selection menu is bound by bindSelectionMenu, there will be only the selectMenu_.
+        Then, selectMenuInner_, backButton_, extensionMenu_ will be null.
+        Text selection menu node structure whill be like bellow:
+        -rootNode
+            -selectOverlay
+                -selectMenu_(menu)
+                    -scroller
+                        -customBuilderMenu
     */
     RefPtr<FrameNode> selectMenu_;
     RefPtr<FrameNode> selectMenuInner_;

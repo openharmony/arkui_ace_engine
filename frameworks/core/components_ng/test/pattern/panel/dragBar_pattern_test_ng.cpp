@@ -319,4 +319,33 @@ HWTEST_F(DragBarPatternTestNg, DragBarPatternTest004, TestSize.Level1)
     bool flag = dragBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(flag == true);
 }
+
+/**
+ * @tc.name: DragBarPatternTest005
+ * @tc.desc: Test dragBar HandleTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragBarPatternTestNg, DragBarPatternTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get dragBar frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHasDragBar(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(columnNode);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    CHECK_NULL_VOID(dragBarNode);
+    dragBarNode->MarkModifyDone();
+    auto dragBarPattern = dragBarNode->GetPattern<DragBarPattern>();
+    EXPECT_FALSE(dragBarPattern == nullptr);
+    auto paintProperty = dragBarNode->GetPaintProperty<DragBarPaintProperty>();
+    EXPECT_FALSE(paintProperty == nullptr);
+    paintProperty->UpdateDragOffset(OffsetF(0.1f, 0.2f));
+    dragBarPattern->HandleTouchUp();
+    EXPECT_TRUE(paintProperty->GetDragOffset() == OffsetF(0.1f, 0.2f));
+}
 } // namespace OHOS::Ace::NG

@@ -64,7 +64,7 @@ void NapiThrow(napi_env env, const std::string& message, int32_t errCode)
     napi_throw(env, error);
 }
 
-void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int32_t containCount)
+void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, int32_t containCount)
 {
     auto size = static_cast<int32_t>(params.size());
     if (containCount == size) {
@@ -126,18 +126,17 @@ bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_val
         return true;
     }
     if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (ParseResourceParam(env, value, id, type, params)) {
-            ParseString(id, type, params, retStr);
+        ResourceInfo recv;
+        if (ParseResourceParam(env, value, recv)) {
+            ParseString(recv, retStr);
             return true;
         }
     }
     return false;
 }
 
-RefPtr<ThemeConstants> GetThemeConstants()
+RefPtr<ThemeConstants> GetThemeConstants(const std::optional<std::string>& bundleName = std::nullopt,
+    const std::optional<std::string>& moduleName = std::nullopt)
 {
     auto container = Container::Current();
     if (!container) {
@@ -154,32 +153,39 @@ RefPtr<ThemeConstants> GetThemeConstants()
         LOGE("themeManager is null!");
         return nullptr;
     }
+    if (bundleName.has_value() && moduleName.has_value()) {
+        return themeManager->GetThemeConstants(bundleName.value_or(""), moduleName.value_or(""));
+    }
     return themeManager->GetThemeConstants();
 }
 
-bool ParseResourceParam(napi_env env, napi_value value, int32_t& id, int32_t& type, std::vector<std::string>& params)
+bool ParseResourceParam(napi_env env, napi_value value, ResourceInfo& info)
 {
     napi_value idNApi = nullptr;
     napi_value typeNApi = nullptr;
     napi_value paramsNApi = nullptr;
+    napi_value bundleNameNApi = nullptr;
+    napi_value moduleNameNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
     if (valueType == napi_object) {
         napi_get_named_property(env, value, "id", &idNApi);
         napi_get_named_property(env, value, "type", &typeNApi);
         napi_get_named_property(env, value, "params", &paramsNApi);
+        napi_get_named_property(env, value, "bundleName", &bundleNameNApi);
+        napi_get_named_property(env, value, "moduleName", &moduleNameNApi);
     } else {
         return false;
     }
 
     napi_typeof(env, idNApi, &valueType);
     if (valueType == napi_number) {
-        napi_get_value_int32(env, idNApi, &id);
+        napi_get_value_int32(env, idNApi, &info.resId);
     }
 
     napi_typeof(env, typeNApi, &valueType);
     if (valueType == napi_number) {
-        napi_get_value_int32(env, typeNApi, &type);
+        napi_get_value_int32(env, typeNApi, &info.type);
     }
 
     bool isArray = false;
@@ -203,43 +209,79 @@ bool ParseResourceParam(napi_env env, napi_value value, int32_t& id, int32_t& ty
             size_t strLen = GetParamLen(indexValue) + 1;
             std::unique_ptr<char[]> indexStr = std::make_unique<char[]>(strLen);
             napi_get_value_string_utf8(env, indexValue, indexStr.get(), strLen, &ret);
-            params.emplace_back(indexStr.get());
+            info.params.emplace_back(indexStr.get());
         } else if (valueType == napi_number) {
             int32_t num;
             napi_get_value_int32(env, indexValue, &num);
-            params.emplace_back(std::to_string(num));
+            info.params.emplace_back(std::to_string(num));
         }
     }
+
+    napi_typeof(env, bundleNameNApi, &valueType);
+    if (valueType == napi_string) {
+        size_t ret = 0;
+        size_t strLen = GetParamLen(bundleNameNApi) + 1;
+        std::unique_ptr<char[]> bundleNameStr = std::make_unique<char[]>(strLen);
+        napi_get_value_string_utf8(env, bundleNameNApi, bundleNameStr.get(), strLen, &ret);
+        info.bundleName = bundleNameStr.get();
+    }
+
+    napi_typeof(env, moduleNameNApi, &valueType);
+    if (valueType == napi_string) {
+        size_t ret = 0;
+        size_t strLen = GetParamLen(moduleNameNApi) + 1;
+        std::unique_ptr<char[]> moduleNameStr = std::make_unique<char[]>(strLen);
+        napi_get_value_string_utf8(env, moduleNameNApi, moduleNameStr.get(), strLen, &ret);
+        info.moduleName = moduleNameStr.get();
+    }
+
     return true;
 }
 
-bool ParseString(int32_t resId, int32_t type, std::vector<std::string>& params, std::string& result)
+std::string DimensionToString(Dimension dimension)
 {
-    auto themeConstants = GetThemeConstants();
+    static const int32_t unitsNum = 6;
+    static const int32_t percentIndex = 3;
+    static const int32_t percentUnit = 100;
+    static std::array<std::string, unitsNum> units = { "px", "vp", "fp", "%", "lpx", "auto" };
+    auto unit = dimension.Unit();
+    auto value = dimension.Value();
+    if (unit == DimensionUnit::NONE) {
+        return StringUtils::DoubleToString(value).append("none");
+    }
+    if (units[static_cast<int>(unit)] == units[percentIndex]) {
+        return StringUtils::DoubleToString(value * percentUnit).append(units[static_cast<int>(unit)]);
+    }
+    return StringUtils::DoubleToString(value).append(units[static_cast<int>(unit)]);
+}
+
+bool ParseString(const ResourceInfo& info, std::string& result)
+{
+    auto themeConstants = GetThemeConstants(info.bundleName, info.moduleName);
     if (!themeConstants) {
         LOGE("themeConstants is nullptr");
         return false;
     }
 
-    if (type == static_cast<int>(ResourceType::PLURAL)) {
-        auto count = StringUtils::StringToDouble(params[0]);
-        auto pluralResults = themeConstants->GetStringArray(resId);
+    if (info.type == static_cast<int>(ResourceType::PLURAL)) {
+        auto count = StringUtils::StringToDouble(info.params[0]);
+        auto pluralResults = themeConstants->GetStringArray(info.resId);
         auto pluralChoice = Localization::GetInstance()->PluralRulesFormat(count);
         auto iter = std::find(pluralResults.begin(), pluralResults.end(), pluralChoice);
         std::string originStr;
         if (iter != pluralResults.end() && ++iter != pluralResults.end()) {
             originStr = *iter;
         }
-        ReplaceHolder(originStr, params, 1);
+        ReplaceHolder(originStr, info.params, 1);
         result = originStr;
-    } else if (type == static_cast<int>(ResourceType::RAWFILE)) {
-        auto fileName = params[0];
+    } else if (info.type == static_cast<int>(ResourceType::RAWFILE)) {
+        auto fileName = info.params[0];
         result = themeConstants->GetRawfile(fileName);
-    } else if (type == static_cast<int>(ResourceType::FLOAT)) {
-        result = std::to_string(themeConstants->GetDouble(resId));
+    } else if (info.type == static_cast<int>(ResourceType::FLOAT)) {
+        result = DimensionToString(themeConstants->GetDimension(info.resId));
     } else {
-        auto originStr = themeConstants->GetString(resId);
-        ReplaceHolder(originStr, params, 0);
+        auto originStr = themeConstants->GetString(info.resId);
+        ReplaceHolder(originStr, info.params, 0);
         result = originStr;
     }
     return true;

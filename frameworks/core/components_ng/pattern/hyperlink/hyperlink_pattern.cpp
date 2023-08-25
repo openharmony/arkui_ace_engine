@@ -106,7 +106,7 @@ void HyperlinkPattern::LinkToAddress()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
-    hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextLinkedColor());
+    hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(theme->GetTextLinkedColor()));
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     pipeline->HyperlinkStartAbility(address_);
 #endif
@@ -168,7 +168,8 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
     if (touchType == TouchType::DOWN) {
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
         if (isLinked_) {
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextLinkedColor());
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
+                theme->GetTextLinkedColor()));
         } else {
             hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(
                 theme->GetTextTouchedColor()));
@@ -235,7 +236,8 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextSelectedDecoration());
         if (isLinked_) {
-            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextLinkedColor());
+            hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor().BlendColor(
+                theme->GetTextLinkedColor()));
         } else {
             hyperlinkLayoutProperty->UpdateTextDecorationColor(theme->GetTextColor());
         }

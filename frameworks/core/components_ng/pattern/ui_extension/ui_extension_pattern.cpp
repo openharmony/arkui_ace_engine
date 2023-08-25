@@ -93,6 +93,10 @@ UIExtensionPattern::~UIExtensionPattern()
     UnregisterLifecycleListener();
     UnregisterAbilityResultListener();
     RequestExtensionSessionDestruction();
+    // Native modal page destroy callback
+    if (onModalDestroy_) {
+        onModalDestroy_();
+    }
 }
 
 void UIExtensionPattern::OnConnect()
@@ -170,6 +174,7 @@ void UIExtensionPattern::OnExtensionDied()
             auto extensionPattern = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(extensionPattern);
             if (extensionPattern->onReleaseCallback_) {
+                extensionPattern->isDestruction_ = true;
                 extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
             }
         },
@@ -530,6 +535,11 @@ void UIExtensionPattern::SetModalOnRemoteReadyCallback(
                 }
             }, TaskExecutor::TaskType::UI);
         };
+}
+
+void UIExtensionPattern::SetModalOnDestroy(const std::function<void()>&& callback)
+{
+    onModalDestroy_ = std::move(callback);
 }
 
 void UIExtensionPattern::SetOnReleaseCallback(const std::function<void(int32_t)>&& callback)
