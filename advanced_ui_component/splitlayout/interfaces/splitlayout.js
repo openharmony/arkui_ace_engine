@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-export class splitlayout extends ViewPU {
+export class SplitLayout extends ViewPU {
   constructor(e, t, o, r = -1) {
     super(e, o, r);
     this.container = void 0;
@@ -519,3 +519,4 @@ export class splitlayout extends ViewPU {
     this.updateDirtyElements()
   }
 }
+export default { SplitLayout };
