@@ -840,8 +840,10 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
         textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
         return dy;
     }
-    auto dy = contentRect_.GetY() + GetBorderTop() +
-            contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
+    auto dy = contentRect_.GetY() + GetBorderTop() + contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        dy = contentRect_.GetY() + contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
+    }
     // caret does not exceed bottom boundary, still need to check against safeArea
     if (GreatOrEqual(dy, 0.0f)) {
         return FitCursorInSafeArea();
@@ -2529,12 +2531,18 @@ void TextFieldPattern::ProcessInnerPadding()
                     : paddingProperty->left.value_or(CalcLength(themePadding.Left())).GetDimension().ConvertToPx();
     offsetDifference_.SetX(left + (float)currentBorderWidth.leftDimen->ConvertToPx() - GetPaddingLeft() -
                            GetBorderLeft());
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        offsetDifference_.SetX(left - GetPaddingLeft());
+    }
     utilPadding_.left = left;
     auto top = !paddingProperty
                    ? CalcLength(themePadding.Top()).GetDimension().ConvertToPx()
                    : paddingProperty->top.value_or(CalcLength(themePadding.Top())).GetDimension().ConvertToPx();
     offsetDifference_.SetY(top + (float)currentBorderWidth.topDimen->ConvertToPx() - GetPaddingTop() -
                            GetBorderTop());
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        offsetDifference_.SetY(top - GetPaddingTop());
+    }
     utilPadding_.top = top;
     utilPadding_.bottom =
         !paddingProperty
@@ -5908,7 +5916,10 @@ void TextFieldPattern::RestorePreInlineStates()
         currentBorderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
     }
     textRect_.SetOffset(OffsetF((GetPaddingLeft() + (float)(currentBorderWidth.leftDimen->ConvertToPx())),
-        (GetPaddingTop() + (float)currentBorderWidth.topDimen->ConvertToPx())));
+                                (GetPaddingTop() + (float)currentBorderWidth.topDimen->ConvertToPx())));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
+    }
     layoutProperty->UpdateMargin(inlineState_.margin);
     CalcSize idealSize;
     std::optional<CalcLength> width(inlineState_.frameRect.Width());
