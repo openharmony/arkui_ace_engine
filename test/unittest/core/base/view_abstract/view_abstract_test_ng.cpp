@@ -55,6 +55,8 @@ const int32_t TEN = 10;
 const int32_t FOUF = 4;
 const int32_t INDEX = 1;
 const Color BLUE = Color(0xff0000ff);
+const SafeAreaExpandOpts safeAreaExpandOpts = SafeAreaExpandOpts();
+const std::vector<ObscuredReasons> reasonsVector = { ObscuredReasons::PLACEHOLDER };
 
 const BackgroundImageSize BACKGROUNDSIZE { BackgroundImageSizeType::AUTO, 1.0 };
 const BackgroundImagePosition BACKGROUNDPOSITION { BackgroundImagePositionType::PERCENT, -1.0,
@@ -118,6 +120,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest001, TestSize.Level1)
     ViewAbstract::SetMinHeight(NG::CalcLength(MIN_HEIGHT));
     ViewAbstract::SetMaxWidth(NG::CalcLength(MIN_WIDTH));
     ViewAbstract::SetMaxHeight(NG::CalcLength(MIN_HEIGHT));
+    ViewAbstract::ResetAspectRatio();
     ViewAbstract::ClearWidthOrHeight(true);
 
     /**
@@ -145,6 +148,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest002, TestSize.Level1)
     ViewAbstract::SetMinHeight(NG::CalcLength(MIN_HEIGHT));
     ViewAbstract::SetMaxWidth(NG::CalcLength(MIN_WIDTH));
     ViewAbstract::SetMaxHeight(NG::CalcLength(MIN_HEIGHT));
+    ViewAbstract::ResetAspectRatio();
     ViewAbstract::ClearWidthOrHeight(true);
 
     /**
@@ -837,6 +841,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest019, TestSize.Level1)
     ViewAbstract::SetUseEffect(false);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
+    ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);
+    ViewAbstract::SetObscured(reasonsVector);
 
     /**
      * @tc.expected: Return expected results.
@@ -877,6 +883,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest020, TestSize.Level1)
     ViewAbstract::SetUseEffect(false);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
+    ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);
+    ViewAbstract::SetObscured(reasonsVector);
 
     /**
      * @tc.expected: Return expected results.
@@ -1231,6 +1239,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest029, TestSize.Level1)
     ViewAbstract::SetBackgroundImage(imageSourceInfo);
     ViewAbstract::SetBackgroundImageSize(BACKGROUNDSIZE);
     ViewAbstract::SetBackgroundImagePosition(BACKGROUNDPOSITION);
+    ViewAbstract::ResetAspectRatio();
 
     /**
      * @tc.expected: Return expected results.
@@ -1511,6 +1520,11 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest036, TestSize.Level1)
     ViewAbstract::SetLightUpEffect(RATIO);
     ViewAbstract::SetForegroundColor(BLUE);
     ViewAbstract::ClearWidthOrHeight(true);
+    ViewAbstract::SetUseEffect(false);
+    ViewAbstract::SetRenderGroup(false);
+    ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
+    ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);
+    ViewAbstract::SetObscured(reasonsVector);
 
     PixStretchEffectOption option;
     option.bottom = BOTTOM;
