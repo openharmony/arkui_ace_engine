@@ -800,6 +800,7 @@ void ViewAbstract::SetOnVisibleChange(
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    frameNode->ClearVisibleAreaUserCallback();
 
     for (const auto& ratio : ratioList) {
         pipeline->AddVisibleAreaChangeNode(frameNode, ratio, onVisibleChange);
