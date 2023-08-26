@@ -329,14 +329,17 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float selectedItemWidth = selectedItemWidthValue * INDICATOR_ZOOM_IN_SCALE;
     float padding = static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx());
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
-    int32_t currentIndex = swiperPattern->GetCurrentIndex();
+    int32_t currentIndex = swiperPattern->GetCurrentShownIndex();
     int32_t itemCount = swiperPattern->TotalCount();
+    int32_t loopCount = itemCount == 0 ? 0 : std::abs(currentIndex / itemCount);
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto axis = swiperPattern->GetDirection();
     float centerX = padding;
     float centerY = ((axis == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - itemHeight) * 0.5f;
     PointF hoverPoint = axis == Axis::HORIZONTAL ? hoverPoint_ : PointF(hoverPoint_.GetY(), hoverPoint_.GetX());
-    for (int32_t i = 0; i < itemCount; ++i) {
+    int start = currentIndex >= 0 ? loopCount * itemCount : -(loopCount +1) * itemCount;
+    int end = currentIndex >= 0 ? (loopCount + 1) * itemCount : -loopCount * itemCount;
+    for (int32_t i = start; i < end; ++i) {
         if (i != currentIndex) {
             if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
                 hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {

@@ -712,7 +712,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto targetIndex = (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
+    auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
     targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
     if (currentIndex_ == targetIndex) {
         LOGD("Target index is same with current index.");
