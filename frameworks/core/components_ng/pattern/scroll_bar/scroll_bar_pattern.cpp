@@ -128,10 +128,18 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (displayMode_ != DisplayMode::OFF) {
         auto host = GetHost();
         CHECK_NULL_RETURN_NOLOG(host, false);
-        auto layoutProperty = host->GetLayoutProperty<ScrollBarLayoutProperty>();
-        CHECK_NULL_RETURN_NOLOG(layoutProperty, false);
-        auto visible = Positive(controlDistance_) ? VisibleType::VISIBLE : VisibleType::INVISIBLE;
-        layoutProperty->UpdateVisibility(visible);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN_NOLOG(renderContext, false);
+        if (Positive(controlDistance_) && opacity_ == 0) {
+            SetOpacity(UINT8_MAX);
+            if (displayMode_ == DisplayMode::AUTO) {
+                StartAnimator();
+            }
+            return true;
+        } else if (!Positive(controlDistance_) && opacity_ == UINT8_MAX) {
+            SetOpacity(0);
+            return true;
+        }
     }
     return false;
 }
@@ -177,6 +185,9 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
 
 void ScrollBarPattern::StartAnimator()
 {
+    if (!Positive(controlDistance_)) {
+        return;
+    }
     if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
         scrollEndAnimator_->Stop();
     }
@@ -208,6 +219,9 @@ void ScrollBarPattern::StartAnimator()
 
 void ScrollBarPattern::StopAnimator()
 {
+    if (!Positive(controlDistance_)) {
+        return;
+    }
     if (scrollEndAnimator_ && !scrollEndAnimator_->IsStopped()) {
         scrollEndAnimator_->Stop();
     }
@@ -220,6 +234,7 @@ void ScrollBarPattern::SetOpacity(uint8_t value)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    opacity_ = value;
     renderContext->UpdateOpacity(static_cast<double>(value) / UINT8_MAX);
     host->MarkNeedRenderOnly();
 }
