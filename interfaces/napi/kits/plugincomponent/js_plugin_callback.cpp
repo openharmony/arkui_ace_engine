@@ -382,9 +382,6 @@ void JSPluginCallback::OnRequestCallBack(const PluginComponentTemplate& pluginTe
         uvWorkData_.extraData = extraData;
 
         if (getpid() != gettid()) {
-            uv_loop_s* loop = nullptr;
-            napi_get_uv_event_loop(cbInfo_.env, &loop);
-
             struct ResultData {
                 JSPluginCallback* context = nullptr;
                 std::mutex mtx;
