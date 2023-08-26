@@ -257,19 +257,6 @@ public:
         return minuteId_.value();
     }
 
-    bool HasSecondNode() const
-    {
-        return secondId_.has_value();
-    }
-
-    int32_t GetSecondId()
-    {
-        if (!secondId_.has_value()) {
-            secondId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return secondId_.value();
-    }
-
     bool GetHasSecond() const
     {
         return hasSecond_;
@@ -277,18 +264,6 @@ public:
     void SetHasSecond(bool value)
     {
         hasSecond_ = value;
-    }
-
-    bool GetWheelModeEnabled() const
-    {
-        auto timePickerLayoutProperty = GetLayoutProperty<TimePickerLayoutProperty>();
-        CHECK_NULL_RETURN(timePickerLayoutProperty, wheelModeEnabled_);
-        return timePickerLayoutProperty->GetLoopValue();
-    }
-
-    void SetWheelModeEnabled(bool value)
-    {
-        wheelModeEnabled_ = value;
     }
 
     RefPtr<FrameNode> GetColumn(int32_t tag) const
@@ -321,8 +296,6 @@ public:
     std::string GetHourFormatString(uint32_t hour) const;
 
     std::string GetMinuteFormatString(uint32_t minute) const;
-
-    std::string GetSecondFormatString(uint32_t Second) const;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -376,8 +349,6 @@ private:
     void PaintFocusState();
     void SetButtonIdeaSize();
     double SetAmPmButtonIdeaSize();
-    void GetAllChildNodeWithSecond();
-    void CreateOrDeleteSecondNode();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -394,7 +365,6 @@ private:
     std::optional<int32_t> amPmId_;
     std::optional<int32_t> hourId_;
     std::optional<int32_t> minuteId_;
-    std::optional<int32_t> secondId_;
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;
     std::optional<int32_t> DividerId_;
@@ -402,7 +372,6 @@ private:
     WeakPtr<FrameNode> weakButtonCancel_;
 
     bool hasSecond_ = false;
-    bool wheelModeEnabled_ = true;
     std::vector<RefPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
 

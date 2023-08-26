@@ -23,12 +23,11 @@ class TimePickerModelImpl : public TimePickerModel {
 public:
     TimePickerModelImpl() = default;
     ~TimePickerModelImpl() override = default;
-
-    void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) override;
+    
+    void CreateTimePicker(RefPtr<PickerTheme> pickerTheme) override;
     void SetSelectedTime(const PickerTime& value) override;
     void SetOnChange(ChangeEvent&& onChange) override;
     void SetHour24(bool isUseMilitaryTime) override;
-    void SetWheelModeEnabled(bool wheelModeEnabled) override {};
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
     void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
