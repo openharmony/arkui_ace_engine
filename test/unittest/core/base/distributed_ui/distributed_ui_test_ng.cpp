@@ -265,4 +265,66 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg005, TestSize.Level1)
     EXPECT_TRUE(distributedUI.newNodes_.empty());
     EXPECT_FALSE(distributedUI.IsNewNode(100));
 }
+
+/**
+ * @tc.name: DistributedUiTestNg006
+ * @tc.desc: DistributedUi of tests
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg006, TestSize.Level1)
+{
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::JS_SYNTAX_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNode::CreateFrameNode(
+        "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    parentNode->AddChild(childNode);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+    /**
+     * @tc.steps: step1. creat distributedUI and creat parentNode add childNode
+     * @tc.expected: step1. call DumpUITree() return SerializeableObjectArray
+     */
+    DistributedUI distributedUI;
+    auto array = distributedUI.DumpUITree();
+    EXPECT_EQ(distributedUI.status_, DistributedUI::StateMachine::SOURCE_START);
+    EXPECT_TRUE(!array.empty());
+
+    /**
+     * @tc.steps: step2. call SetIdMapping
+     * @tc.expected: step2. nodeIdMapping_.size() > 0
+     */
+    int32_t srcNodeId = 0;
+    int32_t sinkNodeId = 0;
+    distributedUI.SetIdMapping(srcNodeId, sinkNodeId);
+    EXPECT_EQ(distributedUI.GetIdMapping(srcNodeId), sinkNodeId);
+    /**
+     * @tc.steps: step3. call SetIdMapping
+     * @tc.expected: step3. set same numerals fix value price
+     */
+    distributedUI.SetIdMapping(srcNodeId, sinkNodeId + 1);
+    EXPECT_EQ(distributedUI.nodeIdMapping_.size(), 1);
+    /**
+     * @tc.steps: step4. call GetIdMapping
+     * @tc.expected: step4. Enter a value that does not exist and return -1
+     */
+    EXPECT_EQ(distributedUI.GetIdMapping(10), -1);
+
+    /**
+     * @tc.steps: step5. call IsRecordHash
+     * @tc.expected: step5. Returns false or true to determine whether a value already exists
+     */
+    distributedUI.AddNodeHash(0, 0);
+    EXPECT_FALSE(distributedUI.IsRecordHash(0, 0));
+    EXPECT_TRUE(distributedUI.IsRecordHash(10, 0));
+    EXPECT_TRUE(distributedUI.IsRecordHash(0, 10));
+    EXPECT_TRUE(distributedUI.IsRecordHash(10, 10));
+
+    /**
+     * @tc.steps: step6. call IsInCurrentPage
+     * @tc.expected: step6. Returns false or true to determine whether a value already exists
+     */
+    EXPECT_TRUE(distributedUI.IsInCurrentPage(parentNode, 0));
+    EXPECT_TRUE(distributedUI.IsInCurrentPage(childNode, 0));
+    EXPECT_FALSE(distributedUI.IsInCurrentPage(childNode, 5));
+}
 } // namespace OHOS::Ace::NG
