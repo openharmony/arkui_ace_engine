@@ -85,6 +85,7 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("selectedColor", &JSCheckbox::SelectedColor);
     JSClass<JSCheckbox>::StaticMethod("unselectedColor", &JSCheckbox::UnSelectedColor);
     JSClass<JSCheckbox>::StaticMethod("mark", &JSCheckbox::Mark);
+    JSClass<JSCheckbox>::StaticMethod("responseRegion", &JSCheckbox::JsResponseRegion);
     JSClass<JSCheckbox>::StaticMethod("width", &JSCheckbox::JsWidth);
     JSClass<JSCheckbox>::StaticMethod("height", &JSCheckbox::JsHeight);
     JSClass<JSCheckbox>::StaticMethod("size", &JSCheckbox::JsSize);
@@ -142,6 +143,23 @@ void JSCheckbox::SetOnChange(const JSCallbackInfo& args)
     };
     CheckBoxModel::GetInstance()->SetOnChange(onChange);
     args.ReturnSelf();
+}
+
+void JSCheckbox::JsResponseRegion(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsResponseRegion(info);
+        return;
+    }
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    std::vector<DimensionRect> result;
+    if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        return;
+    }
+    CheckBoxModel::GetInstance()->SetResponseRegion(result);
 }
 
 void JSCheckbox::JsWidth(const JSCallbackInfo& info)

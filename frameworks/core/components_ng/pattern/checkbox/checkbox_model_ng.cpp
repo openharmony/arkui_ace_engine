@@ -103,4 +103,14 @@ void CheckBoxModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
+
+void CheckBoxModelNG::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
+{
+    NG::ViewAbstract::SetResponseRegion(responseRegion);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsUserSetResponseRegion(true);
+}
 } // namespace OHOS::Ace::NG
