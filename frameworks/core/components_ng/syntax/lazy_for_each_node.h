@@ -103,6 +103,7 @@ public:
             builder_->SetCacheCount(cacheCount);
         }
     }
+    int32_t GetIndexByUINode(const RefPtr<UINode>& uiNode) const;
 
 private:
     void OnAttachToMainTree(bool recursive) override
