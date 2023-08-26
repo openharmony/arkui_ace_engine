@@ -75,16 +75,6 @@ public:
         return isMoreItemNode_;
     }
 
-    void SetIsTitleMenuNodeShowing(bool isTitleMenuNodeShowing)
-    {
-        isTitleMenuNodeShowing_ = isTitleMenuNodeShowing;
-    }
-
-    bool IsTitleMenuNodeShowing() const
-    {
-        return isTitleMenuNodeShowing_;
-    }
-
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(IconSrc, std::string);
     void OnIconSrcUpdate(const std::string& value) {}
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Text, std::string);
@@ -95,7 +85,6 @@ private:
     RefPtr<UINode> icon_;
     bool isInToolbar_ = false;
     bool isMoreItemNode_ = false;
-    bool isTitleMenuNodeShowing_ = false;
 };
 
 } // namespace OHOS::Ace::NG
