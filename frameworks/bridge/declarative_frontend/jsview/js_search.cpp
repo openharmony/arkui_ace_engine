@@ -198,7 +198,8 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         // set button font size, unit FP
         auto fontSize = param->GetProperty("fontSize");
         CalcDimension size = theme->GetFontSize();
-        if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
+            GreatOrEqual(size.Value(), 0.0)) {
             ParseJsDimensionFp(fontSize, size);
         } else {
             size = theme->GetFontSize();
@@ -439,7 +440,8 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     Font font;
     auto fontSize = param->GetProperty("size");
     CalcDimension size = Dimension(-1);
-    if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
+    if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
+        GreatOrEqual(size.Value(), 0.0)) {
         ParseJsDimensionFp(fontSize, size);
     } else {
         size = Dimension(-1);
