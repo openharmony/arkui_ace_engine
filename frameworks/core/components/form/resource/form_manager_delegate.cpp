@@ -544,6 +544,16 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
         LOGE("get event action failed");
         return;
     }
+    auto uri = eventAction->GetValue("uri");
+    if (uri->IsValid()) {
+        CHECK_NULL_VOID(formUtils_);
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto instantId = context->GetInstanceId();
+        LOGI("OnActionEvent with uri");
+        formUtils_->RouterEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+        return;
+    }
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
         LOGE("get event key failed");

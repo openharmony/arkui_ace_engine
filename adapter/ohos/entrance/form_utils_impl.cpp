@@ -35,18 +35,8 @@ int32_t FormUtilsImpl::RouterEvent(
     CHECK_NULL_RETURN_NOLOG(token_, -1);
     AAFwk::Want want;
     auto eventAction = JsonUtil::ParseJsonString(action);
-    auto bundleName = eventAction->GetValue("bundleName");
-    auto abilityName = eventAction->GetValue("abilityName");
+    auto uri = eventAction->GetValue("uri");
     auto params = eventAction->GetValue("params");
-    auto bundle = bundleName->GetString();
-    auto ability = abilityName->GetString();
-    if (ability.empty()) {
-        return -1;
-    }
-    if (bundle.empty()) {
-        bundle = defaultBundleName;
-    }
-    want.SetElementName(bundle, ability);
     if (params->IsValid()) {
         auto child = params->GetChild();
         while (child->IsValid()) {
@@ -64,6 +54,23 @@ int32_t FormUtilsImpl::RouterEvent(
         }
     }
     want.SetParam("params", params->ToString());
+    if (uri->IsValid()) {
+        auto uriStr = uri->GetString();
+        want.SetUri(uriStr);
+    } else {
+        auto bundleName = eventAction->GetValue("bundleName");
+        auto abilityName = eventAction->GetValue("abilityName");
+        auto bundle = bundleName->GetString();
+        auto ability = abilityName->GetString();
+        if (ability.empty()) {
+            return -1;
+        }
+        if (bundle.empty()) {
+            bundle = defaultBundleName;
+        }
+        want.SetElementName(bundle, ability);
+    }
+
     return AppExecFwk::FormMgr::GetInstance().RouterEvent(formId, want, token_);
 }
 
