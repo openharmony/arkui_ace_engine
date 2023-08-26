@@ -291,7 +291,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
     if (paragraph) {
-        if (inlineFocusState_) {
+        if (inlineFocusState_ && needApplyInlineSize_) {
             CalcSize idealSize;
 #ifndef USE_GRAPHIC_TEXT_GINE
             auto paragraphWidth = paragraph_->GetLongestLine();
@@ -5879,6 +5879,7 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     if (!IsTextArea()) {
         layoutProperty->ResetMaxLines();
     }
+    needApplyInlineSize_ = true;
 }
 
 bool TextFieldPattern::ResetObscureTickCountDown()

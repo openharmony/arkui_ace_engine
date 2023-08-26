@@ -242,7 +242,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         // for InlineStyle, max width is content width with safe boundary.
         float inlineBoxWidth = 0.0f;
         auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2 + INLINE_SAFE_BOUNDARY_VALUE;
-        if (pattern->IsSelected()) {
+        if (pattern->IsFocus()) {
             inlineBoxWidth = pattern->GetPreviewWidth() < layoutConstraint->maxSize.Width()
                                  ? (pattern->GetPreviewWidth() + safeBoundary)
                                  : (layoutConstraint->maxSize.Width() - safeBoundary);
@@ -295,7 +295,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
     }
-    if (isInlineStyle && pattern->IsSelected() && paragraph_->GetLineCount() != 0) {
+    if (isInlineStyle && pattern->IsFocus() && paragraph_->GetLineCount() != 0) {
         pattern->SetSingleLineHeight(preferredHeight / paragraph_->GetLineCount());
     }
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -309,7 +309,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             (textContent.empty() || !showPlaceHolder) ? preferredHeight : static_cast<float>(paragraph_->GetHeight());
         auto useHeight =
             static_cast<float>(paragraphHeight + (counterParagraph_ ? counterParagraph_->GetHeight() : 0.0f));
-        if (isInlineStyle && pattern->IsSelected()) {
+        if (isInlineStyle && pattern->IsFocus()) {
             idealHeight = pattern->GetSingleLineHeight() *
                           textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
 #ifndef USE_GRAPHIC_TEXT_GINE

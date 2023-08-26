@@ -1025,6 +1025,11 @@ public:
         return isCustomFont_;
     }
 
+    bool IsFocus()
+    {
+        return HasFocus();
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -1244,6 +1249,7 @@ private:
     float inlinePadding_ = 0.0f;
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
+    bool needApplyInlineSize_ = false;
     std::optional<DisplayMode> barState_;
     InputStyle preInputStyle_ = InputStyle::DEFAULT;
     bool preErrorState_ = false;
