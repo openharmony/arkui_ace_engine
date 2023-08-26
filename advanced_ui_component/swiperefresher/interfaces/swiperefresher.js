@@ -117,3 +117,5 @@ export class SwipeRefresher extends ViewPU {
     this.updateDirtyElements()
   }
 }
+
+export default { SwipeRefresher };

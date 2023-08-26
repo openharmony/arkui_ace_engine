@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-import { KeyCode } from "@ohos.multimodalInput.keyCode";
-
+const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
 const SPACE_MARGIN = 8;
 const MARGIN_NUM = 4;
 const IMAGE_WIDTH_NUM = 16;
@@ -1192,4 +1191,4 @@ export class SubHeader extends ViewPU {
   }
 }
 
-export default { OperationStyle, SubHeader }
+export default { OperationType, SubHeader }

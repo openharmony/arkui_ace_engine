@@ -23,7 +23,7 @@ extern const char _binary_tabtitlebar_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_tabtitlebar_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_TabTitleBar_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_tabtitlebar_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_tabtitlebar_GetABCCode(const char **buf, int *buflen)
 /*
  * Module define
  */
-static napi_module tabtitlebarModule = {
+static napi_module TabTitleBarModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.tabtitlebar",
+    .nm_modname = "arkui.advanced.TabTitleBar",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -48,7 +48,7 @@ static napi_module tabtitlebarModule = {
 /*
  * Module registerfunction
  */
-extern "C" __attribute__((constructor)) void tabtitlebarRegisterModule(void)
+extern "C" __attribute__((constructor)) void TabTitleBarRegisterModule(void)
 {
-    napi_module_register(&tabtitlebarModule);
+    napi_module_register(&TabTitleBarModule);
 }

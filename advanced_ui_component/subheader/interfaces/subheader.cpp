@@ -23,7 +23,7 @@ extern const char _binary_subheader_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_subheader_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_SubHeader_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_subheader_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_subheader_GetABCCode(const char **buf, int *buflen)
 /*
  * Module define
  */
-static napi_module subheaderModule = {
+static napi_module SubHeaderModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.subheader",
+    .nm_modname = "arkui.advanced.SubHeader",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -48,7 +48,7 @@ static napi_module subheaderModule = {
 /*
  * Module registerfunction
  */
-extern "C" __attribute__((constructor)) void subheaderRegisterModule(void)
+extern "C" __attribute__((constructor)) void SubHeaderRegisterModule(void)
 {
-    napi_module_register(&subheaderModule);
+    napi_module_register(&SubHeaderModule);
 }

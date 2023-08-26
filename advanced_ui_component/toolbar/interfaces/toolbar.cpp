@@ -23,7 +23,7 @@ extern const char _binary_toolbar_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_toolbar_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_ToolBar_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_toolbar_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_toolbar_GetABCCode(const char **buf, int *buflen)
 /*
  * Module define
  */
-static napi_module toolbarModule = {
+static napi_module ToolBarModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.toolbar",
+    .nm_modname = "arkui.advanced.ToolBar",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -48,7 +48,7 @@ static napi_module toolbarModule = {
 /*
  * Module registerfunction
  */
-extern "C" __attribute__((constructor)) void toolbarRegisterModule(void)
+extern "C" __attribute__((constructor)) void ToolBarRegisterModule(void)
 {
-    napi_module_register(&toolbarModule);
+    napi_module_register(&ToolBarModule);
 }
