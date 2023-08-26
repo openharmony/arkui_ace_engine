@@ -56,6 +56,7 @@ void TextPattern::OnAttachToFrameNode()
         host->GetRenderContext()->UpdateClipEdge(true);
     }
     InitSurfaceChangedCallback();
+    InitSurfacePositionChangedCallback();
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
     host->SetDraggable(theme->GetDraggable());
@@ -1093,6 +1094,25 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
         newWidth, newHeight, prevWidth, prevHeight);
     CloseSelectOverlay();
     ResetSelection();
+}
+
+void TextPattern::InitSurfacePositionChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfacePositionChangedCallback()) {
+        auto callbackId =
+            pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t posX, int32_t posY) {
+                auto pattern = weak.Upgrade();
+                if (pattern) {
+                    pattern->HandleSurfacePositionChanged(posX, posY);
+                }
+            });
+        LOGI("Add position changed callback id %{public}d", callbackId);
+        UpdateSurfacePositionChangedCallbackId(callbackId);
+    }
 }
 
 void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
