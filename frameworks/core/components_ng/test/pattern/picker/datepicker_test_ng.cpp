@@ -15,25 +15,42 @@
 
 #include <functional>
 #include <optional>
+#include <utility>
 
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
+#include "base/geometry/dimension.h"
+#include "base/geometry/dimension_offset.h"
+#include "base/geometry/point.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/system_properties.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/dialog/dialog_properties.h"
+#include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/input_event.h"
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/picker/date_time_animation_controller.h"
+#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/picker/picker_model.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/ace_events.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
@@ -44,7 +61,9 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double PATTERN_OFFSET = 1000;
-constexpr double TEST_FONT_SIZE = 10;
+constexpr double UP_FONT_SIZE = 5.0;
+constexpr double TEST_FONT_SIZE = 10.0;
+constexpr double DOWN_FONT_SIZE = 20.0;
 constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t START_YEAR = 1980;
 constexpr int32_t SELECTED_YEAR = 2000;
@@ -2496,7 +2515,7 @@ HWTEST_F(DatePickerTestNg, TossAnimationControllerTest002, TestSize.Level1)
     toss->SetEnd(YOFFSET_END2);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
     ret = toss->Play();
-    EXPECT_EQ(toss->yStart_, YOFFSET_START2);
+    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END2);
     EXPECT_FALSE(ret);
     auto column = AceType::MakeRefPtr<DatePickerColumnPattern>();
@@ -2666,5 +2685,666 @@ HWTEST_F(DatePickerTestNg, DatePickerEventActionsTest002, TestSize.Level1)
     ASSERT_NE(controller, nullptr);
     auto isRunning = controller->IsRunning();
     EXPECT_TRUE(isRunning);
+}
+
+/**
+ * @tc.name: DateTimeAnimationControllerTest001
+ * @tc.desc: Test DateTimeAnimationController PlayOldColumnOpacityInAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set DatePickerSettingData and create dateNode.
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, CURRENT_DAY, CURRENT_DAY);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    auto dateNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
+        settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    ASSERT_NE(dateNode, nullptr);
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
+        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    ASSERT_NE(monthDaysNode, nullptr);
+    auto timeNode = DatePickerDialogView::CreateTimeNode(
+        settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
+    ASSERT_NE(timeNode, nullptr);
+
+    /**
+     * @tc.steps: step2. PlayOldColumnOpacityInAnimation without datePicker.
+     * @tc.expected: Opacity of render is set.
+     */
+    auto dateTimeAnimationController = AceType::MakeRefPtr<DateTimeAnimationController>();
+    dateTimeAnimationController->SetMonthDays(monthDaysNode);
+    dateTimeAnimationController->SetTimePicker(timeNode);
+    auto monthDaysRender = dateTimeAnimationController->monthDays_->GetRenderContext();
+    ASSERT_NE(monthDaysRender, nullptr);
+    auto timePickerRender = dateTimeAnimationController->timePicker_->GetRenderContext();
+    ASSERT_NE(timePickerRender, nullptr);
+    dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
+    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
+    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 1.0f);
+
+    /**
+     * @tc.steps: step3. Set datePicker.
+     */
+    auto tempChildren = dateNode->children_;
+    dateNode->children_.clear();
+    dateTimeAnimationController->SetDatePicker(dateNode);
+    dateNode->children_ = tempChildren;
+    dateTimeAnimationController->SetDatePicker(dateNode);
+    auto datePickerLayoutProperty = dateTimeAnimationController->datePicker_->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(datePickerLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. PlayOldColumnOpacityInAnimation with datePicker.
+     * @tc.expected: datePicker's visibility is set visible.
+     */
+    monthDaysRender->UpdateOpacity(0.0f);
+    timePickerRender->UpdateOpacity(0.0f);
+    dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
+    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
+    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 1.0f);
+    EXPECT_EQ(datePickerLayoutProperty->GetVisibilityValue(), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step5. PlayOldColumnOpacityInAnimation without datePicker layoutProperty.
+     * @tc.expected: datePicker's visibility is not set.
+     */
+    dateTimeAnimationController->datePicker_->layoutProperty_ = nullptr;
+    monthDaysRender->UpdateOpacity(0.0f);
+    timePickerRender->UpdateOpacity(0.0f);
+    dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
+    EXPECT_FLOAT_EQ(monthDaysRender->GetOpacityValue(), 1.0f);
+    EXPECT_FLOAT_EQ(timePickerRender->GetOpacityValue(), 1.0f);
+}
+
+/**
+ * @tc.name: DateTimeAnimationControllerTest002
+ * @tc.desc: Test DateTimeAnimationController PlayOldColumnOpacityInAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DateTimeAnimationControllerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set DatePickerSettingData and create dateNode.
+     */
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, CURRENT_DAY, CURRENT_DAY);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    auto dateNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
+        settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    ASSERT_NE(dateNode, nullptr);
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(ElementRegister::GetInstance()->MakeUniqueId(),
+        settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    ASSERT_NE(monthDaysNode, nullptr);
+    auto timeNode = DatePickerDialogView::CreateTimeNode(
+        settingData.timePickerProperty, settingData.properties, settingData.useMilitary);
+    ASSERT_NE(timeNode, nullptr);
+
+    /**
+     * @tc.steps: step2. StopOldColumnOpacityAnimation while oldColumnOpacityAnimation not set.
+     */
+    auto dateTimeAnimationController = AceType::MakeRefPtr<DateTimeAnimationController>();
+    dateTimeAnimationController->StopOldColumnOpacityInAnimation();
+    dateTimeAnimationController->StopOldColumnOpacityOutAnimation();
+
+    /**
+     * @tc.steps: step3. StopOldColumnOpacityAnimation after oldColumnOpacityAnimation set.
+     * @tc.expected: OldColumnOpacityAnimations is clear.
+     */
+    dateTimeAnimationController->SetMonthDays(monthDaysNode);
+    dateTimeAnimationController->SetTimePicker(timeNode);
+    dateTimeAnimationController->PlayOldColumnOpacityInAnimation();
+    dateTimeAnimationController->PlayOldColumnOpacityOutAnimation();
+
+    /**
+     * @tc.steps: step4. Play animation.
+     * @tc.expected: isInAnimationPlaying_ or isOutAnimationPlaying_ is set.
+     */
+    dateTimeAnimationController->SetDatePicker(dateNode);
+    dateTimeAnimationController->created_ = false;
+    dateTimeAnimationController->Play(true);
+    EXPECT_TRUE(dateTimeAnimationController->created_);
+    EXPECT_TRUE(dateTimeAnimationController->isInAnimationPlaying_);
+    dateTimeAnimationController->isInAnimationPlaying_ = false;
+    dateTimeAnimationController->Play(false);
+    EXPECT_TRUE(dateTimeAnimationController->isOutAnimationPlaying_);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest008
+ * @tc.desc: Test DatePickerColumnPattern InitMouseAndPressEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. InitMouseAndPressEvent while mouseEvent_ or touchListener_ is null.
+     * @tc.expected: Function called successfully.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    auto emptyMouseEventFunc = [](bool isHover) {};
+    columnPattern_->mouseEvent_ = AceType::MakeRefPtr<InputEvent>(std::move(emptyMouseEventFunc));
+    columnPattern_->touchListener_ = nullptr;
+    columnPattern_->InitMouseAndPressEvent();
+    auto emptyTouchListenerFunc = [](const TouchEventInfo& info) {};
+    columnPattern_->mouseEvent_ = nullptr;
+    columnPattern_->touchListener_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(emptyTouchListenerFunc));
+    columnPattern_->InitMouseAndPressEvent();
+
+    /**
+     * @tc.steps: step2. Get touchListener.
+     */
+    columnPattern_->mouseEvent_ = nullptr;
+    columnPattern_->touchListener_ = nullptr;
+    auto columnEventHub = columnNode_->GetEventHub<EventHub>();
+    ASSERT_NE(columnEventHub, nullptr);
+    auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(columnGesture, nullptr);
+    columnPattern_->InitMouseAndPressEvent();
+    auto touchListener = columnGesture->touchEventActuator_->touchEvents_.back()->callback_;
+
+    /**
+     * @tc.steps: step3. Set TouchType DOWN and call callback.
+     * @tc.expected: animationBreak_ and clickBreak_ are set false.
+     */
+    TouchEventInfo touchEventInfo("touch");
+    TouchLocationInfo localLocationInfo(1);
+    localLocationInfo.SetTouchType(TouchType::DOWN);
+    std::list<TouchLocationInfo> touches;
+    touches.emplace_back(localLocationInfo);
+    touchEventInfo.touches_ = touches;
+    touchListener(touchEventInfo);
+    EXPECT_FALSE(columnPattern_->animationBreak_);
+    EXPECT_FALSE(columnPattern_->clickBreak_);
+
+    /**
+     * @tc.steps: step4. Set tossStatus true and call callback.
+     * @tc.expected: touchBreak_ animationBreak_ and clickBreak_ are set true.
+     */
+    columnPattern_->SetTossStatus(true);
+
+    auto toss = columnPattern_->GetToss();
+    ASSERT_NE(toss, nullptr);
+    auto propertyCallback = [](float position) {};
+    toss->property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    toss->end_ = OFFSET_Y;
+    touchListener(touchEventInfo);
+    EXPECT_TRUE(columnPattern_->touchBreak_);
+    EXPECT_TRUE(columnPattern_->animationBreak_);
+    EXPECT_TRUE(columnPattern_->clickBreak_);
+    EXPECT_FLOAT_EQ(columnPattern_->yLast_, OFFSET_Y);
+
+    /**
+     * @tc.steps: step5. Set TouchType UP and call callback.
+     * @tc.expected: touchBreak_ is set false.
+     */
+    localLocationInfo.SetTouchType(TouchType::UP);
+    touches.clear();
+    touches.emplace_back(localLocationInfo);
+    touchEventInfo.touches_ = touches;
+    columnPattern_->animationBreak_ = false;
+    touchListener(touchEventInfo);
+    EXPECT_FALSE(columnPattern_->touchBreak_);
+
+    /**
+     * @tc.steps: step5. Set animationBreak_ true and call callback.
+     * @tc.expected: yOffset_ is set 0.
+     */
+    columnPattern_->animationBreak_ = true;
+    touchListener(touchEventInfo);
+    EXPECT_FLOAT_EQ(columnPattern_->yOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest009
+ * @tc.desc: Test DatePickerColumnPattern FlushAnimationTextProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add random dateTextProperties to animationProperties_.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    DateTextProperties dateTextProperties;
+    dateTextProperties.upFontSize = Dimension(UP_FONT_SIZE);
+    dateTextProperties.fontSize = Dimension(TEST_FONT_SIZE);
+    dateTextProperties.downFontSize = Dimension(DOWN_FONT_SIZE);
+    dateTextProperties.upColor = Color::RED;
+    dateTextProperties.currentColor = Color::BLUE;
+    dateTextProperties.downColor = Color::GREEN;
+    columnPattern_->animationProperties_.clear();
+    columnPattern_->animationProperties_.emplace_back(dateTextProperties);
+
+    /**
+     * @tc.steps: step2. Call AddAnimationTextProperties function.
+     * @tc.expected: animationProperties_'s size is added to 2.
+     */
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    textLayoutProperty->UpdateFontSize(Dimension(TEST_FONT_SIZE));
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->AddAnimationTextProperties(0, textLayoutProperty);
+    EXPECT_EQ(columnPattern_->animationProperties_.size(), 2);
+
+    /**
+     * @tc.steps: step3. Call FlushAnimationTextProperties function.
+     * @tc.expected: animationProperties_'s properties is changed.
+     */
+    columnPattern_->FlushAnimationTextProperties(false);
+    EXPECT_EQ(columnPattern_->animationProperties_[1].upFontSize, Dimension(UP_FONT_SIZE));
+    EXPECT_EQ(columnPattern_->animationProperties_[1].fontSize, Dimension(TEST_FONT_SIZE));
+    EXPECT_EQ(columnPattern_->animationProperties_[1].downFontSize, Dimension(DOWN_FONT_SIZE));
+    EXPECT_EQ(columnPattern_->animationProperties_[1].upColor, Color::RED);
+    EXPECT_EQ(columnPattern_->animationProperties_[1].currentColor, Color::BLUE);
+    EXPECT_EQ(columnPattern_->animationProperties_[1].downColor, Color::GREEN);
+    EXPECT_EQ(columnPattern_->animationProperties_[0].upFontSize, Dimension());
+    EXPECT_EQ(columnPattern_->animationProperties_[0].fontSize, Dimension(UP_FONT_SIZE));
+    EXPECT_EQ(columnPattern_->animationProperties_[0].downFontSize, Dimension(TEST_FONT_SIZE));
+    EXPECT_EQ(columnPattern_->animationProperties_[0].upColor, Color());
+    auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+    EXPECT_EQ(
+        columnPattern_->animationProperties_[0].currentColor, colorEvaluator->Evaluate(Color(), Color::BLUE, 0.5));
+    EXPECT_EQ(columnPattern_->animationProperties_[0].downColor, Color::BLUE);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest010
+ * @tc.desc: Test DatePickerColumnPattern TextPropertiesLinearAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add random dateTextProperties to animationProperties_.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    DateTextProperties dateTextProperties;
+    dateTextProperties.upFontSize = Dimension(UP_FONT_SIZE);
+    dateTextProperties.fontSize = Dimension(TEST_FONT_SIZE);
+    dateTextProperties.downFontSize = Dimension(DOWN_FONT_SIZE);
+    dateTextProperties.upColor = Color::RED;
+    dateTextProperties.currentColor = Color::BLUE;
+    dateTextProperties.downColor = Color::GREEN;
+    columnPattern_->animationProperties_.clear();
+    columnPattern_->animationProperties_.emplace_back(dateTextProperties);
+    columnPattern_->animationProperties_.emplace_back(dateTextProperties);
+
+    /**
+     * @tc.steps: step2. Call TextPropertiesLinearAnimation while index is equal to midIndex.
+     * @tc.expected: textLayoutProperty's properties is changed.
+     */
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 2, 0, false, 0.0f);
+    columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 4, true, 0.0f);
+    columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 4, true, 1.0f);
+    columnPattern_->CandidateWeight_ = FontWeight::BOLD;
+    columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 2, true, 0.0f);
+    columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 2, true, 1.0f);
+    EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    Dimension updateSize = columnPattern_->LinearFontSize(
+        Dimension(TEST_FONT_SIZE), Dimension(UP_FONT_SIZE), columnPattern_->distancePercent_);
+    EXPECT_EQ(textLayoutProperty->GetFontSize().value(), updateSize);
+    Color updateColor = AceType::MakeRefPtr<LinearEvaluator<Color>>()->Evaluate(
+        Color::BLUE, Color::RED, static_cast<float>(columnPattern_->distancePercent_));
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), updateColor);
+
+    /**
+     * @tc.steps: step3. Call TextPropertiesLinearAnimation while index is one bigger than midIndex.
+     * @tc.expected: textLayoutProperty's properties is changed.
+     */
+    columnPattern_->SelectedWeight_ = FontWeight::BOLDER;
+    columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 0, true, 0.0f);
+    columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 0, true, 1.0f);
+    EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), FontWeight::BOLDER);
+    updateSize = columnPattern_->LinearFontSize(
+        Dimension(TEST_FONT_SIZE), Dimension(UP_FONT_SIZE), columnPattern_->distancePercent_);
+    EXPECT_EQ(textLayoutProperty->GetFontSize().value(), updateSize);
+    updateColor = AceType::MakeRefPtr<LinearEvaluator<Color>>()->Evaluate(
+        Color::BLUE, Color::RED, static_cast<float>(columnPattern_->distancePercent_));
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), updateColor);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest011
+ * @tc.desc: Test DatePickerColumnPattern infrequent branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->UpdateTextPropertiesLinear(true, 2.0f);
+    columnPattern_->showCount_ = 1;
+    columnPattern_->UpdateTextPropertiesLinear(true, 0.5f);
+
+    /**
+     * @tc.steps: step2. Call HandleDragMove while inputEventType is AXIS and sourceTool is MOUSE.
+     * @tc.expected: animationBreak_ is set false.
+     */
+    auto eventHub = columnNode_->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    columnPattern_->InitPanEvent(gestureHub);
+    auto actionEndTask = columnPattern_->panEvent_->actionEnd_;
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+    actionEndTask(info);
+    columnPattern_->HandleDragMove(info);
+    EXPECT_FALSE(columnPattern_->animationBreak_);
+
+    /**
+     * @tc.steps: step3. Call HandleDragMove while inputEventType is AXIS and sourceTool is FINGER.
+     * @tc.expected: yLast_ is changed.
+     */
+    info.SetSourceTool(SourceTool::FINGER);
+    Point globalPoint(1.0f, 1.0f);
+    info.SetGlobalPoint(globalPoint);
+    info.SetOffsetX(1.0f);
+    info.SetOffsetY(1.0f);
+    columnPattern_->yLast_ = 0.0f;
+    columnPattern_->pressed_ = true;
+    columnPattern_->HandleDragMove(info);
+    EXPECT_FLOAT_EQ(columnPattern_->yLast_, 2.0f);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest012
+ * @tc.desc: Test DatePickerColumnPattern OnAroundButtonClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    auto param = AceType::MakeRefPtr<DatePickerEventParam>();
+    columnPattern_->clickBreak_ = true;
+    columnPattern_->OnAroundButtonClick(param);
+
+    /**
+     * @tc.steps: step2. Call OnAroundButtonClick.
+     * @tc.expected: Duration of columnPattern's fromController_ is set 300.
+     */
+    columnPattern_->clickBreak_ = false;
+    param->itemIndex_ = 1;
+    columnPattern_->showCount_ = 2;
+    columnPattern_->OnAroundButtonClick(param);
+    param->itemIndex_ = 2;
+    columnPattern_->fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+    columnPattern_->fromController_->status_ = Animator::Status::RUNNING;
+    columnPattern_->OnAroundButtonClick(param);
+    EXPECT_EQ(columnPattern_->fromController_->GetDuration(), 300);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest013
+ * @tc.desc: Test DatePickerColumnPattern HandleCurveStopped.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->fromController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+    columnPattern_->fromTopCurve_ = columnPattern_->CreateAnimation(0.0f, 0.0f);
+    columnPattern_->fromBottomCurve_ = columnPattern_->CreateAnimation(0.0f, 0.0f);
+
+    /**
+     * @tc.steps: step2. Call OnAroundButtonClick with different scrollDelta_.
+     * @tc.expected: Interpolators_ of fromController_ is added.
+     */
+    columnPattern_->scrollDelta_ = -1.0f;
+    columnPattern_->HandleCurveStopped();
+    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
+    columnPattern_->scrollDelta_ = 1.0f;
+    columnPattern_->HandleCurveStopped();
+    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest014
+ * @tc.desc: Test DatePickerColumnPattern UpdateFinishToss.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    auto options = columnPattern_->GetOptions();
+    auto strings = options[columnNode_];
+    strings.clear();
+    strings.emplace_back("option");
+    strings.emplace_back("option");
+    strings.emplace_back("option");
+    options[columnNode_] = strings;
+    columnPattern_->options_ = options;
+
+    /**
+     * @tc.steps: step2. Call UpdateFinishToss while scroll can move.
+     * @tc.expected: ScrollDelta_ is added.
+     */
+    columnPattern_->showCount_ = strings.size() * 2;
+    columnPattern_->SetCurrentIndex(5);
+    columnPattern_->UpdateFinishToss(OFFSET_Y);
+    EXPECT_FALSE(columnPattern_->CanMove(true));
+    columnPattern_->SetCurrentIndex(1);
+    EXPECT_TRUE(columnPattern_->CanMove(true));
+    DatePickerOptionProperty datePickerOptionProperty;
+    datePickerOptionProperty.prevDistance = 0.0f;
+    datePickerOptionProperty.nextDistance = 1.0f;
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    columnPattern_->yLast_ = 0.0f;
+    columnPattern_->UpdateFinishToss(OFFSET_Y);
+    EXPECT_EQ(columnPattern_->scrollDelta_, 1.0f);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest015
+ * @tc.desc: Test DatePickerColumnPattern CalcScrollIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Call CalcScrollIndex with different parameters.
+     * @tc.expected: Function return correct index.
+     */
+    EXPECT_EQ(
+        columnPattern_->CalcScrollIndex(MIDDLE_OF_COUNTS, BIG_SHOWCOUNT, false, SMALL_SHOWCOUNT), MIDDLE_OF_COUNTS - 1);
+    EXPECT_EQ(columnPattern_->CalcScrollIndex(MIDDLE_OF_COUNTS, BIG_SHOWCOUNT, false, -SMALL_SHOWCOUNT),
+        BIG_SHOWCOUNT - SMALL_SHOWCOUNT);
+    EXPECT_EQ(columnPattern_->CalcScrollIndex(MIDDLE_OF_COUNTS, BIG_SHOWCOUNT, false, 0), BIG_SHOWCOUNT);
+    EXPECT_EQ(columnPattern_->CalcScrollIndex(MIDDLE_OF_COUNTS, BIG_SHOWCOUNT, true, SMALL_SHOWCOUNT), 0);
+    EXPECT_EQ(columnPattern_->CalcScrollIndex(0, BIG_SHOWCOUNT, true, SMALL_SHOWCOUNT), BIG_SHOWCOUNT);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest016
+ * @tc.desc: Test DatePickerColumnPattern GetShiftDistanceForLandscape.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnPattern and set pickerTheme.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->showOptionCount_ = -2;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(pickerTheme));
+
+    /**
+     * @tc.steps: step2. Call GetShiftDistanceForLandscape in different situation.
+     * @tc.expected: Function return correct distance.
+     */
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(0, DatePickerScrollDirection::DOWN), 0.0f);
+    pickerTheme->showOptionCount_ = 1;
+    DatePickerOptionProperty datePickerOptionProperty;
+    datePickerOptionProperty.height = DOWN_FONT_SIZE;
+    datePickerOptionProperty.fontheight = TEST_FONT_SIZE;
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(0, DatePickerScrollDirection::UP), -DOWN_FONT_SIZE);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(0, DatePickerScrollDirection::DOWN), 25.0f);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(1, DatePickerScrollDirection::DOWN), 25.0f);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(2, DatePickerScrollDirection::DOWN), DOWN_FONT_SIZE);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(2, DatePickerScrollDirection::UP), -25.0f);
+    EXPECT_FLOAT_EQ(columnPattern_->GetShiftDistanceForLandscape(3, DatePickerScrollDirection::UP), 0.0f);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest017
+ * @tc.desc: Test DatePickerColumnPattern UpdateColumnChildPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    auto options = columnPattern_->GetOptions();
+    auto strings = options[columnNode_];
+    strings.clear();
+    strings.emplace_back("option");
+    strings.emplace_back("option");
+    strings.emplace_back("option");
+    options[columnNode_] = strings;
+    columnPattern_->options_ = options;
+
+    /**
+     * @tc.steps: step2. Call UpdateColumnChildPosition in different situation.
+     * @tc.expected: offsetCurSet_ and yOffset_ is set.
+     */
+    columnPattern_->SetCurrentIndex(5);
+    columnPattern_->UpdateColumnChildPosition(OFFSET_Y);
+    DatePickerOptionProperty datePickerOptionProperty;
+    datePickerOptionProperty.prevDistance = TEST_FONT_SIZE;
+    datePickerOptionProperty.nextDistance = DOWN_FONT_SIZE;
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    columnPattern_->showCount_ = 0;
+    columnPattern_->yLast_ = 0.0f;
+    columnPattern_->yOffset_ = 0.0f;
+    columnPattern_->UpdateColumnChildPosition(OFFSET_Y);
+    EXPECT_FLOAT_EQ(columnPattern_->offsetCurSet_, OFFSET_Y);
+    EXPECT_FLOAT_EQ(columnPattern_->yOffset_, OFFSET_Y);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest018
+ * @tc.desc: Test DatePickerColumnPattern SetAccessibilityAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnNode_, nullptr);
+    ASSERT_NE(columnPattern_, nullptr);
+    auto options = columnPattern_->GetOptions();
+    auto strings = options[columnNode_];
+    strings.clear();
+    strings.emplace_back("option");
+    strings.emplace_back("option");
+    strings.emplace_back("option");
+    options[columnNode_] = strings;
+    columnPattern_->options_ = options;
+
+    /**
+     * @tc.steps: step2. Call SetAccessibilityAction and get the scroll action.
+     * @tc.expected: interpolators_ of fromController_ is set.
+     */
+    columnPattern_->SetCurrentIndex(1);
+    auto accessibilityProperty = columnNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    columnPattern_->SetAccessibilityAction();
+    auto actionScrollForward = accessibilityProperty->actionScrollForwardImpl_;
+    auto actionScrollBackward = accessibilityProperty->actionScrollBackwardImpl_;
+    actionScrollForward();
+    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
+    actionScrollBackward();
+    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest019
+ * @tc.desc: Test DatePickerColumnPattern PlayRestAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnPattern.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->showCount_ = 0;
+    DatePickerOptionProperty datePickerOptionProperty;
+    datePickerOptionProperty.prevDistance = TEST_FONT_SIZE;
+    datePickerOptionProperty.nextDistance = DOWN_FONT_SIZE;
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+
+    /**
+     * @tc.steps: step2. Call PlayRestAnimation in different situation.
+     * @tc.expected: scrollDelta_ is set.
+     */
+    columnPattern_->scrollDelta_ = OFFSET_X;
+    columnPattern_->PlayRestAnimation();
+    EXPECT_FLOAT_EQ(columnPattern_->scrollDelta_, OFFSET_X);
+    EXPECT_EQ(columnPattern_->fromController_->interpolators_.size(), 1);
+    datePickerOptionProperty.prevDistance = 1.0f;
+    datePickerOptionProperty.nextDistance = 2.0f;
+    columnPattern_->optionProperties_.clear();
+    columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
+    columnPattern_->PlayRestAnimation();
+    EXPECT_FLOAT_EQ(columnPattern_->scrollDelta_, OFFSET_X - 2.0);
 }
 } // namespace OHOS::Ace::NG
