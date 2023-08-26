@@ -91,6 +91,16 @@ public:
         customCallback_ = dragEvent;
     }
 
+    void ClearDragEvent()
+    {
+        if (userCallback_) {
+            userCallback_.Reset();
+        }
+        if (customCallback_) {
+            customCallback_.Reset();
+        }
+    }
+
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
 #ifdef ENABLE_DRAG_FRAMEWORK

@@ -310,6 +310,14 @@ public:
         hitTestMode_ = hitTestMode;
     }
 
+    void RemoveDragEvent()
+    {
+        if (!dragEventActuator_) {
+            return;
+        }
+        dragEventActuator_->ClearDragEvent();
+    }
+
     void CombineIntoExclusiveRecognizer(
         const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
 
