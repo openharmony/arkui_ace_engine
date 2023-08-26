@@ -434,7 +434,7 @@ void ViewFunctions::InitViewFunctions(
             jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
         }
 
-        JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActive");
+        JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActiveInternal");
         if (jsSetActive->IsFunction()) {
             jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
         } else {

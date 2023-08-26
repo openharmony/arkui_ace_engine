@@ -905,12 +905,18 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     bool closeArkTSPartialUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
     });
+
+    bool isDelayedUpdateOnInactive = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "delayedUpdateOnInactive" && metaDataItem.value == "true";
+    });
+    AceApplicationInfo::GetInstance().SetDelayedUpdateOnInactive(isDelayedUpdateOnInactive);
+
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
             apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     LOGI("UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
-         "useNewPipe: %{public}d",
-        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
+         "useNewPipe: %{public}d, isDelayedUpdateOnInactive: %{public}d",
+        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe, isDelayedUpdateOnInactive);
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
