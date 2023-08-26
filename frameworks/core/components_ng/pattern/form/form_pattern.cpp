@@ -832,9 +832,15 @@ void FormPattern::OnLoadEvent()
 
 void FormPattern::OnActionEvent(const std::string& action) const
 {
+    CHECK_NULL_VOID_NOLOG(formManagerBridge_);
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         LOGE("get event action failed");
+        return;
+    }
+    auto uri = eventAction->GetValue("uri");
+    if (uri->IsValid()) {
+        formManagerBridge_->OnActionEvent(action);
         return;
     }
     auto actionType = eventAction->GetValue("action");
@@ -853,7 +859,6 @@ void FormPattern::OnActionEvent(const std::string& action) const
         FireOnRouterEvent(eventAction);
     }
 
-    CHECK_NULL_VOID_NOLOG(formManagerBridge_);
     formManagerBridge_->OnActionEvent(action);
 }
 
