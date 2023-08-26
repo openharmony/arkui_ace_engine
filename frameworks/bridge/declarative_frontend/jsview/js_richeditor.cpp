@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 
 #include <string>
+
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -459,25 +460,29 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("BindSelectionMenu");
         func->Execute();
     };
-    NG::MenuParam menuParam;
+    SelectMenuParam menuParam;
     if (info.Length() > 3 && info[3]->IsObject()) {
         ParseMenuParam(info, info[3], menuParam);
     }
     RichEditorModel::GetInstance()->BindSelectionMenu(editorType, responseType, buildFunc, menuParam);
 }
 
-void JSRichEditor::ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions,
-    NG::MenuParam& menuParam)
+void JSRichEditor::ParseMenuParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, SelectMenuParam& menuParam)
 {
     auto onAppearValue = menuOptions->GetProperty("onAppear");
     if (onAppearValue->IsFunction()) {
         RefPtr<JsFunction> jsOnAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
-        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)]() {
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc)](
+                            int32_t start, int32_t end) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGI("About to call onAppear method on js");
             ACE_SCORING_EVENT("onAppear");
-            func->Execute();
+
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(start));
+            params[1] = JSRef<JSVal>::Make(ToJSValue(end));
+            func->ExecuteJS(2, params);
         };
         menuParam.onAppear = std::move(onAppear);
     }
