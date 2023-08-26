@@ -192,8 +192,8 @@ void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, const bool isButto
     barItemNode->MarkModifyDone();
 }
 
-void BuildMoreItemNodeAction(
-    const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode, const RefPtr<FrameNode>& barMenuNode)
+void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
+    const RefPtr<FrameNode>& barMenuNode, const RefPtr<NavBarNode>& navBarNode)
 {
     auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -201,7 +201,8 @@ void BuildMoreItemNodeAction(
     auto context = PipelineContext::GetCurrentContext();
     auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
                              weakMenu = WeakPtr<FrameNode>(barMenuNode),
-                             weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)]() {
+                             weakBarItemNode = WeakPtr<BarItemNode>(barItemNode),
+                             weakNavBarNode = WeakPtr<NavBarNode>(navBarNode)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
 
@@ -236,11 +237,13 @@ void BuildMoreItemNodeAction(
         imgOffset.SetY(imgOffset.GetY() + imageSize.Height());
         overlayManager->ShowMenu(id, imgOffset, menu);
 
-        barItemNode->SetIsTitleMenuNodeShowing(true);
-        auto hidMenuCallback = [weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)]() {
-            auto barItemNode = weakBarItemNode.Upgrade();
-            CHECK_NULL_VOID(barItemNode);
-            barItemNode->SetIsTitleMenuNodeShowing(false);
+        auto navBarNode = weakNavBarNode.Upgrade();
+        CHECK_NULL_VOID(navBarNode);
+        navBarNode->SetIsTitleMenuNodeShowing(true);
+        auto hidMenuCallback = [weakNavBarNode = WeakPtr<NavBarNode>(navBarNode)]() {
+            auto navBarNode = weakNavBarNode.Upgrade();
+            CHECK_NULL_VOID(navBarNode);
+            navBarNode->SetIsTitleMenuNodeShowing(false);
         };
         overlayManager->RegisterOnHideMenu(hidMenuCallback);
     };
@@ -354,7 +357,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         auto renderContext = menuItemNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode);
+        BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode);
         InitTitleBarButtonEvent(menuItemNode, true);
 
         PaddingProperty padding;
@@ -752,6 +755,9 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 {
     auto navBarNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(navBarNode);
+    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
+        isTitleMenuNodeShowing_ = navBarNode->IsTitleMenuNodeShowing();
+    }
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     if (titleBarNode->GetMenu()) {
@@ -761,7 +767,7 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
         CHECK_NULL_VOID(barItemNode);
         auto barItemFrameNode = AceType::DynamicCast<BarItemNode>(barItemNode);
         CHECK_NULL_VOID(barItemFrameNode);
-        if (barItemFrameNode->IsMoreItemNode() && barItemFrameNode->IsTitleMenuNodeShowing()) {
+        if (barItemFrameNode->IsMoreItemNode() && isTitleMenuNodeShowing_) {
             auto eventHub = barItemFrameNode->GetEventHub<BarItemEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireItemAction();
