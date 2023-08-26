@@ -990,9 +990,25 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 {
     auto lastPage = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(lastPage, nullptr);
-    auto navigationNode = lastPage->FindChildNodeOfClass<NavigationGroupNode>();
-    CHECK_NULL_RETURN_NOLOG(navigationNode, nullptr);
-    return navigationNode->GetNavDestinationNodeToHandleBack();
+    return FindNavDestinationNodeToHandleBack(lastPage);
+}
+
+RefPtr<FrameNode> PipelineContext::FindNavDestinationNodeToHandleBack(const RefPtr<UINode>& node)
+{
+    const auto& children = node->GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+
+        auto target = FindNavDestinationNodeToHandleBack(child);
+        if (target) {
+            return target;
+        }
+    }
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(node);
+    if (navigationGroupNode) {
+        return navigationGroupNode->GetNavDestinationNodeToHandleBack();
+    }
+    return nullptr;
 }
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive)
