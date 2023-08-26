@@ -689,14 +689,18 @@ void NavBarPattern::OnModifyDone()
     CHECK_NULL_VOID(hostNode);
     MountTitleBar(hostNode);
     MountToolBar(hostNode);
-    auto gesture = hostNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    InitPanEvent(gesture);
 
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBar().value_or(false);
     RegistOritationListener();
+    // if current mode is not free, doesn't have animation
+    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+        return;
+    }
+    auto gesture = hostNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    InitPanEvent(gesture);
 }
 
 void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
