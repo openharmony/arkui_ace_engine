@@ -63,6 +63,16 @@ public:
         }
     }
 
+    void UpdateOnDisappear(std::function<void()>&& onDisappear) {
+        onDisappear_ = std::move(onDisappear);
+    }
+
+    void OnDisappear() {
+        if (onDisappear_) {
+            onDisappear_();
+        }
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -73,6 +83,7 @@ private:
     int32_t targetId_ = -1;
     ModalTransition type_ = ModalTransition::DEFAULT;
     std::function<void(const std::string&)> callback_;
+    std::function<void()> onDisappear_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ModalPresentationPattern);
 };

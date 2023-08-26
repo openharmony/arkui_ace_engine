@@ -1148,6 +1148,7 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
             rootNode->RemoveChild(topModalNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
     } else if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         topModalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
         auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetLastChild());
@@ -1157,6 +1158,7 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         PlaySheetTransition(topModalNode, false);
+        topModalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
     }
     return true;
 }
@@ -1354,6 +1356,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
                     if (modalStyle.backgroundColor.has_value()) {
                         topModalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
                     }
+                    topModalNode->GetPattern<ModalPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
                     topModalNode->GetPattern<ModalPresentationPattern>()->SetType(modalTransition.value());
                     return;
                 }
@@ -1371,6 +1374,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         if (modalStyle.backgroundColor.has_value()) {
             modalNode->GetRenderContext()->UpdateBackgroundColor(modalStyle.backgroundColor.value());
         }
+        modalNode->GetPattern<ModalPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
         modalStack_.push(WeakClaim(RawPtr(modalNode)));
         modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
         SaveLastModalNode();
@@ -1396,9 +1400,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         }
         if (topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() != targetId) {
             DeleteModal(targetId);
-            if (onDisappear != nullptr) {
-                onDisappear();
-            }
+            topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
             return;
         }
         auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
@@ -1425,9 +1427,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             modalList_.pop_back();
         }
         FireModalPageHide();
-        if (onDisappear != nullptr) {
-            onDisappear();
-        }
+        modalPresentationPattern->OnDisappear();
         SaveLastModalNode();
     }
 }
@@ -1598,6 +1598,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
                     if (sheetStyle.backgroundColor.has_value()) {
                         topModalNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
                     }
+                    topModalNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
                     auto layoutProperty = topModalNode->GetLayoutProperty<SheetPresentationProperty>();
                     layoutProperty->UpdateSheetStyle(sheetStyle);
                     topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1624,6 +1625,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         if (sheetStyle.backgroundColor.has_value()) {
             sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
         }
+        sheetNode->GetPattern<SheetPresentationPattern>()->UpdateOnDisappear(std::move(onDisappear));
         modalStack_.push(WeakClaim(RawPtr(sheetNode)));
         SaveLastModalNode();
         // create maskColor node
@@ -1657,9 +1659,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
         }
         if (topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
             DeleteModal(targetId);
-            if (onDisappear != nullptr) {
-                onDisappear();
-            }
+            topSheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
             return;
         }
         auto builder = AceType::DynamicCast<FrameNode>(topSheetNode->GetLastChild());
@@ -1675,9 +1675,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
             modalList_.pop_back();
         }
         FireModalPageHide();
-        if (onDisappear != nullptr) {
-            onDisappear();
-        }
+        topSheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
         SaveLastModalNode();
     }
 }
