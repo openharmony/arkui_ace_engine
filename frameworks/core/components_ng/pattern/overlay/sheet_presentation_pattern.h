@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_PRESENTATION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_PRESENTATION_PATTERN_H
 
+#include <functional>
+#include <utility>
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/alignment.h"
@@ -72,6 +75,18 @@ public:
         }
     }
 
+    void UpdateOnDisappear(std::function<void()>&& onDisappear)
+    {
+        onDisappear_ = std::move(onDisappear);
+    }
+
+    void OnDisappear()
+    {
+        if (onDisappear_) {
+            onDisappear_();
+        }
+    }
+
     void InitialLayoutProps();
 
     // initial drag gesture event
@@ -102,6 +117,7 @@ private:
 
     int32_t targetId_ = -1;
     std::function<void(const std::string&)> callback_;
+    std::function<void()> onDisappear_;
     RefPtr<PanEvent> panEvent_;
     float currentOffset_ = 0.0f;
     float height_ = 0.0f;
