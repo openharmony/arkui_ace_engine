@@ -205,6 +205,8 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover001, TestSize.Level1)
     EXPECT_NE(topModalNode, nullptr);
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     EXPECT_NE(topModalPattern, nullptr);
+    overlayManager->ModalExitProcess(topModalNode);
+    overlayManager->PlayDefaultModalTransition(topModalNode, false);
     auto type = topModalPattern->GetType();
     EXPECT_EQ(type, ModalTransition::NONE);
 }
@@ -542,6 +544,15 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
      */
     auto onDisappear = []() {};
     overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, nullptr, onDisappear, targetId);
+    overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(stageNode)));
+    overlayManager->DestroySheet(sheetNode, targetId);
+    overlayManager->FindWindowScene(targetNode);
+    overlayManager->DeleteModal(targetId);
+    overlayManager->DestroySheetMask(sheetNode);
+    EXPECT_TRUE(overlayManager->modalStack_.empty());
+    auto maskNode = FrameNode::CreateFrameNode
+        (V2::SHEET_MASK_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    overlayManager->DestroySheetMask(maskNode);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
 /**
@@ -640,9 +651,12 @@ HWTEST_F(OverlayManagerTestNg, PopupTest003, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     popupNode->MountToParent(rootNode);
+    targetNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->HidePopup(targetId, popupInfo);
+    overlayManager->BlurOverlayNode(rootNode);
+    overlayManager->MarkDirty(rootNode->layoutProperty_->GetPropertyChangeFlag());
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
@@ -714,6 +728,8 @@ HWTEST_F(OverlayManagerTestNg, MenuTest001, TestSize.Level1)
      * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
      * @tc.expected: return normally
      */
+    overlayManager->RemoveMenu(menuNode);
+    overlayManager->RemoveOverlayInSubwindow();
     overlayManager->DeleteMenu(targetId);
     EXPECT_TRUE(overlayManager->menuMap_.empty());
 }
@@ -1044,6 +1060,7 @@ HWTEST_F(OverlayManagerTestNg, DialogTest001, TestSize.Level1)
      */
     overlayManager->CloseDialog(dialogNode);
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
     EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
     /**
      * @tc.steps: step4. call CloseDialog again when dialogMap_ is empty.
