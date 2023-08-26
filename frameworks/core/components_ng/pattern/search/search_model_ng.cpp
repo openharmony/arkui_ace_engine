@@ -74,7 +74,9 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
     ViewStackProcessor::GetInstance()->Push(frameNode);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     pattern->SetSearchController(AceType::MakeRefPtr<TextFieldController>());
-    pattern->UpdateChangeEvent(value.value_or(""));
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    pattern->UpdateChangeEvent(textFieldPattern->GetTextEditingValue().text);
     return pattern->GetSearchController();
 }
 
@@ -252,8 +254,8 @@ void SearchModelNG::SetCancelButtonStyle(CancelButtonStyle style)
     CHECK_NULL_VOID(imageEvent);
 
     if ((style == CancelButtonStyle::CONSTANT) ||
-        ((style == CancelButtonStyle::INPUT) &&
-          textLayoutProperty->HasValue() && !textLayoutProperty->GetValue()->empty())) {
+        ((style == CancelButtonStyle::INPUT) && textLayoutProperty->HasValue() &&
+            !textLayoutProperty->GetValue()->empty())) {
         cancelButtonRenderContext->UpdateOpacity(1.0);
         cancelImageRenderContext->UpdateOpacity(1.0);
         cancelButtonEvent->SetEnabled(true);
@@ -539,7 +541,7 @@ void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
     eventHub->SetOnPaste(std::move(func));
 }
 
-void SearchModelNG::SetCustomKeyboard(const std::function<void ()> &&buildFunc)
+void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -551,8 +553,8 @@ void SearchModelNG::SetCustomKeyboard(const std::function<void ()> &&buildFunc)
     }
 }
 
-void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
-    const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode)
+void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::string>& placeholder,
+    const std::optional<std::string>& value, bool hasTextFieldNode)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
