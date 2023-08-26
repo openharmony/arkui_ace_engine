@@ -2251,7 +2251,7 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
             auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
             pattern->selectionMenuParams_->onAppear(selectStart, selectEnd);
         };
-        selectInfo.menuCallback.onAppear = callback;
+        selectInfo.menuCallback.onAppear = std::move(callback);
     }
     selectInfo.menuCallback.onDisappear = selectionMenuParams_->onDisappear;
 }
