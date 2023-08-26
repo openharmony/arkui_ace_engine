@@ -643,6 +643,9 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
                 DoMouseActionRelease();
             }
         }
+        if (event.pullAction == MouseAction::PULL_UP) {
+            DoMouseActionRelease();
+        }
         for (const auto& mouseTarget : currMouseTestResults_) {
             if (mouseTarget &&
                 std::find(handledResults.begin(), handledResults.end(), mouseTarget) == handledResults.end()) {
