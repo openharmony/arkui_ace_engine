@@ -33,6 +33,7 @@ public:
     ~WindowPattern() override = default;
 
     std::vector<Rosen::Rect> GetHotAreas();
+    sptr<Rosen::Session> GetSession();
 
 protected:
     void OnModifyDone() override;

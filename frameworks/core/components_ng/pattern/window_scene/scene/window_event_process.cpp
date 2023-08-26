@@ -23,42 +23,64 @@ WindowEventProcess::WindowEventProcess() {}
 
 WindowEventProcess::~WindowEventProcess() {}
 
-void WindowEventProcess::ProcessWindowMouseEvent(const RefPtr<WindowNode>& windowNode,
-    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void WindowEventProcess::ProcessEnterLeaveEvent(int32_t nodeId,
+    sptr<Rosen::Session> session, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    CHECK_NULL_VOID(windowNode);
+    CHECK_NULL_VOID(session);
     CHECK_NULL_VOID(pointerEvent);
     std::shared_ptr<MMI::PointerEvent> enterEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
-    auto lastWindowNode = lastWindowNode_.Upgrade();
 
     int32_t action = pointerEvent->GetPointerAction();
     if (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW) {
-        lastWindowNode_ = windowNode;
+        lastWindowNodeId_ = nodeId;
+        lastWeakSession_ = session;
         lastPointEvent_ = enterEvent;
         return;
     }
-    if (lastWindowNode == nullptr) {
+    auto lastSession = lastWeakSession_.promote();
+    if (lastSession == nullptr) {
         enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-        DispatchPointerEvent(windowNode, enterEvent);
-        lastWindowNode_ = windowNode;
+        DispatchPointerEvent(session, enterEvent);
+        lastWindowNodeId_ = nodeId;
+        lastWeakSession_ = session;
         lastPointEvent_ = enterEvent;
         return;
     }
 
-    if (windowNode->GetId() != lastWindowNode->GetId()) {
+    if (lastWindowNodeId_ != nodeId) {
         LOGD("Window switching, enter window:%{public}d, leave window:%{public}d",
-            windowNode->GetId(), lastWindowNode->GetId());
+            nodeId, lastWindowNodeId_);
         if (lastPointEvent_ != nullptr) {
             lastPointEvent_->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
             lastPointEvent_->SetId(pointerEvent->GetId());
-            DispatchPointerEvent(lastWindowNode, lastPointEvent_);
+            DispatchPointerEvent(lastSession, lastPointEvent_);
 
             enterEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW);
-            DispatchPointerEvent(windowNode, enterEvent);
+            DispatchPointerEvent(session, enterEvent);
         }
+        lastWindowNodeId_ = nodeId;
+        lastWeakSession_ = session;
     }
-    lastWindowNode_ = windowNode;
     lastPointEvent_ = enterEvent;
+}
+
+void WindowEventProcess::ProcessWindowMouseEvent(int32_t nodeId,
+    sptr<Rosen::Session> session, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(session);
+    CHECK_NULL_VOID(pointerEvent);
+    if (pointerEvent->GetSourceType() != MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        return;
+    }
+    int32_t action = pointerEvent->GetPointerAction();
+    if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
+        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) ||
+        (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW)) {
+        ProcessEnterLeaveEvent(nodeId, session, pointerEvent);
+    }
+    if (action == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW) {
+        CleanWindowMouseRecord();
+    }
 }
 
 void WindowEventProcess::ProcessWindowDragEvent(const RefPtr<WindowNode>& windowNode,
@@ -89,7 +111,8 @@ void WindowEventProcess::ProcessWindowDragEvent(const RefPtr<WindowNode>& window
 
 void WindowEventProcess::CleanWindowMouseRecord()
 {
-    lastWindowNode_ = nullptr;
+    lastWindowNodeId_ = -1;
+    lastWeakSession_ = nullptr;
     lastPointEvent_ = nullptr;
 }
 
@@ -102,7 +125,11 @@ void WindowEventProcess::CleanWindowDragEvent()
 void WindowEventProcess::UpdateWindowMouseRecord(const RefPtr<WindowNode>& windowNode,
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    lastWindowNode_ = windowNode;
+    CHECK_NULL_VOID(windowNode);
+    lastWindowNodeId_ = windowNode->GetId();
+    auto pattern = windowNode->GetPattern<WindowPattern>();
+    CHECK_NULL_VOID(pattern);
+    lastWeakSession_ = pattern->GetSession();
     lastPointEvent_ = pointerEvent;
 }
 
@@ -113,5 +140,13 @@ void WindowEventProcess::DispatchPointerEvent(const RefPtr<WindowNode>& windowNo
     auto pattern = windowNode->GetPattern<WindowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->DispatchPointerEvent(pointerEvent);
+}
+
+void WindowEventProcess::DispatchPointerEvent(sptr<Rosen::Session> session,
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(session);
+    CHECK_NULL_VOID(pointerEvent);
+    session->TransferPointerEvent(pointerEvent);
 }
 } // namespace OHOS::Ace::NG

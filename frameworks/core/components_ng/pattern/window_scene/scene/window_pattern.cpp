@@ -385,26 +385,23 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
+    DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
+        host->GetId(), session_, pointerEvent);
     int32_t action = pointerEvent->GetPointerAction();
-    if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
-        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) ||
-        (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW)) {
-        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
-            AceType::DynamicCast<WindowNode>(host), pointerEvent);
-    }
     if (action == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowDragEvent(
             AceType::DynamicCast<WindowNode>(host), pointerEvent);
-    }
-    if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
-        (action == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW)) {
-        DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowMouseRecord();
     }
     if (action == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowDragEvent();
     }
     SetWindowSceneConsumed(action);
     DispatchPointerEvent(pointerEvent);
+}
+
+sptr<Rosen::Session> WindowPattern::GetSession()
+{
+    return session_;
 }
 
 bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
