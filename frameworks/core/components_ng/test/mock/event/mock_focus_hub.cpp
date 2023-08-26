@@ -35,7 +35,10 @@ bool FocusHub::RequestFocusImmediately(bool isWholePathFocusable)
     return true;
 }
 
-void FocusHub::OnClick(const KeyEvent& event) {}
+bool FocusHub::OnClick(const KeyEvent& event)
+{
+    return false;
+}
 
 void FocusHub::MarkRootFocusNeedUpdate() {}
 
