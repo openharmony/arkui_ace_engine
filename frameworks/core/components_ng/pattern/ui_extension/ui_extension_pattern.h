@@ -84,6 +84,13 @@ private:
         CONNECT_BROKEN,
     };
 
+    enum AbilityState {
+        NONE = 0,
+        FOREGROUND,
+        BACKGROUND,
+        DESTRUCTION,
+    };
+
     struct ErrorMsg {
         int32_t code = 0;
         std::string name;
@@ -121,9 +128,8 @@ private:
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
 
-    bool isBackground_ = false;
-    bool isDestruction_ = false;
     ErrorMsg lastError_;
+    AbilityState state_ = AbilityState::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
 } // namespace OHOS::Ace::NG
