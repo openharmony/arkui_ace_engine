@@ -26,9 +26,6 @@ public:
     ShapeLayoutAlgorithm() = default;
     ~ShapeLayoutAlgorithm() override = default;
 
-    std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
-
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ShapeLayoutAlgorithm);
 };
