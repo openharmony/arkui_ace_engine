@@ -1369,6 +1369,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
     auto toolBarNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
     auto navBarContentNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
     auto toolBarChild = FrameNode::CreateFrameNode("text", 99, AceType::MakeRefPtr<TextPattern>());
+    navBar->UpdatePrevMenuIsCustom(true);
+    navBar->UpdatePrevToolBarIsCustom(true);
 
     LayoutConstraintF constraint;
     LayoutConstraintF constraint2;
