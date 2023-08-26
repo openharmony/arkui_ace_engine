@@ -76,8 +76,7 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary) {}
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag) {}
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
 void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
-void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
-{}
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) {}
 void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout)
 {}
 void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) {}
@@ -86,6 +85,11 @@ void FrameNode::ForceUpdateLayoutPropertyFlag(PropertyChangeFlag propertyChangeF
 void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag) {}
 void FrameNode::MarkResponseRegion(bool isResponseRegion) {}
 void FrameNode::MarkNeedSyncRenderTree(bool) {}
+RefPtr<LayoutWrapperNode> FrameNode::UpdateLayoutWrapper(
+    RefPtr<LayoutWrapperNode> layoutWrapper, bool forceMeasure, bool forceLayout)
+{
+    return nullptr;
+}
 RefPtr<UINode> FrameNode::GetFrameChildByIndex(uint32_t index, bool needBuild)
 {
     return nullptr;
