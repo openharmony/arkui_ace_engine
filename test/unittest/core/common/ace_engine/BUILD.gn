@@ -77,6 +77,7 @@ ohos_unittest("ace_engine_special_test") {
     "$ace_root/frameworks/core/common/ace_engine.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
+    "$ace_root/frameworks/core/common/hdc_register.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
@@ -94,6 +95,7 @@ ohos_unittest("ace_engine_special_test") {
     "$ace_root/test/mock/core/common/mock_font_manager.cpp",
     "ace_engine_special_test.cpp",
     "font_manager_test_ng.cpp",
+    "hdc_register_test.cpp",
     "window_test.cpp",
   ]
   deps = [
