@@ -52,12 +52,12 @@ enum class MoveDirection { FORWARD, BACKWARD };
 struct SelectionMenuParams {
     RichEditorType type;
     std::function<void()> buildFunc;
-    std::function<void()> onAppear;
+    std::function<void(int32_t, int32_t)> onAppear;
     std::function<void()> onDisappear;
     ResponseType responseType;
 
-    SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc, std::function<void()> _onAppear,
-        std::function<void()> _onDisappear, ResponseType _responseType)
+    SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc,
+        std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear, ResponseType _responseType)
         : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
           responseType(_responseType)
     {}
@@ -213,7 +213,7 @@ public:
         customKeyboardBulder_ = keyboardBuilder;
     }
     void BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>& menuBuilder,
-        std::function<void()>& onAppear, std::function<void()>& onDisappear)
+        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear)
     {
         selectionMenuParams_ =
             std::make_shared<SelectionMenuParams>(richEditorType, menuBuilder, onAppear, onDisappear, type);

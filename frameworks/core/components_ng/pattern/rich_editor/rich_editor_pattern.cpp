@@ -2239,7 +2239,20 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
         return;
     }
     selectInfo.menuInfo.menuBuilder = selectionMenuParams_->buildFunc;
-    selectInfo.menuCallback.onAppear = selectionMenuParams_->onAppear;
+    if (selectionMenuParams_->onAppear) {
+        auto weak = AceType::WeakClaim(this);
+        auto callback = [weak]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->selectionMenuParams_->onAppear);
+
+            auto& textSelector = pattern->textSelector_;
+            auto selectStart = std::min(textSelector.baseOffset, textSelector.destinationOffset);
+            auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
+            pattern->selectionMenuParams_->onAppear(selectStart, selectEnd);
+        };
+        selectInfo.menuCallback.onAppear = callback;
+    }
     selectInfo.menuCallback.onDisappear = selectionMenuParams_->onDisappear;
 }
 

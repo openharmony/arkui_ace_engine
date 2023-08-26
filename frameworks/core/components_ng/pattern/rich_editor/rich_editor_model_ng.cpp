@@ -121,7 +121,7 @@ void RichEditorModelNG::SetCopyOption(CopyOptions& copyOptions)
 }
 
 void RichEditorModelNG::BindSelectionMenu(
-    RichEditorType& editorType, ResponseType& type, std::function<void()>& buildFunc, MenuParam& menuParam)
+    RichEditorType& editorType, ResponseType& type, std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

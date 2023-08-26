@@ -40,5 +40,5 @@ void RichEditorModelImpl::SetCustomKeyboard(std::function<void()>&& func) {}
 void RichEditorModelImpl::SetCopyOption(CopyOptions& copyOptions) {}
 
 void RichEditorModelImpl::BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
-    std::function<void()>& buildFunc, NG::MenuParam& menuParam) {}
+    std::function<void()>& buildFunc, SelectMenuParam& menuParam) {}
 } // namespace OHOS::Ace::Framework
