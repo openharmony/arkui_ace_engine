@@ -413,6 +413,11 @@ public:
         surfaceChangedCallbackId_ = id;
     }
 
+    void SetIndicatorLongPress(bool isIndicatorLongPress)
+    {
+        isIndicatorLongPress_ = isIndicatorLongPress;
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -426,7 +431,10 @@ public:
     bool IsAutoFill() const;
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
-    void SwipeToWithoutAnimationAutoPlay();
+    void StopAutoPlay();
+    void StartAutoPlay();
+    void StopTranslateAnimation();
+    void StopSpringAnimation();
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -478,12 +486,8 @@ private:
     // Implement of swiper controller
 
     void FinishAnimation();
-    void StopTranslateAnimation();
-    void StopSpringAnimation();
     void StopFadeAnimation();
 
-    void StopAutoPlay();
-    void StartAutoPlay();
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
     float GetRemainingOffset() const;
     float MainSize() const;
@@ -639,6 +643,7 @@ private:
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
+    bool isIndicatorLongPress_ = false;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;

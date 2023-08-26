@@ -426,106 +426,10 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     lastTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SwiperIndicatorPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto axis = swiperPattern->GetDirection();
-    if (axis_ == axis) {
-        return;
-    }
-    axis_ = axis;
-
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
-            return;
-        }
-        pattern->HandleDragStart(info);
-    };
-
-    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
-            return;
-        }
-
-        pattern->HandleDragUpdate(info);
-    };
-
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
-            return;
-        }
-        pattern->HandleDragEnd(info.GetMainVelocity());
-    };
-
-    auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGD("Pan event cancel");
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandleDragEnd(0.0);
-    };
-
-    if (panEvent_ != nullptr) {
-        gestureHub->RemovePanEvent(panEvent_);
-    }
-
-    panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    if (axis_ == Axis::VERTICAL) {
-        panDirection = { .type = PanDirection::VERTICAL };
-    }
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-}
-
 void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
 {
     dragStartPoint_ =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
-}
-
-void SwiperIndicatorPattern::HandleDragUpdate(const GestureEvent& info)
-{
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
-    if (swiperPattern->TotalCount() <= displayCount) {
-        return;
-    }
-    if (CheckIsTouchBottom(info)) {
-        return;
-    }
-    auto dragPoint =
-        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
-    auto offset = dragPoint - dragStartPoint_;
-    auto turnPageRateOffset = swiperPattern->GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
-    if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
-        return;
-    }
-
-    auto turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
-    swiperPattern->SetTurnPageRate(turnPageRate);
-    if (GreatOrEqual(std::abs(turnPageRate), 1)) {
-        if (Positive(info.GetMainDelta())) {
-            swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + 1);
-        }
-        if (NonPositive(info.GetMainDelta())) {
-            swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() - 1);
-        }
-        dragStartPoint_ = dragPoint;
-    }
 }
 
 void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
@@ -535,6 +439,13 @@ void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     swiperPattern->SetTurnPageRate(0.0f);
+    auto swiperPaintProperty = swiperPattern->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    auto autoPlay = swiperPaintProperty->GetAutoPlay().value_or(false);
+    if (autoPlay) {
+        swiperPattern->SetIndicatorLongPress(false);
+        swiperPattern->StartAutoPlay();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     touchBottomType_ = TouchBottomType::NONE;
@@ -613,13 +524,13 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
     TouchBottomType touchBottomType = TouchBottomType::NONE;
 
     if ((currentIndex <= 0) && !isLoop) {
-        if (Negative(touchOffset) || NonPositive(touchOffset)) {
+        if (NonPositive(touchOffset)) {
             touchBottomType = TouchBottomType::START;
         }
     }
 
     if ((currentIndex >= childrenSize - displayCount) && !isLoop) {
-        if (Positive(touchOffset) || NonNegative(touchOffset)) {
+        if (Positive(touchOffset)) {
             touchBottomType = TouchBottomType::END;
         }
     }
@@ -646,9 +557,22 @@ void SwiperIndicatorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& g
 
 void SwiperIndicatorPattern::HandleLongPress(GestureEvent& info)
 {
-    isLongPress_ = true;
     HandleTouchDown();
     HandleDragStart(info);
+
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto swiperPaintProperty = swiperPattern->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    auto autoPlay = swiperPaintProperty->GetAutoPlay().value_or(false);
+    if (autoPlay) {
+        swiperPattern->SetIndicatorLongPress(true);
+        swiperPattern->StopTranslateAnimation();
+        swiperPattern->StopSpringAnimation();
+        swiperPattern->StopAutoPlay();
+    }
 }
 
 void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
@@ -687,12 +611,6 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() - 1);
         }
 
-        auto swiperPaintProperty = swiperPattern->GetPaintProperty<SwiperPaintProperty>();
-        CHECK_NULL_VOID(swiperPaintProperty);
-        auto autoPlay = swiperPaintProperty->GetAutoPlay().value_or(false);
-        if (autoPlay) {
-            swiperPattern->SwipeToWithoutAnimationAutoPlay();
-        }
         dragStartPoint_ = dragPoint;
     }
 }
