@@ -37,7 +37,6 @@ public:
     {
         auto value = MakeRefPtr<TimePickerLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
-        value->propLoop_= CloneLoop();
         value->propDisappearTextStyle_ = CloneDisappearTextStyle();
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
@@ -47,7 +46,6 @@ public:
     void Reset() override
     {
         LinearLayoutProperty::Reset();
-        ResetLoop();
         ResetDisappearTextStyle();
         ResetTextStyle();
         ResetSelectedTextStyle();
@@ -57,8 +55,6 @@ public:
     {
         LayoutProperty::ToJsonValue(json);
         json->Put("useMilitaryTime", V2::ConvertBoolToString(GetIsUseMilitaryTimeValue(false)).c_str());
-        auto canLoop = GetLoopValue();
-        json->Put("loop", canLoop ? "true" : "false");
         auto disappearFont = JsonUtil::Create(true);
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
         disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
@@ -87,7 +83,6 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsUseMilitaryTime, bool, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DisappearTextStyle, FontSize, DisappearFontSize, Dimension, PROPERTY_UPDATE_MEASURE);

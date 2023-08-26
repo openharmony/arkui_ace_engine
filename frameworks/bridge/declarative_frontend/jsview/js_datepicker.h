@@ -74,7 +74,6 @@ public:
 
     static void JSBind(BindingTarget globalObj);
     static void OnChange(const JSCallbackInfo& info);
-    static void Loop(bool isLoop);
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void PickerBackgroundColor(const JSCallbackInfo& info);
 

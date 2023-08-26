@@ -30,11 +30,10 @@ public:
     static TimePickerModel* GetInstance();
     virtual ~TimePickerModel() = default;
 
-    virtual void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) = 0;
+    virtual void CreateTimePicker(RefPtr<PickerTheme> pickerTheme) = 0;
     virtual void SetSelectedTime(const PickerTime& value) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
     virtual void SetHour24(bool isUseMilitaryTime) = 0;
-    virtual void SetWheelModeEnabled(bool wheelModeEnabled) = 0;
     virtual void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
     virtual void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
     virtual void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) = 0;
