@@ -5653,7 +5653,6 @@ void TextFieldPattern::ApplyUnderlineStates()
     }
     Radius radius;
     renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
-    needApplyInlineSize_ = true;
 }
 
 float TextFieldPattern::GetMarginBottom() const
@@ -5867,6 +5866,7 @@ void TextFieldPattern::ApplyInlineStates(bool focusStatus)
     if (!IsTextArea()) {
         layoutProperty->ResetMaxLines();
     }
+    needApplyInlineSize_ = true;
 }
 
 bool TextFieldPattern::ResetObscureTickCountDown()
