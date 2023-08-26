@@ -104,6 +104,10 @@ constexpr Dimension MORE_BUTTON_CORNER_RADIUS = 8.0_vp;
 constexpr uint32_t MAXIMUM_TOOLBAR_ITEMS_IN_BAR = 5;
 constexpr uint32_t ONE_TOOLBAR_ITEM = 1;
 
+// navigation mask color
+const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
+const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
+
 enum class NavToolbarItemStatus {
     NORMAL = 0,
     DISABLED,
