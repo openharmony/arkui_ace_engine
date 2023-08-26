@@ -45,8 +45,20 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     }
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+
+    // get keyboard index to put selet_overlay before keyboard node
+    int32_t slot = DEFAULT_NODE_SLOT;
+    int32_t index = 0;
+    for (const auto& it : rootNode->GetChildren()) {
+        if (it->GetTag() == V2::KEYBOARD_ETS_TAG) {
+            slot = index;
+            break;
+        }
+        index++;
+    }
+
     // mount to parent
-    selectOverlayNode->MountToParent(rootNode);
+    selectOverlayNode->MountToParent(rootNode, slot);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (!infoPtr->isUsingMouse) {
         auto node = DynamicCast<SelectOverlayNode>(selectOverlayNode);
