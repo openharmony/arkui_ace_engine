@@ -54,6 +54,7 @@ public:
 
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
+    MOCK_METHOD(bool, WindowIsShow, (), (const, override));
     static RefPtr<MockContainer> container_;
 
 private:
