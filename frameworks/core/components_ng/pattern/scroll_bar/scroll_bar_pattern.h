@@ -176,6 +176,7 @@ private:
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
     RectF childRect_;
+    uint8_t opacity_ = UINT8_MAX;
 };
 
 } // namespace OHOS::Ace::NG
