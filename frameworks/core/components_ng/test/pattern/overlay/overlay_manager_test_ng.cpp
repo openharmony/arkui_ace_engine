@@ -201,6 +201,7 @@ HWTEST_F(OverlayManagerTestNg, BindContentCover001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->BindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, targetId);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
+    overlayManager->PlayDefaultModalTransition(rootNode, false);
     auto topModalNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_NE(topModalNode, nullptr);
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
@@ -398,6 +399,11 @@ HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
     auto sheetDragBarPattern = sheetDragBarNode->GetPattern<SheetDragBarPattern>();
     EXPECT_FALSE(sheetDragBarPattern == nullptr);
     auto sheetDragBarPaintProperty = sheetDragBarNode->GetPaintProperty<SheetDragBarPaintProperty>();
+    EXPECT_FALSE(sheetDragBarPaintProperty == nullptr);
+    SheetStyle sheetStyle1;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    std::stack<WeakPtr<FrameNode>> modalStack;
+    overlayManager->modalStack_ = modalStack;
     EXPECT_FALSE(sheetDragBarPaintProperty == nullptr);
 }
 
@@ -783,7 +789,12 @@ HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
      */
     overlayManager->HideAllMenus();
     overlayManager->CleanMenuInSubWindow();
+    overlayManager->FocusOverlayNode(menuNode, false);
     EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
+    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
+    overlayManager->RemoveMenu(rootNode);
 }
 
 /**
@@ -978,6 +989,7 @@ HWTEST_F(OverlayManagerTestNg, ToastTest001, TestSize.Level1)
      * @tc.expected: toastMap_ is empty
      */
     overlayManager->PopToast(toastId);
+    overlayManager->DeleteModal(DURATION);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
 }
 /**
