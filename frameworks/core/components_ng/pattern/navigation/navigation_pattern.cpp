@@ -226,7 +226,9 @@ void NavigationPattern::CheckTopNavPathChange(
                 if (shallowBuilder) {
                     shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                 }
-                preTopNavDestination->GetContentNode()->Clean();
+                if (preTopNavDestination->GetContentNode()) {
+                    preTopNavDestination->GetContentNode()->Clean();
+                }
                 auto parent = preTopNavDestination->GetParent();
                 if (parent) {
                     parent->RemoveChild(preTopNavDestination);
@@ -294,7 +296,6 @@ void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<NavDestinat
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationNode);
-    auto contentNode = navigationNode->GetContentNode();
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     if (newTopNavDestination && preTopNavDestination) {
