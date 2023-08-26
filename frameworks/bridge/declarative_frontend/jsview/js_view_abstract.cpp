@@ -123,6 +123,7 @@ constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
+constexpr float MAX_ANGLE = 360.0f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
@@ -4661,18 +4662,21 @@ void JSViewAbstract::NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient
     // start
     GetAngle("start", argsPtrItem, degree);
     if (degree) {
+        CheckAngle(degree);
         newGradient.GetSweepGradient()->startAngle = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
     }
     // end
     GetAngle("end", argsPtrItem, degree);
     if (degree) {
+        CheckAngle(degree);
         newGradient.GetSweepGradient()->endAngle = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
     }
     // rotation
     GetAngle("rotation", argsPtrItem, degree);
     if (degree) {
+        CheckAngle(degree);
         newGradient.GetSweepGradient()->rotation = CalcDimension(degree.value(), DimensionUnit::PX);
         degree.reset();
     }
@@ -6064,6 +6068,15 @@ void JSViewAbstract::GetAngle(
         angle = static_cast<float>(value->GetDouble());
     } else {
         LOGE("Invalid value type");
+    }
+}
+
+void JSViewAbstract::CheckAngle(std::optional<float>& angle)
+{
+    if (LessNotEqual(angle.value(), 0.0f)) {
+        angle = 0.0f;
+    } else if (GreatNotEqual(angle.value(), MAX_ANGLE)) {
+        angle = MAX_ANGLE;
     }
 }
 
