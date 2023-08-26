@@ -35,6 +35,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2704,7 +2705,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0051, TestSize.Level1)
 
 /**
  * @tc.name: PanelTestNg0052
- * @tc.desc: Test panel pattern Layout.
+ * @tc.desc: Test panel pattern Layout and Measure.
  * @tc.type: FUNC
  */
 HWTEST_F(PanelTestNg, PanelTestNg0052, TestSize.Level1)
@@ -2716,8 +2717,8 @@ HWTEST_F(PanelTestNg, PanelTestNg0052, TestSize.Level1)
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    EXPECT_FALSE(layoutWrapper == nullptr);
     auto frameNode_test1 = AceType::MakeRefPtr<FrameNode>(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
     auto frameNode_test2 =
         AceType::MakeRefPtr<FrameNode>(V2::PANEL_CLOSE_ICON_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
@@ -2729,22 +2730,32 @@ HWTEST_F(PanelTestNg, PanelTestNg0052, TestSize.Level1)
     ASSERT_NE(layoutWrapper2, nullptr);
     auto panelPattern = frameNode->GetPattern<SlidingPanelPattern>();
     EXPECT_FALSE(panelPattern == nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<SlidingPanelLayoutAlgorithm>(panelPattern->CreateLayoutAlgorithm());
-    EXPECT_FALSE(layoutAlgorithm == nullptr);
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto panelLayoutProperty = panelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    EXPECT_FALSE(panelLayoutProperty == nullptr);
+    auto panelLayoutAlgorithm = panelPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(panelLayoutAlgorithm == nullptr);
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
     parentLayoutConstraint.percentReference = CONTAINER_SIZE;
     layoutWrapper->currentChildCount_ = 2;
-    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
-    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    panelLayoutProperty->UpdateCustomHeight(Dimension(0.0));
+    panelLayoutProperty->UpdatePanelType(PanelType::CUSTOM);
+    geometryNode->padding_ = std::make_unique<MarginPropertyF>();
+    geometryNode->padding_->left = 200.0f;
+    geometryNode->padding_->right = 200.0f;
+    geometryNode->padding_->top = 200.0f;
+    geometryNode->padding_->bottom = 200.0f;
+    layoutWrapper->geometryNode_ = geometryNode;
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(PANEL_HEIGHT)));
     layoutWrapper->childrenMap_.emplace(std::make_pair(0, layoutWrapper1));
     layoutWrapper->childrenMap_.emplace(std::make_pair(1, layoutWrapper2));
-    layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    panelLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    panelLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    panelLayoutProperty->UpdatePanelType(PanelType::MINI_BAR);
+    panelLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
 }
 } // namespace OHOS::Ace::NG
