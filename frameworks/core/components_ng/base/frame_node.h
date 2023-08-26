@@ -511,6 +511,13 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
+    void ForceSyncGeometryNode()
+    {
+        CHECK_NULL_VOID_NOLOG(renderContext_);
+        oldGeometryNode_.Reset();
+        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
+    }
+
     template<typename T>
     RefPtr<T> FindFocusChildNodeOfClass()
     {

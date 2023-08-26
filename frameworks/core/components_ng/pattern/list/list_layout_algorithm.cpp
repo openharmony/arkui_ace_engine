@@ -1104,9 +1104,7 @@ void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
     CHECK_NULL_VOID(wrapper);
     auto host = wrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->SyncGeometryProperties(AceType::RawPtr(wrapper->GetGeometryNode()));
+    host->ForceSyncGeometryNode();
 }
 
 std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount)
