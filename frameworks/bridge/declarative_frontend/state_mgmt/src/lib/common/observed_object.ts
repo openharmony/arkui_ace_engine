@@ -164,7 +164,7 @@ class SubscribableHandler {
       if (owningProperty) {
         // PU code path
         if ('objectPropertyHasBeenReadPU' in owningProperty) {
-          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasBeenReadPU(this, propName);
+          (owningProperty as unknown as ObservedPropertyAbstractPU<any>).objectPropertyHasBeenReadPU(this, propName);
         }
       }
     });

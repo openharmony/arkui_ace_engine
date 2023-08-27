@@ -56,7 +56,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
   // flag for initgial rendering or re-render on-going.
-  private isRenderInProgress: boolean = false;
+  private isRenderInProgress_: boolean = false;
 
   // flag if active of inActive
   // inActive means updates are delayed
@@ -151,18 +151,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.constructor.name} constructor: Using LocalStorage instance provided via @Entry.`);
     }
-
-    // populate ownStateVariables_ with all decorated variables owned by this @Component
-    Object.getOwnPropertyNames(this)
-      .filter((propName) => propName.startsWith("__"))
-      .forEach((propName) => {
-        const stateVar = Reflect.get(this, propName) as Object;
-        if (("notifyPropertyHasBeenReadPU" in stateVar)
-          && ("notifyPropertyHasChangedPU" in stateVar)) {
-          this.ownStateVariables_.set(propName, stateVar as unknown as ObservedPropertyAbstractPU<any>);
-        }
-      });
-
+    
     SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.constructor.name}(${this.id__()}): constructor done`);
   }
@@ -312,17 +301,34 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return childWeakRef ? childWeakRef.deref() : undefined;
   }
 
+  // returns true while inital or re-render is in progress
+  public isRenderInProgress() : boolean {
+    return this.isRenderInProgress_;
+  }
+
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
   protected abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
-  protected updateStateVars(params: {}) : void {
+  protected updateStateVars(params: {}): void {
     stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.")
   }
 
   protected initialRenderView(): void {
-    this.isRenderInProgress = true;
+    // populate ownStateVariables_ with all decorated variables owned by this @Component
+    Object.getOwnPropertyNames(this)
+      .filter((propName) => propName.startsWith("__"))
+      .forEach((propName) => {
+        const stateVar = Reflect.get(this, propName) as Object;
+    //    if (("notifyPropertyHasBeenReadPU" in stateVar)
+    //      && ("notifyPropertyHasChangedPU" in stateVar)) {
+          stateMgmtConsole.debug(`... add state variable ${propName}`)
+          this.ownStateVariables_.set(propName, stateVar as unknown as ObservedPropertyAbstractPU<any>);
+   //     }
+      });
+
+    this.isRenderInProgress_ = true;
     this.initialRender();
-    this.isRenderInProgress = false;
+    this.isRenderInProgress_ = false;
   }
 
   private UpdateElement(elmtId: number): void {
@@ -337,7 +343,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
     } else {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: updateDirtyElements: update on elmtId ${elmtId} start ...`);
-      this.isRenderInProgress = true;
+      this.isRenderInProgress_ = true;
 
       // purge all dependencies recorded earlier for this elmtId 
       // these dependencies will be recorded and updated in the next steps
@@ -351,7 +357,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.finishUpdateFunc(elmtId);
       ViewStackProcessor.StopGetAccessRecording();
 
-      this.isRenderInProgress = false;
+      this.isRenderInProgress_ = false;
       stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}: ViewPU.updateDirtyElements: update on elmtId ${elmtId} - DONE`);
     }
   }
@@ -428,7 +434,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtTrace.scopedTrace(() => {
-      if (this.isRenderInProgress) {
+      if (this.isRenderInProgress_) {
         stateMgmtConsole.error(`@Component '${this.constructor.name}' (id: ${this.id__()}) State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
       }
       

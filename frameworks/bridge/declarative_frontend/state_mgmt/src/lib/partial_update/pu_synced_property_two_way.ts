@@ -91,23 +91,6 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     }
   }
 
-  /**
-   * called when wrapped ObservedObject has changed poperty
-   * @param souceObject 
-   * @param changedPropertyName 
-   */
-  public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
-    this.notifyPropertyHasChangedPU(/* object property has changed */ changedPropertyName);
-  }
-
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-    objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
-    this.notifyPropertyHasBeenReadPU(/* changed object property*/ changedPropertyName);
-  }
-
   public getUnmonitored(): C {
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
     // unmonitored get access , no call to notifyPropertyRead !

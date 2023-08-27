@@ -39,7 +39,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
     public getDependentElmtIds(changedObjectProperty: string | undefined, debugInfo : string): Set<number> {
       if (!changedObjectProperty) {
-        stateMgmtConsole.debug(`${debugInfo}: variable value assignment: returning affected elmtIds ${this.map_.keys()}`);
+        stateMgmtConsole.debug(`${debugInfo}: variable value assignment: returning affected elmtIds ${JSON.stringify(this.map_.keys())}`);
         return new Set<number>(this.map_.keys());
       }
       let result = new Set<number>();
@@ -48,7 +48,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           result.add(elmtId);
         }
       });
-      stateMgmtConsole.debug(`${debugInfo}: changed object property '${changedObjectProperty}': returning affected elmtIds ${Array.from(result)}`);
+      stateMgmtConsole.debug(`${debugInfo}: changed object property '${changedObjectProperty}': returning affected elmtIds ${JSON.stringify(Array.from(result))}`);
       return result;
     }
 
@@ -59,13 +59,13 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         this.map_.set(elmtId, propertyDependencies);
         stateMgmtConsole.debug(`${debugInfo} - add elmtId ${elmtId} - updated list of dependent elmtIds: ${this.map_.keys()} .`);
       } else {
-        stateMgmtConsole.debug(`${debugInfo} - elmtId ${elmtId} known already - unchanged list of dependent elmtIds: ${this.map_.keys()} .`);
+        stateMgmtConsole.debug(`${debugInfo} - elmtId ${elmtId} known already - unchanged list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
       }
     
       if (readProperty) {
         /* record dependency on given property */
         propertyDependencies.add(readProperty);
-        stateMgmtConsole.debug(`   ... for elmtId ${elmtId} added dependency for object property '${readProperty}' - updated dependent property list ${Array.from(propertyDependencies)} .`);
+        stateMgmtConsole.debug(`   ... for elmtId ${elmtId} added dependency for object property '${readProperty}' - updated dependent property list ${JSON.stringify(Array.from(propertyDependencies))} .`);
       }
     }
 
@@ -168,8 +168,37 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         notifyPropertyRead, DO NOT USE with PU. Use notifyPropertyHasBeenReadPU`);
   }
 
+
+  /**
+ * Wrapped ObservedObjectPU has changed
+ * @param souceObject 
+ * @param changedPropertyName 
+ */
+  public objectPropertyHasChangedPU(souceObject: ObservedObject<T>, changedPropertyName: string) {
+    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+          objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
+    this.notifyPropertyHasChangedPU(/* object property has changed */ changedPropertyName);
+  }
+
+  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<T>, changedPropertyName: string) {
+    if (this.owningView_ && !this.owningView_.isRenderInProgress()) {
+      // only notify read while owning ViewPU render is in progress
+      return;
+    }
+
+    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+      objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
+    this.notifyPropertyHasBeenReadPU(/* property has been read */ changedPropertyName);
+  }
+
+
   protected notifyPropertyHasBeenReadPU(readProperty : string | undefined /* undefined means variable read */) {
-    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyHasBeenReadPU.`)
+    if (this.owningView_ && !this.owningView_.isRenderInProgress()) {
+      // only notify read while render is in progress
+      return;
+    }
+
+    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyHasBeenReadPU: ${readProperty ? 'caused by object property ' + readProperty + ' read' : 'caused by value read'}`)
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
         // TODO
@@ -190,7 +219,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   3- syncPeerHasChanged
   */
   protected notifyPropertyHasChangedPU(changedProperty : string | undefined /* undefined means new variable value assignment */) {
-    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyHasChangedPU.`)
+    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyHasChangedPU: ${changedProperty ? 'caused by object property ' + changedProperty + ' change' : 'caused by value assignment'}`)
     if (this.owningView_) {
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away

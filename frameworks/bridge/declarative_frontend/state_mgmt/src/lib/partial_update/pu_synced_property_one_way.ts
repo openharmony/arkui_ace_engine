@@ -140,7 +140,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
     if (eventSource && this.source_ == eventSource) {
       // defensive programming: should always be the case!
-      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}]: syncPeerHasChanged(): Source '${eventSource.info()}' has changed'.`)
+      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}]: syncPeerHasChanged(): Source '${eventSource.info()}' ${changedProperty ? 'by object property ' + changedProperty + ' has changed has changed' : 'by value assignment'}.`)
       const newValue = this.source_.getUnmonitored();
       if (this.checkIsSupportedValue(newValue)) {
         stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: hasChanged:  newValue '${JSON.stringify(newValue)}'.`);
@@ -161,18 +161,6 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName: string) {
       stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: objectPropertyHasChangedPU '${changedPropertyName}' has changed.`);
       this.notifyPropertyHasChangedPU(/* object property has changed */ changedPropertyName);
-  }
-
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
-    objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
-    this.notifyPropertyHasBeenReadPU(/* changed object property */ changedPropertyName);
-  }
-
-  public getUnmonitored(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
-    // unmonitored get access , no call to notifyPropertyRead !
-    return this.localCopyObservedObject_;
   }
 
   public get(): C {

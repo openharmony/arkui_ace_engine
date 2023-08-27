@@ -50,24 +50,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
     this.notifyPropertyHasChangedPU(changedObjectProperty);
   }
-
-  /**
-   * Wraped ObservedObjectPU has changed
-   * @param souceObject 
-   * @param changedPropertyName 
-   */
-  public objectPropertyHasChangedPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
-        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
-    this.notifyPropertyHasChangedPU(/* object property has changed */ changedPropertyName);
-  }
-
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<T>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
-    objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
-    this.notifyPropertyHasBeenReadPU(/* property has been read */ changedPropertyName);
-  }
-  
+ 
   private unsubscribeWrappedObject() {
     if (this.wrappedValue_) {
       if (this.wrappedValue_ instanceof SubscribableAbstract) {

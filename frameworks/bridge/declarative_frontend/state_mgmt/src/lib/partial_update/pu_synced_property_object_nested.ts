@@ -51,19 +51,6 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     ObservedObject.removeOwningProperty(this.obsObject_, this);
     super.aboutToBeDeleted();
   }
-
-  public objectPropertyHasChangedPU(eventSource: ObservedObject<C>, changedPropertyName: string) {
-    stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
-        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
-    this.notifyPropertyHasChangedPU(changedPropertyName);
-  }
-
-
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
-    objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
-    this.notifyPropertyHasBeenReadPU(changedPropertyName);
-  }
   
   public getUnmonitored(): C {
     stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
