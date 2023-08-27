@@ -76,7 +76,6 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     bool IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void AdapterRotation(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void SetWindowSceneConsumed(int32_t action);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
