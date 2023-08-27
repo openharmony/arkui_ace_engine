@@ -711,12 +711,38 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
     if (rect.IsEmpty()) {
         return;
     }
+    if (NeedPreloadImage(optionList, rect)) {
+        return;
+    }
     std::vector<OHOS::Rosen::ParticleParams> particleParams;
     for (auto& item : optionList) {
         particleParams.emplace_back(ConvertParticleOptionToParams(item, rect));
     }
     rsNode_->SetParticleParams(particleParams);
     RequestNextFrame();
+}
+
+bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)
+{
+    bool flag = false;
+    std::vector<OHOS::Rosen::ParticleParams> particleParams;
+    for (auto& item : optionList) {
+        auto emitterOption = item.GetEmitterOption();
+        auto particle = emitterOption.GetParticle();
+        auto particleType = particle.GetParticleType();
+        auto particleConfig = particle.GetConfig();
+        if (particleType == ParticleType::IMAGE) {
+            auto imageParameter = particleConfig.GetImageParticleParameter();
+            auto imageSize = imageParameter.GetSize();
+            auto imageWidth = Dimension(ConvertDimensionToPx(imageSize.first, rect.Width()), DimensionUnit::PX);
+            auto imageHeight = Dimension(ConvertDimensionToPx(imageSize.second, rect.Height()), DimensionUnit::PX);
+            if (particleImageMap_.find(imageParameter.GetImageSource()) == particleImageMap_.end()) {
+                LoadParticleImage(imageParameter.GetImageSource(), imageWidth, imageHeight);
+                flag = true;
+            }
+        }
+    }
+    return flag;
 }
 
 Rosen::ParticleParams RosenRenderContext::ConvertParticleOptionToParams(
@@ -802,8 +828,6 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
         auto rsImagePtr = std::make_shared<Rosen::RSImage>();
         if (particleImageMap_.find(imageSource) != particleImageMap_.end()) {
             SetRsParticleImage(rsImagePtr, imageSource);
-        } else {
-            LoadParticleImage(imageParameter.GetImageSource(), imageWidth, imageHeight);
         }
         rsImagePtr->SetImageFit(static_cast<int32_t>(imageParameter.GetImageFit().value_or(ImageFit::COVER)));
         OHOS::Rosen::Vector2f rsImageSize(imageWidth.ConvertToPx(), imageHeight.ConvertToPx());
@@ -828,7 +852,11 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
         CHECK_NULL_VOID_NOLOG(image);
         auto pixmap = image->GetPixelMap();
         CHECK_NULL_VOID_NOLOG(pixmap);
-        rsImagePtr->SetPixelMap(pixmap->GetPixelMapSharedPtr());
+        auto pixMapPtr = pixmap->GetPixelMapSharedPtr();
+        rsImagePtr->SetPixelMap(pixMapPtr);
+        if (pixMapPtr) {
+            rsImagePtr->SetSrcRect(Rosen::RectF(0, 0, pixMapPtr->GetWidth(), pixMapPtr->GetHeight()));
+        }
     }
 }
 
