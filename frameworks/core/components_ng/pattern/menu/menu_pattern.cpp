@@ -550,6 +550,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
 
     auto bgColor = theme->GetBackgroundColor();
     renderContext->UpdateBackgroundColor(bgColor);
