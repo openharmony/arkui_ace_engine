@@ -124,6 +124,7 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(bool optionsHasIcon, const std::s
     std::function<void()>&& onClickFunc, int32_t index, const std::string& icon)
 {
     auto option = Create(index);
+    CHECK_NULL_RETURN(option, nullptr);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto pattern = option->GetPattern<OptionPattern>();
