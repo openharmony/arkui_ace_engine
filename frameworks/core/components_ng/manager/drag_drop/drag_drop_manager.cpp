@@ -389,7 +389,7 @@ void DragDropManager::OnDragMove(const Point& point, const std::string& extraInf
     }
 
     if (preTargetFrameNode_) {
-        auto preRect = preTargetFrameNode_->GetRenderContext()->GetPaintRectWithTransform();
+        auto preRect = preTargetFrameNode_->GetTransformRectRelativeToWindow();
         if (!preRect.IsInRegion(PointF(static_cast<float>(point.GetX()), static_cast<float>(point.GetY())))) {
             FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
         }
