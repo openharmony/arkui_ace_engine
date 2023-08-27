@@ -414,7 +414,7 @@ private:
     void PaintDebugBoundary();
     bool IsUsingPosition(const RefPtr<FrameNode>& frameNode);
 
-    void SetContentRectToFrame(RectF rect);
+    void SetContentRectToFrame(RectF rect) override;
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
