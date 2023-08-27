@@ -305,6 +305,11 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     return { 1.0f, 1.0f };
 }
 
+RectF FrameNode::GetTransformRectRelativeToWindow() const
+{
+    return RectF(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
 OffsetF FrameNode::GetTransformRelativeOffset() const
 {
     return { 1.0f, 1.0f };
