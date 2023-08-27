@@ -720,6 +720,7 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
     auto maxChildrenWidth = optionConstraint.minSize.Width();
     auto optionsLayoutWrapper = GetOptionsLayoutWrappper(layoutWrapper);
     for (const auto& optionWrapper : optionsLayoutWrapper) {
+        optionWrapper->GetLayoutProperty()->ResetCalcMinSize();
         optionWrapper->Measure(optionConstraint);
         auto childSize = optionWrapper->GetGeometryNode()->GetMarginFrameSize();
         maxChildrenWidth = std::max(maxChildrenWidth, childSize.Width());
