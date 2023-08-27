@@ -49,15 +49,13 @@ static bool ParseFamilyName(napi_env env, napi_value familyNameNApi, std::string
         napi_get_value_string_utf8(env, familyNameNApi, name.get(), nameLen + 1, &nameLen);
         familyName = name.get();
     } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (!ParseResourceParam(env, familyNameNApi, id, type, params)) {
+        ResourceInfo recv;
+        if (!ParseResourceParam(env, familyNameNApi, recv)) {
             LOGE("can not parse resource info from input params.");
             NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
-        if (!ParseString(id, type, params, familyName)) {
+        if (!ParseString(recv, familyName)) {
             LOGE("can not get message from resource manager.");
             NapiThrow(env, "Can not get familyName from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
@@ -79,16 +77,14 @@ static bool ParseFamilySrc(napi_env env, napi_value familySrcNApi, std::string& 
         napi_get_value_string_utf8(env, familySrcNApi, src.get(), srcLen + 1, &srcLen);
         familySrc = src.get();
     } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (!ParseResourceParam(env, familySrcNApi, id, type, params)) {
+        ResourceInfo recv;
+        if (!ParseResourceParam(env, familySrcNApi, recv)) {
             LOGE("can not parse resource info from input params.");
             NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
 
-        if (!ParseString(id, type, params, familySrc)) {
+        if (!ParseString(recv, familySrc)) {
             LOGE("can not get familySrc from resource manager.");
             NapiThrow(env, "Can not get familySrc from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return false;
