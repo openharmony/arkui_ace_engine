@@ -116,7 +116,7 @@ public:
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
-    void ShowWindow();
+    void ShowWindow(bool needFocus = true);
     void HideWindow();
 
     // Convert Rect to Rosen::Rect
