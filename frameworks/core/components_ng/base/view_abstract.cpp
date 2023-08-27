@@ -867,13 +867,9 @@ void ViewAbstract::SetDraggable(bool draggable)
 void ViewAbstract::SetOnDragStart(
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    if (!frameNode->IsDraggable()) {
-        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
-    }
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->InitDragDropEvent();
 
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
