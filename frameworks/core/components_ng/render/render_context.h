@@ -193,6 +193,7 @@ public:
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
+    virtual void SetContentRectToFrame(RectF rect) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
