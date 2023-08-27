@@ -20,7 +20,6 @@
 #include "core/common/clipboard/paste_data.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -48,7 +47,10 @@ constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_IMAGE_SIZE = 57.0f;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 } // namespace
-RichEditorPattern::RichEditorPattern() {}
+RichEditorPattern::RichEditorPattern()
+{
+    ignoreEvent_ = true;
+}
 
 RichEditorPattern::~RichEditorPattern()
 {
@@ -59,9 +61,9 @@ RichEditorPattern::~RichEditorPattern()
 
 void RichEditorPattern::OnModifyDone()
 {
-    TextPattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TextPattern::OnModifyDone();
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     copyOption_ = layoutProperty->GetCopyOption().value_or(CopyOptions::Distributed);
     auto context = host->GetContext();
@@ -1015,7 +1017,7 @@ void RichEditorPattern::HandleOnSelectAll()
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay();
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
     selectMenuInfo_.showCopyAll = false;
     selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
     auto host = GetHost();
@@ -2312,13 +2314,14 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
     selectInfo.menuCallback.onDisappear = selectionMenuParams_->onDisappear;
 }
 
-void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
+void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle](bool hasData) {
+    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, isCopyAll](bool hasData) {
         auto pattern = weak.Upgrade();
         SelectOverlayInfo selectInfo;
+        bool usingMouse = pattern->IsUsingMouse();
         if (!pattern->IsUsingMouse()) {
             selectInfo.firstHandle.paintRect = firstHandle;
             selectInfo.secondHandle.paintRect = secondHandle;
@@ -2341,7 +2344,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         auto host = pattern->GetHost();
         CHECK_NULL_VOID_NOLOG(host);
 
-        pattern->UpdateSelectMenuInfo(hasData, selectInfo);
+        pattern->UpdateSelectMenuInfo(hasData, selectInfo, isCopyAll);
         if (pattern->copyOption_ == CopyOptions::None) {
             selectInfo.menuInfo.showCopy = false;
             selectInfo.menuInfo.showCut = false;
@@ -2366,9 +2369,10 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnPaste();
         };
-        selectInfo.menuCallback.onSelectAll = [weak]() {
+        selectInfo.menuCallback.onSelectAll = [weak, usingMouse]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->isMousePressed_ = usingMouse;
             pattern->HandleOnSelectAll();
         };
         selectInfo.callerFrameNode = host;

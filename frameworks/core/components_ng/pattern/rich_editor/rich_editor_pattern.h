@@ -25,6 +25,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -171,7 +172,7 @@ public:
     std::u16string GetLeftTextOfCursor(int32_t number);
     std::u16string GetRightTextOfCursor(int32_t number);
     int32_t GetTextIndexAtCursor();
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
@@ -228,12 +229,13 @@ public:
     bool HasFocus() const;
 
 private:
-    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
+    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
         auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
-        selectInfo.menuInfo.showCopy = hasValue;
-        selectInfo.menuInfo.showCut = hasValue;
-        selectInfo.menuInfo.showCopyAll = hasValue;
+        bool isDisableItem = isCopyAll && copyOption_ == CopyOptions::None;
+        selectInfo.menuInfo.showCopy = !isDisableItem && hasValue;
+        selectInfo.menuInfo.showCut = !isDisableItem && hasValue;
+        selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
         selectMenuInfo_ = selectInfo.menuInfo;
