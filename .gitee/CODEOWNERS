@@ -41,7 +41,7 @@ frameworks/core/components_ng/pattern/badge/  @nickyjd
 frameworks/core/components_ng/pattern/blank/  @xiexiyun
 frameworks/core/components_ng/pattern/bubble/  @zhao-xinyu007
 frameworks/core/components_ng/pattern/button/  @zhang-xiao150
-frameworks/core/components_ng/pattern/calendar/  @jinweiliu
+frameworks/core/components_ng/pattern/calendar/  @techbuilding
 frameworks/core/components_ng/pattern/canvas_context/  @zhangbingce
 frameworks/core/components_ng/pattern/canvas_renderer/  @zhangbingce
 frameworks/core/components_ng/pattern/checkbox/  @zhang-xiao150
@@ -51,7 +51,7 @@ frameworks/core/components_ng/pattern/container_modal/  @cc520bf
 frameworks/core/components_ng/pattern/counter/  @zhang-xiao150
 frameworks/core/components_ng/pattern/custom/  @yan-shuifeng
 frameworks/core/components_ng/pattern/custom_paint/  @zhangbingce
-frameworks/core/components_ng/pattern/data_panel/  @jinweiliu
+frameworks/core/components_ng/pattern/data_panel/  @xzken
 frameworks/core/components_ng/pattern/dialog/  @zhao-xinyu007
 frameworks/core/components_ng/pattern/divider/  @zhang-xiao150
 frameworks/core/components_ng/pattern/effect_component/  @liuchao92
@@ -63,7 +63,7 @@ frameworks/core/components_ng/pattern/grid/  @zcdqs
 frameworks/core/components_ng/pattern/grid_col/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_container/  @xiexiyun
 frameworks/core/components_ng/pattern/grid_row/  @xiexiyun
-frameworks/core/components_ng/pattern/hyperlink/  @jinweiliu
+frameworks/core/components_ng/pattern/hyperlink/  @techbuilding
 frameworks/core/components_ng/pattern/image/  @zhoutianer
 frameworks/core/components_ng/pattern/image_animator/  @zhoutianer
 frameworks/core/components_ng/pattern/indexer/  @aryawang
@@ -85,7 +85,7 @@ frameworks/core/components_ng/pattern/picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/plugin/  @wangchensu1
 frameworks/core/components_ng/pattern/preview_mock/  @laigerendaqiu
 frameworks/core/components_ng/pattern/progress/  @cheng-feiwang
-frameworks/core/components_ng/pattern/qrcode/  @jinweiliu
+frameworks/core/components_ng/pattern/qrcode/  @techbuilding
 frameworks/core/components_ng/pattern/radio/  @zhang-xiao150
 frameworks/core/components_ng/pattern/rating/  @cheng-feiwang
 frameworks/core/components_ng/pattern/recycle_view/  @guozejun
@@ -121,7 +121,7 @@ frameworks/core/components_ng/pattern/time_picker/  @cheng-feiwang
 frameworks/core/components_ng/pattern/toast/  @zhao-xinyu007
 frameworks/core/components_ng/pattern/toggle/  @zhang-xiao150
 frameworks/core/components_ng/pattern/ui_extension/  @lushi1202
-frameworks/core/components_ng/pattern/video/  @jinweiliu
+frameworks/core/components_ng/pattern/video/  @xzken
 frameworks/core/components_ng/pattern/view_context/  @hehongyang9
 frameworks/core/components_ng/pattern/waterflow/  @zcdqs
 frameworks/core/components_ng/pattern/web/  @LongLie
@@ -134,7 +134,7 @@ frameworks/core/components/badge/  @nickyjd
 frameworks/core/components/box/  @yangfan229
 frameworks/core/components/bubble/  @zhao-xinyu007
 frameworks/core/components/button/  @zhang-xiao150
-frameworks/core/components/calendar/  @jinweiliu
+frameworks/core/components/calendar/  @techbuilding
 frameworks/core/components/camera/  @cc520bf
 frameworks/core/components/chart/  @zhang-xiao150
 frameworks/core/components/checkable/  @zhang-xiao150
@@ -146,7 +146,7 @@ frameworks/core/components/counter/  @zhang-xiao150
 frameworks/core/components/coverage/  @
 frameworks/core/components/custom_dialog/  @zhao-xinyu007
 frameworks/core/components/custom_paint/  @zhangbingce
-frameworks/core/components/data_panel/  @jinweiliu
+frameworks/core/components/data_panel/  @xzken
 frameworks/core/components/declaration/  @cc520bf
 frameworks/core/components/dialog/  @zhao-xinyu007
 frameworks/core/components/dialog_modal/  @zhao-xinyu007
@@ -165,7 +165,7 @@ frameworks/core/components/form/  @wangchensu1
 frameworks/core/components/gesture_listener/  @zheng-qiyi
 frameworks/core/components/grid/  @zcdqs
 frameworks/core/components/grid_layout/  @zcdqs
-frameworks/core/components/hyperlink/  @jinweiliu
+frameworks/core/components/hyperlink/  @techbuilding
 frameworks/core/components/ifelse/  @yan-shuifeng
 frameworks/core/components/image/  @zhoutianer
 frameworks/core/components/indexer/  @aryawang
@@ -189,7 +189,7 @@ frameworks/core/components/popup/  @fengjituo111
 frameworks/core/components/positioned/  @yangfan229
 frameworks/core/components/progress/  @cheng-feiwang
 frameworks/core/components/proxy/  @yan-shuifeng
-frameworks/core/components/qrcode/  @jinweiliu
+frameworks/core/components/qrcode/  @techbuilding
 frameworks/core/components/rating/  @cheng-feiwang
 frameworks/core/components/refresh/  @aryawang
 frameworks/core/components/relative_container/  @nickyjd
@@ -234,7 +234,7 @@ frameworks/core/components/transform/  @
 frameworks/core/components/transition/  @
 frameworks/core/components/triangle/  @
 frameworks/core/components/tween/  @hehongyang9
-frameworks/core/components/video/  @jinweiliu
+frameworks/core/components/video/  @xzken
 frameworks/core/components/watch_slider/  @cheng-feiwang
 frameworks/core/components/web/  @LongLie
 frameworks/core/components/wrap/  @yangfan229
@@ -313,7 +313,7 @@ frameworks/core/components_ng/test/pattern/badge/  @nickyjd
 frameworks/core/components_ng/test/pattern/blank/  @xiexiyun
 frameworks/core/components_ng/test/pattern/bubble/  @zhao-xinyu007
 frameworks/core/components_ng/test/pattern/button/  @zhang-xiao150
-frameworks/core/components_ng/test/pattern/calendar/  @jinweiliu
+frameworks/core/components_ng/test/pattern/calendar/  @techbuilding
 frameworks/core/components_ng/test/pattern/canvas_context/  @zhangbingce
 frameworks/core/components_ng/test/pattern/canvas_renderer/  @zhangbingce
 frameworks/core/components_ng/test/pattern/checkbox/  @zhang-xiao150
