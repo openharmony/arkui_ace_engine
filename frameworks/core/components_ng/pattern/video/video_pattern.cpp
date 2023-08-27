@@ -271,6 +271,10 @@ bool VideoPattern::SetSourceForMediaPlayer()
 
 void VideoPattern::RegisterMediaPlayerEvent()
 {
+    if (src_.empty()) {
+        LOGD("Video src is empty, RegisterMediaPlayerEvent return");
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
