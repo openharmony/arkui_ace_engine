@@ -279,6 +279,7 @@ private:
     void PrintPlayerStatus(PlaybackStatus status);
 
     void UpdateFsState();
+    void checkNeedAutoPlay();
 
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError();
@@ -306,6 +307,8 @@ private:
     bool loop_ = false;
     
     bool pastPlayingStatus_ = false;
+
+    bool dragEndAutoPlay_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;

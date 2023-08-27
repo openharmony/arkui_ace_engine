@@ -491,7 +491,6 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     currentPos_ = currentPos;
     isInitialState_ = currentPos != 0 ? false : isInitialState_;
     isPlaying_ = mediaPlayer_->IsPlaying();
-
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
 
@@ -525,11 +524,19 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     UpdateSpeed();
     UpdateMuted();
 
+    checkNeedAutoPlay();
+}
+
+void VideoPattern::checkNeedAutoPlay()
+{
     if (isStop_) {
         isStop_ = false;
         Start();
     }
-
+    if (dragEndAutoPlay_) {
+        dragEndAutoPlay_ = false;
+        Start();
+    }
     if (autoPlay_) {
         Start();
     }
