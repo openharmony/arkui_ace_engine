@@ -117,6 +117,11 @@ public:
         transitionStatus_ = transitionStatus;
     }
 
+    TransitionStatus GetTransitionStatus()
+    {
+        return transitionStatus_;
+    }
+
     void SetSkipHotArea(bool skip)
     {
         skipHotArea_ = skip;
