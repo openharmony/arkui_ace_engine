@@ -177,7 +177,12 @@ class SubscribableHandler {
 
   public get(target: Object, property: PropertyKey, receiver?: any): any {
     stateMgmtConsole.debug(`SubscribableHandler: get '${property.toString()}'.`);
-    return (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) ? target : Reflect.get(target, property, receiver);
+    if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
+      return target;
+     } else {
+      this.notifyObjectPropertyHasBeenRead(property.toString());
+      return Reflect.get(target, property, receiver);
+     } 
   }
 
   public set(target: Object, property: PropertyKey, newValue: any): boolean {
@@ -295,9 +300,9 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
         public get(target: Object, property: PropertyKey, receiver: any): any {
           let ret = super.get(target, property, receiver);
+          const prop = property.toString();
           if (ret && typeof ret === "function") {
             const self = this;
-            const prop = property.toString();
             // prop is the function name here
             if (prop == "splice") {
               // 'splice' self modifies the array, returns deleted array items
@@ -331,7 +336,9 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
             // binding the proxiedObject ensures that modifying functions like push() operate on the 
             // proxied array and each array change is notified.
             return ret.bind(proxiedObject);
-          }
+          } // if value is a function
+
+          this.notifyObjectPropertyHasBeenRead(prop);
 
           return ret;
         }       
