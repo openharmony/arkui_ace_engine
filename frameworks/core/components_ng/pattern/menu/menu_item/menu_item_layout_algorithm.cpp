@@ -18,6 +18,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -36,9 +37,25 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutConstraint);
     const auto& padding = props->CreatePaddingAndBorderWithDefault(horInterval_, 0.0f, 0.0f, 0.0f);
     float maxRowWidth = layoutConstraint->maxSize.Width() - padding.Width();
-    if (layoutConstraint->selfIdealSize.Width() &&
-        layoutConstraint->selfIdealSize.Width().value() < layoutConstraint->maxSize.Width()) {
-        maxRowWidth = layoutConstraint->selfIdealSize.Width().value() - padding.Width();
+    // update ideal width if user defined
+    const auto& calcConstraint = props->GetCalcLayoutConstraint();
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value() &&
+        calcConstraint->selfIdealSize.value().Width().has_value()) {
+        ScaleProperty scaleProperty;
+        if (layoutWrapper->GetGeometryNode() && layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
+            scaleProperty = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()->scaleProperty;
+        } else {
+            scaleProperty = layoutConstraint->scaleProperty;
+        }
+        layoutConstraint->selfIdealSize.SetWidth(
+            ConvertToPx(calcConstraint->selfIdealSize.value().Width()->GetDimension(), scaleProperty,
+                layoutConstraint->percentReference.Width()));
+    }
+    if (layoutConstraint->selfIdealSize.Width().has_value()) {
+        maxRowWidth =
+            std::max(layoutConstraint->minSize.Width(),
+                std::min(layoutConstraint->maxSize.Width(), layoutConstraint->selfIdealSize.Width().value())) -
+            padding.Width();
     }
     float minRowWidth = layoutConstraint->minSize.Width();
 
@@ -70,10 +87,11 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         SizeF(std::max(minRowWidth, contentWidth), std::max(leftRowHeight, rightRowHeight)));
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 
-    if (layoutConstraint->selfIdealSize.Width().has_value() &&
-        layoutConstraint->selfIdealSize.Width().value() >= layoutConstraint->maxSize.Width()) {
+    if (layoutConstraint->selfIdealSize.Width().has_value()) {
+        auto idealWidth = std::max(layoutConstraint->minSize.Width(),
+            std::min(layoutConstraint->maxSize.Width(), layoutConstraint->selfIdealSize.Width().value()));
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
-        idealSize.SetWidth(layoutConstraint->maxSize.Width());
+        idealSize.SetWidth(idealWidth);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
 }
