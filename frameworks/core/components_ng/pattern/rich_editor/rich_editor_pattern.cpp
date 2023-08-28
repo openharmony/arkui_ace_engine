@@ -2830,4 +2830,14 @@ void RichEditorPattern::InitSelection(const Offset& pos)
         }
     }
 }
+
+void RichEditorPattern::BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>&
+    menuBuilder, std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear)
+{
+    selectionMenuParams_ =
+        std::make_shared<SelectionMenuParams>(richEditorType, menuBuilder, onAppear, onDisappear, type);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
 } // namespace OHOS::Ace::NG
