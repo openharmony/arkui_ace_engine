@@ -1149,8 +1149,10 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
 
     RectF rect = layoutProperty->GetIndicatorRect(indicator);
     paintProperty->UpdateIndicator(rect);
-    currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
-    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (!isTouchingSwiper_) {
+        currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
+        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
     if (tabBarStyles_[indicator] == TabBarStyle::SUBTABBATSTYLE) {
         UpdateSubTabBoard();
     }
@@ -1477,6 +1479,13 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
         return;
     }
 
+    if (LessOrEqual(turnPageRate_, 0.0f)) {
+        turnPageRate_ = 0.0f;
+    }
+    if (GreatOrEqual(turnPageRate_, 1.0f)) {
+        turnPageRate_ = 1.0f;
+    }
+
     if (swiperStartIndex_ < 0 || swiperStartIndex_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
         tabBarStyles_[swiperStartIndex_] != TabBarStyle::SUBTABBATSTYLE ||
         swiperStartIndex_ >= static_cast<int32_t>(selectedModes_.size()) ||
@@ -1517,11 +1526,6 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
     LinearColor color = LinearColor(indicatorStyle.color) +
                         (LinearColor(nextIndicatorStyle.color) - LinearColor(indicatorStyle.color)) * turnPageRate_;
     indicatorStyle.color = color.ToColor();
-
-    if (LessOrEqual(turnPageRate_, 0.0f) || GreatOrEqual(turnPageRate_, 1.0f)) {
-        isTouchingSwiper_ = false;
-        turnPageRate_ = 0.0f;
-    }
 }
 
 float TabBarPattern::GetSpace(int32_t indicator)
@@ -1874,6 +1878,14 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     }
 
     auto index = swiperStartIndex_ + 1;
+    if (index >= static_cast<int32_t>(tabBarStyles_.size())) {
+        swiperStartIndex_--;
+        index--;
+        turnPageRate += 1.0f;
+    }
+    if (Negative(turnPageRate)) {
+        turnPageRate = 0.0f;
+    }
     if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
         tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE || index >= static_cast<int32_t>(selectedModes_.size()) ||
         selectedModes_[index] != SelectedMode::INDICATOR) {
