@@ -1627,6 +1627,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDragLeave", &JSWeb::JsOnDragLeave);
     JSClass<JSWeb>::StaticMethod("onDrop", &JSWeb::JsOnDrop);
     JSClass<JSWeb>::StaticMethod("onScroll", &JSWeb::OnScroll);
+    JSClass<JSWeb>::StaticMethod("rotate", &JSWeb::WebRotate);
     JSClass<JSWeb>::StaticMethod("pinchSmooth", &JSWeb::PinchSmoothModeEnabled);
     JSClass<JSWeb>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSWeb>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -1964,6 +1965,11 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
     WebModel::GetInstance()->SetFocusable(true);
     WebModel::GetInstance()->SetFocusNode(true);
+}
+
+void JSWeb::WebRotate(const JSCallbackInfo& args)
+{
+    // LOGD("Web rotate is not supported.");
 }
 
 void JSWeb::OnAlert(const JSCallbackInfo& args)
