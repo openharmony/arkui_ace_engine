@@ -66,10 +66,11 @@ public:
     static bool IsArray(napi_env env, napi_value value);
     static void SetSelementToArray(napi_env env, napi_value array, int index, napi_value value);
     static napi_value CreateArray(napi_env env);
-    static Color ParseColor(napi_env env, napi_value value);
+    static bool ParseColorFromResource(napi_env env, napi_value value, Color& result);
+    static bool ParseColor(napi_env env, napi_value value, Color& result);
     static std::unique_ptr<JsonValue> PutJsonValue(napi_env env, napi_value value, std::string& key);
-    static RefPtr<ThemeConstants> GetThemeConstants(const std::string& bundleName, const std::string& moduleName);
-    static CalcDimension GetDimensionResult(napi_env env, napi_value value);
+    static RefPtr<ThemeConstants> GetThemeConstants(napi_env env, napi_value value);
+    static bool GetDimensionResult(napi_env env, napi_value value, CalcDimension& result);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAPI_COMMON_UTILS_COMMON_NAPI_UTILS_H
