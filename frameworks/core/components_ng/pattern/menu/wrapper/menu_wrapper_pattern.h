@@ -111,6 +111,9 @@ public:
     {
         isFirstShow_ = true;
     }
+protected:
+    void OnTouchEvent(const TouchEventInfo& info);
+    void CheckAndShowAnimation();
 
 private:
     bool ShouldAvoidKeyboard() const override
@@ -119,7 +122,6 @@ private:
     }
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
-    void OnTouchEvent(const TouchEventInfo& info);
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);

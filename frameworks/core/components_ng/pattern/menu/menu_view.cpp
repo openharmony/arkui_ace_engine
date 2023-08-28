@@ -215,7 +215,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
-    if (type == MenuType::SUB_MENU || !withWrapper) {
+    if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
         wrapperNode->RemoveChild(menuNode);
         wrapperNode.Reset();
         return menuNode;

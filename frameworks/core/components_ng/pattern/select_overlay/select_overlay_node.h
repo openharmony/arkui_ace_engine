@@ -131,7 +131,7 @@ private:
         Then, selectMenuInner_, backButton_, extensionMenu_ will be null.
         Text selection menu node structure whill be like bellow:
         -rootNode
-            -selectOverlay
+            -selectOverlay(menuWrapper)
                 -selectMenu_(menu)
                     -scroller
                         -customBuilderMenu

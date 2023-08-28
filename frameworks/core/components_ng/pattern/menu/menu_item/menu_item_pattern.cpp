@@ -26,7 +26,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -171,7 +170,7 @@ RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
     CHECK_NULL_RETURN(host, nullptr);
     auto parent = host->GetParent();
     while (parent) {
-        if (parent->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        if (parent->GetTag() == V2::MENU_WRAPPER_ETS_TAG || parent->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(parent);
         }
         parent = parent->GetParent();
@@ -195,6 +194,15 @@ RefPtr<FrameNode> MenuItemPattern::GetMenu(bool needTopMenu)
         parent = parent->GetParent();
     }
     return menuNode;
+}
+
+RefPtr<MenuPattern> MenuItemPattern::GetMenuPattern(bool needTopMenu)
+{
+    auto menu = GetMenu(true);
+    if (!menu) {
+        return nullptr;
+    }
+    return menu->GetPattern<MenuPattern>();
 }
 
 void MenuItemPattern::ShowSubMenu()
@@ -228,7 +236,9 @@ void MenuItemPattern::ShowSubMenu()
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), MenuType::SUB_MENU);
+    bool isSelectOverlayMenu = IsSelectOverlayMenu();
+    MenuType menuType = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
+    auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), menuType);
     CHECK_NULL_VOID(subMenu);
     auto menuPattern = subMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -247,14 +257,21 @@ void MenuItemPattern::ShowSubMenu()
     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     RegisterWrapperMouseEvent();
 
-    auto focusHub = subMenu->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusWithDefaultFocusFirstly();
+    // select overlay menu no need focus
+    if (!isSelectOverlayMenu) {
+        auto focusHub = subMenu->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusWithDefaultFocusFirstly();
+    }
     parentMenuPattern->SetShowedSubMenu(subMenu);
 }
 
 void MenuItemPattern::CloseMenu()
 {
+    // no need close for selection menu
+    if (IsSelectOverlayMenu()) {
+        return;
+    }
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
@@ -289,15 +306,6 @@ void MenuItemPattern::RegisterOnClick()
         if (pattern->GetSubBuilder() != nullptr) {
             pattern->ShowSubMenu();
             return;
-        }
-
-        // no need close menu
-        auto topMenu = pattern->GetMenu(true);
-        if (topMenu && topMenu->GetPattern()) {
-            auto menuPattern = DynamicCast<MenuPattern>(topMenu->GetPattern());
-            if (menuPattern && menuPattern->IsSelectOverlayCustomMenu()) {
-                return;
-            }
         }
 
         // hide menu when menu item is clicked
@@ -726,5 +734,15 @@ void MenuItemPattern::SetAccessibilityAction()
 
         pattern->CloseMenu();
     });
+}
+
+bool MenuItemPattern::IsSelectOverlayMenu()
+{
+    auto topLevelMenuPattern = GetMenuPattern(true);
+    if (!topLevelMenuPattern) {
+        return false;
+    }
+    return topLevelMenuPattern->IsSelectOverlayExtensionMenu() || topLevelMenuPattern->IsSelectOverlayCustomMenu() ||
+           topLevelMenuPattern->IsSelectOverlaySubMenu();
 }
 } // namespace OHOS::Ace::NG
