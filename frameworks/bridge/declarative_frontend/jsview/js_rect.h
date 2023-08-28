@@ -27,8 +27,8 @@ class JSRect : public JSShapeAbstract {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
-    static void JsRadiusWidth(const JSCallbackInfo& info);
-    static void JsRadiusHeight(const JSCallbackInfo& info);
+    static void SetRadiusWidth(const JSCallbackInfo& info);
+    static void SetRadiusHeight(const JSCallbackInfo& info);
     static void SetRadius(const JSCallbackInfo& info);
 
     static void ConstructorCallback(const JSCallbackInfo& info);
@@ -43,8 +43,6 @@ private:
         const RefPtr<ShapeRect>& shapeRect, const CalcDimension& radiusX, const CalcDimension& radiusY, int32_t index);
     static void SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal);
     static void SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal);
-    static void SetRadiusWidth(const JSRef<JSVal>& jsVal);
-    static void SetRadiusHeight(const JSRef<JSVal>& jsVal);
 };
 
 } // namespace OHOS::Ace::Framework

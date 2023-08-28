@@ -214,11 +214,7 @@ HWTEST_F(ShapePatternTestNg, InheritedProperty001, TestSize.Level1)
     layoutConstraint.selfIdealSize.SetHeight(HEIGHT);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(circleFrameNode, geometryNode, circleFrameNode->GetLayoutProperty());
-    auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), &layoutWrapper);
+    auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);
     EXPECT_EQ(size.has_value(), true);
     auto paintMethod = pattern->CreateNodePaintMethod();
     EXPECT_EQ(paintMethod == nullptr, false);
@@ -402,7 +398,7 @@ HWTEST_F(ShapePatternTestNg, GetChildrenSize002, TestSize.Level1)
     frameNode->AddChild(firstItem);
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_FALSE(geometryNode == nullptr);
     geometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
 
