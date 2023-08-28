@@ -1377,7 +1377,8 @@ bool WebDelegate::SetCookie(const std::string& url, const std::string& value)
 std::string WebDelegate::GetCookie(const std::string& url) const
 {
     if (cookieManager_) {
-        return cookieManager_->ReturnCookie(url);
+        bool isValid = true;
+        return cookieManager_->ReturnCookie(url, isValid);
     }
     return "";
 }
