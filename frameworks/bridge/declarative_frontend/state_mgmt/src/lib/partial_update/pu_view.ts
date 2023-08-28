@@ -315,8 +315,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   protected initialRenderView(): void {
     // populate ownStateVariables_ with all decorated variables owned by this @Component
+    stateMgmtConsole.debug(`initialRenderView: populate ownStateVariables_`);
     Object.getOwnPropertyNames(this)
-      .filter((propName) => propName.startsWith("__"))
+      .filter((propName) => {
+        stateMgmtConsole.debug(propName);
+        return propName.startsWith("__")
+      })
       .forEach((propName) => {
         const stateVar = Reflect.get(this, propName) as Object;
     //    if (("notifyPropertyHasBeenReadPU" in stateVar)

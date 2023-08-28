@@ -165,6 +165,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get.`)
+    ObservedObject.setReadingProperty(this.localCopyObservedObject_, this);
     this.notifyPropertyHasBeenReadPU(/* variable value assignment */ undefined)
     return this.localCopyObservedObject_;
   }
@@ -179,6 +180,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
     stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newV value.`);
     if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
+      ObservedObject.setReadingProperty(this.localCopyObservedObject_, this);
       this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
     }
   }

@@ -1918,6 +1918,7 @@ __IGNORE_FORCE_decode_GENERATION__ = __decorate([
 class SubscribableHandler {
     constructor(owningProperty) {
         this.owningProperties_ = new Set();
+        this.readingPropertyId_ = -1;
         if (owningProperty) {
             this.addOwningProperty(owningProperty);
         }
@@ -1942,6 +1943,29 @@ class SubscribableHandler {
         stateMgmtConsole.debug(`SubscribableHandler: removeOwningProperty '${subscriberId}'.`);
         this.owningProperties_.delete(subscriberId);
     }
+    setReadingProperty(property) {
+        if (property) {
+            stateMgmtConsole.debug(`SubscribableHandler: setReadingProperty: property '${property.id__()}'.`);
+            this.readingPropertyId_ = property.id__();
+        }
+        else {
+            stateMgmtConsole.warn(`SubscribableHandler: setReadingProperty: undefined property. - Internal error?`);
+        }
+    }
+    unsetReadingProperty() {
+        stateMgmtConsole.debug(`SubscribableHandler: unsetReadingProperty`);
+        this.readingPropertyId_ = -1;
+    }
+    notifyReadingProperty(propName) {
+        if (this.readingPropertyId_ == -1) {
+            return;
+        }
+        var property = SubscriberManager.Find(this.readingPropertyId_);
+        if (property && 'objectPropertyHasBeenReadPU' in property) {
+            stateMgmtConsole.error("ObsObj read calling to objectPropertyHasBeenReadPU");
+            property.objectPropertyHasBeenReadPU(this, propName);
+        }
+    }
     notifyObjectPropertyHasChanged(propName, newValue) {
         stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`);
         this.owningProperties_.forEach((subscribedId) => {
@@ -1964,22 +1988,6 @@ class SubscribableHandler {
             }
         });
     }
-    // notify a property has been 'read'
-    // this functionality is in preparation for observed computed variables
-    // enable calling from 'get' trap handler functions to this function once
-    // adding support for observed computed variables
-    notifyObjectPropertyHasBeenRead(propName) {
-        stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasBeenRead '${propName}'.`);
-        this.owningProperties_.forEach((subscribedId) => {
-            var owningProperty = SubscriberManager.Find(subscribedId);
-            if (owningProperty) {
-                // PU code path
-                if ('objectPropertyHasBeenReadPU' in owningProperty) {
-                    owningProperty.objectPropertyHasBeenReadPU(this, propName);
-                }
-            }
-        });
-    }
     has(target, property) {
         stateMgmtConsole.debug(`SubscribableHandler: has '${property.toString()}'.`);
         return (property === ObservedObject.__IS_OBSERVED_OBJECT) ? true : Reflect.has(target, property);
@@ -1990,7 +1998,7 @@ class SubscribableHandler {
             return target;
         }
         else {
-            this.notifyObjectPropertyHasBeenRead(property.toString());
+            this.notifyReadingProperty(property.toString());
             return Reflect.get(target, property, receiver);
         }
     }
@@ -2004,6 +2012,16 @@ class SubscribableHandler {
             case SubscribableHandler.UNSUBSCRIBE:
                 // assignment obsObj[SubscribableHandler.UNSUBSCRCRIBE] = subscriber
                 this.removeOwningProperty(newValue);
+                return true;
+                break;
+            case SubscribableHandler.SET_READING:
+                // assignment obsObj[SubscribableHandler.SET_READING] = subscriber
+                this.setReadingProperty(newValue);
+                return true;
+                break;
+            case SubscribableHandler.UNSET_READING:
+                // assignment obsObj[SubscribableHandler.SET_READING] = subscriber
+                this.unsetReadingProperty();
                 return true;
                 break;
             default:
@@ -2022,6 +2040,8 @@ class SubscribableHandler {
 }
 SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
+SubscribableHandler.SET_READING = Symbol("_____set_reading__");
+SubscribableHandler.UNSET_READING = Symbol("_____unset_reading__");
 class SubscribableDateHandler extends SubscribableHandler {
     constructor(owningProperty) {
         super(owningProperty);
@@ -2124,7 +2144,7 @@ class ObservedObject extends ExtendableProxy {
                     // proxied array and each array change is notified.
                     return ret.bind(proxiedObject);
                 } // if value is a function
-                this.notifyObjectPropertyHasBeenRead(prop);
+                this.notifyReadingProperty(prop);
                 return ret;
             }
         }(owningProperty) // SubscribableArrayHandlerAnonymous
@@ -2179,6 +2199,20 @@ class ObservedObject extends ExtendableProxy {
             return false;
         }
         obj[SubscribableHandler.UNSUBSCRIBE] = subscriber;
+        return true;
+    }
+    static setReadingProperty(obj, property) {
+        if (!ObservedObject.IsObservedObject(obj)) {
+            return false;
+        }
+        obj[SubscribableHandler.SET_READING] = property;
+        return true;
+    }
+    static unsetReadingProperty(obj) {
+        if (!ObservedObject.IsObservedObject(obj)) {
+            return false;
+        }
+        obj[SubscribableHandler.UNSET_READING] = -1;
         return true;
     }
     /**
@@ -3250,7 +3284,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 if (!propertyDependencies) {
                     propertyDependencies = new Set();
                     this.map_.set(elmtId, propertyDependencies);
-                    stateMgmtConsole.debug(`${debugInfo} - add elmtId ${elmtId} - updated list of dependent elmtIds: ${this.map_.keys()} .`);
+                    stateMgmtConsole.debug(`${debugInfo} - add elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
                 }
                 else {
                     stateMgmtConsole.debug(`${debugInfo} - elmtId ${elmtId} known already - unchanged list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
@@ -3263,7 +3297,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             }
             unregisterDependenciesForElmtId(rmElmtId, debugInfo) {
                 const removedOK = this.map_.delete(rmElmtId);
-                stateMgmtConsole.debug(`${debugInfo} - removed dependency on elmtId ${rmElmtId} - resulting dependency list: ${this.map_.keys()} .`);
+                stateMgmtConsole.debug(`${debugInfo} - removed dependency on elmtId ${rmElmtId} - resulting dependency list: ${JSON.stringify(this.map_.keys())} .`);
                 return removedOK;
             }
         }; // inner class PropertyDependencies
@@ -3357,6 +3391,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     objectPropertyHasBeenReadPU(sourceObject, changedPropertyName) {
         if (this.owningView_ && !this.owningView_.isRenderInProgress()) {
             // only notify read while owning ViewPU render is in progress
+            stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+      objectPropertyHasBeenReadPU render is not in progress`);
             return;
         }
         stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
@@ -3594,6 +3630,7 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
             }
             else {
                 ObservedObject.removeOwningProperty(this.wrappedValue_, this);
+                ObservedObject.unsetReadingProperty(this.wrappedValue_);
             }
         }
     }
@@ -3624,16 +3661,19 @@ class ObservedPropertyPU extends ObservedPropertyAbstractPU {
         else if (ObservedObject.IsObservedObject(newValue)) {
             stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
             ObservedObject.addOwningProperty(newValue, this);
+            ObservedObject.setReadingProperty(newValue, this);
             this.wrappedValue_ = newValue;
         }
         else {
             stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
             this.wrappedValue_ = ObservedObject.createNew(newValue, this);
+            ObservedObject.setReadingProperty(this.wrappedValue_, this);
         }
         return true;
     }
     get() {
         stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`);
+        ObservedObject.setReadingProperty(this.getUnmonitored(), this);
         this.notifyPropertyHasBeenReadPU(/* var value has been read */ undefined);
         return this.wrappedValue_;
     }
@@ -3798,6 +3838,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
     }
     get() {
         stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get.`);
+        ObservedObject.setReadingProperty(this.localCopyObservedObject_, this);
         this.notifyPropertyHasBeenReadPU(/* variable value assignment */ undefined);
         return this.localCopyObservedObject_;
     }
@@ -3810,6 +3851,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         }
         stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newV value.`);
         if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
+            ObservedObject.setReadingProperty(this.localCopyObservedObject_, this);
             this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
         }
     }
@@ -4026,6 +4068,9 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         if (this.source_) {
             // register to the parent property
             this.source_.addSubscriber(this);
+            if (typeof this.source_.getUnmonitored() === "object") {
+                ObservedObject.addOwningProperty(this.source_.getUnmonitored(), this);
+            }
         }
         else {
             throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source variable in parent/ancestor @ Component must be defined. Application error!`);
@@ -4059,6 +4104,10 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set.`);
         if (this.checkIsSupportedValue(newValue)) {
             // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
+            // FIXME memory leak when parent assigns new object, then we do nto get a chance to unsubscribe from old object
+            if (typeof this.source_.getUnmonitored() === "object") {
+                ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
+            }
             this.source_.set(newValue);
         }
     }
@@ -4083,6 +4132,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
     get() {
         stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`);
         this.notifyPropertyHasBeenReadPU(/* variable read */ undefined);
+        ObservedObject.setReadingProperty(this.source_.getUnmonitored(), this);
         return this.getUnmonitored();
     }
     // set 'writes through` to the ObservedProperty
@@ -4095,6 +4145,7 @@ class SynchedPropertyTwoWayPU extends ObservedPropertyAbstractPU {
         // avoid circular notifications @Link -> source @State -> other but also back to same @Link
         this.changeNotificationIsOngoing_ = true;
         this.setObject(newValue);
+        ObservedObject.setReadingProperty(this.source_.getUnmonitored(), this);
         this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
         this.changeNotificationIsOngoing_ = false;
     }
@@ -4448,8 +4499,12 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     initialRenderView() {
         // populate ownStateVariables_ with all decorated variables owned by this @Component
+        stateMgmtConsole.debug(`initialRenderView: populate ownStateVariables_`);
         Object.getOwnPropertyNames(this)
-            .filter((propName) => propName.startsWith("__"))
+            .filter((propName) => {
+            stateMgmtConsole.debug(propName);
+            return propName.startsWith("__");
+        })
             .forEach((propName) => {
             const stateVar = Reflect.get(this, propName);
             //    if (("notifyPropertyHasBeenReadPU" in stateVar)

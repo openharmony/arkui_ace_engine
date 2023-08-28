@@ -57,7 +57,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       if (!propertyDependencies) {
         propertyDependencies = new Set<string>();
         this.map_.set(elmtId, propertyDependencies);
-        stateMgmtConsole.debug(`${debugInfo} - add elmtId ${elmtId} - updated list of dependent elmtIds: ${this.map_.keys()} .`);
+        stateMgmtConsole.debug(`${debugInfo} - add elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
       } else {
         stateMgmtConsole.debug(`${debugInfo} - elmtId ${elmtId} known already - unchanged list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
       }
@@ -71,7 +71,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
     public unregisterDependenciesForElmtId(rmElmtId: number, debugInfo : string): boolean {
       const removedOK = this.map_.delete(rmElmtId);
-      stateMgmtConsole.debug(`${debugInfo} - removed dependency on elmtId ${rmElmtId} - resulting dependency list: ${this.map_.keys()} .`);
+      stateMgmtConsole.debug(`${debugInfo} - removed dependency on elmtId ${rmElmtId} - resulting dependency list: ${JSON.stringify(this.map_.keys())} .`);
       return removedOK;
     }
   }; // inner class PropertyDependencies
@@ -183,6 +183,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<T>, changedPropertyName: string) {
     if (this.owningView_ && !this.owningView_.isRenderInProgress()) {
       // only notify read while owning ViewPU render is in progress
+      stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+      objectPropertyHasBeenReadPU render is not in progress`);
       return;
     }
 

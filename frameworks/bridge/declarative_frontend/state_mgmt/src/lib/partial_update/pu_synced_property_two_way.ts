@@ -34,6 +34,9 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.source_) {
       // register to the parent property
       this.source_.addSubscriber(this);
+      if (typeof this.source_.getUnmonitored() === "object") {
+        ObservedObject.addOwningProperty(this.source_.getUnmonitored() as Object, this);
+      }
     } else {
       throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source variable in parent/ancestor @ Component must be defined. Application error!`);
     }
@@ -71,12 +74,17 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set.`);
 
+
     if (this.checkIsSupportedValue(newValue)) {
     // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
-    this.source_.set(newValue)
+
+    // FIXME memory leak when parent assigns new object, then we do nto get a chance to unsubscribe from old object
+      if (typeof this.source_.getUnmonitored() === "object") {
+        ObservedObject.removeOwningProperty(this.source_.getUnmonitored() as Object, this);
+      }
+      this.source_.set(newValue)
     }
   }
-
 
   /**
    * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has changed value
@@ -101,6 +109,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
     this.notifyPropertyHasBeenReadPU(/* variable read */ undefined)
+    ObservedObject.setReadingProperty(this.source_.getUnmonitored(), this);
     return this.getUnmonitored();
   }
 
@@ -116,6 +125,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     // avoid circular notifications @Link -> source @State -> other but also back to same @Link
     this.changeNotificationIsOngoing_ = true;
     this.setObject(newValue);
+    ObservedObject.setReadingProperty(this.source_.getUnmonitored(), this);
     this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
     this.changeNotificationIsOngoing_ = false;
   }

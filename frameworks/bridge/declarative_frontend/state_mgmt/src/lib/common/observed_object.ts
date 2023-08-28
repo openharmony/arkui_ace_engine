@@ -96,19 +96,23 @@ function Observed(constructor_: any, _?: any): any {
 
 class SubscribableHandler {
   static readonly SUBSCRIBE = Symbol("_____subscribe__");
-  static readonly UNSUBSCRIBE = Symbol("_____unsubscribe__")
+  static readonly UNSUBSCRIBE = Symbol("_____unsubscribe__");
+  static readonly SET_READING = Symbol("_____set_reading__");
+  static readonly UNSET_READING = Symbol("_____unset_reading__");
 
   private owningProperties_: Set<number>;
+  private readingPropertyId_ : number;
 
   constructor(owningProperty: IPropertySubscriber) {
     this.owningProperties_ = new Set<number>();
+    this.readingPropertyId_ = -1;
     if (owningProperty) {
       this.addOwningProperty(owningProperty);
     }
     stateMgmtConsole.debug(`SubscribableHandler: constructor done`);
   }
 
-  addOwningProperty(subscriber: IPropertySubscriber): void {
+  public addOwningProperty(subscriber: IPropertySubscriber): void {
     if (subscriber) {
       stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
       this.owningProperties_.add(subscriber.id__());
@@ -129,6 +133,30 @@ class SubscribableHandler {
     this.owningProperties_.delete(subscriberId);
   }
 
+  public setReadingProperty(property: IPropertySubscriber): void {
+    if (property) {
+      stateMgmtConsole.debug(`SubscribableHandler: setReadingProperty: property '${property.id__()}'.`)
+      this.readingPropertyId_ = property.id__();
+    } else {
+      stateMgmtConsole.warn(`SubscribableHandler: setReadingProperty: undefined property. - Internal error?`);
+    }
+  }
+
+  public unsetReadingProperty() {
+    stateMgmtConsole.debug(`SubscribableHandler: unsetReadingProperty`)
+    this.readingPropertyId_ = -1;
+  }
+
+  public notifyReadingProperty(propName: string) {
+    if (this.readingPropertyId_ == -1) {
+      return;
+    }
+    var property: IPropertySubscriber = SubscriberManager.Find(this.readingPropertyId_);
+    if (property && 'objectPropertyHasBeenReadPU' in property) {
+      stateMgmtConsole.error("ObsObj read calling to objectPropertyHasBeenReadPU");
+      (property as unknown as ObservedPropertyAbstractPU<any>).objectPropertyHasBeenReadPU(this, propName);
+    }
+  }
 
   protected notifyObjectPropertyHasChanged(propName: string, newValue: any) {
     stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`)
@@ -137,7 +165,7 @@ class SubscribableHandler {
       if (owningProperty) {
         if ('objectPropertyHasChangedPU' in owningProperty) {
           // PU code path
-          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
+          (owningProperty as ObservedPropertyAbstractPU<any>).objectPropertyHasChangedPU(this, propName);
         }
 
         // FU code path
@@ -152,24 +180,7 @@ class SubscribableHandler {
       }
     });
   }
-
-  // notify a property has been 'read'
-  // this functionality is in preparation for observed computed variables
-  // enable calling from 'get' trap handler functions to this function once
-  // adding support for observed computed variables
-  protected notifyObjectPropertyHasBeenRead(propName: string) {
-    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasBeenRead '${propName}'.`)
-    this.owningProperties_.forEach((subscribedId) => {
-      var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
-      if (owningProperty) {
-        // PU code path
-        if ('objectPropertyHasBeenReadPU' in owningProperty) {
-          (owningProperty as unknown as ObservedPropertyAbstractPU<any>).objectPropertyHasBeenReadPU(this, propName);
-        }
-      }
-    });
-  }
-
+  
   public has(target: Object, property: PropertyKey) : boolean {
     stateMgmtConsole.debug(`SubscribableHandler: has '${property.toString()}'.`);
     return (property === ObservedObject.__IS_OBSERVED_OBJECT) ? true : Reflect.has(target, property);
@@ -180,7 +191,7 @@ class SubscribableHandler {
     if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
       return target;
      } else {
-      this.notifyObjectPropertyHasBeenRead(property.toString());
+      this.notifyReadingProperty(property.toString());
       return Reflect.get(target, property, receiver);
      } 
   }
@@ -197,6 +208,17 @@ class SubscribableHandler {
         this.removeOwningProperty(newValue as IPropertySubscriber);
         return true;
         break;
+        case SubscribableHandler.SET_READING:
+          // assignment obsObj[SubscribableHandler.SET_READING] = subscriber
+          this.setReadingProperty(newValue as IPropertySubscriber);
+          return true;
+          break;
+          case SubscribableHandler.UNSET_READING:
+            // assignment obsObj[SubscribableHandler.SET_READING] = subscriber
+            this.unsetReadingProperty();
+            return true;
+            break;
+    
       default:
         if (Reflect.get(target, property) == newValue) {
           return true;
@@ -338,7 +360,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
             return ret.bind(proxiedObject);
           } // if value is a function
 
-          this.notifyObjectPropertyHasBeenRead(prop);
+          this.notifyReadingProperty(prop);
 
           return ret;
         }       
@@ -406,6 +428,24 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     return true;
   }
 
+  public static setReadingProperty(obj: Object, property: IPropertySubscriber): boolean {
+    if (!ObservedObject.IsObservedObject(obj)) {
+      return false;
+    }
+
+    obj[SubscribableHandler.SET_READING] = property;
+    return true;
+  }
+
+  public static unsetReadingProperty(obj: Object): boolean {
+    if (!ObservedObject.IsObservedObject(obj)) {
+      return false;
+    }
+
+    obj[SubscribableHandler.UNSET_READING] = -1;
+    return true;
+  }
+  
   /**
    * Utility function for debugging the prototype chain of given Object
    * The given object can be any Object, it is not required to be an ObservedObject

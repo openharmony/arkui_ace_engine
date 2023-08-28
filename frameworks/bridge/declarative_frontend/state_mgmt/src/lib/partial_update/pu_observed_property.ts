@@ -57,6 +57,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
         (this.wrappedValue_ as SubscribableAbstract).removeOwningProperty(this);
       } else {
         ObservedObject.removeOwningProperty(this.wrappedValue_, this);
+        ObservedObject.unsetReadingProperty(this.wrappedValue_);
       }
     }
   }
@@ -88,16 +89,19 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     } else if (ObservedObject.IsObservedObject(newValue)) {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
       ObservedObject.addOwningProperty(newValue, this);
+      ObservedObject.setReadingProperty(newValue, this);
       this.wrappedValue_ = newValue;
     } else {
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
       this.wrappedValue_ = ObservedObject.createNew(newValue, this);
+      ObservedObject.setReadingProperty(this.wrappedValue_, this);
     }
     return true;
   }
 
   public get(): T {
     stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: get`);
+    ObservedObject.setReadingProperty(this.getUnmonitored(), this);
     this.notifyPropertyHasBeenReadPU(/* var value has been read */ undefined);
     return this.wrappedValue_;
   }
