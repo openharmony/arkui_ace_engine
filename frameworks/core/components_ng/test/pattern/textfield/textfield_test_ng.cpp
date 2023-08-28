@@ -4171,6 +4171,11 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     textFieldPattern->inlineFocusState_ = false;
     dirtySwapConfig.skipMeasure = false;
     EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    textFieldPattern->textEditingValue_.text = "";
+    textFieldPattern->CheckScrollable();
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    textFieldPattern->updateSelectionAfterObscure_ = true;
+    EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
     layoutWrapper->skipMeasureContent_ = false;
     dirtySwapConfig.frameSizeChange = false;
     EXPECT_TRUE(textFieldPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
@@ -6316,4 +6321,145 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternApplyInlineState002, TestSize.L
     renderContext->UpdateBackgroundColor(textFieldTheme->GetInlineBgColor());
     EXPECT_EQ(renderContext->GetBackgroundColor(), textFieldTheme->GetInlineBgColor());
 }
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper
+ * @tc.desc: test BeforeCreateLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, BeforeCreateLayoutWrapper, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step2. set clipboard avoid nullptr and call BeforeCreateLayoutWrapper.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    textFieldPattern->clipboard_ = clipboard;
+
+    CaretUpdateType exptectFalseTypes[] = { CaretUpdateType::INPUT, CaretUpdateType::PRESSED,
+        CaretUpdateType::LONG_PRESSED, CaretUpdateType::EVENT, CaretUpdateType::DEL, CaretUpdateType::ICON_PRESSED,
+        CaretUpdateType::RIGHT_CLICK, CaretUpdateType::HANDLE_MOVE };
+    for (auto caretType : exptectFalseTypes) {
+        textFieldPattern->caretUpdateType_ = caretType;
+        textFieldPattern->BeforeCreateLayoutWrapper();
+        EXPECT_FALSE(textFieldPattern->UpdateCaretRect());
+    }
+
+    EXPECT_TRUE(textFieldPattern->CaretPositionCloseToTouchPosition());
+    EXPECT_FALSE(textFieldPattern->SelectOverlayIsOn());
+    EXPECT_TRUE(textFieldPattern->caretUpdateType_ != CaretUpdateType::LONG_PRESSED);
+    EXPECT_FALSE(textFieldPattern->isMousePressed_);
+    textFieldPattern->UpdateCaretByPressOrLongPress();
+    textFieldPattern->UpdateCaretByRightClick();
+
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::EVENT;
+    textFieldPattern->isMousePressed_ = true;
+    textFieldPattern->BeforeCreateLayoutWrapper();
+    textFieldPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
+    EXPECT_FALSE(textFieldPattern->UpdateCaretPositionByMouseMovement());
+}
+
+/**
+ * @tc.name: UpdateCaretOffsetByEvent
+ * @tc.desc: test UpdateCaretOffsetByEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step2. set clipboard avoid nullptr and call UpdateCaretOffsetByEvent.
+     * @tc.expected: Check it is not nullptr.
+     */
+    textFieldPattern->UpdateCaretOffsetByEvent();
+    EXPECT_FALSE(textFieldPattern->textEditingValue_.text.empty());
+
+    textFieldPattern->textEditingValue_.Reset();
+    textFieldPattern->textEditingValue_.text = TEXT_VALUE;
+    textFieldPattern->UpdateCaretOffsetByEvent();
+    EXPECT_TRUE(textFieldPattern->isMousePressed_);
+    textFieldPattern->textEditingValue_.caretPosition = 10;
+
+    textFieldPattern->isMousePressed_ = true;
+    textFieldPattern->UpdateCaretOffsetByEvent();
+    EXPECT_FALSE(textFieldPattern->IsSelected());
+
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+    textFieldPattern->textEditingValue_.text = TEXT_VALUE;
+    textFieldPattern->isMousePressed_ = false;
+    textFieldPattern->UpdateCaretOffsetByEvent();
+
+    textFieldPattern->textEditingValue_.text = "";
+    textFieldPattern->UpdateCaretOffsetByEvent();
+}
+
+/**
+ * @tc.name: CalcCursorOffsetByPosition
+ * @tc.desc: test CalcCursorOffsetByPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CalcCursorOffsetByPosition, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    frameNode->GetOrCreateFocusHub()->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step2. set clipboard avoid nullptr and call CalcCursorOffsetByPosition.
+     * @tc.expected: Check it is not nullptr.
+     */
+    textFieldPattern->textEditingValue_.caretPosition = 10;
+    textFieldPattern->textEditingValue_.text = TEXT_VALUE;
+    auto position = textFieldPattern->textEditingValue_.caretPosition;
+    textFieldPattern->CalcCursorOffsetByPosition(position, false);
+    textFieldPattern->CalcCursorOffsetByPosition(position, true);
+
+    /**
+     * @tc.steps: step3. set contentSize and textSize. contentWidth less than textWidth.
+     * @tc.expected: Check it is not nullptr.
+     */
+    SizeF textSize(730.0, 160.0);
+    SizeF contentSize(720.0, 150.0);
+    textFieldPattern->contentRect_.Reset();
+    textFieldPattern->textRect_.Reset();
+    textFieldPattern->caretRect_.Reset();
+    textFieldPattern->contentRect_.SetSize(contentSize);
+    textFieldPattern->textRect_.SetSize(textSize);
+    layoutProperty->UpdateMaxLines(1);
+
+    EXPECT_FALSE(textFieldPattern->AdjustTextRectOffsetX());
+    layoutProperty->UpdateMaxLines(2);
+    EXPECT_TRUE(textFieldPattern->IsTextArea());
+}
+
 } // namespace OHOS::Ace::NG
