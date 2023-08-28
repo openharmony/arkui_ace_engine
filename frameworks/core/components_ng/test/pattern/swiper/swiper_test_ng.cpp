@@ -915,9 +915,11 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest002, TestSize.Level2)
     auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
     ASSERT_NE(swiperLayoutProperty, nullptr);
     swiperLayoutProperty->UpdateDisplayCount(-1);
+    auto getAutoFill = swiperPattern->IsAutoFill();
+    ASSERT_NE(getAutoFill, true);
 
     OptionalSizeF setSize = OptionalSize(SizeF(SWIPER_IDEAL_WIDTH, SWIPER_IDEAL_HEIGHT));
-    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
+    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
 }
 
@@ -935,9 +937,11 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest003, TestSize.Level2)
     auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
     ASSERT_NE(swiperLayoutProperty, nullptr);
     swiperLayoutProperty->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    auto getAutoFill = swiperPattern->IsAutoFill();
+    ASSERT_NE(getAutoFill, true);
 
     OptionalSizeF setSize = OptionalSize(SizeF(SWIPER_IDEAL_WIDTH, SWIPER_IDEAL_HEIGHT));
-    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
+    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
 }
 
@@ -954,6 +958,8 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest004, TestSize.Level1)
     ASSERT_NE(swiperPattern, nullptr);
     auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
     ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto getAutoFill = swiperPattern->IsAutoFill();
+    ASSERT_NE(getAutoFill, true);
     swiperLayoutProperty->UpdateIndex(CURRENT_INDEX);
     swiperLayoutProperty->UpdateItemSpace(ITEM_SPACE);
     swiperLayoutProperty->UpdateCachedCount(CACHED_COUNT);
@@ -963,11 +969,11 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest004, TestSize.Level1)
     swiperLayoutProperty->UpdateNextMargin(NEXT_MARGIN);
 
     OptionalSizeF setSize = OptionalSize(SizeF(SWIPER_IDEAL_WIDTH, SWIPER_IDEAL_HEIGHT));
-    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
+    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
 
     swiperLayoutProperty->UpdateNextMargin(NEXT_MARGIN_EXTRA_LARGE);
-    result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
+    result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
 }
 
@@ -984,6 +990,8 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest005, TestSize.Level2)
     ASSERT_NE(swiperPattern, nullptr);
     auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
     ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto getAutoFill = swiperPattern->IsAutoFill();
+    ASSERT_NE(getAutoFill, true);
     swiperLayoutProperty->UpdateIndex(CURRENT_INDEX);
     swiperLayoutProperty->UpdateItemSpace(ITEM_SPACE);
     swiperLayoutProperty->UpdateCachedCount(CACHED_COUNT);
@@ -993,7 +1001,7 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest005, TestSize.Level2)
     swiperLayoutProperty->UpdateNextMargin(NEXT_MARGIN);
 
     OptionalSizeF setSize;
-    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
+    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
 }
 
@@ -1010,6 +1018,8 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest006, TestSize.Level1)
     ASSERT_NE(swiperPattern, nullptr);
     auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
     ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto getAutoFill = swiperPattern->IsAutoFill();
+    ASSERT_NE(getAutoFill, true);
     swiperLayoutProperty->UpdateIndex(CURRENT_INDEX);
     swiperLayoutProperty->UpdateItemSpace(ITEM_SPACE);
     swiperLayoutProperty->UpdateCachedCount(CACHED_COUNT);
@@ -1019,11 +1029,11 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest006, TestSize.Level1)
     swiperLayoutProperty->UpdateNextMargin(NEXT_MARGIN);
 
     OptionalSizeF setSize = OptionalSize(SizeF(SWIPER_IDEAL_WIDTH, SWIPER_IDEAL_HEIGHT));
-    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
+    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
 
     swiperLayoutProperty->UpdateNextMargin(NEXT_MARGIN_EXTRA_LARGE);
-    result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
+    result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
 }
 
@@ -1040,6 +1050,8 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest007, TestSize.Level2)
     ASSERT_NE(swiperPattern, nullptr);
     auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
     ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto getAutoFill = swiperPattern->IsAutoFill();
+    ASSERT_NE(getAutoFill, true);
     swiperLayoutProperty->UpdateIndex(CURRENT_INDEX);
     swiperLayoutProperty->UpdateItemSpace(ITEM_SPACE);
     swiperLayoutProperty->UpdateCachedCount(CACHED_COUNT);
@@ -1049,7 +1061,7 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest007, TestSize.Level2)
     swiperLayoutProperty->UpdateNextMargin(NEXT_MARGIN);
 
     OptionalSizeF setSize;
-    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
+    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
 }
 
@@ -1066,6 +1078,8 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest008, TestSize.Level1)
     ASSERT_NE(swiperPattern, nullptr);
     auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
     ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto getAutoFill = swiperPattern->IsAutoFill();
+    ASSERT_NE(getAutoFill, true);
     swiperLayoutProperty->UpdateIndex(CURRENT_INDEX);
     swiperLayoutProperty->UpdateItemSpace(ITEM_SPACE);
     swiperLayoutProperty->UpdateCachedCount(CACHED_COUNT);
@@ -1075,7 +1089,7 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest008, TestSize.Level1)
     swiperLayoutProperty->UpdateNextMargin(NEXT_MARGIN);
 
     OptionalSizeF setSize = OptionalSize(SizeF(SWIPER_IDEAL_WIDTH, SWIPER_IDEAL_HEIGHT));
-    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize);
+    auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
 }
 

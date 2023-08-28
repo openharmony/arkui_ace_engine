@@ -93,7 +93,7 @@ const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
-const std::string EMAIL_WHITE_LIST = "[\\w.]";
+const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
 const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
@@ -289,8 +289,8 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         setSelectionFlag_ = false;
     }
     if (inlineSelectAllFlag_) {
-        inlineSelectAllFlag_ = false;
         HandleOnSelectAll(true);
+        inlineSelectAllFlag_ = false;
     }
     if (updateSelectionAfterObscure_) {
         GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
@@ -1499,10 +1499,12 @@ void TextFieldPattern::HandleOnSelectAll(bool inlineStyle)
     isSingleHandle_ = textEditingValue_.text.empty();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-    CloseSelectOverlay(true);
-    std::optional<RectF> firstHandle = textSelector_.firstHandle;
-    std::optional<RectF> secondHandle = textSelector_.secondHandle;
-    ShowSelectOverlay(firstHandle, secondHandle);
+    if (!inlineSelectAllFlag_) {
+        CloseSelectOverlay(true);
+        std::optional<RectF> firstHandle = textSelector_.firstHandle;
+        std::optional<RectF> secondHandle = textSelector_.secondHandle;
+        ShowSelectOverlay(firstHandle, secondHandle);
+    }
 }
 
 void TextFieldPattern::HandleOnCopy()
@@ -1586,7 +1588,7 @@ void TextFieldPattern::HandleOnPaste()
         }
         std::string result;
         std::string valueToUpdate(data);
-        textfield->EditingValueFilter(valueToUpdate, result);
+        textfield->EditingValueFilter(valueToUpdate, result, true);
         LOGD("After filter paste value is %{private}s", result.c_str());
         std::wstring pasteData;
         std::wstring wData = StringUtils::ToWstring(result);
@@ -2221,7 +2223,7 @@ void TextFieldPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     isTransparent_ = renderContext->GetOpacityValue(1.0f) == 0.0f;
-    if (!preErrorState_) {
+    if (!preErrorState_ && !restoreMarginState_) {
         SavePasswordModeStates();
     }
     InitClickEvent();
@@ -2333,7 +2335,8 @@ void TextFieldPattern::OnModifyDone()
     }
     auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
     if ((!IsSelected() && IsNormalInlineState()) || ((inputStyle == InputStyle::DEFAULT) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED &&
+        (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT) &&
         preInputStyle_ != InputStyle::INLINE)) {
         inlineState_.saveInlineState = false;
         SaveInlineStates();
@@ -2342,10 +2345,13 @@ void TextFieldPattern::OnModifyDone()
         preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
     if (layoutProperty->GetShowUnderlineValue(false) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+        (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT)) {
         ApplyUnderlineStates();
     }
-    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
+    if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT &&
+        (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
+        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT)) {
         RestorePreInlineStates();
     }
     preInputStyle_ = inputStyle;
@@ -3529,7 +3535,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     } else {
         caretStart = textEditingValue_.caretPosition;
     }
-    EditingValueFilter(valueToUpdate, result);
+    EditingValueFilter(valueToUpdate, result, true);
     if (result.empty()) {
         return;
     }
@@ -3622,7 +3628,7 @@ bool TextFieldPattern::FilterWithRegex(
     return !errorText.empty();
 }
 
-void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::string& result)
+void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::string& result, bool isInsertValue)
 {
     auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
@@ -3647,7 +3653,7 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
             break;
         }
         case TextInputType::EMAIL_ADDRESS: {
-            if (valueToUpdate == "@") {
+            if (valueToUpdate == "@" && isInsertValue) {
                 auto charExists = textEditingValue_.text.find('@') != std::string::npos;
                 result = charExists ? "" : valueToUpdate;
                 return;
@@ -5342,11 +5348,11 @@ void TextFieldPattern::UpdateErrorTextMargin()
     if (layoutProperty->GetShowErrorTextValue(false) && (preErrorMargin_ < ERROR_TEXT_CAPSULE_MARGIN)) {
         errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
         layoutProperty->UpdateMargin(errorMargin);
-        preErrorState_ = true;
-    } else {
+        restoreMarginState_ = true;
+    } else if (restoreMarginState_ == true) {
         errorMargin.bottom = CalcLength(preErrorMargin_);
         layoutProperty->UpdateMargin(errorMargin);
-        preErrorState_ = false;
+        restoreMarginState_ = false;
     }
 }
 
@@ -5703,7 +5709,8 @@ bool TextFieldPattern::IsNormalInlineState() const
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
-           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED;
+           (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
+           layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT);
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -5971,8 +5978,11 @@ void TextFieldPattern::FilterExistText()
     auto inputType = layoutProperty->GetTextInputType();
     if ((inputFilter.has_value() || inputType.has_value()) && !textEditingValue_.text.empty()) {
         std::string result;
-        EditingValueFilter(textEditingValue_.text, result);
-        InitEditingValueText(result);
+        auto textEditorValue = textEditingValue_.text;
+        EditingValueFilter(textEditorValue, result);
+        if (textEditingValue_.text != result) {
+            InitEditingValueText(result);
+        }
     }
 }
 

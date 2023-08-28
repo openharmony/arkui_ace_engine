@@ -139,11 +139,12 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
         bool needMove = ProcessNavBarReactOnUpdate(isDraggedDown, offset);
         if (coordinationEvent_) {
             auto onScroll = coordinationEvent_->GetOnScroll();
-            if (onScroll) {
-                onScroll(offset);
-                needMove &= scrollEffect_ && scrollEffect_->IsSpringEffect();
+            CHECK_NULL_RETURN(onScroll, needMove);
+            if (!onScroll(offset)) {
+                isReactInParentMovement_ = false;
+                return true;
             }
-            return needMove;
+            return needMove || (scrollEffect_ && scrollEffect_->IsSpringEffect());
         }
     }
     if (source == SCROLL_FROM_START) {
@@ -641,11 +642,14 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         PlaySpringAnimation(position, currVelocity, 1.0f, stiffness, damping);
     } else {
         auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(GetTotalOffset(), position, curve);
-        animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
+        animation->AddListener([weakScroll = AceType::WeakClaim(this), position](float value) {
             auto pattern = weakScroll.Upgrade();
             CHECK_NULL_VOID_NOLOG(pattern);
             if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - value, SCROLL_FROM_ANIMATION_CONTROLLER)) {
-                pattern->animator_->Stop();
+                if ((pattern->IsAtTop() && LessOrEqual(position, pattern->GetTotalOffset())) ||
+                    (pattern->IsAtBottom() && GreatOrEqual(position, pattern->GetTotalOffset()))) {
+                    pattern->animator_->Stop();
+                }
             }
         });
         animator_->AddInterpolator(animation);

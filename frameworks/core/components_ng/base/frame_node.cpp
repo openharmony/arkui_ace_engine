@@ -1474,12 +1474,14 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
-    auto name = GetInspectorId().value_or("");
     auto param = renderContext_->GetTrans();
-    TransformConfig cfg = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7], param[8],
-        GetId() };
+    if (param.empty()) {
+        translateCfg[GetId()] = { .id = GetId() };
+    } else {
+        translateCfg[GetId()] = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7],
+            param[8], GetId() };
+    }
     auto parent = GetAncestorNodeOfFrame();
-    translateCfg[GetId()] = cfg;
     if (parent) {
         AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
         translateIds[GetId()] = ancestorNodeInfo;

@@ -182,7 +182,7 @@ public:
 
     int32_t GetCurrentShownIndex() const
     {
-        return GetLoopIndex(currentIndex_);
+        return IsLoop() ? currentIndex_ : GetLoopIndex(currentIndex_);
     }
 
     RefPtr<SwiperController> GetSwiperController() const
@@ -413,6 +413,11 @@ public:
         surfaceChangedCallbackId_ = id;
     }
 
+    void SetIndicatorLongPress(bool isIndicatorLongPress)
+    {
+        isIndicatorLongPress_ = isIndicatorLongPress;
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -423,10 +428,13 @@ public:
     void OnWindowHide() override;
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
-
+    bool IsAutoFill() const;
     void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
-    void SwipeToWithoutAnimationAutoPlay();
+    void StopAutoPlay();
+    void StartAutoPlay();
+    void StopTranslateAnimation();
+    void StopSpringAnimation();
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -478,12 +486,8 @@ private:
     // Implement of swiper controller
 
     void FinishAnimation();
-    void StopTranslateAnimation();
-    void StopSpringAnimation();
     void StopFadeAnimation();
 
-    void StopAutoPlay();
-    void StartAutoPlay();
     bool IsOutOfBoundary(float mainOffset = 0.0f) const;
     float GetRemainingOffset() const;
     float MainSize() const;
@@ -502,8 +506,7 @@ private:
     int32_t GetDisplayCount() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
-        float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
-    bool IsAutoFill() const;
+    float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
     int32_t GetDuration() const;
     int32_t GetInterval() const;
     RefPtr<Curve> GetCurve() const;
@@ -517,7 +520,6 @@ private:
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
-    bool IsOutOfIndicatorZone(const PointF& dragPoint);
     void SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
@@ -641,6 +643,7 @@ private:
     int32_t propertyAnimationIndex_ = -1;
     bool isUserFinish_ = true;
     bool isVoluntarilyClear_ = false;
+    bool isIndicatorLongPress_ = false;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
     SwiperLayoutAlgorithm::PositionMap itemPositionInAnimation_;

@@ -781,9 +781,9 @@ public:
                         Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
         for (const auto& textBoxes : textBoxes_) {
             bool isInRange = LessOrEqual(textBoxes.rect_.GetLeft(), offset.GetX()) &&
-                LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
-                LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
-                LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
+                             LessOrEqual(offset.GetX(), textBoxes.rect_.GetRight()) &&
+                             LessOrEqual(textBoxes.rect_.GetTop(), offset.GetY()) &&
+                             LessOrEqual(offset.GetY(), textBoxes.rect_.GetBottom());
             if (isInRange) {
                 return true;
             }
@@ -920,7 +920,7 @@ public:
     }
 
     void StopEditing();
-    
+
     void MarkContentChange()
     {
         contChange_ = true;
@@ -1077,7 +1077,7 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     bool FilterWithAscii(const std::string& valueToUpdate, std::string& result);
-    void EditingValueFilter(std::string& valueToUpdate, std::string& result);
+    void EditingValueFilter(std::string& valueToUpdate, std::string& result, bool isInsertValue = false);
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     float FitCursorInSafeArea();
@@ -1209,6 +1209,7 @@ private:
     InputStyle preInputStyle_ = InputStyle::DEFAULT;
     bool preErrorState_ = false;
     float preErrorMargin_ = 0.0f;
+    bool restoreMarginState_ = false;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;

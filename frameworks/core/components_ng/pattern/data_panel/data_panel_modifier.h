@@ -190,7 +190,8 @@ public:
     };
 
 private:
-    void PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData) const;
+    void PaintRainbowFilterMask(
+        RSCanvas& canvas, double factor, ArcData arcData, float shadowColorSize, float totalValue) const;
     void PaintColorSegmentFilterMask(RSCanvas& canvas, const LinearData& segmentLinearData) const;
     Gradient SortGradientColorsOffset(const Gradient& srcGradient) const;
     RefPtr<AnimatablePropertyFloat> date_;

@@ -16,9 +16,6 @@
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
 namespace OHOS::Ace::NG {
-LongPressRecognizer::LongPressRecognizer(
-    int32_t duration, int32_t fingers, bool repeat, bool isForDrag, bool isDisableMouseLeft) {}
-
 void LongPressRecognizer::OnAccepted() {}
 
 void LongPressRecognizer::OnRejected() {}

@@ -712,7 +712,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto targetIndex = (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
+    auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
     targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
     if (currentIndex_ == targetIndex) {
         LOGD("Target index is same with current index.");
@@ -1386,10 +1386,6 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     auto dragPoint =
         PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
     if (IsOutOfHotRegion(dragPoint)) {
-        return;
-    }
-
-    if (!IsOutOfIndicatorZone(dragPoint)) {
         return;
     }
 
@@ -2101,13 +2097,12 @@ int32_t SwiperPattern::CalculateDisplayCount() const
     bool isAutoFill = IsAutoFill();
     if (isAutoFill) {
         auto minSize = swiperLayoutProperty->GetMinSize()->ConvertToPx();
-        if (LessOrEqual(minSize, 0)) {
-            return 1;
-        }
         float contentWidth = GetMainContentSize();
         auto displayCount =
             CalculateCount(contentWidth, minSize, SWIPER_MARGIN.ConvertToPx(), SWIPER_GUTTER.ConvertToPx());
-
+        if (LessOrEqual(minSize, 0)) {
+            displayCount = 1;
+        }
         displayCount = displayCount > 0 ? displayCount : 1;
         auto totalCount = TotalCount();
         displayCount = displayCount > totalCount ? totalCount : displayCount;
@@ -2135,8 +2130,7 @@ bool SwiperPattern::IsAutoFill() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
-    return swiperLayoutProperty->GetMinSize().has_value() &&
-           !LessOrEqual(swiperLayoutProperty->GetMinSize()->ConvertToPx(), 0);
+    return swiperLayoutProperty->GetMinSize().has_value();
 }
 
 bool SwiperPattern::IsAutoPlay() const
@@ -2377,25 +2371,6 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
     return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
-bool SwiperPattern::IsOutOfIndicatorZone(const PointF& dragPoint)
-{
-    if (!HasIndicatorNode() || !IsShowIndicator() || (GetIndicatorType() != SwiperIndicatorType::DOT)) {
-        return true;
-    }
-
-    auto swiperNode = GetHost();
-    CHECK_NULL_RETURN(swiperNode, true);
-    auto indicatorNode = swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetIndicatorId()));
-    CHECK_NULL_RETURN(indicatorNode, true);
-    auto indicatorFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode);
-    CHECK_NULL_RETURN(indicatorFrameNode, true);
-    auto geometryNode = indicatorFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, true);
-
-    auto hotRegion = geometryNode->GetFrameRect();
-    return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
-}
-
 void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
 {
     CHECK_NULL_VOID(indicatorNode);
@@ -2537,7 +2512,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
 bool SwiperPattern::NeedAutoPlay() const
 {
     bool reachEnd = GetLoopIndex(currentIndex_) >= TotalCount() - 1 && !IsLoop();
-    return IsAutoPlay() && !reachEnd && isVisible_;
+    return IsAutoPlay() && !reachEnd && isVisible_ && !isIndicatorLongPress_;
 }
 
 void SwiperPattern::TriggerAnimationEndOnSwipeToLeft()
@@ -3054,10 +3029,5 @@ int32_t SwiperPattern::TotalDisPlayCount() const
         }
     }
     return displayCount;
-}
-
-void SwiperPattern::SwipeToWithoutAnimationAutoPlay()
-{
-    PostTranslateTask(GetInterval());
 }
 } // namespace OHOS::Ace::NG

@@ -29,25 +29,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double MAX_THRESHOLD = 15.0;
-constexpr int32_t MAX_LONGPRESS_FINGERS = 10;
-constexpr int32_t DEFAULT_LONGPRESS_FINGERS = 1;
-constexpr int32_t DEFAULT_LONGPRESS_DURATION = 500;
+constexpr int32_t MAX_FINGERS = 10;
 } // namespace
-
-LongPressRecognizer::LongPressRecognizer(
-    int32_t duration, int32_t fingers, bool repeat, bool isForDrag, bool isDisableMouseLeft)
-    : MultiFingersRecognizer(fingers), duration_(duration), repeat_(repeat), isForDrag_(isForDrag),
-      isDisableMouseLeft_(isDisableMouseLeft)
-{
-    if (fingers_ > MAX_LONGPRESS_FINGERS || fingers_ < DEFAULT_LONGPRESS_FINGERS) {
-        LOGW("longPressRecognizer fingers_ is illegal, change to DEFAULT_LONGPRESS_FINGERS.");
-        fingers_ = DEFAULT_LONGPRESS_FINGERS;
-    }
-    if (duration_ <= 0) {
-        LOGW("longPressRecognizer duration_ is illegal, change to DEAULT_LONGPRESS_DURATION.");
-        duration_ = DEFAULT_LONGPRESS_DURATION;
-    }
-}
 
 void LongPressRecognizer::OnAccepted()
 {
@@ -113,6 +96,11 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
+    if (fingers_ > MAX_FINGERS) {
+        LOGW("fingers_ is too big.");
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
 
     LOGI("long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     int32_t curDuration = duration_;
@@ -143,7 +131,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 {
     LOGD("long press recognizer receives touch up event");
-    if (currentFingers_ != fingers_) {
+    if (currentFingers_ < fingers_) {
+        LOGW("LongPressGesture current finger number is less than requiried finger number.");
         return;
     }
     if (refereeState_ == RefereeState::SUCCEED) {
@@ -157,7 +146,8 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("long press recognizer receives touch move event");
-    if (currentFingers_ != fingers_) {
+    if (currentFingers_ < fingers_) {
+        LOGW("LongPressGesture current finger number is less than requiried finger number.");
         return;
     }
     if (IsRefereeFinished()) {

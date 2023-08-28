@@ -145,14 +145,16 @@ void NavigationPattern::OnModifyDone()
     for (size_t i = 0; i < pathNames.size(); ++i) {
         auto pathName = pathNames[i];
         RefPtr<UINode> uiNode = navigationStack_->Get(pathName);
-        navigationStack_->RemoveInNavPathList(pathName, uiNode);
         if (uiNode) {
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            navigationStack_->RemoveInNavPathList(pathName, uiNode);
+            navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             continue;
         }
         uiNode = navigationStack_->GetFromPreBackup(pathName);
         if (uiNode) {
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            navigationStack_->RemoveInPreNavPathList(pathName, uiNode);
             continue;
         }
         uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
@@ -183,8 +185,7 @@ void NavigationPattern::OnModifyDone()
 
 void NavigationPattern::CheckTopNavPathChange(
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
-    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
-    bool isPopPage)
+    const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage)
 {
     if (preTopNavPath == newTopNavPath) {
         return;
@@ -199,7 +200,7 @@ void NavigationPattern::CheckTopNavPathChange(
     RefPtr<NavDestinationGroupNode> preTopNavDestination;
     if (preTopNavPath.has_value()) {
         // pre page is not in the current stack
-        isPopPage |= navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second) == -1;
+        isPopPage |= navigationStack_->FindIndex(preTopNavPath->first, preTopNavPath->second, true) == -1;
         preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
         if (preTopNavDestination) {
@@ -224,7 +225,9 @@ void NavigationPattern::CheckTopNavPathChange(
                 if (shallowBuilder) {
                     shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                 }
-                preTopNavDestination->GetContentNode()->Clean();
+                if (preTopNavDestination->GetContentNode()) {
+                    preTopNavDestination->GetContentNode()->Clean();
+                }
                 auto parent = preTopNavDestination->GetParent();
                 if (parent) {
                     parent->RemoveChild(preTopNavDestination);
@@ -292,7 +295,6 @@ void NavigationPattern::DoNavigationTransitionAnimation(const RefPtr<NavDestinat
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationNode);
-    auto contentNode = navigationNode->GetContentNode();
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     if (newTopNavDestination && preTopNavDestination) {
@@ -411,6 +413,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     } else {
                         hostNode->SetBackButtonVisible(curTopNavDestination, true);
                     }
+                    pattern->UpdateContextRect(curTopNavDestination, hostNode);
                 },
                 TaskExecutor::TaskType::UI);
         }
@@ -422,6 +425,36 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     AddDividerHotZoneRect(navigationLayoutAlgorithm);
     ifNeedInit_ = false;
     return false;
+}
+
+void NavigationPattern::UpdateContextRect(
+    const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& hostNode)
+{
+    CHECK_NULL_VOID_NOLOG(curDestination);
+    CHECK_NULL_VOID_NOLOG(hostNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID_NOLOG(hostNode);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
+    auto size = curDestination->GetGeometryNode()->GetFrameSize();
+    curDestination->GetRenderContext()->ClipWithRRect(
+        RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
+    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+    if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
+        auto navBarProperty = navBarNode->GetLayoutProperty();
+        navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
+        curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+        curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+        auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
+        CHECK_NULL_VOID_NOLOG(titleNode);
+        titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+        return;
+    }
+    auto navBarProperty = navBarNode->GetLayoutProperty();
+    navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
+    navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
 }
 
 bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode)

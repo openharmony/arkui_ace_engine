@@ -1039,12 +1039,12 @@ var ShadowStyle;
   ShadowStyle[ShadowStyle["OuterDefaultLG"] = 3] = "OuterDefaultLG";
   ShadowStyle[ShadowStyle["OuterFloatingSM"] = 4] = "OuterFloatingSM";
   ShadowStyle[ShadowStyle["OuterFloatingMD"] = 5] = "OuterFloatingMD";
-  ShadowStyle[ShadowStyle["OUTERDEFAULT_XS"] = 0] = "OUTERDEFAULT_XS";
-  ShadowStyle[ShadowStyle["OUTERDEFAULT_SM"] = 1] = "OUTERDEFAULT_SM";
-  ShadowStyle[ShadowStyle["OUTERDEFAULT_MD"] = 2] = "OuterDefault_MD";
-  ShadowStyle[ShadowStyle["OUTERDEFAULT_LG"] = 3] = "OUTERDEFAULT_LG";
-  ShadowStyle[ShadowStyle["OUTERFLOATING_SM"] = 4] = "OUTERFLOATING_SM";
-  ShadowStyle[ShadowStyle["OUTERFLOATING_MD"] = 5] = "OUTERFLOATING_MD";
+  ShadowStyle[ShadowStyle["OUTER_DEFAULT_XS"] = 0] = "OUTER_DEFAULT_XS";
+  ShadowStyle[ShadowStyle["OUTER_DEFAULT_SM"] = 1] = "OUTER_DEFAULT_SM";
+  ShadowStyle[ShadowStyle["OUTER_DEFAULT_MD"] = 2] = "OUTER_DEFAULT_MD";
+  ShadowStyle[ShadowStyle["OUTER_DEFAULT_LG"] = 3] = "OUTER_DEFAULT_LG";
+  ShadowStyle[ShadowStyle["OUTER_FLOATING_SM"] = 4] = "OUTER_FLOATING_SM";
+  ShadowStyle[ShadowStyle["OUTER_FLOATING_MD"] = 5] = "OUTER_FLOATING_MD";
 })(ShadowStyle || (ShadowStyle = {}));
 
 var ShadowType;
@@ -1478,6 +1478,14 @@ class NavPathStack {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
   }
+  pushPathByName(name, param) {
+    this.pathArray.push(new NavPathInfo(name, param));
+    this.changeFlag = this.changeFlag + 1;
+  }
+  pushPath(info) {
+    this.pathArray.push(info);
+    this.changeFlag = this.changeFlag + 1;
+  }
   pop() {
     if (this.pathArray.length === 0) {
       return undefined;
@@ -1487,6 +1495,15 @@ class NavPathStack {
     return pathInfo;
   }
   popTo(name) {
+    let index = this.pathArray.findIndex(element => element.name === name);
+    if (index === -1) {
+      return -1;
+    }
+    this.pathArray.splice(index + 1);
+    this.changeFlag = this.changeFlag + 1;
+    return index;
+  }
+  popToName(name) {
     let index = this.pathArray.findIndex(element => element.name === name);
     if (index === -1) {
       return -1;
@@ -1703,14 +1720,14 @@ var ListItemGroupStyle;
   ListItemGroupStyle[ListItemGroupStyle["CARD"] = 1] = "CARD";
 })(ListItemGroupStyle || (ListItemGroupStyle = {}));
 
-var DragRet;
-(function (DragRet) {
-  DragRet[DragRet["DRAG_SUCCESS"] = 0] = "DRAG_SUCCESS";
-  DragRet[DragRet["DRAG_FAILED"] = 1] = "DRAG_FAILED";
-  DragRet[DragRet["DRAG_CANCELED"] = 2] = "DRAG_CANCELED";
-  DragRet[DragRet["DROP_ENABLED"] = 3] = "DROP_ENABLED";
-  DragRet[DragRet["DROP_DISABLED"] = 4] = "DROP_DISABLED";
-})(DragRet || (DragRet = {}));
+var DragResult;
+(function (DragResult) {
+  DragResult[DragResult["DRAG_SUCCESSFUL"] = 0] = "DRAG_SUCCESSFUL";
+  DragResult[DragResult["DRAG_FAILED"] = 1] = "DRAG_FAILED";
+  DragResult[DragResult["DRAG_CANCELED"] = 2] = "DRAG_CANCELED";
+  DragResult[DragResult["DROP_ENABLED"] = 3] = "DROP_ENABLED";
+  DragResult[DragResult["DROP_DISABLED"] = 4] = "DROP_DISABLED";
+})(DragResult || (DragResult = {}));
 
 var XComponentType;
 (function (XComponentType) {

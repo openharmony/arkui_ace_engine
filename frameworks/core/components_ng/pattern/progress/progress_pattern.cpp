@@ -189,7 +189,7 @@ void ProgressPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusPadding = appTheme->GetFocusOutPaddingVp();
-    auto focusDistance = paintWidth + focusPadding;
+    auto focusDistance = paintWidth / 2 + focusPadding;
     auto focusRadius =
         std::min(contentSize.Width(), contentSize.Height()) * 0.5 + static_cast<float>(focusDistance.ConvertToPx());
     paintRect.SetRect(RectF(contentOffset.GetX() - focusDistance.ConvertToPx(),

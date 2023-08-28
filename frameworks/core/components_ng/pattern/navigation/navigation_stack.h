@@ -92,6 +92,7 @@ public:
     void Remove(const std::string& name);
     void Remove(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     int32_t RemoveInNavPathList(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+    int32_t RemoveInPreNavPathList(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void RemoveAll();
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
@@ -111,7 +112,7 @@ public:
     virtual void Clear();
     virtual RefPtr<UINode> CreateNodeByIndex(int32_t index);
     virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo);
-    int32_t FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+    int32_t FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode, bool isNavPathList);
 
 private:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);

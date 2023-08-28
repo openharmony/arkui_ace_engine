@@ -64,6 +64,7 @@ private:
     std::list<int32_t> LayoutCachedALineBackward(
         LayoutWrapper* layoutWrapper, int32_t& index, float& endPos, float crossSize);
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
+    static int32_t GetLazyForEachIndex(const RefPtr<FrameNode>& host);
 
     int32_t lanes_ = 1;
     std::optional<float> minLaneLength_;
