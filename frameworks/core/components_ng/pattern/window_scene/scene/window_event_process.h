@@ -21,27 +21,32 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
+#include "session/host/include/session.h"
 
 namespace OHOS::Ace::NG {
 class WindowEventProcess {
     DECLARE_DELAYED_SINGLETON(WindowEventProcess);
 public:
     DISALLOW_COPY_AND_MOVE(WindowEventProcess);
-    void ProcessWindowMouseEvent(const RefPtr<WindowNode>& windowNode,
+    void ProcessWindowMouseEvent(int32_t nodeId, sptr<Rosen::Session> session,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void ProcessWindowDragEvent(const RefPtr<WindowNode>& windowNode,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void CleanWindowDragEvent();
-    void CleanWindowMouseRecord();
 
 private:
     void DispatchPointerEvent(const RefPtr<WindowNode>& windowNode,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateWindowMouseRecord(const RefPtr<WindowNode>& windowNode,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-
+    void CleanWindowMouseRecord();
+    void ProcessEnterLeaveEvent(int32_t nodeId, sptr<Rosen::Session> session,
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void DispatchPointerEvent(sptr<Rosen::Session> session,
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 private:
-    WeakPtr<WindowNode> lastWindowNode_ { nullptr };
+    int32_t lastWindowNodeId_ { -1 };
+    wptr<Rosen::Session> lastWeakSession_ { nullptr };
     std::shared_ptr<MMI::PointerEvent> lastPointEvent_ { nullptr };
 
     WeakPtr<WindowNode> lastDragWindowNode_  { nullptr };
