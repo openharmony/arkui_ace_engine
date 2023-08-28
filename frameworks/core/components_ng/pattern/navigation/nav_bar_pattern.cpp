@@ -569,6 +569,7 @@ void NavBarPattern::HandleOnDragStart(float offset)
     CHECK_NULL_VOID(titleNode);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
+    titlePattern->SetCanOverDrag(false);
     titlePattern->ProcessTittleDragStart(offset);
 }
 
@@ -615,12 +616,8 @@ void NavBarPattern::OnCoordScrollStart()
     CHECK_NULL_VOID(titleNode);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
+    titlePattern->SetCanOverDrag(true);
     titlePattern->ProcessTittleDragStart(offset_);
-    auto scrollableNode = scrollableNode_.Upgrade();
-    CHECK_NULL_VOID(scrollableNode);
-    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(scrollablePattern);
-    scrollablePattern->SetParentDraggedDown(titlePattern->IsTitleDraggedDown());
 }
 
 void NavBarPattern::OnCoordScrollUpdate(float offset)
@@ -633,12 +630,6 @@ void NavBarPattern::OnCoordScrollUpdate(float offset)
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     titlePattern->ProcessTittleDragUpdate(offset_);
-
-    auto scrollableNode = scrollableNode_.Upgrade();
-    CHECK_NULL_VOID(scrollableNode);
-    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_VOID(scrollablePattern);
-    scrollablePattern->SetParentDraggedDown(titlePattern->IsTitleDraggedDown());
 }
 
 void NavBarPattern::OnCoordScrollEnd()
@@ -650,6 +641,57 @@ void NavBarPattern::OnCoordScrollEnd()
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     titlePattern->ProcessTittleDragEnd();
     offset_ = 0.0f;
+}
+
+void NavBarPattern::OnScrollStart()
+{
+    offset_ = 0.0f;
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->SetCanOverDrag(false);
+    titlePattern->ProcessTittleDragStart(offset_);
+}
+
+void NavBarPattern::OnScrollUpdate(float offset)
+{
+    offset_ += offset;
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->ProcessTittleDragUpdate(offset_);
+    if (GetFullStatus()) {
+        StopNavBarMotion();
+    }
+}
+
+void NavBarPattern::OnScrollEnd()
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    titlePattern->ProcessTittleDragEnd();
+    offset_ = 0.0f;
+}
+
+bool NavBarPattern::GetFullStatus()
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, false);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, false);
+    auto isFullStatus = titlePattern->IsTitleFullStatus();
+    return isFullStatus;
 }
 
 RefPtr<FrameNode> NavBarPattern::FindScrollableChild()
@@ -690,6 +732,9 @@ void NavBarPattern::OnModifyDone()
     MountTitleBar(hostNode);
     MountToolBar(hostNode);
 
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    controller_ = CREATE_ANIMATOR(context);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBar().value_or(false);
@@ -744,5 +789,38 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     isOritationListenerRegisted_ = false;
+}
+
+void NavBarPattern::NavBarMotion(double velocity, double friction)
+{
+    float mainPosition = 0.0f;
+    if (!motion_) {
+        motion_ = AceType::MakeRefPtr<FrictionMotion>(friction, mainPosition, velocity);
+    } else {
+        motion_->Reset(friction, mainPosition, velocity);
+    }
+    motionOffset_ = 0.0f;
+    motion_->AddListener([weak = AceType::WeakClaim(this)](double value) {
+        auto navBar = weak.Upgrade();
+        if (navBar) {
+            navBar->OnScrollUpdate(value - navBar->motionOffset_);
+            navBar->motionOffset_ = value;
+        }
+    });
+    controller_->ClearStopListeners();
+    controller_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+        auto navBar = weak.Upgrade();
+        if (navBar) {
+            navBar->OnScrollEnd();
+        }
+    });
+    OnScrollStart();
+    controller_->PlayMotion(motion_);
+}
+void NavBarPattern::StopNavBarMotion()
+{
+    if (controller_->IsRunning()) {
+        controller_->Stop();
+    }
 }
 } // namespace OHOS::Ace::NG
