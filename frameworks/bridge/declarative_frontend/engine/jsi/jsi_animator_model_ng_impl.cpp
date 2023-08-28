@@ -15,7 +15,11 @@
 
 #include "core/components_ng/pattern/animator/animator_model_ng.h"
 
+#ifdef NG_BUILD
+#include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#else
 #include "bridge/declarative_frontend/declarative_frontend.h"
+#endif
 #include "core/common/container.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -38,7 +42,11 @@ RefPtr<NG::PagePattern> GetCurrentPage()
     {
         auto container = Container::Current();
         CHECK_NULL_RETURN(container, nullptr);
+#ifdef NG_BUILD
+        auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(container->GetFrontend());
+#else
         auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
+#endif
         CHECK_NULL_RETURN(frontEnd, nullptr);
         auto pageRouterManager = frontEnd->GetPageRouterManager();
         CHECK_NULL_RETURN(pageRouterManager, nullptr);

@@ -25,7 +25,11 @@
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
+#ifdef NG_BUILD
+#include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#else
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
+#endif
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
 #include "bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
@@ -259,7 +263,11 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
         } else
 #endif
         {
+#ifdef NG_BUILD
+            auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(container->GetFrontend());
+#else
             auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
+#endif
             CHECK_NULL_VOID(frontEnd);
             auto pageRouterManager = frontEnd->GetPageRouterManager();
             CHECK_NULL_VOID(pageRouterManager);

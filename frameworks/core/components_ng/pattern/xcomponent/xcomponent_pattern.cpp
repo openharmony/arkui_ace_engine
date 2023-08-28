@@ -19,7 +19,11 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#ifdef NG_BUILD
+#include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#else
 #include "bridge/declarative_frontend/declarative_frontend.h"
+#endif
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
@@ -681,7 +685,11 @@ ExternalEvent XComponentPattern::CreateExternalEvent()
         ContainerScope scope(instanceId);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
+#ifdef NG_BUILD
+        auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(context->GetFrontend());
+#else
         auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
+#endif
         CHECK_NULL_VOID(frontEnd);
         auto jsEngine = frontEnd->GetJsEngine();
         jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
