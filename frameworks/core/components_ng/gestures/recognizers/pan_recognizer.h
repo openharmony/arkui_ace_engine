@@ -87,6 +87,7 @@ private:
     double GetMainAxisDelta();
 
     void OnResetStatus() override;
+    void OnSucceedCancel() override;
 
     const TouchRestrict& GetTouchRestrict() const
     {
