@@ -99,9 +99,10 @@ public:
     OffsetF GetAnimatableBlockCenter() const
     {
         if (sliderContentModifier_ != nullptr) {
-            return sliderContentModifier_->GetBlockCenter();
+            auto blockCenter = sliderContentModifier_->GetBlockCenter();
+            return { blockCenter.GetX(), blockCenter.GetY() };
         }
-        return OffsetF();
+        return {};
     }
 
     float GetValueRatio() const

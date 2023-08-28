@@ -199,7 +199,7 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
     if (selectStart_->Get() != selectEnd_->Get()) {
         auto trackBorderRadius = trackBorderRadius_->Get();
         auto direction = static_cast<Axis>(directionAxis_->Get());
-        auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
+        auto blockCenter = GetBlockCenter();
         auto trackThickness = trackThickness_->Get();
         auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
         auto rect = GetTrackRect();
@@ -249,9 +249,9 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
     canvas.AttachBrush(brush);
 
     auto blockSize = blockSize_->Get();
-    auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
+    auto blockCenter = GetBlockCenter();
     float radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
-    canvas.DrawCircle(ToRSPoint(blockCenter), radius);
+    canvas.DrawCircle(ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), radius);
     canvas.DetachBrush();
     if (!NearEqual(borderWidth, .0f)) {
         canvas.DetachPen();
@@ -274,7 +274,7 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
     auto blockSize = blockSize_->Get();
     float diameter = std::min(blockSize.Width(), blockSize.Height());
     auto penRadius = (diameter + hotCircleShadowWidth_) * HALF;
-    auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
+    auto blockCenter = GetBlockCenter();
     canvas.DrawCircle(ToRSPoint(blockCenter), penRadius);
     canvas.DetachPen();
 }
@@ -288,7 +288,7 @@ void SliderContentModifier::DrawShadow(DrawingContext& context)
     if (!mouseHoverFlag_ && !mousePressedFlag_) {
         auto& canvas = context.canvas;
         auto blockSize = blockSize_->Get();
-        auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
+        auto blockCenter = GetBlockCenter();
         float radius = std::min(blockSize.Width(), blockSize.Height()) * HALF;
         canvas.Save();
         RSBrush shadowBrush;
@@ -342,7 +342,7 @@ void SliderContentModifier::UpdateData(const Parameters& parameters)
     hotCircleShadowWidth_ = parameters.hotCircleShadowWidth;
 }
 
-void SliderContentModifier::JudgeNeedAimate(const RefPtr<SliderPaintProperty>& property)
+void SliderContentModifier::JudgeNeedAnimate(const RefPtr<SliderPaintProperty>& property)
 {
     auto reverse = property->GetReverseValue(false);
     // when reverse is changed, slider block position changes do not animated.
@@ -788,7 +788,7 @@ void SliderContentModifier::UpdateContentDirtyRect(const SizeF& frameSize)
 void SliderContentModifier::SetBlockClip(DrawingContext& context)
 {
     auto& canvas = context.canvas;
-    auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
+    auto blockCenter = GetBlockCenter();
     auto blockSize = blockSize_->Get();
     RectF rect(blockCenter.GetX() - blockSize.Width() * HALF, blockCenter.GetY() - blockSize.Height() * HALF,
         blockSize.Width(), blockSize.Height());
