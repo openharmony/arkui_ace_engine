@@ -70,15 +70,15 @@ std::unique_ptr<DataProviderRes> DataProviderManagerStandard::GetDataProviderRes
     auto size = statBuf.st_size;
 
     // read file content.
-    std::vector<uint8_t> buffer(size);
-    auto readRes = read(fd, buffer.data(), size);
+    auto buffer = std::make_unique<uint8_t[]>(size);
+    auto readRes = read(fd, buffer.get(), size);
     close(fd);
     if (readRes == -1) {
         LOGE("read file fail");
         return nullptr;
     }
 
-    auto result = std::make_unique<DataProviderRes>(std::move(buffer));
+    auto result = std::make_unique<DataProviderRes>(std::move(buffer), size);
     return result;
 }
 

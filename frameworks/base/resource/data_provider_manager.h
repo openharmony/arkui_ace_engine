@@ -19,11 +19,10 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <shared_mutex>
 #include <string>
 #include <type_traits>
-#include <vector>
-#include <mutex>
 
 #include "base/memory/ace_type.h"
 #include "base/resource/data_ability_helper.h"
@@ -33,17 +32,22 @@ namespace OHOS::Ace {
 
 class DataProviderRes {
 public:
-    explicit DataProviderRes(std::vector<uint8_t>&& data) : data_(std::move(data)) {}
-    DataProviderRes(uint8_t* dataRes, int64_t size) : data_(dataRes, dataRes + size) {}
+    DataProviderRes(std::unique_ptr<uint8_t[]>&& data, int64_t size) : data_(std::move(data)), size_(size) {}
+    DataProviderRes(uint8_t* dataRes, int64_t size) : data_(std::unique_ptr<uint8_t[]>(dataRes)), size_(size) {}
     ~DataProviderRes() = default;
 
-    const std::vector<uint8_t>& GetData()
+    std::unique_ptr<uint8_t[]>&& GetData()
     {
-        return data_;
+        return std::move(data_);
+    }
+    int64_t GetSize() const
+    {
+        return size_;
     }
 
 private:
-    std::vector<uint8_t> data_;
+    std::unique_ptr<uint8_t[]> data_;
+    int64_t size_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(DataProviderRes);
 };
