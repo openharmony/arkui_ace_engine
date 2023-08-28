@@ -48,7 +48,6 @@ constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr Dimension listPaddingHeight = 48.0_vp;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 
 } // namespace
 
@@ -372,8 +371,8 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(
         }
         return true;
     }
-    bool version10OrLarger = PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
-    if (version10OrLarger && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
+
+    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
             topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
             return true;
