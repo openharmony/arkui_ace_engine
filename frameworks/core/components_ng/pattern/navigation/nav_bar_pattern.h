@@ -143,6 +143,7 @@ private:
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
     float motionOffset_ = 0.0f;
+    bool isTitleMenuNodeShowing_ = false;
 };
 
 } // namespace OHOS::Ace::NG
