@@ -77,6 +77,7 @@ public:
     static void OnResourceLoad(const JSCallbackInfo& args);
     static void OnScaleChange(const JSCallbackInfo& args);
     static void OnScroll(const JSCallbackInfo& args);
+    static void WebRotate(const JSCallbackInfo& info);
     static void BackgroundColor(const JSCallbackInfo& info);
     static void InitialScale(float scale);
     static void Password(bool password);
