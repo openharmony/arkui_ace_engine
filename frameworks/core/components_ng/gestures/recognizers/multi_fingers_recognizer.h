@@ -50,11 +50,11 @@ protected:
         touchPoints_[touchId] = {};
     }
 
-    void OnFinishGestureReferee(int32_t touchId) override
+    void OnFinishGestureReferee(int32_t touchId, bool isBlocked) override
     {
         touchPoints_.erase(touchId);
         if (touchPoints_.empty()) {
-            ResetStatusOnFinish();
+            ResetStatusOnFinish(isBlocked);
         }
     }
 

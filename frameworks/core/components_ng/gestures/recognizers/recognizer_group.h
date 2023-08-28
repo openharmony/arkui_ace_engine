@@ -64,7 +64,7 @@ public:
     const std::list<RefPtr<NGGestureRecognizer>>& GetGroupRecognizer();
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
-    void OnFinishGestureReferee(int32_t touchId) override;
+    void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;
     void GroupAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
 
     bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
