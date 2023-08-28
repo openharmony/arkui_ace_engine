@@ -150,6 +150,10 @@ public:
         visibleAreaUserCallbacks_[ratio] = callback;
     }
 
+    void ClearVisibleAreaUserCallback()
+    {
+        visibleAreaUserCallbacks_.clear();
+    }
     void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaInnerCallbacks_[ratio] = callback;
