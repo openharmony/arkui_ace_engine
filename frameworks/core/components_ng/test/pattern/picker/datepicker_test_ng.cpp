@@ -2492,6 +2492,9 @@ HWTEST_F(DatePickerTestNg, TossAnimationControllerTest002, TestSize.Level1)
     EXPECT_EQ(toss->yStart_, YOFFSET_START1);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END1);
     EXPECT_FALSE(ret);
+    auto column = AceType::MakeRefPtr<DatePickerColumnPattern>();
+    toss->SetColumn(column);
+    column->touchBreak_ = true;
     toss->SetStart(YOFFSET_START2);
     toss->SetEnd(YOFFSET_END2);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
@@ -2499,8 +2502,6 @@ HWTEST_F(DatePickerTestNg, TossAnimationControllerTest002, TestSize.Level1)
     EXPECT_EQ(toss->yStart_, YOFFSET_START2);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END2);
     EXPECT_FALSE(ret);
-    auto column = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    toss->SetColumn(column);
 }
 
 /**
