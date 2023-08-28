@@ -34,7 +34,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 } // namespace
-void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
+void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -99,6 +99,7 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme)
         layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
     }
+    timePickerRowPattern->SetHasSecond(hasSecond);
     stack->Push(timePickerNode);
 }
 
@@ -131,6 +132,11 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->ClearOptionsHour();
+}
+
+void TimePickerModelNG::SetWheelModeEnabled(bool wheelModeEnabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Loop, wheelModeEnabled);
 }
 
 void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)

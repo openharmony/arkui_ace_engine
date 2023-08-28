@@ -213,6 +213,16 @@ public:
         return hour24_;
     }
 
+    bool GetWheelModeEnabled() const
+    {
+        return wheelModeEnabled_;
+    }
+
+    void SetWheelModeEnabled(bool value)
+    {
+        wheelModeEnabled_ = value;
+    }
+
     const RefPtr<TimePickerTossAnimationController>& GetToss() const
     {
         return tossAnimationController_;
@@ -384,6 +394,7 @@ private:
     RefPtr<PanEvent> panEvent_;
     bool pressed_ = false;
     bool hoverd_ = false;
+    bool wheelModeEnabled_ = true;
     double scrollDelta_ = 0.0;
     bool animationCreated_ = false;
     RefPtr<Animator> toController_;
