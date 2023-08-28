@@ -48,9 +48,6 @@ RectModel* RectModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
-} // namespace
 
 void JSRect::Create(const JSCallbackInfo& info)
 {
@@ -58,18 +55,28 @@ void JSRect::Create(const JSCallbackInfo& info)
     JSShapeAbstract::SetSize(info);
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> radiusWidth = obj->GetProperty("radiusWidth");
-        SetRadiusWidth(radiusWidth);
-
-        JSRef<JSVal> radiusHeight = obj->GetProperty("radiusHeight");
-        SetRadiusHeight(radiusHeight);
-
-        JSRef<JSVal> radius = obj->GetProperty("radius");
-        if (radius->IsNumber() || radius->IsString()) {
-            SetRadiusWithJsVal(nullptr, radius);
-        }
-        if (radius->IsArray()) {
-            SetRadiusWithArrayValue(nullptr, radius);
+        auto propertyNames = obj->GetPropertyNames();
+        for (size_t i = 0; i < propertyNames->Length(); i++) {
+            JSRef<JSVal> value = propertyNames->GetValueAt(i);
+            if (!value->IsString()) {
+                continue;
+            }
+            auto propertyName = value->ToString();
+            if (propertyName == "radiusWidth") {
+                JSRef<JSVal> radiusWidth = obj->GetProperty("radiusWidth");
+                SetRadiusWidth(radiusWidth);
+            } else if (propertyName == "radiusHeight") {
+                JSRef<JSVal> radiusHeight = obj->GetProperty("radiusHeight");
+                SetRadiusHeight(radiusHeight);
+            } else if (propertyName == "radius") {
+                JSRef<JSVal> radius = obj->GetProperty("radius");
+                if (radius->IsNumber() || radius->IsString()) {
+                    SetRadiusWithJsVal(nullptr, radius);
+                }
+                if (radius->IsArray()) {
+                    SetRadiusWithArrayValue(nullptr, radius);
+                }
+            }
         }
         info.SetReturnValue(info.This());
     }
@@ -96,14 +103,15 @@ void JSRect::JsRadiusHeight(const JSCallbackInfo& info)
 void JSRect::SetRadiusWidth(const JSRef<JSVal>& jsVal)
 {
     CalcDimension value(0.0f);
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(jsVal, value)) {
+            LOGW("value is invalid, use default value(0.0) instead.");
+        }
+    } else {
         if (!ParseJsDimensionVpNG(jsVal, value)) {
             LOGW("value is invalid, use default value(0.0) instead.");
             value.SetValue(0.0f);
         }
-    } else if (!ParseJsDimensionVp(jsVal, value)) {
-        LOGW("value is invalid, use default value(0.0) instead.");
     }
     RectModel::GetInstance()->SetRadiusWidth(value);
 }
@@ -111,14 +119,15 @@ void JSRect::SetRadiusWidth(const JSRef<JSVal>& jsVal)
 void JSRect::SetRadiusHeight(const JSRef<JSVal>& jsVal)
 {
     CalcDimension value(0.0f);
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(jsVal, value)) {
+            LOGW("value is invalid, use default value(0.0) instead.");
+        }
+    } else {
         if (!ParseJsDimensionVpNG(jsVal, value)) {
             LOGW("value is invalid, use default value(0.0) instead.");
             value.SetValue(0.0f);
         }
-    } else if (!ParseJsDimensionVp(jsVal, value)) {
-        LOGW("value is invalid, use default value(0.0) instead.");
     }
     RectModel::GetInstance()->SetRadiusHeight(value);
 }
@@ -143,14 +152,15 @@ void JSRect::SetRadius(const JSCallbackInfo& info)
 void JSRect::SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal)
 {
     CalcDimension value(0.0f);
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(jsVal, value)) {
+            LOGW("value is invalid, use default value(0.0) instead.");
+        }
+    } else {
         if (!ParseJsDimensionVpNG(jsVal, value)) {
             LOGW("value is invalid, use default value(0.0) instead.");
             value.SetValue(0.0f);
         }
-    } else if (!ParseJsDimensionVp(jsVal, value)) {
-        LOGW("value is invalid, use default value(0.0) instead.");
     }
     if (shapeRect) {
         AnimationOption option = ViewStackModel::GetInstance()->GetImplicitAnimationOption();
@@ -188,8 +198,11 @@ void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const J
         JSRef<JSVal> radiusY = radiusArray->GetValueAt(1);
         CalcDimension radiusXValue(0.0f);
         CalcDimension radiusYValue(0.0f);
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            if (!ParseJsDimensionVp(radiusX, radiusXValue) || !ParseJsDimensionVp(radiusY, radiusYValue)) {
+                LOGW("value is invalid, use default value(0.0) instead.");
+            }
+        } else {
             if (!ParseJsDimensionVpNG(radiusX, radiusXValue)) {
                 LOGW("radiusX is invalid, use default value(0.0) instead.");
                 radiusXValue.SetValue(0.0f);
@@ -198,8 +211,6 @@ void JSRect::SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const J
                 LOGW("radiusY is invalid, use default value(0.0) instead.");
                 radiusYValue.SetValue(0.0f);
             }
-        } else if (!ParseJsDimensionVp(radiusX, radiusXValue) || !ParseJsDimensionVp(radiusY, radiusYValue)) {
-            LOGW("value is invalid, use default value(0.0) instead.");
         }
         SetRadiusValue(shapeRect, radiusXValue, radiusYValue, i);
     }
