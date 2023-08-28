@@ -470,9 +470,8 @@ RefPtr<FrameNode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     info->menuInfo.menuBuilder();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    // long press no need menuwrapper
-    auto type = info->isUsingMouse ? MenuType::SELECT_OVERLAY_CUSTOM_MENU : MenuType::SELECT_OVERLAY_EXTENSION_MENU;
-    auto menuNode = MenuView::Create(customNode, -1, "", type, MenuParam(), info->isUsingMouse);
+    auto menuNode =
+        MenuView::Create(customNode, -1, "", MenuType::SELECT_OVERLAY_CUSTOM_MENU, MenuParam(), info->isUsingMouse);
     auto eventHub = menuNode->GetEventHub<EventHub>();
     if (eventHub && info->menuCallback.onAppear) {
         eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));

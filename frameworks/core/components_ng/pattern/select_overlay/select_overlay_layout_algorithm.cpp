@@ -39,8 +39,7 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     } else {
         menu->SetActive(true);
     }
-    auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
-    menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
+
     // custom menu need to layout all menu and submenu
     if (info_->menuInfo.menuBuilder) {
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -49,6 +48,8 @@ void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
 
+    auto menuOffset = ComputeSelectMenuPosition(layoutWrapper);
+    menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
     menu->Layout();
     auto button = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(button);
@@ -107,7 +108,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 
     // When the extended menu is displayed, the default menu becomes circular, but the position of the circle is aligned
     // with the end of the original menu.
-    if (GreatNotEqual(menuWidth, menuHeight) || info_->menuInfo.menuBuilder) {
+    if (GreatNotEqual(menuWidth, menuHeight)) {
         menuWidth_ = menuWidth;
     } else {
         return defaultMenuEndOffset_ - OffsetF(menuWidth, 0.0f);
