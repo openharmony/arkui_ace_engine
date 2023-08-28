@@ -93,7 +93,7 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::SURFACE, "RosenWeb" };
+        return RenderContext::ContextParam { RenderContext::ContextType::HARDWARE_SURFACE, "RosenWeb" };
     }
 
     bool IsAtomicNode() const override
