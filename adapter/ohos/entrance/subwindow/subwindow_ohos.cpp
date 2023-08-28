@@ -259,7 +259,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    ShowWindow();
+    ShowWindow(false);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
     overlayManager->ShowPopup(targetId, popupInfo);
@@ -301,27 +301,40 @@ const RefPtr<NG::OverlayManager> SubwindowOhos::GetOverlayManager()
     return context->GetOverlayManager();
 }
 
-void SubwindowOhos::ShowWindow()
+void SubwindowOhos::ShowWindow(bool needFocus)
 {
+    CHECK_NULL_VOID(window_);
     if (isShowed_) {
-        LOGI("Subwindow is on display");
+        LOGI("subwindow id:%{public}u is on display", window_->GetWindowId());
+        if (needFocus) {
+            window_->SetFocusable(needFocus);
+            RequestFocus();
+        }
         return;
     }
-    LOGI("Show the subwindow");
-    CHECK_NULL_VOID(window_);
+    LOGI("Show subwindow id:%{public}u", window_->GetWindowId());
+
     // Set min window hot area so that sub window can transparent event.
     std::vector<Rect> rects;
     rects.emplace_back(MIN_WINDOW_HOT_AREA);
     SetHotAreas(rects, -1);
     window_->SetNeedDefaultAnimation(false);
-    OHOS::Rosen::WMError ret = window_->Show();
-
+    auto ret = window_->SetFocusable(needFocus);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGE("Show window failed with errCode: %{public}d", static_cast<int32_t>(ret));
+        LOGE("subwindow id:%{public}u set focusable %{public}d failed with WMError: %{public}d", window_->GetWindowId(),
+            needFocus, static_cast<int32_t>(ret));
+    }
+    ret = window_->Show();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        LOGE("Show subwindow id:%{public}u failed with WMError: %{public}d", window_->GetWindowId(),
+            static_cast<int32_t>(ret));
         return;
     }
-    RequestFocus();
-    LOGI("Show the subwindow successfully.");
+    if (needFocus) {
+        RequestFocus();
+    }
+    LOGI("Show subwindow id:%{public}u successfully.", window_->GetWindowId());
+
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = aceContainer->GetPipelineContext();
@@ -1071,15 +1084,17 @@ Rect SubwindowOhos::GetParentWindowRect() const
 void SubwindowOhos::RequestFocus()
 {
     if (window_->IsFocused()) {
+        LOGI("subwindow id:%{public}u already focused", window_->GetWindowId());
         // already focused, no need to focus
         return;
     }
     OHOS::Rosen::WMError ret = window_->RequestFocus();
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        LOGW("Window request focus failed with errCode: %{public}d", static_cast<int32_t>(ret));
+        LOGE("subindow id:%{public}u request focus failed with WMError: %{public}d", window_->GetWindowId(),
+            static_cast<int32_t>(ret));
         return;
     }
-    LOGD("The window request focus successfully.");
+    LOGI("subwindow id:%{public}u request focus successfully.", window_->GetWindowId());
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
