@@ -217,7 +217,22 @@ void FormPattern::TakeSurfaceCaptureForUI()
 
 void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 {
+    ContainerScope scope(scopeId_);
     LOGI("OnSnapshot");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto uiTaskExecutor =
+        SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this), pixelMap] {
+        auto formPattern = weak.Upgrade();
+        CHECK_NULL_VOID(formPattern);
+        formPattern->HandleOnSnapshot(pixelMap);
+    });
+}
+
+void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    LOGI("HandleOnSnapshot");
     CHECK_NULL_VOID(pixelMap);
     pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     UpdateStaticCard();
@@ -577,7 +592,16 @@ void FormPattern::InitFormManagerDelegate()
         LOGI("HandleUnTrustForm");
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        formPattern->HandleUnTrustForm();
+        auto host = formPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak, instanceID] {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->HandleUnTrustForm();
+        });
     });
 
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID]() {

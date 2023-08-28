@@ -67,6 +67,8 @@ public:
 
     void OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
 
+    void HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
+
     RefPtr<RenderContext> GetExternalRenderContext()
     {
         return externalRenderContext_;
