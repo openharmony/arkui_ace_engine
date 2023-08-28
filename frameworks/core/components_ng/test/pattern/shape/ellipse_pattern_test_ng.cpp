@@ -50,10 +50,7 @@ public:
         layoutConstraint.selfIdealSize.SetHeight(HEIGHT);
         layoutProperty->UpdateLayoutConstraint(layoutConstraint);
         layoutProperty->UpdateContentConstraint();
-        RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-        ASSERT_NE(geometryNode, nullptr);
-        LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
-        auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), &layoutWrapper);
+        auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);
         EXPECT_EQ(size.has_value(), true);
         auto paintMethod = pattern->CreateNodePaintMethod();
         EXPECT_EQ(paintMethod == nullptr, false);
