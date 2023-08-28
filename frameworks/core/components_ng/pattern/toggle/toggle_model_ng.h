@@ -32,6 +32,7 @@ public:
     bool IsToggle() override;
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
 
 private:
     static void CreateCheckbox(int32_t nodeId);

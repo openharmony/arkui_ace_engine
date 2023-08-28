@@ -51,6 +51,7 @@ public:
     virtual bool IsToggle() = 0;
     virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) = 0;
     virtual void OnChangeEvent(NG::ChangeEvent&& onChangeEvent) = 0;
+    virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
 
 private:
     static std::unique_ptr<ToggleModel> instance_;
