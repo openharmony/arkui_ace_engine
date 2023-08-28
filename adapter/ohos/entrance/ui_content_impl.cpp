@@ -69,6 +69,9 @@
 #include "core/common/plugin_manager.h"
 #endif
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef NG_BUILD
+#include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -397,7 +400,11 @@ NativeValue* UIContentImpl::GetUIContext()
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, nullptr);
     if (frontend->GetType() == FrontendType::DECLARATIVE_JS) {
+#ifdef NG_BUILD
+        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend);
+#else
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
+#endif
         CHECK_NULL_RETURN(declarativeFrontend, nullptr);
         return declarativeFrontend->GetContextValue();
     }
