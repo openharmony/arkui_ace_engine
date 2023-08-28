@@ -53,7 +53,6 @@ namespace {
 constexpr double DEFAULT_OPACITY = 1.0;
 constexpr double MIN_OPACITY = 0.0;
 constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 } // namespace
 
 void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
@@ -69,11 +68,10 @@ void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
         JSRef<JSVal> value = array->GetValueAt(i);
         CalcDimension dim;
         bool paramIsValid = false;
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-            paramIsValid = ParseJsDimensionVpNG(value, dim);
-        } else {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             paramIsValid = ParseJsDimensionVp(value, dim);
+        } else {
+            paramIsValid = ParseJsDimensionVpNG(value, dim);
         }
         if (paramIsValid) {
             dashArray.emplace_back(dim);
@@ -130,15 +128,14 @@ void JSShapeAbstract::SetStrokeDashOffset(const JSCallbackInfo& info)
         return;
     }
     CalcDimension offset(0.0f);
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(info[0], offset)) {
+            return;
+        }
+    } else {
         if (!ParseJsDimensionVpNG(info[0], offset)) {
             // set to default value(0.0f)
             offset.SetValue(0.0f);
-        }
-    } else {
-        if (!ParseJsDimensionVp(info[0], offset)) {
-            return;
         }
     }
     ShapeAbstractModel::GetInstance()->SetStrokeDashOffset(offset);
@@ -212,14 +209,13 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
     CalcDimension lineWidth = 1.0_vp;
     if (info[0]->IsString()) {
         const std::string& value = info[0]->ToString();
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            lineWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
+        } else {
             if (!StringUtils::StringToDimensionWithUnitNG(value, lineWidth, DimensionUnit::VP, 1.0)) {
                 // unit is invalid, use default value(1.0vp) instead.
                 lineWidth = 1.0_vp;
             }
-        } else {
-            lineWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
         }
     } else {
         ParseJsDimensionVp(info[0], lineWidth);
@@ -247,7 +243,30 @@ void JSShapeAbstract::JsWidth(const JSCallbackInfo& info)
 
 void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
 {
-    JSViewAbstract::JsWidth(jsValue);
+    CalcDimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        LOGW("jsValue is undefined");
+        return;
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(jsValue, value)) {
+            LOGW("ParseJsDimensionVp failed");
+            return;
+        }
+    } else {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            LOGW("ParseJsDimensionVp failed");
+            return;
+        }
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        LOGW("value is less than zero");
+        value.SetValue(0.0);
+    }
+    ShapeAbstractModel::GetInstance()->SetWidth(value);
 }
 
 void JSShapeAbstract::JsHeight(const JSCallbackInfo& info)
@@ -262,7 +281,30 @@ void JSShapeAbstract::JsHeight(const JSCallbackInfo& info)
 
 void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
 {
-    JSViewAbstract::JsHeight(jsValue);
+    CalcDimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        LOGW("jsValue is undefined");
+        return;
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(jsValue, value)) {
+            LOGW("ParseJsDimensionVp failed");
+            return;
+        }
+    } else {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+            LOGW("ParseJsDimensionVp failed");
+            return;
+        }
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        LOGW("value is less than zero");
+        value.SetValue(0.0);
+    }
+    ShapeAbstractModel::GetInstance()->SetHeight(value);
 }
 
 void JSShapeAbstract::JsSize(const JSCallbackInfo& info)
@@ -410,8 +452,8 @@ void JSShapeAbstract::SetSize(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> width = obj->GetProperty("width");
         JSRef<JSVal> height = obj->GetProperty("height");
-        JSViewAbstract::JsWidth(width);
-        JSViewAbstract::JsHeight(height);
+        SetWidth(width);
+        SetHeight(height);
     }
 }
 
