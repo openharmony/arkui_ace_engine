@@ -45,15 +45,13 @@ VideoLayoutAlgorithm::VideoLayoutAlgorithm() = default;
 void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
-    auto contentOffset = layoutWrapper->GetGeometryNode()->GetContentOffset();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
-            child->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
+            child->GetGeometryNode()->SetMarginFrameOffset(OffsetF { 0.0f, 0.0f });
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
             auto controlBarHeight = CalControlBarHeight();
             auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
-            child->GetGeometryNode()->SetMarginFrameOffset(
-                { contentOffset.GetX(), contentOffset.GetY() + contentSize.Height() - controlBarHeight });
+            child->GetGeometryNode()->SetMarginFrameOffset(OffsetF { 0.0f, contentSize.Height() - controlBarHeight });
         }
         child->Layout();
     }
