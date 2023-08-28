@@ -164,6 +164,22 @@ public:
 
     bool OnDataMoved(size_t from, size_t to)
     {
+        if (from == to) {
+            return false;
+        }
+        auto fromIter = cachedItems_.find(from);
+        auto toIter = cachedItems_.find(to);
+        if (fromIter != cachedItems_.end() && toIter != cachedItems_.end()) {
+            std::swap(fromIter->second, toIter->second);
+        } else if (fromIter != cachedItems_.end()) {
+            expiringItem_.try_emplace(
+                fromIter->second.first, LazyForEachCacheChild(to, std::move(fromIter->second.second)));
+            cachedItems_.erase(fromIter);
+        } else if (toIter != cachedItems_.end()) {
+            expiringItem_.try_emplace(
+                toIter->second.first, LazyForEachCacheChild(from, std::move(toIter->second.second)));
+            cachedItems_.erase(toIter);
+        }
         return true;
     }
 
@@ -263,11 +279,13 @@ public:
         std::unordered_set<int32_t> idleIndexes;
         if (startIndex_ != -1 && endIndex_ != -1) {
             for (int32_t i = 1; i <= cacheCount_; i++) {
-                if (startIndex_ >= i) {
-                    idleIndexes.emplace(startIndex_ - i);
-                }
                 if (endIndex_ + i < count) {
                     idleIndexes.emplace(endIndex_ + i);
+                }
+            }
+            for (int32_t i = 1; i <= cacheCount_; i++) {
+                if (startIndex_ >= i) {
+                    idleIndexes.emplace(startIndex_ - i);
                 }
             }
         }

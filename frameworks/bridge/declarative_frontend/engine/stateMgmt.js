@@ -4716,7 +4716,7 @@ class ViewPU extends NativeViewPartialUpdate {
         };
         let node;
         // if there is no suitable recycle node, run a normal creation function.
-        if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
+        if (!name || !this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
             
             this.observeComponentCreation(compilerAssignedUpdateFunc);
             return;

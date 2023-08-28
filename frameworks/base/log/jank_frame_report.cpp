@@ -126,7 +126,7 @@ void JankFrameReport::RecordJankStatus(double jank)
         return;
     }
     // skip first frame
-    if (prevFrameUpdateCount_ == 0 && currentFrameUpdateCount_ > 0) {
+    if (prevFrameUpdateCount_ == 0 && (currentFrameUpdateCount_ > 0 || currentFrameUpdateCount_ == 0)) {
         return;
     };
     needReport_ = true;
