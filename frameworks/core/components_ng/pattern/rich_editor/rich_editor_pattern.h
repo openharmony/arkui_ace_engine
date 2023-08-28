@@ -331,6 +331,7 @@ private:
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
     bool blockPress_ = false;
+    bool leftMousePress_ = false;
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
     OffsetF rightClickOffset_;
@@ -344,7 +345,6 @@ private:
     RectF frameRect_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
-    bool isDragMoving = false;
 #endif // ENABLE_DRAG_FRAMEWORK
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
