@@ -786,6 +786,13 @@ void SelectOverlayNode::CreateToolBar()
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
     if (info->menuInfo.menuBuilder) {
         selectMenu_ = CreateCustomSelectMenu(info);
+        if (info->menuInfo.menuIsShow) {
+            selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+            selectMenuStatus_ = FrameNodeStatus::VISIBLE;
+        } else {
+            selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+            selectMenuStatus_ = FrameNodeStatus::GONE;
+        }
         selectMenu_->MountToParent(Claim(this));
         selectMenu_->MarkModifyDone();
         return;

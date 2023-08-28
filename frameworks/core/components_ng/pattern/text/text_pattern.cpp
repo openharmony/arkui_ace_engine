@@ -869,6 +869,9 @@ void TextPattern::OnModifyDone()
         return;
     }
     copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
+    if (ignoreEvent_) {
+        return;
+    }
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     if (copyOption_ != CopyOptions::None) {
