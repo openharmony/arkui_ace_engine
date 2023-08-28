@@ -514,20 +514,6 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         BindCloseCallBack(hub, -1);
     }
 
-    // register Register keyboard event
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    auto onKeyEvent = [focusHub](const KeyEvent& event) -> bool {
-        if (event.action != KeyAction::DOWN) {
-            return false;
-        }
-        if (event.code == KeyCode::KEY_ENTER) {
-            focusHub->OnClick(event);
-            return true;
-        }
-        return false;
-    };
-    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
-
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
