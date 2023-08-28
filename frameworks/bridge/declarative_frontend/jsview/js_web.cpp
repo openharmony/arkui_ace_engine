@@ -1967,9 +1967,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
     WebModel::GetInstance()->SetFocusNode(true);
 }
 
-void JSWeb::WebRotate()
+void JSWeb::WebRotate(const JSCallbackInfo& args)
 {
-    //LOGD("Web rotate implement is empty.");
+    //LOGD("Web rotate is not supported.");
 }
 
 void JSWeb::OnAlert(const JSCallbackInfo& args)
