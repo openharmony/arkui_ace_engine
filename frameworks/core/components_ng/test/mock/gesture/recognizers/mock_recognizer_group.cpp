@@ -24,7 +24,7 @@ void RecognizerGroup::OnFlushTouchEventsEnd() {}
 
 void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, bool needUpdateChild) {}
 
-void RecognizerGroup::OnFinishGestureReferee(int32_t touchId) {}
+void RecognizerGroup::OnFinishGestureReferee(int32_t touchId, bool isBlocked) {}
 
 void RecognizerGroup::OnResetStatus() {}
 

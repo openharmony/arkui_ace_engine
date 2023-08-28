@@ -35,14 +35,14 @@ void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, bool needUpdateChil
     }
 }
 
-void RecognizerGroup::OnFinishGestureReferee(int32_t touchId)
+void RecognizerGroup::OnFinishGestureReferee(int32_t touchId, bool isBlocked)
 {
     for (const auto& child : recognizers_) {
         if (child) {
-            child->FinishReferee(touchId);
+            child->FinishReferee(touchId, isBlocked);
         }
     }
-    MultiFingersRecognizer::OnFinishGestureReferee(touchId);
+    MultiFingersRecognizer::OnFinishGestureReferee(touchId, isBlocked);
 }
 
 const std::list<RefPtr<NGGestureRecognizer>>& RecognizerGroup::GetGroupRecognizer()
