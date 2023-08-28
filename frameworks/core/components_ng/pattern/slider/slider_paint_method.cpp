@@ -30,7 +30,7 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto sliderTheme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(sliderTheme);
     sliderContentModifier_->UpdateData(parameters_);
-    sliderContentModifier_->JudgeNeedAimate(paintProperty);
+    sliderContentModifier_->JudgeNeedAnimate(paintProperty);
     sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
     sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
     sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);

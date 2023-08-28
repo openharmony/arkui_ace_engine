@@ -2816,7 +2816,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest013, TestSize.Level1)
 
 /**
  * @tc.name: SliderContentModifierTest014
- * @tc.desc: Test JudgeNeedAimate
+ * @tc.desc: Test JudgeNeedAnimate
  * @tc.type: FUNC
  */
 HWTEST_F(SliderPatternTestNg, SliderContentModifierTest014, TestSize.Level1)
@@ -2832,7 +2832,7 @@ HWTEST_F(SliderPatternTestNg, SliderContentModifierTest014, TestSize.Level1)
     SliderContentModifier sliderContentModifier(parameters, nullptr);
 
     sliderContentModifier.reverse_ = true;
-    sliderContentModifier.JudgeNeedAimate(sliderPaintProperty);
+    sliderContentModifier.JudgeNeedAnimate(sliderPaintProperty);
     EXPECT_FALSE(sliderContentModifier.needAnimate_);
     EXPECT_FALSE(sliderContentModifier.reverse_);
 }
