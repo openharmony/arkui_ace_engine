@@ -1960,7 +1960,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerHasSecond003, TestSize.Level1)
      * @tc.steps: step3. SetHasSecond(false) then check the secondColumn has been deleted.
      */
     timePickerRowPattern->SetHasSecond(false);
-    auto childSize = frameNode->GetChildren().size();
     frameNode->MarkModifyDone();
     EXPECT_EQ(frameNode->GetChildren().size(), CHILD_WITH_AMPM_SIZE);
 }
