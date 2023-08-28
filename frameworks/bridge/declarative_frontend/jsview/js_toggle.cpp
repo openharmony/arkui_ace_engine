@@ -64,6 +64,7 @@ void JSToggle::JSBind(BindingTarget globalObj)
     JSClass<JSToggle>::StaticMethod("selectedColor", &JSToggle::SelectedColor);
     JSClass<JSToggle>::StaticMethod("width", &JSToggle::JsWidth);
     JSClass<JSToggle>::StaticMethod("height", &JSToggle::JsHeight);
+    JSClass<JSToggle>::StaticMethod("responseRegion", &JSToggle::JsResponseRegion);
     JSClass<JSToggle>::StaticMethod("size", &JSToggle::JsSize);
     JSClass<JSToggle>::StaticMethod("padding", &JSToggle::JsPadding);
     JSClass<JSToggle>::StaticMethod("switchPointColor", &JSToggle::SwitchPointColor);
@@ -192,6 +193,19 @@ void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
         }
     }
     ToggleModel::GetInstance()->SetHeight(value);
+}
+
+void JSToggle::JsResponseRegion(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsResponseRegion(info);
+        return;
+    }
+    std::vector<DimensionRect> result;
+    if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        return;
+    }
+    ToggleModel::GetInstance()->SetResponseRegion(result);
 }
 
 void JSToggle::JsSize(const JSCallbackInfo& info)

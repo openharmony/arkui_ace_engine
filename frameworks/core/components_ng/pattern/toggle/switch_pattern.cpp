@@ -59,11 +59,9 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     width_ = width;
     height_ = height;
     auto geometryNode = dirty->GetGeometryNode();
-    auto offset = geometryNode->GetContentOffset();
-    auto size = geometryNode->GetContentSize();
-    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
-        offset_ = offset;
-        size_ = size;
+    offset_ = geometryNode->GetContentOffset();
+    size_ = geometryNode->GetContentSize();
+    if (!isUserSetResponseRegion_) {
         AddHotZoneRect();
     }
     return true;
@@ -417,7 +415,11 @@ void SwitchPattern::AddHotZoneRect()
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->AddHotZoneRect(hotZoneRegion);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    std::vector<DimensionRect> hotZoneRegions;
+    hotZoneRegions.emplace_back(hotZoneRegion);
+    gestureHub->SetResponseRegion(hotZoneRegions);
 }
 
 void SwitchPattern::RemoveLastHotZoneRect() const

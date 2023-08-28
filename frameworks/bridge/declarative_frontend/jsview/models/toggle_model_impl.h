@@ -32,6 +32,7 @@ public:
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
     bool IsToggle() override;
     void OnChangeEvent(NG::ChangeEvent&& onChange) override {};
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override {};
 };
 
 } // namespace OHOS::Ace::Framework
