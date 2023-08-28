@@ -1326,7 +1326,7 @@ void UIContentImpl::Destroy()
     CHECK_NULL_VOID_NOLOG(container);
     // stop performance check and output json file
     AcePerformanceCheck::Stop();
-    if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
+    if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
         Platform::DialogContainer::DestroyContainer(instanceId_);
     } else {
         Platform::AceContainer::DestroyContainer(instanceId_);
@@ -1383,20 +1383,27 @@ bool UIContentImpl::ProcessBackPressed()
     LOGI("UIContentImpl: ProcessBackPressed: Platform::AceContainer::OnBackPressed called");
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN_NOLOG(container, false);
-    if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
-        if (Platform::DialogContainer::OnBackPressed(instanceId_)) {
-            LOGI("UIContentImpl::ProcessBackPressed DialogContainer return true");
-            return true;
-        }
-    } else {
-        LOGI("UIContentImpl::ProcessBackPressed AceContainer");
-        if (Platform::AceContainer::OnBackPressed(instanceId_)) {
-            LOGI("UIContentImpl::ProcessBackPressed AceContainer return true");
-            return true;
-        }
-    }
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN_NOLOG(taskExecutor, false);
+    bool ret = false;
+    taskExecutor->PostSyncTask(
+        [container, this, &ret]() {
+            if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
+                if (Platform::DialogContainer::OnBackPressed(instanceId_)) {
+                    LOGI("UIContentImpl::ProcessBackPressed DialogContainer return true");
+                    ret = true;
+                }
+            } else {
+                LOGI("UIContentImpl::ProcessBackPressed AceContainer");
+                if (Platform::AceContainer::OnBackPressed(instanceId_)) {
+                    LOGI("UIContentImpl::ProcessBackPressed AceContainer return true");
+                    ret = true;
+                }
+            }
+        },
+        TaskExecutor::TaskType::UI);
     LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed return false");
-    return false;
+    return ret;
 }
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
