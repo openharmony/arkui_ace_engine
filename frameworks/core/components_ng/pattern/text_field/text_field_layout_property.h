@@ -54,7 +54,7 @@ public:
         ResetShowPasswordIcon();
         ResetCopyOptions();
         ResetLastValue();
-        ResetNeedFireOnChangeWhenCreate();
+        ResetNeedFireOnChange();
         ResetWidthAuto();
         ResetCaretPosition();
         ResetErrorText();
@@ -124,7 +124,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextInputType, TextInputType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputFilter, std::string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordIcon, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordIcon, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCounter, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowUnderline, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayMode, DisplayMode, PROPERTY_UPDATE_MEASURE);
@@ -138,11 +138,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredTextLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredPlaceholderLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LastValue, std::string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedFireOnChangeWhenCreate, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedFireOnChange, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretPosition, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretPosition, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectionMenuHidden, bool, PROPERTY_UPDATE_MEASURE);
 
 protected:
@@ -161,7 +161,7 @@ protected:
         value->propShowPasswordIcon_ = CloneShowPasswordIcon();
         value->propCopyOptions_ = CloneCopyOptions();
         value->propLastValue_ = CloneLastValue();
-        value->propNeedFireOnChangeWhenCreate_ = CloneNeedFireOnChangeWhenCreate();
+        value->propNeedFireOnChange_ = CloneNeedFireOnChange();
         value->propWidthAuto_ = CloneWidthAuto();
         value->propErrorText_ = CloneErrorText();
         value->propShowErrorText_ = CloneShowErrorText();
