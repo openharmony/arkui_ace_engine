@@ -195,7 +195,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
 
 // create menu with custom node from a builder
 RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, const std::string& targetTag,
-    MenuType type, const MenuParam& menuParam)
+    MenuType type, const MenuParam& menuParam, bool withWrapper)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
     // put custom node in a scroll to limit its height
@@ -215,7 +215,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
-    if (type == MenuType::SUB_MENU) {
+    if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
         wrapperNode->RemoveChild(menuNode);
         wrapperNode.Reset();
         return menuNode;

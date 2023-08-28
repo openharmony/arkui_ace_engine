@@ -451,7 +451,11 @@ void CheckBoxGroupPattern::AddHotZoneRect()
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->AddHotZoneRect(hotZoneRegion);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    std::vector<DimensionRect> hotZoneRegions;
+    hotZoneRegions.emplace_back(hotZoneRegion);
+    gestureHub->SetResponseRegion(hotZoneRegions);
 }
 
 void CheckBoxGroupPattern::RemoveLastHotZoneRect() const

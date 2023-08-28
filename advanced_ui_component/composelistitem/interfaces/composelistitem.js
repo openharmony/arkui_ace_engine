@@ -437,6 +437,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Button.createWithChild();
+      Button.hitTestBehavior(HitTestMode.Block);
       Button.fontSize({
         id: -1,
         type: 10002,
@@ -460,8 +461,6 @@ class OperateItemStruct extends ViewPU {
         moduleName: ""
       });
       Button.labelStyle({ maxLines: 1 });
-      Button.onClick((() => {
-      }));
       Button.onFocus((() => {
         this.parentCanFocus = !1
       }));
@@ -503,6 +502,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((t, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(t);
       Button.createWithChild({ type: ButtonType.Normal });
+      Button.hitTestBehavior(HitTestMode.Block);
       Button.backgroundColor(Color.Transparent);
       Button.height(48);
       Button.width(48);
@@ -528,8 +528,7 @@ class OperateItemStruct extends ViewPU {
           this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
         }
       }));
-      Button.onClick(null == e.action ? () => {
-      } : e.action);
+      Button.onClick(e.action);
       o || Button.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -595,6 +594,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((t, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(t);
       Button.createWithChild({ type: ButtonType.Normal });
+      Button.hitTestBehavior(HitTestMode.Block);
       Button.backgroundColor(Color.Transparent);
       Button.height(24);
       Button.width(12);
@@ -613,8 +613,7 @@ class OperateItemStruct extends ViewPU {
           this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
         }
       }));
-      Button.onClick(null == e.action ? () => {
-      } : e.action);
+      Button.onClick(e.action);
       o || Button.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -631,7 +630,6 @@ class OperateItemStruct extends ViewPU {
         bundleName: "",
         moduleName: ""
       });
-      Image.onClick(e.action);
       Image.draggable(!1);
       o || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
@@ -650,6 +648,7 @@ class OperateItemStruct extends ViewPU {
       Radio.onFocus((() => {
         this.parentCanFocus = !1
       }));
+      Radio.hitTestBehavior(HitTestMode.Block);
       Radio.onTouch((e => {
         e.type == TouchType.Down && (this.parentCanTouch = !1);
         e.type == TouchType.Up && (this.parentCanTouch = !0)
@@ -678,6 +677,7 @@ class OperateItemStruct extends ViewPU {
       Checkbox.onFocus((() => {
         this.parentCanFocus = !1
       }));
+      Checkbox.hitTestBehavior(HitTestMode.Block);
       Checkbox.onTouch((e => {
         e.type == TouchType.Down && (this.parentCanTouch = !1);
         e.type == TouchType.Up && (this.parentCanTouch = !0)
@@ -728,6 +728,7 @@ class OperateItemStruct extends ViewPU {
       Toggle.onClick((() => {
         this.switchState = !this.switchState
       }));
+      Toggle.hitTestBehavior(HitTestMode.Block);
       o || Toggle.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -739,6 +740,7 @@ class OperateItemStruct extends ViewPU {
     this.observeComponentCreation(((e, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Button.createWithChild({ type: ButtonType.Normal });
+      Button.hitTestBehavior(HitTestMode.Block);
       Button.labelStyle({ maxLines: 1 });
       Button.backgroundColor(Color.Transparent);
       Button.height(32);
@@ -764,8 +766,7 @@ class OperateItemStruct extends ViewPU {
           this.parentIsHover && (this.parentFrontColor = this.parentIsHover ? "#0d000000" : this.parentIsActive ? "#1a0a59f7" : Color.Transparent.toString())
         }
       }));
-      Button.onClick(null == t.action ? () => {
-      } : t.action);
+      Button.onClick(t.action);
       o || Button.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -1017,10 +1018,10 @@ export class ComposeListItem extends ViewPU {
   }
 
   aboutToAppear() {
-    if (void 0 !== this.contentItem) {
-      void 0 === this.contentItem.secondaryText && void 0 === this.contentItem.description ? void 0 === this.contentItem.icon ? this.itemHeight = ItemHeight.FIRST_HEIGHT : this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT : void 0 === this.contentItem.description ? void 0 === this.contentItem.icon || void 0 !== this.contentItem.icon && this.contentItem.iconStyle <= IconType.SYSTEM_ICON ? this.itemHeight = ItemHeight.THIRD_HEIGHT : this.itemHeight = ItemHeight.FOURTH_HEIGHT : this.itemHeight = ItemHeight.FIFTH_HEIGHT;
+    if (null !== this.contentItem) {
+      null === this.contentItem.secondaryText && null === this.contentItem.description ? null === this.contentItem.icon ? this.itemHeight = ItemHeight.FIRST_HEIGHT : this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT : null === this.contentItem.description ? null === this.contentItem.icon || null !== this.contentItem.icon && this.contentItem.iconStyle <= IconType.SYSTEM_ICON ? this.itemHeight = ItemHeight.THIRD_HEIGHT : this.itemHeight = ItemHeight.FOURTH_HEIGHT : this.itemHeight = ItemHeight.FIFTH_HEIGHT;
       ICON_SIZE_MAP.get(this.contentItem.iconStyle) >= this.itemHeight && (this.itemHeight = ICON_SIZE_MAP.get(this.contentItem.iconStyle) + 32)
-    } else void 0 === this.operateItem.image && void 0 === this.operateItem.icon && void 0 === this.operateItem.subIcon || (this.itemHeight = 80)
+    } else null === this.operateItem.image && null === this.operateItem.icon && null === this.operateItem.subIcon || (this.itemHeight = 80)
   }
 
   initialRender() {
@@ -1071,11 +1072,10 @@ export class ComposeListItem extends ViewPU {
       }));
       Flex.onTouch((e => {
         e.type == TouchType.Down && this.canTouch && (this.frontColor = "#1a000000");
-        e.type == TouchType.Up && (this.frontColor = this.isActive ? "#1a0a59f7" : Color.Transparent.toString())
-      }));
-      Flex.onClick((() => {
-        this.isActive = !this.isActive;
-        this.frontColor = this.isActive ? "#1a0a59f7" : Color.Transparent.toString()
+        if (e.type == TouchType.Up) {
+          this.isActive = !this.isActive;
+          this.frontColor = this.isActive ? "#1a0a59f7" : Color.Transparent.toString()
+        }
       }));
       t || Flex.pop();
       ViewStackProcessor.StopGetAccessRecording()
@@ -1083,7 +1083,7 @@ export class ComposeListItem extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       If.create();
-      void 0 === this.contentItem ? this.ifElseBranchUpdateFunction(0, (() => {
+      null === this.contentItem ? this.ifElseBranchUpdateFunction(0, (() => {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           t ? ViewPU.create(new ContentItemStruct(this, {}, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
@@ -1097,7 +1097,7 @@ export class ComposeListItem extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       If.create();
-      void 0 !== this.contentItem ? this.ifElseBranchUpdateFunction(0, (() => {
+      null !== this.contentItem ? this.ifElseBranchUpdateFunction(0, (() => {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           t ? ViewPU.create(new ContentItemStruct(this, {
@@ -1117,7 +1117,7 @@ export class ComposeListItem extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       If.create();
-      void 0 !== this.operateItem ? this.ifElseBranchUpdateFunction(0, (() => {
+      null !== this.operateItem ? this.ifElseBranchUpdateFunction(0, (() => {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           __Common__.create();
@@ -1201,3 +1201,5 @@ export class ComposeListItem extends ViewPU {
     this.updateDirtyElements()
   }
 }
+
+export default { IconType, ComposeListItem };

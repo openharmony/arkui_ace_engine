@@ -36,6 +36,7 @@
 #include "core/common/container.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -114,6 +115,9 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
+            if (textValue->IsUndefined()) {
+                value = "";
+            }
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -158,6 +162,9 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
         } else {
             if (ParseJsString(textValue, text)) {
                 value = text;
+            }
+            if (textValue->IsUndefined()) {
+                value = "";
             }
         }
         auto controllerObj = paramObject->GetProperty("controller");
@@ -479,6 +486,10 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
         return;
     }
     std::string inputFilter;
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
+        return;
+    }
     if (!ParseJsString(info[0], inputFilter)) {
         LOGI("Parse inputFilter failed");
         return;
@@ -531,6 +542,7 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
     }
     if (LessNotEqual(value.Value(), 0.0)) {
         LOGI("dimension value: %{public}f is invalid!", value.Value());
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return;
     }
     TextFieldModel::GetInstance()->SetHeight(value);
@@ -841,6 +853,10 @@ void JSTextField::SetOnClick(const JSCallbackInfo& info)
 void JSTextField::SetCopyOption(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
     auto copyOptions = CopyOptions::None;

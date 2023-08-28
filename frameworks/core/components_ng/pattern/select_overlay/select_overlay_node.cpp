@@ -326,7 +326,8 @@ void SetOptionsAction(const std::vector<RefPtr<FrameNode>>& options)
 } // namespace
 
 SelectOverlayNode::SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
-    : FrameNode("SelectOverlay", ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<SelectOverlayPattern>(info))
+    : FrameNode(V2::SELECT_OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+          MakeRefPtr<SelectOverlayPattern>(info))
 {
     stateFuncs_[FrameNodeStatus::VISIBLE] = &SelectOverlayNode::DispatchVisibleState;
     stateFuncs_[FrameNodeStatus::VISIBLETOGONE] = &SelectOverlayNode::DispatchVisibleToGoneState;
@@ -469,7 +470,9 @@ RefPtr<FrameNode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     info->menuInfo.menuBuilder();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    auto menuNode = MenuView::Create(customNode, -1);
+    // long press no need menuwrapper
+    auto type = info->isUsingMouse ? MenuType::SELECT_OVERLAY_CUSTOM_MENU : MenuType::SELECT_OVERLAY_EXTENSION_MENU;
+    auto menuNode = MenuView::Create(customNode, -1, "", type, MenuParam(), info->isUsingMouse);
     auto eventHub = menuNode->GetEventHub<EventHub>();
     if (eventHub && info->menuCallback.onAppear) {
         eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));
@@ -968,10 +971,7 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
 void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
-    if (info->menuInfo.menuBuilder) {
-        return;
-    }
-    if (menuItemChanged) {
+    if (menuItemChanged && info->menuInfo.menuBuilder == nullptr && selectMenuInner_) {
         selectMenuInner_->Clean();
         selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         if (isExtensionMenu_) {
@@ -1113,6 +1113,16 @@ bool SelectOverlayNode::IsInSelectedOrSelectOverlayArea(const PointF& point)
     }
     if (extensionMenu_ && extensionMenu_->GetGeometryNode()) {
         rects.emplace_back(extensionMenu_->GetGeometryNode()->GetFrameRect() + offset);
+    }
+
+    if (pattern->IsCustomMenu()) {
+        for (auto& child : pattern->GetHost()->GetChildren()) {
+            auto childFrameNode = DynamicCast<FrameNode>(child);
+            if (!childFrameNode) {
+                continue;
+            }
+            rects.emplace_back(childFrameNode->GetGeometryNode()->GetFrameRect() + offset);
+        }
     }
 
     for (const auto& rect : rects) {

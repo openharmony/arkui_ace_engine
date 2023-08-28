@@ -81,11 +81,9 @@ public:
         const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
         auto geometryNode = dirty->GetGeometryNode();
-        auto offset = geometryNode->GetContentOffset();
-        auto size = geometryNode->GetContentSize();
-        if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
-            offset_ = offset;
-            size_ = size;
+        offset_ = geometryNode->GetContentOffset();
+        size_ = geometryNode->GetContentSize();
+        if (!isUserSetResponseRegion_) {
             AddHotZoneRect();
         }
         return true;
@@ -114,6 +112,11 @@ public:
     void SetIsAddToMap(bool isAddToMap)
     {
         isAddToMap_ = isAddToMap;
+    }
+
+    void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
+    {
+        isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -171,6 +174,7 @@ private:
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool isClick_ = false;
     bool isFirstCreated_ = true;
+    bool isUserSetResponseRegion_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

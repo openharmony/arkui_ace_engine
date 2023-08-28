@@ -28,6 +28,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_measure_layout.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -100,10 +101,9 @@ JSRef<JSObject> GenPositionInfo(const RefPtr<NG::LayoutWrapper>& layoutWrapper)
     return position;
 }
 
-JSRef<JSObject> GenSelfLayoutInfo(NG::LayoutWrapper* layoutWrapper)
+JSRef<JSObject> GenSelfLayoutInfo(RefPtr<NG::LayoutProperty> layoutProperty)
 {
     JSRef<JSObject> selfLayoutInfo = JSRef<JSObject>::New();
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
     if (!layoutProperty) {
         return selfLayoutInfo;
     }
@@ -254,7 +254,8 @@ void ViewFunctions::ExecutePlaceChildren(NG::LayoutWrapper* layoutWrapper)
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
 
-    auto selfLayoutInfo = GenSelfLayoutInfo(layoutWrapper);
+    auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutWrapper->GetHostNode()->GetParent());
+    auto selfLayoutInfo = GenSelfLayoutInfo(parentNode->GetLayoutProperty());
     auto childArray = GenPlaceChildrenArray(children);
     auto constraint = GenConstraint(parentConstraint);
 
@@ -278,7 +279,8 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
 
-    auto selfLayoutInfo = GenSelfLayoutInfo(layoutWrapper);
+    auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutWrapper->GetHostNode()->GetParent());
+    auto selfLayoutInfo = GenSelfLayoutInfo(parentNode->GetLayoutProperty());
     auto childArray = GenMeasureChildArray(children, true);
     auto constraint = GenConstraint(parentConstraint);
 
@@ -432,7 +434,7 @@ void ViewFunctions::InitViewFunctions(
             jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
         }
 
-        JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActive");
+        JSRef<JSVal> jsSetActive = jsObject->GetProperty("setActiveInternal");
         if (jsSetActive->IsFunction()) {
             jsSetActive_ = JSRef<JSFunc>::Cast(jsSetActive);
         } else {

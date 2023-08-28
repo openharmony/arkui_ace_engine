@@ -23,7 +23,7 @@ extern const char _binary_editabletitlebar_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_editabletitlebar_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_EditableTitleBar_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_editabletitlebar_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_editabletitlebar_GetABCCode(const char **buf, int *bufl
 /*
  * Module define
  */
-static napi_module editabletitlebarModule = {
+static napi_module EditableTitleBarModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.editabletitlebar",
+    .nm_modname = "arkui.advanced.EditableTitleBar",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -48,7 +48,7 @@ static napi_module editabletitlebarModule = {
 /*
  * Module registerfunction
  */
-extern "C" __attribute__((constructor)) void editabletitlebarRegisterModule(void)
+extern "C" __attribute__((constructor)) void EditableTitleBarRegisterModule(void)
 {
-    napi_module_register(&editabletitlebarModule);
+    napi_module_register(&EditableTitleBarModule);
 }

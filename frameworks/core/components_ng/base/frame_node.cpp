@@ -348,13 +348,10 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->ProcessOffscreenTask();
     node->MarkModifyDone();
     node->UpdateLayoutPropertyFlag();
-    auto layoutWrapper = node->CreateLayoutWrapper();
-    CHECK_NULL_VOID(layoutWrapper);
-    layoutWrapper->SetActive();
-    layoutWrapper->SetRootMeasureNode();
-    layoutWrapper->Measure(node->GetLayoutConstraint());
-    layoutWrapper->Layout();
-    layoutWrapper->MountToHostOnMainThread();
+    node->SetActive();
+    node->isLayoutDirtyMarked_ = true;
+    node->CreateLayoutTask();
+
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
     if (wrapper != nullptr) {
@@ -364,6 +361,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
+    node->SetActive(false);
 }
 
 void FrameNode::InitializePatternAndContext()
@@ -633,6 +631,11 @@ void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configuration
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    if (configurationChange.DirectionOrDpiUpdate) {
+        pattern_->OnDirectionOrDpiConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void FrameNode::OnVisibleChange(bool isVisible)
@@ -672,7 +675,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     SetGeometryNode(dirty->GetGeometryNode());
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    if (geometryTransition != nullptr && geometryTransition->IsRunning()) {
+    if (geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this))) {
         geometryTransition->DidLayout(dirty);
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
@@ -2336,7 +2339,7 @@ void FrameNode::Layout()
 void FrameNode::SyncGeometryNode()
 {
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning();
+    bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
 
     if (!isActive_ && !hasTransition) {
         LOGD("current node is inactive, don't need to render");

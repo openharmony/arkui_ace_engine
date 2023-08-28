@@ -123,6 +123,13 @@ public:
         TestingTypographyProperties::IndexAndAffinity res(1, TestingTypographyProperties::Affinity::PREV);
         return res;
     }
+
+    virtual TestingTypographyProperties::Boundary<size_t> GetWordBoundaryByIndex(size_t offset)
+    {
+        TestingTypographyProperties::Boundary<size_t> range =
+            TestingTypographyProperties::Boundary<size_t>(offset, offset + 1);
+        return range;
+    }
 #endif
 };
 } // namespace OHOS::Ace::Testing

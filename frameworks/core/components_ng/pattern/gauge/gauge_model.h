@@ -40,6 +40,7 @@ public:
     virtual void SetStrokeWidth(const Dimension& strokeWidth) = 0;
     virtual void SetLabelMarkedText(std::string labelTextString) = 0;
     virtual void SetMarkedTextColor(const Color color) = 0;
+    virtual void SetShadowOptions(const NG::GaugeShadowOptions& shadowOptions) = 0;
 
 private:
     static std::unique_ptr<GaugeModel> instance_;

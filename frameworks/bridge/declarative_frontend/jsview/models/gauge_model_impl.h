@@ -33,6 +33,7 @@ public:
     void SetGradientColors(const std::vector<NG::ColorStopArray>& colors, const std::vector<float>& values,
         const NG::GaugeType& type) override
     {}
+    void SetShadowOptions(const NG::GaugeShadowOptions& shadowOptions) override {}
 };
 
 } // namespace OHOS::Ace::Framework

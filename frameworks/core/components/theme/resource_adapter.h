@@ -199,6 +199,11 @@ public:
     {
         return false;
     }
+
+    virtual uint32_t GetResourceLimitKeys() const
+    {
+        return 0;
+    }
 };
 
 } // namespace OHOS::Ace

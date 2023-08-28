@@ -102,7 +102,7 @@ public:
 
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
-    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
+    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};
 
     virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
     virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}

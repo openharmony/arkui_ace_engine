@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,21 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
-
-#include <string>
-
-#include "base/utils/utils.h"
+#define private public
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-std::optional<SizeF> ShapeLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+void MenuWrapperPattern::OnModifyDone() {}
+void MenuWrapperPattern::OnAttachToFrameNode() {}
+bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
-    }
-    return std::nullopt;
+    return true;
 }
-} // namespace OHOS::Ace::NG
+void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info) {}
+void MenuWrapperPattern::CheckAndShowAnimation() {}
+}; // namespace OHOS::Ace::NG

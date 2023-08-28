@@ -1186,7 +1186,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg040, TestSize.Level1)
     EXPECT_EQ(ZERO->children_.size(), 2);
 }
 
-
 /**
  * @tc.name: UINodeTestNg042
  * @tc.desc: Test ui node method
@@ -1217,5 +1216,37 @@ HWTEST_F(UINodeTestNg, UINodeTestNg042, TestSize.Level1)
     child->isDisappearing_ = true;
     parent->RemoveDisappearingChild(child);
     EXPECT_EQ(parent->disappearingChildren_.size(), 1);
+}
+
+/**
+ * @tc.name: UINodeTestNg043
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create some node
+     */
+    auto parent = FrameNode::CreateFrameNode("parent", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", 3, AceType::MakeRefPtr<Pattern>());
+    parent->AddChild(child);
+    /**
+     * @tc.steps: step2. call GetFrameChildByIndex
+     * @tc.expected: return nullptr
+     */
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize.SetWidth(0);
+    parentLayoutConstraint.maxSize.SetHeight(0);
+    PerformanceCheckNodeMap un_Map;
+    un_Map.emplace(0, PerformanceCheckNode());
+    parent->UINode::OnSetCacheCount(3, parentLayoutConstraint);
+    parent->UINode::DoRemoveChildInRenderTree(0, true);
+    parent->UINode::DoRemoveChildInRenderTree(0, false);
+    parent->UINode::DoRemoveChildInRenderTree(5, false);
+    parent->UINode::GetFrameChildByIndex(0, false);
+    EXPECT_FALSE(parent->UINode::GetDisappearingChildById(""));
+    EXPECT_FALSE(parent->UINode::GetFrameChildByIndex(5, false));
 }
 } // namespace OHOS::Ace::NG

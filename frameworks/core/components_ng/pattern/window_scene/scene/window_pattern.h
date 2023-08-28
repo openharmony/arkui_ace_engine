@@ -50,7 +50,6 @@ protected:
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
 
-    void InitContent();
     void CreateStartingNode();
     void CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
 

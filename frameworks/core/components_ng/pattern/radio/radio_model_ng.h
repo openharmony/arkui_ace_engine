@@ -32,6 +32,7 @@ public:
     void SetUncheckedBorderColor(const Color& color) override;
     void SetIndicatorColor(const Color& color) override;
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent) override;
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
 };
 } // namespace OHOS::Ace::NG
 

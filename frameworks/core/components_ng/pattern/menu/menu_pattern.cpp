@@ -17,6 +17,7 @@
 
 #include <stack>
 
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -119,18 +120,6 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<Men
     if (labelChanged) {
         label->MarkModifyDone();
         label->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
-}
-
-void UpdateMenuItemAttrNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty)
-{
-    if (menuProperty->GetMenuWidth().has_value()) {
-        auto rootWidth = PipelineContext::GetCurrentRootWidth();
-        auto menuWidth = menuProperty->GetMenuWidthValue().ConvertToPxWithSize(rootWidth);
-        bool isOK = LessNotEqual(MIN_MENU_WIDTH.ConvertToPx(), menuWidth) && LessNotEqual(menuWidth, rootWidth);
-        if (isOK && !itemProperty->GetMenuWidth().has_value()) {
-            itemProperty->UpdateMenuWidth(Dimension(menuWidth, DimensionUnit::PX));
-        }
     }
 }
 } // namespace
@@ -247,7 +236,8 @@ bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
     if (event.action != KeyAction::DOWN || IsMultiMenu()) {
         return false;
     }
-    if ((event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_ESCAPE) && IsSubMenu()) {
+    if ((event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_ESCAPE) &&
+        (IsSubMenu() || IsSelectOverlaySubMenu())) {
         auto menuWrapper = GetMenuWrapper();
         CHECK_NULL_RETURN(menuWrapper, true);
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
@@ -291,7 +281,6 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
             auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
             CHECK_NULL_VOID(itemPattern);
             UpdateMenuItemTextNode(layoutProperty, itemProperty, itemPattern);
-            UpdateMenuItemAttrNode(layoutProperty, itemProperty);
         } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
             auto itemGroupNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(itemGroupNode);
@@ -348,15 +337,20 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 
 void MenuPattern::HideMenu(bool isMenuOnTouch) const
 {
+    auto wrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(wrapper);
+    if (wrapper->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
+        return;
+    }
     if (IsContextMenu()) {
-        SubwindowManager::GetInstance()->HideMenuNG(GetMenuWrapper(), targetId_);
+        SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->HideMenu(GetMenuWrapper(), targetId_, isMenuOnTouch);
+    overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
     LOGI("MenuPattern closing menu %{public}d", targetId_);
 }
 
@@ -390,7 +384,7 @@ RefPtr<FrameNode> MenuPattern::GetMenuWrapper() const
     CHECK_NULL_RETURN(host, nullptr);
     auto parent = host->GetParent();
     while (parent) {
-        if (parent->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        if (parent->GetTag() == V2::MENU_WRAPPER_ETS_TAG || parent->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(parent);
         }
         parent = parent->GetParent();
@@ -524,6 +518,7 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
         case MenuType::DESKTOP_MENU:
             return MakeRefPtr<MultiMenuLayoutAlgorithm>();
         case MenuType::SUB_MENU:
+        case MenuType::SELECT_OVERLAY_SUB_MENU:
             return MakeRefPtr<SubMenuLayoutAlgorithm>();
         default:
             return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
@@ -646,10 +641,10 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     radius.SetRadius(defaultRadius);
     if (menuProp->GetBorderRadius().has_value()) {
         auto borderRadius = menuProp->GetBorderRadiusValue();
-        auto topRadius = borderRadius.radiusTopLeft.value_or(Dimension())
-            + borderRadius.radiusTopRight.value_or(Dimension());
-        auto bottomRadius = borderRadius.radiusBottomLeft.value_or(Dimension())
-            + borderRadius.radiusBottomRight.value_or(Dimension());
+        auto topRadius =
+            borderRadius.radiusTopLeft.value_or(Dimension()) + borderRadius.radiusTopRight.value_or(Dimension());
+        auto bottomRadius =
+            borderRadius.radiusBottomLeft.value_or(Dimension()) + borderRadius.radiusBottomRight.value_or(Dimension());
         auto menuRadius = std::max(topRadius.ConvertToPx(), bottomRadius.ConvertToPx());
         auto geometryNode = dirty->GetGeometryNode();
         CHECK_NULL_RETURN(geometryNode, false);
@@ -661,7 +656,6 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     renderContext->UpdateBorderRadius(radius);
     return true;
 }
-
 
 RefPtr<MenuPattern> MenuPattern::GetMainMenuPattern() const
 {
@@ -751,5 +745,10 @@ void MenuPattern::OnColorConfigurationUpdate()
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     host->SetNeedCallChildrenUpdate(false);
+}
+void MenuPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(
+        std::string("MenuType: ").append(std::to_string(static_cast<int32_t>(GetMenuType()))));
 }
 } // namespace OHOS::Ace::NG

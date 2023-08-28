@@ -644,6 +644,9 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     };
 
     auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active) -> void {
+        if (!AceApplicationInfo::GetInstance().IsDelayedUpdateOnInactive()) {
+            return;
+        }
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());

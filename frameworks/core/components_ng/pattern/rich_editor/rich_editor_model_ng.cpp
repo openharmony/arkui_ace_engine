@@ -37,6 +37,7 @@ void RichEditorModelNG::Create()
     richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
 
     richEditorPattern->InitSurfaceChangedCallback();
+    richEditorPattern->InitSurfacePositionChangedCallback();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -121,7 +122,7 @@ void RichEditorModelNG::SetCopyOption(CopyOptions& copyOptions)
 }
 
 void RichEditorModelNG::BindSelectionMenu(
-    RichEditorType& editorType, ResponseType& type, std::function<void()>& buildFunc, MenuParam& menuParam)
+    RichEditorType& editorType, ResponseType& type, std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

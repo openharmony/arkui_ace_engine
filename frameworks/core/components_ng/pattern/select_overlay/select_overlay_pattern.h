@@ -23,7 +23,7 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/event/click_event.h"
-#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
@@ -32,11 +32,13 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT SelectOverlayPattern : public PopupBasePattern {
-    DECLARE_ACE_TYPE(SelectOverlayPattern, PopupBasePattern);
+class ACE_EXPORT SelectOverlayPattern : public MenuWrapperPattern {
+    DECLARE_ACE_TYPE(SelectOverlayPattern, MenuWrapperPattern);
 
 public:
-    explicit SelectOverlayPattern(std::shared_ptr<SelectOverlayInfo> info) : info_(std::move(info)) {}
+    explicit SelectOverlayPattern(std::shared_ptr<SelectOverlayInfo> info)
+        : MenuWrapperPattern(-1), info_(std::move(info))
+    {}
     ~SelectOverlayPattern() override = default;
 
     bool IsMeasureBoundary() const override
@@ -136,13 +138,18 @@ public:
     {
         closedByGlobalTouchEvent_ = closedByGlobalTouch;
     }
-	
+
     bool IsMenuShow();
     bool IsHandleShow();
 
     void SetHasShowAnimation(bool animation)
     {
         hasShowAnimation_ = animation;
+    }
+
+    bool IsCustomMenu()
+    {
+        return info_ && info_->menuInfo.menuBuilder != nullptr;
     }
 
 private:
@@ -163,6 +170,7 @@ private:
     void StartHiddenHandleTask();
     void StopHiddenHandleTask();
     void HiddenHandle();
+    void AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion);
 
     std::shared_ptr<SelectOverlayInfo> info_;
     RefPtr<PanEvent> panEvent_;

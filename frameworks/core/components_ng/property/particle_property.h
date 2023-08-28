@@ -303,7 +303,7 @@ public:
         return animations_;
     }
 
-    void SetNullStr(const std::string& noneValue)
+    void SetNullStr(const std::string noneValue)
     {
         noneValue_ = noneValue;
     }
@@ -549,7 +549,7 @@ public:
         return type_;
     }
 
-    void SetUpdateType(UpdaterType& type)
+    void SetUpdateType(UpdaterType type)
     {
         type_ = type;
     }

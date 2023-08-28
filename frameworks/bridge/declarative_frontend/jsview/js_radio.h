@@ -29,6 +29,7 @@ public:
     static void JsHeight(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsRadioStyle(const JSCallbackInfo& info);
+    static void JsResponseRegion(const JSCallbackInfo& info);
     static void JsWidth(const JSRef<JSVal>& jsValue);
     static void JsHeight(const JSRef<JSVal>& jsValue);
     static void JsSize(const JSCallbackInfo& args);

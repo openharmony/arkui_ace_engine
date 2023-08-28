@@ -261,8 +261,7 @@ void TextPickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
     auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
     auto renderContext = buttonNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(pressColor);
-    buttonNode->MarkModifyDone();
-    buttonNode->MarkDirtyNode();
+    buttonNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextPickerColumnPattern::PlayPressAnimation(const Color& pressColor)

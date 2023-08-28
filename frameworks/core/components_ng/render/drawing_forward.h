@@ -35,6 +35,7 @@ class Image;
 class ColorSpace;
 class Picture;
 struct BitmapFormat;
+class ImageFilter;
 } // namespace Drawing
 } // namespace OHOS::Rosen
 namespace OHOS::Ace {
@@ -54,6 +55,7 @@ using RSImage = Rosen::Drawing::Image;
 using RSColorSpace = Rosen::Drawing::ColorSpace;
 using RSPicture = Rosen::Drawing::Picture;
 using RSBitmapFormat = Rosen::Drawing::BitmapFormat;
+using RSImageFilter = Rosen::Drawing::ImageFilter;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

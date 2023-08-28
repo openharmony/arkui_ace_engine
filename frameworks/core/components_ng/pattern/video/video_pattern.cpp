@@ -271,6 +271,10 @@ bool VideoPattern::SetSourceForMediaPlayer()
 
 void VideoPattern::RegisterMediaPlayerEvent()
 {
+    if (src_.empty()) {
+        LOGD("Video src is empty, RegisterMediaPlayerEvent return");
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
@@ -487,7 +491,6 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     currentPos_ = currentPos;
     isInitialState_ = currentPos != 0 ? false : isInitialState_;
     isPlaying_ = mediaPlayer_->IsPlaying();
-
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
 
@@ -521,11 +524,19 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     UpdateSpeed();
     UpdateMuted();
 
+    checkNeedAutoPlay();
+}
+
+void VideoPattern::checkNeedAutoPlay()
+{
     if (isStop_) {
         isStop_ = false;
         Start();
     }
-
+    if (dragEndAutoPlay_) {
+        dragEndAutoPlay_ = false;
+        Start();
+    }
     if (autoPlay_) {
         Start();
     }
@@ -1314,7 +1325,7 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
 void VideoPattern::OnSliderChange(float posTime, int32_t mode)
 {
     LOGD("posTime: %{public}lf, mode: %{public}d", posTime, mode);
-    SetCurrentTime(posTime, OHOS::Ace::SeekMode::SEEK_CLOSEST);
+    SetCurrentTime(posTime, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);

@@ -33,7 +33,6 @@ void NavRouterPattern::OnModifyDone()
         auto eventHub = pattern->GetEventHub<NavRouterEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestinationChangeEvent();
-        eventHub->FireChangeEvent(true);
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);

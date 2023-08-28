@@ -55,9 +55,9 @@ public:
     static RefPtr<GridColumnInfo> GetInfoByType(const GridColumnType& type);
     // width is use px unit.
     SystemGridInfo GetSystemGridInfo(const GridTemplateType& templateType, double width);
-    double GetScreenWidth() const
+    double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const
     {
-        return ScreenSystemManager::GetInstance().GetScreenWidth();
+        return ScreenSystemManager::GetInstance().GetScreenWidth(pipeline);
     }
 
     double GetDipScale() const

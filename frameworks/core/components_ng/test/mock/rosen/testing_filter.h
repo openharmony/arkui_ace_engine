@@ -21,6 +21,7 @@
 #include "testing_color.h"
 #include "testing_color_filter.h"
 #include "testing_mask_filter.h"
+#include "testing_image_filter.h"
 
 namespace OHOS::Ace::Testing {
 class TestingFilter {
@@ -36,6 +37,8 @@ public:
     };
 
     virtual void SetMaskFilter(std::shared_ptr<TestingMaskFilter> /* maskFilter */) {}
+
+    virtual void SetImageFilter(std::shared_ptr<TestingImageFilter> /* imageFilter */) {}
 
     virtual void SetFilterQuality(FilterQuality fq) {}
 

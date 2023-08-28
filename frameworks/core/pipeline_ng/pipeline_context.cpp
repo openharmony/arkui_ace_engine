@@ -338,14 +338,6 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
     needRenderNode_.insert(node);
 }
 
-void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange)
-{
-    LOGI("NotifyConfigurationChange");
-    auto rootNode = GetRootElement();
-    rootNode->UpdateConfigurationUpdate(configurationChange);
-    PipelineBase::NotifyConfigurationChange(configurationChange);
-}
-
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
@@ -998,9 +990,25 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 {
     auto lastPage = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(lastPage, nullptr);
-    auto navigationNode = lastPage->FindChildNodeOfClass<NavigationGroupNode>();
-    CHECK_NULL_RETURN_NOLOG(navigationNode, nullptr);
-    return navigationNode->GetNavDestinationNodeToHandleBack();
+    return FindNavDestinationNodeToHandleBack(lastPage);
+}
+
+RefPtr<FrameNode> PipelineContext::FindNavDestinationNodeToHandleBack(const RefPtr<UINode>& node)
+{
+    const auto& children = node->GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+
+        auto target = FindNavDestinationNodeToHandleBack(child);
+        if (target) {
+            return target;
+        }
+    }
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(node);
+    if (navigationGroupNode) {
+        return navigationGroupNode->GetNavDestinationNodeToHandleBack();
+    }
+    return nullptr;
 }
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive)
@@ -1670,16 +1678,20 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     containerPattern->SetAppIcon(icon);
 }
 
-void PipelineContext::FlushReload()
+void PipelineContext::FlushReload(const OnConfigurationChange& configurationChange)
 {
     LOGI("PipelineContext::FlushReload.");
     AnimationOption option;
     const int32_t duration = 400;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        if (configurationChange.IsNeedUpdate()) {
+            auto rootNode = pipeline->GetRootElement();
+            rootNode->UpdateConfigurationUpdate(configurationChange);
+        }
         CHECK_NULL_VOID(pipeline->stageManager_);
         pipeline->SetIsReloading(true);
         pipeline->stageManager_->ReloadStage();

@@ -15,6 +15,7 @@ group("advanced_ui_component") {
   deps = [
     "composelistitem/interfaces:composelistitem",
     "composetitlebar/interfaces:composetitlebar",
+    "counter/interfaces:counter",
     "dialog/interfaces:dialog",
     "editabletitlebar/interfaces:editabletitlebar",
     "filter/interfaces:filter",

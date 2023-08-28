@@ -245,8 +245,8 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto windowManager = context->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     auto mode = windowManager->GetWindowMode();
-    auto sizeType = GridContainerUtils::ProcessGridSizeType(
-        layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()), mode);
+    auto sizeType = GridContainerUtils::ProcessGridSizeType(layoutProperty->GetBreakPointsValue(),
+        Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContext());
     if (hostLayoutProperty->GetSizeTypeValue(V2::GridSizeType::UNDEFINED) != sizeType) {
         auto sizeTypeString = ConvertSizeTypeToString(sizeType);
         layoutWrapper->GetHostNode()->GetEventHub<GridRowEventHub>()->FireChangeEvent(sizeTypeString);

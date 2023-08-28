@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -64,6 +65,14 @@ void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("color", GetColorString().c_str());
 }
 
+void BlankPattern::DumpInfo()
+{
+    auto blankProperty = GetLayoutProperty<BlankLayoutProperty>();
+    CHECK_NULL_VOID(blankProperty);
+    auto blankMin = blankProperty->GetMinSize().value_or(Dimension());
+    DumpLog::GetInstance().AddDesc(std::string("min: ").append(blankMin.ToString().c_str()));
+}
+
 void BlankPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
@@ -88,6 +97,7 @@ void BlankPattern::BeforeCreateLayoutWrapper()
         crossAxisHasSize = (isParentRow && calcConstraint->selfIdealSize.value().Height().has_value()) ||
                            (!isParentRow && calcConstraint->selfIdealSize.value().Width().has_value());
     }
+    LOGD("Main axis has size %{public}d, cross has size %{public}d", mainAxisHasSize, crossAxisHasSize);
     if (!crossAxisHasSize) {
         layoutProp->UpdateAlignSelf(FlexAlign::STRETCH);
     }
@@ -98,9 +108,15 @@ void BlankPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID_NOLOG(layoutProp->GetMinSize().has_value());
     auto blankMin = layoutProp->GetMinSize().value_or(Dimension());
     if (isParentRow) {
-        layoutProp->UpdateCalcMinSize(CalcSize(CalcLength(blankMin), std::nullopt));
+        if (!(calcConstraint && calcConstraint->minSize.has_value() &&
+                calcConstraint->minSize.value().Width().has_value())) {
+            layoutProp->UpdateCalcMinSize(CalcSize(CalcLength(blankMin), std::nullopt));
+        }
     } else {
-        layoutProp->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(blankMin)));
+        if (!(calcConstraint && calcConstraint->minSize.has_value() &&
+                calcConstraint->minSize.value().Height().has_value())) {
+            layoutProp->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(blankMin)));
+        }
     }
 }
 

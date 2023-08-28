@@ -72,11 +72,11 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
     if (layoutProperty->GetPanelType() != PanelType::CUSTOM) {
-        childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+        childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height()));
     }
-    childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height()));
     childLayoutConstraint.parentIdealSize =
-        OptionalSizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+        OptionalSizeF(width, static_cast<float>(idealSize.Height()));
     childLayoutConstraint.percentReference = childLayoutConstraint.maxSize;
     layoutConstraint->percentReference = childLayoutConstraint.maxSize;
     auto colunmNodeWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::COLUMN_ETS_TAG);
@@ -103,10 +103,13 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(columnWrapper);
     auto columnGeometryNode = columnWrapper->GetGeometryNode();
     CHECK_NULL_VOID(columnGeometryNode);
-
-    auto left = geometryNode->GetPadding()->left.value_or(0.0f);
-    auto right = geometryNode->GetPadding()->right.value_or(0.0f);
-    auto childOffsetX = static_cast<float>((idealSize_.Width() - left - right - maxWidth_) / HALF_VALUS);
+    auto leftPadding = 0.0f;
+    auto rightPadding = 0.0f;
+    if (geometryNode->GetPadding()) {
+        leftPadding = geometryNode->GetPadding()->left.value_or(0.0f);
+        rightPadding = geometryNode->GetPadding()->right.value_or(0.0f);
+    }
+    auto childOffsetX = static_cast<float>((idealSize_.Width() - leftPadding - rightPadding - maxWidth_) / HALF_VALUS);
     fullHeight_ =
         layoutProperty->GetFullHeight().value_or(Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()));
     halfHeight_ = layoutProperty->GetHalfHeight().value_or(

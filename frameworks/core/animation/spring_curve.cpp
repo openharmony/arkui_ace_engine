@@ -43,7 +43,7 @@ void SpringCurve::SetEndPosition(float endPosition, float startVelocity)
     currentVelocity_ = startVelocity;
     currentPosition_ = startPosition_;
     velocityThreshold_ = valueThreshold_ * VELOCITY_THRESHOLD_RATIO;
-    solution_ = SpringModel::Build(endPosition_, startVelocity, property_);
+    solution_ = SpringModel::Build(startPosition_ - endPosition_, startVelocity, property_);
     if (!solution_) {
         LOGW("Create springCurve error, %{public}s", ToString().c_str());
         return;
@@ -57,7 +57,7 @@ void SpringCurve::InitEstimateDuration()
     float velocity = 0.0f;
     float time = 1.0f / DEFAULT_ESTIMATE_STEPS;
     for (int32_t i = 1; i < DEFAULT_ESTIMATE_STEPS; ++i) {
-        position = endPosition_ - solution_->Position(time * i);
+        position = endPosition_ + solution_->Position(time * i);
         velocity = solution_->Velocity(time * i);
         if (NearEqual(position, endPosition_, valueThreshold_) && NearZero(velocity, velocityThreshold_)) {
             estimateDuration_ = time * i;
@@ -73,7 +73,7 @@ float SpringCurve::MoveInternal(float time)
         return FRACTION_PARAMETER_MAX;
     }
     CHECK_NULL_RETURN(solution_, endPosition_);
-    currentPosition_ = endPosition_ - solution_->Position(time * estimateDuration_);
+    currentPosition_ = endPosition_ + solution_->Position(time * estimateDuration_);
     currentVelocity_ = solution_->Velocity(time * estimateDuration_);
     if (NearEqual(currentPosition_, endPosition_, valueThreshold_) &&
         NearZero(currentVelocity_, velocityThreshold_)) {

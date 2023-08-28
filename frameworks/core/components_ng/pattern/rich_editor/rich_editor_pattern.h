@@ -41,6 +41,7 @@
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
+struct TextConfig;
 } // namespace OHOS::MiscServices
 #endif
 #endif
@@ -49,15 +50,18 @@ namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
 
+constexpr float CARET_WIDTH = 1.5f;
+constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
+
 struct SelectionMenuParams {
     RichEditorType type;
     std::function<void()> buildFunc;
-    std::function<void()> onAppear;
+    std::function<void(int32_t, int32_t)> onAppear;
     std::function<void()> onDisappear;
     ResponseType responseType;
 
-    SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc, std::function<void()> _onAppear,
-        std::function<void()> _onDisappear, ResponseType _responseType)
+    SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc,
+        std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear, ResponseType _responseType)
         : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
           responseType(_responseType)
     {}
@@ -96,6 +100,9 @@ public:
         }
         if (!richEditorOverlayModifier_) {
             richEditorOverlayModifier_ = MakeRefPtr<RichEditorOverlayModifier>();
+        }
+        if (isCustomFont_) {
+            richEditorContentModifier_->SetIsCustomFont(true);
         }
         return MakeRefPtr<RichEditorPaintMethod>(
             WeakClaim(this), paragraph_, baselineOffset_, richEditorContentModifier_, richEditorOverlayModifier_);
@@ -200,6 +207,7 @@ public:
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
+    void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
@@ -210,7 +218,7 @@ public:
         customKeyboardBulder_ = keyboardBuilder;
     }
     void BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>& menuBuilder,
-        std::function<void()>& onAppear, std::function<void()>& onDisappear)
+        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear)
     {
         selectionMenuParams_ =
             std::make_shared<SelectionMenuParams>(richEditorType, menuBuilder, onAppear, onDisappear, type);
@@ -277,11 +285,14 @@ private:
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     void OnHover(bool isHover);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
+    void UpdateCaretInfoToController();
 #if defined(ENABLE_STANDARD_INPUT)
     bool EnableStandardInput(bool needShowSoftKeyboard);
+    std::optional<MiscServices::TextConfig> GetMiscTextConfig();
 #else
     bool UnableStandardInput(bool isFocusViewChanged);
 #endif
+
     bool HasConnection() const;
     bool CloseKeyboard(bool forceClose) override;
     void CalcInsertValueObj(TextInsertValueInfo& info);

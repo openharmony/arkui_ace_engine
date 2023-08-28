@@ -56,6 +56,7 @@ void TextPattern::OnAttachToFrameNode()
         host->GetRenderContext()->UpdateClipEdge(true);
     }
     InitSurfaceChangedCallback();
+    InitSurfacePositionChangedCallback();
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID_NOLOG(theme);
     host->SetDraggable(theme->GetDraggable());
@@ -96,7 +97,6 @@ void TextPattern::CloseSelectOverlay(bool animation)
 
 void TextPattern::ResetSelection()
 {
-    showSelectOverlay_ = false;
     if (textSelector_.IsValid()) {
         textSelector_.Update(-1, -1);
         auto host = GetHost();
@@ -120,7 +120,6 @@ void TextPattern::InitSelection(const Offset& pos)
 {
     CHECK_NULL_VOID(paragraph_);
     int32_t extend = paragraph_->GetHandlePositionForClick(pos);
-#ifndef USE_GRAPHIC_TEXT_GINE
     int32_t start = 0;
     int32_t end = 0;
     if (!paragraph_->GetWordBoundary(extend, start, end)) {
@@ -129,11 +128,6 @@ void TextPattern::InitSelection(const Offset& pos)
             static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
     }
     textSelector_.Update(start, end);
-#else
-    int32_t extendEnd =
-        std::min(static_cast<int32_t>(GetWideText().length()) + imageCount_, extend + GetGraphemeClusterLength(extend));
-    textSelector_.Update(extend, extendEnd);
-#endif
 }
 
 OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight)
@@ -143,8 +137,8 @@ OffsetF TextPattern::CalcCursorOffsetByPosition(int32_t position, float& selectL
     auto rect = host->GetGeometryNode()->GetFrameRect();
     CHECK_NULL_RETURN(paragraph_, OffsetF(0.0f, 0.0f));
     CaretMetrics metrics;
-    auto computeSuccess = paragraph_->ComputeOffsetForCaretUpstream(position, metrics) ||
-                          paragraph_->ComputeOffsetForCaretDownstream(position, metrics);
+    auto computeSuccess = paragraph_->ComputeOffsetForCaretDownstream(position, metrics) ||
+                          paragraph_->ComputeOffsetForCaretUpstream(position, metrics);
     if (!computeSuccess) {
         LOGW("Get caret offset failed, set it to text tail");
         return { rect.Width(), 0.0f };
@@ -210,7 +204,6 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-    showSelectOverlay_ = true;
     InitSelection(textOffset);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
@@ -368,8 +361,6 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         CHECK_NULL_VOID(pattern);
         if (closedByGlobalEvent) {
             pattern->ResetSelection();
-        } else {
-            pattern->showSelectOverlay_ = false;
         }
     };
 
@@ -945,7 +936,7 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
 
 bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (showSelectOverlay_) {
+    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
@@ -1037,9 +1028,6 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
-
-            // Register callback for fonts.
-            FontRegisterCallback(spanNode);
         } else if (current->GetTag() == V2::IMAGE_ETS_TAG) {
             imageCount_++;
             AddChildSpanItem(current);
@@ -1051,26 +1039,6 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
     }
 }
 
-void TextPattern::FontRegisterCallback(RefPtr<SpanNode> spanNode)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto callback = [span = AceType::WeakClaim(AceType::RawPtr(spanNode))] {
-        auto node = span.Upgrade();
-        if (node) {
-            node->RequestTextFlushDirty();
-        }
-    };
-    auto fontManager = pipelineContext->GetFontManager();
-    auto fontFamilies = spanNode->GetFontFamily();
-    if (fontManager && fontFamilies.has_value()) {
-        for (const auto& familyName : fontFamilies.value()) {
-            fontManager->RegisterCallbackNG(spanNode, familyName, callback);
-        }
-    }
-}
 
 void TextPattern::GetGlobalOffset(Offset& offset)
 {
@@ -1120,6 +1088,25 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
         newWidth, newHeight, prevWidth, prevHeight);
     CloseSelectOverlay();
     ResetSelection();
+}
+
+void TextPattern::InitSurfacePositionChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfacePositionChangedCallback()) {
+        auto callbackId =
+            pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t posX, int32_t posY) {
+                auto pattern = weak.Upgrade();
+                if (pattern) {
+                    pattern->HandleSurfacePositionChanged(posX, posY);
+                }
+            });
+        LOGI("Add position changed callback id %{public}d", callbackId);
+        UpdateSurfacePositionChangedCallbackId(callbackId);
+    }
 }
 
 void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)

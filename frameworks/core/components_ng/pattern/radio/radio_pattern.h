@@ -114,6 +114,11 @@ public:
         prePageId_ = pageId;
     }
 
+    void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
+    {
+        isUserSetResponseRegion_ = isUserSetResponseRegion;
+    }
+
     FocusPattern GetFocusPattern() const override;
 
     void UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode);
@@ -131,6 +136,7 @@ public:
     }
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -176,6 +182,7 @@ private:
     bool isGroupChanged_ = false;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
     bool isOnAnimationFlag_ = false;
+    bool isUserSetResponseRegion_ = false;
 
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);

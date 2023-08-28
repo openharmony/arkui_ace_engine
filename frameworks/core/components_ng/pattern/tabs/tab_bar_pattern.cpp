@@ -1080,7 +1080,8 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     Color color = pressColor;
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     if (color == Color::TRANSPARENT && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && index == indicator_ &&
-        selectedModes_[index] == SelectedMode::BOARD && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
+        selectedModes_[index] == SelectedMode::BOARD &&
+        layoutProperty->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         color = indicatorStyles_[index].color;
     }
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), selectedIndex = index, color = color]() {
@@ -1548,7 +1549,7 @@ float TabBarPattern::CalculateFrontChildrenMainSize(int32_t indicator)
         auto childFrameSize = childGeometryNode->GetMarginFrameSize();
         frontChildrenMainSize += childFrameSize.MainSize(axis_);
     }
-    return frontChildrenMainSize;
+    return indicator == 0 ? 0.0f : frontChildrenMainSize;
 }
 
 float TabBarPattern::CalculateBackChildrenMainSize(int32_t indicator)
@@ -1564,7 +1565,7 @@ float TabBarPattern::CalculateBackChildrenMainSize(int32_t indicator)
         auto childFrameSize = childGeometryNode->GetMarginFrameSize();
         backChildrenMainSize += childFrameSize.MainSize(axis_);
     }
-    return backChildrenMainSize;
+    return indicator == childCount - 1 ? 0.0f : backChildrenMainSize;
 }
 
 void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)

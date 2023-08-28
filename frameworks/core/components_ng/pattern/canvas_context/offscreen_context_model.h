@@ -27,6 +27,7 @@ public:
     virtual ~OffscreenContextModel() = default;
 
     virtual RefPtr<AceType> CreateOffscreenPattern(int width, int height) = 0;
+    virtual bool IsSucceed(RefPtr<AceType> offscreenPattern) = 0;
 
 private:
     static std::unique_ptr<OffscreenContextModel> instance_;

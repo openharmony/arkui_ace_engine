@@ -186,7 +186,7 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(target.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, target, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, target, true);
             return;
         }
     }
@@ -238,7 +238,7 @@ void PageRouterManager::ReplaceNamedRoute(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(target.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, target, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, target, false, true, false);
             return;
         }
     }
@@ -636,7 +636,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, info, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
     }
@@ -716,7 +716,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, info, false);
+            MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
     }
@@ -965,7 +965,7 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
 void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& pageNode, const RouterPageInfo& target,
     bool needHideLast, bool forceShowCurrent, bool needTransition)
 {
-    LOGD("MovePageToFront to index: %{public}d", index);
+    LOGI("MovePageToFront to index: %{public}d", index);
     if (target.errorCallback != nullptr) {
         target.errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }

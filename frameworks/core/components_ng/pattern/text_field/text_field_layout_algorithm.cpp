@@ -147,7 +147,6 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 layoutConstraint->minSize.Width());
         frameSize.SetWidth(width);
     }
-    frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     if (layoutConstraint->maxSize.Height() < layoutConstraint->minSize.Height()) {
         frameSize.SetHeight(layoutConstraint->minSize.Height());
     }
@@ -213,6 +212,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (contentModifier) {
         SetPropertyToModifier(textStyle, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
+        contentModifier->SetFontReady(false);
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
@@ -242,7 +242,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         // for InlineStyle, max width is content width with safe boundary.
         float inlineBoxWidth = 0.0f;
         auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2 + INLINE_SAFE_BOUNDARY_VALUE;
-        if (pattern->IsSelected()) {
+        if (pattern->IsFocus()) {
             inlineBoxWidth = pattern->GetPreviewWidth() < layoutConstraint->maxSize.Width()
                                  ? (pattern->GetPreviewWidth() + safeBoundary)
                                  : (layoutConstraint->maxSize.Width() - safeBoundary);
@@ -296,11 +296,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         preferredHeight = pattern->PreferredLineHeight();
     }
 #ifndef USE_GRAPHIC_TEXT_GINE // support sigleline
-    if (isInlineStyle && pattern->IsSelected()) {
+    if (isInlineStyle && pattern->IsFocus()) {
         pattern->SetSingleLineHeight(preferredHeight);
     }
 #else // support multi-line
-    if (isInlineStyle && pattern->IsSelected() && paragraph_->GetLineCount() != 0) {
+    if (isInlineStyle && pattern->IsFocus() && paragraph_->GetLineCount() != 0) {
         pattern->SetSingleLineHeight(preferredHeight / paragraph_->GetLineCount());
     }
 #endif
@@ -315,7 +315,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             (textContent.empty() || !showPlaceHolder) ? preferredHeight : static_cast<float>(paragraph_->GetHeight());
         auto useHeight =
             static_cast<float>(paragraphHeight + (counterParagraph_ ? counterParagraph_->GetHeight() : 0.0f));
-        if (isInlineStyle && pattern->IsSelected()) {
+        if (isInlineStyle && pattern->IsFocus()) {
             idealHeight = pattern->GetSingleLineHeight() *
                           textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -426,6 +426,9 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft() + pattern->GetBorderLeft();
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            textRectOffsetX = pattern->GetPaddingLeft();
+        }
         auto isEmptyTextEditValue = pattern->GetTextEditingValue().text.empty();
         if (!isEmptyTextEditValue) {
             switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
@@ -560,9 +563,8 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
         auto pattern = frameNode->GetPattern<TextFieldPattern>();
         CHECK_NULL_VOID(pattern);
         auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
-        if (modifier) {
-            modifier->SetFontReady(true);
-        }
+        CHECK_NULL_VOID(modifier);
+        modifier->SetFontReady(true);
     };
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -575,16 +577,15 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
+        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont) {
             auto pattern = frameNode->GetPattern<TextFieldPattern>();
             CHECK_NULL_VOID(pattern);
+            pattern->SetIsCustomFont(true);
             auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
-            if (modifier) {
-                modifier->SetIsCustomFont(true);
-                modifier->SetFontReady(false);
-            }
+            CHECK_NULL_VOID(modifier);
+            modifier->SetIsCustomFont(true);
         }
-        fontManager->AddVariationNodeNG(frameNode);
     }
 }
 
@@ -696,6 +697,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
 #else
     auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    if (fontCollection == nullptr) {
+        LOGE("fontCollection is nullptr");
+        return;
+    }
     auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     for (size_t i = 0; i < contents.size(); i++) {
@@ -750,6 +755,10 @@ void TextFieldLayoutAlgorithm::CreateCounterParagraph(
     paraStyle.textAlign = ToRSTextAlign(TextAlign::END);
     paraStyle.maxLines = COUNTER_TEXT_MAXLINE;
     auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    if (fontCollection == nullptr) {
+        LOGE("fontCollection is nullptr");
+        return;
+    }
     auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), countTextStyle));
@@ -784,6 +793,10 @@ void TextFieldLayoutAlgorithm::CreateErrorParagraph(const std::string& content, 
     paraStyle.fontSize = errorTextStyle.GetFontSize().ConvertToPx();
     paraStyle.textAlign = ToRSTextAlign(TextAlign::START);
     auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    if (fontCollection == nullptr) {
+        LOGE("fontCollection is nullptr");
+        return;
+    }
     auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), errorTextStyle));

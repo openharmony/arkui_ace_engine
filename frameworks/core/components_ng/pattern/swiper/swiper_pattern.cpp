@@ -254,6 +254,13 @@ void SwiperPattern::OnModifyDone()
         }
     };
     swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
+
+    if (IsAutoPlay()) {
+        StartAutoPlay();
+    } else {
+        translateTask_.Cancel();
+    }
+
     SetAccessibilityAction();
 }
 
@@ -293,11 +300,6 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     if (mainSizeIsMeasured_ && isNeedResetPrevMarginAndNextMargin_) {
         layoutProperty->UpdatePrevMarginWithoutMeasure(0.0_px);
         layoutProperty->UpdateNextMarginWithoutMeasure(0.0_px);
-    }
-    if (IsAutoPlay()) {
-        StartAutoPlay();
-    } else {
-        translateTask_.Cancel();
     }
 }
 
@@ -1389,10 +1391,6 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         return;
     }
 
-    if (!IsOutOfIndicatorZone(dragPoint)) {
-        return;
-    }
-
     UpdateCurrentOffset(static_cast<float>(mainDelta));
     UpdateItemRenderGroup(true);
 }
@@ -2375,25 +2373,6 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
     return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
-bool SwiperPattern::IsOutOfIndicatorZone(const PointF& dragPoint)
-{
-    if (!HasIndicatorNode() || !IsShowIndicator() || (GetIndicatorType() != SwiperIndicatorType::DOT)) {
-        return true;
-    }
-
-    auto swiperNode = GetHost();
-    CHECK_NULL_RETURN(swiperNode, true);
-    auto indicatorNode = swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(GetIndicatorId()));
-    CHECK_NULL_RETURN(indicatorNode, true);
-    auto indicatorFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode);
-    CHECK_NULL_RETURN(indicatorFrameNode, true);
-    auto geometryNode = indicatorFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, true);
-
-    auto hotRegion = geometryNode->GetFrameRect();
-    return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
-}
-
 void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
 {
     CHECK_NULL_VOID(indicatorNode);
@@ -2534,7 +2513,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
 
 bool SwiperPattern::NeedAutoPlay() const
 {
-    bool reachEnd = GetLoopIndex(currentIndex_) >= TotalCount() - 1 && !IsLoop();
+    bool reachEnd = GetLoopIndex(CurrentIndex()) >= TotalCount() - 1 && !IsLoop();
     return IsAutoPlay() && !reachEnd && isVisible_ && !isIndicatorLongPress_;
 }
 

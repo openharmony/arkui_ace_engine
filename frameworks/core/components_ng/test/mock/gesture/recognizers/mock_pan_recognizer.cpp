@@ -16,8 +16,6 @@
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
 namespace OHOS::Ace::NG {
-PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance) {}
-
 void PanRecognizer::OnAccepted() {}
 
 void PanRecognizer::OnRejected() {}
@@ -43,6 +41,8 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& /* event */) {}
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& /* event */) {}
 
 void PanRecognizer::OnResetStatus() {}
+
+void PanRecognizer::OnSucceedCancel() {}
 
 void PanRecognizer::SetDirection(OHOS::Ace::PanDirection const& direction) {}
 

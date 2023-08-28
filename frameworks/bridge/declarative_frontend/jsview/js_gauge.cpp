@@ -63,6 +63,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("colors", &JSGauge::SetColors);
     JSClass<JSGauge>::StaticMethod("strokeWidth", &JSGauge::SetStrokeWidth);
     JSClass<JSGauge>::StaticMethod("labelConfig", &JSGauge::SetLabelConfig);
+    JSClass<JSGauge>::StaticMethod("trackShadow", &JSGauge::SetShadowOptions);
     JSClass<JSGauge>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSGauge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGauge>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -254,4 +255,45 @@ void JSGauge::SetLabelConfig(const JSCallbackInfo& info)
     }
 }
 
+void JSGauge::SetShadowOptions(const JSCallbackInfo& info)
+{
+    NG::GaugeShadowOptions shadowOptions;
+    if (info[0]->IsNull()) {
+        shadowOptions.isShadowVisible = false;
+        GaugeModel::GetInstance()->SetShadowOptions(shadowOptions);
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
+    JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
+    JSRef<JSVal> jsOffsetY = paramObject->GetProperty("offsetY");
+
+    double radius = 0.0;
+    if (!ParseJsDouble(jsRadius, radius)) {
+        radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
+    }
+
+    if (NonPositive(radius)) {
+        radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
+    }
+
+    double offsetX = 0.0;
+    if (!ParseJsDouble(jsOffsetX, offsetX)) {
+        offsetX = NG::DEFAULT_GAUGE_SHADOW_OFFSETX;
+    }
+
+    double offsetY = 0.0;
+    if (!ParseJsDouble(jsOffsetY, offsetY)) {
+        offsetY = NG::DEFAULT_GAUGE_SHADOW_OFFSETY;
+    }
+
+    shadowOptions.radius = radius;
+    shadowOptions.offsetX = offsetX;
+    shadowOptions.offsetY = offsetY;
+
+    GaugeModel::GetInstance()->SetShadowOptions(shadowOptions);
+}
 } // namespace OHOS::Ace::Framework

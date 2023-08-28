@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <utility>
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
@@ -62,7 +63,7 @@ public:
 
     void SyncGeometryProperties(const RectF& paintRect) override;
 
-    void SetSandBox(const std::optional<OffsetF>& parentPosition) override;
+    void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 
     void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
 
@@ -362,6 +363,10 @@ private:
         std::optional<OHOS::Rosen::Range<OHOS::Rosen::RSColor>> rsInitRangeOpt);
     Rosen::ParticleParaType<float> ConvertParticleFloatOption(const ParticleFloatPropertyOption& floatOption);
     Rosen::ParticleParaType<float> ConvertParticleDefaultFloatOption(OHOS::Rosen::Range<float>& rsInitRange);
+    bool NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect);
+    void LoadParticleImage(const std::string& src, Dimension& width, Dimension& height);
+    void OnParticleImageLoaded(const std::string& src, const RefPtr<CanvasImage> canvas);
+    void SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource);
 #ifndef USE_ROSEN_DRAWING
     void PaintSkBgImage();
 #else
@@ -429,6 +434,8 @@ private:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
+    std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
+    std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 

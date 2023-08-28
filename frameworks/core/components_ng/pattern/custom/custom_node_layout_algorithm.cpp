@@ -19,6 +19,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace::NG {
@@ -35,16 +36,24 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         {
             ACE_SCOPED_TRACE("CustomNode:BuildItem");
             // first create child node and wrapper.
+            auto* stack = ViewStackProcessor::GetInstance();
+            auto nodeId = stack->ClaimNodeId();
+            auto frameNode =
+                FrameNode::GetOrCreateFrameNode("dummyNode", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+            stack->Push(frameNode);
             auto child = renderFunction_();
             renderFunction_ = nullptr;
+            stack->Pop();
             CHECK_NULL_VOID(child);
-            buildItem_ = child;
-            if (child) {
-                child->MountToParent(host);
-            }
             auto layoutWrapperNode = DynamicCast<LayoutWrapperNode>(Claim(layoutWrapper));
-            if (layoutWrapperNode) {
-                child->AdjustLayoutWrapperTree(layoutWrapperNode, true, true);
+            for (const auto& child : frameNode->GetChildren()) {
+                if (!child) {
+                    continue;
+                }
+                child->MountToParent(host);
+                if (layoutWrapperNode) {
+                    child->AdjustLayoutWrapperTree(layoutWrapperNode, true, true);
+                }
             }
         }
     }

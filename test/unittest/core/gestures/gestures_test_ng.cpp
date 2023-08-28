@@ -1755,7 +1755,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest002, TestSize.Level1)
     panRecognizer.refereeState_ = RefereeState::SUCCEED;
     panRecognizer.touchPoints_.clear();
     panRecognizer.HandleTouchDownEvent(axisEvent);
-    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
 
     /**
      * @tc.steps: step2. call HandleTouchDown function and compare result.
