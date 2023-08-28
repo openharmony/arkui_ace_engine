@@ -27,8 +27,8 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,6 +50,9 @@ const OffsetF ORIGIN_POINT(ZERO, ZERO);
 const SizeF SMALL_ITEM_SIZE(SMALL_ITEM_WIDTH, SMALL_ITEM_HEIGHT);
 const std::string COLOR_WHITE = "#FFFFFFFF";
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+constexpr int32_t PLATFORM_VERSION_10 = 10;
+constexpr int32_t PLATFORM_VERSION_9 = 9;
+constexpr Dimension NEGATIVE_BLANK_MIN(-10.0f);
 } // namespace
 
 class BlankPatternTestNg : public testing::Test {
@@ -216,39 +219,72 @@ PaddingProperty BlankPatternTestNg::CreatePadding(float left, float top, float r
  */
 HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator001, TestSize.Level1)
 {
-    BlankModelNG blank;
-    blank.Create();
-    blank.SetBlankMin(BLANK_MIN);
+    std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
+    for (int32_t i = 0; i < platformVersions.size(); i++) {
+        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersions[i]);
+        BlankModelNG blank;
+        blank.Create();
+        blank.SetBlankMin(BLANK_MIN);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
-    EXPECT_NE(blankLayoutProperty, nullptr);
-    EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()), BLANK_MIN);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_NE(frameNode, nullptr);
+        auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+        EXPECT_NE(blankLayoutProperty, nullptr);
+        EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()), BLANK_MIN);
+    }
 }
 
 /**
  * @tc.name: BlankFrameNodeCreator002
- * @tc.desc: Test height of Blank.
+ * @tc.desc: Test negative blankMin of Blank.
  * @tc.type: FUNC
  * @tc.author:
  */
 HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator002, TestSize.Level1)
 {
-    BlankModelNG blank;
-    blank.Create();
-    blank.SetHeight(SMALL_BLANK_HEIGHT);
+    std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
+    for (int32_t i = 0; i < platformVersions.size(); i++) {
+        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersions[i]);
+        BlankModelNG blank;
+        blank.Create();
+        blank.SetBlankMin(NEGATIVE_BLANK_MIN);
 
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
-    EXPECT_NE(blankLayoutProperty, nullptr);
-    EXPECT_EQ(blankLayoutProperty->GetHeight(), SMALL_BLANK_HEIGHT);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_NE(frameNode, nullptr);
+        auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+        EXPECT_NE(blankLayoutProperty, nullptr);
+        EXPECT_EQ(blankLayoutProperty->GetMinSize().value_or(Dimension()), Dimension());
+    }
+}
 
-    auto blankPattern = frameNode->GetPattern<BlankPattern>();
-    EXPECT_NE(blankPattern, nullptr);
-    auto layoutProperty = blankPattern->CreateLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
+/**
+ * @tc.name: BlankFrameNodeCreator003
+ * @tc.desc: Test height of Blank.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator003, TestSize.Level1)
+{
+    std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
+    for (int32_t i = 0; i < platformVersions.size(); i++) {
+        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersions[i]);
+        BlankModelNG blank;
+        blank.Create();
+        blank.SetHeight(SMALL_BLANK_HEIGHT);
+
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_NE(frameNode, nullptr);
+        auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+        EXPECT_NE(blankLayoutProperty, nullptr);
+        EXPECT_EQ(blankLayoutProperty->GetHeight(), SMALL_BLANK_HEIGHT);
+
+        auto blankPattern = frameNode->GetPattern<BlankPattern>();
+        EXPECT_NE(blankPattern, nullptr);
+        blankPattern->BeforeCreateLayoutWrapper();
+        blankPattern->DumpInfo();
+        auto layoutProperty = blankPattern->CreateLayoutProperty();
+        EXPECT_NE(layoutProperty, nullptr);
+    }
 }
 
 /**
@@ -259,59 +295,64 @@ HWTEST_F(BlankPatternTestNg, BlankFrameNodeCreator002, TestSize.Level1)
  */
 HWTEST_F(BlankPatternTestNg, BlankPatternTest001, TestSize.Level1)
 {
-    auto row = CreateRow();
-    auto rowFrameNode = row.first;
-    EXPECT_NE(rowFrameNode, nullptr);
-    auto rowLayoutWrapper = row.second;
+    std::vector<int32_t> platformVersions = { PLATFORM_VERSION_9, PLATFORM_VERSION_10 };
+    for (int32_t i = 0; i < platformVersions.size(); i++) {
+        PipelineBase::GetCurrentContext()->SetMinPlatformVersion(platformVersions[i]);
+        auto row = CreateRow();
+        auto rowFrameNode = row.first;
+        EXPECT_NE(rowFrameNode, nullptr);
+        auto rowLayoutWrapper = row.second;
 
-    auto childLayoutConstraint = rowLayoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.maxSize = CONTAINER_SIZE;
-    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+        auto childLayoutConstraint = rowLayoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        childLayoutConstraint.maxSize = CONTAINER_SIZE;
+        childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
 
-    // create child
-    BlankModelNG blank;
-    blank.Create();
-    blank.SetBlankMin(BLANK_MIN);
-    blank.SetHeight(SMALL_BLANK_HEIGHT);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_EQ(frameNode->GetTag(), V2::BLANK_ETS_TAG);
-    EXPECT_NE(frameNode, nullptr);
-    auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
-    EXPECT_NE(blankLayoutProperty, nullptr);
-    auto blankPattern = frameNode->GetPattern<BlankPattern>();
-    EXPECT_NE(blankPattern, nullptr);
-    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
-    firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
-    firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
-    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
-    firstLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
-    auto blankLayoutAlgorithm = frameNode->GetPattern<BlankPattern>()->CreateLayoutAlgorithm();
-    EXPECT_NE(blankLayoutAlgorithm, nullptr);
-    firstLayoutWrapper->SetLayoutAlgorithm(
-        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(blankLayoutAlgorithm));
+        // create child
+        BlankModelNG blank;
+        blank.Create();
+        blank.SetBlankMin(BLANK_MIN);
+        blank.SetHeight(SMALL_BLANK_HEIGHT);
+        auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+        EXPECT_EQ(frameNode->GetTag(), V2::BLANK_ETS_TAG);
+        EXPECT_NE(frameNode, nullptr);
+        auto blankLayoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+        EXPECT_NE(blankLayoutProperty, nullptr);
+        auto blankPattern = frameNode->GetPattern<BlankPattern>();
+        EXPECT_NE(blankPattern, nullptr);
+        RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+        RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, firstGeometryNode, frameNode->GetLayoutProperty());
+        firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+        firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(SMALL_ITEM_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
+        PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+        firstLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+        auto blankLayoutAlgorithm = frameNode->GetPattern<BlankPattern>()->CreateLayoutAlgorithm();
+        EXPECT_NE(blankLayoutAlgorithm, nullptr);
+        firstLayoutWrapper->SetLayoutAlgorithm(
+            AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(blankLayoutAlgorithm));
 
-    rowFrameNode->AddChild(frameNode);
-    rowLayoutWrapper->AppendChild(firstLayoutWrapper);
-    blankPattern->OnMountToParentDone();
-    auto parent = frameNode->GetParent();
-    EXPECT_EQ(parent->GetTag(), V2::ROW_ETS_TAG);
-    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(rowLayoutWrapper), false);
-    LinearLayoutUtils::Layout(
-        AccessibilityManager::RawPtr(rowLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
+        rowFrameNode->AddChild(frameNode);
+        rowLayoutWrapper->AppendChild(firstLayoutWrapper);
+        blankPattern->OnMountToParentDone();
+        auto parent = frameNode->GetParent();
+        EXPECT_EQ(parent->GetTag(), V2::ROW_ETS_TAG);
+        blankPattern->BeforeCreateLayoutWrapper();
+        LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(rowLayoutWrapper), false);
+        LinearLayoutUtils::Layout(
+            AccessibilityManager::RawPtr(rowLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
 
-    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
-    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
+        EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SMALL_ITEM_SIZE);
+        EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), ORIGIN_POINT);
 
-    blankLayoutProperty->UpdateHeight(LARGE_BLANK_HEIGHT);
-    blankPattern->OnModifyDone();
-    blankPattern->OnMountToParentDone();
+        blankLayoutProperty->UpdateHeight(LARGE_BLANK_HEIGHT);
+        blankPattern->OnModifyDone();
+        blankPattern->OnMountToParentDone();
 
-    LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(rowLayoutWrapper), false);
-    LinearLayoutUtils::Layout(
-        AccessibilityManager::RawPtr(rowLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
+        LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(rowLayoutWrapper), false);
+        LinearLayoutUtils::Layout(
+            AccessibilityManager::RawPtr(rowLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
+    }
 }
 
 /**
@@ -357,7 +398,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest002, TestSize.Level1)
     blankPattern->OnMountToParentDone();
     auto parent = frameNode->GetParent();
     EXPECT_EQ(parent->GetTag(), V2::COLUMN_ETS_TAG);
-
+    blankPattern->BeforeCreateLayoutWrapper();
     LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(columnLayoutWrapper), true);
     LinearLayoutUtils::Layout(
         AccessibilityManager::RawPtr(columnLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
@@ -416,7 +457,7 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest003, TestSize.Level1)
     blankPattern->OnMountToParentDone();
     auto parent = frameNode->GetParent();
     EXPECT_EQ(parent->GetTag(), V2::FLEX_ETS_TAG);
-
+    blankPattern->BeforeCreateLayoutWrapper();
     LinearLayoutUtils::Measure(AccessibilityManager::RawPtr(flexRowLayoutWrapper), false);
     LinearLayoutUtils::Layout(
         AccessibilityManager::RawPtr(flexRowLayoutWrapper), false, FlexAlign::FLEX_START, FlexAlign::FLEX_START);
@@ -552,7 +593,9 @@ HWTEST_F(BlankPatternTestNg, BlankPatternTest005, TestSize.Level1)
     rowFrameNode->AddChild(frameNode);
     layoutWrapper->AppendChild(firstLayoutWrapper);
 
-    frameNode->GetPattern<BlankPattern>()->OnMountToParentDone();
+    auto blankPattern = frameNode->GetPattern<BlankPattern>();
+    blankPattern->OnMountToParentDone();
+    blankPattern->BeforeCreateLayoutWrapper();
     auto parent = frameNode->GetParent();
     EXPECT_EQ(parent->GetTag(), V2::BADGE_ETS_TAG);
 }
