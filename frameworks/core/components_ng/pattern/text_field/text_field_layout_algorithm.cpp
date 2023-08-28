@@ -691,6 +691,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const std::vector<TextStyle>& tex
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
 #else
     auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    if (fontCollection == nullptr) {
+        LOGE("fontCollection is nullptr");
+        return;
+    }
     auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     for (size_t i = 0; i < contents.size(); i++) {
@@ -745,6 +749,10 @@ void TextFieldLayoutAlgorithm::CreateCounterParagraph(
     paraStyle.textAlign = ToRSTextAlign(TextAlign::END);
     paraStyle.maxLines = COUNTER_TEXT_MAXLINE;
     auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    if (fontCollection == nullptr) {
+        LOGE("fontCollection is nullptr");
+        return;
+    }
     auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), countTextStyle));
@@ -779,6 +787,10 @@ void TextFieldLayoutAlgorithm::CreateErrorParagraph(const std::string& content, 
     paraStyle.fontSize = errorTextStyle.GetFontSize().ConvertToPx();
     paraStyle.textAlign = ToRSTextAlign(TextAlign::START);
     auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
+    if (fontCollection == nullptr) {
+        LOGE("fontCollection is nullptr");
+        return;
+    }
     auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
 #endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), errorTextStyle));
