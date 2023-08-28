@@ -366,7 +366,8 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     // set font size, unit FP
     CalcDimension fontSize;
     if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFp(size, fontSize)) {
-        if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0)) {
+        if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0) ||
+            fontSize.Unit() == DimensionUnit::PERCENT) {
             fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
         }
     } else {
@@ -443,14 +444,16 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionVp(bottomValue, dimPosition);
     swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionVp(itemWidthValue, dimPosition);
+    parseOk = ParseJsDimensionVp(itemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionVp(itemHeightValue, dimPosition);
+    parseOk = ParseJsDimensionVp(itemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    bool parseSeleItemWOk = ParseJsDimensionVp(selectedItemWidthValue, dimPosition);
+    bool parseSeleItemWOk =
+        ParseJsDimensionVp(selectedItemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.selectedItemWidth = parseSeleItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    bool parseSeleItemHOk = ParseJsDimensionVp(selectedItemHeightValue, dimPosition);
+    bool parseSeleItemHOk =
+        ParseJsDimensionVp(selectedItemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.selectedItemHeight = parseSeleItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     if (parseSeleItemWOk == false && parseSeleItemHOk == false) {
         SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
