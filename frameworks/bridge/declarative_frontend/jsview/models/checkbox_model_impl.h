@@ -30,6 +30,7 @@ public:
     void SetHeight(const Dimension& height) override;
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
     void SetChangeEvent(std::function<void(bool)>&& changeEvent) override {};
+    void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CHECKBOX_MODEL_IMPL_H

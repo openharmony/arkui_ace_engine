@@ -157,6 +157,23 @@ void JSCheckboxGroup::SetOnChange(const JSCallbackInfo& args)
     CheckBoxGroupModel::GetInstance()->SetOnChange(onChange);
 }
 
+void JSCheckboxGroup::JsResponseRegion(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsResponseRegion(info);
+        return;
+    }
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    std::vector<DimensionRect> result;
+    if (!JSViewAbstract::ParseJsResponseRegionArray(info[0], result)) {
+        return;
+    }
+    CheckBoxGroupModel::GetInstance()->SetResponseRegion(result);
+}
+
 void JSCheckboxGroup::JsWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
