@@ -647,7 +647,6 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
     auto leadingMarginObj = styleObject->GetProperty("leadingMargin");
     JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(leadingMarginObj);
     if (!leadingMarginObject->IsUndefined()) {
-        LOGI("zxm: leadingMarginObject is defined");
         JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("placeholder");
         if (IsPixelMap(placeholder)) {
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -668,7 +667,6 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
             DimensionSize dimensionSize = { width, height };
-            LOGI("zxm: leadingMarginObject size=%{public}s", dimensionSize.ToString().c_str());
             updateSpanStyle_.updateTextLeadingMarginSize = dimensionSize;
             updateSpanStyle_.updateTextIndent.emplace(width);
             style.SetTextIndent(width);
@@ -791,7 +789,6 @@ bool JSRichEditorController::IsPixelMap(const JSRef<JSVal>& jsValue)
         return false;
     }
     JSRef<JSVal> func = jsObj->GetProperty("readPixelsToBuffer");
-    LOGI("zxm IsPixelMap");
     return (!func->IsNull() && func->IsFunction());
 }
 

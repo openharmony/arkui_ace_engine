@@ -241,8 +241,6 @@ void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
         auto width = size.Width();
         auto height = size.Height();
         pixelMapImage->DrawRect(rsCanvas, ToRSRect(RectF(x, y, width, height)));
-        LOGI("zxm: draw TxtParagraph::Paint x=%{public}f y=%{public}f  width=%{public}f height=%{public}f", x, y, width, height);
-        LOGI("zxm: draw placeholder pixelMapImage width: %{public}d height: %{public}d", pixelMapImage->GetWidth(), pixelMapImage->GetHeight());
     }
 }
 
