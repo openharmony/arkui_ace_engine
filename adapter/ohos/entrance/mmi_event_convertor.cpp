@@ -394,10 +394,14 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
     const NG::VectorF& scale, const int32_t udegree)
 {
     CHECK_NULL_VOID(point);
-    int32_t pointerId = point->GetPointerId();
-    MMI::PointerEvent::PointerItem item;
-    bool ret = point->GetPointerItem(pointerId, item);
-    if (ret) {
+    auto ids = point->GetPointerIds();
+    for (auto&& id : ids) {
+        MMI::PointerEvent::PointerItem item;
+        bool ret = point->GetPointerItem(id, item);
+        if (!ret) {
+            LOGE("get pointer:%{public}d item failed", id);
+            continue;
+        }
         float xRelative = item.GetDisplayX();
         float yRelative = item.GetDisplayY();
         float windowX = xRelative;
@@ -427,7 +431,7 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
 
         item.SetWindowX(static_cast<int32_t>(windowX));
         item.SetWindowY(static_cast<int32_t>(windowY));
-        point->UpdatePointerItem(pointerId, item);
+        point->UpdatePointerItem(id, item);
     }
 }
 } // namespace OHOS::Ace::Platform
