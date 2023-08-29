@@ -572,8 +572,9 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
         auto overDragOffset = titlePattern->GetOverDragOffset();
         auto menuOffsetY = (SINGLE_LINE_TITLEBAR_HEIGHT - menuHeight_) / 2;
         // custom menu width has no right padding
-        auto offsetX = isCustomMenu ? maxWidth - menuWidth :
-            (maxWidth - menuWidth - static_cast<float>(defaultPaddingStart_.ConvertToPx()));
+        auto offsetX = isCustomMenu ? maxWidth - menuWidth
+                                    : (maxWidth - menuWidth - static_cast<float>(maxPaddingEnd_.ConvertToPx()) +
+                                          BUTTON_PADDING.ConvertToPx());
         OffsetF menuOffset(offsetX, static_cast<float>(menuOffsetY.ConvertToPx()) + overDragOffset / MENU_OFFSET_RATIO);
         geometryNode->SetMarginFrameOffset(menuOffset);
         menuWrapper->Layout();
@@ -583,8 +584,8 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     auto menuOffsetY =  (SINGLE_LINE_TITLEBAR_HEIGHT - menuHeight_) / 2;
     auto menuOffsetX = maxWidth - menuWidth;
     // custom menu doesn't have right padding. if menu isn't custom, menu items has right padding
-    menuOffsetX = isCustomMenu ? menuOffsetX : menuOffsetX - defaultPaddingStart_.ConvertToPx();
-    
+    menuOffsetX =
+        isCustomMenu ? menuOffsetX : (menuOffsetX - maxPaddingEnd_.ConvertToPx() + BUTTON_PADDING.ConvertToPx());
     OffsetF menuOffset(menuOffsetX, static_cast<float>(menuOffsetY.ConvertToPx()));
     geometryNode->SetMarginFrameOffset(menuOffset);
     menuWrapper->Layout();
