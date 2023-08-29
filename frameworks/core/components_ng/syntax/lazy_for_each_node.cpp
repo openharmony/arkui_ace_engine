@@ -153,7 +153,12 @@ void LazyForEachNode::OnDataChanged(size_t index)
 
 void LazyForEachNode::OnDataMoved(size_t from, size_t to)
 {
-    // TODO: data move
+    if (builder_) {
+        builder_->OnDataMoved(from, to);
+    }
+    children_.clear();
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void LazyForEachNode::NotifyDataCountChanged(int32_t index)
