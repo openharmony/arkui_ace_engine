@@ -1628,14 +1628,14 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
 
 void RichEditorPattern::DeleteBackward(int32_t length)
 {
-    if (caretPosition_ == 0) {
-        return;
-    }
     if (textSelector_.IsValid()) {
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         SetCaretPosition(textSelector_.GetTextEnd());
         CloseSelectOverlay();
         ResetSelection();
+    }
+    if (caretPosition_ == 0) {
+        return;
     }
     RichEditorDeleteValue info;
     info.SetOffset(caretPosition_ - 1);
@@ -1659,6 +1659,12 @@ void RichEditorPattern::DeleteBackward(int32_t length)
 
 void RichEditorPattern::DeleteForward(int32_t length)
 {
+    if (textSelector_.IsValid()) {
+        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+        SetCaretPosition(textSelector_.GetTextStart());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
     if (caretPosition_ == GetTextContentLength()) {
         return;
     }
