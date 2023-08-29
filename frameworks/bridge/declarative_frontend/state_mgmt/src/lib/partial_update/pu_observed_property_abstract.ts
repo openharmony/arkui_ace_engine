@@ -57,7 +57,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       if (!propertyDependencies) {
         propertyDependencies = new Set<string>();
         this.map_.set(elmtId, propertyDependencies);
-        stateMgmtConsole.debug(`${debugInfo} - add elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
+        stateMgmtConsole.debug(`${debugInfo} - add elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(Array.from(this.map_.keys()))} .`);
       } else {
         stateMgmtConsole.debug(`${debugInfo} - elmtId ${elmtId} known already - unchanged list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
       }

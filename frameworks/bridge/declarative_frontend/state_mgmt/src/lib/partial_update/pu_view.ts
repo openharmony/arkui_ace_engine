@@ -823,15 +823,17 @@ abstract class ViewPU extends NativeViewPartialUpdate
     if (idGenFuncUsesIndex) {
       stateMgmtConsole.debug(`ID Gen with index parameter or with default id gen func`);
       // Create array of new ids.
-      arr.forEach((item, indx) => {
-        newIdArray.push(idGenFunc(item, indx));
+      itemArray.forEach((_, indx) => {
+        // FIXME itemArray[indx] to trigger 'get'
+        newIdArray.push(idGenFunc(itemArray[indx], indx));
       });
     }
     else {
       // Create array of new ids.
       stateMgmtConsole.debug(`ID Gen without index parameter`);
-      arr.forEach((item, index) => {
-        newIdArray.push(`${itemGenFuncUsesIndex ? index + '_':''}` + idGenFunc(item));
+      itemArray.forEach((_, indx) => {
+        // FIXME itemArray[indx] to trigger 'get'
+        newIdArray.push(`${itemGenFuncUsesIndex ? indx + '_':''}` + idGenFunc(itemArray[indx]));
       });
     }
 

@@ -2119,30 +2119,31 @@ class ObservedObject extends ExtendableProxy {
                         // 'splice' self modifies the array, returns deleted array items
                         // means, alike other self-modifying functions, splice does not return the array itself.
                         return function () {
+                            stateMgmtConsole.debug(`function ${prop} execute, marks forEach as changed ...`);
                             const result = ret.apply(target, arguments);
-                            // prop is the function name here
-                            // and result is the function return value
-                            // functinon modifies none or more properties
-                            self.notifyObjectPropertyHasChanged(prop, target);
+                            // any render that uses Array.forEach, such as ArkUI ForEach
+                            // needs to re-compute, 
+                            self.notifyObjectPropertyHasChanged("forEach", target);
                             return result;
                         }.bind(proxiedObject);
                     }
-                    if (self.inPlaceModifications.has(prop)) {
-                        // in place modfication function result == target, the raw array modified
-                        stateMgmtConsole.debug("return self mod function");
-                        return function () {
-                            const result = ret.apply(target, arguments);
-                            // 'result' is the unproxied object               
-                            // functinon modifies none or more properties
-                            self.notifyObjectPropertyHasChanged(prop, result);
-                            // returning the 'proxiedObject' ensures that when chain calls also 2nd function call
-                            // operates on the proxied object.
-                            return proxiedObject;
-                        }.bind(proxiedObject);
-                    }
+                    //            if (self.inPlaceModifications.has(prop)) {
+                    // in place modfication function result == target, the raw array modified
+                    stateMgmtConsole.debug("return function");
+                    return function () {
+                        stateMgmtConsole.debug(`function ${prop} execute, marks forEach as changed ...`);
+                        const result = ret.apply(target, arguments);
+                        // 'result' is the un-proxied object               
+                        // function modifies none or more properties
+                        self.notifyObjectPropertyHasChanged("forEach", result);
+                        // returning the 'proxiedObject' ensures that when chain calls also 2nd function call
+                        // operates on the proxied object.
+                        return proxiedObject;
+                    }.bind(proxiedObject);
+                    //          }
                     // binding the proxiedObject ensures that modifying functions like push() operate on the 
                     // proxied array and each array change is notified.
-                    return ret.bind(proxiedObject);
+                    //        return ret.bind(proxiedObject);
                 } // if value is a function
                 this.notifyReadingProperty(prop);
                 return ret;
@@ -3284,7 +3285,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 if (!propertyDependencies) {
                     propertyDependencies = new Set();
                     this.map_.set(elmtId, propertyDependencies);
-                    stateMgmtConsole.debug(`${debugInfo} - add elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
+                    stateMgmtConsole.debug(`${debugInfo} - add elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(Array.from(this.map_.keys()))} .`);
                 }
                 else {
                     stateMgmtConsole.debug(`${debugInfo} - elmtId ${elmtId} known already - unchanged list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
@@ -4932,15 +4933,17 @@ class ViewPU extends NativeViewPartialUpdate {
         if (idGenFuncUsesIndex) {
             stateMgmtConsole.debug(`ID Gen with index parameter or with default id gen func`);
             // Create array of new ids.
-            arr.forEach((item, indx) => {
-                newIdArray.push(idGenFunc(item, indx));
+            itemArray.forEach((_, indx) => {
+                // FIXME itemArray[indx] to trigger 'get'
+                newIdArray.push(idGenFunc(itemArray[indx], indx));
             });
         }
         else {
             // Create array of new ids.
             stateMgmtConsole.debug(`ID Gen without index parameter`);
-            arr.forEach((item, index) => {
-                newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
+            itemArray.forEach((_, indx) => {
+                // FIXME itemArray[indx] to trigger 'get'
+                newIdArray.push(`${itemGenFuncUsesIndex ? indx + '_' : ''}` + idGenFunc(itemArray[indx]));
             });
         }
         // Set new array on C++ side.
