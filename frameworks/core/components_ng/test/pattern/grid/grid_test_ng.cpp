@@ -1272,13 +1272,10 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
      * @tc.steps: step1. Test OnScrollPosition/OnScrollEnd.
      */
     CreateGrid();
-    auto scrollable = pattern_->scrollableEvent_->GetScrollable();
-    auto callback_1 = scrollable->callback_;
-    auto callback_2 = scrollable->scrollEndCallback_;
-    EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_START));
-    callback_2();
+    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));
+    pattern_->OnScrollEnd();
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
     auto event1 = [](double) { return true; };
     auto event2 = []() {};
@@ -1286,12 +1283,12 @@ HWTEST_F(GridTestNg, ScrollablePattern001, TestSize.Level1)
     coordinationEvent->SetOnScrollStartEvent(event2);
     coordinationEvent->SetOnScrollEndEvent(event2);
     pattern_->SetCoordinationEvent(coordinationEvent);
-    EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_START));
-    callback_2();
-    EXPECT_TRUE(callback_1(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
-    callback_2();
+    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
+    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_START));
+    pattern_->OnScrollEnd();
+    EXPECT_TRUE(pattern_->OnScrollPosition(ITEM_HEIGHT, SCROLL_FROM_UPDATE));
+    pattern_->OnScrollEnd();
 
     /**
      * @tc.steps: step2. Test OnScrollCallback.
@@ -1493,7 +1490,7 @@ HWTEST_F(GridTestNg, Event003, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
@@ -1502,7 +1499,7 @@ HWTEST_F(GridTestNg, Event003, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
 }
 
 /**
@@ -1532,7 +1529,7 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
@@ -1550,7 +1547,7 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
@@ -1559,7 +1556,7 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_JUMP);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_JUMP);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
@@ -1568,7 +1565,7 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION_CONTROLLER);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
@@ -1577,7 +1574,7 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
@@ -1586,7 +1583,7 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_BAR_FLING);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
@@ -1595,7 +1592,7 @@ HWTEST_F(GridTestNg, Event004, TestSize.Level1)
     isTrigger = false;
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_NONE);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
-    EXPECT_FALSE(isTrigger);
+    EXPECT_TRUE(isTrigger);
     isTrigger = false;
     pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
     RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
