@@ -65,7 +65,7 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon);
 
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
 
     void SetCloseButtonStatus(bool isEnabled);
 
@@ -98,7 +98,5 @@ private:
     bool isFocus_ = true;
     bool hideSplitButton_ = false;
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H

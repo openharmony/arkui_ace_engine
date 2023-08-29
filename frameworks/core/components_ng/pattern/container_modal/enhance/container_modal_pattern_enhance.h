@@ -26,6 +26,7 @@ public:
     ~ContainerModalPatternEnhance() override = default;
     void OnWindowFocused() override;
     void OnWindowUnfocused() override;
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& titleNode, int32_t originIndex) override;

@@ -62,6 +62,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const Dimension MENU_CONTAINER_WIDTH = 240.0_vp;
 const Dimension MENU_CONTAINER_HEIGHT = 209.0_vp;
+const Dimension MENU_CONTAINER_HEIGHT_HIDE = 100.0_vp;
 const Dimension MENU_CONTAINER_DIVIDER_HEIGHT = 9.0_vp;
 const Dimension MENU_CONTAINER_DIVIDER_STROKE_HEIGHT = 1.0_vp;
 const Dimension MENU_ITEM_RADIUS = 8.0_vp;
@@ -81,6 +82,7 @@ const Color MENU_ITEM_COLOR = Color(0xffffff);
 } // namespace
 bool ContainerModalViewEnhance::sIsHovering = false;
 bool ContainerModalViewEnhance::sIsMenuPending_ = false;
+bool ContainerModalViewEnhance::enableSplit_ = true;
 CancelableCallback<void()> ContainerModalViewEnhance::sContextTimer_;
 
 RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
@@ -292,13 +294,14 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
     auto listLayoutProperty = menuList->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listLayoutProperty, nullptr);
     listLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(MENU_CONTAINER_WIDTH),
-        CalcLength(MENU_CONTAINER_HEIGHT)));
+        CalcLength(enableSplit_ ? MENU_CONTAINER_HEIGHT : MENU_CONTAINER_HEIGHT_HIDE)));
     menuList->AddChild(BuildMaximizeMenuItem());
     menuList->AddChild(BuildFullScreenMenuItem());
-    menuList->AddChild(BuildDividerMenuItem());
-    menuList->AddChild(BuildLeftSplitMenuItem());
-    menuList->AddChild(BuildRightSplitMenuItem());
-
+    if (enableSplit_) {
+        menuList->AddChild(BuildDividerMenuItem());
+        menuList->AddChild(BuildLeftSplitMenuItem());
+        menuList->AddChild(BuildRightSplitMenuItem());
+    }
     if ((!SubwindowManager::GetInstance()->GetCurrentWindow()
         || !SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown())) {
         MenuParam menu {};
