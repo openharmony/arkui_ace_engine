@@ -777,7 +777,9 @@ public:
         if (!InSelectMode()) {
             return false;
         }
-        Offset offset = globalOffset - Offset(textRect_.GetX(), textRect_.GetY()) -
+        Offset offset = globalOffset -
+                        Offset(IsTextArea() ? contentRect_.GetX() : textRect_.GetX(),
+                            IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) -
                         Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
         for (const auto& textBoxes : textBoxes_) {
             bool isInRange = LessOrEqual(textBoxes.rect_.GetLeft(), offset.GetX()) &&
@@ -978,9 +980,9 @@ public:
     }
 
     bool IsNormalInlineState() const;
-    void TextIsEmptyRect(RectF &rect);
-    void TextAreaInputRectUpdate(RectF &rect);
-    void UpdateRectByAlignment(RectF &rect);
+    void TextIsEmptyRect(RectF& rect);
+    void TextAreaInputRectUpdate(RectF& rect);
+    void UpdateRectByAlignment(RectF& rect);
 
     void EditingValueFilterChange();
 
@@ -1025,8 +1027,8 @@ private:
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void UpdateSelectorByPosition(const int32_t& pos);
     // assert handles are inside the contentRect, reset them if not
-    void CheckHandles(std::optional<RectF>& firstHandle,
-        std::optional<RectF>& secondHandle, float firstHandleSize = 0.0f, float secondHandleSize = 0.0f);
+    void CheckHandles(std::optional<RectF>& firstHandle, std::optional<RectF>& secondHandle,
+        float firstHandleSize = 0.0f, float secondHandleSize = 0.0f);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle,
         bool animation = false, bool isMenuShow = true);
 
@@ -1239,7 +1241,7 @@ private:
     int32_t dragTextStart_ = 0;
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
-    DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
+    DragStatus dragStatus_ = DragStatus::NONE;          // The status of the dragged initiator
     DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     std::vector<std::string> dragContents_;
     RefPtr<Clipboard> clipboard_;
