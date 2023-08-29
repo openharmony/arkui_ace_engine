@@ -264,7 +264,8 @@ void ScrollBar::SetRectTrickRegion(
             }
         }
         // If the scrollBar length changes, start the adaptation animation
-        if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation) {
+        if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation &&
+            !Negative(inactiveMainOffset)) {
             PlayAdaptAnimation(activeSize, activeMainOffset, inactiveSize, inactiveMainOffset);
         }
     }
