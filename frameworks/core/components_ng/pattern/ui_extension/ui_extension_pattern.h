@@ -20,17 +20,25 @@
 #include <functional>
 #include <memory>
 
+#include <refbase.h>
+
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
+#include "core/common/container.h"
 #include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 
-namespace OHOS::AAFwk {
-class Want;
-class WantParams;
-} // namespace OHOS::AAFwk
+namespace OHOS::Rosen {
+class Session;
+class ILifecycleListener;
+} // namespace OHOS::Rosen
+
+namespace OHOS::MMI {
+class KeyEvent;
+class PointerEvent;
+} // namespace OHOS::MMI
 
 namespace OHOS::Ace {
 class ModalUIExtensionProxy;
@@ -38,8 +46,8 @@ class ModalUIExtensionProxy;
 
 namespace OHOS::Ace::NG {
 class UIExtensionProxy;
-class UIExtensionPattern : public WindowPattern {
-    DECLARE_ACE_TYPE(UIExtensionPattern, WindowPattern);
+class UIExtensionPattern : public Pattern {
+    DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
 
 public:
     explicit UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
@@ -53,13 +61,6 @@ public:
     void OnVisibleChange(bool visible) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
-    bool HasStartingPage() override
-    {
-        return false;
-    }
-
-    int32_t GetSessionId();
-
     void SetModalOnDestroy(const std::function<void()>&& callback);
     void SetModalOnRemoteReadyCallback(
         const std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)>&& callback);
@@ -70,13 +71,18 @@ public:
     void SetOnErrorCallback(
         const std::function<void(int32_t code, const std::string& name, const std::string& message)>&& callback);
 
-    void OnConnect() override;
-    void OnDisconnect() override;
-    void OnExtensionDied() override;
+    void RegisterLifecycleListener();
+    void UnregisterLifecycleListener();
+
+    void OnConnect();
+    void OnDisconnect();
+    void OnExtensionDied();
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
     void RequestExtensionSessionDestruction();
+
+    int32_t GetSessionId();
 
 private:
     enum ReleaseCode {
@@ -113,6 +119,12 @@ private:
     void UnregisterAbilityResultListener();
     void OnConnectInner();
 
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
+    void DisPatchFocusActiveEvent(bool isFocusActive);
+    void TransferFocusState(bool focusState);
+
     void RegisterVisibleAreaChange();
     void UpdateTextFieldManager(const Offset& offset, float height);
     bool IsCurrentFocus() const;
@@ -128,7 +140,12 @@ private:
     std::function<void(const AAFwk::WantParams&)> onReceiveCallback_;
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
 
+    std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
+    sptr<Rosen::Session> session_;
+    RefPtr<FrameNode> contentNode_;
+
     ErrorMsg lastError_;
+    int32_t instanceId_ = Container::CurrentId();
     AbilityState state_ = AbilityState::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
