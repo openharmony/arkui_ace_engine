@@ -114,6 +114,7 @@ public:
             }
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, theme->pressColor_);
+            theme->paddingHorizontal_ = pattern->GetAttr<Dimension>("padding_horizontal", 24.0_vp);
             if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
                 return; // light, dart color only for phone
             }
@@ -129,7 +130,6 @@ public:
             theme->titleStyle_.SetTextColor(theme->normalOptionStyle_.GetTextColor());
             theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", theme->dividerColor_);
             theme->dividerThickness_ = pattern->GetAttr<Dimension>("divider_thickness", 2.0_px);
-            theme->paddingHorizontal_ = pattern->GetAttr<Dimension>("padding_horizontal", 24.0_vp);
             theme->contentMarginVertical_ = pattern->GetAttr<Dimension>("content_margin_vertical", 8.0_vp);
             theme->lunarswitchTextSize_ =
                 pattern->GetAttr<Dimension>("lunarswitch_text_size", theme->lunarswitchTextSize_);
