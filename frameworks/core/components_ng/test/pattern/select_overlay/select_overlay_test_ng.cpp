@@ -26,6 +26,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/theme.h"
@@ -2169,5 +2170,207 @@ HWTEST_F(SelectOverlayTestNg, UpdateToolBar002, TestSize.Level1)
     EXPECT_TRUE(selectOverlayNode->isExtensionMenu_);
     selectOverlayNode->UpdateToolBar(true);
     EXPECT_FALSE(selectOverlayNode->isExtensionMenu_);
+}
+
+/**
+ * @tc.name: ExecuteOverlayStatus001
+ * @tc.desc: Test ExecuteOverlayStatus function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, ExecuteOverlayStatus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create invalid type and call ExecuteOverlayStatus function.
+     */
+    
+    FrameNodeType type = (FrameNodeType) 4;
+    selectOverlayNode->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
+    ASSERT_NE(selectOverlayNode, nullptr);
+}
+
+/**
+ * @tc.name: SetFrameNodeOpacity002
+ * @tc.desc: Test SetFrameNodeOpacity function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SetFrameNodeOpacity002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create invalid type and call SetFrameNodeOpacity function.
+     */
+    
+    FrameNodeType type = (FrameNodeType) 4;
+    selectOverlayNode->SetFrameNodeOpacity(type, 0.0);
+    ASSERT_NE(selectOverlayNode, nullptr);
+}
+
+/**
+ * @tc.name: SetFrameNodeVisibility002
+ * @tc.desc: Test SetFrameNodeVisibility function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SetFrameNodeVisibility002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create invalid type and call SetFrameNodeVisibility function.
+     */
+    
+    FrameNodeType type = (FrameNodeType) 4;
+    selectOverlayNode->SetFrameNodeVisibility(type, VisibleType::INVISIBLE);
+    ASSERT_NE(selectOverlayNode, nullptr);
+}
+
+/**
+ * @tc.name: SetFrameNodeStatus002
+ * @tc.desc: Test SetFrameNodeStatus function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SetFrameNodeStatus002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create invalid type and call SetFrameNodeStatus function.
+     */
+    
+    FrameNodeType type = (FrameNodeType) 4;
+    selectOverlayNode->SetFrameNodeStatus(type, FrameNodeStatus::VISIBLE);
+    ASSERT_NE(selectOverlayNode, nullptr);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeTest003
+ * @tc.desc: Test IsInSelectedOrSelectOverlayArea with menuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, SelectOverlayNodeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.singleLineHeight = NODE_ID;
+    selectInfo.menuOptionItems = GetMenuOptionItems();
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create pattern and initialize HandleRegion
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->firstHandleRegion_ = FIRST_HANDLE_REGION;
+    pattern->secondHandleRegion_ = SECOND_HANDLE_REGION;
+
+    /**
+     * @tc.steps: step3. Construct Point and Call IsInSelectedOrSelectOverlayArea.
+     * @tc.expected: return false
+     */
+    pattern->info_->menuInfo.menuBuilder = []() {
+        return ;
+    };
+    frameNode->geometryNode_ = nullptr;
+    selectOverlayNode->selectMenu_ = nullptr;
+    selectOverlayNode->extensionMenu_ = nullptr;
+    const NG::PointF point { 9.0f, 12.0f };
+    auto result = selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step4. Construct Point and Call IsInSelectedOrSelectOverlayArea.
+     * @tc.expected: return true
+     */
+    const NG::PointF point2 { 12.0f, 12.0f };
+    auto result2 = selectOverlayNode->IsInSelectedOrSelectOverlayArea(point2);
+    EXPECT_TRUE(result2);
+}
+
+/**
+ * @tc.name: DispatchGoneToVisibleState01
+ * @tc.desc: Test DispatchGoneToVisibleState function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, DispatchGoneToVisibleState001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create invalid type and call DispatchGoneToVisibleState function.
+     */
+    FrameNodeType type = FrameNodeType::BACKBUTTON;
+    FrameNodeTrigger trigger = (FrameNodeTrigger) 4;
+    selectOverlayNode->DispatchGoneToVisibleState(type, trigger);
+    ASSERT_NE(selectOverlayNode, nullptr);
+}
+
+/**
+ * @tc.name: DispatchGoneState001
+ * @tc.desc: Test DispatchGoneState function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, DispatchGoneState001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create invalid type and call DispatchGoneState function.
+     */
+    FrameNodeType type = FrameNodeType::BACKBUTTON;
+    FrameNodeTrigger trigger = (FrameNodeTrigger) 4;
+    selectOverlayNode->DispatchGoneState(type, trigger);
+    ASSERT_NE(selectOverlayNode, nullptr);
 }
 } // namespace OHOS::Ace::NG
