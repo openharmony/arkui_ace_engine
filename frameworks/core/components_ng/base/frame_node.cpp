@@ -348,13 +348,10 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->ProcessOffscreenTask();
     node->MarkModifyDone();
     node->UpdateLayoutPropertyFlag();
-    auto layoutWrapper = node->CreateLayoutWrapper();
-    CHECK_NULL_VOID(layoutWrapper);
-    layoutWrapper->SetActive();
-    layoutWrapper->SetRootMeasureNode();
-    layoutWrapper->Measure(node->GetLayoutConstraint());
-    layoutWrapper->Layout();
-    layoutWrapper->MountToHostOnMainThread();
+    node->SetActive();
+    node->isLayoutDirtyMarked_ = true;
+    node->CreateLayoutTask();
+
     auto paintProperty = node->GetPaintProperty<PaintProperty>();
     auto wrapper = node->CreatePaintWrapper();
     if (wrapper != nullptr) {
@@ -364,6 +361,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushMessages();
+    node->SetActive(false);
 }
 
 void FrameNode::InitializePatternAndContext()
