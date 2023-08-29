@@ -80,7 +80,7 @@ HWTEST_F(WindowTest, Window002, TestSize.Level1)
     uint64_t nanoTimestamp = 10;
     uint32_t frameCount = 10;
 
-    auto callback = [=](uint64_t, uint32_t) -> void {};
+    auto callback = [](uint64_t, uint32_t) -> void {};
 
     window.SetVsyncCallback(callback);
     window.OnVsync(nanoTimestamp, frameCount);
