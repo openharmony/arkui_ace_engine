@@ -39,6 +39,8 @@ void TextFieldPattern::InitEditingValueText(std::string content)
 
 void TextFieldPattern::SearchRequestKeyboard() {}
 
+void TextFieldPattern::BeforeCreateLayoutWrapper() {}
+
 void TextFieldPattern::InitCaretPosition(std::string content)
 {
     textEditingValue_.caretPosition = static_cast<int32_t>(StringUtils::ToWstring(content).length());

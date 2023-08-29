@@ -73,10 +73,10 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetHeight(std::min(layoutConstraint->maxSize.Width(),
                     contentWidth + pattern->GetHorizontalPaddingSum()));
             } else if (!calcLayoutConstraint) {
-            // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
+                // If calcLayoutConstraint has not set, use the LayoutConstraint initial value
                 frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
             } else {
-            // If maxWidth is not set and calcLayoutConstraint is set, set minWidth to layoutConstraint
+                // If maxWidth is not set and calcLayoutConstraint is set, set minWidth to layoutConstraint
                 frameSize.SetWidth(layoutConstraint->minSize.Width());
             }
         }
@@ -90,8 +90,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetHeight(std::min(layoutConstraint->maxSize.Height(),
                     contentHeight + pattern->GetVerticalPaddingSum()));
             } else if (!calcLayoutConstraint || NearZero(layoutConstraint->minSize.Height())) {
-            // calcLayoutConstraint initialized once when setting width, set minHeight=0,
-            // so add "minHeight=0" to the constraint.
+                // calcLayoutConstraint initialized once when setting width, set minHeight=0,
+                // so add "minHeight=0" to the constraint.
                 frameSize.SetHeight(
                     std::min(layoutConstraint->maxSize.Height(), contentHeight + pattern->GetVerticalPaddingSum()));
             } else {
@@ -239,8 +239,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2 + INLINE_SAFE_BOUNDARY_VALUE;
         if (pattern->IsSelected()) {
             inlineBoxWidth = pattern->GetPreviewWidth() < layoutConstraint->maxSize.Width()
-                ? (pattern->GetPreviewWidth() + safeBoundary)
-                : (layoutConstraint->maxSize.Width() - safeBoundary);
+                                 ? (pattern->GetPreviewWidth() + safeBoundary)
+                                 : (layoutConstraint->maxSize.Width() - safeBoundary);
         } else {
             inlineBoxWidth = idealWidth;
         }
@@ -380,22 +380,22 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
-    auto isHandleMoving = pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE;
-    auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::DEL ||
+    auto isUsingMouse = pattern->GetMouseStatus() == MouseStatus::MOVE ||
+                        pattern->GetMouseStatus() == MouseStatus::RELEASED || pattern->GetIsMousePressed();
+    auto needForceCheck = ((pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
+                               pattern->GetCaretUpdateType() == CaretUpdateType::DEL) &&
+                              (paragraphWidth_ <= contentSize.Width())) ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED ||
-                          layoutProperty->GetTextAlignChangedValue(false) ||
-                          pattern->GetTextEditingValue().text.empty();
-    auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
-                              pattern->GetIsMousePressed();
+                          pattern->GetCaretUpdateType() == CaretUpdateType::VISIBLE_PASSWORD_ICON ||
+                          layoutProperty->GetTextAlignChangedValue(false);
+    auto needToKeepTextRect = isUsingMouse || !needForceCheck;
     if (needToKeepTextRect) {
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
     }
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!pattern->IsTextArea() && !needToKeepTextRect && (!pattern->IsNormalInlineState() ||
-        layoutProperty->GetValueValue("").empty())) {
+    if (!pattern->IsTextArea() && !needToKeepTextRect &&
+        (!pattern->IsNormalInlineState() || layoutProperty->GetValueValue("").empty())) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft() + pattern->GetBorderLeft();
