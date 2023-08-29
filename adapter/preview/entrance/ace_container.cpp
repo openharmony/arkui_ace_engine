@@ -219,13 +219,8 @@ void AceContainer::RunNativeEngineLoop()
 }
 
 void AceContainer::InitializeStageAppConfig(const std::string& assetPath, const std::string& bundleName,
-    const std::string& moduleName, const std::string& compileMode, uint32_t minPlatformVersion)
+    const std::string& moduleName, const std::string& compileMode)
 {
-    if (pipelineContext_) {
-        LOGI("Set MinPlatformVersion to %{public}d", minPlatformVersion);
-        pipelineContext_->SetMinPlatformVersion(minPlatformVersion);
-    }
-
     bool isBundle = (compileMode != "esmodule");
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
     CHECK_NULL_VOID(declarativeFrontend);

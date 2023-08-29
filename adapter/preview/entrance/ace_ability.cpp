@@ -242,10 +242,13 @@ void AceAbility::InitEnv()
     }
     // Drive the native engine with the platform thread.
     container->RunNativeEngineLoop();
-    if (runArgs_.projectModel == ProjectModel::STAGE) {
-        container->InitializeStageAppConfig(
-            runArgs_.assetPath, bundleName_, moduleName_, compileMode_, compatibleVersion_);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        LOGI("Set MinPlatformVersion to %{public}d", compatibleVersion_);
+        pipelineContext->SetMinPlatformVersion(compatibleVersion_);
     }
+    container->InitializeStageAppConfig(
+        runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
