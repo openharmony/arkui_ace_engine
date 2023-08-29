@@ -40,6 +40,7 @@
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
+struct TextConfig;
 } // namespace OHOS::MiscServices
 #endif
 #endif
@@ -47,6 +48,9 @@ class OnTextChangedListener;
 namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
+
+constexpr float CARET_WIDTH = 1.5f;
+constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
 
 class RichEditorPattern : public TextPattern, public TextInputClient {
     DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, TextInputClient);
@@ -183,6 +187,7 @@ public:
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
+    void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
@@ -254,11 +259,14 @@ private:
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     void OnHover(bool isHover);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
+    void UpdateCaretInfoToController();
 #if defined(ENABLE_STANDARD_INPUT)
     bool EnableStandardInput(bool needShowSoftKeyboard);
+    std::optional<MiscServices::TextConfig> GetMiscTextConfig();
 #else
     bool UnableStandardInput(bool isFocusViewChanged);
 #endif
+
     bool HasConnection() const;
     bool CloseKeyboard(bool forceClose) override;
     void CalcInsertValueObj(TextInsertValueInfo& info);

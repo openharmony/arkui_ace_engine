@@ -18,10 +18,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr float CARET_WIDTH = 1.5f;
-constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
-} // namespace
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph,
     float baselineOffset, RefPtr<RichEditorContentModifier> richEditorContentModifier,
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier)

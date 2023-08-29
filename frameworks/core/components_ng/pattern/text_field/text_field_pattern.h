@@ -61,6 +61,7 @@
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
+struct TextConfig;
 } // namespace OHOS::MiscServices
 #endif
 #endif
@@ -1119,6 +1120,9 @@ private:
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void UpdateErrorTextMargin();
+#if defined(ENABLE_STANDARD_INPUT)
+    std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
+#endif
 
     RectF frameRect_;
     RectF contentRect_;

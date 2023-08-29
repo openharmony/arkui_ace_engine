@@ -218,7 +218,9 @@ public:
     // ===========================================================
 
     void InitSurfaceChangedCallback();
+    void InitSurfacePositionChangedCallback();
     virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfacePositionChanged(int32_t posX, int32_t posY) {};
     bool HasSurfaceChangedCallback()
     {
         return surfaceChangedCallbackId_.has_value();
@@ -227,6 +229,16 @@ public:
     {
         surfaceChangedCallbackId_ = id;
     }
+
+    bool HasSurfacePositionChangedCallback()
+    {
+        return surfacePositionChangedCallbackId_.has_value();
+    }
+    void UpdateSurfacePositionChangedCallbackId(int32_t id)
+    {
+        surfacePositionChangedCallbackId_ = id;
+    }
+
     void SetOnClickEvent(GestureEventFunc&& onClick)
     {
         onClick_ = std::move(onClick);
@@ -348,6 +360,7 @@ private:
     RefPtr<TextContentModifier> textContentModifier_;
     RefPtr<TextOverlayModifier> textOverlayModifier_;
     std::optional<int32_t> surfaceChangedCallbackId_;
+    std::optional<int32_t> surfacePositionChangedCallbackId_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

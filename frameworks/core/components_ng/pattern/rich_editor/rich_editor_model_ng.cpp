@@ -37,6 +37,7 @@ void RichEditorModelNG::Create()
     richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
 
     richEditorPattern->InitSurfaceChangedCallback();
+    richEditorPattern->InitSurfacePositionChangedCallback();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
