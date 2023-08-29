@@ -41,4 +41,9 @@ bool NavBarPattern::GetFullStatus()
 {
     return true;
 }
+
+bool NavBarPattern::GetIsMinTitle() const
+{
+    return true;
+}
 }; // namespace OHOS::Ace::NG

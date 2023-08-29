@@ -694,6 +694,17 @@ bool NavBarPattern::GetFullStatus()
     return isFullStatus;
 }
 
+bool NavBarPattern::GetIsMinTitle() const
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, false);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, false);
+    return titlePattern->IsMinTitle();
+}
+
 RefPtr<FrameNode> NavBarPattern::FindScrollableChild()
 {
     auto host = GetHost();
