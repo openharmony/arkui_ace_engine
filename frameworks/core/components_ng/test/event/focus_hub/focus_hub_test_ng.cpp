@@ -1705,4 +1705,152 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0034, TestSize.Level1)
     focusHub->ClearFocusState(false);
     EXPECT_NE(focusHub->focusStyleType_, FocusStyleType::NONE);
 }
+
+/**
+ * @tc.name: FocusHubTestNg0035
+ * @tc.desc: Test the function RequestFocusImmediately.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0035, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    context->SetIsFocusingByTab(true);
+    focusHub->SetFocusType(FocusType::DISABLE);
+    focusHub->focusType_ = FocusType::NODE;
+    focusHub->currentFocus_ = false;
+    focusHub->onPreFocusCallback_ = []() {};
+    EXPECT_TRUE(focusHub->RequestFocusImmediately(true));
+    EXPECT_TRUE(focusHub->RequestFocusImmediately());
+    context->SetIsFocusingByTab(false);
+    focusHub->SetFocusType(FocusType::DISABLE);
+    focusHub->currentFocus_ = true;
+    EXPECT_TRUE(focusHub->RequestFocusImmediately());
+}
+
+/**
+ * @tc.name: FocusHubTestNg0036
+ * @tc.desc: Test the function OnFocusScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    child->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = true;
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_EQ(itNewFocusNode, focusNodes.end());
+    focusHub->OnFocusScope();
+    EXPECT_TRUE(focusHub->currentFocus_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0037
+ * @tc.desc: Test the function IsFocusableScopeByTab.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    child->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = true;
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_EQ(itNewFocusNode, focusNodes.end());
+    EXPECT_TRUE(focusHub->IsFocusableScopeByTab());
+}
+
+/**
+ * @tc.name: FocusHubTestNg0038
+ * @tc.desc: Test the function IsCurrentFocusWholePath.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_FALSE(focusHub->IsCurrentFocusWholePath());
+    focusHub->currentFocus_ = true;
+    EXPECT_FALSE(focusHub->IsCurrentFocusWholePath());
+    focusHub->focusType_ = FocusType::NODE;
+    EXPECT_TRUE(focusHub->IsCurrentFocusWholePath());
+    focusHub->focusType_ = FocusType::SCOPE;
+    EXPECT_FALSE(focusHub->IsCurrentFocusWholePath());
+}
+
+/**
+ * @tc.name: FocusHubTestNg0039
+ * @tc.desc: Test the function DumpFocusTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    int32_t depth = 1;
+    focusHub->focusType_ = FocusType::DISABLE;
+    focusHub->DumpFocusTree(depth);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0040
+ * @tc.desc: Test the function AcceptFocusOfLastFocus and AcceptFocusByRectOfLastFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    RectF childRect;
+    focusHub->focusType_ = FocusType::SCOPE;
+    EXPECT_FALSE(focusHub->AcceptFocusOfLastFocus());
+    EXPECT_FALSE(focusHub->AcceptFocusByRectOfLastFocus(childRect));
+    focusHub->focusType_ = FocusType::NODE;
+    EXPECT_FALSE(focusHub->AcceptFocusOfLastFocus());
+    EXPECT_FALSE(focusHub->AcceptFocusByRectOfLastFocus(childRect));
+    focusHub->focusType_ = FocusType::DISABLE;
+    EXPECT_FALSE(focusHub->AcceptFocusOfLastFocus());
+    EXPECT_FALSE(focusHub->AcceptFocusByRectOfLastFocus(childRect));
+}
 } // namespace OHOS::Ace::NG
