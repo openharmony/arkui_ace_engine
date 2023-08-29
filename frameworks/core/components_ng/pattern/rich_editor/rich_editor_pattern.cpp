@@ -2342,10 +2342,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         CHECK_NULL_VOID_NOLOG(host);
 
         pattern->UpdateSelectMenuInfo(hasData, selectInfo, isCopyAll);
-        if (pattern->copyOption_ == CopyOptions::None) {
-            selectInfo.menuInfo.showCopy = false;
-            selectInfo.menuInfo.showCut = false;
-        }
 
         selectInfo.menuCallback.onCopy = [weak]() {
             auto pattern = weak.Upgrade();
