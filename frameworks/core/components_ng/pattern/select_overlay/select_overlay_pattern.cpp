@@ -275,13 +275,6 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
 {
-    auto host = DynamicCast<SelectOverlayNode>(GetHost());
-    CHECK_NULL_VOID(host);
-    orignMenuIsShow_ = info_->menuInfo.menuIsShow;
-    if (info_->menuInfo.menuIsShow) {
-        info_->menuInfo.menuIsShow = false;
-        host->UpdateToolBar(false);
-    }
     PointF point = { info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY() };
     if (firstHandleRegion_.IsInRegion(point)) {
         firstHandleDrag_ = true;
@@ -297,8 +290,16 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
         }
     } else {
         LOGW("the point is not in drag area");
+        return;
     }
 
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    orignMenuIsShow_ = info_->menuInfo.menuIsShow;
+    if (info_->menuInfo.menuIsShow) {
+        info_->menuInfo.menuIsShow = false;
+        host->UpdateToolBar(false);
+    }
     if (info_->isSingleHandle && !info_->isHandleLineShow) {
         StopHiddenHandleTask();
     }
