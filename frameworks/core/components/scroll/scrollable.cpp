@@ -925,8 +925,7 @@ void Scrollable::ProcessScrollSnapMotion(double position)
         }
     }
     currentPos_ = scrollSnapMotion_->GetCurrentPosition();
-    if (canOverScroll_ || needScrollSnapChange_ ||
-        (!overScrollOffsetCallback_ && (outBoundaryCallback_ && outBoundaryCallback_()))) {
+    if (outBoundaryCallback_ && outBoundaryCallback_()) {
         scrollPause_ = true;
         scrollSnapController_->Stop();
     }
