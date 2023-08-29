@@ -219,11 +219,7 @@ public:
         customKeyboardBulder_ = keyboardBuilder;
     }
     void BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>& menuBuilder,
-        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear)
-    {
-        selectionMenuParams_ =
-            std::make_shared<SelectionMenuParams>(richEditorType, menuBuilder, onAppear, onDisappear, type);
-    }
+        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
