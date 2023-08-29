@@ -13,10 +13,40 @@
  * limitations under the License.
  */
 
+#include <list>
+#include <string>
+#include <vector>
+
 #include "gtest/gtest.h"
 
 #define private public
+#define protected public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_window.h"
+
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/offset.h"
+#include "base/geometry/point.h"
+#include "base/geometry/rect.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
+#include "core/components/ability_component/ability_component.h"
+#include "core/components/ability_component/render_ability_component.h"
+#include "core/components/box/render_box.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/focus_hub.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/ace_events.h"
+#include "core/event/axis_event.h"
+#include "core/event/key_event.h"
+#include "core/event/mouse_event.h"
+#include "core/event/touch_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/event_manager.h"
 
 using namespace testing;
@@ -27,6 +57,9 @@ const std::string CTRL = "Ctrl";
 const std::string SHIFT = "shift";
 const std::string ALT = "alt";
 const std::string CTRLSHIFT = "Ctrl + shift";
+const std::string MOUSE = "mouse";
+const std::string MOUSE_EVENT = "mouse_event";
+const std::string MOUSE_EVENT_2 = "mouse_event_2";
 
 const std::string CHARACTER_C = "C";
 const std::string CHARACTER_A = "A";
@@ -35,11 +68,26 @@ const std::string CHARACTER_Z = "Z";
 const std::string CHARACTER_EIGHT = "8";
 const std::string CHARACTER_X = "X";
 
+const std::string SHORT_CUT_VALUE_X = "X";
+const std::string SHORT_CUT_VALUE_Y = "Y";
+const std::string SHORT_CUT_VALUE_Z = "Z";
+const std::string SHORT_CUT_VALUE_A = "A";
+const std::string SHORT_CUT_VALUE_C = "C";
+const std::string SHORT_CUT_VALUE_V = "V";
+
 constexpr int32_t NUM_CTRL_VALUE = 1;
 constexpr int32_t NUM_SHIFT_VALUE = 2;
 constexpr int32_t NUM_ALT_VALUE = 4;
 
 constexpr int32_t NODEID = 1;
+constexpr int32_t NODEID_2 = 2;
+constexpr int32_t NODEID_3 = 3;
+
+enum class CtrlKeysBit {
+    CTRL = 1,
+    SHIFT = 2,
+    ALT = 4,
+};
 } // namespace
 
 class EventManagerTestNg : public testing::Test {
@@ -244,5 +292,857 @@ HWTEST_F(EventManagerTestNg, EventManagerTest005, TestSize.Level1)
     auto frameNodetwo = FrameNode::GetOrCreateFrameNode(SHIFT, NODEID, nullptr);
     eventManager->DelKeyboardShortcutNode(frameNodetwo->GetId());
     ASSERT_NE(frameNodetwo, nullptr);
+}
+
+/**
+ * @tc.name: EventManagerTest006
+ * @tc.desc: Test GetKeyboardShortcutKeys
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetKeyboardShortcutKeys with keys.size() > KEYS_MAX_VALUE.
+     * @tc.expected: Value of ret is 0.
+     */
+    std::vector<ModifierKey> keys { ModifierKey::ALT, ModifierKey::CTRL, ModifierKey::SHIFT, ModifierKey::SHIFT };
+    auto ret = eventManager->GetKeyboardShortcutKeys(keys);
+    ASSERT_EQ(ret, 0);
+
+    /**
+     * @tc.steps: step3. Call GetKeyboardShortcutKeys with keys CTRL SHIFT ALT.
+     * @tc.expected: Value of ret is CTRL | SHIFT | ALT.
+     */
+    keys.pop_back();
+    ret = eventManager->GetKeyboardShortcutKeys(keys);
+    uint8_t target = static_cast<uint8_t>(CtrlKeysBit::CTRL) | static_cast<uint8_t>(CtrlKeysBit::SHIFT) |
+                     static_cast<uint8_t>(CtrlKeysBit::ALT);
+    ASSERT_EQ(ret, target);
+
+    /**
+     * @tc.steps: step4. Call GetKeyboardShortcutKeys with keys CTRL CTRL.
+     * @tc.expected: Value of ret is 0.
+     */
+    keys = std::vector<ModifierKey>({ ModifierKey::CTRL, ModifierKey::CTRL });
+    ret = eventManager->GetKeyboardShortcutKeys(keys);
+    ASSERT_EQ(ret, 0);
+
+    /**
+     * @tc.steps: step5. Call GetKeyboardShortcutKeys with keys SHIFT SHIFT.
+     * @tc.expected: Value of ret is 0.
+     */
+    keys = std::vector<ModifierKey>({ ModifierKey::SHIFT, ModifierKey::SHIFT });
+    ret = eventManager->GetKeyboardShortcutKeys(keys);
+    ASSERT_EQ(ret, 0);
+
+    /**
+     * @tc.steps: step6. Call GetKeyboardShortcutKeys with keys SHIFT SHIFT.
+     * @tc.expected: Value of ret is 0.
+     */
+    keys = std::vector<ModifierKey>({ ModifierKey::ALT, ModifierKey::ALT });
+    ret = eventManager->GetKeyboardShortcutKeys(keys);
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: EventManagerTest007
+ * @tc.desc: Test IsSystemKeyboardShortcut
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call IsSystemKeyboardShortcut with CTRL C.
+     * @tc.expected: retFlag is true.
+     */
+    std::string value = SHORT_CUT_VALUE_C;
+    uint8_t keys = static_cast<uint8_t>(CtrlKeysBit::CTRL);
+    auto retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step2. Call IsSystemKeyboardShortcut with CTRL A.
+     * @tc.expected: retFlag is true.
+     */
+    value = SHORT_CUT_VALUE_A;
+    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step3. Call IsSystemKeyboardShortcut with CTRL V.
+     * @tc.expected: retFlag is true.
+     */
+    value = SHORT_CUT_VALUE_V;
+    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step4. Call IsSystemKeyboardShortcut with CTRL X.
+     * @tc.expected: retFlag is true.
+     */
+    value = SHORT_CUT_VALUE_X;
+    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step5. Call IsSystemKeyboardShortcut with CTRL Y.
+     * @tc.expected: retFlag is true.
+     */
+    value = SHORT_CUT_VALUE_Y;
+    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step6. Call IsSystemKeyboardShortcut with CTRL Z.
+     * @tc.expected: retFlag is true.
+     */
+    value = SHORT_CUT_VALUE_Z;
+    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step6. Call IsSystemKeyboardShortcut with CTRL SHIFT Z.
+     * @tc.expected: retFlag is true.
+     */
+    value = SHORT_CUT_VALUE_Z;
+    keys = static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT);
+    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step6. Call IsSystemKeyboardShortcut with CTRL SHIFT A.
+     * @tc.expected: retFlag is false.
+     */
+    value = SHORT_CUT_VALUE_A;
+    keys = static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT);
+    retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
+    ASSERT_FALSE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest008
+ * @tc.desc: Test IsSystemKeyboardShortcut
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call IsSameKeyboardShortcutNode with CTRL C.
+     * @tc.expected: retFlag is true.
+     */
+    std::string value = SHORT_CUT_VALUE_A;
+    uint8_t keys = static_cast<uint8_t>(CtrlKeysBit::CTRL);
+    auto retFlag = eventManager->IsSystemKeyboardShortcut(value, keys);
+    ASSERT_TRUE(retFlag);
+    retFlag = eventManager->IsSameKeyboardShortcutNode(value, keys);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step2. Call IsSystemKeyboardShortcut with SHIFT A.
+     * @tc.expected: retFlag is true.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(CTRL, NUM_CTRL_VALUE, nullptr);
+    frameNode->eventHub_ = nullptr;
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
+
+    auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, NUM_SHIFT_VALUE, nullptr);
+    frameNodeShift->eventHub_->SetKeyboardShortcut(SHORT_CUT_VALUE_A, static_cast<int>(CtrlKeysBit::SHIFT), []() {});
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
+
+    value = SHORT_CUT_VALUE_A;
+    keys = static_cast<uint8_t>(CtrlKeysBit::SHIFT);
+    retFlag = eventManager->IsSameKeyboardShortcutNode(value, keys);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step3. Call IsSystemKeyboardShortcut with SHIFT X while shortcut in frameNode is SHIFT A.
+     * @tc.expected: retFlag is true.
+     */
+    value = SHORT_CUT_VALUE_X;
+    keys = static_cast<uint8_t>(CtrlKeysBit::SHIFT);
+    retFlag = eventManager->IsSameKeyboardShortcutNode(value, keys);
+    ASSERT_FALSE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest009
+ * @tc.desc: Test ClearResults
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Add KeyboardShortcutNode
+     * @tc.expected: keyboardShortcutNode_.size() > 0.
+     */
+    auto frameNodeShift = FrameNode::GetOrCreateFrameNode(SHIFT, NUM_SHIFT_VALUE, nullptr);
+    frameNodeShift->eventHub_->SetKeyboardShortcut(SHORT_CUT_VALUE_A, static_cast<int>(CtrlKeysBit::SHIFT), []() {});
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
+    ASSERT_GT(eventManager->keyboardShortcutNode_.size(), 0);
+
+    /**
+     * @tc.steps: step3. Call ClearResults
+     * @tc.expected: keyboardShortcutNode_.size() = 0.
+     */
+    eventManager->ClearResults();
+    ASSERT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+}
+
+/**
+ * @tc.name: EventManagerTest010
+ * @tc.desc: Test TouchTest with RenderNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call TouchTest
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
+     */
+    TouchEvent touchPoint;
+    auto renderNode = RenderAbilityComponent::Create();
+    TouchRestrict touchRestrict;
+    Offset offset;
+    EXPECT_EQ(eventManager->touchTestResults_.count(touchPoint.id), 0);
+    eventManager->TouchTest(touchPoint, renderNode, touchRestrict, offset, 0, true);
+    EXPECT_GT(eventManager->touchTestResults_.count(touchPoint.id), 0);
+}
+
+/**
+ * @tc.name: EventManagerTest011
+ * @tc.desc: Test TouchTest with FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create FrameNode and Call TouchTest with needAppend false
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
+     */
+    TouchEvent touchPoint;
+    touchPoint.id = 0;
+    touchPoint.type = TouchType::DOWN;
+
+    const int nodeId = 10001;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+    Offset offset;
+    EXPECT_EQ(eventManager->touchTestResults_.count(touchPoint.id), 0);
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, false);
+    EXPECT_GT(eventManager->touchTestResults_.count(touchPoint.id), 0);
+
+    /**
+     * @tc.steps: step2. Create FrameNode and Call TouchTest with needAppend true
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
+     */
+    eventManager->touchTestResults_.erase(touchPoint.id);
+    EXPECT_EQ(eventManager->touchTestResults_.count(touchPoint.id), 0);
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
+    EXPECT_GT(eventManager->touchTestResults_.count(touchPoint.id), 0);
+}
+
+/**
+ * @tc.name: EventManagerTest012
+ * @tc.desc: Test TouchTest with FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create FrameNode and Call TouchTest
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
+     */
+    AxisEvent axisEvent;
+    axisEvent.sourceType = SourceType::TOUCH;
+
+    const int nodeId = 10002;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+
+    EXPECT_EQ(eventManager->axisTouchTestResults_.count(axisEvent.id), 0);
+    eventManager->TouchTest(axisEvent, frameNode, touchRestrict);
+    EXPECT_GT(eventManager->axisTouchTestResults_.count(axisEvent.id), 0);
+}
+
+/**
+ * @tc.name: EventManagerTest013
+ * @tc.desc: Test HandleGlobalEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create FrameNode and Call TouchTest to add touchTestResults_[touchPoint.id]
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
+     */
+    TouchEvent touchPoint;
+    touchPoint.type = TouchType::DOWN;
+
+    const int nodeId = 10003;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+    Offset offset;
+
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
+    EXPECT_GT(eventManager->touchTestResults_.count(touchPoint.id), 0);
+
+    /**
+     * @tc.steps: step3. Create FrameNode and Call TouchTest to add touchTestResults_[touchPoint.id]
+     * @tc.expected: selectOverlayManager->touchTestResults_ is empty for do not have specific event
+     */
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(frameNode);
+    NG::OffsetF rootOffset;
+    eventManager->HandleGlobalEventNG(touchPoint, selectOverlayManager, rootOffset);
+    EXPECT_EQ(selectOverlayManager->touchTestResults_.size(), 0);
+}
+
+/**
+ * @tc.name: EventManagerTest014
+ * @tc.desc: Test HandleOutOfRectCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create rectCallbackList
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
+     */
+    Point point(10, 20);
+    point.SetSourceType(SourceType::TOUCH);
+
+    auto rectGetCallback1 = [](std::vector<Rect>& rectList) -> void { rectList.push_back(Rect()); };
+    auto rectGetCallback2 = [](std::vector<Rect>& rectList) -> void { rectList.push_back(Rect(0, 0, 100, 100)); };
+
+    auto touchCallback = []() -> void {};
+    auto mouseCallback = []() -> void {};
+    std::vector<RectCallback> rectCallbackList { RectCallback(rectGetCallback1, touchCallback, mouseCallback),
+        RectCallback(rectGetCallback2, touchCallback, mouseCallback) };
+
+    /**
+     * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::TOUCH
+     * @tc.expected: rectCallbackList.size() is 1
+     */
+    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
+    EXPECT_EQ(rectCallbackList.size(), 1);
+
+    /**
+     * @tc.steps: step4. Call HandleOutOfRectCallback with SourceType::MOUSE
+     * @tc.expected: rectCallbackList.size() is 0
+     */
+    point.SetSourceType(SourceType::MOUSE);
+    rectCallbackList = vector<RectCallback>({ RectCallback(rectGetCallback1, touchCallback, mouseCallback) });
+    eventManager->HandleOutOfRectCallback(point, rectCallbackList);
+    EXPECT_TRUE(rectCallbackList.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest015
+ * @tc.desc: Test TouchTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call TouchTest.
+     * @tc.expected: eventManager is not null.
+     */
+    AxisEvent axisEvent;
+    axisEvent.sourceType = SourceType::TOUCH;
+
+    auto renderNode = RenderAbilityComponent::Create();
+    TouchRestrict touchRestrict;
+
+    EXPECT_EQ(eventManager->axisTouchTestResults_.count(axisEvent.id), 0);
+    eventManager->TouchTest(axisEvent, renderNode, touchRestrict);
+    EXPECT_GT(eventManager->axisTouchTestResults_.count(axisEvent.id), 0);
+}
+
+/**
+ * @tc.name: EventManagerTest016
+ * @tc.desc: Test DispatchTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create TouchEvent and Call DispatchTouchEvent
+     * @tc.expected: retFlag is false
+     */
+    AxisEvent event;
+    event.action = AxisAction::BEGIN;
+
+    auto retFlag = eventManager->DispatchTouchEvent(event);
+    EXPECT_FALSE(retFlag);
+
+    /**
+     * @tc.steps: step3. Create FrameNode and Call TouchTest to add axisTouchTestResults_
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
+     */
+    event.action = AxisAction::END;
+
+    const int nodeId = 10004;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+
+    eventManager->TouchTest(event, frameNode, touchRestrict);
+    EXPECT_GT(eventManager->axisTouchTestResults_.count(event.id), 0);
+
+    /**
+     * @tc.steps: step4. Call DispatchTouchEvent
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance
+     */
+    retFlag = eventManager->DispatchTouchEvent(event);
+    EXPECT_TRUE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest017
+ * @tc.desc: Test DispatchTabIndexEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create frameNodes
+     * @tc.expected: retFlag is false
+     */
+    const int focusNodeId = 10005;
+    auto focusNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, focusNodeId, nullptr);
+    const int mainNodeId = 10006;
+    auto mainNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, mainNodeId, nullptr);
+
+    /**
+     * @tc.steps: step3. Call DispatchTabIndexEventNG
+     * @tc.expected: retFlag is false
+     */
+    KeyEvent event;
+    auto retFlag = eventManager->DispatchTabIndexEventNG(event, focusNode, mainNode);
+    ASSERT_FALSE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest018
+ * @tc.desc: Test DispatchKeyEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create frameNodes
+     * @tc.expected: retFlag is false
+     */
+    const int focusNodeId = 10007;
+    auto focusNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, focusNodeId, nullptr);
+    focusNode->eventHub_ = AceType::MakeRefPtr<ButtonEventHub>();
+    focusNode->eventHub_->GetOrCreateFocusHub(FocusType::NODE);
+    ASSERT_NE(focusNode->GetFocusHub(), nullptr);
+
+    /**
+     * @tc.steps: step3. Call DispatchKeyEventNG
+     * @tc.expected: retFlag is false
+     */
+    KeyEvent event;
+    auto retFlag = eventManager->DispatchKeyEventNG(event, focusNode);
+    ASSERT_FALSE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest019
+ * @tc.desc: Test MouseTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call MouseTest with MouseAction::WINDOW_LEAVE
+     * @tc.expected: retFlag is false
+     */
+    auto renderNode = RenderAbilityComponent::Create();
+
+    MouseEvent event;
+    event.action = MouseAction::WINDOW_LEAVE;
+    eventManager->mouseHoverTestResults_.push_back(renderNode);
+    ASSERT_FALSE(eventManager->mouseHoverTestResults_.empty());
+    eventManager->MouseTest(event, renderNode);
+    ASSERT_TRUE(eventManager->mouseHoverTestResults_.empty());
+
+    /**
+     * @tc.steps: step3. Call MouseTest with MouseAction::WINDOW_LEAVE
+     * @tc.expected: retFlag is false
+     */
+    event.action = MouseAction::WINDOW_ENTER;
+    eventManager->mouseHoverTestResultsPre_.push_back(renderNode);
+    ASSERT_FALSE(eventManager->mouseHoverTestResultsPre_.empty());
+    eventManager->MouseTest(event, renderNode);
+    ASSERT_TRUE(eventManager->mouseHoverTestResultsPre_.empty());
+
+    /**
+     * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
+     * @tc.expected: retFlag is false
+     */
+    event.action = MouseAction::HOVER;
+    eventManager->mouseHoverTestResults_.push_back(renderNode);
+    ASSERT_TRUE(eventManager->mouseHoverTestResultsPre_.empty());
+    ASSERT_FALSE(eventManager->mouseHoverTestResults_.empty());
+    eventManager->MouseTest(event, renderNode);
+    ASSERT_FALSE(eventManager->mouseHoverTestResultsPre_.empty());
+    ASSERT_TRUE(eventManager->mouseHoverTestResults_.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest020
+ * @tc.desc: Test MouseTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto renderNode = RenderAbilityComponent::Create();
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->mouseHoverTestResults_.push_back(renderNode);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseEvent with MouseAction::PRESS
+     * @tc.expected: retFlag is true
+     */
+    MouseEvent event;
+
+    event.action = MouseAction::PRESS;
+    auto retFlag = eventManager->DispatchMouseEvent(event);
+    EXPECT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step3. Call DispatchMouseEvent with MouseAction::RELEASE
+     * @tc.expected: retFlag is true
+     */
+    event.action = MouseAction::RELEASE;
+    retFlag = eventManager->DispatchMouseEvent(event);
+    EXPECT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step4. Call DispatchMouseEvent with MouseAction::MOVE
+     * @tc.expected: retFlag is true
+     */
+    event.action = MouseAction::MOVE;
+    retFlag = eventManager->DispatchMouseEvent(event);
+    EXPECT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step5. Call DispatchMouseEvent with MouseAction::HOVER
+     * @tc.expected: retFlag is false
+     */
+    event.action = MouseAction::HOVER;
+    retFlag = eventManager->DispatchMouseEvent(event);
+    EXPECT_FALSE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest021
+ * @tc.desc: Test DispatchMouseHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto renderNode = RenderAbilityComponent::Create();
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->mouseHoverTestResults_.push_back(renderNode);
+    eventManager->mouseHoverTestResultsPre_.push_back(renderNode);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseHoverEvent
+     * @tc.expected: retFlag is true
+     */
+    MouseEvent event;
+    auto retFlag = eventManager->DispatchMouseHoverEvent(event);
+    EXPECT_TRUE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest022
+ * @tc.desc: Test MouseTest (frameNode)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call MouseTest with MouseAction::WINDOW_LEAVE
+     * @tc.expected: currHoverTestResults_ is empty
+     */
+    MouseEvent event;
+    const int nodeId = 10008;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+
+    event.action = MouseAction::WINDOW_LEAVE;
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    eventManager->currHoverTestResults_.push_back(hoverEventTarget);
+    ASSERT_FALSE(eventManager->currHoverTestResults_.empty());
+    eventManager->MouseTest(event, frameNode, touchRestrict);
+    ASSERT_TRUE(eventManager->currHoverTestResults_.empty());
+
+    /**
+     * @tc.steps: step3. Call MouseTest with MouseAction::WINDOW_ENTER
+     * @tc.expected: lastHoverTestResults_ is empty
+     */
+    event.action = MouseAction::WINDOW_ENTER;
+    eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
+    ASSERT_FALSE(eventManager->lastHoverTestResults_.empty());
+    eventManager->MouseTest(event, frameNode, touchRestrict);
+    ASSERT_TRUE(eventManager->lastHoverTestResults_.empty());
+
+    /**
+     * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
+     * @tc.expected: lastHoverTestResults_ is empty and currHoverTestResults_ is empty
+     */
+    event.action = MouseAction::HOVER;
+    eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
+    eventManager->MouseTest(event, frameNode, touchRestrict);
+    ASSERT_TRUE(eventManager->lastHoverTestResults_.empty());
+    ASSERT_TRUE(eventManager->currHoverTestResults_.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest023
+ * @tc.desc: Test DispatchMouseEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseEventNG
+     * @tc.expected: currHoverTestResults_ is empty
+     */
+    MouseEvent event;
+    event.action = MouseAction::PRESS;
+    event.button = MouseButton::LEFT_BUTTON;
+    event.pullAction = MouseAction::MOVE;
+
+    auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
+    eventManager->pressMouseTestResults_.push_back(mouseEventTarget);
+    eventManager->currMouseTestResults_.push_back(mouseEventTarget);
+
+    auto retFlag = eventManager->DispatchMouseEventNG(event);
+    ASSERT_FALSE(retFlag);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseEventNG
+     * @tc.expected: currHoverTestResults_ is empty
+     */
+    event.action = MouseAction::RELEASE;
+    event.button = MouseButton::LEFT_BUTTON;
+    event.pullAction = MouseAction::MOVE;
+    retFlag = eventManager->DispatchMouseEventNG(event);
+    ASSERT_FALSE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest024
+ * @tc.desc: Test DispatchMouseHoverEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseHoverEventNG with lastHoverTestResults != currHoverTestResults
+     * @tc.expected: retFlag is true
+     */
+    MouseEvent event;
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(MOUSE, NODEID);
+    auto hoverEventTarget2 = AceType::MakeRefPtr<HoverEventTarget>(MOUSE_EVENT, NODEID_2);
+    auto hoverEventTarget3 = AceType::MakeRefPtr<HoverEventTarget>(MOUSE_EVENT_2, NODEID_3);
+    eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
+    eventManager->currHoverTestResults_.push_back(hoverEventTarget2);
+    eventManager->currHoverTestResults_.push_back(hoverEventTarget3);
+    eventManager->currHoverTestResults_.push_back(hoverEventTarget);
+    eventManager->lastHoverDispatchLength_++;
+
+    auto retFlag = eventManager->DispatchMouseHoverEventNG(event);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseHoverEventNG with lastHoverTestResults == currHoverTestResults
+     * @tc.expected: retFlag is true
+     */
+    eventManager->lastHoverTestResults_.clear();
+    eventManager->lastHoverTestResults_.push_back(hoverEventTarget);
+    eventManager->currHoverTestResults_.clear();
+    eventManager->currHoverTestResults_.push_back(hoverEventTarget);
+
+    retFlag = eventManager->DispatchMouseHoverEventNG(event);
+    ASSERT_TRUE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest025
+ * @tc.desc: Test DispatchAxisEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call DispatchAxisEventNG with horizontalAxis verticalAxis pinchAxisScale = 0
+     * @tc.expected: retFlag is false
+     */
+    AxisEvent event;
+    event.horizontalAxis = 0;
+    event.verticalAxis = 0;
+    event.pinchAxisScale = 0;
+    auto retFlag = eventManager->DispatchAxisEventNG(event);
+    ASSERT_FALSE(retFlag);
+
+    /**
+     * @tc.steps: step3. Call DispatchAxisEventNG with axisTestResults_ empty
+     * @tc.expected: retFlag is false
+     */
+    event.horizontalAxis = 1;
+    retFlag = eventManager->DispatchAxisEventNG(event);
+    ASSERT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step4. Call DispatchAxisEventNG with axisTestResults_ not empty
+     * @tc.expected: retFlag is false
+     */
+    auto axisEventTarget = AceType::MakeRefPtr<AxisEventTarget>();
+    auto onAxisCallback = [](AxisInfo&) -> void {};
+    axisEventTarget->SetOnAxisCallback(onAxisCallback);
+
+    eventManager->axisTestResults_.push_back(axisEventTarget);
+    retFlag = eventManager->DispatchAxisEventNG(event);
+    ASSERT_TRUE(retFlag);
 }
 } // namespace OHOS::Ace::NG
