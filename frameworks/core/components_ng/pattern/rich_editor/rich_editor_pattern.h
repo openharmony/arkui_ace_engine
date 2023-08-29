@@ -167,7 +167,7 @@ public:
     std::u16string GetLeftTextOfCursor(int32_t number);
     std::u16string GetRightTextOfCursor(int32_t number);
     int32_t GetTextIndexAtCursor();
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     int32_t GetHandleIndex(const Offset& offset) const override;
     void OnAreaChangedInner() override;
@@ -237,7 +237,7 @@ public:
 #endif
 
 private:
-    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
+    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
         auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
         bool isShowItem = copyOption_ != CopyOptions::None;

@@ -1169,7 +1169,7 @@ void RichEditorPattern::HandleOnSelectAll()
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay();
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
     selectMenuInfo_.showCopyAll = false;
     selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
     auto host = GetHost();
@@ -2638,13 +2638,14 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
     selectInfo.menuCallback.onDisappear = menuParams->onDisappear;
 }
 
-void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle)
+void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle](bool hasData) {
+    auto hasDataCallback = [weak = WeakClaim(this), pipeline, firstHandle, secondHandle, isCopyAll](bool hasData) {
         auto pattern = weak.Upgrade();
         SelectOverlayInfo selectInfo;
+        bool usingMouse = pattern->IsUsingMouse();
         if (!pattern->IsUsingMouse()) {
             selectInfo.firstHandle.paintRect = firstHandle;
             selectInfo.secondHandle.paintRect = secondHandle;
@@ -2667,7 +2668,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         auto host = pattern->GetHost();
         CHECK_NULL_VOID_NOLOG(host);
 
-        pattern->UpdateSelectMenuInfo(hasData, selectInfo);
+        pattern->UpdateSelectMenuInfo(hasData, selectInfo, isCopyAll);
 
         selectInfo.menuCallback.onCopy = [weak]() {
             auto pattern = weak.Upgrade();
@@ -2688,9 +2689,10 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnPaste();
         };
-        selectInfo.menuCallback.onSelectAll = [weak]() {
+        selectInfo.menuCallback.onSelectAll = [weak, usingMouse]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->isMousePressed_ = usingMouse;
             pattern->HandleOnSelectAll();
         };
         selectInfo.callerFrameNode = host;
