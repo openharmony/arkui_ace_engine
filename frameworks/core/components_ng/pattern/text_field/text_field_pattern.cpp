@@ -296,6 +296,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
         updateSelectionAfterObscure_ = false;
     }
+    if (hostLayoutProperty && hostLayoutProperty->GetFontSizeChangedValue(false)) {
+        GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+        hostLayoutProperty->ResetFontSizeChanged();
+    }
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
     }
