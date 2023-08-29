@@ -1508,8 +1508,10 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     // pack gesture group.
     TouchTestResult newComingTargets;
     auto tmp = parentLocalPoint - paintRect.GetOffset();
+    auto preLocation = tmp;
     renderContext_->GetPointWithTransform(tmp);
     const auto localPoint = tmp;
+    auto localTransformOffset = preLocation - localPoint;
     bool consumed = false;
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
@@ -1558,7 +1560,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             auto gestureHub = eventHub_->GetGestureEventHub();
             if (gestureHub) {
                 TouchTestResult finalResult;
-                const auto coordinateOffset = globalPoint - localPoint;
+                const auto coordinateOffset = globalPoint - localPoint - localTransformOffset;
                 preventBubbling = gestureHub->ProcessTouchTestHit(
                     coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId, localPoint);
                 newComingTargets.swap(finalResult);
