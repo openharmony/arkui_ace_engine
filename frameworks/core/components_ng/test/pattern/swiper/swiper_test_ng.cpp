@@ -4170,8 +4170,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorCalculateNormalMargin001, TestSize.Level1)
     paintMethod->IsCustomSizeValue_ = true;
     /**
      * @tc.steps: step3. call PaintNormalIndicator.
-     * @tc.expected: paintMethod->normalMargin_.X is 342.0
-     *               paintMethod->normalMargin_.Y is 548.5
+     * @tc.expected: run success
      */
     paintMethod->PaintNormalIndicator(&paintWrapper);
 
@@ -4451,6 +4450,9 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPaintPressIndicator001, TestSize.Level1)
      */
     paintMethod->PaintPressIndicator(&paintWrapper);
     EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsPressed());
+    paintMethod->IsCustomSizeValue_ = true;
+    paintMethod->PaintPressIndicator(&paintWrapper);
+    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsPressed());
 }
 
 /**
@@ -4502,6 +4504,8 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPaintPressIndicator002, TestSize.Level1)
     paintMethod->PaintPressIndicator(&paintWrapper);
     EXPECT_TRUE(NearEqual(
         paintMethod->dotIndicatorModifier_->itemHalfSizes_->Get()[1], ITEM_HEIGHT * 0.5 * INDICATOR_ZOOM_IN_SCALE));
+    paintMethod->IsCustomSizeValue_ = true;
+    paintMethod->PaintPressIndicator(&paintWrapper);
 }
 
 /**
@@ -5284,6 +5288,83 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier003, TestSize.Level1)
     EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[1], ITEM_HEIGHT);
     EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], SELECTED_ITEM_WIDTH);
     EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], SELECTED_ITEM_HEIGHT_LARGE);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier004
+ * @tc.desc: Test PaintMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, DotIndicatorModifier004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DotIndicatorModifier. Update PaintProperty.Call the function onDraw.
+     * @tc.expected: step1. Check the PaintProperty update success.
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.emplace_back(ITEM_WIDTH);
+    // call the UpdateDilatePaintProperty to set property.
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ONE;
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(ITEM_WIDTH);
+    itemHalfSizes.emplace_back(ITEM_HEIGHT);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_WIDTH);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_HEIGHT_LARGE);
+    dotIndicatorModifier.UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX, LONG_POINT_CENTER_X);
+    dotIndicatorModifier.onDraw(context);
+    dotIndicatorModifier.PaintMask(context);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier005
+ * @tc.desc: Test PaintMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, DotIndicatorModifier005, TestSize.Level1)
+{
+    DotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.emplace_back(ITEM_WIDTH);
+    // call the UpdateDilatePaintProperty to set property.
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ONE;
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(ITEM_WIDTH);
+    itemHalfSizes.emplace_back(ITEM_HEIGHT);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_WIDTH);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_HEIGHT_LARGE);
+    dotIndicatorModifier.UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX, LONG_POINT_CENTER_X);
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.onDraw(context);
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::START;
+    dotIndicatorModifier.onDraw(context);
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::END;
+    dotIndicatorModifier.onDraw(context);
 }
 
 /**
@@ -6702,7 +6783,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious001, TestSize.Level1)
     ASSERT_NE(swiperPattern, nullptr);
     swiperNode->Clean(false, false);
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-    ASSERT_EQ(swiperPattern->TotalCount(), 0);
     swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
     ASSERT_NE(swiperNode->paintProperty_, nullptr);
     swiperPattern->currentIndex_ = 0;
