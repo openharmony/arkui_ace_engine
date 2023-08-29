@@ -23,4 +23,10 @@ RefPtr<AceType> OffscreenContextModelNG::CreateOffscreenPattern(int width, int h
     auto offscreenPattern = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(width, height);
     return offscreenPattern;
 }
+bool OffscreenContextModelNG::IsSucceed(RefPtr<AceType> offscreenPattern)
+{
+    auto tempPattern = OHOS::Ace::AceType::DynamicCast<OffscreenCanvasPattern>(offscreenPattern);
+    CHECK_NULL_RETURN(tempPattern, false);
+    return tempPattern->IsSucceed();
+}
 } // namespace OHOS::Ace::NG

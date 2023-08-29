@@ -179,8 +179,7 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         std::lock_guard<std::mutex> lock(mutex_);
         offscreenPatternMap_[offscreenPatternCount_++] = offscreenPattern;
 
-        auto tempPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(offscreenPattern);
-        if (!tempPattern->IsSucceed()) {
+        if (!OffscreenContextModel::GetInstance()->IsSucceed(offscreenPattern)) {
             return;
         }
     }

@@ -22,6 +22,10 @@ namespace OHOS::Ace::Framework {
 class OffscreenContextModelImpl : public OHOS::Ace::OffscreenContextModel {
 public:
     RefPtr<AceType> CreateOffscreenPattern(int width, int height) override;
+    bool IsSucceed(RefPtr<AceType> offscreenPattern) override
+    {
+        return true;
+    }
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_OFFSCREEN_CONTEXT_MODEL_IMPL_H
