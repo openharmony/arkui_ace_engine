@@ -178,6 +178,7 @@ void WindowScene::OnActivation()
             self->contentNode_.Reset();
             self->snapshotNode_.Reset();
             self->OnAttachToFrameNode();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             return;
         }
 
