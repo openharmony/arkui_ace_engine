@@ -53,7 +53,7 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
         .bundleName_ = want.GetElement().GetBundleName(),
         .abilityName_ = want.GetElement().GetAbilityName(),
         .callerToken_ = callerToken,
-        .want = new (std::nothrow) Want(want),
+        .want = std::make_shared<Want>(want),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -75,7 +75,7 @@ UIExtensionPattern::UIExtensionPattern(const AAFwk::Want& want)
         .bundleName_ = want.GetElement().GetBundleName(),
         .abilityName_ = want.GetElement().GetAbilityName(),
         .callerToken_ = callerToken,
-        .want = new (std::nothrow) Want(want),
+        .want = std::make_shared<Want>(want),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
