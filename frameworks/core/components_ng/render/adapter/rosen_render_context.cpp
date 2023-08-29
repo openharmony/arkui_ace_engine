@@ -848,7 +848,7 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
 void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource)
 {
     if (particleImageMap_.find(imageSource) != particleImageMap_.end()) {
-        auto image = DynamicCast<NG::PixelMapImage>(particleImageMap_[imageSource]);
+        auto image = particleImageMap_[imageSource];
         CHECK_NULL_VOID_NOLOG(image);
         auto pixmap = image->GetPixelMap();
         CHECK_NULL_VOID_NOLOG(pixmap);
