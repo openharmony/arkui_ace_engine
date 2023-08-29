@@ -1535,6 +1535,8 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsConstraintSize", info, checkList)) {
         ViewAbstractModel::GetInstance()->ResetMaxSize(true);
         ViewAbstractModel::GetInstance()->ResetMinSize(true);
+        ViewAbstractModel::GetInstance()->ResetMaxSize(false);
+        ViewAbstractModel::GetInstance()->ResetMinSize(false);
         return;
     }
 
