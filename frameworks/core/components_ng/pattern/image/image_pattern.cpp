@@ -531,7 +531,9 @@ void ImagePattern::EnableDrag()
     };
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragStart(std::move(dragStart));
+    if (!eventHub->HasOnDragStart()) {
+        eventHub->SetOnDragStart(std::move(dragStart));
+    }
 }
 
 bool ImagePattern::BetweenSelectedPosition(const Offset& globalOffset)
