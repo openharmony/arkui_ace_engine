@@ -228,9 +228,9 @@ private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
         auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
-        bool isDisableItem = isCopyAll && copyOption_ == CopyOptions::None;
-        selectInfo.menuInfo.showCopy = !isDisableItem && hasValue;
-        selectInfo.menuInfo.showCut = !isDisableItem && hasValue;
+        bool isShowItem = copyOption_ != CopyOptions::None;
+        selectInfo.menuInfo.showCopy = isShowItem && hasValue;
+        selectInfo.menuInfo.showCut = isShowItem && hasValue;
         selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
