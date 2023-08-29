@@ -354,8 +354,8 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
         auto fit = ImageFit::COVER;
         if (objectFitJsValue->IsNumber()) {
             auto fitIntValue = objectFitJsValue->ToNumber<int32_t>();
-            if (fitIntValue >= static_cast<int32_t>(ImageFit::SCALE_DOWN) &&
-                fitIntValue <= static_cast<int32_t>(ImageFit::FILL)) {
+            if (fitIntValue >= static_cast<int32_t>(ImageFit::FILL) &&
+                fitIntValue <= static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
                 fit = static_cast<ImageFit>(fitIntValue);
             }
         }
