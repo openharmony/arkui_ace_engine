@@ -33,7 +33,7 @@ template("napi_componentutils_static") {
     ]
 
     sources = [ "js_component_utils.cpp" ]
-    if (platform != "ohos") {
+    if (platform != "ohos" || is_asan) {
       sources += [ "$ace_root/frameworks/base/geometry/matrix4.cpp" ]
     }
     deps = []

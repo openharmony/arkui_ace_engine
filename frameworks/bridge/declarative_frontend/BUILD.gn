@@ -837,7 +837,11 @@ template("declarative_js_engine_ng") {
       deps += [ "$ace_root/frameworks/bridge:framework_bridge_ng_$platform" ]
       defines += [ "BUILT_IN_JS_ENGINE" ]
     } else {
-      deps += [ "$ace_root/build:libace" ]
+      if (is_asan) {
+        deps += [ "$ace_root/build:libace_compatible" ]
+      } else {
+        deps += [ "$ace_root/build:libace" ]
+      }
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
         deps += [ "$ace_napi:ace_container_scope" ]
