@@ -183,13 +183,17 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
     snapshotNode_->SetHitTestMode(HitTestMode::HTMNONE);
 
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-    CHECK_NULL_VOID(session_);
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
-        CHECK_NULL_VOID(pixelMap);
+        if (!pixelMap) {
+            LOGE("pixelMap is null");
+            snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+            return;
+        }
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {
+        snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+        CHECK_NULL_VOID(session_);
         CHECK_NULL_VOID(session_->GetScenePersistence());
         ImageSourceInfo sourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
