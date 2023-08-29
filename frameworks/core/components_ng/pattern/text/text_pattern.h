@@ -312,7 +312,6 @@ protected:
     std::vector<int32_t> placeHolderIndex_;
     TextSelector textSelector_;
     float baselineOffset_ = 0.0f;
-    bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool touchEventInitialized_ = false;
