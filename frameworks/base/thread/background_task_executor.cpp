@@ -95,10 +95,10 @@ bool BackgroundTaskExecutor::PostTask(Task&& task, BgTaskPriority priority)
     if (ft != nullptr && ft->IsEnabled()) {
         switch (priority) {
             case BgTaskPriority::LOW:
-                ft->QuickExecute(std::move(task));
+                ft->SlowExecute(std::move(task));
                 break;
             default:
-                ft->SlowExecute(std::move(task));
+                ft->QuickExecute(std::move(task));
                 break;
         }
         return true;
@@ -130,10 +130,10 @@ bool BackgroundTaskExecutor::PostTask(const Task& task, BgTaskPriority priority)
         Task variableTask = task;
         switch (priority) {
             case BgTaskPriority::LOW:
-                ft->QuickExecute(std::move(variableTask));
+                ft->SlowExecute(std::move(variableTask));
                 break;
             default:
-                ft->SlowExecute(std::move(variableTask));
+                ft->QuickExecute(std::move(variableTask));
         }
         return true;
     }
