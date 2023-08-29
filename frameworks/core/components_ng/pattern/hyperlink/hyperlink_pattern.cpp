@@ -66,6 +66,7 @@ void HyperlinkPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     InitClickEvent(gestureHub);
     InitTouchEvent(gestureHub);
+    InitLongPressEvent(gestureHub);
 
     auto inputHub = hub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -181,6 +182,18 @@ void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
         hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void HyperlinkPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID_NOLOG(!longPressEvent_);
+    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->LinkToAddress();
+    };
+    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    gestureHub->SetLongPressEvent(longPressEvent_);
 }
 
 void HyperlinkPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
