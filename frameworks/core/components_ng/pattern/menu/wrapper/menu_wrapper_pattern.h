@@ -66,11 +66,6 @@ public:
 
     void HideMenu();
 
-    void AddSubMenuId(int32_t subMenuId)
-    {
-        subMenuIds_.emplace_back(subMenuId);
-    }
-
     bool IsHided() const
     {
         return isHided_;
@@ -140,8 +135,6 @@ private:
     Placement menuPlacement_ = Placement::NONE;
     bool isFirstShow_ = true;
     bool isHided_ = false;
-
-    std::list<int32_t> subMenuIds_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };

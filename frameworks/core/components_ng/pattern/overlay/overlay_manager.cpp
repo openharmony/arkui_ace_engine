@@ -772,16 +772,14 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     LOGI("menuNode mounted in subwindow");
 }
 
-void OverlayManager::HideMenuInSubWindow(int32_t targetId)
+void OverlayManager::HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId)
 {
     LOGI("OverlayManager::HideMenuInSubWindow");
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
-        return;
     }
-    auto node = menuMap_[targetId];
-    CHECK_NULL_VOID(node);
-    PopMenuAnimation(node);
+    CHECK_NULL_VOID(menu);
+    PopMenuAnimation(menu);
 }
 
 void OverlayManager::HideMenuInSubWindow()
@@ -798,15 +796,14 @@ void OverlayManager::HideMenuInSubWindow()
     }
 }
 
-void OverlayManager::HideMenu(int32_t targetId, bool isMenuOnTouch)
+void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
     LOGI("OverlayManager::HideMenuNode menu targetId is %{public}d", targetId);
     if (menuMap_.find(targetId) == menuMap_.end()) {
         LOGW("OverlayManager: menuNode %{public}d not found in map", targetId);
-        return;
     }
-    PopMenuAnimation(menuMap_[targetId]);
-    menuMap_[targetId]->OnAccessibilityEvent(
+    PopMenuAnimation(menu);
+    menu->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 #ifdef ENABLE_DRAG_FRAMEWORK
     RemoveEventColumn();

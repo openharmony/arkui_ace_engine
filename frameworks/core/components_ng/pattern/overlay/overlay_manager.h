@@ -95,10 +95,10 @@ public:
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenu(int32_t targetId, bool isMenuOnTouch = false);
+    void HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch = false);
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
-    void HideMenuInSubWindow(int32_t targetId);
+    void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);
     void HideMenuInSubWindow();
     void CleanMenuInSubWindow();
     void HideAllMenus();

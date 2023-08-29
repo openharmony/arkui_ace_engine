@@ -233,9 +233,6 @@ void MenuItemPattern::ShowSubMenu()
 
     auto menuWrapper = GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapper);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->AddSubMenuId(host->GetId());
     subMenu->MountToParent(menuWrapper);
 
     OffsetF offset = GetSubMenuPostion(host);
