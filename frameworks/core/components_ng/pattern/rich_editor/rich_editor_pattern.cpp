@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
@@ -2006,10 +2007,14 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
+        if (blockPress_) {
+            return;
+        }
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
         CHECK_NULL_VOID(paragraph_);
+        mouseStatus_ = MouseStatus::MOVE;
         if (isFirstMouseSelect_) {
             int32_t extend = paragraph_->GetHandlePositionForClick(textOffset);
             int32_t extendEnd = extend + GetGraphemeClusterLength(extend);
@@ -2026,7 +2031,17 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
         isMousePressed_ = true;
+        if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+            blockPress_ = true;
+            return;
+        }
+        mouseStatus_ = MouseStatus::PRESSED;
+        blockPress_ = false;
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+        if (blockPress_) {
+            blockPress_ = false;
+        }
+        mouseStatus_ = MouseStatus::RELEASED;
         isMouseSelect_ = false;
         isMousePressed_ = false;
         isFirstMouseSelect_ = true;
@@ -2037,7 +2052,7 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
         auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
         auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-        if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
+        if (!textSelectInfo.GetSelection().resultObjects.empty()) {
             eventHub->FireOnSelect(&textSelectInfo);
         }
     }
