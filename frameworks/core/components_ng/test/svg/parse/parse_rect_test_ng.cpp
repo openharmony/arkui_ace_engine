@@ -83,7 +83,7 @@ HWTEST_F(ParseRectTestNg, ParseTest001, TestSize.Level1)
 {
     auto svgDom = ParseRect(SVG_LABEL);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
@@ -99,7 +99,7 @@ HWTEST_F(ParseRectTestNg, ParseTest002, TestSize.Level1)
     auto svgDom = ParseRect(SVG_LABEL);
     RSCanvas rSCanvas;
     svgDom->svgContext_ = nullptr;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
@@ -114,7 +114,7 @@ HWTEST_F(ParseRectTestNg, ParseTest003, TestSize.Level1)
 {
     auto svgDom = ParseRect(SVG_LABEL2);
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::FILL, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
 }
 } // namespace OHOS::Ace::NG

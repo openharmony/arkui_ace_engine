@@ -268,7 +268,7 @@ bool SvgDom::IsStatic()
 }
 
 void SvgDom::DrawImage(
-    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>&)
+    RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
     CHECK_NULL_VOID_NOLOG(root_);
     canvas.Save();

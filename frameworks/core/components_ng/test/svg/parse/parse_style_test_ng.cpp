@@ -57,7 +57,7 @@ HWTEST_F(ParseStyleTestNg, ParseTest001, TestSize.Level1)
     EXPECT_NE(svgStyle, nullptr);
     // todo parse style attr
     RSCanvas rSCanvas;
-    svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::RED);
+    svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
 }
