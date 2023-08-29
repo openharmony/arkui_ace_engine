@@ -502,6 +502,7 @@ private:
     bool isNeedFlushMouseEvent_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
+    bool isDensityChanged_ = false;
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
