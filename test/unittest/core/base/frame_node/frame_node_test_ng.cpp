@@ -889,15 +889,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithTransition0
      * @tc.expected: expect The function is run ok.
      */
     std::list<RefPtr<FrameNode>> visibleList;
-    uint32_t index = 1;
-    FRAME_NODE2->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
+    FRAME_NODE2->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
 
     /**
      * @tc.steps: step2.push the framenode to visibleList and callback OnGenerateOneDepthVisibleFrameWithTransition
      * @tc.expected: expect visibleList.size is 3.
      */
     visibleList.push_back(FRAME_NODE);
-    FRAME_NODE2->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
+    FRAME_NODE3->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
     EXPECT_EQ(visibleList.size(), 3);
 }
 

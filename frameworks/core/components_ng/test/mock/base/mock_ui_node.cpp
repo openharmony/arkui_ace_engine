@@ -31,7 +31,7 @@ void UINode::MarkNeedSyncRenderTree(bool needRebuild) {}
 void UINode::RebuildRenderContextTree() {}
 void UINode::OnDetachFromMainTree(bool) {}
 void UINode::OnAttachToMainTree(bool) {}
-void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) {}
+void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) {}
 bool UINode::OnRemoveFromParent(bool)
 {
     return true;

@@ -448,11 +448,15 @@ void UINode::DumpTree(int32_t depth)
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+        DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
         DumpInfo();
         DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(children_.size()));
     }
 
     for (const auto& item : GetChildren()) {
+        item->DumpTree(depth + 1);
+    }
+    for (const auto& [item, index] : disappearingChildren_) {
         item->DumpTree(depth + 1);
     }
 }
@@ -475,13 +479,27 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
 
 void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {
-    // normal child
-    for (const auto& child : GetChildren()) {
-        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+    if (disappearingChildren_.empty()) {
+        // normal child
+        for (const auto& child : GetChildren()) {
+            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+        }
+        return;
     }
-    // disappearing children
-    for (const auto& [child, index] : disappearingChildren_) {
-        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
+    // generate the merged list of children_ and disappearingChildren_
+    auto allChildren = GetChildren();
+    for (auto iter = disappearingChildren_.rbegin(); iter != disappearingChildren_.rend(); ++iter) {
+        auto& [disappearingChild, index] = *iter;
+        if (index >= allChildren.size()) {
+            allChildren.emplace_back(disappearingChild);
+        } else {
+            auto insertIter = allChildren.begin();
+            std::advance(insertIter, index);
+            allChildren.insert(insertIter, disappearingChild);
+        }
+    }
+    for (const auto& child : allChildren) {
+        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
 }
 
@@ -726,16 +744,9 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
     return true;
 }
 
-void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
+void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
 {
-    // populating with visible children
-    for (const auto& child : GetChildren()) {
-        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
-    }
-    // inserting disappearing children
-    for (const auto& [child, index] : disappearingChildren_) {
-        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
-    }
+    GenerateOneDepthVisibleFrameWithTransition(visibleList);
 }
 
 bool UINode::RemoveImmediately() const
