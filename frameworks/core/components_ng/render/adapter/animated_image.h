@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_ANIMATED_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_ANIMATED_IMAGE_H
 
+#include <atomic>
 #include <memory>
 #include <utility>
 
@@ -82,12 +83,15 @@ private:
     virtual void UseCachedFrame(RefPtr<CanvasImage>&& image) = 0;
     virtual void CacheFrame(const std::string& key) = 0;
 
+    std::atomic_int32_t queueSize_ = 0;
     RefPtr<Animator> animator_;
     std::function<void()> redraw_;
     const std::string cacheKey_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AnimatedImage);
 };
+
+// ================================================================================================
 
 #ifndef USE_ROSEN_DRAWING
 class AnimatedSkImage : public AnimatedImage, public SkiaImage {
@@ -137,6 +141,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(AnimatedRSImage);
 #endif
 };
+
+// ================================================================================================
 
 class AnimatedPixmap : public AnimatedImage, public PixelMapImage {
     DECLARE_ACE_TYPE(AnimatedPixmap, AnimatedImage, PixelMapImage)
