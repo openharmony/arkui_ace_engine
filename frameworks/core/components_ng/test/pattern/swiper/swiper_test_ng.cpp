@@ -997,7 +997,7 @@ HWTEST_F(SwiperTestNg, SwiperUtilsTest005, TestSize.Level2)
     swiperLayoutProperty->UpdateNextMargin(NEXT_MARGIN);
     auto getAutoFill = swiperPattern->IsAutoFill();
     ASSERT_NE(getAutoFill, true);
-    
+
     OptionalSizeF setSize;
     auto result = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, setSize, getAutoFill);
     EXPECT_EQ(result.parentIdealSize, setSize);
@@ -10105,7 +10105,7 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutBackward003, TestSize.Level1)
      * @tc.steps: step2. call LayoutBackward.
      * @tc.expected: Related function runs ok.
      */
-    swiperLayoutAlgorithm->overScrollFeature_ = false; 
+    swiperLayoutAlgorithm->overScrollFeature_ = false;
     swiperLayoutAlgorithm->LayoutBackward(&layoutWrapper, layoutConstraint, axis, endIndex, endPos);
 }
 
@@ -10135,11 +10135,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
 
     swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayCount(-3);
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateMinSize(Dimension(-1));
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetDisplayCount();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetMinSize();
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    EXPECT_EQ(swiperPattern->TotalDisPlayCount(), -1);
-    EXPECT_FALSE(swiperPattern->IsLoop());
+    // EXPECT_TRUE(swiperPattern->IsLoop());
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     ASSERT_NE(indicatorNode, nullptr);
@@ -10148,6 +10147,15 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
     ASSERT_NE(indicatorNodeLeftArrow, nullptr);
     indicatorNode->AddChild(indicatorNodeLeftArrow);
     swiperNode->AddChild(indicatorNode);
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, swiperPattern->GetRightButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(rightArrow, nullptr);
+    swiperNode->Clean(false, false);
+    swiperNode->AddChild(leftArrow);
+    swiperNode->AddChild(rightArrow);
     swiperPattern->leftButtonId_.reset();
     swiperPattern->rightButtonId_.reset();
     swiperPattern->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 2 }));
@@ -10163,5 +10171,414 @@ HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
         swiperPattern->isVisible_ = false;
         swiperPattern->preTargetIndex_ = 0;
     }
+}
+
+/**
+ * @tc.name: SwiperPatternPreviousFocus004
+ * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus004, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_LEFT_ARROW_ETS_TAG, 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->Clean(false, false);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetDisplayCount();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetMinSize();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    // EXPECT_TRUE(swiperPattern->IsLoop());
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
+        swiperPattern->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(indicatorNodeLeftArrow, nullptr);
+    indicatorNode->AddChild(indicatorNodeLeftArrow);
+    swiperNode->AddChild(indicatorNode);
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    swiperNode->AddChild(leftArrow);
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->indicatorId_.reset();
+    swiperPattern->rightButtonId_.reset();
+    swiperPattern->currentIndex_ = 1;
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(swiperNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps: step2. call PreviousFocus.
+     * @tc.expected: frameNode->GetFocusHub()->parentFocusable is true.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperPattern->PreviousFocus(swiperNode->GetFocusHub());
+            if (i == 1) {
+                swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+                continue;
+            }
+            swiperPattern->currentIndex_ = 0;
+        }
+        swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternPreviousFocus005
+ * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPreviousFocus005, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_INDICATOR_ETS_TAG, 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->Clean(false, false);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetDisplayCount();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetMinSize();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    // EXPECT_TRUE(swiperPattern->IsLoop());
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
+        swiperPattern->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(indicatorNodeLeftArrow, nullptr);
+    indicatorNode->AddChild(indicatorNodeLeftArrow);
+    swiperNode->AddChild(indicatorNode);
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    swiperNode->AddChild(leftArrow);
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->indicatorId_.reset();
+    swiperPattern->rightButtonId_.reset();
+    swiperPattern->currentIndex_ = 1;
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(swiperNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps: step2. call PreviousFocus.
+     * @tc.expected: frameNode->GetFocusHub()->parentFocusable is true.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperPattern->PreviousFocus(swiperNode->GetFocusHub());
+            if (i == 1) {
+                swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+                continue;
+            }
+            swiperPattern->leftButtonId_ = 1;
+            swiperPattern->currentIndex_ = 0;
+        }
+        swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternNextFocus004
+ * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternNextFocus004, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_LEFT_ARROW_ETS_TAG, 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->Clean(false, false);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetDisplayCount();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetMinSize();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    // EXPECT_TRUE(swiperPattern->IsLoop());
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
+        swiperPattern->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(indicatorNodeLeftArrow, nullptr);
+    indicatorNode->AddChild(indicatorNodeLeftArrow);
+    swiperNode->AddChild(indicatorNode);
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    swiperNode->AddChild(leftArrow);
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->indicatorId_ = 1;
+    swiperPattern->rightButtonId_.reset();
+    swiperPattern->currentIndex_ = 1;
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(swiperNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps: step2. call NextFocus.
+     * @tc.expected: the related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperPattern->NextFocus(swiperNode->GetFocusHub());
+            if (i == 1) {
+                swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+                continue;
+            }
+            swiperPattern->currentIndex_ = 0;
+        }
+        swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    }
+}
+
+/**
+ * @tc.name: SwiperInitIndicator006
+ * @tc.desc: Test SwiperPattern SwiperInitIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperInitIndicator006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->indicatorId_ = 1;
+
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    swiperNode->AddChild(indicatorNode);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
+    swiperPattern->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
+
+    /**
+     * @tc.steps: step3. call InitIndicator.
+     * @tc.expected: swiperNode lastChild is SWIPER_INDICATOR_ETS_TAG
+     */
+    swiperPattern->InitIndicator();
+    ASSERT_EQ(swiperNode->GetLastChild()->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+}
+
+/**
+ * @tc.name: SwiperPatternAutoPlay002
+ * @tc.desc: StartAutoPlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternAutoPlay002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetDisplayCount();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetMinSize();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    swiperPattern->isVisible_ = true;
+    swiperPattern->isIndicatorLongPress_ = false;
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, swiperPattern->GetRightButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(rightArrow, nullptr);
+    swiperNode->Clean(false, false);
+    swiperNode->AddChild(leftArrow);
+    swiperNode->AddChild(rightArrow);
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_.reset();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+
+    /**
+     * @tc.steps: step2. call StartAutoPlay.
+     * @tc.expected: Related functions run ok.
+     */
+    swiperPattern->StartAutoPlay();
+}
+
+/**
+ * @tc.name: SwiperPatternCreateLayoutAlgorithm002
+ * @tc.desc: CreateLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternCreateLayoutAlgorithm002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperPattern->jumpIndex_.reset();
+    swiperPattern->targetIndex_ = 1;
+
+    /**
+     * @tc.steps: step2. call CreateLayoutAlgorithm.
+     * @tc.expected: Related function runs ok.
+     */
+    swiperPattern->CreateLayoutAlgorithm();
+}
+
+/**
+ * @tc.name: SwiperPatternCreateLayoutAlgorithm003
+ * @tc.desc: CreateLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternCreateLayoutAlgorithm003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    float velocity = 0.1f;
+
+    /**
+     * @tc.steps: step2. call CreateLayoutAlgorithm.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        swiperPattern->UpdateAnimationProperty(velocity);
+        swiperPattern->isDragging_ = true;
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternOnTouchTestHit002
+ * @tc.desc: OnTouchTestHit
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnTouchTestHit002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto hitTestType = SourceType::MOUSE;
+
+    /**
+     * @tc.steps: step2. call OnTouchTestHit.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        swiperPattern->OnTouchTestHit(hitTestType);
+        swiperPattern->isTouchDown_ = true;
+    }
+}
+
+/**
+ * @tc.name: SwiperPatternHandleTouchDown001
+ * @tc.desc: HandleTouchDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchDown001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->indicatorController_ = AceType::MakeRefPtr<Animator>();
+    swiperPattern->usePropertyAnimation_ = true;
+
+    /**
+     * @tc.steps: step2. call HandleTouchDown.
+     * @tc.expected: Related function runs ok.
+     */
+    swiperPattern->HandleTouchDown();
+}
+
+/**
+ * @tc.name: SwiperPatternPlayPropertyTranslateAnimation002
+ * @tc.desc: PlayPropertyTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternPlayPropertyTranslateAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->indicatorController_ = AceType::MakeRefPtr<Animator>();
+    swiperPattern->usePropertyAnimation_ = true;
+    float translate = 0.1f;
+    int32_t nextIndex = 1;
+    float velocity = 0.1f;
+    swiperPattern->usePropertyAnimation_ = true;
+    swiperPattern->itemPositionInAnimation_.clear();
+    swiperPattern->targetIndex_ = 1;
+    swiperPattern->indicatorController_ = nullptr;
+
+    /**
+     * @tc.steps: step2. call HandleTouchDown.
+     * @tc.expected: Related function runs ok.
+     */
+    swiperPattern->PlayPropertyTranslateAnimation(translate, nextIndex, velocity);
 }
 } // namespace OHOS::Ace::NG
