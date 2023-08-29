@@ -160,7 +160,7 @@ bool FocusHub::RequestFocusImmediately(bool isWholePathFocusable)
         return true;
     }
 
-    if (!isWholePathFocusable && !IsFocusableWholePath()) {
+    if (!IsFocusable()) {
         return false;
     }
 
