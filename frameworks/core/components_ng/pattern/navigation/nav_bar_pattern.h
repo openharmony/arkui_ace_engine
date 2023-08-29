@@ -111,6 +111,7 @@ public:
     void OnScrollEnd();
     bool GetDraggedDown();
     bool GetFullStatus();
+    bool GetIsMinTitle() const;
     void NavBarMotion(double velocity, double friction);
     void StopNavBarMotion();
 
