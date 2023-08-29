@@ -5720,6 +5720,7 @@ HWTEST_F(TextFieldPatternTestNg, OnKeyEvent, TestSize.Level1)
     auto context = PipelineContext::GetCurrentContext();
     context->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
     pattern->paragraph_ = std::make_shared<RSParagraph>();
+    pattern->imeAttached_ = true;
 
     KeyEvent event;
     EXPECT_FALSE(pattern->OnKeyEvent(event));
@@ -5810,6 +5811,7 @@ HWTEST_F(TextFieldPatternTestNg, StopEditing001, TestSize.Level2)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    textFieldPattern->imeAttached_ = false;
     auto textFieldController = AceType::MakeRefPtr<TextFieldController>();
     ASSERT_NE(textFieldController, nullptr);
     textFieldController->SetPattern(textFieldPattern);
