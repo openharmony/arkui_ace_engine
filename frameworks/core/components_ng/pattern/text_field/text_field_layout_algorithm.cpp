@@ -394,8 +394,7 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!pattern->IsTextArea() && !needToKeepTextRect &&
-        (!pattern->IsNormalInlineState() || layoutProperty->GetValueValue("").empty())) {
+    if (!pattern->IsTextArea() && !needToKeepTextRect) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft() + pattern->GetBorderLeft();
