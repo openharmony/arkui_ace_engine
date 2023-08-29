@@ -46,8 +46,7 @@ enum class MenuType {
     // ----- special menu used in other components ------
     NAVIGATION_MENU,               // menu used in a Navigation component
     SELECT_OVERLAY_EXTENSION_MENU, // menu used in SelectOverlay Extension of text component,skip menu layout algorithm
-                                   // also used in custom long press menu
-    SELECT_OVERLAY_CUSTOM_MENU,    // menu used in SelectOverlay for right click
+    SELECT_OVERLAY_CUSTOM_MENU,    // menu used in SelectOverlay for custom menu
                                    // click menu item whill not trigger close menu
     SELECT_OVERLAY_SUB_MENU,       // menu type used for select overlay sub menu
 };

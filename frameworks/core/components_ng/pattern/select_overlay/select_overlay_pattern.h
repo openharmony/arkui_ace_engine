@@ -152,6 +152,8 @@ public:
         return info_ && info_->menuInfo.menuBuilder != nullptr;
     }
 
+    void BeforeCreateLayoutWrapper() override;
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void UpdateHandleHotZone();
