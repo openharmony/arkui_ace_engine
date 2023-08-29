@@ -113,7 +113,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
 
 bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const SizeF& navigationSize)
 {
-    if (!hostNode->IsNavbarUseToolbarConfiguration()) {
+    if (!hostNode->IsNavbarUseToolbarConfiguration() || hostNode->GetPrevMenuIsCustomValue(false)) {
         return false;
     }
 
@@ -306,7 +306,7 @@ void LayoutToolBarDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>
 
 void UpdateTitleBarMenuNode(const RefPtr<NavBarNode>& navBarNode, const SizeF& navigationSize)
 {
-    if (navBarNode->GetPrevMenuIsCustomValue(false) || navBarNode->GetPrevToolBarIsCustomValue(false)) {
+    if (navBarNode->GetPrevMenuIsCustomValue(false)) {
         return;
     }
 
