@@ -126,7 +126,7 @@ public:
         return overDragOffset_;
     }
     
-    bool IsTitleDraggedDown()
+    bool IsTitleDraggedDown() const
     {
         if (NearZero(tempTitleBarHeight_)) {
             return true;
@@ -135,13 +135,22 @@ public:
             true : false;
     }
 
-    bool IsTitleFullStatus()
+    bool IsTitleFullStatus() const
     {
         if (NearZero(tempTitleBarHeight_)) {
             return true;
         }
         GetMaxTitleBarHeight();
         return GreatOrEqual(tempTitleBarHeight_, maxTitleBarHeight_) ? true : false;
+    }
+
+    bool IsMinTitle() const
+    {
+        if (NearZero(tempTitleBarHeight_)) {
+            return true;
+        }
+        GetMaxTitleBarHeight();
+        return LessNotEqual(tempTitleBarHeight_, maxTitleBarHeight_);
     }
 
     NavigationTitleMode GetNavigationTitleMode() const
@@ -159,7 +168,7 @@ private:
 
     void ClearDragState();
     float GetSubtitleOpacity();
-    float GetFontSize();
+    float GetFontSize(float offset);
     float GetMappedOffset(float offset);
     void SpringAnimation(float startPos, float endPos);
     void UpdateScaleByDragOverDragOffset(float overDragOffset);

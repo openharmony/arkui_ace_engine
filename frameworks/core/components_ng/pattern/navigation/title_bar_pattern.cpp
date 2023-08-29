@@ -301,8 +301,7 @@ void TitleBarPattern::ProcessTittleDragStart(float offset)
 
     defaultTitleBarHeight_ = titleBarNode->GetGeometryNode()->GetFrameSize().Height();
     SetMaxTitleBarHeight();
-    auto mappedOffset = GetMappedOffset(offset);
-    SetTempTitleBarHeight(mappedOffset);
+    SetTempTitleBarHeight(offset);
     minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2.0f;
     maxTitleOffsetY_ = initialTitleOffsetY_;
     moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
@@ -316,7 +315,8 @@ void TitleBarPattern::ProcessTittleDragStart(float offset)
 
     // title font size
     SetDefaultTitleFontSize();
-    auto tempFontSize = GetFontSize();
+    auto mappedOffset = GetMappedOffset(offset);
+    auto tempFontSize = GetFontSize(mappedOffset);
     UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::VP));
 
     // subTitle Opacity
@@ -337,7 +337,6 @@ void TitleBarPattern::ProcessTittleDragUpdate(float offset)
     SetTitleStyleByOffset(offset);
     if (CanOverDrag_) {
         overDragOffset_ = offset + defaultTitleBarHeight_ - maxTitleBarHeight_;
-        overDragOffset_ = std::clamp(overDragOffset_, 0.0f, static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx()));
     } else {
         overDragOffset_ = 0.0f;
     }
@@ -352,15 +351,15 @@ void TitleBarPattern::ProcessTittleDragUpdate(float offset)
 void TitleBarPattern::SetTitleStyleByOffset(float offset)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    auto mappedOffset = GetMappedOffset(offset);
-    SetTempTitleBarHeight(mappedOffset);
+    SetTempTitleBarHeight(offset);
     titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
     SetTempTitleOffsetY();
     SetTempSubTitleOffsetY();
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
     // title font size
-    auto tempFontSize = GetFontSize();
+    auto mappedOffset = GetMappedOffset(offset);
+    auto tempFontSize = GetFontSize(mappedOffset);
     UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::VP));
 
     // subTitle Opacity
@@ -401,13 +400,20 @@ float TitleBarPattern::GetSubtitleOpacity()
     return tempOpacity;
 }
 
-float TitleBarPattern::GetFontSize()
+float TitleBarPattern::GetFontSize(float offset)
 {
+    auto titleBarHeight = defaultTitleBarHeight_ + offset;
+    if (LessNotEqual(titleBarHeight, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()))) {
+        titleBarHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    }
+    if (GreatNotEqual(titleBarHeight, maxTitleBarHeight_)) {
+        titleBarHeight = maxTitleBarHeight_;
+    }
     auto titleFontSizeDiff = MAX_TITLE_FONT_SIZE - MIN_TITLE_FONT_SIZE;
     auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     fontSizeRatio_ = titleFontSizeDiff.Value() / titleBarHeightDiff;
     auto tempFontSize = static_cast<float>(
-        (tempTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * fontSizeRatio_ +
+        (titleBarHeight - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * fontSizeRatio_ +
         MIN_TITLE_FONT_SIZE.Value());
     return tempFontSize;
 }
@@ -503,7 +509,8 @@ void TitleBarPattern::TransformScale(float overDragOffset, const RefPtr<FrameNod
     CHECK_NULL_VOID(frameNode);
     auto renderCtx = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
-    auto scaleRatio = overDragOffset / static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx());
+    auto offset = std::clamp(overDragOffset, 0.0f, static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx()));
+    auto scaleRatio = offset / static_cast<float>(MAX_OVER_DRAG_OFFSET.ConvertToPx());
     VectorF scaleValue = VectorF(scaleRatio * 0.1f + 1.0f, scaleRatio * 0.1f + 1.0f);
     renderCtx->UpdateTransformScale(scaleValue);
 }

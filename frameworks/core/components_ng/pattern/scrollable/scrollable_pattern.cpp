@@ -96,10 +96,14 @@ void ScrollablePattern::ProcessNavBarReactOnStart()
 bool ScrollablePattern::ProcessNavBarReactOnUpdate(bool isDraggedDown, float offset)
 {
     CHECK_NULL_RETURN_NOLOG(navBarPattern_, true);
+    auto minTitle = navBarPattern_ ? navBarPattern_->GetIsMinTitle() : false;
     navBarPattern_->OnCoordScrollUpdate(offset);
     DraggedDownScrollEndProcess();
     if (isDraggedDown && Negative(offset) && !OutBoundaryCallback()) {
         return false;
+    }
+    if (minTitle) {
+        return scrollEffect_ && scrollEffect_->IsNoneEffect();
     }
     return scrollEffect_ && scrollEffect_->IsSpringEffect();
 }
