@@ -4085,6 +4085,226 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorUpdateContentModifier002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperIndicatorUpdateContentModifier003
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorUpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorUpdateContentModifier003, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper and GetContentModifier.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    paintMethod->isHover_ = true;
+    paintMethod->touchBottomType_ = TouchBottomType::START;
+
+    /**
+     * @tc.steps: step3. call GetContentModifier.
+     * @tc.expected: dotIndicatorModifier_->isHover_ is true.
+     */
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    EXPECT_FALSE(paintMethod->dotIndicatorModifier_->GetIsHover());
+}
+
+/**
+ * @tc.name: SwiperIndicatorCalculateNormalMargin001
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorCalculateNormalMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorCalculateNormalMargin001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateItemWidth(Dimension(ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(ITEM_HEIGHT, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemWidth(Dimension(SELECTED_ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemHeight(Dimension(SELECTED_ITEM_HEIGHT, DimensionUnit::PX));
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->IsCustomSizeValue_ = true;
+    /**
+     * @tc.steps: step3. call PaintNormalIndicator.
+     * @tc.expected: run success
+     */
+    paintMethod->PaintNormalIndicator(&paintWrapper);
+
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 347.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 548.5);
+}
+
+/**
+ * @tc.name: SwiperIndicatorCalculatePointCenterX001
+ * @tc.desc: Test DotIndicatorPaintMethod CalculatePointCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorCalculatePointCenterX001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateItemWidth(Dimension(ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(ITEM_HEIGHT, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemWidth(Dimension(SELECTED_ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemHeight(Dimension(SELECTED_ITEM_HEIGHT, DimensionUnit::PX));
+    LinearVector<float> vectorBlackPointCenterX;
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->IsCustomSizeValue_ = true;
+    paintMethod->turnPageRate_ = 1.0;
+    /**
+     * @tc.steps: step3. call CalculatePointCenterX.
+     * @tc.expected: run success
+     */
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    paintMethod->CalculatePointCenterX(vectorBlackPointCenterX, 0.0, 0.0, 0.0, 0);
+    paintMethod->turnPageRate_ = 1.0;
+    paintMethod->CalculatePointCenterX(vectorBlackPointCenterX, 0.0, 0.0, 0.0, 0);
+
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 0);
+}
+
+/**
+ * @tc.name: SwiperIndicatorUpdateBackgroundX001
+ * @tc.desc: Test DotIndicatorPaintMethod UpdateBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorUpdateBackgroundX001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateItemWidth(Dimension(ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(ITEM_HEIGHT, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemWidth(Dimension(SELECTED_ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemHeight(Dimension(SELECTED_ITEM_HEIGHT, DimensionUnit::PX));
+    LinearVector<float> vectorBlackPointCenterX;
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->IsCustomSizeValue_ = true;
+    paintMethod->turnPageRate_ = 1.0;
+    paintMethod->touchBottomType_ = TouchBottomType::START;
+    /**
+     * @tc.steps: step3. call UpdateBackground.
+     * @tc.expected: run success
+     */
+    paintMethod->UpdateBackground(&paintWrapper);
+}
+
+/**
  * @tc.name: SwiperIndicatorPaintNormalIndicator001
  * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintNormalIndicator
  * @tc.type: FUNC
@@ -4240,6 +4460,9 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPaintPressIndicator001, TestSize.Level1)
      */
     paintMethod->PaintPressIndicator(&paintWrapper);
     EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsPressed());
+    paintMethod->IsCustomSizeValue_ = true;
+    paintMethod->PaintPressIndicator(&paintWrapper);
+    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsPressed());
 }
 
 /**
@@ -4291,6 +4514,8 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPaintPressIndicator002, TestSize.Level1)
     paintMethod->PaintPressIndicator(&paintWrapper);
     EXPECT_TRUE(NearEqual(
         paintMethod->dotIndicatorModifier_->itemHalfSizes_->Get()[1], ITEM_HEIGHT * 0.5 * INDICATOR_ZOOM_IN_SCALE));
+    paintMethod->IsCustomSizeValue_ = true;
+    paintMethod->PaintPressIndicator(&paintWrapper);
 }
 
 /**
@@ -5073,6 +5298,83 @@ HWTEST_F(SwiperTestNg, DotIndicatorModifier003, TestSize.Level1)
     EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[1], ITEM_HEIGHT);
     EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], SELECTED_ITEM_WIDTH);
     EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], SELECTED_ITEM_HEIGHT_LARGE);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier004
+ * @tc.desc: Test PaintMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, DotIndicatorModifier004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DotIndicatorModifier. Update PaintProperty.Call the function onDraw.
+     * @tc.expected: step1. Check the PaintProperty update success.
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.emplace_back(ITEM_WIDTH);
+    // call the UpdateDilatePaintProperty to set property.
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ONE;
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(ITEM_WIDTH);
+    itemHalfSizes.emplace_back(ITEM_HEIGHT);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_WIDTH);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_HEIGHT_LARGE);
+    dotIndicatorModifier.UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX, LONG_POINT_CENTER_X);
+    dotIndicatorModifier.onDraw(context);
+    dotIndicatorModifier.PaintMask(context);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier005
+ * @tc.desc: Test PaintMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, DotIndicatorModifier005, TestSize.Level1)
+{
+    DotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.emplace_back(ITEM_WIDTH);
+    // call the UpdateDilatePaintProperty to set property.
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ONE;
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(ITEM_WIDTH);
+    itemHalfSizes.emplace_back(ITEM_HEIGHT);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_WIDTH);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_HEIGHT_LARGE);
+    dotIndicatorModifier.UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX, LONG_POINT_CENTER_X);
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.onDraw(context);
+    dotIndicatorModifier.isCustomSize_ = true;
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::START;
+    dotIndicatorModifier.onDraw(context);
+    dotIndicatorModifier.axis_ = Axis::VERTICAL;
+    dotIndicatorModifier.touchBottomType_ = TouchBottomType::END;
+    dotIndicatorModifier.onDraw(context);
 }
 
 /**
