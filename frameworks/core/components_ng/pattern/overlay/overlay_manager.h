@@ -129,6 +129,9 @@ public:
      *   @return    true if popup was removed, false if no overlay exists
      */
     bool RemoveOverlay(bool isBackPressed, bool isPageRouter = false);
+    bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed);
+    bool RemoveBubble(const RefPtr<FrameNode>& overlay);
+    bool RemoveMenu(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
     bool RemoveOverlayInSubwindow();
