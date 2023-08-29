@@ -119,11 +119,6 @@ common_bin = [
     part_name = "flutter"
   },
   {
-    label = "//foundation/arkui/napi:ace_napi_ark"
-    subsystem_name = "arkui"
-    part_name = "napi"
-  },
-  {
     label = "//arkcompiler/ets_runtime:libark_jsruntime"
     subsystem_name = "arkcompiler"
     part_name = "ets_runtime"

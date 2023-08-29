@@ -183,12 +183,7 @@ template("declarative_js_engine_ark") {
       external_deps += [
         "ets_runtime:libark_jsruntime",
         "napi:ace_napi",
-        "napi:ace_napi_ark",
       ]
-    }
-
-    if (is_cross_platform_build) {
-      deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
     }
 
     if (defined(config.build_for_preview) && config.build_for_preview) {
