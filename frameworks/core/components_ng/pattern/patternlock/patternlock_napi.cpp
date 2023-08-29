@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/patternlock/pattern_lock_controller.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
+#include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 
 extern const char _binary_arkui_patternlock_js_start[];
 extern const char _binary_arkui_patternlock_abc_start[];
@@ -38,6 +39,16 @@ static constexpr const size_t MAX_ARG_NUM = 10;
 } // namespace
 std::unique_ptr<PatternLockModel> PatternLockModel::instance_ = nullptr;
 std::mutex PatternLockModel::mutex_;
+
+template<typename T>
+RefPtr<T> GetTheme()
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetTheme<T>();
+}
 
 PatternLockModel* PatternLockModel::GetInstance()
 {
@@ -84,7 +95,12 @@ napi_value SideLength(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
 
-    CalcDimension sideLength = CommonNapiUtils::GetDimensionResult(env, argv[0]);
+    CalcDimension sideLength;
+    if (!CommonNapiUtils::GetDimensionResult(env, argv[0], sideLength)) {
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_RETURN(patternLockTheme, CommonNapiUtils::CreateNull(env));
+        sideLength = patternLockTheme->GetSideLength();
+    }
     PatternLockModel::GetInstance()->SetSideLength(sideLength);
     return CommonNapiUtils::CreateNull(env);
 }
@@ -97,10 +113,13 @@ napi_value CircleRadius(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
 
-    CalcDimension radius = CommonNapiUtils::GetDimensionResult(env, argv[0]);
-    if (radius.IsValid()) {
-        PatternLockModel::GetInstance()->SetCircleRadius(radius);
+    CalcDimension radius;
+    if (!CommonNapiUtils::GetDimensionResult(env, argv[0], radius) || radius.IsNonPositive()) {
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_RETURN(patternLockTheme, CommonNapiUtils::CreateNull(env));
+        radius = patternLockTheme->GetCircleRadius();
     }
+    PatternLockModel::GetInstance()->SetCircleRadius(radius);
     return CommonNapiUtils::CreateNull(env);
 }
 
@@ -112,7 +131,12 @@ napi_value PathStrokeWidth(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= 1, "Wrong number of arguments");
 
-    CalcDimension lineWidth = CommonNapiUtils::GetDimensionResult(env, argv[0]);
+    CalcDimension lineWidth;
+    if (!CommonNapiUtils::GetDimensionResult(env, argv[0], lineWidth)) {
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_RETURN(patternLockTheme, CommonNapiUtils::CreateNull(env));
+        lineWidth = patternLockTheme->GetPathStrokeWidth();
+    }
     PatternLockModel::GetInstance()->SetStrokeWidth(lineWidth);
     return CommonNapiUtils::CreateNull(env);
 }
@@ -125,7 +149,12 @@ napi_value ActiveColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= 1, "PatternLockModelNapi activeColor wrong number of arguments");
 
-    Color activeColor = CommonNapiUtils::ParseColor(env, argv[0]);
+    Color activeColor;
+    if (!CommonNapiUtils::ParseColor(env, argv[0], activeColor)) {
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_RETURN(patternLockTheme, CommonNapiUtils::CreateNull(env));
+        activeColor = patternLockTheme->GetActiveColor();
+    }
     PatternLockModel::GetInstance()->SetActiveColor(activeColor);
     return CommonNapiUtils::CreateNull(env);
 }
@@ -138,7 +167,12 @@ napi_value SelectedColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= 1, "PatternLockModelNapi selectedColor Wrong number of arguments");
 
-    Color selectedColor = CommonNapiUtils::ParseColor(env, argv[0]);
+    Color selectedColor;
+    if (!CommonNapiUtils::ParseColor(env, argv[0], selectedColor)) {
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_RETURN(patternLockTheme, CommonNapiUtils::CreateNull(env));
+        selectedColor = patternLockTheme->GetSelectedColor();
+    }
     PatternLockModel::GetInstance()->SetSelectedColor(selectedColor);
     return CommonNapiUtils::CreateNull(env);
 }
@@ -151,7 +185,12 @@ napi_value PathColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= 1, "PatternLockModelNapi pathColor Wrong number of arguments");
 
-    Color pathColor = CommonNapiUtils::ParseColor(env, argv[0]);
+    Color pathColor;
+    if (!CommonNapiUtils::ParseColor(env, argv[0], pathColor)) {
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_RETURN(patternLockTheme, CommonNapiUtils::CreateNull(env));
+        pathColor = patternLockTheme->GetPathColor();
+    }
     PatternLockModel::GetInstance()->SetPathColor(pathColor);
     return CommonNapiUtils::CreateNull(env);
 }
@@ -163,7 +202,12 @@ napi_value RegularColor(napi_env env, napi_callback_info info)
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= 1, "PatternLockModelNapi regularColor Wrong number of arguments");
-    Color regularColor = CommonNapiUtils::ParseColor(env, argv[0]);
+    Color regularColor;
+    if (!CommonNapiUtils::ParseColor(env, argv[0], regularColor)) {
+        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+        CHECK_NULL_RETURN(patternLockTheme, CommonNapiUtils::CreateNull(env));
+        regularColor = patternLockTheme->GetRegularColor();
+    }
     PatternLockModel::GetInstance()->SetRegularColor(regularColor);
     return CommonNapiUtils::CreateNull(env);
 }

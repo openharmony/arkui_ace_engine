@@ -68,7 +68,10 @@ napi_value JsColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= ARG_NUM_1, "QRCodeModelNapi color wrong number of arguments");
 
-    Color colorResult = CommonNapiUtils::ParseColor(env, argv[0]);
+    Color colorResult;
+    if (!CommonNapiUtils::ParseColor(env, argv[0], colorResult)) {
+        return CommonNapiUtils::CreateNull(env);
+    }
     QRCodeModel::GetInstance()->SetQRCodeColor(colorResult);
     return CommonNapiUtils::CreateNull(env);
 }
@@ -81,7 +84,10 @@ napi_value JsBackgroundColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= ARG_NUM_1, "QRCodeModelNapi backgroundColor wrong number of arguments");
 
-    Color colorResult = CommonNapiUtils::ParseColor(env, argv[0]);
+    Color colorResult;
+    if (!CommonNapiUtils::ParseColor(env, argv[0], colorResult)) {
+        return CommonNapiUtils::CreateNull(env);
+    }
     QRCodeModel::GetInstance()->SetQRBackgroundColor(colorResult);
     return CommonNapiUtils::CreateNull(env);
 }
