@@ -24,6 +24,8 @@ config("drawable_config") {
     "${ace_root}/interfaces/frameworks",
     "${ace_root}/interfaces/inner_api/drawable_descriptor",
     "${ace_root}/interfaces/napi/kits/drawabledescriptor",
+    "//foundation/graphic/graphic_2d/rosen/modules/platform/image_native",
+    "//foundation/multimedia/image_framework/interfaces/innerkits/include",
   ]
   if (current_os != "ohos") {
     include_dirs += [
