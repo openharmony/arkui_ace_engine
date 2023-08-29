@@ -173,11 +173,18 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         dotIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
     if (mouseClickIndex_ && mouseClickIndex_ != currentIndex_) {
-        CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
-            static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex_.value());
+        if (currentIndex_ == itemCount_ - displayCount_ && !isLoop_ &&
+            mouseClickIndex_ > currentIndex_ && mouseClickIndex_ < itemCount_) {
+            CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
+                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+        } else {
+            CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
+                static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex_.value());
+        }
         dotIndicatorModifier_->UpdateAllPointCenterXAnimation(
             mouseClickIndex_ > currentIndex_, vectorBlackPointCenterX_, longPointCenterX_);
         longPointIsHover_ = true;
+        mouseClickIndex_ = std::nullopt;
     }
     if (dotIndicatorModifier_->GetLongPointIsHover() != longPointIsHover_) {
         dotIndicatorModifier_->SetLongPointIsHover(longPointIsHover_);
