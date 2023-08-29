@@ -608,7 +608,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
-        type == WindowSizeChangeReason::CUSTOM_ANIMATION) {
+        type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
         return;
     }
@@ -751,6 +751,11 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         auto rootContext = rootNode_->GetRenderContext();
         rootContext->SyncGeometryProperties(RawPtr(rootNode_->GetGeometryNode()));
         RequestFrame();
+    }
+    if (isDensityChanged_) {
+        rootNode_->GetGeometryNode()->ResetParentLayoutConstraint();
+        rootNode_->MarkForceMeasure();
+        isDensityChanged_ = false;
     }
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     // For cross-platform build, flush tasks when first resize, speed up for fisrt frame.
@@ -1128,6 +1133,9 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     LOGD("density_(%{public}lf), dipScale_(%{public}lf)", density_, dipScale_);
+    if (!NearEqual(density, density_)) {
+        isDensityChanged_ = true;
+    }
     density_ = density;
     if (!NearZero(viewScale_)) {
         LOGD("viewScale_(%{public}lf)", viewScale_);

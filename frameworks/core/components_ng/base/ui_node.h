@@ -472,6 +472,14 @@ public:
     // return value: true if the node can be removed immediately.
     virtual bool OnRemoveFromParent(bool allowTransition);
 
+    void MarkForceMeasure()
+    {
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        for (const auto& child : children_) {
+            child->MarkForceMeasure();
+        }
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
