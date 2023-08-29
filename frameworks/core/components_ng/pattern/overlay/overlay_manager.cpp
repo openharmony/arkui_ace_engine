@@ -1268,6 +1268,7 @@ void OverlayManager::BlurLowerNode(const RefPtr<FrameNode>& currentOverlay)
 
 void OverlayManager::ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay)
 {
+    CHECK_NULL_VOID(currentOverlay);
     auto root = DynamicCast<FrameNode>(currentOverlay->GetParent());
     CHECK_NULL_VOID(root);
     auto children = root->GetChildren();
