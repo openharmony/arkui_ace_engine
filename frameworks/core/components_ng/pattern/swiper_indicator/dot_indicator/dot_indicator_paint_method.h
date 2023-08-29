@@ -61,6 +61,11 @@ public:
         itemCount_ = itemCount;
     }
 
+    void SetDisplayCount(int32_t displayCount)
+    {
+        displayCount_ = displayCount;
+    }
+
     void SetAxis(Axis axis)
     {
         axis_ = axis;
@@ -69,6 +74,11 @@ public:
     Axis GetAxis() const
     {
         return axis_;
+    }
+
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
     }
 
     void SetIsHover(bool isHover)
@@ -134,8 +144,10 @@ private:
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
     int32_t itemCount_ = 0;
+    int32_t displayCount_ = 1;
     float turnPageRate_ = 0.0f;
     float touchBottomRate_ = 0.0f;
+    bool isLoop_ = true;
     bool isHover_ = false;
     bool isPressed_ = false;
     bool longPointIsHover_ = false;
