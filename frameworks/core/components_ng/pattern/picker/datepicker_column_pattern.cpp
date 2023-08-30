@@ -54,7 +54,7 @@ constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr int32_t MINDDLE_CHILD_INDEX = 2;
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
-constexpr float FONTWEIGHT = 0.33f;
+constexpr float FONTWEIGHT = 0.5f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 } // namespace
 
@@ -502,12 +502,18 @@ void DatePickerColumnPattern::AddAnimationTextProperties(
     if (textLayoutProperty->HasTextColor()) {
         properties.currentColor = textLayoutProperty->GetTextColor().value();
     }
+    if (textLayoutProperty->HasFontWeight()) {
+        properties.fontWeight = textLayoutProperty->GetFontWeight().value();
+    }
     if (currentIndex > 0) {
         properties.upFontSize = animationProperties_[currentIndex - 1].fontSize;
         animationProperties_[currentIndex - 1].downFontSize = properties.fontSize;
 
         properties.upColor = animationProperties_[currentIndex - 1].currentColor;
         animationProperties_[currentIndex - 1].downColor = properties.currentColor;
+
+        properties.upFontWeight = animationProperties_[currentIndex - 1].fontWeight;
+        animationProperties_[currentIndex - 1].downFontWeight = properties.fontWeight;
     }
     animationProperties_.emplace_back(properties);
 }
@@ -582,25 +588,17 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     }
     Dimension endFontSize;
     Color endColor;
-    auto midIndex = showCount / 2;
     if (!isDown) {
         endFontSize = animationProperties_[index].downFontSize;
         endColor = animationProperties_[index].downColor;
-        if ((index == midIndex - 1) && (scale >= FONTWEIGHT)) {
-            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
-        }
-        if ((index == midIndex) && (scale >= FONTWEIGHT)) {
-            textLayoutProperty->UpdateFontWeight(CandidateWeight_);
+        if (scale >= FONTWEIGHT) {
+            textLayoutProperty->UpdateFontWeight(animationProperties_[index].downFontWeight);
         }
     } else {
         endFontSize = animationProperties_[index].upFontSize;
         endColor = animationProperties_[index].upColor;
-
-        if ((index == midIndex + 1) && (scale >= FONTWEIGHT)) {
-            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
-        }
-        if ((index == midIndex) && (scale >= FONTWEIGHT)) {
-            textLayoutProperty->UpdateFontWeight(CandidateWeight_);
+        if (scale >= FONTWEIGHT) {
+            textLayoutProperty->UpdateFontWeight(animationProperties_[index].upFontWeight);
         }
     }
     Dimension updateSize = LinearFontSize(startFontSize, endFontSize, distancePercent_);
@@ -609,11 +607,7 @@ void DatePickerColumnPattern::TextPropertiesLinearAnimation(
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
-        if (index == midIndex) {
-            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
-        } else {
-            textLayoutProperty->UpdateFontWeight(CandidateWeight_);
-        }
+        textLayoutProperty->UpdateFontWeight(animationProperties_[index].fontWeight);
     }
 }
 
@@ -869,11 +863,8 @@ void DatePickerColumnPattern::ScrollOption(double delta, bool isJump)
     auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
                                                                 : optionProperties_[midIndex].nextDistance;
     distancePercent_ = delta / shiftDistance;
-    auto textThresHold = optionProperties_[midIndex].height / 4; // ux required
     auto textLinearPercent = 0.0;
-    if (std::abs(delta) > textThresHold) {
-        textLinearPercent = (std::abs(delta) - textThresHold) / (std::abs(shiftDistance) - textThresHold);
-    }
+    textLinearPercent = (std::abs(delta)) / (optionProperties_[midIndex].height);
     UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), textLinearPercent);
     CalcAlgorithmOffset(dir, distancePercent_);
     auto host = GetHost();

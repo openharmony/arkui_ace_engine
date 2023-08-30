@@ -47,7 +47,7 @@ const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
-constexpr float FONTWEIGHT = 0.33f;
+constexpr float FONTWEIGHT = 0.5f;
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
 } // namespace
 
@@ -489,7 +489,7 @@ void TimePickerColumnPattern::ChangeTextStyle(uint32_t index, uint32_t showOptio
 void TimePickerColumnPattern::AddAnimationTextProperties(
     uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
-    TextProperties properties;
+    TimeTextProperties properties;
     if (textLayoutProperty->HasFontSize()) {
         MeasureContext measureContext;
         measureContext.textContent = MEASURE_SIZE_STRING;
@@ -501,6 +501,9 @@ void TimePickerColumnPattern::AddAnimationTextProperties(
         SetOptionShiftDistance();
         properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
     }
+    if (textLayoutProperty->HasFontWeight()) {
+        properties.fontWeight = textLayoutProperty->GetFontWeight().value();
+    }
     if (textLayoutProperty->HasTextColor()) {
         properties.currentColor = textLayoutProperty->GetTextColor().value();
     }
@@ -510,6 +513,9 @@ void TimePickerColumnPattern::AddAnimationTextProperties(
 
         properties.upColor = animationProperties_[currentIndex - 1].currentColor;
         animationProperties_[currentIndex - 1].downColor = properties.currentColor;
+
+        properties.upFontWeight = animationProperties_[currentIndex - 1].fontWeight;
+        animationProperties_[currentIndex - 1].downFontWeight = properties.fontWeight;
     }
     animationProperties_.emplace_back(properties);
 }
@@ -582,28 +588,21 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
         textLayoutProperty->UpdateTextColor(startColor);
         return;
     }
-    auto midIndex = showCount / 2;
     Dimension endFontSize;
     Color endColor;
     if (!isDown) {
         endFontSize = animationProperties_[index].downFontSize;
         endColor = animationProperties_[index].downColor;
 
-        if ((index == midIndex - 1) && (scale >= FONTWEIGHT)) {
-            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
-        }
-        if ((index == midIndex) && (scale >= FONTWEIGHT)) {
-            textLayoutProperty->UpdateFontWeight(DisappearWeight_);
+        if (scale >= FONTWEIGHT) {
+            textLayoutProperty->UpdateFontWeight(animationProperties_[index].downFontWeight);
         }
     } else {
         endFontSize = animationProperties_[index].upFontSize;
         endColor = animationProperties_[index].upColor;
 
-        if ((index == midIndex + 1) && (scale >= FONTWEIGHT)) {
-            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
-        }
-        if ((index == midIndex) && (scale >= FONTWEIGHT)) {
-            textLayoutProperty->UpdateFontWeight(DisappearWeight_);
+        if (scale >= FONTWEIGHT) {
+            textLayoutProperty->UpdateFontWeight(animationProperties_[index].upFontWeight);
         }
     }
     Dimension updateSize = LinearFontSize(startFontSize, endFontSize, distancePercent_);
@@ -612,11 +611,7 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
     Color updateColor = colorEvaluator->Evaluate(startColor, endColor, distancePercent_);
     textLayoutProperty->UpdateTextColor(updateColor);
     if (scale < FONTWEIGHT) {
-        if (index == midIndex) {
-            textLayoutProperty->UpdateFontWeight(SelectedWeight_);
-        } else {
-            textLayoutProperty->UpdateFontWeight(DisappearWeight_);
-        }
+        textLayoutProperty->UpdateFontWeight(animationProperties_[index].fontWeight);
     }
 }
 
@@ -830,11 +825,8 @@ void TimePickerColumnPattern::ScrollOption(double delta, bool isJump)
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
                                                                 : optionProperties_[midIndex].nextDistance;
     distancePercent_ = delta / shiftDistance;
-    auto textThresHold = optionProperties_[midIndex].height / 4; // ux required
     auto textLinearPercent = 0.0;
-    if (std::abs(delta) > textThresHold) {
-        textLinearPercent = (std::abs(delta) - textThresHold) / (std::abs(shiftDistance) - textThresHold);
-    }
+    textLinearPercent = (std::abs(delta)) / (optionProperties_[midIndex].height);
     UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), textLinearPercent);
     CalcAlgorithmOffset(dir, distancePercent_);
     auto host = GetHost();

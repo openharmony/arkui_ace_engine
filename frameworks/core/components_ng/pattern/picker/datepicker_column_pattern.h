@@ -42,6 +42,9 @@ struct DateTextProperties {
     Dimension upFontSize;
     Dimension fontSize;
     Dimension downFontSize;
+    FontWeight upFontWeight;
+    FontWeight fontWeight;
+    FontWeight downFontWeight;
     Color upColor;
     Color currentColor;
     Color downColor;
