@@ -84,6 +84,9 @@ public:
 
     void OnDataReloaded()
     {
+        for (auto& [key, node] : expiringItem_) {
+            node.first = -1;
+        }
         for (auto& [index, node] : cachedItems_) {
             if (node.second) {
                 expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
@@ -95,11 +98,7 @@ public:
 
     bool OnDataAdded(size_t index)
     {
-        if (cachedItems_.empty()) {
-            return true;
-        }
-        if (index <= static_cast<size_t>(cachedItems_.rbegin()->first) ||
-            index >= static_cast<size_t>(cachedItems_.begin()->first)) {
+        if (!cachedItems_.empty() && index <= static_cast<size_t>(cachedItems_.rbegin()->first)) {
             decltype(cachedItems_) temp(std::move(cachedItems_));
 
             for (auto& [oldindex, id] : temp) {
