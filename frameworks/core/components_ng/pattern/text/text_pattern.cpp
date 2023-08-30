@@ -162,8 +162,6 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     float endSelectHeight = 0.0f;
     auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight);
     auto endOffset = CalcCursorOffsetByPosition(textSelector_.destinationOffset, endSelectHeight);
-    float selectLineHeight = std::max(startSelectHeight, endSelectHeight);
-    SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), selectLineHeight };
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
 
@@ -172,12 +170,13 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
-    firstHandle.SetSize(handlePaintSize);
+    firstHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight });
     textSelector_.firstHandle = firstHandle;
 
     RectF secondHandle;
     secondHandle.SetOffset(secondHandleOffset);
-    secondHandle.SetSize(handlePaintSize);
+    secondHandle.SetSize({ SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight });
+    secondHandle.SetHeight(endSelectHeight);
     textSelector_.secondHandle = secondHandle;
 }
 
