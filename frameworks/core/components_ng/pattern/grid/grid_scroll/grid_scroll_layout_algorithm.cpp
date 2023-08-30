@@ -347,6 +347,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
             gridLayoutInfo_.prevOffset_ = 0.0;
         }
         if (!haveNewLineAtStart) {
+            layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
             return;
         }
         // we need lastline if blank at start is not fully filled when start line is shorter
