@@ -71,7 +71,7 @@ public:
     }
 
     void UpdateData(const Parameters& parameters);
-    void JudgeNeedAimate(const RefPtr<SliderPaintProperty>& property);
+    void JudgeNeedAnimate(const RefPtr<SliderPaintProperty>& property);
 
     void SetTrackThickness(float trackThickness)
     {
@@ -206,9 +206,18 @@ public:
         }
     }
 
-    OffsetF GetBlockCenter()
+    PointF GetBlockCenter()
     {
-        return OffsetF(blockCenterX_->Get(), blockCenterY_->Get());
+        auto blockCenterX = blockCenterX_->Get();
+        auto blockCenterY = blockCenterY_->Get();
+        auto backStart = backStart_->Get();
+        auto backEnd = backEnd_->Get();
+        if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
+            blockCenterX = std::clamp(blockCenterX, backStart.GetX(), backEnd.GetX());
+        } else {
+            blockCenterY = std::clamp(blockCenterY, backStart.GetY(), backEnd.GetY());
+        }
+        return { blockCenterX, blockCenterY };
     }
 
     float GetTrackThickness() const
