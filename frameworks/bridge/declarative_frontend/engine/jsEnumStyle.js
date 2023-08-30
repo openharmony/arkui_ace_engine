@@ -1730,6 +1730,12 @@ var ListItemStyle;
   ListItemStyle[ListItemStyle["CARD"] = 1] = "CARD";
 })(ListItemStyle || (ListItemStyle = {}));
 
+var GridItemStyle;
+(function (GridItemStyle) {
+  GridItemStyle[GridItemStyle["NONE"] = 0] = "NONE";
+  GridItemStyle[GridItemStyle["PLAIN"] = 1] = "PLAIN";
+})(GridItemStyle || (GridItemStyle = {}));
+
 var ListItemGroupStyle;
 (function (ListItemGroupStyle) {
   ListItemGroupStyle[ListItemGroupStyle["NONE"] = 0] = "NONE";

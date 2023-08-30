@@ -25,14 +25,15 @@
 
 namespace OHOS::Ace::Framework {
 
-void GridItemModelImpl::Create()
+void GridItemModelImpl::Create(NG::GridItemStyle gridItemStyle)
 {
     auto itemComponent = AceType::MakeRefPtr<GridLayoutItemComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(itemComponent);
     ViewStackProcessor::GetInstance()->Push(itemComponent);
 }
 
-void GridItemModelImpl::Create(std::function<void(int32_t)>&& deepRenderFunc, bool isLazy)
+void GridItemModelImpl::Create(
+    std::function<void(int32_t)>&& deepRenderFunc, bool isLazy, NG::GridItemStyle gridItemStyle)
 {
     auto itemComponent = AceType::MakeRefPtr<GridLayoutItemComponent>();
     DeepRenderFunc gridItemDeepRenderFunc = [func = std::move(deepRenderFunc),
