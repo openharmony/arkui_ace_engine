@@ -68,6 +68,7 @@ constexpr double HALF_CIRCLE_ANGLE = 180.0;
 constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
 constexpr double CONIC_END_ANGLE = 359.9;
+constexpr double MAX_GRAYSCALE = 255.0;
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
 
 #ifndef USE_ROSEN_DRAWING
@@ -606,7 +607,9 @@ void CustomPaintPaintMethod::GetStrokePaint(SkPaint& paint)
 
     // set global alpha
     if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha());
+        paint.setAlphaf(globalState_.GetAlpha() *
+                        static_cast<double>(strokeState_.GetColor().GetAlpha()) /
+                        MAX_GRAYSCALE);
     }
 }
 
@@ -658,7 +661,13 @@ void CustomPaintPaintMethod::GetStrokePaint(SkPaint& paint, SkSamplingOptions& o
 
     // set global alpha
     if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha());
+        if (strokeState_.GetPaintStyle() == PaintStyle::Color) {
+            paint.setAlphaf(globalState_.GetAlpha() *
+                            static_cast<double>(strokeState_.GetColor().GetAlpha()) /
+                            MAX_GRAYSCALE);
+        } else {
+            paint.setAlphaf(globalState_.GetAlpha());
+        }
     }
 }
 
@@ -710,7 +719,13 @@ void CustomPaintPaintMethod::GetStrokePaint(RSPen& pen, RSSamplingOptions& optio
 
     // set global alpha
     if (globalState_.HasGlobalAlpha()) {
-        pen.SetAlphaF(globalState_.GetAlpha());
+        if (strokeState_.GetPaintStyle() == PaintStyle::Color) {
+            pen.SetAlphaF(globalState_.GetAlpha() *
+                            static_cast<double>(strokeState_.GetColor().GetAlpha()) /
+                            MAX_GRAYSCALE);
+        } else {
+            pen.SetAlphaF(globalState_.GetAlpha());
+        }
     }
 }
 
@@ -922,7 +937,13 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha()); // update the global alpha after setting the color
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            paint.setAlphaf(globalState_.GetAlpha() *
+                            static_cast<double>(fillState_.GetColor().GetAlpha()) /
+                            MAX_GRAYSCALE);
+        } else {
+            paint.setAlphaf(globalState_.GetAlpha()); // update the global alpha after setting the color
+        }
     }
     if (HasShadow()) {
         SkPath path;
@@ -961,7 +982,13 @@ void CustomPaintPaintMethod::FillRect(PaintWrapper* paintWrapper, const Rect& re
         UpdatePaintShader(fillState_.GetPatternValue(), nullptr, &brush);
     }
     if (globalState_.HasGlobalAlpha()) {
-        brush.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            brush.SetAlphaF(globalState_.GetAlpha() *
+                            static_cast<double>(fillState_.GetColor().GetAlpha()) /
+                            MAX_GRAYSCALE);
+        } else {
+            brush.SetAlphaF(globalState_.GetAlpha()); // update the global alpha after setting the color
+        }
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachBrush(brush);
@@ -1155,7 +1182,13 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha());
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            paint.setAlphaf(globalState_.GetAlpha() *
+                            static_cast<double>(fillState_.GetColor().GetAlpha()) /
+                            MAX_GRAYSCALE);
+        } else {
+            paint.setAlphaf(globalState_.GetAlpha());
+        }
     }
     if (HasShadow()) {
         PaintShadow(skPath_, shadow_, skCanvas_.get(), &paint);
@@ -1188,7 +1221,13 @@ void CustomPaintPaintMethod::Fill(PaintWrapper* paintWrapper)
         UpdatePaintShader(fillState_.GetPatternValue(), nullptr, &brush);
     }
     if (globalState_.HasGlobalAlpha()) {
-        brush.SetAlphaF(globalState_.GetAlpha());
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            brush.SetAlphaF(globalState_.GetAlpha() *
+                            static_cast<double>(fillState_.GetColor().GetAlpha()) /
+                            MAX_GRAYSCALE);
+        } else {
+            brush.SetAlphaF(globalState_.GetAlpha());
+        }
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachBrush(brush);
@@ -1243,7 +1282,13 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
         UpdatePaintShader(fillState_.GetPatternValue(), paint);
     }
     if (globalState_.HasGlobalAlpha()) {
-        paint.setAlphaf(globalState_.GetAlpha());
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            paint.setAlphaf(globalState_.GetAlpha() *
+                            static_cast<double>(fillState_.GetColor().GetAlpha()) /
+                            MAX_GRAYSCALE);
+        } else {
+            paint.setAlphaf(globalState_.GetAlpha());
+        }
     }
     if (HasShadow()) {
         PaintShadow(skPath2d_, shadow_, skCanvas_.get(), &paint);
@@ -1276,7 +1321,13 @@ void CustomPaintPaintMethod::Path2DFill(const OffsetF& offset)
         UpdatePaintShader(fillState_.GetPattern(), nullptr, &brush);
     }
     if (globalState_.HasGlobalAlpha()) {
-        brush.SetAlphaF(globalState_.GetAlpha());
+        if (fillState_.GetPaintStyle() == OHOS::Ace::PaintStyle::Color) {
+            brush.SetAlphaF(globalState_.GetAlpha() *
+                            static_cast<double>(fillState_.GetColor().GetAlpha()) /
+                            MAX_GRAYSCALE);
+        } else {
+            brush.SetAlphaF(globalState_.GetAlpha());
+        }
     }
     if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
         rsCanvas_->AttachBrush(brush);
