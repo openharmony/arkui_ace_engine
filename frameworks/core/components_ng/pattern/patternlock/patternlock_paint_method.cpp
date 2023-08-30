@@ -40,7 +40,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     pathStrokeWidth_ = paintProperty->GetPathStrokeWidth().value_or(pathStrokeWidth_);
 
     patternlockModifier_->SetSideLength(sideLength_);
-    patternlockModifier_->SetCircleRadius(circleRadius_.ConvertToPx());
+    patternlockModifier_->SetCircleRadius(circleRadius_.ConvertToPxWithSize(sideLength_));
     patternlockModifier_->SetRegularColor(regularColor_);
     patternlockModifier_->SetSelectColor(selectedColor_);
     patternlockModifier_->SetActiveColor(activeColor_);
@@ -48,7 +48,7 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->SetHoverColor(hoverColor_);
     patternlockModifier_->SetWrongColor(wrongColor_);
     patternlockModifier_->SetCorrectColor(correctColor_);
-    patternlockModifier_->SetPathStrokeWidth(pathStrokeWidth_.ConvertToPx());
+    patternlockModifier_->SetPathStrokeWidth(pathStrokeWidth_.ConvertToPxWithSize(sideLength_));
     patternlockModifier_->SetIsMoveEventValid(isMoveEventValid_);
     patternlockModifier_->SetCellCenterOffset(cellCenter_);
     patternlockModifier_->SetContentOffset(paintWrapper->GetContentOffset());
