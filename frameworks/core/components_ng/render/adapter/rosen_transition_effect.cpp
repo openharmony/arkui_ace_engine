@@ -583,7 +583,7 @@ InternalScaleEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f, 1
 {}
 
 template<>
-InternalCameraDistanceEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f), activeValue_(1.0f)
+InternalCameraDistanceEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0f), activeValue_(0.0f)
 {}
 
 RefPtr<RosenTransitionEffect> RosenTransitionEffect::CreateDefaultRosenTransitionEffect()
