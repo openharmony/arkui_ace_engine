@@ -33,7 +33,7 @@ public:
     void SetCustomKeyboard(std::function<void()>&& func) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
-        std::function<void()>& buildFunc, SelectMenuParam& menuParam) {}
+         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
     void SetOnPaste(std::function<bool()>&& func) override;
 
 private:
