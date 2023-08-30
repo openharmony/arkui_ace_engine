@@ -30,9 +30,8 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void SetCustomKeyboard(std::function<void()>&& func) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
-        std::function<void()>& buildFunc, NG::MenuParam& menuParam) override;
-    void SetOnPaste(std::function<bool()>&& func) override;
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
+    void SetOnPaste(std::function<bool()>&& func) override;
 };
 } // namespace OHOS::Ace::Framework
 
