@@ -2361,6 +2361,11 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
         menuParam.arrowOffset = offset;
     }
+
+    // if enableArrow is true and placement not set, set placement default value to top.
+    if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
+        menuParam.placement = Placement::TOP;
+    }
 }
 
 void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
