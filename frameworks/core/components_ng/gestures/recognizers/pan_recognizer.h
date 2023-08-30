@@ -25,16 +25,7 @@ class PanRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PanRecognizer, MultiFingersRecognizer);
 
 public:
-    PanRecognizer(int32_t fingers, const PanDirection& direction, double distance)
-        : MultiFingersRecognizer(fingers), direction_(direction), distance_(distance), newFingers_(fingers_),
-          newDistance_(distance_), newDirection_(direction_)
-    {
-        if ((direction_.type & PanDirection::VERTICAL) == 0) {
-            velocityTracker_ = VelocityTracker(Axis::HORIZONTAL);
-        } else if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
-            velocityTracker_ = VelocityTracker(Axis::VERTICAL);
-        }
-    }
+    PanRecognizer(int32_t fingers, const PanDirection& direction, double distance);
 
     explicit PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption);
 

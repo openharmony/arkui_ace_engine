@@ -36,8 +36,17 @@ constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 300;
 constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
 constexpr double MAX_THRESHOLD = 20.0;
+constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 
 } // namespace
+
+ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count) : MultiFingersRecognizer(fingers), count_(count)
+{
+    if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
+        LOGW("clickRecognizer fingers_ is illegal, change to DEFAULT_TAP_FINGERS.");
+        fingers_ = DEFAULT_TAP_FINGERS;
+    }
+}
 
 void ClickRecognizer::InitGlobalValue(SourceType sourceType)
 {
@@ -118,11 +127,6 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     LOGI("click recognizer receives %{public}d touch down event, begin to detect click event, current finger info: "
          "%{public}d, %{public}d",
         event.id, equalsToFingers_, currentTouchPointsNum_);
-    if (fingers_ > MAX_TAP_FINGERS) {
-        LOGE("finger is lager than max fingers");
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        return;
-    }
 
     if (currentTouchPointsNum_ >= fingers_) {
         LOGI("current down finger is larger than defined, %{public}d, %{public}d", currentTouchPointsNum_, fingers_);
