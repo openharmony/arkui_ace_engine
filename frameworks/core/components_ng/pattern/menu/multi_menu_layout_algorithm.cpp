@@ -47,7 +47,7 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(columnInfo);
         CHECK_NULL_VOID(columnInfo->GetParent());
         columnInfo->GetParent()->BuildColumnWidth();
-        auto minWidth = static_cast<float>(columnInfo->GetWidth());
+        auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
         childConstraint.minSize.SetWidth(minWidth);
     }
     // Calculate max width of menu items
