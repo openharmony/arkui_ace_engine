@@ -117,6 +117,10 @@ public:
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param)
     {}
 
+    virtual void SetSurfaceChangedCallBack(
+        const std::function<void(float, float, float, float)>& callback) {}
+    virtual void RemoveSurfaceChangedCallBack() {}
+
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
 

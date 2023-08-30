@@ -57,6 +57,10 @@ public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;
 
+    void SetSurfaceChangedCallBack(const std::function<void(float, float, float, float)>& callback) override;
+
+    void RemoveSurfaceChangedCallBack() override;
+
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
     void SyncGeometryProperties(GeometryNode* geometryNode) override;
