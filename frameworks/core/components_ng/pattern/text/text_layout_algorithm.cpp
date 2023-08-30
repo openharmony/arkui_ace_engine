@@ -328,7 +328,6 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto rect = rectsForPlaceholders.at(imageSpanIndex);
-        LOGI("ImageSpan rect = %s", rect.ToString().c_str());
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             ++index;
