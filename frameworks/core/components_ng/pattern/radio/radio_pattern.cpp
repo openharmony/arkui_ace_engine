@@ -406,11 +406,9 @@ FocusPattern RadioPattern::GetFocusPattern() const
 bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
 {
     auto geometryNode = dirty->GetGeometryNode();
-    auto offset = geometryNode->GetContentOffset();
-    auto size = geometryNode->GetContentSize();
-    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
-        offset_ = offset;
-        size_ = size;
+    offset_ = geometryNode->GetContentOffset();
+    size_ = geometryNode->GetContentSize();
+    if (!isUserSetResponseRegion_) {
         AddHotZoneRect();
     }
     return true;
@@ -430,7 +428,9 @@ void RadioPattern::AddHotZoneRect()
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->AddHotZoneRect(hotZoneRegion);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetResponseRegion(std::vector<DimensionRect>({ hotZoneRegion }));
 }
 
 void RadioPattern::RemoveLastHotZoneRect() const
