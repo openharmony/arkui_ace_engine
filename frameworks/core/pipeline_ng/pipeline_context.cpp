@@ -1237,10 +1237,10 @@ void PipelineContext::FlushTouchEvents()
         canUseLongPredictTask_ = false;
         eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_map<int, TouchEvent> idToTouchPoints;
-        for (auto iter = touchEvents.begin(); iter != touchEvents.end(); ++iter) {
+        for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
             auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
             idToTouchPoints.emplace(scalePoint.id, scalePoint);
-            idToTouchPoints[scalePoint.id].history.emplace_back(scalePoint);
+            idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
         }
         std::list<TouchEvent> touchPoints;
         for (auto& [_, item] : idToTouchPoints) {
