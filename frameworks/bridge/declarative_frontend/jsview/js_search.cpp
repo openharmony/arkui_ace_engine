@@ -55,7 +55,7 @@ SearchModel* SearchModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
+const static int32_t PLATFORM_VERSION_TEN = 10;
 namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 } // namespace
@@ -225,7 +225,7 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
         // set icon size
         CalcDimension size;
         auto sizeProp = param->GetProperty("size");
-        if (!sizeProp->IsUndefined() && !sizeProp->IsNull() && ParseJsDimensionVp(sizeProp, size)) {
+        if (!sizeProp->IsUndefined() && !sizeProp->IsNull() && ParseJsDimensionVpNG(sizeProp, size)) {
             if (LessNotEqual(size.Value(), 0.0) || size.Unit() == DimensionUnit::PERCENT) {
                 size = theme->GetIconHeight();
             }
@@ -309,7 +309,7 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
     auto theme = GetTheme<SearchTheme>();
-    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVp(iconSizeProp, iconSize)) {
+    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVpNG(iconSizeProp, iconSize)) {
         if (LessOrEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
             iconSize = theme->GetIconHeight();
         }
@@ -357,8 +357,7 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         // set caret width
         CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
         auto caretWidthProp = param->GetProperty("width");
-        ParseJsDimensionVpNG(caretWidthProp, caretWidth, false);
-        if (LessNotEqual(caretWidth.Value(), 0.0)) {
+        if (!ParseJsDimensionVpNG(caretWidthProp, caretWidth, false) || LessNotEqual(caretWidth.Value(), 0.0)) {
             caretWidth = textFieldTheme->GetCursorWidth();
         }
         SearchModel::GetInstance()->SetCaretWidth(caretWidth);
@@ -393,8 +392,11 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         font.fontSize = Dimension(-1);
     } else {
+        auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
+                                  PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
         CalcDimension size;
-        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+        if (versionTenOrLarger ? !ParseJsDimensionVpNG(fontSize, size) : !ParseJsDimensionVp(fontSize, size) ||
+            !ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
         } else {
             font.fontSize = size;
@@ -578,7 +580,9 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
+                              PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
+    if (versionTenOrLarger ? !ParseJsDimensionVpNG(info[0], value) : !ParseJsDimensionVp(info[0], value)) {
         LOGE("The arg is wrong, it is supposed to be a number arguments");
         return;
     }
