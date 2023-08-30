@@ -457,16 +457,22 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
      * @tc.steps: step4. Change the sheetStyle.
      * @tc.expected: the sheetStyle is updated successfully
      */
-    sheetStyle.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetMode = SheetMode::AUTO;
     sheetStyle.showDragBar = false;
     overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
     EXPECT_FALSE(topSheetNode == nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->InitialLayoutProps();
+    sheetStyle.sheetMode = SheetMode::MEDIUM;
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->InitialLayoutProps();
     EXPECT_EQ(sheetPattern->GetTargetId(), topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId());
     sheetNodeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     style = sheetNodeLayoutProperty->GetSheetStyle();
-    EXPECT_EQ(style->sheetMode.value(), SheetMode::LARGE);
+    EXPECT_EQ(style->sheetMode.value(), SheetMode::MEDIUM);
     EXPECT_EQ(style->showDragBar.value(), false);
 
     /**
@@ -1151,4 +1157,78 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
+
+/**
+ * @tc.name: SheetPresentationPattern1
+ * @tc.desc: Test SheetPresentationPattern create sheet page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create builder.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    bool isShow = true;
+    auto onAppear = []() {};
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, onAppear, nullptr, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    auto sheetNodeLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    auto style = sheetNodeLayoutProperty->GetSheetStyle();
+    EXPECT_EQ(style->sheetMode.value(), SheetMode::MEDIUM);
+    EXPECT_EQ(style->showDragBar.value(), true);
+
+    sheetStyle.sheetMode = SheetMode::LARGE;
+    sheetStyle.showDragBar = false;
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    EXPECT_EQ(sheetPattern->GetTargetId(), topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId());
+    sheetPattern->InitPanEvent();
+    GestureEvent info;
+    sheetPattern->HandleDragUpdate(info);
+    sheetPattern->HandleDragEnd({});
+    sheetNodeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    style = sheetNodeLayoutProperty->GetSheetStyle();
+    RefPtr<LayoutWrapperNode> layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(sheetNode)), geometryNode->Clone(), sheetNodeLayoutProperty->Clone());
+    DirtySwapConfig dirtySwapConfig;
+    EXPECT_TRUE(sheetPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
+    sheetPattern->InitPanEvent();
+    EXPECT_EQ(style->sheetMode.value(), SheetMode::LARGE);
+    EXPECT_EQ(style->showDragBar.value(), false);
+}
+
 } // namespace OHOS::Ace::NG

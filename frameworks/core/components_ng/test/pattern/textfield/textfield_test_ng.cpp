@@ -5926,7 +5926,7 @@ HWTEST_F(TextFieldPatternTestNg, FitInSafeArea, TestSize.Level1)
     EXPECT_EQ(pattern->caretRect_, CARE_RECT_DANGEROUS);
     int32_t charPosition[3] = {-1, 0, 2};
     auto content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[1], true);;
-    for (int i=0; i<3; i++) {
+    for (int i = 0; i < 3; i++) {
         content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], true);
         content = pattern->CreateDisplayText(TEXT_CONTENT, charPosition[i], false);
         content = pattern->CreateDisplayText(EMPTY_TEXT_VALUE, charPosition[i], true);
