@@ -127,8 +127,8 @@ bool PatternLockPattern::CheckInHotSpot(const OffsetF& offset, int32_t x, int32_
         return false;
     }
     auto activeCircleRadiusScale = patternLockTheme->GetActiveCircleRadiusScale();
-    auto handleCircleRadius =
-        std::min(static_cast<float>(circleRadius_.ConvertToPx()), sideLength / backgroundRadiusScale / RADIUS_COUNT);
+    auto handleCircleRadius = std::min(static_cast<float>(circleRadius_.ConvertToPxWithSize(sideLength)),
+        sideLength / backgroundRadiusScale / RADIUS_COUNT);
     auto hotSpotCircleRadius = patternLockTheme->GetHotSpotCircleRadius();
     handleCircleRadius = std::max(handleCircleRadius * activeCircleRadiusScale,
         std::min(
@@ -395,7 +395,7 @@ void PatternLockPattern::InitFocusEvent()
 void PatternLockPattern::HandleFocusEvent()
 {
     HandleReset();
-    currentPoint_ = {1, 1};
+    currentPoint_ = { 1, 1 };
     isMoveEventValid_ = true;
 }
 
@@ -414,16 +414,17 @@ void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(patternLockTheme);
     auto patternLockPaintProperty = host->GetPaintProperty<PatternLockPaintProperty>();
     CHECK_NULL_VOID(patternLockPaintProperty);
-    float circleRadius =
-        patternLockPaintProperty->GetCircleRadius().value_or(patternLockTheme->GetCircleRadius()).ConvertToPx();
-    auto backgroundRadiusScale = patternLockTheme->GetBackgroundRadiusScale();
-    auto focusPaddingRadius = patternLockTheme->GetFocusPaddingRadius();
-    auto focusPaintWidth = patternLockTheme->GetFocusPaintWidth();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     OffsetF contentOffset = geometryNode->GetContentOffset();
     float sideLength = geometryNode->GetContentSize().Width();
     float offset = sideLength / PATTERN_LOCK_COL_COUNT;
+    float circleRadius = patternLockPaintProperty->GetCircleRadius()
+                             .value_or(patternLockTheme->GetCircleRadius())
+                             .ConvertToPxWithSize(sideLength);
+    auto backgroundRadiusScale = patternLockTheme->GetBackgroundRadiusScale();
+    auto focusPaddingRadius = patternLockTheme->GetFocusPaddingRadius();
+    auto focusPaintWidth = patternLockTheme->GetFocusPaintWidth();
     float foucusCircleRadius = std::min(circleRadius * backgroundRadiusScale, offset / RADIUS_TO_DIAMETER) +
                                (focusPaddingRadius).ConvertToPx() + focusPaintWidth.ConvertToPx() / RADIUS_TO_DIAMETER;
     float outRadius = offset / RADIUS_TO_DIAMETER - foucusCircleRadius;
@@ -488,7 +489,7 @@ void PatternLockPattern::PaintFocusState()
 void PatternLockPattern::OnKeyDrapUp()
 {
     if (currentPoint_.second != 1) {
-        currentPoint_ = {currentPoint_.first, currentPoint_.second - 1};
+        currentPoint_ = { currentPoint_.first, currentPoint_.second - 1 };
         PaintFocusState();
     }
 }
@@ -496,7 +497,7 @@ void PatternLockPattern::OnKeyDrapUp()
 void PatternLockPattern::OnKeyDrapDown()
 {
     if (currentPoint_.second != PATTERN_LOCK_COL_COUNT) {
-        currentPoint_ = {currentPoint_.first, currentPoint_.second + 1};
+        currentPoint_ = { currentPoint_.first, currentPoint_.second + 1 };
         PaintFocusState();
     }
 }
@@ -504,7 +505,7 @@ void PatternLockPattern::OnKeyDrapDown()
 void PatternLockPattern::OnKeyDrapLeft()
 {
     if (currentPoint_.first != 1) {
-        currentPoint_ = {currentPoint_.first - 1, currentPoint_.second};
+        currentPoint_ = { currentPoint_.first - 1, currentPoint_.second };
         PaintFocusState();
     }
 }
@@ -512,7 +513,7 @@ void PatternLockPattern::OnKeyDrapLeft()
 void PatternLockPattern::OnKeyDrapRight()
 {
     if (currentPoint_.first != PATTERN_LOCK_COL_COUNT) {
-        currentPoint_ = {currentPoint_.first + 1, currentPoint_.second};
+        currentPoint_ = { currentPoint_.first + 1, currentPoint_.second };
         PaintFocusState();
     }
 }
@@ -544,11 +545,11 @@ bool PatternLockPattern::OnKeyEvent(const KeyEvent& event)
             OnKeyDrapRight();
             return true;
         case KeyCode::KEY_MOVE_HOME:
-            currentPoint_ = {1, 1};
+            currentPoint_ = { 1, 1 };
             PaintFocusState();
             return true;
         case KeyCode::KEY_MOVE_END:
-            currentPoint_ = {PATTERN_LOCK_COL_COUNT, PATTERN_LOCK_COL_COUNT};
+            currentPoint_ = { PATTERN_LOCK_COL_COUNT, PATTERN_LOCK_COL_COUNT };
             PaintFocusState();
             return true;
         case KeyCode::KEY_ESCAPE:
