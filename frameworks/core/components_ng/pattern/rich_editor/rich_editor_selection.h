@@ -58,7 +58,9 @@ struct SpanPosition {
 struct TextStyleResult {
     std::string fontColor = "";
     double fontSize = 0.0;
+    double leadingMargin[2] = { 0.0, 0.0 };
     int32_t fontStyle = 0;
+    int32_t textAlign = 0;
     int32_t fontWeight = 0;
     std::string fontFamily = "";
     int32_t decorationType = 0;

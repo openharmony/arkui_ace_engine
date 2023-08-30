@@ -26,6 +26,7 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
 struct ImageSpanSize {
@@ -83,9 +84,7 @@ struct UpdateSpanStyle {
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
         updateTextAlign.reset();
-        updateTextIndent.reset();
-        updateTextPlaceholder.reset();
-        updateTextLeadingMarginSize.reset();
+        updateLeadingMargin.reset();
 
         updateImageWidth.reset();
         updateImageHeight.reset();
@@ -101,9 +100,7 @@ struct UpdateSpanStyle {
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<TextAlign> updateTextAlign = std::nullopt;
-    std::optional<Dimension> updateTextIndent = std::nullopt;
-    std::optional<RefPtr<PixelMap>> updateTextPlaceholder = std::nullopt;
-    std::optional<DimensionSize> updateTextLeadingMarginSize = std::nullopt;
+    std::optional<NG::LeadingMargin> updateLeadingMargin = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;

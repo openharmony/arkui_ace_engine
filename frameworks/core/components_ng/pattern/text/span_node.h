@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/gestures/gesture_info.h"
@@ -209,7 +210,7 @@ enum class PropertyInfo {
     LETTERSPACE,
     LINEHEIGHT,
     TEXT_ALIGN,
-    INDENT,
+    LEADING_MARGIN,
     NONE,
 };
 
@@ -259,9 +260,7 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextIndent, Dimension);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMarginSize, SizeF);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(Placeholder, RefPtr<PixelMap>);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
 
     // Mount to the previous Span node or Text node.
     void MountToParagraph();
@@ -304,7 +303,7 @@ public:
         const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
             PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
             PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
-            PropertyInfo::INDENT };
+            PropertyInfo::LEADING_MARGIN };
         set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
             propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
         return inheritPropertyInfo;

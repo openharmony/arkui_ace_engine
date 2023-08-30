@@ -19,8 +19,11 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
+// #ifdef PIXEL_MAP_SUPPORTED
 #include "base/image/pixel_map.h"
+// #endif
 
 namespace OHOS::Ace::NG {
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
@@ -52,8 +55,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightAdaptivePolicy, TextHeightAdaptivePolicy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextIndent, Dimension);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMarginSize, SizeF);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(Placeholder, RefPtr<PixelMap>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMargin, LeadingMargin);
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,

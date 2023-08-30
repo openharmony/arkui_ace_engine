@@ -106,17 +106,12 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
         style.leadingMargin = std::make_optional<LeadingMargin>();
         style.leadingMargin->size = SizeF(lineStyle->propTextIndent->ConvertToPx(), 0.0f);
     }
-    if (lineStyle && lineStyle->propLeadingMarginSize) {
+    if (lineStyle && lineStyle->propLeadingMargin) {
         if (!style.leadingMargin) {
             style.leadingMargin = std::make_optional<LeadingMargin>();
         }
-        style.leadingMargin->size = lineStyle->propLeadingMarginSize.value();
-    }
-    if (lineStyle && lineStyle->propPlaceholder) {
-        if (!style.leadingMargin) {
-            style.leadingMargin = std::make_optional<LeadingMargin>();
-        }
-        style.leadingMargin->pixmap = lineStyle->propPlaceholder.value();
+        style.leadingMargin->size = lineStyle->propLeadingMargin->size;
+        style.leadingMargin->pixmap = lineStyle->propLeadingMargin->pixmap;
     }
 
     return style;

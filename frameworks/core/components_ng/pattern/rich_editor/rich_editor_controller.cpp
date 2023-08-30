@@ -77,8 +77,7 @@ void RichEditorController::UpdateSpanStyle(
         return;
     }
     richEditorPattern->SetUpdateSpanStyle(updateSpanStyle_);
-    if (updateSpanStyle_.updateTextAlign.has_value() || updateSpanStyle_.updateTextIndent.has_value() ||
-        updateSpanStyle_.updateTextPlaceholder.has_value()) {
+    if (updateSpanStyle_.updateTextAlign.has_value() || updateSpanStyle_.updateLeadingMargin.has_value()) {
         richEditorPattern->UpdateParagraphStyle(start, end, textStyle);
     }
 

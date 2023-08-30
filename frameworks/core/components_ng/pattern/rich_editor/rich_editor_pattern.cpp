@@ -595,9 +595,9 @@ void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanN
         target->AddPropertyInfo(PropertyInfo::TEXT_ALIGN);
     }
 
-    if (source->HasTextIndent()) {
-        target->UpdateTextIndent(source->GetTextIndentValue(Dimension()));
-        target->AddPropertyInfo(PropertyInfo::INDENT);
+    if (source->HasLeadingMargin()) {
+        target->UpdateLeadingMargin(source->GetLeadingMarginValue({}));
+        target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);
     }
 }
 
@@ -914,16 +914,10 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const T
         auto spanNode = DynamicCast<SpanNode>(*headIt);
         if (spanNode) {
             if (updateSpanStyle_.updateTextAlign.has_value()) {
-                spanNode->UpdateTextAlign(textStyle.GetTextAlign());
+                spanNode->UpdateTextAlign(*updateSpanStyle_.updateTextAlign);
             }
-            if (updateSpanStyle_.updateTextIndent.has_value()) {
-                spanNode->UpdateTextIndent(textStyle.GetTextIndent());
-            }
-            if (updateSpanStyle_.updateTextPlaceholder.has_value()) {
-                spanNode->UpdatePlaceholder(textStyle.GetPlaceholder());
-            }
-            if (updateSpanStyle_.updateTextLeadingMarginSize.has_value()) {
-                spanNode->UpdateLeadingMarginSize(textStyle.GetLeadingMarginSize());
+            if (updateSpanStyle_.updateLeadingMargin.has_value()) {
+                spanNode->UpdateLeadingMargin(*updateSpanStyle_.updateLeadingMargin);
             }
         }
         ++headIt;

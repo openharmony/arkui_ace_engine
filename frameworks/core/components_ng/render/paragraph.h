@@ -34,6 +34,11 @@ namespace OHOS::Ace::NG {
 struct LeadingMargin {
     SizeF size;
     RefPtr<PixelMap> pixmap;
+
+    bool operator==(const LeadingMargin& other) const
+    {
+        return size == other.size && pixmap == other.pixmap;
+    }
 };
 
 struct ParagraphStyle {
