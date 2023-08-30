@@ -84,6 +84,9 @@ public:
 
     void OnDataReloaded()
     {
+        for (auto& [key, node] : expiringItem_) {
+            node.first = -1;
+        }
         for (auto& [index, node] : cachedItems_) {
             if (node.second) {
                 expiringItem_.try_emplace(node.first, LazyForEachCacheChild(-1, std::move(node.second)));
