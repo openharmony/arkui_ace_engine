@@ -169,8 +169,7 @@ bool NavigationLayoutAlgorithm::IsAutoHeight(const RefPtr<LayoutProperty>& layou
     auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!calcLayoutConstraint || !calcLayoutConstraint->selfIdealSize.has_value() ||
         !calcLayoutConstraint->selfIdealSize->Height().has_value() ||
-        (calcLayoutConstraint->selfIdealSize->Height().value().ToString().find("auto")
-        == std::string::npos)) {
+        (calcLayoutConstraint->selfIdealSize->Height().value().ToString().find("auto") == std::string::npos)) {
             return false;
         }
     return true;
@@ -181,8 +180,7 @@ void NavigationLayoutAlgorithm::RangeCalculation(
 {
     const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto parentSize =
-         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+    auto parentSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     auto frameSize = parentSize.ConvertToSizeT();
     float frameSizeWidth = frameSize.Width();
     Dimension defaultValue = Dimension(-1.0);
@@ -269,18 +267,17 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(
 }
 
 void NavigationLayoutAlgorithm::SizeCalculation(LayoutWrapper* layoutWrapper,
-    const RefPtr<NavigationGroupNode>& hostNode,
-    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize)
+    const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty,
+    const SizeF& frameSize)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto constraint = navigationLayoutProperty->GetLayoutConstraint();
-    auto parentSize =
-        CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+    auto parentSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto navigationLayoutAlgorithm =
-    AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
     if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
         auto minNavBarWidth = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
@@ -407,8 +404,8 @@ void NavigationLayoutAlgorithm::MeasureNavBar(LayoutWrapper* layoutWrapper, cons
 }
 
 void NavigationLayoutAlgorithm::MeasureContentChild(LayoutWrapper* layoutWrapper,
-    const RefPtr<NavigationGroupNode>& hostNode,
-    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& contentSize)
+    const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty,
+    const SizeF& contentSize)
 {
     auto contentNode = hostNode->GetContentNode();
     CHECK_NULL_VOID(contentNode);
@@ -439,7 +436,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(constraint);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto size =
-         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
+        CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     FitScrollFullWindow(size);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -456,7 +453,9 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize_);
     MeasureContentChild(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
     MeasureDivider(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize_);
-    SetNavigationHeight(layoutWrapper, size);
+    if (IsAutoHeight(navigationLayoutProperty)) {
+        SetNavigationHeight(layoutWrapper, size);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
