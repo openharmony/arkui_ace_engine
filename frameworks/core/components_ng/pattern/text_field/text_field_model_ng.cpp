@@ -400,6 +400,7 @@ void TextFieldModelNG::SetPasswordIcon(const PasswordIcon& passwordIcon)
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordSourceInfo,
             ImageSourceInfo(passwordIcon.showResult, passwordIcon.showBundleName, passwordIcon.showModuleName));
         pattern->SetShowUserDefinedIcon(true);
+        pattern->SetShowUserDefinedIconSrc(passwordIcon.showResult);
     }
     if (passwordIcon.hideResult == "") {
         pattern->SetHideUserDefinedIcon(false);
@@ -407,6 +408,7 @@ void TextFieldModelNG::SetPasswordIcon(const PasswordIcon& passwordIcon)
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HidePasswordSourceInfo,
             ImageSourceInfo(passwordIcon.hideResult, passwordIcon.hideBundleName, passwordIcon.hideModuleName));
         pattern->SetHideUserDefinedIcon(true);
+        pattern->SetHideUserDefinedIconSrc(passwordIcon.hideResult);
     }
 }
 

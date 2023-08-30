@@ -620,6 +620,16 @@ public:
         hideUserDefinedIcon_ = enable;
     }
 
+    void SetShowUserDefinedIconSrc(const std::string& iconSrc)
+    {
+        showUserDefinedIconSrc_ = iconSrc;
+    }
+
+    void SetHideUserDefinedIconSrc(const std::string& iconSrc)
+    {
+        hideUserDefinedIconSrc_ = iconSrc;
+    }
+
     void SetEnableTouchAndHoverEffect(bool enable)
     {
         enableTouchAndHoverEffect_ = enable;
@@ -1189,6 +1199,8 @@ private:
 
     bool showUserDefinedIcon_ = false;
     bool hideUserDefinedIcon_ = false;
+    std::string showUserDefinedIconSrc_;
+    std::string hideUserDefinedIconSrc_;
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
     float baselineOffset_ = 0.0f;
