@@ -318,7 +318,7 @@ bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValu
             LOGE("can not get message from resource manager.");
             return false;
         }
-        result = StringUtils::StringToDimensionWithUnit(parameterStr);
+        result = StringUtils::StringToDimensionWithUnit(parameterStr, defaultUnit);
         return true;
     }
     return false;
