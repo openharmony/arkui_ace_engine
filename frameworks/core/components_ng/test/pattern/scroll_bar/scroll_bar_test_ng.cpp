@@ -738,9 +738,18 @@ HWTEST_F(ScrollBarTestNg, AccessibilityEventTest001, TestSize.Level1)
     EXPECT_EQ(pattern->scrollEndAnimator_, nullptr);
 
     /**
-     * @tc.steps: step3. call callback function.
+     * @tc.steps: step3. call callback function and controlDistance_ is 0.
+     * @tc.expected: scrollEndAnimator_ is nullptr.
+     */
+    pattern->displayMode_ = DisplayMode::AUTO;
+    callback();
+    EXPECT_EQ(pattern->scrollEndAnimator_, nullptr);
+
+    /**
+     * @tc.steps: step4. call callback function and controlDistance_ bigger than 0.
      * @tc.expected: scrollEndAnimator_ is not nullptr.
      */
+    pattern->controlDistance_ = 10.f;
     pattern->displayMode_ = DisplayMode::AUTO;
     callback();
     EXPECT_NE(pattern->scrollEndAnimator_, nullptr);
