@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 
-#include <utility>
-
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -64,7 +62,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
             continue;
         }
         auto firstSpan = *group.begin();
-        pManager_->AddParagraph({ .paragraph = paragraph,
+        pManager_->AddParagraph( { .paragraph = paragraph,
             .start = firstSpan->position - firstSpan->content.length(),
             .end = (*group.rbegin())->position });
     }
@@ -132,7 +130,7 @@ void RichEditorLayoutAlgorithm::ApplyIndent(const TextStyle& /*_*/, double /*_*/
     if (lineStyle && lineStyle->propTextIndent) {
         auto&& paragraph = GetParagraph();
         // indent the whole paragraph
-        paragraph->SetIndents({ lineStyle->propTextIndent->ConvertToPx() });
+        paragraph->SetIndents( { lineStyle->propTextIndent->ConvertToPx() });
     }
 }
 

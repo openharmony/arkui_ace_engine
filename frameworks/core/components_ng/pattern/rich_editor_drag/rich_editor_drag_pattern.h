@@ -24,7 +24,6 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-
 class RichEditorDragPattern : public TextDragPattern {
     DECLARE_ACE_TYPE(RichEditorDragPattern, TextDragPattern);
 

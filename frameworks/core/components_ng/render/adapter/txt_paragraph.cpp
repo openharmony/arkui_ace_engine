@@ -140,7 +140,7 @@ void TxtParagraph::Build()
 #endif
 
     if (paraStyle_.leadingMargin) {
-        SetIndents({ paraStyle_.leadingMargin->size.Width() });
+        SetIndents( { paraStyle_.leadingMargin->size.Width() });
     }
 }
 

@@ -16,8 +16,8 @@
 #include "paragraph_manager.h"
 
 #include "base/utils/utils.h"
-namespace OHOS::Ace::NG {
 
+namespace OHOS::Ace::NG {
 float ParagraphManager::GetHeight() const
 {
     float res = 0;
@@ -113,5 +113,4 @@ std::string ParagraphManager::ParagraphInfo::ToString() const
 {
     return "Paragraph start: " + std::to_string(start) + ", end: " + std::to_string(end);
 }
-
 } // namespace OHOS::Ace::NG

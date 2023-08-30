@@ -86,7 +86,8 @@ public:
     void SetFontReady(bool value);
 
 protected:
-    OffsetF GetPaintOffset() const {
+    OffsetF GetPaintOffset() const
+    {
         return paintOffset_;
     }
 private:
