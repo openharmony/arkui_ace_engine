@@ -1115,6 +1115,7 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     bool FilterWithAscii(const std::string& valueToUpdate, std::string& result);
+    bool FilterWithEmail(std::string& result);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result, bool isInsertValue = false);
 #ifndef USE_GRAPHIC_TEXT_GINE
     bool LastTouchIsInSelectRegion(const std::vector<RSTypographyProperties::TextBox>& boxes);
