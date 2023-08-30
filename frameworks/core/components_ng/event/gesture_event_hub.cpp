@@ -509,11 +509,10 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
     } else {
-        auto frameNodeOffset = frameNode->GetOffsetRelativeToWindow();
-        auto coordinateX = frameNodeOffset.GetX() > SystemProperties::GetDeviceWidth()
-                               ? frameNodeOffset.GetX() - SystemProperties::GetDeviceWidth()
-                               : frameNodeOffset.GetX();
-        auto coordinateY = frameNodeOffset.GetY();
+        auto coordinateX = frameNodeOffset_.GetX() > SystemProperties::GetDeviceWidth()
+                               ? frameNodeOffset_.GetX() - SystemProperties::GetDeviceWidth()
+                               : frameNodeOffset_.GetX();
+        auto coordinateY = frameNodeOffset_.GetY();
         result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
         result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
     }
@@ -596,6 +595,11 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     event->SetScreenX(info.GetScreenLocation().GetX());
     event->SetScreenY(info.GetScreenLocation().GetY());
 
+    /*
+     * Users may remove frameNode in the js callback function "onDragStart "triggered below,
+     * so save the offset of the framenode relative to the window in advance
+     */
+    frameNodeOffset_ = frameNode->GetOffsetRelativeToWindow();
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)

@@ -506,6 +506,7 @@ private:
     std::vector<DimensionRect> mouseResponseRegion_;
     bool touchable_ = true;
     RefPtr<PixelMap> pixelMap_;
+    OffsetF frameNodeOffset_;
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
 
