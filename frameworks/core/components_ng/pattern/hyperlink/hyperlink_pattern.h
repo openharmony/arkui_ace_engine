@@ -60,12 +60,14 @@ private:
     void OnHoverEvent(bool isHovered);
     void OnMouseEvent(MouseInfo& info);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void OnTouchEvent(const TouchEventInfo& info);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
 
     bool isLinked_ = false;
     RefPtr<TouchEventImpl> onTouchEvent_;
+    RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<InputEvent> onHoverEvent_;
     RefPtr<InputEvent> onMouseEvent_;
     RefPtr<ClickEvent> clickListener_;
