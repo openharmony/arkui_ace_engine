@@ -199,12 +199,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
  * ArkUI engine will call this function when the corresponding CustomNode's active status change.
  * @param active true for active, false for inactive
  */
-  public setActive(active: boolean): void {
+  public setActiveInternal(active: boolean): void {
     if (this.isActive_ == active) {
-      stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active} with unchanged state - ignoring`);
+      stateMgmtConsole.debug(`${this.constructor.name}: setActiveInternal ${active} with unchanged state - ignoring`);
       return;
     }
-    stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+    stateMgmtConsole.debug(`${this.constructor.name}: setActiveInternal ${active ? ' inActive -> active' : 'active -> inActive'}`);
     this.isActive_ = active;
     if (this.isActive_) {
       this.onActiveInternal()
@@ -223,7 +223,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     for (const child of this.childrenWeakrefMap_.values()) {
       const childViewPU: ViewPU | undefined = child.deref();
       if (childViewPU) {
-        childViewPU.setActive(this.isActive_);
+        childViewPU.setActiveInternal(this.isActive_);
       }
     }
   }
@@ -242,7 +242,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     for (const child of this.childrenWeakrefMap_.values()) {
       const childViewPU: ViewPU | undefined = child.deref();
       if (childViewPU) {
-        childViewPU.setActive(this.isActive_);
+        childViewPU.setActiveInternal(this.isActive_);
       }
     }
   }

@@ -4306,7 +4306,7 @@ class ViewPU extends NativeViewPartialUpdate {
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
    * @param active true for active, false for inactive
    */
-    setActive(active) {
+    setActiveInternal(active) {
         if (this.isActive_ == active) {
             
             return;
@@ -4329,7 +4329,7 @@ class ViewPU extends NativeViewPartialUpdate {
         for (const child of this.childrenWeakrefMap_.values()) {
             const childViewPU = child.deref();
             if (childViewPU) {
-                childViewPU.setActive(this.isActive_);
+                childViewPU.setActiveInternal(this.isActive_);
             }
         }
     }
@@ -4344,7 +4344,7 @@ class ViewPU extends NativeViewPartialUpdate {
         for (const child of this.childrenWeakrefMap_.values()) {
             const childViewPU = child.deref();
             if (childViewPU) {
-                childViewPU.setActive(this.isActive_);
+                childViewPU.setActiveInternal(this.isActive_);
             }
         }
     }
