@@ -2438,7 +2438,6 @@ void RichEditorPattern::HandleOnPaste()
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto overridePaste = eventHub->FireOnPaste();
-    LOGE("jyj overridePaste %d", overridePaste);
     if (overridePaste) {
         return;
     }
