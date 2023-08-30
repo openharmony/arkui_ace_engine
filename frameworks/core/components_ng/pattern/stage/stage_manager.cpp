@@ -210,6 +210,8 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         return true;
     }
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
     return true;
 }
 
