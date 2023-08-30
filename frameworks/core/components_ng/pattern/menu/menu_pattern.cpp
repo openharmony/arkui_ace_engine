@@ -200,8 +200,8 @@ void MenuPattern::RegisterOnTouch()
 
 void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    if (GetInnerMenuCount() > 0 || IsMultiMenu()) {
-        // not click hide menu for multi menu
+    if (GetInnerMenuCount() > 0 || IsMultiMenu() || IsSelectOverlayCustomMenu()) {
+        // not click hide menu for multi menu or select overlay custom menu
         return;
     }
     if (!options_.empty()) {
