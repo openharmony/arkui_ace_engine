@@ -31,8 +31,12 @@ foreach(module, common_napi_libs) {
     }
   } else if (!is_cross_platform_build) {
     ace_napi_lib(module) {
-      # napi libs remain isolate in libace.z.so
-      platform = "ohos_ng"
+      # napi libs remain isolate in libace.z.so and asan version
+      if (is_asan) {
+        platform = "ohos"
+      } else {
+        platform = "ohos_ng"
+      }
     }
   }
 

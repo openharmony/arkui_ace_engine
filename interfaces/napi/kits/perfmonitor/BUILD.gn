@@ -26,7 +26,11 @@ ohos_shared_library("performancemonitor") {
 
   sources = [ "napi_perf_monitor.cpp" ]
 
-  deps = [ "$ace_root/build:libace" ]
+  if (is_asan) {
+    deps = [ "$ace_root/build:libace_compatible" ]
+  } else {
+    deps = [ "$ace_root/build:libace" ]
+  }
 
   external_deps = [
     "c_utils:utils",

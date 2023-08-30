@@ -30,8 +30,9 @@ if (is_ohos_standard_system) {
     }
   }
 
-  platforms += [
-    ohos_platform,
-    ohos_platform_ng,
-  ]
+  platforms += [ ohos_platform ]
+
+  if (!is_asan) {
+    platforms += [ ohos_platform_ng ]
+  }
 }

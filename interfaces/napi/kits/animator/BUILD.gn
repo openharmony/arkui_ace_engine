@@ -43,7 +43,7 @@ template("napi_animator_static") {
       deps += [ config.libace_target ]
     }
 
-    if (platform != "ohos") {
+    if (platform != "ohos" || is_asan) {
       if (frame_trace_support) {
         sources +=
             [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp" ]

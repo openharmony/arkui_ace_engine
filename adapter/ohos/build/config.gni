@@ -27,3 +27,7 @@ platform_deps = [
 ]
 
 libace_target = "//foundation/arkui/ace_engine/build:libace"
+
+if (is_asan) {
+  libace_target = "//foundation/arkui/ace_engine/build:libace_compatible"
+}

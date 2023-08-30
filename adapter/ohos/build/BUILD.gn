@@ -29,4 +29,8 @@ group("ace_packages") {
     "$ace_root/interfaces/napi/kits:napi_group",
     "$ace_root/interfaces/native:ace_packages_ndk",
   ]
+
+  if (is_asan) {
+    deps -= [ "$ace_root/build:libace" ]
+  }
 }
