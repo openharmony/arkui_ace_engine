@@ -79,6 +79,10 @@ build_component_ng("render_ng") {
     ]
   }
 
+  if (is_cross_platform_build) {
+    defines = [ "CROSS_PLATFORM" ]
+  }
+
   if (current_os != "ohos") {
     rosen_sources -= [
       "adapter/rosen_media_player.cpp",

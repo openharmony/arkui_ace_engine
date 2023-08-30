@@ -70,6 +70,9 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
+#ifdef CROSS_PLATFORM
+#include "render_service_client/core/pipeline/rs_render_thread.h"
+#endif
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "core/components_ng/render/adapter/skia_image.h"
@@ -245,6 +248,25 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
         return;
     }
     SetPivot(xPivot, yPivot, zPivot);
+}
+
+void RosenRenderContext::SetSurfaceChangedCallBack(
+    const std::function<void(float, float, float, float)>& callback)
+{
+#ifdef CROSS_PLATFORM
+    if (rsNode_) {
+        RSRenderThread::Instance().AddSurfaceChangedCallBack(rsNode_->GetId(), callback);
+    }
+#endif
+}
+
+void RosenRenderContext::RemoveSurfaceChangedCallBack()
+{
+#ifdef CROSS_PLATFORM
+    if (rsNode_) {
+        RSRenderThread::Instance().RemoveSurfaceChangedCallBack(rsNode_->GetId());
+    }
+#endif
 }
 
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
