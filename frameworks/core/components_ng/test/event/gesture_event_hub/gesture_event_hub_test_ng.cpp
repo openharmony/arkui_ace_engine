@@ -85,7 +85,6 @@ void GestureEventHubTestNg::TearDownTestSuite()
     GTEST_LOG_(INFO) << "GestureEventHubTestNg TearDownTestCase";
 }
 
-
 /**
  * @tc.name: GestureEventHubTest001
  * @tc.desc: Create GestureEventHub and call GetFrameNode
@@ -883,5 +882,170 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest012, TestSize.Level1)
 
     auto sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeGestureHierarchy, GESTURES_COUNTS);
+}
+
+/**
+ * @tc.name: GestureEventHubTest013
+ * @tc.desc: Test ProcessTouchTestHit
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    OffsetF coordinateOffset;
+    TouchRestrict touchRestrict;
+    TouchTestResult innerTargets;
+    TouchTestResult finalResult;
+    PointF localPoint;
+
+    PanDirection panDirection;
+    /**
+     * @tc.steps: step2. call ProcessTouchTestHit
+     * @tc.expected: result is true
+     */
+    guestureEventHub->scrollableActuator_ =
+        AceType::MakeRefPtr<ScrollableActuator>(AceType::WeakClaim(AceType::RawPtr(guestureEventHub)));
+    guestureEventHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+    guestureEventHub->clickEventActuator_ =
+        AceType::MakeRefPtr<ClickEventActuator>(AceType::WeakClaim(AceType::RawPtr(guestureEventHub)));
+    guestureEventHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(guestureEventHub)), panDirection, 1, 50.0f);
+    guestureEventHub->longPressEventActuator_ =
+        AceType::MakeRefPtr<LongPressEventActuator>(AceType::WeakClaim(AceType::RawPtr(guestureEventHub)));
+    guestureEventHub->dragEventActuator_ = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(guestureEventHub)), panDirection, 1, 50.0f);
+    auto result = guestureEventHub->ProcessTouchTestHit(
+        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GestureEventHubTest014
+ * @tc.desc: Test IsAllowedDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 101, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto result = guestureEventHub->IsAllowedDrag(eventHub);
+    ASSERT_FALSE(result);
+    /**
+     * @tc.steps: step2. call IsAllowedDrag
+     * @tc.expected: result is correct
+     */
+    frameNode->userSet_ = true;
+    result = guestureEventHub->IsAllowedDrag(eventHub);
+    ASSERT_FALSE(result);
+
+    frameNode->userSet_ = false;
+    auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
+    eventHub->onDragStart_ = func;
+    result = guestureEventHub->IsAllowedDrag(eventHub);
+    ASSERT_TRUE(result);
+
+    guestureEventHub->HandleOnDragStart(GestureEvent());
+
+    frameNode->draggable_ = true;
+    result = guestureEventHub->IsAllowedDrag(eventHub);
+    ASSERT_TRUE(result);
+
+    frameNode->draggable_ = true;
+    eventHub->onDragStart_ = nullptr;
+    result = guestureEventHub->IsAllowedDrag(eventHub);
+    ASSERT_FALSE(result);
+}
+
+/**
+ * @tc.name: GestureEventHubTest015
+ * @tc.desc: Test StartDragTaskForWeb HandleNotallowDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    guestureEventHub->StartDragTaskForWeb();
+
+    guestureEventHub->isReceivedDragGestureInfo_ = true;
+    guestureEventHub->StartDragTaskForWeb();
+    ASSERT_FALSE(guestureEventHub->isReceivedDragGestureInfo_);
+
+    guestureEventHub->HandleNotallowDrag(GestureEvent());
+
+    frameNode = FrameNode::CreateFrameNode("Web", 102, AceType::MakeRefPtr<Pattern>());
+    guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    event = guestureEventHub->eventHub_.Upgrade();
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    frameNode->userSet_ = false;
+    auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
+    event->onDragStart_ = func;
+    guestureEventHub->HandleOnDragStart(GestureEvent());
+
+    guestureEventHub->HandleNotallowDrag(GestureEvent());
+    ASSERT_TRUE(guestureEventHub->isReceivedDragGestureInfo_);
+}
+
+/**
+ * @tc.name: GestureEventHubTest016
+ * @tc.desc: Test BindMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    auto func = [](GestureEvent& info) {};
+    guestureEventHub->BindMenu(func);
+
+    guestureEventHub->showMenu_ = AceType::MakeRefPtr<ClickEvent>([](GestureEvent& info) {});
+    guestureEventHub->BindMenu(func);
+
+    guestureEventHub->clickEventActuator_ = nullptr;
+    guestureEventHub->ClearUserOnClick();
+    guestureEventHub->ClearUserOnTouch();
+
+    guestureEventHub->clickEventActuator_ =
+        AceType::MakeRefPtr<ClickEventActuator>(AceType::WeakClaim(AceType::RawPtr(guestureEventHub)));
+    guestureEventHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+    guestureEventHub->ClearUserOnClick();
+    guestureEventHub->ClearUserOnTouch();
+    ASSERT_FALSE(guestureEventHub->clickEventActuator_->userCallback_);
 }
 } // namespace OHOS::Ace::NG
