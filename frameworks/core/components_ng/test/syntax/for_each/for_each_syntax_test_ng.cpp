@@ -177,6 +177,40 @@ HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ForEachSyntaxUpdateTest006
+ * @tc.desc: FlushUpdateAndMarkDirty
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForEachSyntaxTestNg, ForEachSyntaxUpdateTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set branch id which is same as before.
+     */
+    ForEachModelNG forEach;
+    forEach.Create();
+    std::list<std::string> ids = FOR_EACH_ARRAY;
+    forEach.SetNewIds(std::move(ids));
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(forEachNode != nullptr && forEachNode->GetTag() == V2::JS_FOR_EACH_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. CompareAndUpdateChildren when newIds and oldIds are same.
+     */
+    forEachNode->CreateTempItems();
+    std::list<std::string> ids2 = ID_ARRAY;
+    forEachNode->SetIds(std::move(ids2));
+    forEachNode->onMainTree_ = true;
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    forEachNode->SetParent(node);
+    forEachNode->children_ = { node };
+    forEachNode->CompareAndUpdateChildren();
+    forEachNode->ids_ = forEachNode->tempIds_;
+    forEachNode->FlushUpdateAndMarkDirty();
+    auto tempIds = forEachNode->GetTempIds();
+    EXPECT_TRUE(tempIds.empty());
+}
+
+/**
  * @tc.name: ForEachSyntaxCreateTest006
  * @tc.desc: Create ForEach with same node id.
  * @tc.type: FUNC
