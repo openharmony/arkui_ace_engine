@@ -41,10 +41,6 @@
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
-namespace {
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY,
-    TextAlign::LEFT, TextAlign::RIGHT };
-}
 std::unique_ptr<RichEditorModel> RichEditorModel::instance_ = nullptr;
 std::mutex RichEditorModel::mutex_;
 RichEditorModel* RichEditorModel::GetInstance()
@@ -641,11 +637,12 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
     }
     auto textAlignObj = styleObject->GetProperty("textAlign");
     if (!textAlignObj->IsNull() && textAlignObj->IsNumber()) {
-        auto value = textAlignObj->ToNumber<int32_t>();
-        if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
-            updateSpanStyle_.updateTextAlign = TEXT_ALIGNS[value];
-            style.SetTextAlign(TEXT_ALIGNS[value]);
+        auto align = static_cast<TextAlign>(textAlignObj->ToNumber<int32_t>());
+        if (align < TextAlign::START || align > TextAlign::JUSTIFY) {
+            align = TextAlign::START;
         }
+        updateSpanStyle_.updateTextAlign = align;
+        style.SetTextAlign(align);
     }
     auto leadingMarginObj = styleObject->GetProperty("leadingMargin");
     JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(leadingMarginObj);

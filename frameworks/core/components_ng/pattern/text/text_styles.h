@@ -21,9 +21,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_v2/inspector/utils.h"
-// #ifdef PIXEL_MAP_SUPPORTED
-#include "base/image/pixel_map.h"
-// #endif
 
 namespace OHOS::Ace::NG {
 constexpr Dimension TEXT_DEFAULT_FONT_SIZE = 16.0_fp;
