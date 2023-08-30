@@ -81,5 +81,10 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 void TextPattern::OnColorConfigurationUpdate() {}
 void TextPattern::InitSurfaceChangedCallback() {}
 void TextPattern::OnAttachToFrameNode() {}
-void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {}
+void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {};
+
+int32_t TextPattern::GetHandleIndex(const Offset& offset) const
+{
+    return 0;
+}
 } // namespace OHOS::Ace::NG
