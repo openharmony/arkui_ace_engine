@@ -130,7 +130,6 @@ void JSSearch::Create(const JSCallbackInfo& info)
             tip = placeholder;
         }
         std::string text;
-        key = "";
         JSRef<JSVal> textValue = param->GetProperty("value");
         if (textValue->IsObject()) {
             JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(textValue);
