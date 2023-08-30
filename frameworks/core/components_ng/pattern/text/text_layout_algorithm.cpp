@@ -726,6 +726,7 @@ void TextLayoutAlgorithm::ApplyIndent(const TextStyle& textStyle, double width)
         indent = width * textStyle.GetTextIndent().Value();
     }
     std::vector<float> indents;
+    // only indent first line
     indents.emplace_back(static_cast<float>(indent));
     indents.emplace_back(0.0);
     paragraph_->SetIndents(indents);

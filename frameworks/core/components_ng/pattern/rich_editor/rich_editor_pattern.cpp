@@ -2451,24 +2451,29 @@ std::string RichEditorPattern::GetSelectedSpanText(std::wstring value, int32_t s
     return StringUtils::ToString(value.substr(min, max - min));
 }
 
-TextStyleResult RichEditorPattern::GetTextStyleObject(RefPtr<SpanNode> node)
+TextStyleResult RichEditorPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
 {
     TextStyleResult textStyle;
     textStyle.fontColor = node->GetTextColorValue(Color::BLACK).ColorToString();
     textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp();
     textStyle.fontStyle = static_cast<int32_t>(node->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
     textStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
-    std::string fontFamilyValue = "";
+    std::string fontFamilyValue;
     const std::vector<std::string> defaultFontFamily = { "HarmonyOS Sans" };
     auto fontFamily = node->GetFontFamilyValue(defaultFontFamily);
-    for (auto str : fontFamily) {
+    for (const auto& str : fontFamily) {
         fontFamilyValue += str;
         fontFamilyValue += ",";
     }
     fontFamilyValue = fontFamilyValue.substr(0, fontFamilyValue.size() - 1);
-    textStyle.fontFamily = fontFamilyValue != "" ? fontFamilyValue : defaultFontFamily.front();
+    textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
+    textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
+
+    auto leadingMarginSize = node->GetLeadingMarginValue({}).size;
+    textStyle.leadingMargin[0] = Dimension(leadingMarginSize.Width()).ConvertToVp();
+    textStyle.leadingMargin[1] = Dimension(leadingMarginSize.Height()).ConvertToVp();
     return textStyle;
 }
 

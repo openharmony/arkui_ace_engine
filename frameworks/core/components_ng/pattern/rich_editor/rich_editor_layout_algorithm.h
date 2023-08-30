@@ -41,7 +41,10 @@ private:
     void GetPlaceholderRects(std::vector<Rect>& rects) override;
     int32_t GetPreviousLength() const override;
     ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const override;
-    void ApplyIndent(const TextStyle& textStyle, double width) override;
+
+    void ApplyIndent(const TextStyle& textStyle, double width) override
+    { // do nothing
+    }
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     ParagraphManager* pManager_;

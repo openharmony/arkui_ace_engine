@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -99,14 +100,15 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
 
     auto&& spanGroup = GetSpans();
     auto&& lineStyle = spanGroup.front()->textLineStyle;
-    if (lineStyle && lineStyle->propTextAlign) {
+    CHECK_NULL_RETURN(lineStyle, style);
+    if (lineStyle->propTextAlign) {
         style.align = *(lineStyle->propTextAlign);
     }
-    if (lineStyle && lineStyle->propTextIndent) {
+    if (lineStyle->propTextIndent) {
         style.leadingMargin = std::make_optional<LeadingMargin>();
         style.leadingMargin->size = SizeF(lineStyle->propTextIndent->ConvertToPx(), 0.0f);
     }
-    if (lineStyle && lineStyle->propLeadingMargin) {
+    if (lineStyle->propLeadingMargin) {
         if (!style.leadingMargin) {
             style.leadingMargin = std::make_optional<LeadingMargin>();
         }
@@ -115,18 +117,6 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     }
 
     return style;
-}
-
-void RichEditorLayoutAlgorithm::ApplyIndent(const TextStyle& /*_*/, double /*_*/)
-{
-    auto&& spanGroup = GetSpans();
-
-    auto&& lineStyle = spanGroup.front()->textLineStyle;
-    if (lineStyle && lineStyle->propTextIndent) {
-        auto&& paragraph = GetParagraph();
-        // indent the whole paragraph
-        paragraph->SetIndents( { lineStyle->propTextIndent->ConvertToPx() });
-    }
 }
 
 int32_t RichEditorLayoutAlgorithm::GetPreviousLength() const
