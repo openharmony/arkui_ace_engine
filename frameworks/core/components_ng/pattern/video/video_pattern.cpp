@@ -700,6 +700,36 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderContext);
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface" };
     renderContextForMediaPlayer_->InitContext(false, param);
+    auto isFullScreen = IsFullScreen();
+    if (SystemProperties::GetExtSurfaceEnabled() && !isFullScreen) {
+        auto OnAreaChangedCallBack =
+            [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(videoPattern);
+
+            auto host = videoPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto videoNodeSize = geometryNode->GetContentSize();
+            auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+
+            Rect rect = Rect(x +
+                (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE, y +
+                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(),  videoFrameSize.Height());
+
+            if (videoPattern->renderSurface_) {
+                if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(rect.Left(),
+                    rect.Top(), rect.Width(), rect.Height())) {
+                    videoPattern->lastBoundsRect_ = rect;
+                }
+            }
+        };
+        renderContextForMediaPlayer_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
+    }
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
@@ -900,7 +930,8 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 void VideoPattern::OnAreaChangedInner()
 {
-    if (SystemProperties::GetExtSurfaceEnabled()) {
+    auto isFullScreen = IsFullScreen();
+    if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
@@ -1479,6 +1510,9 @@ void VideoPattern::EnableDrag()
 
 VideoPattern::~VideoPattern()
 {
+    if (renderContextForMediaPlayer_) {
+        renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
+    }
     if (!fullScreenNodeId_.has_value()) {
         return;
     }
