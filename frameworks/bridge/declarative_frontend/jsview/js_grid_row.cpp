@@ -299,6 +299,8 @@ void JSGridRow::AlignItems(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         auto value = info[0]->ToNumber<int32_t>();
         ParseAlignItems(value);
+    } else if (info[0]->IsUndefined()) {
+        GridRowModel::GetInstance()->SetAlignItems(FlexAlign::FLEX_START);
     }
 }
 
