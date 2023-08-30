@@ -33,9 +33,8 @@ public:
     void SetCustomKeyboard(std::function<void()>&& func) override;
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
-        std::function<void()>& buildFunc, MenuParam& menuParam) override;
+        std::function<void()>& buildFunc, SelectMenuParam& menuParam) {}
     void SetOnPaste(std::function<bool()>&& func) override;
-        std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
 
 private:
     void SetDraggable(bool draggable);
