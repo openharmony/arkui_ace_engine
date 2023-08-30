@@ -77,14 +77,13 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    
-    // Register callback for fonts.
-    FontRegisterCallback(frameNode, textStyle);
-
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
+        contentModifier->SetFontReady(false);
     }
+    // Register callback for fonts.
+    FontRegisterCallback(frameNode, textStyle);
 
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
@@ -140,7 +139,7 @@ bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,
     return result;
 }
 
-void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  const TextStyle& textStyle)
+void TextLayoutAlgorithm::FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle)
 {
     auto callback = [weakNode = WeakPtr<FrameNode>(frameNode)] {
         auto frameNode = weakNode.Upgrade();
@@ -149,9 +148,8 @@ void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  con
         auto pattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(pattern);
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
-        if (modifier) {
-            modifier->SetFontReady(true);
-        }
+        CHECK_NULL_VOID(modifier);
+        modifier->SetFontReady(true);
     };
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -164,16 +162,15 @@ void TextLayoutAlgorithm::FontRegisterCallback(RefPtr<FrameNode> frameNode,  con
                 isCustomFont = true;
             }
         }
+        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont) {
             auto pattern = frameNode->GetPattern<TextPattern>();
             CHECK_NULL_VOID(pattern);
+            pattern->SetIsCustomFont(true);
             auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
-            if (modifier) {
-                modifier->SetIsCustomFont(true);
-                modifier->SetFontReady(false);
-            }
+            CHECK_NULL_VOID(modifier);
+            modifier->SetIsCustomFont(true);
         }
-        fontManager->AddVariationNodeNG(frameNode);
     }
 }
 
@@ -196,6 +193,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    auto frameNode = layoutWrapper->GetHostNode();
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto iterItems = children.begin();
@@ -221,13 +219,13 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             }
             auto width = geometryNode->GetMarginFrameSize().Width();
             auto height = geometryNode->GetMarginFrameSize().Height();
-            child->placeHolderIndex = child->UpdateParagraph(paragraph_, width, height, verticalAlign);
+            child->placeHolderIndex = child->UpdateParagraph(frameNode, paragraph_, width, height, verticalAlign);
             child->content = " ";
             child->position = spanTextLength + 1;
             spanTextLength += 1;
             iterItems++;
         } else {
-            child->UpdateParagraph(paragraph_);
+            child->UpdateParagraph(frameNode, paragraph_);
             child->position = spanTextLength + StringUtils::ToWstring(child->content).length();
             spanTextLength += StringUtils::ToWstring(child->content).length();
         }

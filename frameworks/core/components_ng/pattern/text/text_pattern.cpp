@@ -1017,9 +1017,6 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
-
-            // Register callback for fonts.
-            FontRegisterCallback(spanNode);
         } else if (current->GetTag() == V2::IMAGE_ETS_TAG) {
             imageCount_++;
             AddChildSpanItem(current);
@@ -1031,26 +1028,6 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
     }
 }
 
-void TextPattern::FontRegisterCallback(RefPtr<SpanNode> spanNode)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto callback = [span = AceType::WeakClaim(AceType::RawPtr(spanNode))] {
-        auto node = span.Upgrade();
-        if (node) {
-            node->RequestTextFlushDirty();
-        }
-    };
-    auto fontManager = pipelineContext->GetFontManager();
-    auto fontFamilies = spanNode->GetFontFamily();
-    if (fontManager && fontFamilies.has_value()) {
-        for (const auto& familyName : fontFamilies.value()) {
-            fontManager->RegisterCallbackNG(spanNode, familyName, callback);
-        }
-    }
-}
 
 void TextPattern::GetGlobalOffset(Offset& offset)
 {

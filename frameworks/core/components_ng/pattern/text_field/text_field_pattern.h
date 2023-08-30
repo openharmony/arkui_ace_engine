@@ -160,6 +160,9 @@ public:
                 AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect());
             SetScrollBarOverlayModifier(textFieldOverlayModifier);
         }
+        if (isCustomFont_) {
+            textFieldContentModifier_->SetIsCustomFont(true);
+        }
         auto paint =
             MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier, textFieldContentModifier_);
         auto scrollBar = GetScrollBar();
@@ -999,6 +1002,16 @@ public:
         caretUpdateType_ = CaretUpdateType::VISIBLE_PASSWORD_ICON;
     }
 
+    void SetIsCustomFont(bool isCustomFont)
+    {
+        isCustomFont_ = isCustomFont;
+    }
+
+    bool GetIsCustomFont()
+    {
+        return isCustomFont_;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -1277,6 +1290,7 @@ private:
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
     bool isTouchAtLeftOffset_ = true;
+    bool isCustomFont_ = false;
 };
 } // namespace OHOS::Ace::NG
 

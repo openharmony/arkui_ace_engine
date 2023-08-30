@@ -208,6 +208,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (contentModifier) {
         SetPropertyToModifier(textStyle, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
+        contentModifier->SetFontReady(false);
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
@@ -536,9 +537,8 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
         auto pattern = frameNode->GetPattern<TextFieldPattern>();
         CHECK_NULL_VOID(pattern);
         auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
-        if (modifier) {
-            modifier->SetFontReady(true);
-        }
+        CHECK_NULL_VOID(modifier);
+        modifier->SetFontReady(true);
     };
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -551,16 +551,15 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
+        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont) {
             auto pattern = frameNode->GetPattern<TextFieldPattern>();
             CHECK_NULL_VOID(pattern);
+            pattern->SetIsCustomFont(true);
             auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
-            if (modifier) {
-                modifier->SetIsCustomFont(true);
-                modifier->SetFontReady(false);
-            }
+            CHECK_NULL_VOID(modifier);
+            modifier->SetIsCustomFont(true);
         }
-        fontManager->AddVariationNodeNG(frameNode);
     }
 }
 
