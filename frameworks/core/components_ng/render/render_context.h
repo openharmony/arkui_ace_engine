@@ -102,7 +102,7 @@ public:
 
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
-    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition) {};
+    virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};
 
     virtual void RegisterSharedTransition(const RefPtr<RenderContext>& other) {}
     virtual void UnregisterSharedTransition(const RefPtr<RenderContext>& other) {}
@@ -116,6 +116,10 @@ public:
     };
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param)
     {}
+
+    virtual void SetSurfaceChangedCallBack(
+        const std::function<void(float, float, float, float)>& callback) {}
+    virtual void RemoveSurfaceChangedCallBack() {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
@@ -195,6 +199,7 @@ public:
     virtual void AddChild(const RefPtr<RenderContext>& renderContext, int index) {}
     virtual void RemoveChild(const RefPtr<RenderContext>& renderContext) {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
+    virtual void SetContentRectToFrame(RectF rect) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}

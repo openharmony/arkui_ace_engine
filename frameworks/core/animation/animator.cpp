@@ -607,6 +607,7 @@ void Animator::OnFrame(int64_t duration)
         }
         return;
     }
+    JankFrameReport::RecordFrameUpdate();
     NotifyPrepareListener();
     // get playedTime
     auto playedTime = elapsedTime_ - scaledStartDelay_;

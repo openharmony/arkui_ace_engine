@@ -23,7 +23,7 @@ extern const char _binary_treeview_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_treeview_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_TreeView_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_treeview_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_treeview_GetABCCode(const char **buf, int *buflen)
 /*
  * Module define
  */
-static napi_module treeviewModule = {
+static napi_module TreeViewModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.treeview",
+    .nm_modname = "arkui.advanced.TreeView",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -48,7 +48,7 @@ static napi_module treeviewModule = {
 /*
  * Module registerfunction
  */
-extern "C" __attribute__((constructor)) void treeviewRegisterModule(void)
+extern "C" __attribute__((constructor)) void TreeViewRegisterModule(void)
 {
-    napi_module_register(&treeviewModule);
+    napi_module_register(&TreeViewModule);
 }

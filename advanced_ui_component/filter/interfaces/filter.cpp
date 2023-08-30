@@ -23,7 +23,7 @@ extern const char _binary_filter_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_filter_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_Filter_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_filter_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_filter_GetABCCode(const char **buf, int *buflen)
 /*
  * Module define
  */
-static napi_module filterModule = {
+static napi_module FilterModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.filter",
+    .nm_modname = "arkui.advanced.Filter",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -48,7 +48,7 @@ static napi_module filterModule = {
 /*
  * Module registerfunction
  */
-extern "C" __attribute__((constructor)) void filterRegisterModule(void)
+extern "C" __attribute__((constructor)) void FilterRegisterModule(void)
 {
-    napi_module_register(&filterModule);
+    napi_module_register(&FilterModule);
 }

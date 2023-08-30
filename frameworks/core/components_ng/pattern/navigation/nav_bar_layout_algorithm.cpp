@@ -113,7 +113,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
 
 bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const SizeF& navigationSize)
 {
-    if (!hostNode->IsNavbarUseToolbarConfiguration()) {
+    if (!hostNode->IsNavbarUseToolbarConfiguration() || hostNode->GetPrevMenuIsCustomValue(false)) {
         return false;
     }
 
@@ -303,6 +303,37 @@ void LayoutToolBarDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>
     dividerGeometryNode->SetFrameOffset(toolBarDividerOffset);
     dividerWrapper->Layout();
 }
+
+void UpdateTitleBarMenuNode(const RefPtr<NavBarNode>& navBarNode, const SizeF& navigationSize)
+{
+    if (navBarNode->GetPrevMenuIsCustomValue(false)) {
+        return;
+    }
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(navBarNode->GetToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(toolBarLayoutProperty);
+    auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
+    auto isHideToolbar = navBarPattern->GetToolbarHideStatus();
+
+    if (titleBarNode->GetMenu()) {
+        titleBarNode->RemoveChild(titleBarNode->GetMenu());
+    }
+
+    if (CheckWhetherNeedToHideToolbar(navBarNode, navigationSize) && !isHideToolbar) {
+        toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        titleBarNode->SetMenu(navBarNode->GetLandscapeMenu());
+    } else {
+        if (!isHideToolbar) {
+            toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        }
+        titleBarNode->SetMenu(navBarNode->GetMenu());
+    }
+    titleBarNode->AddChild(titleBarNode->GetMenu());
+}
 } // namespace
 
 void NavBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -317,6 +348,7 @@ void NavBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
+    UpdateTitleBarMenuNode(hostNode, size);
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navBarLayoutProperty, size);
     float toolBarHeight = MeasureToolBar(layoutWrapper, hostNode, navBarLayoutProperty, size);
     float toolBarDividerHeight =

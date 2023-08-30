@@ -69,6 +69,9 @@
 #include "core/common/plugin_manager.h"
 #endif
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef NG_BUILD
+#include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -397,7 +400,11 @@ NativeValue* UIContentImpl::GetUIContext()
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, nullptr);
     if (frontend->GetType() == FrontendType::DECLARATIVE_JS) {
+#ifdef NG_BUILD
+        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend);
+#else
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
+#endif
         CHECK_NULL_RETURN(declarativeFrontend, nullptr);
         return declarativeFrontend->GetContextValue();
     }
@@ -905,12 +912,18 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     bool closeArkTSPartialUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
     });
+
+    bool isDelayedUpdateOnInactive = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "delayedUpdateOnInactive" && metaDataItem.value == "true";
+    });
+    AceApplicationInfo::GetInstance().SetDelayedUpdateOnInactive(isDelayedUpdateOnInactive);
+
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
             apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     LOGI("UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
-         "useNewPipe: %{public}d",
-        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
+         "useNewPipe: %{public}d, isDelayedUpdateOnInactive: %{public}d",
+        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe, isDelayedUpdateOnInactive);
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
@@ -1320,7 +1333,7 @@ void UIContentImpl::Destroy()
     CHECK_NULL_VOID_NOLOG(container);
     // stop performance check and output json file
     AcePerformanceCheck::Stop();
-    if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
+    if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
         Platform::DialogContainer::DestroyContainer(instanceId_);
     } else {
         Platform::AceContainer::DestroyContainer(instanceId_);
@@ -1377,20 +1390,27 @@ bool UIContentImpl::ProcessBackPressed()
     LOGI("UIContentImpl: ProcessBackPressed: Platform::AceContainer::OnBackPressed called");
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN_NOLOG(container, false);
-    if (strcmp(AceType::TypeName(container), AceType::TypeName<Platform::DialogContainer>()) == 0) {
-        if (Platform::DialogContainer::OnBackPressed(instanceId_)) {
-            LOGI("UIContentImpl::ProcessBackPressed DialogContainer return true");
-            return true;
-        }
-    } else {
-        LOGI("UIContentImpl::ProcessBackPressed AceContainer");
-        if (Platform::AceContainer::OnBackPressed(instanceId_)) {
-            LOGI("UIContentImpl::ProcessBackPressed AceContainer return true");
-            return true;
-        }
-    }
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN_NOLOG(taskExecutor, false);
+    bool ret = false;
+    taskExecutor->PostSyncTask(
+        [container, this, &ret]() {
+            if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
+                if (Platform::DialogContainer::OnBackPressed(instanceId_)) {
+                    LOGI("UIContentImpl::ProcessBackPressed DialogContainer return true");
+                    ret = true;
+                }
+            } else {
+                LOGI("UIContentImpl::ProcessBackPressed AceContainer");
+                if (Platform::AceContainer::OnBackPressed(instanceId_)) {
+                    LOGI("UIContentImpl::ProcessBackPressed AceContainer return true");
+                    ret = true;
+                }
+            }
+        },
+        TaskExecutor::TaskType::UI);
     LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed return false");
-    return false;
+    return ret;
 }
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
@@ -1440,10 +1460,13 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
         [weakContainer = WeakPtr<Platform::AceContainer>(container), config]() {
             auto container = weakContainer.Upgrade();
             CHECK_NULL_VOID_NOLOG(container);
-            auto colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-            auto deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-            auto languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-            container->UpdateConfiguration(colorMode, deviceAccess, languageTag, (*config).GetName());
+            Platform::ParsedConfig parsedConfig;
+            parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+            parsedConfig.deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+            parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+            parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
+            parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+            container->UpdateConfiguration(parsedConfig, config->GetName());
         },
         TaskExecutor::TaskType::UI);
     LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
@@ -1455,6 +1478,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
     SystemProperties::SetDeviceOrientation(config.Orientation());
+    ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();

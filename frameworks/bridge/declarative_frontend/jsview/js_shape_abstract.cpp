@@ -62,21 +62,27 @@ void JSShapeAbstract::SetStrokeDashArray(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSArray> array = JSRef<JSArray>::Cast(info[0]);
-    int32_t length = static_cast<int32_t>(array->Length());
+    auto length = static_cast<int32_t>(array->Length());
     std::vector<Dimension> dashArray;
     for (int32_t i = 0; i < length; i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
         CalcDimension dim;
-        if (ParseJsDimensionVp(value, dim)) {
+        bool paramIsValid = false;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            paramIsValid = ParseJsDimensionVp(value, dim);
+        } else {
+            paramIsValid = ParseJsDimensionVpNG(value, dim);
+        }
+        if (paramIsValid) {
             dashArray.emplace_back(dim);
+        } else {
+            LOGE("ParseJsDimension failed");
+            dashArray.clear();
+            break;
         }
     }
-    if (length != static_cast<int32_t>(dashArray.size())) {
-        LOGE("ParseJsDimensionVp failed");
-        return;
-    }
     // if odd,add twice
-    if ((static_cast<uint32_t>(length) & 1)) {
+    if (static_cast<uint32_t>(length) == dashArray.size() && (static_cast<uint32_t>(length) & 1)) {
         for (int32_t i = 0; i < length; i++) {
             dashArray.emplace_back(dashArray[i]);
         }
@@ -121,9 +127,16 @@ void JSShapeAbstract::SetStrokeDashOffset(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
-    CalcDimension offset;
-    if (!ParseJsDimensionVp(info[0], offset)) {
-        return;
+    CalcDimension offset(0.0f);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(info[0], offset)) {
+            return;
+        }
+    } else {
+        if (!ParseJsDimensionVpNG(info[0], offset)) {
+            // set to default value(0.0f)
+            offset.SetValue(0.0f);
+        }
     }
     ShapeAbstractModel::GetInstance()->SetStrokeDashOffset(offset);
 }
@@ -196,7 +209,14 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
     CalcDimension lineWidth = 1.0_vp;
     if (info[0]->IsString()) {
         const std::string& value = info[0]->ToString();
-        lineWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            lineWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, 1.0);
+        } else {
+            if (!StringUtils::StringToDimensionWithUnitNG(value, lineWidth, DimensionUnit::VP, 1.0)) {
+                // unit is invalid, use default value(1.0vp) instead.
+                lineWidth = 1.0_vp;
+            }
+        }
     } else {
         ParseJsDimensionVp(info[0], lineWidth);
     }
@@ -223,11 +243,30 @@ void JSShapeAbstract::JsWidth(const JSCallbackInfo& info)
 
 void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension dimWidth;
-    if (!ParseJsDimensionVp(jsValue, dimWidth)) {
+    CalcDimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+        LOGW("jsValue is undefined");
         return;
     }
-    ShapeAbstractModel::GetInstance()->SetWidth(dimWidth);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(jsValue, value)) {
+            LOGW("ParseJsDimensionVp failed");
+            return;
+        }
+    } else {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            LOGW("ParseJsDimensionVp failed");
+            return;
+        }
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        LOGW("value is less than zero");
+        value.SetValue(0.0);
+    }
+    ShapeAbstractModel::GetInstance()->SetWidth(value);
 }
 
 void JSShapeAbstract::JsHeight(const JSCallbackInfo& info)
@@ -242,11 +281,30 @@ void JSShapeAbstract::JsHeight(const JSCallbackInfo& info)
 
 void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
 {
-    CalcDimension dimHeight;
-    if (!ParseJsDimensionVp(jsValue, dimHeight)) {
+    CalcDimension value;
+    if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+        LOGW("jsValue is undefined");
         return;
     }
-    ShapeAbstractModel::GetInstance()->SetHeight(dimHeight);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(jsValue, value)) {
+            LOGW("ParseJsDimensionVp failed");
+            return;
+        }
+    } else {
+        if (!ParseJsDimensionVpNG(jsValue, value)) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+            LOGW("ParseJsDimensionVp failed");
+            return;
+        }
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        LOGW("value is less than zero");
+        value.SetValue(0.0);
+    }
+    ShapeAbstractModel::GetInstance()->SetHeight(value);
 }
 
 void JSShapeAbstract::JsSize(const JSCallbackInfo& info)
@@ -394,14 +452,8 @@ void JSShapeAbstract::SetSize(const JSCallbackInfo& info)
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> width = obj->GetProperty("width");
         JSRef<JSVal> height = obj->GetProperty("height");
-        CalcDimension dimWidth;
-        if (ParseJsDimensionVp(width, dimWidth)) {
-            ShapeAbstractModel::GetInstance()->SetWidth(dimWidth);
-        }
-        CalcDimension dimHeight;
-        if (ParseJsDimensionVp(height, dimHeight)) {
-            ShapeAbstractModel::GetInstance()->SetHeight(dimHeight);
-        }
+        SetWidth(width);
+        SetHeight(height);
     }
 }
 

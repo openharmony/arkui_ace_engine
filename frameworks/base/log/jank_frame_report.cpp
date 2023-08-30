@@ -50,6 +50,32 @@ int64_t GetSteadyTimestamp()
     return duration_cast<T>(steady_clock::now().time_since_epoch()).count();
 }
 
+uint32_t GetJankRange(double jank)
+{
+    if (jank < 6.0f) {
+        return JANK_FRAME_6_FREQ;
+    }
+    if (jank < 15.0f) {
+        return JANK_FRAME_15_FREQ;
+    }
+    if (jank < 20.0f) {
+        return JANK_FRAME_20_FREQ;
+    }
+    if (jank < 36.0f) {
+        return JANK_FRAME_36_FREQ;
+    }
+    if (jank < 48.0f) {
+        return JANK_FRAME_48_FREQ;
+    }
+    if (jank < 60.0f) {
+        return JANK_FRAME_60_FREQ;
+    }
+    if (jank < 120.0f) {
+        return JANK_FRAME_120_FREQ;
+    }
+    return JANK_FRAME_180_FREQ;
+}
+
 class SteadyTimeRecorder {
 public:
     static steady_clock::time_point begin;
@@ -68,7 +94,9 @@ steady_clock::time_point SteadyTimeRecorder::begin {};
 } // namespace
 
 std::vector<uint16_t> JankFrameReport::frameJankRecord_(JANK_SIZE, 0);
-int32_t OHOS::Ace::JankFrameReport::jankFrameCount_ = 0;
+int32_t JankFrameReport::jankFrameCount_ = 0;
+int32_t JankFrameReport::prevFrameUpdateCount_ = 0;
+int32_t JankFrameReport::currentFrameUpdateCount_ = 0;
 JankFrameFlag JankFrameReport::recordStatus_ = JANK_IDLE;
 int64_t JankFrameReport::startTime_ = 0;
 int64_t JankFrameReport::prevEndTimeStamp_ = 0;
@@ -86,41 +114,27 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
     double jank = double(duration) / refreshPeriod_;
     // perf monitor jank frame
     PerfMonitor::GetPerfMonitor()->SetFrameTime(timeStampNanos, duration, jank);
+    RecordJankStatus(jank);
+    prevFrameUpdateCount_ = currentFrameUpdateCount_;
+    RecordPreviousEnd();
+}
+
+void JankFrameReport::RecordJankStatus(double jank)
+{
+    // on need to record
     if (jank <= 1.0f || recordStatus_ == JANK_IDLE) {
         return;
     }
+    // skip first frame
+    if (prevFrameUpdateCount_ == 0 && (currentFrameUpdateCount_ > 0 || currentFrameUpdateCount_ == 0)) {
+        return;
+    };
     needReport_ = true;
-    if (jank < 6.0f) {
-        frameJankRecord_[JANK_FRAME_6_FREQ]++;
-        return;
+    frameJankRecord_[GetJankRange(jank)]++;
+    if (jank >= 6.0f) {
+        jankFrameCount_++;
+        ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
     }
-    jankFrameCount_++;
-    ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
-    if (jank < 15.0f) {
-        frameJankRecord_[JANK_FRAME_15_FREQ]++;
-        return;
-    }
-    if (jank < 20.0f) {
-        frameJankRecord_[JANK_FRAME_20_FREQ]++;
-        return;
-    }
-    if (jank < 36.0f) {
-        frameJankRecord_[JANK_FRAME_36_FREQ]++;
-        return;
-    }
-    if (jank < 48.0f) {
-        frameJankRecord_[JANK_FRAME_48_FREQ]++;
-        return;
-    }
-    if (jank < 60.0f) {
-        frameJankRecord_[JANK_FRAME_60_FREQ]++;
-        return;
-    }
-    if (jank < 120.0f) {
-        frameJankRecord_[JANK_FRAME_120_FREQ]++;
-        return;
-    }
-    frameJankRecord_[JANK_FRAME_180_FREQ]++;
 }
 
 void JankFrameReport::SetRefreshPeriod(int64_t refreshPeriod)
@@ -138,6 +152,8 @@ void JankFrameReport::ClearFrameJankRecord()
     std::fill(frameJankRecord_.begin(), frameJankRecord_.end(), 0);
     jankFrameCount_ = 0;
     recordStatus_ = JANK_IDLE;
+    prevEndTimeStamp_ = 0;
+    currentFrameUpdateCount_ = 0;
     needReport_ = false;
 }
 
@@ -151,6 +167,15 @@ void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag)
     if (recordStatus_ > 0) {
         recordStatus_--;
     }
+    if (recordStatus_ == JANK_IDLE) {
+        prevEndTimeStamp_ = 0;
+        currentFrameUpdateCount_ = 0;
+    }
+}
+
+void JankFrameReport::RecordFrameUpdate()
+{
+    currentFrameUpdateCount_++;
 }
 
 void JankFrameReport::ResetFrameJankClock()

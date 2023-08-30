@@ -46,9 +46,9 @@ public:
     }
 
     // Triggered when the Gesture referee ends a gesture referee.
-    void FinishReferee(int32_t touchId)
+    void FinishReferee(int32_t touchId, bool isBlocked = false)
     {
-        OnFinishGestureReferee(touchId);
+        OnFinishGestureReferee(touchId, isBlocked);
     }
 
     // Called when request of handling gesture sequence is accepted by gesture referee.
@@ -179,8 +179,11 @@ public:
     }
 
     // called when gesture scope is closed.
-    void ResetStatusOnFinish()
+    void ResetStatusOnFinish(bool isBlocked = false)
     {
+        if (isBlocked && refereeState_ == RefereeState::SUCCEED) {
+            OnSucceedCancel();
+        }
         refereeState_ = RefereeState::READY;
         OnResetStatus();
     }
@@ -217,7 +220,7 @@ protected:
     virtual void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
 
     virtual void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) {}
-    virtual void OnFinishGestureReferee(int32_t touchId) {}
+    virtual void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) {}
 
     virtual void HandleTouchDownEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
@@ -229,6 +232,8 @@ protected:
     virtual void HandleTouchCancelEvent(const AxisEvent& event) {}
 
     virtual void OnResetStatus() = 0;
+
+    virtual void OnSucceedCancel() {}
 
     RefereeState refereeState_ = RefereeState::READY;
 

@@ -75,4 +75,8 @@ void GaugeModelNG::SetLabelMarkedText(std::string labelTextString) {}
 
 void GaugeModelNG::SetMarkedTextColor(const Color color) {}
 
+void GaugeModelNG::SetShadowOptions(const GaugeShadowOptions& shadowOptions)
+{
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, ShadowOptions, shadowOptions);
+}
 } // namespace OHOS::Ace::NG

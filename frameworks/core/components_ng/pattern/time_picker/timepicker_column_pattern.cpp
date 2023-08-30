@@ -327,9 +327,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     auto child = host->GetChildren();
     auto iter = child.begin();
-    if (child.size() != showOptionCount) {
-        return;
-    }
+
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
     }
@@ -493,6 +491,14 @@ void TimePickerColumnPattern::AddAnimationTextProperties(
 {
     TextProperties properties;
     if (textLayoutProperty->HasFontSize()) {
+        MeasureContext measureContext;
+        measureContext.textContent = MEASURE_SIZE_STRING;
+        measureContext.fontSize = textLayoutProperty->GetFontSize().value();
+        auto size = MeasureUtil::MeasureTextSize(measureContext);
+        if (!optionProperties_.empty()) {
+            optionProperties_[currentIndex].fontheight = size.Height();
+        }
+        SetOptionShiftDistance();
         properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
     }
     if (textLayoutProperty->HasTextColor()) {
@@ -860,7 +866,7 @@ void TimePickerColumnPattern::CalcAlgorithmOffset(TimePickerScrollDirection dir,
     for (uint32_t i = 0; i < counts; i++) {
         auto distance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[i].prevDistance
                                                                : optionProperties_[i].nextDistance;
-        algorithmOffset_.emplace_back(distance * distancePercent);
+        algorithmOffset_.emplace_back(static_cast<int32_t>(distance * distancePercent));
     }
 }
 
@@ -903,9 +909,10 @@ float TimePickerColumnPattern::GetShiftDistance(uint32_t index, TimePickerScroll
             }
             break;
         case TimePickerOptionIndex::COLUMN_INDEX_3:
-            val = optionProperties_[index].height / MIDDLE_CHILD_INDEX + optionProperties_[nextIndex].height -
-                  optionProperties_[nextIndex].fontheight / MIDDLE_CHILD_INDEX;
+            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MIDDLE_CHILD_INDEX +
+                  optionProperties_[nextIndex].height;
             distance = (dir == TimePickerScrollDirection::DOWN) ? val : (0.0f - val);
+            distance = std::floor(distance);
             break;
         case TimePickerOptionIndex::COLUMN_INDEX_4:
             if (dir == TimePickerScrollDirection::DOWN) {
@@ -961,9 +968,10 @@ float TimePickerColumnPattern::GetShiftDistanceForLandscape(uint32_t index, Time
             }
             break;
         case TimePickerOptionIndex::COLUMN_INDEX_1:
-            val = optionProperties_[index].height / MIDDLE_CHILD_INDEX + optionProperties_[nextIndex].height -
-                  optionProperties_[nextIndex].fontheight / MIDDLE_CHILD_INDEX;
+            val = (optionProperties_[index].height - optionProperties_[nextIndex].fontheight) / MIDDLE_CHILD_INDEX +
+                  optionProperties_[nextIndex].height;
             distance = (dir == TimePickerScrollDirection::DOWN) ? val : (0.0f - val);
+            distance = std::floor(distance);
             break;
         case TimePickerOptionIndex::COLUMN_INDEX_2: // last
             if (dir == TimePickerScrollDirection::DOWN) {
@@ -1003,10 +1011,20 @@ void TimePickerColumnPattern::SetOptionShiftDistance()
 
 void TimePickerColumnPattern::UpdateToss(double offsetY)
 {
-    if (offsetY == 0.0) {
+    UpdateColumnChildPosition(offsetY);
+}
+
+void TimePickerColumnPattern::UpdateFinishToss(double offsetY)
+{
+    int32_t dragDelta = offsetY - yLast_;
+    if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
     }
-    UpdateColumnChildPosition(offsetY);
+    auto midIndex = GetShowCount() / 2;
+    TimePickerScrollDirection dir = dragDelta > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
+    auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
+                                                                : optionProperties_[midIndex].nextDistance;
+    ScrollOption(shiftDistance);
 }
 
 void TimePickerColumnPattern::TossStoped()

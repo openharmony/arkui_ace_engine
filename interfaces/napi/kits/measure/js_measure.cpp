@@ -48,14 +48,12 @@ static int32_t HandleIntStyle(napi_value fontStyleNApi, napi_env env)
     } else if (valueType == napi_number) {
         napi_get_value_int32(env, fontStyleNApi, &fontStyleInt);
     } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (!ParseResourceParam(env, fontStyleNApi, id, type, params)) {
+        ResourceInfo recv;
+        if (!ParseResourceParam(env, fontStyleNApi, recv)) {
             LOGE("can not parse resource info from inout params.");
             return fontStyleInt;
         }
-        if (!ParseString(id, type, params, fontStyleStr)) {
+        if (!ParseString(recv, fontStyleStr)) {
             LOGE("can not get message from resource manager.");
             return fontStyleInt;
         }
@@ -83,14 +81,12 @@ static std::string HandleStringType(napi_value ParameterNApi, napi_env env)
         napi_get_value_int32(env, ParameterNApi, &ParameterInt);
         ParameterStr = std::to_string(ParameterInt);
     } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (!ParseResourceParam(env, ParameterNApi, id, type, params)) {
+        ResourceInfo recv;
+        if (!ParseResourceParam(env, ParameterNApi, recv)) {
             LOGE("can not parse resource info from inout params.");
             return ParameterStr;
         }
-        if (!ParseString(id, type, params, ParameterStr)) {
+        if (!ParseString(recv, ParameterStr)) {
             LOGE("can not get message from resource manager.");
             return ParameterStr;
         }
@@ -120,14 +116,12 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
         ParameterStr = ParameterTemp.get();
         Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
     } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (!ParseResourceParam(env, ParameterNApi, id, type, params)) {
+        ResourceInfo recv;
+        if (!ParseResourceParam(env, ParameterNApi, recv)) {
             LOGE("can not parse resource info from inout params.");
             return std::nullopt;
         }
-        if (!ParseString(id, type, params, ParameterStr)) {
+        if (!ParseString(recv, ParameterStr)) {
             LOGE("can not get message from resource manager.");
             return std::nullopt;
         }

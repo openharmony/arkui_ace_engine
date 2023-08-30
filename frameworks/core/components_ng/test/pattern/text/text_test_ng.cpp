@@ -115,6 +115,7 @@ const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension ADAPT_MAX_FONT_SIZE_VALUE = Dimension(200, DimensionUnit::PX);
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
+const Dimension TEXT_INDENT = Dimension(5, DimensionUnit::PX);
 const Dimension ADAPT_UPDATE_FONTSIZE_VALUE = Dimension(50, DimensionUnit::PX);
 const std::string ROOT_TAG("root");
 constexpr int32_t NODE_ID = 143;
@@ -183,6 +184,7 @@ struct TestProperty {
     std::optional<Dimension> adaptMinFontSize = std::nullopt;
     std::optional<Dimension> adaptMaxFontSize = std::nullopt;
     std::optional<Dimension> letterSpacing = std::nullopt;
+    std::optional<Dimension> textIndent = std::nullopt;
 };
 
 class TextTestNg : public testing::Test {
@@ -282,6 +284,9 @@ RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue
     if (testProperty.letterSpacing.has_value()) {
         textModel.SetLetterSpacing(testProperty.letterSpacing.value());
     }
+    if (testProperty.textIndent.has_value()) {
+        textModel.SetTextIndent(testProperty.textIndent.value());
+    }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // TextView pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -376,6 +381,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
     testProperty.textCaseValue = std::make_optional(TEXT_CASE_VALUE);
     testProperty.adaptMinFontSize = std::make_optional(ADAPT_MIN_FONT_SIZE_VALUE);
     testProperty.adaptMaxFontSize = std::make_optional(ADAPT_MAX_FONT_SIZE_VALUE);
+    testProperty.textIndent = std::make_optional(TEXT_INDENT);
 
     RefPtr<FrameNode> frameNode = CreateTextParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
@@ -4095,10 +4101,10 @@ HWTEST_F(TextTestNg, BetweenSelectedPosition001, TestSize.Level1)
     
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
-     * @tc.expected: Running the BetweenSelectedPosition function and check the result with expected results. 
+     * @tc.expected: Running the BetweenSelectedPosition function and check the result with expected results.
      */
     std::vector<Offset> cases = {
-        Offset(1, 1), Offset(21, 21), 
+        Offset(1, 1), Offset(21, 21)
     };
     std::vector<bool> exceptResults = {
         true, false
@@ -4131,7 +4137,7 @@ HWTEST_F(TextTestNg, OnHandleMove002, TestSize.Level1)
     
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
-     * @tc.expected: Running the OnHandleMove function and check the result with expected results. 
+     * @tc.expected: Running the OnHandleMove function and check the result with expected results.
      */
     std::vector<RectF> handleRects = {
         {1.0, 2.0, 3.0, 4.0}, {5.0, 6.0, 7.0, 8.0}, {-9.0, -10.0, 11.0, 12.0}
@@ -4164,7 +4170,7 @@ HWTEST_F(TextTestNg, GetGlobalOffset001, TestSize.Level1)
     
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
-     * @tc.expected: Running GetGlobalOffset function and check the result with expected results. 
+     * @tc.expected: Running GetGlobalOffset function and check the result with expected results.
      */
     std::vector<OffsetF> offsetCases = {
     {3.0, 5.0}, {4.0, 5.0}, {6.0, 7.0}
@@ -4178,5 +4184,246 @@ HWTEST_F(TextTestNg, GetGlobalOffset001, TestSize.Level1)
         pattern->GetGlobalOffset(tmp);
         EXPECT_EQ(tmp, expectResults[turn]);
     }
+}
+
+/**
+ * @tc.name: CreateImageSpanAndLayout001
+ * @tc.desc: test text_layout_algorithm.cpp CreateImageSpanAndLayout function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateImageSpanAndLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [frameNode, pattern] = Init();
+    auto pipeline = frameNode->GetContext();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+
+    /**
+     * @tc.steps: step2. Add Text and Image Span.
+     */
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->children_.push_back(layoutWrapper);
+    
+    auto textSpanNode = CreateSpanNodeWithSetDefaultProperty("this is a test.");
+    ASSERT_NE(textSpanNode, nullptr);
+    pattern->AddChildSpanItem(textSpanNode);
+    frameNode->AddChild(textSpanNode);
+    nodeId = stack->ClaimNodeId();
+    auto imageSpanNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageSpanNode, nullptr);
+    pattern->AddChildSpanItem(imageSpanNode);
+    frameNode->AddChild(imageSpanNode);
+
+    /**
+     * @tc.steps: step3. Init TextLayoutAlgorithm and Paragraph, then run the CreateImageSpanAndLayout Func.
+     * @tc.expected: Construct result is True.
+     */
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
+    auto ret = rowLayoutAlgorithm->CreateImageSpanAndLayout(
+        textStyle, "", contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ApplyIndents002
+ * @tc.desc: test text_layout_algorithm.cpp ApplyIndents function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ApplyIndents002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+
+    /**
+     * @tc.steps: step2. construct textStyle with TextIndent 5.
+     */
+    TextStyle textStyle;
+    textStyle.SetTextIndent(Dimension(5));
+    rowLayoutAlgorithm->CreateParagraph(textStyle, "This is a test.", nullptr);
+
+    /**
+     * @tc.steps: step3. run the ApplyIndents Func.
+     * @tc.expected: paragraph_.rawPtr_ is nullptr.
+     */
+    rowLayoutAlgorithm->ApplyIndents(textStyle, 10.0);
+    EXPECT_NE(rowLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
+}
+
+/**
+ * @tc.name: ApplyIndents003
+ * @tc.desc: test text_layout_algorithm.cpp ApplyIndents function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ApplyIndents003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+
+    /**
+     * @tc.steps: step2. construct textStyle with TextIndent 5 and type is DimensionUnit::PERCENT.
+     */
+    TextStyle textStyle;
+    textStyle.SetTextIndent(Dimension(5, DimensionUnit::PERCENT));
+    rowLayoutAlgorithm->CreateParagraph(textStyle, "This is a test.", nullptr);
+
+    /**
+     * @tc.steps: step3. run the ApplyIndents Func.
+     * @tc.expected: paragraph_.rawPtr_ is nullptr.
+     */
+    rowLayoutAlgorithm->ApplyIndents(textStyle, 10.0);
+    EXPECT_NE(rowLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
+}
+
+/**
+ * @tc.name: SetDraggable001
+ * @tc.desc: test text_model_ng.cpp SetDraggable function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetDraggable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    /**
+     * @tc.steps: step3. construct 2 groups cases and corresponding expected results.
+     * @tc.expected: Running SetDraggable function and check the result with expected results.
+     */
+    std::vector<bool> cases = { true, false };
+    std::vector<bool> expectResult = { true, false };
+    for (uint32_t turn = 0; turn < cases.size(); ++turn) {
+        textModelNG.SetDraggable(cases[turn]);
+        EXPECT_EQ(frameNode->IsDraggable(), expectResult[turn]);
+    }
+}
+
+/**
+ * @tc.name: SetMenuOptionItems001
+ * @tc.desc: test text_model_ng.cpp SetMenuOptionItems function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetMenuOptionItems001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    /**
+     * @tc.steps: step2. construct menuOptionItems.
+     * @tc.expected: Running SetMenuOptionItems function and check the result.
+     */
+    std::vector<MenuOptionsParam> menuOptionItems;
+    MenuOptionsParam menuOptionItem1;
+    menuOptionItem1.content = "test1";
+    menuOptionItem1.action = [](const std::string&) {};
+    menuOptionItems.emplace_back(menuOptionItem1);
+    pattern->menuOptionItems_ = menuOptionItems;
+    textModelNG.SetMenuOptionItems(std::move(menuOptionItems));
+    EXPECT_EQ(pattern->menuOptionItems_.size(), 1);
+    EXPECT_EQ(pattern->menuOptionItems_[0].ToString(), menuOptionItem1.ToString());
+}
+
+/**
+ * @tc.name: ClearOnClick001
+ * @tc.desc: test text_model_ng.cpp ClearOnClick function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ClearOnClick001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    /**
+     * @tc.steps: step2. Running ClearOnClick function.
+     * @tc.expected: the onClick_ will be nullptr.
+     */
+    textModelNG.ClearOnClick();
+    EXPECT_EQ(pattern->onClick_, nullptr);
+}
+
+/**
+ * @tc.name: SetFontSize001
+ * @tc.desc: test text_model_ng.cpp SetFontSize function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    /**
+     * @tc.steps: step2. Run SetFontSize with isvalid data.
+     * @tc.expected: the fontsize will be Dimension(0).
+     */
+    textModelNG.SetFontSize(Dimension(-1));
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    const std::unique_ptr<FontStyle>& fontStyle = textLayoutProperty->GetFontStyle();
+    ASSERT_NE(fontStyle, nullptr);
+    EXPECT_EQ(fontStyle->GetFontSize().value(), Dimension(0));
+}
+
+/**
+ * @tc.name: GetLineCount001
+ * @tc.desc: test text_layout_algorithm.cpp GetLineCount function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetLineCount001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [frameNode, pattern] = Init();
+    auto pipeline = frameNode->GetContext();
+
+    /**
+     * @tc.steps: step2. Create Paragraph
+     */
+    auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    rowLayoutAlgorithm->CreateParagraph(textStyle, "This is a test.", nullptr);
+    
+    /**
+     * @tc.steps: step3. GetLineCount.
+     * @tc.expected: linecount will be 1.
+     */
+    EXPECT_EQ(rowLayoutAlgorithm->GetLineCount(), 1);
 }
 } // namespace OHOS::Ace::NG

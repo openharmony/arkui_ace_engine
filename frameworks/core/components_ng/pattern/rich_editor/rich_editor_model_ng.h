@@ -35,6 +35,7 @@ public:
     void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
         std::function<void()>& buildFunc, MenuParam& menuParam) override;
     void SetOnPaste(std::function<bool()>&& func) override;
+        std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
 
 private:
     void SetDraggable(bool draggable);

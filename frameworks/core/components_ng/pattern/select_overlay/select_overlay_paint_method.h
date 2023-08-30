@@ -42,6 +42,10 @@ public:
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(selectOverlayModifier_, nullptr);
+        // custom menu do not need to draw the overlay icon of default system menu
+        if (info_.menuInfo.menuBuilder) {
+            return nullptr;
+        }
         return selectOverlayModifier_;
     }
 

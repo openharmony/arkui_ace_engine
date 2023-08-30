@@ -327,7 +327,9 @@ void ListPattern::ProcessEvent(
     if (indexChanged) {
         auto onScrollIndex = listEventHub->GetOnScrollIndex();
         if (onScrollIndex) {
-            onScrollIndex(startIndex_, endIndex_, centerIndex_);
+            int32_t startIndex = startIndex_ == -1 ? 0 : startIndex_;
+            int32_t endIndex = endIndex_ == -1 ? 0 : endIndex_;
+            onScrollIndex(startIndex, endIndex, centerIndex_);
         }
     }
 

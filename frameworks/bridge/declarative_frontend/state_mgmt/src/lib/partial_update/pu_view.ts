@@ -199,12 +199,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
  * ArkUI engine will call this function when the corresponding CustomNode's active status change.
  * @param active true for active, false for inactive
  */
-  public setActive(active: boolean): void {
+  public setActiveInternal(active: boolean): void {
     if (this.isActive_ == active) {
-      stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active} with unchanged state - ignoring`);
+      stateMgmtConsole.debug(`${this.constructor.name}: setActiveInternal ${active} with unchanged state - ignoring`);
       return;
     }
-    stateMgmtConsole.debug(`${this.constructor.name}: setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+    stateMgmtConsole.debug(`${this.constructor.name}: setActiveInternal ${active ? ' inActive -> active' : 'active -> inActive'}`);
     this.isActive_ = active;
     if (this.isActive_) {
       this.onActiveInternal()
@@ -223,7 +223,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     for (const child of this.childrenWeakrefMap_.values()) {
       const childViewPU: ViewPU | undefined = child.deref();
       if (childViewPU) {
-        childViewPU.setActive(this.isActive_);
+        childViewPU.setActiveInternal(this.isActive_);
       }
     }
   }
@@ -242,7 +242,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     for (const child of this.childrenWeakrefMap_.values()) {
       const childViewPU: ViewPU | undefined = child.deref();
       if (childViewPU) {
-        childViewPU.setActive(this.isActive_);
+        childViewPU.setActiveInternal(this.isActive_);
       }
     }
   }
@@ -674,7 +674,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     };
     let node: ViewPU;
     // if there is no suitable recycle node, run a normal creation function.
-    if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
+    if (!name || !this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: cannot init node by recycle, crate new node`);
       this.observeComponentCreation(compilerAssignedUpdateFunc);
       return;
@@ -711,7 +711,16 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return;
     }
 
-    If.branchId(branchId);
+    // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
+    // ifElseNode stores the most recent branch, so we can compare
+    // removedChildElmtIds will be filled with the elmtIds of all childten and their children will be deleted in response to if .. else chnage
+    let removedChildElmtIds = new Array<number>();
+    If.branchId(branchId, removedChildElmtIds);
+
+    // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
+    stateMgmtConsole.debug(`ViewPU ifElseBranchUpdateFunction: elmtIds need unregister after if/else branch switch: ${JSON.stringify(removedChildElmtIds)}`);
+    this.purgeDeletedElmtIds(removedChildElmtIds);
+
     branchfunc();
   }
 

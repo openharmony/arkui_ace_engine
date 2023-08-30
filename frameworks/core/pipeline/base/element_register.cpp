@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "core/pipeline/base/element.h"
 
@@ -234,11 +235,11 @@ void ElementRegister::DumpGeometryTransition()
     }
 }
 
-void ElementRegister::ReSyncGeometryTransition()
+void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger)
 {
     for (const auto& [itemId, item] : geometryTransitionMap_) {
-        if (item && item->IsInAndOutValid()) {
-            item->OnReSync();
+        if (item) {
+            item->OnReSync(trigger);
         }
     }
 }

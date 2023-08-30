@@ -35,15 +35,19 @@ public:
     static void ClearFrameJankFlag(JankFrameFlag flag);
     static void StartRecord(const std::string& pageUrl);
     static void FlushRecord();
-    static void RecordPreviousEnd();
     static void SetRefreshPeriod(int64_t refreshPeriod);
+    static void RecordFrameUpdate();
 
 private:
     static void ClearFrameJankRecord();
     static void ResetFrameJankClock();
+    static void RecordPreviousEnd();
+    static void RecordJankStatus(double jank);
 
     static std::vector<uint16_t> frameJankRecord_;
     static int32_t jankFrameCount_;
+    static int32_t prevFrameUpdateCount_;
+    static int32_t currentFrameUpdateCount_;
     static JankFrameFlag recordStatus_;
     static int64_t startTime_;
     static int64_t prevEndTimeStamp_;

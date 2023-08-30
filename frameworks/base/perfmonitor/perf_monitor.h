@@ -82,13 +82,15 @@ std::string GetSourceTypeName(PerfSourceType sourceType);
 
 class SceneRecord {
 public:
-    void InitRecord(const std::string& sId, PerfActionType aType, PerfSourceType sType, const std::string& nt);
+    void InitRecord(const std::string& sId, PerfActionType aType, PerfSourceType sType, const std::string& nt,
+        int64_t time);
     void RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skippedFrames);
-    void Report(const std::string& sceneId, int64_t vsyncTime);
+    void Report(const std::string& sceneId, int64_t vsyncTime, bool isRsRender);
     bool IsTimeOut(int64_t nowTime);
     bool IsFirstFrame();
     void Reset();
 public:
+    int64_t inputTime {0};
     int64_t beginVsyncTime {0};
     int64_t endVsyncTime {0};
     int32_t maxFrameTime {0};

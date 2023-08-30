@@ -803,7 +803,7 @@ protected:
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
-    void FlushReload() override;
+    void FlushReload(const OnConfigurationChange& configurationChange) override;
     void FlushReloadTransition() override;
     void FlushUITasks() override
     {

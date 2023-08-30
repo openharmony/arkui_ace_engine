@@ -146,13 +146,13 @@ bool GestureScope::QueryAllDone(size_t touchId)
     return ret;
 }
 
-void GestureScope::Close()
+void GestureScope::Close(bool isBlocked)
 {
     LOGD("force close gesture scope of id %{public}d", static_cast<int32_t>(touchId_));
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
         if (recognizer) {
-            recognizer->FinishReferee(static_cast<int32_t>(touchId_));
+            recognizer->FinishReferee(static_cast<int32_t>(touchId_), isBlocked);
         }
     }
 }
@@ -207,17 +207,18 @@ bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
     if (type != lastSourceType_) {
         ret = true;
         lastSourceType_ = type;
-    } else if (isAxis_ && !lastIsAxis_) {
-        ret = true;
     }
-    lastIsAxis_ = isAxis_;
+    if (isAxis_ != lastIsAxis_) {
+        ret = true;
+        lastIsAxis_ = isAxis_;
+    }
     return ret;
 }
 
-void GestureReferee::CleanAll()
+void GestureReferee::CleanAll(bool isBlocked)
 {
     for (auto iter = gestureScopes_.begin(); iter != gestureScopes_.end(); iter++) {
-        iter->second->Close();
+        iter->second->Close(isBlocked);
     }
     gestureScopes_.clear();
 }

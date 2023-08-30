@@ -89,6 +89,10 @@ public:
     std::string GetKey() const;
 
     bool SupportObjCache() const;
+    void SetNeedCache(bool needCache)
+    {
+        needCache_ = needCache;
+    }
 
 private:
     SrcType ResolveSrcType() const;
@@ -105,7 +109,7 @@ private:
     RefPtr<PixelMap> pixmap_;
     bool isSvg_ = false;
     bool isPng_ = false;
-
+    bool needCache_ = true;
     [[deprecated("in NG")]]
     std::optional<Color> fillColor_;
 

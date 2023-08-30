@@ -1080,7 +1080,8 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
     Color color = pressColor;
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     if (color == Color::TRANSPARENT && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && index == indicator_ &&
-        selectedModes_[index] == SelectedMode::BOARD && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
+        selectedModes_[index] == SelectedMode::BOARD &&
+        layoutProperty->GetAxis().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         color = indicatorStyles_[index].color;
     }
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), selectedIndex = index, color = color]() {
@@ -1148,8 +1149,10 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
 
     RectF rect = layoutProperty->GetIndicatorRect(indicator);
     paintProperty->UpdateIndicator(rect);
-    currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
-    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (!isTouchingSwiper_) {
+        currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
+        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
     if (tabBarStyles_[indicator] == TabBarStyle::SUBTABBATSTYLE) {
         UpdateSubTabBoard();
     }
@@ -1476,6 +1479,13 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
         return;
     }
 
+    if (LessOrEqual(turnPageRate_, 0.0f)) {
+        turnPageRate_ = 0.0f;
+    }
+    if (GreatOrEqual(turnPageRate_, 1.0f)) {
+        turnPageRate_ = 1.0f;
+    }
+
     if (swiperStartIndex_ < 0 || swiperStartIndex_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
         tabBarStyles_[swiperStartIndex_] != TabBarStyle::SUBTABBATSTYLE ||
         swiperStartIndex_ >= static_cast<int32_t>(selectedModes_.size()) ||
@@ -1516,11 +1526,6 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle)
     LinearColor color = LinearColor(indicatorStyle.color) +
                         (LinearColor(nextIndicatorStyle.color) - LinearColor(indicatorStyle.color)) * turnPageRate_;
     indicatorStyle.color = color.ToColor();
-
-    if (LessOrEqual(turnPageRate_, 0.0f) || GreatOrEqual(turnPageRate_, 1.0f)) {
-        isTouchingSwiper_ = false;
-        turnPageRate_ = 0.0f;
-    }
 }
 
 float TabBarPattern::GetSpace(int32_t indicator)
@@ -1548,7 +1553,7 @@ float TabBarPattern::CalculateFrontChildrenMainSize(int32_t indicator)
         auto childFrameSize = childGeometryNode->GetMarginFrameSize();
         frontChildrenMainSize += childFrameSize.MainSize(axis_);
     }
-    return frontChildrenMainSize;
+    return indicator == 0 ? 0.0f : frontChildrenMainSize;
 }
 
 float TabBarPattern::CalculateBackChildrenMainSize(int32_t indicator)
@@ -1564,7 +1569,7 @@ float TabBarPattern::CalculateBackChildrenMainSize(int32_t indicator)
         auto childFrameSize = childGeometryNode->GetMarginFrameSize();
         backChildrenMainSize += childFrameSize.MainSize(axis_);
     }
-    return backChildrenMainSize;
+    return indicator == childCount - 1 ? 0.0f : backChildrenMainSize;
 }
 
 void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
@@ -1873,6 +1878,14 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     }
 
     auto index = swiperStartIndex_ + 1;
+    if (index >= static_cast<int32_t>(tabBarStyles_.size())) {
+        swiperStartIndex_--;
+        index--;
+        turnPageRate += 1.0f;
+    }
+    if (Negative(turnPageRate)) {
+        turnPageRate = 0.0f;
+    }
     if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
         tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE || index >= static_cast<int32_t>(selectedModes_.size()) ||
         selectedModes_[index] != SelectedMode::INDICATOR) {

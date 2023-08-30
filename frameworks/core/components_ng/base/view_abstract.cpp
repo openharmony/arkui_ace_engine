@@ -800,6 +800,7 @@ void ViewAbstract::SetOnVisibleChange(
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    frameNode->ClearVisibleAreaUserCallback();
 
     for (const auto& ratio : ratioList) {
         pipeline->AddVisibleAreaChangeNode(frameNode, ratio, onVisibleChange);
@@ -867,13 +868,9 @@ void ViewAbstract::SetDraggable(bool draggable)
 void ViewAbstract::SetOnDragStart(
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    if (!frameNode->IsDraggable()) {
-        auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        gestureHub->InitDragDropEvent();
-    }
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->InitDragDropEvent();
 
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1154,17 +1151,8 @@ void ViewAbstract::BindPopup(
         if (isShow) {
             LOGI("Popup now show in subwindow.");
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
-            if (popupPattern) {
-                popupPattern->SetContainerId(Container::CurrentId());
-                popupPattern->StartEnteringAnimation(nullptr);
-            }
         } else {
-            if (popupPattern) {
-                popupPattern->StartExitingAnimation([targetId]() {
-                    LOGI("Popup now hide in subwindow.");
-                    SubwindowManager::GetInstance()->HidePopupNG(targetId);
-                });
-            }
+            SubwindowManager::GetInstance()->HidePopupNG(targetId);
         }
         return;
     }
@@ -1180,20 +1168,9 @@ void ViewAbstract::BindPopup(
     }
     if (isShow) {
         LOGI("begin to update popup node.");
-        overlayManager->UpdatePopupNode(targetId, popupInfo);
-        if (popupPattern) {
-            popupPattern->StartEnteringAnimation(nullptr);
-        }
+        overlayManager->ShowPopup(targetId, popupInfo);
     } else {
-        if (popupPattern) {
-            popupPattern->StartExitingAnimation(
-                [targetId, popupInfo, weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager))]() {
-                    auto overlay = weakOverlayManger.Upgrade();
-                    CHECK_NULL_VOID(overlay);
-                    LOGI("begin to update popup node.");
-                    overlay->UpdatePopupNode(targetId, popupInfo);
-                });
-        }
+        overlayManager->HidePopup(targetId, popupInfo);
     }
 }
 

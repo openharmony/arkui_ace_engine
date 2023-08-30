@@ -338,14 +338,6 @@ void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
     needRenderNode_.insert(node);
 }
 
-void PipelineContext::NotifyConfigurationChange(const OnConfigurationChange& configurationChange)
-{
-    LOGI("NotifyConfigurationChange");
-    auto rootNode = GetRootElement();
-    rootNode->UpdateConfigurationUpdate(configurationChange);
-    PipelineBase::NotifyConfigurationChange(configurationChange);
-}
-
 void PipelineContext::FlushFocus()
 {
     CHECK_RUN_ON(UI);
@@ -616,7 +608,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
-        type == WindowSizeChangeReason::CUSTOM_ANIMATION) {
+        type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
         return;
     }
@@ -759,6 +751,11 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         auto rootContext = rootNode_->GetRenderContext();
         rootContext->SyncGeometryProperties(RawPtr(rootNode_->GetGeometryNode()));
         RequestFrame();
+    }
+    if (isDensityChanged_) {
+        rootNode_->GetGeometryNode()->ResetParentLayoutConstraint();
+        rootNode_->MarkForceMeasure();
+        isDensityChanged_ = false;
     }
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     // For cross-platform build, flush tasks when first resize, speed up for fisrt frame.
@@ -998,9 +995,25 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 {
     auto lastPage = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(lastPage, nullptr);
-    auto navigationNode = lastPage->FindChildNodeOfClass<NavigationGroupNode>();
-    CHECK_NULL_RETURN_NOLOG(navigationNode, nullptr);
-    return navigationNode->GetNavDestinationNodeToHandleBack();
+    return FindNavDestinationNodeToHandleBack(lastPage);
+}
+
+RefPtr<FrameNode> PipelineContext::FindNavDestinationNodeToHandleBack(const RefPtr<UINode>& node)
+{
+    const auto& children = node->GetChildren();
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+
+        auto target = FindNavDestinationNodeToHandleBack(child);
+        if (target) {
+            return target;
+        }
+    }
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(node);
+    if (navigationGroupNode) {
+        return navigationGroupNode->GetNavDestinationNodeToHandleBack();
+    }
+    return nullptr;
 }
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive)
@@ -1120,6 +1133,9 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     LOGD("density_(%{public}lf), dipScale_(%{public}lf)", density_, dipScale_);
+    if (!NearEqual(density, density_)) {
+        isDensityChanged_ = true;
+    }
     density_ = density;
     if (!NearZero(viewScale_)) {
         LOGD("viewScale_(%{public}lf)", viewScale_);
@@ -1221,10 +1237,10 @@ void PipelineContext::FlushTouchEvents()
         canUseLongPredictTask_ = false;
         eventManager_->FlushTouchEventsBegin(touchEvents_);
         std::unordered_map<int, TouchEvent> idToTouchPoints;
-        for (auto iter = touchEvents.begin(); iter != touchEvents.end(); ++iter) {
+        for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter) {
             auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
             idToTouchPoints.emplace(scalePoint.id, scalePoint);
-            idToTouchPoints[scalePoint.id].history.emplace_back(scalePoint);
+            idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
         }
         std::list<TouchEvent> touchPoints;
         for (auto& [_, item] : idToTouchPoints) {
@@ -1670,16 +1686,20 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon)
     containerPattern->SetAppIcon(icon);
 }
 
-void PipelineContext::FlushReload()
+void PipelineContext::FlushReload(const OnConfigurationChange& configurationChange)
 {
     LOGI("PipelineContext::FlushReload.");
     AnimationOption option;
     const int32_t duration = 400;
     option.SetDuration(duration);
     option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), configurationChange]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        if (configurationChange.IsNeedUpdate()) {
+            auto rootNode = pipeline->GetRootElement();
+            rootNode->UpdateConfigurationUpdate(configurationChange);
+        }
         CHECK_NULL_VOID(pipeline->stageManager_);
         pipeline->SetIsReloading(true);
         pipeline->stageManager_->ReloadStage();

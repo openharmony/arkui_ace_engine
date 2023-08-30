@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/size.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -114,6 +115,55 @@ HWTEST_F(LayoutConstraintTestNg, LayoutConstraintTestNg001, TestSize.Level1)
     layoutConstraint.UpdateMaxSizeWithCheck(size);
     layoutConstraint.ApplyAspectRatio(ratio, calcSize);
     EXPECT_EQ(layoutConstraint.parentIdealSize.Width().value(), layoutConstraint.parentIdealSize.Height().value() * 4);
+
+    /**
+     * @tc.steps: step7 call ApplyAspectRatio, set ratio = 1, useDefinedWidth and useDefinedWidth.value() = false.
+     * @tc.expected: the selfIdealSize.Width() = selfIdealSize.Height() * 1.
+     */
+    ratio = 1.0;
+    heightStr = "1024px";
+    height = CalcLength::FromString(heightStr);
+    calcSize = std::make_optional<CalcSize>(std::nullopt, height);
+    layoutConstraint.ApplyAspectRatio(ratio, calcSize);
+    EXPECT_EQ(layoutConstraint.selfIdealSize.Width(), layoutConstraint.selfIdealSize.Height());
+
+    /**
+     * @tc.steps: step8 call ApplyAspectRatio, set ratio = 1, useDefinedWidth NULL.
+     * @tc.expected: the selfIdealSize.Width() = selfIdealSize.Height() * 2.
+     */
+    ratio = 2.0;
+    calcSize = std::nullopt;
+    std::optional<float> selfIdeaWidth = std::nullopt;
+    auto selfIdeaHeight = std::make_optional<float>(960);
+    layoutConstraint.selfIdealSize = OptionalSizeF(selfIdeaWidth, selfIdeaHeight);
+    layoutConstraint.ApplyAspectRatio(ratio, calcSize);
+    EXPECT_EQ(layoutConstraint.selfIdealSize.Width().value(), layoutConstraint.selfIdealSize.Height().value() * 2);
+
+    /**
+     * @tc.steps: step8 call ApplyAspectRatio, set ratio = 1, useDefinedWidth NULL.
+     * @tc.expected: the selfIdealSize.Width() = selfIdealSize.Height() * 4.
+     */
+    ratio = 4.0;
+    calcSize = std::nullopt;
+    selfIdeaWidth = std::nullopt;
+    selfIdeaHeight = std::nullopt;
+    layoutConstraint.selfIdealSize = OptionalSizeF(selfIdeaWidth, selfIdeaHeight);
+    layoutConstraint.ApplyAspectRatio(ratio, calcSize);
+    EXPECT_EQ(layoutConstraint.minSize.Width(), 0);
+
+    /**
+     * @tc.steps: step8 call ApplyAspectRatio, set ratio = 1, useDefinedWidth NULL.
+     * @tc.expected: the selfIdealSize.Width() = selfIdealSize.Height() * 1.
+     */
+    ratio = 1.0;
+    calcSize = std::nullopt;
+    selfIdeaWidth = std::nullopt;
+    selfIdeaHeight = std::nullopt;
+    layoutConstraint.selfIdealSize = OptionalSizeF(selfIdeaWidth, selfIdeaHeight);
+    layoutConstraint.minSize = SizeT<float>(1, 2);
+    layoutConstraint.maxSize = SizeT<float>(100, 200);
+    layoutConstraint.ApplyAspectRatio(ratio, calcSize);
+    EXPECT_EQ(layoutConstraint.minSize.Width(), layoutConstraint.minSize.Height());
 }
 
 /**

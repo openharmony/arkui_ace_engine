@@ -56,6 +56,9 @@ public:
         if (!textOverlayModifier_) {
             textOverlayModifier_ = MakeRefPtr<TextOverlayModifier>();
         }
+        if (isCustomFont_) {
+            textContentModifier_->SetIsCustomFont(true);
+        }
         auto paintMethod = MakeRefPtr<TextPaintMethod>(
             WeakClaim(this), paragraph_, baselineOffset_, textContentModifier_, textOverlayModifier_);
         auto host = GetHost();
@@ -223,7 +226,9 @@ public:
     // ===========================================================
 
     void InitSurfaceChangedCallback();
+    void InitSurfacePositionChangedCallback();
     virtual void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
+    virtual void HandleSurfacePositionChanged(int32_t posX, int32_t posY) {};
     bool HasSurfaceChangedCallback()
     {
         return surfaceChangedCallbackId_.has_value();
@@ -232,6 +237,16 @@ public:
     {
         surfaceChangedCallbackId_ = id;
     }
+
+    bool HasSurfacePositionChangedCallback()
+    {
+        return surfacePositionChangedCallbackId_.has_value();
+    }
+    void UpdateSurfacePositionChangedCallbackId(int32_t id)
+    {
+        surfacePositionChangedCallbackId_ = id;
+    }
+
     void SetOnClickEvent(GestureEventFunc&& onClick)
     {
         onClick_ = std::move(onClick);
@@ -278,6 +293,16 @@ public:
         isMeasureBoundary_ = isMeasureBoundary;
     }
 
+    void SetIsCustomFont(bool isCustomFont)
+    {
+        isCustomFont_ = isCustomFont;
+    }
+
+    bool GetIsCustomFont()
+    {
+        return isCustomFont_;
+    }
+
 protected:
     virtual void HandleOnCopy();
     void InitMouseEvent();
@@ -289,7 +314,7 @@ protected:
     bool IsDraggable(const Offset& localOffset);
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
-    virtual void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -315,7 +340,6 @@ protected:
     std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeHolderIndex_;
     float baselineOffset_ = 0.0f;
-    bool showSelectOverlay_ = false;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
     bool touchEventInitialized_ = false;
@@ -323,6 +347,8 @@ protected:
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
     bool isMeasureBoundary_ = false;
+    bool isCustomFont_ = false;
+    bool ignoreEvent_ = false;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -345,7 +371,6 @@ private:
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
-    void FontRegisterCallback(RefPtr<SpanNode> spanNode);
     // to check if drag is in progress
 
     OffsetF contentOffset_;
@@ -358,6 +383,7 @@ private:
     RefPtr<TextContentModifier> textContentModifier_;
     RefPtr<TextOverlayModifier> textOverlayModifier_;
     std::optional<int32_t> surfaceChangedCallbackId_;
+    std::optional<int32_t> surfacePositionChangedCallbackId_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

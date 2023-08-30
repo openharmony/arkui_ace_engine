@@ -271,6 +271,10 @@ bool VideoPattern::SetSourceForMediaPlayer()
 
 void VideoPattern::RegisterMediaPlayerEvent()
 {
+    if (src_.empty()) {
+        LOGD("Video src is empty, RegisterMediaPlayerEvent return");
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
 
@@ -487,7 +491,6 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     currentPos_ = currentPos;
     isInitialState_ = currentPos != 0 ? false : isInitialState_;
     isPlaying_ = mediaPlayer_->IsPlaying();
-
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
 
@@ -521,11 +524,19 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     UpdateSpeed();
     UpdateMuted();
 
+    checkNeedAutoPlay();
+}
+
+void VideoPattern::checkNeedAutoPlay()
+{
     if (isStop_) {
         isStop_ = false;
         Start();
     }
-
+    if (dragEndAutoPlay_) {
+        dragEndAutoPlay_ = false;
+        Start();
+    }
     if (autoPlay_) {
         Start();
     }
@@ -689,9 +700,39 @@ void VideoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderContext);
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface" };
     renderContextForMediaPlayer_->InitContext(false, param);
+    auto isFullScreen = IsFullScreen();
+    if (SystemProperties::GetExtSurfaceEnabled() && !isFullScreen) {
+        auto OnAreaChangedCallBack =
+            [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(videoPattern);
+
+            auto host = videoPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto geometryNode = host->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            auto videoNodeSize = geometryNode->GetContentSize();
+            auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
+
+            Rect rect = Rect(x +
+                (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE, y +
+                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(),  videoFrameSize.Height());
+
+            if (videoPattern->renderSurface_) {
+                if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(rect.Left(),
+                    rect.Top(), rect.Width(), rect.Height())) {
+                    videoPattern->lastBoundsRect_ = rect;
+                }
+            }
+        };
+        renderContextForMediaPlayer_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
+    }
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
-    renderContext->SetClipToBounds(true);
+    renderContext->SetClipToFrame(true);
 }
 
 void VideoPattern::OnModifyDone()
@@ -862,50 +903,51 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto videoNodeSize = geometryNode->GetContentSize();
-    auto videoNodeOffset = geometryNode->GetContentOffset();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    LOGD("Video node offset is %{public}s, size is %{public}s", videoNodeOffset.ToString().c_str(),
-        videoNodeSize.ToString().c_str());
+    LOGD("Video node size is %{public}s", videoNodeSize.ToString().c_str());
     auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
     // Change the surface layout for drawing video frames
     if (renderContextForMediaPlayer_) {
-        renderContextForMediaPlayer_->SetBounds(
-            videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-            videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
-            videoFrameSize.Width(), videoFrameSize.Height());
+        renderContextForMediaPlayer_->SetBounds((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+            (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
+            videoFrameSize.Height());
         LOGD("Video renderContext for mediaPlayer position x is %{public}lf,y is %{public}lf,width is "
              "%{public}lf,height "
              "is %{public}lf.",
-            videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-            videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
-            videoFrameSize.Width(), videoFrameSize.Height());
+            (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+            (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
+            videoFrameSize.Height());
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto videoNodeFrameSize = geometryNode->GetFrameSize();
+    RectF rect(0, 0, videoNodeFrameSize.Width(), videoNodeFrameSize.Height());
+    renderContext->SetContentRectToFrame(rect);
     host->MarkNeedSyncRenderTree();
     return false;
 }
 
 void VideoPattern::OnAreaChangedInner()
 {
-    if (SystemProperties::GetExtSurfaceEnabled()) {
+    auto isFullScreen = IsFullScreen();
+    if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto videoNodeSize = geometryNode->GetContentSize();
-        auto videoNodeOffset = geometryNode->GetContentOffset();
         auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
 
-        Rect rect = Rect(transformRelativeOffset.GetX() + videoNodeOffset.GetX() +
-                             (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-            transformRelativeOffset.GetY() + videoNodeOffset.GetY() +
-                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
-            videoFrameSize.Width(), videoFrameSize.Height());
+        Rect rect =
+            Rect(transformRelativeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                transformRelativeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height());
         if (renderSurface_ && (rect != lastBoundsRect_)) {
             renderSurface_->SetExtSurfaceBounds(rect.Left(), rect.Top(), rect.Width(), rect.Height());
             lastBoundsRect_ = rect;
@@ -1314,7 +1356,7 @@ void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode
 void VideoPattern::OnSliderChange(float posTime, int32_t mode)
 {
     LOGD("posTime: %{public}lf, mode: %{public}d", posTime, mode);
-    SetCurrentTime(posTime, OHOS::Ace::SeekMode::SEEK_CLOSEST);
+    SetCurrentTime(posTime, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
@@ -1468,6 +1510,9 @@ void VideoPattern::EnableDrag()
 
 VideoPattern::~VideoPattern()
 {
+    if (renderContextForMediaPlayer_) {
+        renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
+    }
     if (!fullScreenNodeId_.has_value()) {
         return;
     }

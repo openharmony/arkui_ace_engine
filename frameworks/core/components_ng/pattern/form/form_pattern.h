@@ -43,7 +43,7 @@ public:
     FormPattern();
     ~FormPattern() override;
 
-    void OnActionEvent(const std::string& action) const;
+    void OnActionEvent(const std::string& action);
 
     void OnLoadEvent();
 
@@ -66,6 +66,8 @@ public:
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
 
     void OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
+
+    void HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
 
     RefPtr<RenderContext> GetExternalRenderContext()
     {
@@ -95,7 +97,7 @@ private:
     void RemoveSubContainer();
 
     void FireOnAcquiredEvent(int64_t id) const;
-    void FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) const;
+    void FireOnRouterEvent(const std::unique_ptr<JsonValue>& action);
     void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;

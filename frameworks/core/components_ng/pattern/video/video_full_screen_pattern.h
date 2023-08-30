@@ -69,7 +69,10 @@ public:
         if (!videoPattern) {
             return MakeRefPtr<VideoLayoutProperty>();
         }
-        return videoPattern->GetLayoutProperty<VideoLayoutProperty>()->Clone();
+        auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>()->Clone();
+        layoutProperty->ResetAspectRatio();
+        layoutProperty->Reset();
+        return layoutProperty;
     }
 
     bool IsFullScreen() override

@@ -25,6 +25,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -41,6 +42,7 @@
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
+struct TextConfig;
 } // namespace OHOS::MiscServices
 #endif
 #endif
@@ -49,15 +51,18 @@ namespace OHOS::Ace::NG {
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
 
+constexpr float CARET_WIDTH = 1.5f;
+constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
+
 struct SelectionMenuParams {
     RichEditorType type;
     std::function<void()> buildFunc;
-    std::function<void()> onAppear;
+    std::function<void(int32_t, int32_t)> onAppear;
     std::function<void()> onDisappear;
     ResponseType responseType;
 
-    SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc, std::function<void()> _onAppear,
-        std::function<void()> _onDisappear, ResponseType _responseType)
+    SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc,
+        std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear, ResponseType _responseType)
         : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
           responseType(_responseType)
     {}
@@ -96,6 +101,9 @@ public:
         }
         if (!richEditorOverlayModifier_) {
             richEditorOverlayModifier_ = MakeRefPtr<RichEditorOverlayModifier>();
+        }
+        if (isCustomFont_) {
+            richEditorContentModifier_->SetIsCustomFont(true);
         }
         return MakeRefPtr<RichEditorPaintMethod>(
             WeakClaim(this), paragraph_, baselineOffset_, richEditorContentModifier_, richEditorOverlayModifier_);
@@ -164,7 +172,7 @@ public:
     std::u16string GetLeftTextOfCursor(int32_t number);
     std::u16string GetRightTextOfCursor(int32_t number);
     int32_t GetTextIndexAtCursor();
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
@@ -200,6 +208,7 @@ public:
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
+    void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
     void SetCustomKeyboard(const std::function<void()>&& keyboardBuilder)
@@ -210,22 +219,19 @@ public:
         customKeyboardBulder_ = keyboardBuilder;
     }
     void BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>& menuBuilder,
-        std::function<void()>& onAppear, std::function<void()>& onDisappear)
-    {
-        selectionMenuParams_ =
-            std::make_shared<SelectionMenuParams>(richEditorType, menuBuilder, onAppear, onDisappear, type);
-    }
+        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
 
 private:
-    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
+    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
         auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
-        selectInfo.menuInfo.showCopy = hasValue;
-        selectInfo.menuInfo.showCut = hasValue;
-        selectInfo.menuInfo.showCopyAll = hasValue;
+        bool isShowItem = copyOption_ != CopyOptions::None;
+        selectInfo.menuInfo.showCopy = isShowItem && hasValue;
+        selectInfo.menuInfo.showCut = isShowItem && hasValue;
+        selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
         selectMenuInfo_ = selectInfo.menuInfo;
@@ -277,11 +283,14 @@ private:
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     void OnHover(bool isHover);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
+    void UpdateCaretInfoToController();
 #if defined(ENABLE_STANDARD_INPUT)
     bool EnableStandardInput(bool needShowSoftKeyboard);
+    std::optional<MiscServices::TextConfig> GetMiscTextConfig();
 #else
     bool UnableStandardInput(bool isFocusViewChanged);
 #endif
+
     bool HasConnection() const;
     bool CloseKeyboard(bool forceClose) override;
     void CalcInsertValueObj(TextInsertValueInfo& info);
@@ -318,6 +327,7 @@ private:
     bool clickEventInitialized_ = false;
     bool focusEventInitialized_ = false;
     bool blockPress_ = false;
+    bool leftMousePress_ = false;
     long long timestamp_ = 0;
     OffsetF parentGlobalOffset_;
     OffsetF rightClickOffset_;
@@ -331,7 +341,6 @@ private:
     RectF frameRect_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
-    bool isDragMoving = false;
 #endif // ENABLE_DRAG_FRAMEWORK
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;

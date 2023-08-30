@@ -14,9 +14,11 @@
  */
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
+
+#include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -35,9 +37,25 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutConstraint);
     const auto& padding = props->CreatePaddingAndBorderWithDefault(horInterval_, 0.0f, 0.0f, 0.0f);
     float maxRowWidth = layoutConstraint->maxSize.Width() - padding.Width();
-    if (layoutConstraint->selfIdealSize.Width() &&
-        layoutConstraint->selfIdealSize.Width().value() < layoutConstraint->maxSize.Width()) {
-        maxRowWidth = layoutConstraint->selfIdealSize.Width().value() - padding.Width();
+    // update ideal width if user defined
+    const auto& calcConstraint = props->GetCalcLayoutConstraint();
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value() &&
+        calcConstraint->selfIdealSize.value().Width().has_value()) {
+        ScaleProperty scaleProperty;
+        if (layoutWrapper->GetGeometryNode() && layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
+            scaleProperty = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()->scaleProperty;
+        } else {
+            scaleProperty = layoutConstraint->scaleProperty;
+        }
+        layoutConstraint->selfIdealSize.SetWidth(
+            ConvertToPx(calcConstraint->selfIdealSize.value().Width()->GetDimension(), scaleProperty,
+                layoutConstraint->percentReference.Width()));
+    }
+    if (layoutConstraint->selfIdealSize.Width().has_value()) {
+        maxRowWidth =
+            std::max(layoutConstraint->minSize.Width(),
+                std::min(layoutConstraint->maxSize.Width(), layoutConstraint->selfIdealSize.Width().value())) -
+            padding.Width();
     }
     float minRowWidth = layoutConstraint->minSize.Width();
 
@@ -48,10 +66,12 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // measure right row
     childConstraint.maxSize.SetWidth(maxRowWidth);
     float rightRowWidth = 0.0f;
+    float rightRowHeight = 0.0f;
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     if (rightRow) {
         rightRow->Measure(childConstraint);
         rightRowWidth = rightRow->GetGeometryNode()->GetMarginFrameSize().Width();
+        rightRowHeight = rightRow->GetGeometryNode()->GetMarginFrameSize().Height();
     }
     // measure left row
     auto middleSpace = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
@@ -60,23 +80,20 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
     MeasureRow(leftRow, childConstraint);
-    MeasureItem(layoutWrapper);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
-    float menuWidth = layoutWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
-    if (!layoutConstraint->selfIdealSize.Width().has_value()) {
-        float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
-        if (!isMenuWidth_) {
-            layoutConstraint->selfIdealSize.SetWidth(std::max(minRowWidth, contentWidth));
-        } else {
-            layoutConstraint->selfIdealSize.SetWidth(menuWidth);
-        }
-        props->UpdateLayoutConstraint(layoutConstraint.value());
-    } else if (layoutConstraint->selfIdealSize.Width().value() >= layoutConstraint->maxSize.Width()) {
-        layoutConstraint->selfIdealSize.SetWidth(layoutConstraint->maxSize.Width());
-        props->UpdateLayoutConstraint(layoutConstraint.value());
-    }
-    
+    float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
+    float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
+    layoutWrapper->GetGeometryNode()->SetContentSize(
+        SizeF(std::max(minRowWidth, contentWidth), std::max(leftRowHeight, rightRowHeight)));
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+
+    if (layoutConstraint->selfIdealSize.Width().has_value()) {
+        auto idealWidth = std::max(layoutConstraint->minSize.Width(),
+            std::min(layoutConstraint->maxSize.Width(), layoutConstraint->selfIdealSize.Width().value()));
+        auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        idealSize.SetWidth(idealWidth);
+        layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    }
 }
 
 void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -142,24 +159,5 @@ void MenuItemLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const
     }
     rowWidth -= iconContentPadding;
     row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, roWHeight));
-}
-
-void MenuItemLayoutAlgorithm::MeasureItem(LayoutWrapper* layoutWrapper)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto iconContentPadding = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
-
-    auto itemProperty = AceType::DynamicCast<MenuItemLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(itemProperty);
-    float menuHeight = 0.0f;
-    if (itemProperty->GetMenuWidth().has_value()) {
-        auto menuWidth = itemProperty->GetMenuWidthValue().ConvertToPx();
-        menuWidth -= iconContentPadding;
-        layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(menuWidth, menuHeight));
-        isMenuWidth_ = true;
-    }
 }
 } // namespace OHOS::Ace::NG

@@ -95,16 +95,12 @@ public:
 
     bool OnDataAdded(size_t index)
     {
-        if (cachedItems_.empty()) {
-            return true;
-        }
-        if (index <= static_cast<size_t>(cachedItems_.rbegin()->first) ||
-            index >= static_cast<size_t>(cachedItems_.begin()->first)) {
+        if (!cachedItems_.empty() && index <= static_cast<size_t>(cachedItems_.rbegin()->first)) {
             decltype(cachedItems_) temp(std::move(cachedItems_));
 
             for (auto& [oldindex, id] : temp) {
                 cachedItems_.try_emplace(
-                    index >= static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
+                    index > static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(id));
             }
         }
         for (auto& [key, node] : expiringItem_) {
@@ -126,7 +122,7 @@ public:
             decltype(cachedItems_) temp(std::move(cachedItems_));
 
             for (auto& [oldindex, child] : temp) {
-                if (oldindex == index) {
+                if (static_cast<size_t>(oldindex) == index) {
                     node = child.second;
                 } else {
                     cachedItems_.try_emplace(
@@ -137,6 +133,7 @@ public:
         for (auto& [key, child] : expiringItem_) {
             if (static_cast<size_t>(child.first) > index) {
                 child.first--;
+                continue;
             }
             if (static_cast<size_t>(child.first) == index) {
                 child.first = -1;
@@ -163,6 +160,22 @@ public:
 
     bool OnDataMoved(size_t from, size_t to)
     {
+        if (from == to) {
+            return false;
+        }
+        auto fromIter = cachedItems_.find(from);
+        auto toIter = cachedItems_.find(to);
+        if (fromIter != cachedItems_.end() && toIter != cachedItems_.end()) {
+            std::swap(fromIter->second, toIter->second);
+        } else if (fromIter != cachedItems_.end()) {
+            expiringItem_.try_emplace(
+                fromIter->second.first, LazyForEachCacheChild(to, std::move(fromIter->second.second)));
+            cachedItems_.erase(fromIter);
+        } else if (toIter != cachedItems_.end()) {
+            expiringItem_.try_emplace(
+                toIter->second.first, LazyForEachCacheChild(from, std::move(toIter->second.second)));
+            cachedItems_.erase(toIter);
+        }
         return true;
     }
 
@@ -262,11 +275,13 @@ public:
         std::unordered_set<int32_t> idleIndexes;
         if (startIndex_ != -1 && endIndex_ != -1) {
             for (int32_t i = 1; i <= cacheCount_; i++) {
-                if (startIndex_ >= i) {
-                    idleIndexes.emplace(startIndex_ - i);
-                }
                 if (endIndex_ + i < count) {
                     idleIndexes.emplace(endIndex_ + i);
+                }
+            }
+            for (int32_t i = 1; i <= cacheCount_; i++) {
+                if (startIndex_ >= i) {
+                    idleIndexes.emplace(startIndex_ - i);
                 }
             }
         }

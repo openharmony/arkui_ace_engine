@@ -84,7 +84,7 @@ void WindowScene::OnAttachToFrameNode()
 
     auto surfaceNode = session_->GetLeashWinSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
-    
+
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
@@ -97,9 +97,7 @@ void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
 {
     CHECK_NULL_VOID(session_);
     CHECK_NULL_VOID(session);
-    if (session_->GetPersistentId() == session->GetPersistentId()) {
-        return;
-    }
+    CHECK_NULL_VOID(session_ != session);
 
     LOGI("session %{public}d changes to %{public}d", session_->GetPersistentId(), session->GetPersistentId());
     session_ = session;
@@ -180,6 +178,7 @@ void WindowScene::OnActivation()
             self->contentNode_.Reset();
             self->snapshotNode_.Reset();
             self->OnAttachToFrameNode();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             return;
         }
 

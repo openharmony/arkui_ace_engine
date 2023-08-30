@@ -85,8 +85,11 @@ public:
                 LOGE("Load card callback failed, host pipeline nullptr");
                 return false;
             }
-
+#ifdef NG_BUILD
+            auto outSidefrontend = AceType::DynamicCast<DeclarativeFrontendNG>(context->GetFrontend());
+#else
             auto outSidefrontend = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
+#endif
             if (!outSidefrontend) {
                 LOGE("Load card callback failed, host frontend nullptr");
                 return false;

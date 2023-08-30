@@ -473,24 +473,14 @@ void JSTabContent::SetSymmetricExtensible(const JSRef<JSVal>& info)
 void JSTabContent::SetBottomTabBarStyle(const JSRef<JSObject>& paramObject)
 {
     JSRef<JSVal> textParam = paramObject->GetProperty("text");
-    auto isTextEmpty = textParam->IsEmpty() || textParam->IsUndefined() || textParam->IsNull();
     std::optional<std::string> textOpt = std::nullopt;
-    if (isTextEmpty) {
-        LOGE("The text param is empty");
-        return;
-    }
     std::string text;
     if (ParseJsString(textParam, text)) {
         textOpt = text;
     }
 
     JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
-    auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
     std::optional<std::string> iconOpt = std::nullopt;
-    if (isIconEmpty) {
-        LOGE("The icon param is empty");
-        return;
-    }
     std::string icon;
     if (ParseJsMedia(iconParam, icon)) {
         iconOpt = icon;

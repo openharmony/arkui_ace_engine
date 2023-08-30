@@ -390,22 +390,48 @@ void CalculatePointerEvent(
     }
 }
 
-void CalculateWindowCoordinate(
-    const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point, const NG::VectorF& scale)
+void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
+    const NG::VectorF& scale, const int32_t udegree)
 {
     CHECK_NULL_VOID(point);
-    int32_t pointerId = point->GetPointerId();
-    MMI::PointerEvent::PointerItem item;
-    bool ret = point->GetPointerItem(pointerId, item);
-    if (ret) {
-        float xRelative = item.GetDisplayX() - offsetF.GetX();
-        float yRelative = item.GetDisplayY() - offsetF.GetY();
-        float windowX = NearZero(scale.x) ? xRelative : xRelative / scale.x;
-        float windowY = NearZero(scale.y) ? yRelative : yRelative / scale.y;
+    auto ids = point->GetPointerIds();
+    for (auto&& id : ids) {
+        MMI::PointerEvent::PointerItem item;
+        bool ret = point->GetPointerItem(id, item);
+        if (!ret) {
+            LOGE("get pointer:%{public}d item failed", id);
+            continue;
+        }
+        float xRelative = item.GetDisplayX();
+        float yRelative = item.GetDisplayY();
+        float windowX = xRelative;
+        float windowY = yRelative;
+        int32_t deviceWidth = SystemProperties::GetDeviceWidth();
+        int32_t deviceHeight = SystemProperties::GetDeviceHeight();
+
+        if (udegree == 0) {
+            windowX = xRelative - offsetF.GetX();
+            windowY = yRelative - offsetF.GetY();
+        }
+        if (udegree == 90) {
+            windowX = yRelative - offsetF.GetX();
+            windowY = deviceWidth - offsetF.GetY() - xRelative;
+        }
+        if (udegree == 180) {
+            windowX = deviceWidth - offsetF.GetX() - xRelative;
+            windowY = deviceHeight - offsetF.GetY() - yRelative;
+        }
+        if (udegree == 270) {
+            windowX = deviceHeight - offsetF.GetX() - yRelative;
+            windowY = xRelative - offsetF.GetY();
+        }
+
+        windowX = NearZero(scale.x) ? windowX : windowX / scale.x;
+        windowY = NearZero(scale.y) ? windowY : windowY / scale.y;
 
         item.SetWindowX(static_cast<int32_t>(windowX));
         item.SetWindowY(static_cast<int32_t>(windowY));
-        point->UpdatePointerItem(pointerId, item);
+        point->UpdatePointerItem(id, item);
     }
 }
 } // namespace OHOS::Ace::Platform

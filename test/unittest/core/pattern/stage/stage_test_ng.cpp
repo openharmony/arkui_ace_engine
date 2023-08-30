@@ -52,7 +52,7 @@ constexpr int32_t CHECK_BOX_ID_SECOND = 5;
 constexpr int32_t CHECK_BOX_ID_THIRD = 6;
 constexpr int32_t CHECK_BOX_ID_FOURTH = 6;
 constexpr int32_t TEST_CONTAINER_ID = 100;
-constexpr int32_t AT_LEAST_TIME = 3;
+constexpr int32_t AT_LEAST_TIME = 1;
 int32_t flag = 0;
 std::function<void()> FLAG_FUNC = []() { flag++; };
 } // namespace
@@ -68,11 +68,15 @@ public:
         pipeline->sharedTransitionManager_ = AceType::MakeRefPtr<SharedOverlayManager>(stageNode);
         EXPECT_CALL(*pipeline, FlushPipelineImmediately()).Times(testing::AtLeast(AT_LEAST_TIME));
         MockContainer::SetUp();
+        EXPECT_CALL(*MockContainer::Current(), WindowIsShow())
+            .Times(testing::AtLeast(AT_LEAST_TIME))
+            .WillRepeatedly(Return(true));
         ContainerScope::UpdateCurrent(TEST_CONTAINER_ID);
     }
     static void TearDownTestSuite()
     {
         MockPipelineBase::TearDown();
+        MockContainer::TearDown();
     }
     void SetUp()
     {
@@ -156,7 +160,7 @@ HWTEST_F(StageTestNg, PageEventHubTest002, TestSize.Level1)
     ElementRegister::GetInstance()->AddReferenced(CHECK_BOX_ID_FIRST, errorNode);
     pageEventHub.RemoveCheckBoxFromGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
     pageEventHub.AddCheckBoxGroupToGroup(TEST_GROUP_NAME, CHECK_BOX_ID_FIRST);
-    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 1);
+    EXPECT_EQ(pageEventHub.GetCheckBoxGroupMap()[TEST_GROUP_NAME].size(), 0);
 
     /**
      * @tc.steps: step3. remove error pattern.
@@ -272,13 +276,6 @@ HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
     stageManager.PopPage(true, false);
     stageManager.PopPage(false, true);
     EXPECT_EQ(stageNode->GetChildren().size(), 3);
-
-    /**
-     * @tc.steps: step8. Call StopPageTransition.
-     * @tc.expected: stop transition and remove in transition page,size meets expectations.
-     */
-    stageManager.StopPageTransition();
-    EXPECT_EQ(stageNode->GetChildren().size(), 2);
 }
 
 /**

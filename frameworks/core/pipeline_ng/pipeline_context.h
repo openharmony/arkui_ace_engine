@@ -137,8 +137,6 @@ public:
 
     void HandleOnAreaChangeEvent();
 
-    void NotifyConfigurationChange(const OnConfigurationChange& configurationChange) override;
-
     void AddVisibleAreaChangeNode(
         const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
@@ -186,6 +184,8 @@ public:
     bool OnBackPressed();
 
     RefPtr<FrameNode> GetNavDestinationBackButtonNode();
+
+    RefPtr<FrameNode> FindNavDestinationNodeToHandleBack(const RefPtr<UINode>& node);
 
     void AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode);
 
@@ -322,7 +322,7 @@ public:
         return geometryNode->GetFrameRect();
     }
 
-    void FlushReload() override;
+    void FlushReload(const OnConfigurationChange& configurationChange) override;
 
     int32_t RegisterSurfaceChangedCallback(
         std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
@@ -502,6 +502,7 @@ private:
     bool isNeedFlushMouseEvent_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
+    bool isDensityChanged_ = false;
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;

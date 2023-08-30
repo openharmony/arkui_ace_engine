@@ -17,6 +17,7 @@
 
 #include "ui/rs_surface_node.h"
 
+#include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +48,11 @@ void SystemWindowScene::OnAttachToFrameNode()
         const auto pointerEvent = info.GetPointerEvent();
         CHECK_NULL_VOID(session_);
         CHECK_NULL_VOID(pointerEvent);
+        auto host = GetHost();
+        if (host != nullptr) {
+            DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
+                host->GetId(), session_, pointerEvent);
+        }
         session_->TransferPointerEvent(pointerEvent);
     };
     mouseEventHub->SetMouseEvent(std::move(mouseCallback));

@@ -16,10 +16,10 @@
 const curves = requireNativeModule('ohos.curves');
 const measure = requireNapi('measure');
 
-var __decorate = this && this.__decorate || function (o, e, t, r) {
-  var i, s = arguments.length, n = s < 3 ? e : null === r ? r = Object.getOwnPropertyDescriptor(e, t) : r;
-  if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) n = Reflect.decorate(o, e, t, r); else for (var a = o.length - 1;a >= 0; a--) (i = o[a]) && (n = (s < 3 ? i(n) : s > 3 ? i(e, t, n) : i(e, t)) || n);
-  return s > 3 && n && Object.defineProperty(e, t, n), n
+var __decorate = this && this.__decorate || function (e, o, t, i) {
+  var r, s = arguments.length, n = s < 3 ? o : null === i ? i = Object.getOwnPropertyDescriptor(o, t) : i;
+  if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) n = Reflect.decorate(e, o, t, i); else for (var a = e.length - 1;a >= 0; a--) (r = e[a]) && (n = (s < 3 ? r(n) : s > 3 ? r(o, t, n) : r(o, t)) || n);
+  return s > 3 && n && Object.defineProperty(o, t, n), n
 };
 
 const TEXT_HOT_AREA_WIDTH = 8;
@@ -42,13 +42,12 @@ const SHARP_CUBIC_BEZIER = curves.cubicBezierCurve(.33, 0, .67, 1);
 const INTER_POLATING_SPRING = curves.interpolatingSpring(0, 1, 328, 34);
 const FRICTION_CUBIC_BEZIER = curves.cubicBezierCurve(.2, 0, .2, 1);
 const TRANS_COLOR = "#00FFFFFF";
-const KEYCODE_SPACE = 2050;
-const KEYCODE_ENTER = 2054;
+const GRADIENT_WIDTH = 16;
 
 export var FilterType;
-!function(o){
-  o[o.MULTI_LINE_FILTER=0] = "MULTI_LINE_FILTER";
-  o[o.LIST_FILTER=1] = "LIST_FILTER"
+!function(e){
+  e[e.MULTI_LINE_FILTER=0] = "MULTI_LINE_FILTER";
+  e[e.LIST_FILTER=1] = "LIST_FILTER"
 }(FilterType || (FilterType = {}));
 let FontWeightArray = class extends Array {
 };
@@ -60,53 +59,120 @@ let BooleanArray = class extends Array {
 };
 BooleanArray = __decorate([Observed], BooleanArray);
 let ObservedBoolean = class {
-  constructor(o) {
-    this.value = o
+  constructor(e) {
+    this.value = e
   }
 };
 ObservedBoolean = __decorate([Observed], ObservedBoolean);
 
 export { ObservedBoolean };
 let ObservedNumber = class {
-  constructor(o) {
-    this.value = o
+  constructor(e) {
+    this.value = e
   }
 };
 ObservedNumber = __decorate([Observed], ObservedNumber);
 
+class GradientMask extends ViewPU {
+  constructor(e, o, t, i = -1) {
+    super(e, t, i);
+    this.x0 = void 0;
+    this.y0 = void 0;
+    this.x1 = void 0;
+    this.y1 = void 0;
+    this.settings = new RenderingContextSettings(!0);
+    this.context2D = new CanvasRenderingContext2D(this.settings);
+    this.setInitiallyProvidedValue(o)
+  }
+
+  setInitiallyProvidedValue(e) {
+    void 0 !== e.x0 && (this.x0 = e.x0);
+    void 0 !== e.y0 && (this.y0 = e.y0);
+    void 0 !== e.x1 && (this.x1 = e.x1);
+    void 0 !== e.y1 && (this.y1 = e.y1);
+    void 0 !== e.settings && (this.settings = e.settings);
+    void 0 !== e.context2D && (this.context2D = e.context2D)
+  }
+
+  updateStateVars(e) {
+  }
+
+  purgeVariableDependenciesOnElmtId(e) {
+  }
+
+  aboutToBeDeleted() {
+    SubscriberManager.Get().delete(this.id__());
+    this.aboutToBeDeletedInternal()
+  }
+
+  initialRender() {
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      Column.create();
+      Column.width(16);
+      Column.height(40);
+      o || Column.pop();
+      ViewStackProcessor.StopGetAccessRecording()
+    }));
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      Canvas.create(this.context2D);
+      Canvas.width(16);
+      Canvas.height(40);
+      Canvas.onReady((() => {
+        var e = this.context2D.createLinearGradient(this.x0, this.y0, this.x1, this.y1);
+        e.addColorStop(0, "#ffffffff");
+        e.addColorStop(1, "#00ffffff");
+        this.context2D.fillStyle = e;
+        this.context2D.fillRect(0, 0, 16, 40)
+      }));
+      o || Canvas.pop();
+      ViewStackProcessor.StopGetAccessRecording()
+    }));
+    Canvas.pop();
+    Column.pop()
+  }
+
+  rerender() {
+    this.updateDirtyElements()
+  }
+}
+
 class ListFilterRow extends ViewPU {
-  constructor(o, e, t, r = -1) {
-    super(o, t, r);
-    this.__colorRow = new SynchedPropertyNesedObjectPU(e.colorRow, this, "colorRow");
-    this.__fontWeightRow = new SynchedPropertyNesedObjectPU(e.fontWeightRow, this, "fontWeightRow");
-    this.__backgroundColorRow = new SynchedPropertyNesedObjectPU(e.backgroundColorRow, this, "backgroundColorRow");
-    this.__isBackgroundHoverRow = new SynchedPropertyNesedObjectPU(e.isBackgroundHoverRow, this, "isBackgroundHoverRow");
+  constructor(e, o, t, i = -1) {
+    super(e, t, i);
+    this.__colorRow = new SynchedPropertyNesedObjectPU(o.colorRow, this, "colorRow");
+    this.__fontWeightRow = new SynchedPropertyNesedObjectPU(o.fontWeightRow, this, "fontWeightRow");
+    this.__backgroundColorRow = new SynchedPropertyNesedObjectPU(o.backgroundColorRow, this, "backgroundColorRow");
+    this.__isBackgroundHoverRow = new SynchedPropertyNesedObjectPU(o.isBackgroundHoverRow, this, "isBackgroundHoverRow");
     this.filterRow = void 0;
     this.onItemClick = void 0;
-    this.setInitiallyProvidedValue(e)
+    this.rowIndex = void 0;
+    this.setInitiallyProvidedValue(o)
   }
 
-  setInitiallyProvidedValue(o) {
-    this.__colorRow.set(o.colorRow);
-    this.__fontWeightRow.set(o.fontWeightRow);
-    this.__backgroundColorRow.set(o.backgroundColorRow);
-    this.__isBackgroundHoverRow.set(o.isBackgroundHoverRow);
-    void 0 !== o.filterRow && (this.filterRow = o.filterRow);
-    void 0 !== o.onItemClick && (this.onItemClick = o.onItemClick)
+  setInitiallyProvidedValue(e) {
+    this.__colorRow.set(e.colorRow);
+    this.__fontWeightRow.set(e.fontWeightRow);
+    this.__backgroundColorRow.set(e.backgroundColorRow);
+    this.__isBackgroundHoverRow.set(e.isBackgroundHoverRow);
+    void 0 !== e.filterRow && (this.filterRow = e.filterRow);
+    void 0 !== e.onItemClick && (this.onItemClick = e.onItemClick);
+    void 0 !== e.rowIndex && (this.rowIndex = e.rowIndex)
   }
 
-  updateStateVars(o) {
-    this.__colorRow.set(o.colorRow);
-    this.__fontWeightRow.set(o.fontWeightRow);
-    this.__backgroundColorRow.set(o.backgroundColorRow);
-    this.__isBackgroundHoverRow.set(o.isBackgroundHoverRow)
+  updateStateVars(e) {
+    this.__colorRow.set(e.colorRow);
+    this.__fontWeightRow.set(e.fontWeightRow);
+    this.__backgroundColorRow.set(e.backgroundColorRow);
+    this.__isBackgroundHoverRow.set(e.isBackgroundHoverRow)
   }
 
-  purgeVariableDependenciesOnElmtId(o) {
-    this.__colorRow.purgeDependencyOnElmtId(o);
-    this.__fontWeightRow.purgeDependencyOnElmtId(o);
-    this.__backgroundColorRow.purgeDependencyOnElmtId(o);
-    this.__isBackgroundHoverRow.purgeDependencyOnElmtId(o)
+  purgeVariableDependenciesOnElmtId(e) {
+    this.__colorRow.purgeDependencyOnElmtId(e);
+    this.__fontWeightRow.purgeDependencyOnElmtId(e);
+    this.__backgroundColorRow.purgeDependencyOnElmtId(e);
+    this.__isBackgroundHoverRow.purgeDependencyOnElmtId(e)
   }
 
   aboutToBeDeleted() {
@@ -135,31 +201,81 @@ class ListFilterRow extends ViewPU {
   }
 
   initialRender() {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      Stack.create({ alignContent: Alignment.End });
+      o || Stack.pop();
+      ViewStackProcessor.StopGetAccessRecording()
+    }));
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      Stack.create({ alignContent: Alignment.Start });
+      o || Stack.pop();
+      ViewStackProcessor.StopGetAccessRecording()
+    }));
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       List.create();
       List.listDirection(Axis.Horizontal);
-      List.margin({ left: -16 });
       List.scrollBar(BarState.Off);
       List.width("100%");
       List.height(40);
       List.align(Alignment.Start);
-      e || List.pop();
+      o || List.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       ForEach.create();
-      this.forEachUpdateFunction(o, this.filterRow.options, ((o, e) => {
-        const t = o;
+      this.forEachUpdateFunction(e, this.filterRow.options, ((e, o) => {
+        const t = e;
+        this.observeComponentCreation(((e, t) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
+          If.create();
+          0 == o ? this.ifElseBranchUpdateFunction(0, (() => {
+            {
+              const e = !0;
+              const o = (o, t) => {
+                ViewStackProcessor.StartGetAccessRecordingFor(o);
+                ListItem.create(i, e);
+                ListItem.width({
+                  id: -1,
+                  type: 10002,
+                  params: ["sys.float.ohos_id_max_padding_start"],
+                  bundleName: "",
+                  moduleName: ""
+                });
+                ListItem.height(40);
+                t || ListItem.pop();
+                ViewStackProcessor.StopGetAccessRecording()
+              };
+              const t = () => {
+                this.observeComponentCreation(o);
+                ListItem.pop()
+              };
+              const i = (e, t) => {
+                o(e, t);
+                this.updateFuncByElmtId.set(e, o);
+                ListItem.pop()
+              };
+              e ? (() => {
+                this.observeComponentCreation(o);
+                ListItem.pop()
+              })() : t()
+            }
+          })) : If.branchId(1);
+          t || If.pop();
+          ViewStackProcessor.StopGetAccessRecording()
+        }));
+        If.pop();
         {
-          const o = !0;
-          const r = (t, r) => {
+          const e = !0;
+          const i = (t, i) => {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
-            ListItem.create(s, o);
+            ListItem.create(s, e);
             ListItem.height("100%");
             ListItem.onClick((() => {
-              this.onItemClick(e)
+              this.onItemClick(o)
             }));
             ListItem.focusable(!0);
             ViewStackProcessor.visualState("focused");
@@ -195,42 +311,44 @@ class ListFilterRow extends ViewPU {
             });
             ListItem.padding({ left: 8, right: 8 });
             ViewStackProcessor.visualState();
-            ListItem.backgroundColor(this.isBackgroundHoverRow[e] ? this.backgroundColorRow[e] : "#00FFFFFF");
-            ListItem.onHover((o => {
+            ListItem.backgroundColor(this.isBackgroundHoverRow[o] ? this.backgroundColorRow[o] : "#00FFFFFF");
+            ListItem.onHover((e => {
               Context.animateTo({ curve: FRICTION_CUBIC_BEZIER, duration: 250 }, (() => {
-                if (o) {
-                  this.backgroundColorRow[e] = {
+                if (e) {
+                  this.backgroundColorRow[o] = {
                     id: -1,
                     type: 10001,
                     params: ["sys.color.ohos_id_color_hover"],
                     bundleName: "",
                     moduleName: ""
                   };
-                  this.isBackgroundHoverRow[e] = !0
-                } else this.isBackgroundHoverRow[e] = !1
+                  this.isBackgroundHoverRow[o] = !0
+                } else this.isBackgroundHoverRow[o] = !1
               }))
             }));
-            ListItem.onTouch((o => {
-              o.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
-                this.backgroundColorRow[e] = {
+            ListItem.onTouch((e => {
+              e.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+                this.backgroundColorRow[o] = {
                   id: -1,
                   type: 10001,
                   params: ["sys.color.ohos_id_color_click_effect"],
                   bundleName: "",
                   moduleName: ""
                 };
-                this.isBackgroundHoverRow[e] = !0
-              })) : o.type === TouchType.Up && Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
-                this.isBackgroundHoverRow[e] = !1
+                this.isBackgroundHoverRow[o] = !0
+              })) : e.type === TouchType.Up && Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+                this.isBackgroundHoverRow[o] = !1
               }))
             }));
-            r || ListItem.pop();
+            ListItem.margin({ left: 0 == o ? -8 : 0 });
+            ListItem.tabIndex(0 == o ? this.rowIndex : -1);
+            i || ListItem.pop();
             ViewStackProcessor.StopGetAccessRecording()
           };
-          const i = () => {
-            this.observeComponentCreation(r);
-            this.observeComponentCreation(((o, r) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
+          const r = () => {
+            this.observeComponentCreation(i);
+            this.observeComponentCreation(((e, i) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
               Text.create(t.toString());
               Text.fontSize({
                 id: -1,
@@ -239,20 +357,20 @@ class ListFilterRow extends ViewPU {
                 bundleName: "",
                 moduleName: ""
               });
-              Text.fontColor(this.colorRow[e]);
-              Text.fontWeight(this.fontWeightRow[e]);
+              Text.fontColor(this.colorRow[o]);
+              Text.fontWeight(this.fontWeightRow[o]);
               Text.focusable(!0);
-              r || Text.pop();
+              i || Text.pop();
               ViewStackProcessor.StopGetAccessRecording()
             }));
             Text.pop();
             ListItem.pop()
           };
-          const s = (o, i) => {
-            r(o, i);
-            this.updateFuncByElmtId.set(o, r);
-            this.observeComponentCreation(((o, r) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
+          const s = (e, r) => {
+            i(e, r);
+            this.updateFuncByElmtId.set(e, i);
+            this.observeComponentCreation(((e, i) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
               Text.create(t.toString());
               Text.fontSize({
                 id: -1,
@@ -261,26 +379,48 @@ class ListFilterRow extends ViewPU {
                 bundleName: "",
                 moduleName: ""
               });
-              Text.fontColor(this.colorRow[e]);
-              Text.fontWeight(this.fontWeightRow[e]);
+              Text.fontColor(this.colorRow[o]);
+              Text.fontWeight(this.fontWeightRow[o]);
               Text.focusable(!0);
-              r || Text.pop();
+              i || Text.pop();
               ViewStackProcessor.StopGetAccessRecording()
             }));
             Text.pop();
             ListItem.pop()
           };
-          o ? (() => {
-            this.observeComponentCreation(r);
+          e ? (() => {
+            this.observeComponentCreation(i);
             ListItem.pop()
-          })() : i()
+          })() : r()
         }
       }), void 0,!0,!1);
-      e || ForEach.pop();
+      o || ForEach.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     ForEach.pop();
-    List.pop()
+    List.pop();
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      o ? ViewPU.create(new GradientMask(this, {
+        x0: 0,
+        y0: 20,
+        x1: 16,
+        y1: 20
+      }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
+      ViewStackProcessor.StopGetAccessRecording()
+    }));
+    Stack.pop();
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      o ? ViewPU.create(new GradientMask(this, {
+        x0: 16,
+        y0: 20,
+        x1: 0,
+        y1: 20
+      }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
+      ViewStackProcessor.StopGetAccessRecording()
+    }));
+    Stack.pop()
   }
 
   rerender() {
@@ -289,16 +429,16 @@ class ListFilterRow extends ViewPU {
 }
 
 class MultiFilterRow extends ViewPU {
-  constructor(o, e, t, r = -1) {
-    super(o, t, r);
-    this.__colorRow = new SynchedPropertyNesedObjectPU(e.colorRow, this, "colorRow");
-    this.__fontWeightRow = new SynchedPropertyNesedObjectPU(e.fontWeightRow, this, "fontWeightRow");
-    this.__backgroundColorRow = new SynchedPropertyNesedObjectPU(e.backgroundColorRow, this, "backgroundColorRow");
-    this.__isBackgroundHoverRow = new SynchedPropertyNesedObjectPU(e.isBackgroundHoverRow, this, "isBackgroundHoverRow");
-    this.__twoLineModeItemNumRow = new SynchedPropertyNesedObjectPU(e.twoLineModeItemNumRow, this, "twoLineModeItemNumRow");
-    this.__twoLineModeItemNumRecordRow = new SynchedPropertyNesedObjectPU(e.twoLineModeItemNumRecordRow, this, "twoLineModeItemNumRecordRow");
-    this.__arrowShowStateRow = new SynchedPropertyNesedObjectPU(e.arrowShowStateRow, this, "arrowShowStateRow");
-    this.__isArrowIconDown = new SynchedPropertyNesedObjectPU(e.isArrowIconDown, this, "isArrowIconDown");
+  constructor(e, o, t, i = -1) {
+    super(e, t, i);
+    this.__colorRow = new SynchedPropertyNesedObjectPU(o.colorRow, this, "colorRow");
+    this.__fontWeightRow = new SynchedPropertyNesedObjectPU(o.fontWeightRow, this, "fontWeightRow");
+    this.__backgroundColorRow = new SynchedPropertyNesedObjectPU(o.backgroundColorRow, this, "backgroundColorRow");
+    this.__isBackgroundHoverRow = new SynchedPropertyNesedObjectPU(o.isBackgroundHoverRow, this, "isBackgroundHoverRow");
+    this.__twoLineModeItemNumRow = new SynchedPropertyNesedObjectPU(o.twoLineModeItemNumRow, this, "twoLineModeItemNumRow");
+    this.__twoLineModeItemNumRecordRow = new SynchedPropertyNesedObjectPU(o.twoLineModeItemNumRecordRow, this, "twoLineModeItemNumRecordRow");
+    this.__arrowShowStateRow = new SynchedPropertyNesedObjectPU(o.arrowShowStateRow, this, "arrowShowStateRow");
+    this.__isArrowIconDown = new SynchedPropertyNesedObjectPU(o.isArrowIconDown, this, "isArrowIconDown");
     this.filterRow = null;
     this.onItemClick = void 0;
     this.__arrowBgColorRow = new ObservedPropertyObjectPU({
@@ -310,47 +450,49 @@ class MultiFilterRow extends ViewPU {
     }, this, "arrowBgColorRow");
     this.__isArrowBgHoverRow = new ObservedPropertySimplePU(!1, this, "isArrowBgHoverRow");
     this.filterColumnWidth = 0;
-    this.setInitiallyProvidedValue(e)
+    this.rowIndex = 0;
+    this.setInitiallyProvidedValue(o)
   }
 
-  setInitiallyProvidedValue(o) {
-    this.__colorRow.set(o.colorRow);
-    this.__fontWeightRow.set(o.fontWeightRow);
-    this.__backgroundColorRow.set(o.backgroundColorRow);
-    this.__isBackgroundHoverRow.set(o.isBackgroundHoverRow);
-    this.__twoLineModeItemNumRow.set(o.twoLineModeItemNumRow);
-    this.__twoLineModeItemNumRecordRow.set(o.twoLineModeItemNumRecordRow);
-    this.__arrowShowStateRow.set(o.arrowShowStateRow);
-    this.__isArrowIconDown.set(o.isArrowIconDown);
-    void 0 !== o.filterRow && (this.filterRow = o.filterRow);
-    void 0 !== o.onItemClick && (this.onItemClick = o.onItemClick);
-    void 0 !== o.arrowBgColorRow && (this.arrowBgColorRow = o.arrowBgColorRow);
-    void 0 !== o.isArrowBgHoverRow && (this.isArrowBgHoverRow = o.isArrowBgHoverRow);
-    void 0 !== o.filterColumnWidth && (this.filterColumnWidth = o.filterColumnWidth)
+  setInitiallyProvidedValue(e) {
+    this.__colorRow.set(e.colorRow);
+    this.__fontWeightRow.set(e.fontWeightRow);
+    this.__backgroundColorRow.set(e.backgroundColorRow);
+    this.__isBackgroundHoverRow.set(e.isBackgroundHoverRow);
+    this.__twoLineModeItemNumRow.set(e.twoLineModeItemNumRow);
+    this.__twoLineModeItemNumRecordRow.set(e.twoLineModeItemNumRecordRow);
+    this.__arrowShowStateRow.set(e.arrowShowStateRow);
+    this.__isArrowIconDown.set(e.isArrowIconDown);
+    void 0 !== e.filterRow && (this.filterRow = e.filterRow);
+    void 0 !== e.onItemClick && (this.onItemClick = e.onItemClick);
+    void 0 !== e.arrowBgColorRow && (this.arrowBgColorRow = e.arrowBgColorRow);
+    void 0 !== e.isArrowBgHoverRow && (this.isArrowBgHoverRow = e.isArrowBgHoverRow);
+    void 0 !== e.filterColumnWidth && (this.filterColumnWidth = e.filterColumnWidth);
+    void 0 !== e.rowIndex && (this.rowIndex = e.rowIndex)
   }
 
-  updateStateVars(o) {
-    this.__colorRow.set(o.colorRow);
-    this.__fontWeightRow.set(o.fontWeightRow);
-    this.__backgroundColorRow.set(o.backgroundColorRow);
-    this.__isBackgroundHoverRow.set(o.isBackgroundHoverRow);
-    this.__twoLineModeItemNumRow.set(o.twoLineModeItemNumRow);
-    this.__twoLineModeItemNumRecordRow.set(o.twoLineModeItemNumRecordRow);
-    this.__arrowShowStateRow.set(o.arrowShowStateRow);
-    this.__isArrowIconDown.set(o.isArrowIconDown)
+  updateStateVars(e) {
+    this.__colorRow.set(e.colorRow);
+    this.__fontWeightRow.set(e.fontWeightRow);
+    this.__backgroundColorRow.set(e.backgroundColorRow);
+    this.__isBackgroundHoverRow.set(e.isBackgroundHoverRow);
+    this.__twoLineModeItemNumRow.set(e.twoLineModeItemNumRow);
+    this.__twoLineModeItemNumRecordRow.set(e.twoLineModeItemNumRecordRow);
+    this.__arrowShowStateRow.set(e.arrowShowStateRow);
+    this.__isArrowIconDown.set(e.isArrowIconDown)
   }
 
-  purgeVariableDependenciesOnElmtId(o) {
-    this.__colorRow.purgeDependencyOnElmtId(o);
-    this.__fontWeightRow.purgeDependencyOnElmtId(o);
-    this.__backgroundColorRow.purgeDependencyOnElmtId(o);
-    this.__isBackgroundHoverRow.purgeDependencyOnElmtId(o);
-    this.__twoLineModeItemNumRow.purgeDependencyOnElmtId(o);
-    this.__twoLineModeItemNumRecordRow.purgeDependencyOnElmtId(o);
-    this.__arrowShowStateRow.purgeDependencyOnElmtId(o);
-    this.__isArrowIconDown.purgeDependencyOnElmtId(o);
-    this.__arrowBgColorRow.purgeDependencyOnElmtId(o);
-    this.__isArrowBgHoverRow.purgeDependencyOnElmtId(o)
+  purgeVariableDependenciesOnElmtId(e) {
+    this.__colorRow.purgeDependencyOnElmtId(e);
+    this.__fontWeightRow.purgeDependencyOnElmtId(e);
+    this.__backgroundColorRow.purgeDependencyOnElmtId(e);
+    this.__isBackgroundHoverRow.purgeDependencyOnElmtId(e);
+    this.__twoLineModeItemNumRow.purgeDependencyOnElmtId(e);
+    this.__twoLineModeItemNumRecordRow.purgeDependencyOnElmtId(e);
+    this.__arrowShowStateRow.purgeDependencyOnElmtId(e);
+    this.__isArrowIconDown.purgeDependencyOnElmtId(e);
+    this.__arrowBgColorRow.purgeDependencyOnElmtId(e);
+    this.__isArrowBgHoverRow.purgeDependencyOnElmtId(e)
   }
 
   aboutToBeDeleted() {
@@ -404,48 +546,48 @@ class MultiFilterRow extends ViewPU {
     return this.__arrowBgColorRow.get()
   }
 
-  set arrowBgColorRow(o) {
-    this.__arrowBgColorRow.set(o)
+  set arrowBgColorRow(e) {
+    this.__arrowBgColorRow.set(e)
   }
 
   get isArrowBgHoverRow() {
     return this.__isArrowBgHoverRow.get()
   }
 
-  set isArrowBgHoverRow(o) {
-    this.__isArrowBgHoverRow.set(o)
+  set isArrowBgHoverRow(e) {
+    this.__isArrowBgHoverRow.set(e)
   }
 
   calcMultiFilterRowItemNum() {
-    var o = this.filterColumnWidth - vp2px(24);
-    var e = 0;
+    var e = this.filterColumnWidth - vp2px(24);
+    var o = 0;
     var t = 1;
-    for (var r = 0;r < this.filterRow.options.length; r++) {
-      let i = this.filterRow.options[r];
-      let s = measure.measureText({ textContent: i, fontSize: 12 });
-      if (0 !== r) {
+    for (var i = 0;i < this.filterRow.options.length; i++) {
+      let r = this.filterRow.options[i];
+      let s = measure.measureText({ textContent: r, fontSize: 12 });
+      if (0 !== i) {
         s += vp2px(16);
-        if (o - s > 0) {
-          o -= s;
-          e += 1
+        if (e - s > 0) {
+          e -= s;
+          o += 1
         } else {
-          if (0 === e) {
-            e++;
-            o = 0
+          if (0 === o) {
+            o++;
+            e = 0
           }
           if (1 !== t) break;
           t += 1;
-          o = this.filterColumnWidth - vp2px(24) - vp2px(24);
-          r--
+          e = this.filterColumnWidth - vp2px(24) - vp2px(24);
+          i--
         }
       }
     }
-    return e
+    return o
   }
 
-  DownAndUpArrow(o = null) {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+  DownAndUpArrow(e = null) {
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create();
       Row.border({
         radius: {
@@ -461,9 +603,9 @@ class MultiFilterRow extends ViewPU {
       Row.backgroundColor(this.isArrowBgHoverRow ? this.arrowBgColorRow : "#00FFFFFF");
       Row.focusable(!0);
       Row.visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden);
-      Row.onHover((o => {
+      Row.onHover((e => {
         Context.animateTo({ curve: FRICTION_CUBIC_BEZIER, duration: 250 }, (() => {
-          if (o) {
+          if (e) {
             this.arrowBgColorRow = {
               id: -1,
               type: 10001,
@@ -475,8 +617,8 @@ class MultiFilterRow extends ViewPU {
           } else this.isArrowBgHoverRow = !1
         }))
       }));
-      Row.onTouch((o => {
-        o.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+      Row.onTouch((e => {
+        e.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
           this.arrowBgColorRow = {
             id: -1,
             type: 10001,
@@ -485,7 +627,7 @@ class MultiFilterRow extends ViewPU {
             moduleName: ""
           };
           this.isArrowBgHoverRow = !0
-        })) : o.type === TouchType.Up && Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+        })) : e.type === TouchType.Up && Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
           this.isArrowBgHoverRow = !1
         }))
       }));
@@ -510,24 +652,24 @@ class MultiFilterRow extends ViewPU {
           }))
         }
       }));
-      e || Row.pop();
+      o || Row.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Image.create(this.isArrowIconDown.value ? {
-                                                  id: -1,
-                                                  type: 2e4,
-                                                  params: ["sys.media.ohos_ic_public_arrow_down"],
-                                                  bundleName: "",
-                                                  moduleName: ""
-                                                } : {
-                                                      id: -1,
-                                                      type: 2e4,
-                                                      params: ["sys.media.ohos_ic_public_arrow_up"],
-                                                      bundleName: "",
-                                                      moduleName: ""
-                                                    });
+        id: -1,
+        type: 2e4,
+        params: ["sys.media.ohos_ic_public_arrow_down"],
+        bundleName: "",
+        moduleName: ""
+      } : {
+        id: -1,
+        type: 2e4,
+        params: ["sys.media.ohos_ic_public_arrow_up"],
+        bundleName: "",
+        moduleName: ""
+      });
       Image.width(24);
       Image.height(40);
       Image.fillColor({
@@ -573,15 +715,16 @@ class MultiFilterRow extends ViewPU {
       Image.width(24);
       Image.offset({ x: 0 });
       ViewStackProcessor.visualState();
-      e || Image.pop();
+      Image.tabIndex(-1);
+      o || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     Row.pop()
   }
 
   initialRender() {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create();
       Row.width("100%");
       Row.alignItems(VerticalAlign.Top);
@@ -601,15 +744,15 @@ class MultiFilterRow extends ViewPU {
           moduleName: ""
         }
       });
-      e || Row.pop();
+      o || Row.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       If.create();
       this.filterRow.options && this.filterRow.options.length > 0 ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((o, e) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(o);
+        this.observeComponentCreation(((e, o) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
           Text.create(this.filterRow.options[0].toString());
           Text.height(40);
           Text.width(px2vp(measure.measureText({
@@ -631,9 +774,9 @@ class MultiFilterRow extends ViewPU {
             this.onItemClick(0)
           }));
           Text.focusable(!0);
-          Text.onHover((o => {
+          Text.onHover((e => {
             Context.animateTo({ curve: FRICTION_CUBIC_BEZIER, duration: 250 }, (() => {
-              if (o) {
+              if (e) {
                 this.backgroundColorRow[0] = {
                   id: -1,
                   type: 10001,
@@ -645,8 +788,8 @@ class MultiFilterRow extends ViewPU {
               } else this.isBackgroundHoverRow[0] = !1
             }))
           }));
-          Text.onTouch((o => {
-            o.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+          Text.onTouch((e => {
+            e.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
               this.backgroundColorRow[0] = {
                 id: -1,
                 type: 10001,
@@ -655,7 +798,7 @@ class MultiFilterRow extends ViewPU {
                 moduleName: ""
               };
               this.isBackgroundHoverRow[0] = !0
-            })) : o.type === TouchType.Up && Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+            })) : e.type === TouchType.Up && Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
               this.isBackgroundHoverRow[0] = !1
             }))
           }));
@@ -692,17 +835,18 @@ class MultiFilterRow extends ViewPU {
           });
           Text.padding({ left: 8, right: 8 });
           ViewStackProcessor.visualState();
-          e || Text.pop();
+          Text.tabIndex(this.rowIndex);
+          o || Text.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
         Text.pop()
       })) : If.branchId(1);
-      e || If.pop();
+      o || If.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     If.pop();
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create();
       Row.width("100%");
       Row.padding({
@@ -714,8 +858,8 @@ class MultiFilterRow extends ViewPU {
           moduleName: ""
         }
       });
-      Row.onAreaChange(((o, e) => {
-        this.filterColumnWidth = vp2px(parseInt(e.width.toString(), 0));
+      Row.onAreaChange(((e, o) => {
+        this.filterColumnWidth = vp2px(parseInt(o.width.toString(), 0));
         if (0 === this.twoLineModeItemNumRow.value) {
           var t = this.calcMultiFilterRowItemNum();
           this.twoLineModeItemNumRow.value = t;
@@ -723,27 +867,27 @@ class MultiFilterRow extends ViewPU {
           t < this.filterRow.options.length - 1 ? this.arrowShowStateRow.value = !0 : this.arrowShowStateRow.value = !1
         }
       }));
-      e || Row.pop();
+      o || Row.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Flex.create({ direction: FlexDirection.Row, wrap: FlexWrap.Wrap });
       Flex.alignSelf(ItemAlign.Stretch);
-      e || Flex.pop();
+      o || Flex.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       ForEach.create();
-      this.forEachUpdateFunction(o, this.filterRow.options.slice(0, this.twoLineModeItemNumRow.value + 1), ((o, e) => {
-        const t = o;
-        this.observeComponentCreation(((o, r) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(o);
+      this.forEachUpdateFunction(e, this.filterRow.options.slice(0, this.twoLineModeItemNumRow.value + 1), ((e, o) => {
+        const t = e;
+        this.observeComponentCreation(((e, i) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
           If.create();
-          e > 0 ? this.ifElseBranchUpdateFunction(0, (() => {
-            this.observeComponentCreation(((o, r) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
+          o > 0 ? this.ifElseBranchUpdateFunction(0, (() => {
+            this.observeComponentCreation(((e, i) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
               Text.create(t.toString());
               Text.transition(TransitionEffect.OPACITY);
               Text.fontSize({
@@ -754,41 +898,41 @@ class MultiFilterRow extends ViewPU {
                 moduleName: ""
               });
               Text.height(40);
-              Text.fontColor(this.colorRow[e]);
-              Text.fontWeight(this.fontWeightRow[e]);
-              Text.backgroundColor(this.isBackgroundHoverRow[e] ? this.backgroundColorRow[e] : "#00FFFFFF");
+              Text.fontColor(this.colorRow[o]);
+              Text.fontWeight(this.fontWeightRow[o]);
+              Text.backgroundColor(this.isBackgroundHoverRow[o] ? this.backgroundColorRow[o] : "#00FFFFFF");
               Text.onClick((() => {
-                this.onItemClick(e)
+                this.onItemClick(o)
               }));
-              Text.onHover((o => {
+              Text.onHover((e => {
                 Context.animateTo({ curve: FRICTION_CUBIC_BEZIER, duration: 250 }, (() => {
-                  if (o) {
-                    this.backgroundColorRow[e] = {
+                  if (e) {
+                    this.backgroundColorRow[o] = {
                       id: -1,
                       type: 10001,
                       params: ["sys.color.ohos_id_color_hover"],
                       bundleName: "",
                       moduleName: ""
                     };
-                    this.isBackgroundHoverRow[e] = !0
-                  } else this.isBackgroundHoverRow[e] = !1
+                    this.isBackgroundHoverRow[o] = !0
+                  } else this.isBackgroundHoverRow[o] = !1
                 }))
               }));
-              Text.onTouch((o => {
-                o.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
-                  this.backgroundColorRow[e] = {
+              Text.onTouch((e => {
+                e.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+                  this.backgroundColorRow[o] = {
                     id: -1,
                     type: 10001,
                     params: ["sys.color.ohos_id_color_click_effect"],
                     bundleName: "",
                     moduleName: ""
                   };
-                  this.isBackgroundHoverRow[e] = !0
-                })) : o.type === TouchType.Up && Context.animateTo({
+                  this.isBackgroundHoverRow[o] = !0
+                })) : e.type === TouchType.Up && Context.animateTo({
                   curve: SHARP_CUBIC_BEZIER,
                   duration: 100
                 }, (() => {
-                  this.isBackgroundHoverRow[e] = !1
+                  this.isBackgroundHoverRow[o] = !1
                 }))
               }));
               Text.focusable(!0);
@@ -825,17 +969,18 @@ class MultiFilterRow extends ViewPU {
               });
               Text.padding({ left: 8, right: 8 });
               ViewStackProcessor.visualState();
-              r || Text.pop();
+              Text.tabIndex(-1);
+              i || Text.pop();
               ViewStackProcessor.StopGetAccessRecording()
             }));
             Text.pop()
           })) : If.branchId(1);
-          r || If.pop();
+          i || If.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
         If.pop()
       }), void 0,!0,!1);
-      e || ForEach.pop();
+      o || ForEach.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     ForEach.pop();
@@ -851,13 +996,13 @@ class MultiFilterRow extends ViewPU {
 }
 
 export class Filter extends ViewPU {
-  constructor(o, e, t, r = -1) {
-    super(o, t, r);
+  constructor(e, o, t, i = -1) {
+    super(e, t, i);
     this.container = void 0;
-    this.__multiFilters = new SynchedPropertyObjectOneWayPU(e.multiFilters, this, "multiFilters");
-    this.__additionFilters = new SynchedPropertyObjectOneWayPU(e.additionFilters, this, "additionFilters");
+    this.__multiFilters = new SynchedPropertyObjectOneWayPU(o.multiFilters, this, "multiFilters");
+    this.__additionFilters = new SynchedPropertyObjectOneWayPU(o.additionFilters, this, "additionFilters");
     this.onFilterChanged = null;
-    this.__filterType = new SynchedPropertySimpleOneWayPU(e.filterType, this, "filterType");
+    this.__filterType = new SynchedPropertySimpleOneWayPU(o.filterType, this, "filterType");
     this.selectedFilters = null;
     this.__colorArr = new ObservedPropertyObjectPU(null, this, "colorArr");
     this.__fontWeightArr = new ObservedPropertyObjectPU(null, this, "fontWeightArr");
@@ -882,73 +1027,71 @@ export class Filter extends ViewPU {
     this.__twoLineModeItemNum = new ObservedPropertyObjectPU(null, this, "twoLineModeItemNum");
     this.__twoLineModeItemNumRecord = new ObservedPropertyObjectPU(null, this, "twoLineModeItemNumRecord");
     this.__downArrowShowState = new ObservedPropertyObjectPU(null, this, "downArrowShowState");
-    this.listScroller = new Scroller;
-    this.setInitiallyProvidedValue(e)
+    this.setInitiallyProvidedValue(o)
   }
 
-  setInitiallyProvidedValue(o) {
-    void 0 !== o.container && (this.container = o.container);
-    void 0 !== o.multiFilters ? this.__multiFilters.set(o.multiFilters) : this.__multiFilters.set([]);
-    void 0 !== o.additionFilters ? this.__additionFilters.set(o.additionFilters) : this.__additionFilters.set(null);
-    void 0 !== o.onFilterChanged && (this.onFilterChanged = o.onFilterChanged);
-    void 0 !== o.filterType ? this.__filterType.set(o.filterType) : this.__filterType.set(FilterType.LIST_FILTER);
-    void 0 !== o.selectedFilters && (this.selectedFilters = o.selectedFilters);
-    void 0 !== o.colorArr && (this.colorArr = o.colorArr);
-    void 0 !== o.fontWeightArr && (this.fontWeightArr = o.fontWeightArr);
-    void 0 !== o.backgroundColorArr && (this.backgroundColorArr = o.backgroundColorArr);
-    void 0 !== o.isBackgroundHover && (this.isBackgroundHover = o.isBackgroundHover);
-    void 0 !== o.floatArrowBgColor && (this.floatArrowBgColor = o.floatArrowBgColor);
-    void 0 !== o.isFloatArrowBgHover && (this.isFloatArrowBgHover = o.isFloatArrowBgHover);
-    void 0 !== o.isArrowIconDownArr && (this.isArrowIconDownArr = o.isArrowIconDownArr);
-    void 0 !== o.additionColorArr && (this.additionColorArr = o.additionColorArr);
-    void 0 !== o.additionFontWeightArr && (this.additionFontWeightArr = o.additionFontWeightArr);
-    void 0 !== o.additionBackgroundColorArr && (this.additionBackgroundColorArr = o.additionBackgroundColorArr);
-    void 0 !== o.isAdditionBackgroundHover && (this.isAdditionBackgroundHover = o.isAdditionBackgroundHover);
-    void 0 !== o.colorRefresh && (this.colorRefresh = o.colorRefresh);
-    void 0 !== o.isFloatBarShow && (this.isFloatBarShow = o.isFloatBarShow);
-    void 0 !== o.isFloatBarShowWithoutAnimation && (this.isFloatBarShowWithoutAnimation = o.isFloatBarShowWithoutAnimation);
-    void 0 !== o.isFloatShowAllFilter && (this.isFloatShowAllFilter = o.isFloatShowAllFilter);
-    void 0 !== o.isFloatShowAllFilterWithoutAnimation && (this.isFloatShowAllFilterWithoutAnimation = o.isFloatShowAllFilterWithoutAnimation);
-    void 0 !== o.floatFilterPosition && (this.floatFilterPosition = o.floatFilterPosition);
-    void 0 !== o.floatFilterBarHeight && (this.floatFilterBarHeight = o.floatFilterBarHeight);
-    void 0 !== o.floatFilterBarPosition && (this.floatFilterBarPosition = o.floatFilterBarPosition);
-    void 0 !== o.filterDynamicHeight && (this.filterDynamicHeight = o.filterDynamicHeight);
-    void 0 !== o.twoLineModeItemNum && (this.twoLineModeItemNum = o.twoLineModeItemNum);
-    void 0 !== o.twoLineModeItemNumRecord && (this.twoLineModeItemNumRecord = o.twoLineModeItemNumRecord);
-    void 0 !== o.downArrowShowState && (this.downArrowShowState = o.downArrowShowState);
-    void 0 !== o.listScroller && (this.listScroller = o.listScroller)
+  setInitiallyProvidedValue(e) {
+    void 0 !== e.container && (this.container = e.container);
+    void 0 === e.multiFilters && this.__multiFilters.set([]);
+    void 0 === e.additionFilters && this.__additionFilters.set(null);
+    void 0 !== e.onFilterChanged && (this.onFilterChanged = e.onFilterChanged);
+    void 0 === e.filterType && this.__filterType.set(FilterType.LIST_FILTER);
+    void 0 !== e.selectedFilters && (this.selectedFilters = e.selectedFilters);
+    void 0 !== e.colorArr && (this.colorArr = e.colorArr);
+    void 0 !== e.fontWeightArr && (this.fontWeightArr = e.fontWeightArr);
+    void 0 !== e.backgroundColorArr && (this.backgroundColorArr = e.backgroundColorArr);
+    void 0 !== e.isBackgroundHover && (this.isBackgroundHover = e.isBackgroundHover);
+    void 0 !== e.floatArrowBgColor && (this.floatArrowBgColor = e.floatArrowBgColor);
+    void 0 !== e.isFloatArrowBgHover && (this.isFloatArrowBgHover = e.isFloatArrowBgHover);
+    void 0 !== e.isArrowIconDownArr && (this.isArrowIconDownArr = e.isArrowIconDownArr);
+    void 0 !== e.additionColorArr && (this.additionColorArr = e.additionColorArr);
+    void 0 !== e.additionFontWeightArr && (this.additionFontWeightArr = e.additionFontWeightArr);
+    void 0 !== e.additionBackgroundColorArr && (this.additionBackgroundColorArr = e.additionBackgroundColorArr);
+    void 0 !== e.isAdditionBackgroundHover && (this.isAdditionBackgroundHover = e.isAdditionBackgroundHover);
+    void 0 !== e.colorRefresh && (this.colorRefresh = e.colorRefresh);
+    void 0 !== e.isFloatBarShow && (this.isFloatBarShow = e.isFloatBarShow);
+    void 0 !== e.isFloatBarShowWithoutAnimation && (this.isFloatBarShowWithoutAnimation = e.isFloatBarShowWithoutAnimation);
+    void 0 !== e.isFloatShowAllFilter && (this.isFloatShowAllFilter = e.isFloatShowAllFilter);
+    void 0 !== e.isFloatShowAllFilterWithoutAnimation && (this.isFloatShowAllFilterWithoutAnimation = e.isFloatShowAllFilterWithoutAnimation);
+    void 0 !== e.floatFilterPosition && (this.floatFilterPosition = e.floatFilterPosition);
+    void 0 !== e.floatFilterBarHeight && (this.floatFilterBarHeight = e.floatFilterBarHeight);
+    void 0 !== e.floatFilterBarPosition && (this.floatFilterBarPosition = e.floatFilterBarPosition);
+    void 0 !== e.filterDynamicHeight && (this.filterDynamicHeight = e.filterDynamicHeight);
+    void 0 !== e.twoLineModeItemNum && (this.twoLineModeItemNum = e.twoLineModeItemNum);
+    void 0 !== e.twoLineModeItemNumRecord && (this.twoLineModeItemNumRecord = e.twoLineModeItemNumRecord);
+    void 0 !== e.downArrowShowState && (this.downArrowShowState = e.downArrowShowState)
   }
 
-  updateStateVars(o) {
-    this.__multiFilters.reset(o.multiFilters);
-    this.__additionFilters.reset(o.additionFilters);
-    this.__filterType.reset(o.filterType)
+  updateStateVars(e) {
+    this.__multiFilters.reset(e.multiFilters);
+    this.__additionFilters.reset(e.additionFilters);
+    this.__filterType.reset(e.filterType)
   }
 
-  purgeVariableDependenciesOnElmtId(o) {
-    this.__multiFilters.purgeDependencyOnElmtId(o);
-    this.__additionFilters.purgeDependencyOnElmtId(o);
-    this.__filterType.purgeDependencyOnElmtId(o);
-    this.__colorArr.purgeDependencyOnElmtId(o);
-    this.__fontWeightArr.purgeDependencyOnElmtId(o);
-    this.__backgroundColorArr.purgeDependencyOnElmtId(o);
-    this.__isBackgroundHover.purgeDependencyOnElmtId(o);
-    this.__floatArrowBgColor.purgeDependencyOnElmtId(o);
-    this.__isFloatArrowBgHover.purgeDependencyOnElmtId(o);
-    this.__isArrowIconDownArr.purgeDependencyOnElmtId(o);
-    this.__additionColorArr.purgeDependencyOnElmtId(o);
-    this.__additionFontWeightArr.purgeDependencyOnElmtId(o);
-    this.__additionBackgroundColorArr.purgeDependencyOnElmtId(o);
-    this.__isAdditionBackgroundHover.purgeDependencyOnElmtId(o);
-    this.__colorRefresh.purgeDependencyOnElmtId(o);
-    this.__isFloatBarShow.purgeDependencyOnElmtId(o);
-    this.__isFloatShowAllFilter.purgeDependencyOnElmtId(o);
-    this.__floatFilterPosition.purgeDependencyOnElmtId(o);
-    this.__floatFilterBarHeight.purgeDependencyOnElmtId(o);
-    this.__floatFilterBarPosition.purgeDependencyOnElmtId(o);
-    this.__twoLineModeItemNum.purgeDependencyOnElmtId(o);
-    this.__twoLineModeItemNumRecord.purgeDependencyOnElmtId(o);
-    this.__downArrowShowState.purgeDependencyOnElmtId(o)
+  purgeVariableDependenciesOnElmtId(e) {
+    this.__multiFilters.purgeDependencyOnElmtId(e);
+    this.__additionFilters.purgeDependencyOnElmtId(e);
+    this.__filterType.purgeDependencyOnElmtId(e);
+    this.__colorArr.purgeDependencyOnElmtId(e);
+    this.__fontWeightArr.purgeDependencyOnElmtId(e);
+    this.__backgroundColorArr.purgeDependencyOnElmtId(e);
+    this.__isBackgroundHover.purgeDependencyOnElmtId(e);
+    this.__floatArrowBgColor.purgeDependencyOnElmtId(e);
+    this.__isFloatArrowBgHover.purgeDependencyOnElmtId(e);
+    this.__isArrowIconDownArr.purgeDependencyOnElmtId(e);
+    this.__additionColorArr.purgeDependencyOnElmtId(e);
+    this.__additionFontWeightArr.purgeDependencyOnElmtId(e);
+    this.__additionBackgroundColorArr.purgeDependencyOnElmtId(e);
+    this.__isAdditionBackgroundHover.purgeDependencyOnElmtId(e);
+    this.__colorRefresh.purgeDependencyOnElmtId(e);
+    this.__isFloatBarShow.purgeDependencyOnElmtId(e);
+    this.__isFloatShowAllFilter.purgeDependencyOnElmtId(e);
+    this.__floatFilterPosition.purgeDependencyOnElmtId(e);
+    this.__floatFilterBarHeight.purgeDependencyOnElmtId(e);
+    this.__floatFilterBarPosition.purgeDependencyOnElmtId(e);
+    this.__twoLineModeItemNum.purgeDependencyOnElmtId(e);
+    this.__twoLineModeItemNumRecord.purgeDependencyOnElmtId(e);
+    this.__downArrowShowState.purgeDependencyOnElmtId(e)
   }
 
   aboutToBeDeleted() {
@@ -983,228 +1126,228 @@ export class Filter extends ViewPU {
     return this.__multiFilters.get()
   }
 
-  set multiFilters(o) {
-    this.__multiFilters.set(o)
+  set multiFilters(e) {
+    this.__multiFilters.set(e)
   }
 
   get additionFilters() {
     return this.__additionFilters.get()
   }
 
-  set additionFilters(o) {
-    this.__additionFilters.set(o)
+  set additionFilters(e) {
+    this.__additionFilters.set(e)
   }
 
   get filterType() {
     return this.__filterType.get()
   }
 
-  set filterType(o) {
-    this.__filterType.set(o)
+  set filterType(e) {
+    this.__filterType.set(e)
   }
 
   get colorArr() {
     return this.__colorArr.get()
   }
 
-  set colorArr(o) {
-    this.__colorArr.set(o)
+  set colorArr(e) {
+    this.__colorArr.set(e)
   }
 
   get fontWeightArr() {
     return this.__fontWeightArr.get()
   }
 
-  set fontWeightArr(o) {
-    this.__fontWeightArr.set(o)
+  set fontWeightArr(e) {
+    this.__fontWeightArr.set(e)
   }
 
   get backgroundColorArr() {
     return this.__backgroundColorArr.get()
   }
 
-  set backgroundColorArr(o) {
-    this.__backgroundColorArr.set(o)
+  set backgroundColorArr(e) {
+    this.__backgroundColorArr.set(e)
   }
 
   get isBackgroundHover() {
     return this.__isBackgroundHover.get()
   }
 
-  set isBackgroundHover(o) {
-    this.__isBackgroundHover.set(o)
+  set isBackgroundHover(e) {
+    this.__isBackgroundHover.set(e)
   }
 
   get floatArrowBgColor() {
     return this.__floatArrowBgColor.get()
   }
 
-  set floatArrowBgColor(o) {
-    this.__floatArrowBgColor.set(o)
+  set floatArrowBgColor(e) {
+    this.__floatArrowBgColor.set(e)
   }
 
   get isFloatArrowBgHover() {
     return this.__isFloatArrowBgHover.get()
   }
 
-  set isFloatArrowBgHover(o) {
-    this.__isFloatArrowBgHover.set(o)
+  set isFloatArrowBgHover(e) {
+    this.__isFloatArrowBgHover.set(e)
   }
 
   get isArrowIconDownArr() {
     return this.__isArrowIconDownArr.get()
   }
 
-  set isArrowIconDownArr(o) {
-    this.__isArrowIconDownArr.set(o)
+  set isArrowIconDownArr(e) {
+    this.__isArrowIconDownArr.set(e)
   }
 
   get additionColorArr() {
     return this.__additionColorArr.get()
   }
 
-  set additionColorArr(o) {
-    this.__additionColorArr.set(o)
+  set additionColorArr(e) {
+    this.__additionColorArr.set(e)
   }
 
   get additionFontWeightArr() {
     return this.__additionFontWeightArr.get()
   }
 
-  set additionFontWeightArr(o) {
-    this.__additionFontWeightArr.set(o)
+  set additionFontWeightArr(e) {
+    this.__additionFontWeightArr.set(e)
   }
 
   get additionBackgroundColorArr() {
     return this.__additionBackgroundColorArr.get()
   }
 
-  set additionBackgroundColorArr(o) {
-    this.__additionBackgroundColorArr.set(o)
+  set additionBackgroundColorArr(e) {
+    this.__additionBackgroundColorArr.set(e)
   }
 
   get isAdditionBackgroundHover() {
     return this.__isAdditionBackgroundHover.get()
   }
 
-  set isAdditionBackgroundHover(o) {
-    this.__isAdditionBackgroundHover.set(o)
+  set isAdditionBackgroundHover(e) {
+    this.__isAdditionBackgroundHover.set(e)
   }
 
   get colorRefresh() {
     return this.__colorRefresh.get()
   }
 
-  set colorRefresh(o) {
-    this.__colorRefresh.set(o)
+  set colorRefresh(e) {
+    this.__colorRefresh.set(e)
   }
 
   get isFloatBarShow() {
     return this.__isFloatBarShow.get()
   }
 
-  set isFloatBarShow(o) {
-    this.__isFloatBarShow.set(o)
+  set isFloatBarShow(e) {
+    this.__isFloatBarShow.set(e)
   }
 
   get isFloatShowAllFilter() {
     return this.__isFloatShowAllFilter.get()
   }
 
-  set isFloatShowAllFilter(o) {
-    this.__isFloatShowAllFilter.set(o)
+  set isFloatShowAllFilter(e) {
+    this.__isFloatShowAllFilter.set(e)
   }
 
   get floatFilterPosition() {
     return this.__floatFilterPosition.get()
   }
 
-  set floatFilterPosition(o) {
-    this.__floatFilterPosition.set(o)
+  set floatFilterPosition(e) {
+    this.__floatFilterPosition.set(e)
   }
 
   get floatFilterBarHeight() {
     return this.__floatFilterBarHeight.get()
   }
 
-  set floatFilterBarHeight(o) {
-    this.__floatFilterBarHeight.set(o)
+  set floatFilterBarHeight(e) {
+    this.__floatFilterBarHeight.set(e)
   }
 
   get floatFilterBarPosition() {
     return this.__floatFilterBarPosition.get()
   }
 
-  set floatFilterBarPosition(o) {
-    this.__floatFilterBarPosition.set(o)
+  set floatFilterBarPosition(e) {
+    this.__floatFilterBarPosition.set(e)
   }
 
   get twoLineModeItemNum() {
     return this.__twoLineModeItemNum.get()
   }
 
-  set twoLineModeItemNum(o) {
-    this.__twoLineModeItemNum.set(o)
+  set twoLineModeItemNum(e) {
+    this.__twoLineModeItemNum.set(e)
   }
 
   get twoLineModeItemNumRecord() {
     return this.__twoLineModeItemNumRecord.get()
   }
 
-  set twoLineModeItemNumRecord(o) {
-    this.__twoLineModeItemNumRecord.set(o)
+  set twoLineModeItemNumRecord(e) {
+    this.__twoLineModeItemNumRecord.set(e)
   }
 
   get downArrowShowState() {
     return this.__downArrowShowState.get()
   }
 
-  set downArrowShowState(o) {
-    this.__downArrowShowState.set(o)
+  set downArrowShowState(e) {
+    this.__downArrowShowState.set(e)
   }
 
-  textColor(o, e) {
-    return this.selectedFilters.length > o && this.selectedFilters[o].index === e ? {
-                                                                                      id: -1,
-                                                                                      type: 10001,
-                                                                                      params: ["sys.color.ohos_id_color_text_primary_activated"],
-                                                                                      bundleName: "",
-                                                                                      moduleName: ""
-                                                                                    } : {
-                                                                                          id: -1,
-                                                                                          type: 10001,
-                                                                                          params: ["sys.color.ohos_id_color_text_primary"],
-                                                                                          bundleName: "",
-                                                                                          moduleName: ""
-                                                                                        }
+  textColor(e, o) {
+    return this.selectedFilters.length > e && this.selectedFilters[e].index === o ? {
+      id: -1,
+      type: 10001,
+      params: ["sys.color.ohos_id_color_text_primary_activated"],
+      bundleName: "",
+      moduleName: ""
+    } : {
+      id: -1,
+      type: 10001,
+      params: ["sys.color.ohos_id_color_text_primary"],
+      bundleName: "",
+      moduleName: ""
+    }
   }
 
   aboutToAppear() {
     this.initParams()
   }
 
-  filterItemClick(o, e) {
-    let t = this.multiFilters[o].options[e];
-    if (e != this.selectedFilters[o].index) {
-      this.colorArr[o][e] = {
+  filterItemClick(e, o) {
+    let t = this.multiFilters[e].options[o];
+    if (o != this.selectedFilters[e].index) {
+      this.colorArr[e][o] = {
         id: -1,
         type: 10001,
         params: ["sys.color.ohos_id_color_text_primary_activated"],
         bundleName: "",
         moduleName: ""
       };
-      this.colorArr[o][this.selectedFilters[o].index] = {
+      this.colorArr[e][this.selectedFilters[e].index] = {
         id: -1,
         type: 10001,
         params: ["sys.color.ohos_id_color_text_primary"],
         bundleName: "",
         moduleName: ""
       };
-      this.fontWeightArr[o][e] = FontWeight.Medium;
-      this.fontWeightArr[o][this.selectedFilters[o].index] = FontWeight.Regular;
+      this.fontWeightArr[e][o] = FontWeight.Medium;
+      this.fontWeightArr[e][this.selectedFilters[e].index] = FontWeight.Regular;
       this.colorRefresh = !this.colorRefresh;
-      this.selectedFilters[o].value = t;
-      this.selectedFilters[o].index = e;
+      this.selectedFilters[e].value = t;
+      this.selectedFilters[e].index = o;
       this.onFilterChanged && this.onFilterChanged(this.selectedFilters)
     }
   }
@@ -1212,17 +1355,17 @@ export class Filter extends ViewPU {
   initParams() {
     if (!this.selectedFilters) {
       this.selectedFilters = [];
-      for (let e of this.multiFilters) {
-        var o = { name: e.name, index: -1, value: null };
-        if (e.options.length > 0) {
-          o.index = 0;
-          o.value = e.options[0]
+      for (let o of this.multiFilters) {
+        var e = { name: o.name, index: -1, value: null };
+        if (o.options.length > 0) {
+          e.index = 0;
+          e.value = o.options[0]
         }
-        this.selectedFilters.push(o)
+        this.selectedFilters.push(e)
       }
       if (this.additionFilters && this.additionFilters.name) {
-        o = { name: this.additionFilters.name, index: -1, value: null };
-        this.selectedFilters.push(o)
+        e = { name: this.additionFilters.name, index: -1, value: null };
+        this.selectedFilters.push(e)
       }
     }
     if (!this.colorArr) {
@@ -1234,18 +1377,18 @@ export class Filter extends ViewPU {
       this.floatArrowBgColor = {
         id: -1,
         type: 10001,
-        params: ["sys.color.ohos_id_color_hover"],
+        params: ["sys.color.ohos_id_color_background"],
         bundleName: "",
         moduleName: ""
       };
-      for (let o of this.multiFilters) {
-        var e = new ResourceArray;
+      for (let e of this.multiFilters) {
+        var o = new ResourceArray;
         var t = new FontWeightArray;
-        var r = new ResourceArray;
-        var i = new BooleanArray;
-        for (let i of o.options.keys()) {
-          if (0 === i) {
-            e.push({
+        var i = new ResourceArray;
+        var r = new BooleanArray;
+        for (let r of e.options.keys()) {
+          if (0 === r) {
+            o.push({
               id: -1,
               type: 10001,
               params: ["sys.color.ohos_id_color_text_primary_activated"],
@@ -1254,7 +1397,7 @@ export class Filter extends ViewPU {
             });
             t.push(FontWeight.Medium)
           } else {
-            e.push({
+            o.push({
               id: -1,
               type: 10001,
               params: ["sys.color.ohos_id_color_text_primary"],
@@ -1263,7 +1406,7 @@ export class Filter extends ViewPU {
             });
             t.push(FontWeight.Regular)
           }
-          r.push({
+          i.push({
             id: -1,
             type: 10001,
             params: ["sys.color.ohos_id_color_hover"],
@@ -1271,10 +1414,10 @@ export class Filter extends ViewPU {
             moduleName: ""
           })
         }
-        this.colorArr.push(e);
+        this.colorArr.push(o);
         this.fontWeightArr.push(t);
-        this.backgroundColorArr.push(r);
-        this.isBackgroundHover.push(i);
+        this.backgroundColorArr.push(i);
+        this.isBackgroundHover.push(r);
         this.isArrowIconDownArr.push(new ObservedBoolean(!0))
       }
     }
@@ -1283,7 +1426,7 @@ export class Filter extends ViewPU {
       this.additionFontWeightArr = [];
       this.additionBackgroundColorArr = [];
       this.isAdditionBackgroundHover = [];
-      for (let o = 0;o < this.additionFilters.options.length; o++) {
+      for (let e = 0;e < this.additionFilters.options.length; e++) {
         this.additionColorArr.push({
           id: -1,
           type: 10001,
@@ -1306,7 +1449,7 @@ export class Filter extends ViewPU {
       this.twoLineModeItemNum = [];
       this.twoLineModeItemNumRecord = [];
       this.downArrowShowState = [];
-      for (let o = 0;o < this.multiFilters.length; o++) {
+      for (let e = 0;e < this.multiFilters.length; e++) {
         this.twoLineModeItemNum.push(new ObservedNumber(0));
         this.twoLineModeItemNumRecord.push(new ObservedNumber(0));
         this.downArrowShowState.push(new ObservedBoolean(!1))
@@ -1314,129 +1457,122 @@ export class Filter extends ViewPU {
     }
   }
 
-  ListFilter(o = null) {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+  ListFilter(e = null) {
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Column.create();
       Column.width("100%");
       Column.align(Alignment.Start);
-      Column.padding({
-        left: {
-          id: -1,
-          type: 10002,
-          params: ["sys.float.ohos_id_max_padding_start"],
-          bundleName: "",
-          moduleName: ""
-        }
-      });
-      Column.onAreaChange(((o, e) => {
+      Column.onAreaChange(((e, o) => {
         if (!this.isFloatShowAllFilterWithoutAnimation && !this.isFloatBarShowWithoutAnimation) {
-          null != this.additionFilters ? this.filterDynamicHeight = parseInt(e.height.toString(), 0) + 40 + 8 : this.filterDynamicHeight = parseInt(e.height.toString(), 0) + 8;
+          null != this.additionFilters ? this.filterDynamicHeight = parseInt(o.height.toString(), 0) + 40 + 8 : this.filterDynamicHeight = parseInt(o.height.toString(), 0) + 8;
           this.floatFilterPosition = -this.filterDynamicHeight
         }
       }));
-      e || Column.pop();
+      o || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       ForEach.create();
-      this.forEachUpdateFunction(o, this.multiFilters, ((o, e) => {
-        const t = o;
-        this.observeComponentCreation(((o, r) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(o);
-          r ? ViewPU.create(new ListFilterRow(this, {
-            colorRow: this.colorArr[e],
-            fontWeightRow: this.fontWeightArr[e],
-            backgroundColorRow: this.backgroundColorArr[e],
-            isBackgroundHoverRow: this.isBackgroundHover[e],
+      this.forEachUpdateFunction(e, this.multiFilters, ((e, o) => {
+        const t = e;
+        this.observeComponentCreation(((e, i) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
+          i ? ViewPU.create(new ListFilterRow(this, {
+            colorRow: this.colorArr[o],
+            fontWeightRow: this.fontWeightArr[o],
+            backgroundColorRow: this.backgroundColorArr[o],
+            isBackgroundHoverRow: this.isBackgroundHover[o],
             filterRow: t,
-            onItemClick: o => {
-              this.filterItemClick(e, o)
-            }
-          }, void 0, o)) : this.updateStateVarsOfChildByElmtId(o, {
-            colorRow: this.colorArr[e],
-            fontWeightRow: this.fontWeightArr[e],
-            backgroundColorRow: this.backgroundColorArr[e],
-            isBackgroundHoverRow: this.isBackgroundHover[e]
+            onItemClick: e => {
+              this.filterItemClick(o, e)
+            },
+            rowIndex: o
+          }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {
+            colorRow: this.colorArr[o],
+            fontWeightRow: this.fontWeightArr[o],
+            backgroundColorRow: this.backgroundColorArr[o],
+            isBackgroundHoverRow: this.isBackgroundHover[o]
           });
           ViewStackProcessor.StopGetAccessRecording()
         }))
       }), void 0,!0,!1);
-      e || ForEach.pop();
+      o || ForEach.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     ForEach.pop();
     Column.pop()
   }
 
-  MultiLineFilter(o = null) {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+  MultiLineFilter(e = null) {
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Column.create();
       Column.width("100%");
-      Column.onAreaChange(((o, e) => {
-        null != this.additionFilters ? this.filterDynamicHeight = parseInt(e.height.toString(), 0) + 40 + 8 : this.filterDynamicHeight = parseInt(e.height.toString(), 0) + 8;
+      Column.onAreaChange(((e, o) => {
+        null != this.additionFilters ? this.filterDynamicHeight = parseInt(o.height.toString(), 0) + 40 + 8 : this.filterDynamicHeight = parseInt(o.height.toString(), 0) + 8;
         this.isFloatBarShowWithoutAnimation || this.isFloatShowAllFilterWithoutAnimation || (this.floatFilterPosition = -this.filterDynamicHeight)
       }));
-      e || Column.pop();
+      o || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       ForEach.create();
-      this.forEachUpdateFunction(o, this.multiFilters, ((o, e) => {
-        const t = o;
-        this.observeComponentCreation(((o, r) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(o);
-          r ? ViewPU.create(new MultiFilterRow(this, {
-            colorRow: this.colorArr[e],
-            fontWeightRow: this.fontWeightArr[e],
-            backgroundColorRow: this.backgroundColorArr[e],
-            isBackgroundHoverRow: this.isBackgroundHover[e],
-            arrowShowStateRow: this.downArrowShowState[e],
-            twoLineModeItemNumRow: this.twoLineModeItemNum[e],
-            twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord[e],
-            isArrowIconDown: this.isArrowIconDownArr[e],
+      this.forEachUpdateFunction(e, this.multiFilters, ((e, o) => {
+        const t = e;
+        this.observeComponentCreation(((e, i) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
+          i ? ViewPU.create(new MultiFilterRow(this, {
+            colorRow: this.colorArr[o],
+            fontWeightRow: this.fontWeightArr[o],
+            backgroundColorRow: this.backgroundColorArr[o],
+            isBackgroundHoverRow: this.isBackgroundHover[o],
+            arrowShowStateRow: this.downArrowShowState[o],
+            twoLineModeItemNumRow: this.twoLineModeItemNum[o],
+            twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord[o],
+            isArrowIconDown: this.isArrowIconDownArr[o],
             filterRow: t,
-            onItemClick: o => {
-              this.filterItemClick(e, o)
-            }
-          }, void 0, o)) : this.updateStateVarsOfChildByElmtId(o, {
-            colorRow: this.colorArr[e],
-            fontWeightRow: this.fontWeightArr[e],
-            backgroundColorRow: this.backgroundColorArr[e],
-            isBackgroundHoverRow: this.isBackgroundHover[e],
-            arrowShowStateRow: this.downArrowShowState[e],
-            twoLineModeItemNumRow: this.twoLineModeItemNum[e],
-            twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord[e],
-            isArrowIconDown: this.isArrowIconDownArr[e]
+            onItemClick: e => {
+              this.filterItemClick(o, e)
+            },
+            rowIndex: o
+          }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {
+            colorRow: this.colorArr[o],
+            fontWeightRow: this.fontWeightArr[o],
+            backgroundColorRow: this.backgroundColorArr[o],
+            isBackgroundHoverRow: this.isBackgroundHover[o],
+            arrowShowStateRow: this.downArrowShowState[o],
+            twoLineModeItemNumRow: this.twoLineModeItemNum[o],
+            twoLineModeItemNumRecordRow: this.twoLineModeItemNumRecord[o],
+            isArrowIconDown: this.isArrowIconDownArr[o]
           });
           ViewStackProcessor.StopGetAccessRecording()
         }))
       }), void 0,!0,!1);
-      e || ForEach.pop();
+      o || ForEach.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     ForEach.pop();
     Column.pop()
   }
 
-  additionItemClick(o) {
-    let e = this.multiFilters.length;
-    if (this.selectedFilters[e].index != o) if (-1 === this.selectedFilters[e].index) {
-      this.additionColorArr[o] = {
+  additionItemClick(e) {
+    let o = this.multiFilters.length;
+    if (this.selectedFilters[o].index != e) if (-1 === this.selectedFilters[o].index) {
+      this.additionColorArr[e] = {
         id: -1,
         type: 10001,
         params: ["sys.color.ohos_id_color_text_primary_activated"],
         bundleName: "",
         moduleName: ""
       };
-      this.additionFontWeightArr[o] = FontWeight.Medium;
-      this.selectedFilters[e].value = this.additionFilters.options[o];
-      this.selectedFilters[e].index = o
+      this.additionFontWeightArr[e] = FontWeight.Medium;
+      this.selectedFilters[o].value = this.additionFilters.options[e];
+      this.selectedFilters[o].index = e
     } else {
-      let t = this.selectedFilters[e].index;
+      let t = this.selectedFilters[o].index;
       this.additionColorArr[t] = {
         id: -1,
         type: 10001,
@@ -1444,7 +1580,7 @@ export class Filter extends ViewPU {
         bundleName: "",
         moduleName: ""
       };
-      this.additionColorArr[o] = {
+      this.additionColorArr[e] = {
         id: -1,
         type: 10001,
         params: ["sys.color.ohos_id_color_text_primary_activated"],
@@ -1452,69 +1588,72 @@ export class Filter extends ViewPU {
         moduleName: ""
       };
       this.additionFontWeightArr[t] = FontWeight.Regular;
-      this.additionFontWeightArr[o] = FontWeight.Medium;
-      this.selectedFilters[e].value = this.additionFilters.options[o];
-      this.selectedFilters[e].index = o
+      this.additionFontWeightArr[e] = FontWeight.Medium;
+      this.selectedFilters[o].value = this.additionFilters.options[e];
+      this.selectedFilters[o].index = e
     } else {
-      this.additionColorArr[o] = {
+      this.additionColorArr[e] = {
         id: -1,
         type: 10001,
         params: ["sys.color.ohos_id_color_text_primary"],
         bundleName: "",
         moduleName: ""
       };
-      this.additionFontWeightArr[o] = FontWeight.Regular;
-      this.selectedFilters[e].value = null;
-      this.selectedFilters[e].index = -1
+      this.additionFontWeightArr[e] = FontWeight.Regular;
+      this.selectedFilters[o].value = null;
+      this.selectedFilters[o].index = -1
     }
     this.onFilterChanged && this.onFilterChanged(this.selectedFilters);
     this.colorRefresh = !this.colorRefresh
   }
 
-  AdditionFilterList(o = null) {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+  AdditionFilterList(e = null) {
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       If.create();
       this.additionFilters && this.additionFilters.name && this.additionFilters.options && 0 != this.additionFilters.options.length ? this.ifElseBranchUpdateFunction(0, (() => {
-        this.observeComponentCreation(((o, e) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(o);
+        this.observeComponentCreation(((e, o) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
+          Stack.create({ alignContent: Alignment.End });
+          o || Stack.pop();
+          ViewStackProcessor.StopGetAccessRecording()
+        }));
+        this.observeComponentCreation(((e, o) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
+          Stack.create({ alignContent: Alignment.Start });
+          o || Stack.pop();
+          ViewStackProcessor.StopGetAccessRecording()
+        }));
+        this.observeComponentCreation(((e, o) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
           List.create();
           List.listDirection(Axis.Horizontal);
           List.scrollBar(BarState.Off);
-          List.padding({
-            left: {
-              id: -1,
-              type: 10002,
-              params: ["sys.float.ohos_id_max_padding_start"],
-              bundleName: "",
-              moduleName: ""
-            }
-          });
-          List.margin({ left: -16 });
           List.width("100%");
           List.height(40);
-          e || List.pop();
+          o || List.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
         {
-          const o = !0;
-          const e = (e, t) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
-            ListItem.create(r, o);
+          const e = !0;
+          const o = (o, t) => {
+            ViewStackProcessor.StartGetAccessRecordingFor(o);
+            ListItem.create(i, e);
             ListItem.height("100%");
+            ListItem.margin({ left: -8 });
             t || ListItem.pop();
             ViewStackProcessor.StopGetAccessRecording()
           };
           const t = () => {
-            this.observeComponentCreation(e);
-            this.observeComponentCreation(((o, e) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
+            this.observeComponentCreation(o);
+            this.observeComponentCreation(((e, o) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
               Row.create();
-              e || Row.pop();
+              o || Row.pop();
               ViewStackProcessor.StopGetAccessRecording()
             }));
-            this.observeComponentCreation(((o, e) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
+            this.observeComponentCreation(((e, o) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
               Text.create(this.additionFilters.name.toString());
               Text.fontSize({
                 id: -1,
@@ -1531,12 +1670,21 @@ export class Filter extends ViewPU {
                 moduleName: ""
               });
               Text.margin({ left: 8, right: 8 });
-              e || Text.pop();
+              Text.padding({
+                left: {
+                  id: -1,
+                  type: 10002,
+                  params: ["sys.float.ohos_id_max_padding_start"],
+                  bundleName: "",
+                  moduleName: ""
+                }
+              });
+              o || Text.pop();
               ViewStackProcessor.StopGetAccessRecording()
             }));
             Text.pop();
-            this.observeComponentCreation(((o, e) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
+            this.observeComponentCreation(((e, o) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
               Row.create();
               Row.width(1);
               Row.height(16);
@@ -1547,24 +1695,24 @@ export class Filter extends ViewPU {
                 bundleName: "",
                 moduleName: ""
               });
-              e || Row.pop();
+              o || Row.pop();
               ViewStackProcessor.StopGetAccessRecording()
             }));
             Row.pop();
             Row.pop();
             ListItem.pop()
           };
-          const r = (o, t) => {
-            e(o, t);
-            this.updateFuncByElmtId.set(o, e);
-            this.observeComponentCreation(((o, e) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
+          const i = (e, t) => {
+            o(e, t);
+            this.updateFuncByElmtId.set(e, o);
+            this.observeComponentCreation(((e, o) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
               Row.create();
-              e || Row.pop();
+              o || Row.pop();
               ViewStackProcessor.StopGetAccessRecording()
             }));
-            this.observeComponentCreation(((o, e) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
+            this.observeComponentCreation(((e, o) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
               Text.create(this.additionFilters.name.toString());
               Text.fontSize({
                 id: -1,
@@ -1581,12 +1729,21 @@ export class Filter extends ViewPU {
                 moduleName: ""
               });
               Text.margin({ left: 8, right: 8 });
-              e || Text.pop();
+              Text.padding({
+                left: {
+                  id: -1,
+                  type: 10002,
+                  params: ["sys.float.ohos_id_max_padding_start"],
+                  bundleName: "",
+                  moduleName: ""
+                }
+              });
+              o || Text.pop();
               ViewStackProcessor.StopGetAccessRecording()
             }));
             Text.pop();
-            this.observeComponentCreation(((o, e) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
+            this.observeComponentCreation(((e, o) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
               Row.create();
               Row.width(1);
               Row.height(16);
@@ -1597,59 +1754,59 @@ export class Filter extends ViewPU {
                 bundleName: "",
                 moduleName: ""
               });
-              e || Row.pop();
+              o || Row.pop();
               ViewStackProcessor.StopGetAccessRecording()
             }));
             Row.pop();
             Row.pop();
             ListItem.pop()
           };
-          o ? (() => {
-            this.observeComponentCreation(e);
+          e ? (() => {
+            this.observeComponentCreation(o);
             ListItem.pop()
           })() : t()
         }
-        this.observeComponentCreation(((o, e) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(o);
+        this.observeComponentCreation(((e, o) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
           ForEach.create();
-          this.forEachUpdateFunction(o, this.additionFilters.options, ((o, e) => {
-            const t = o;
+          this.forEachUpdateFunction(e, this.additionFilters.options, ((e, o) => {
+            const t = e;
             {
-              const o = !0;
-              const r = (t, r) => {
+              const e = !0;
+              const i = (t, i) => {
                 ViewStackProcessor.StartGetAccessRecordingFor(t);
-                ListItem.create(s, o);
+                ListItem.create(s, e);
                 ListItem.height("100%");
-                ListItem.backgroundColor(this.isAdditionBackgroundHover[e] ? this.additionBackgroundColorArr[e] : "#00FFFFFF");
-                ListItem.onHover((o => {
+                ListItem.backgroundColor(this.isAdditionBackgroundHover[o] ? this.additionBackgroundColorArr[o] : "#00FFFFFF");
+                ListItem.onHover((e => {
                   Context.animateTo({ curve: FRICTION_CUBIC_BEZIER, duration: 250 }, (() => {
-                    if (o) {
-                      this.additionBackgroundColorArr[e] = {
+                    if (e) {
+                      this.additionBackgroundColorArr[o] = {
                         id: -1,
                         type: 10001,
                         params: ["sys.color.ohos_id_color_hover"],
                         bundleName: "",
                         moduleName: ""
                       };
-                      this.isAdditionBackgroundHover[e] = !0
-                    } else this.isAdditionBackgroundHover[e] = !1
+                      this.isAdditionBackgroundHover[o] = !0
+                    } else this.isAdditionBackgroundHover[o] = !1
                   }))
                 }));
-                ListItem.onTouch((o => {
-                  o.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
-                    this.additionBackgroundColorArr[e] = {
+                ListItem.onTouch((e => {
+                  e.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+                    this.additionBackgroundColorArr[o] = {
                       id: -1,
                       type: 10001,
                       params: ["sys.color.ohos_id_color_click_effect"],
                       bundleName: "",
                       moduleName: ""
                     };
-                    this.isAdditionBackgroundHover[e] = !0
-                  })) : o.type === TouchType.Up && Context.animateTo({
+                    this.isAdditionBackgroundHover[o] = !0
+                  })) : e.type === TouchType.Up && Context.animateTo({
                     curve: SHARP_CUBIC_BEZIER,
                     duration: 100
                   }, (() => {
-                    this.isAdditionBackgroundHover[e] = !1
+                    this.isAdditionBackgroundHover[o] = !1
                   }))
                 }));
                 ListItem.focusable(!0);
@@ -1687,15 +1844,16 @@ export class Filter extends ViewPU {
                 ListItem.padding({ left: 8, right: 8 });
                 ViewStackProcessor.visualState();
                 ListItem.onClick((() => {
-                  this.additionItemClick(e)
+                  this.additionItemClick(o)
                 }));
-                r || ListItem.pop();
+                ListItem.tabIndex(0 == o ? this.multiFilters.length : -1);
+                i || ListItem.pop();
                 ViewStackProcessor.StopGetAccessRecording()
               };
-              const i = () => {
-                this.observeComponentCreation(r);
-                this.observeComponentCreation(((o, r) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(o);
+              const r = () => {
+                this.observeComponentCreation(i);
+                this.observeComponentCreation(((e, i) => {
+                  ViewStackProcessor.StartGetAccessRecordingFor(e);
                   Text.create(t.toString());
                   Text.fontSize({
                     id: -1,
@@ -1704,20 +1862,20 @@ export class Filter extends ViewPU {
                     bundleName: "",
                     moduleName: ""
                   });
-                  Text.fontColor(this.additionColorArr[e]);
-                  Text.fontWeight(this.additionFontWeightArr[e]);
+                  Text.fontColor(this.additionColorArr[o]);
+                  Text.fontWeight(this.additionFontWeightArr[o]);
                   Text.focusable(!0);
-                  r || Text.pop();
+                  i || Text.pop();
                   ViewStackProcessor.StopGetAccessRecording()
                 }));
                 Text.pop();
                 ListItem.pop()
               };
-              const s = (o, i) => {
-                r(o, i);
-                this.updateFuncByElmtId.set(o, r);
-                this.observeComponentCreation(((o, r) => {
-                  ViewStackProcessor.StartGetAccessRecordingFor(o);
+              const s = (e, r) => {
+                i(e, r);
+                this.updateFuncByElmtId.set(e, i);
+                this.observeComponentCreation(((e, i) => {
+                  ViewStackProcessor.StartGetAccessRecordingFor(e);
                   Text.create(t.toString());
                   Text.fontSize({
                     id: -1,
@@ -1726,40 +1884,62 @@ export class Filter extends ViewPU {
                     bundleName: "",
                     moduleName: ""
                   });
-                  Text.fontColor(this.additionColorArr[e]);
-                  Text.fontWeight(this.additionFontWeightArr[e]);
+                  Text.fontColor(this.additionColorArr[o]);
+                  Text.fontWeight(this.additionFontWeightArr[o]);
                   Text.focusable(!0);
-                  r || Text.pop();
+                  i || Text.pop();
                   ViewStackProcessor.StopGetAccessRecording()
                 }));
                 Text.pop();
                 ListItem.pop()
               };
-              o ? (() => {
-                this.observeComponentCreation(r);
+              e ? (() => {
+                this.observeComponentCreation(i);
                 ListItem.pop()
-              })() : i()
+              })() : r()
             }
           }), void 0,!0,!1);
-          e || ForEach.pop();
+          o || ForEach.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
         ForEach.pop();
-        List.pop()
+        List.pop();
+        this.observeComponentCreation(((e, o) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
+          o ? ViewPU.create(new GradientMask(this, {
+            x0: 0,
+            y0: 20,
+            x1: 16,
+            y1: 20
+          }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
+          ViewStackProcessor.StopGetAccessRecording()
+        }));
+        Stack.pop();
+        this.observeComponentCreation(((e, o) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
+          o ? ViewPU.create(new GradientMask(this, {
+            x0: 16,
+            y0: 20,
+            x1: 0,
+            y1: 20
+          }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {});
+          ViewStackProcessor.StopGetAccessRecording()
+        }));
+        Stack.pop()
       })) : If.branchId(1);
-      e || If.pop();
+      o || If.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     If.pop()
   }
 
-  FilterHeader(o = null) {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+  FilterHeader(e = null) {
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Column.create();
       Column.padding({ top: 8 });
-      Column.onVisibleAreaChange([0, 1], ((o, e) => {
-        if (e > 0) {
+      Column.onVisibleAreaChange([0, 1], ((e, o) => {
+        if (o > 0) {
           this.isFloatShowAllFilter = !1;
           this.isFloatShowAllFilterWithoutAnimation = !1;
           this.isFloatBarShowWithoutAnimation = !1;
@@ -1772,22 +1952,23 @@ export class Filter extends ViewPU {
           this.isFloatBarShow = !0;
           this.isFloatBarShowWithoutAnimation = !0;
           Context.animateTo({ curve: INTER_POLATING_SPRING }, (() => {
+            this.floatFilterBarPosition = 0;
             this.floatFilterBarHeight = 48
           }))
         }
       }));
-      e || Column.pop();
+      o || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       If.create();
       this.filterType === FilterType.LIST_FILTER ? this.ifElseBranchUpdateFunction(0, (() => {
         this.ListFilter.bind(this)()
       })) : this.ifElseBranchUpdateFunction(1, (() => {
         this.MultiLineFilter.bind(this)()
       }));
-      e || If.pop();
+      o || If.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     If.pop();
@@ -1795,9 +1976,9 @@ export class Filter extends ViewPU {
     Column.pop()
   }
 
-  FloatFilterHeader(o = null) {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+  FloatFilterHeader(e = null) {
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Column.create();
       Column.padding({ top: 8 });
       Column.width("100%");
@@ -1814,18 +1995,18 @@ export class Filter extends ViewPU {
       Column.visibility(this.isFloatShowAllFilter ? Visibility.Visible : Visibility.Hidden);
       Column.position({ x: 0, y: this.floatFilterPosition });
       Column.zIndex(2);
-      e || Column.pop();
+      o || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       If.create();
       this.filterType === FilterType.LIST_FILTER ? this.ifElseBranchUpdateFunction(0, (() => {
         this.ListFilter.bind(this)()
       })) : this.ifElseBranchUpdateFunction(1, (() => {
         this.MultiLineFilter.bind(this)()
       }));
-      e || If.pop();
+      o || If.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     If.pop();
@@ -1833,21 +2014,13 @@ export class Filter extends ViewPU {
     Column.pop()
   }
 
-  FloatFilterBar(o = null) {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+  FloatFilterBar(e = null) {
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create();
       Row.width("100%");
-      Row.padding({
-        right: {
-          id: -1,
-          type: 10002,
-          params: ["sys.float.ohos_id_max_padding_end"],
-          bundleName: "",
-          moduleName: ""
-        }
-      });
       Row.height(this.floatFilterBarHeight);
+      Row.padding({ left: 2, right: 2 });
       Row.backgroundColor({
         id: -1,
         type: 10001,
@@ -1862,98 +2035,15 @@ export class Filter extends ViewPU {
       Row.alignItems(VerticalAlign.Bottom);
       Row.position({ x: 0, y: this.floatFilterBarPosition });
       Row.zIndex(1);
-      e || Row.pop();
+      o || Row.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Column.create();
-      Column.alignItems(HorizontalAlign.Center);
-      Column.width("100%");
-      Column.height(40);
-      e || Column.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
-      Row.create();
-      Row.height("100%");
-      Row.alignItems(VerticalAlign.Center);
-      e || Row.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
-      ForEach.create();
-      this.forEachUpdateFunction(o, this.selectedFilters.slice(0, (this.colorRefresh, this.selectedFilters.length)), ((o, e) => {
-        const t = o;
-        this.observeComponentCreation(((o, r) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(o);
-          If.create();
-          0 != e && null != t.value ? this.ifElseBranchUpdateFunction(0, (() => {
-            this.observeComponentCreation(((o, e) => {
-              ViewStackProcessor.StartGetAccessRecordingFor(o);
-              Text.create("/");
-              Text.fontColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_text_primary"],
-                bundleName: "",
-                moduleName: ""
-              });
-              Text.fontSize({
-                id: -1,
-                type: 10002,
-                params: ["sys.float.ohos_id_text_size_body3"],
-                bundleName: "",
-                moduleName: ""
-              });
-              e || Text.pop();
-              ViewStackProcessor.StopGetAccessRecording()
-            }));
-            Text.pop()
-          })) : If.branchId(1);
-          r || If.pop();
-          ViewStackProcessor.StopGetAccessRecording()
-        }));
-        If.pop();
-        this.observeComponentCreation(((o, e) => {
-          ViewStackProcessor.StartGetAccessRecordingFor(o);
-          Text.create(t.value);
-          Text.fontColor({
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_text_primary"],
-            bundleName: "",
-            moduleName: ""
-          });
-          Text.fontSize({
-            id: -1,
-            type: 10002,
-            params: ["sys.float.ohos_id_text_size_body3"],
-            bundleName: "",
-            moduleName: ""
-          });
-          e || Text.pop();
-          ViewStackProcessor.StopGetAccessRecording()
-        }));
-        Text.pop()
-      }), void 0,!0,!1);
-      e || ForEach.pop();
-      ViewStackProcessor.StopGetAccessRecording()
-    }));
-    ForEach.pop();
-    Row.pop();
-    Column.pop();
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
-      Row.create();
-      Row.height(40);
-      Row.margin({ left: -24 });
-      Row.backgroundColor(this.isFloatArrowBgHover ? this.floatArrowBgColor : "#00FFFFFF");
-      Row.focusable(!0);
+      Column.backgroundColor(this.isFloatArrowBgHover ? this.floatArrowBgColor : "#00FFFFFF");
       ViewStackProcessor.visualState("focused");
-      Row.border({
+      Column.border({
         radius: {
           id: -1,
           type: 10002,
@@ -1971,10 +2061,9 @@ export class Filter extends ViewPU {
         },
         style: BorderStyle.Solid
       });
-      Row.width(28);
-      Row.offset({ x: -2 });
+      Column.width(28);
       ViewStackProcessor.visualState("normal");
-      Row.border({
+      Column.border({
         radius: {
           id: -1,
           type: 10002,
@@ -1984,11 +2073,41 @@ export class Filter extends ViewPU {
         },
         width: 0
       });
-      Row.width(24);
-      Row.offset({ x: 0 });
+      Column.width(24);
       ViewStackProcessor.visualState();
-      Row.onHover((o => {
-        o ? Context.animateTo({ curve: FRICTION_CUBIC_BEZIER, duration: 250 }, (() => {
+      Column.alignItems(HorizontalAlign.Center);
+      Column.width("100%");
+      Column.height(40);
+      Column.onTouch((e => {
+        e.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+          this.floatArrowBgColor = {
+            id: -1,
+            type: 10001,
+            params: ["sys.color.ohos_id_color_click_effect"],
+            bundleName: "",
+            moduleName: ""
+          };
+          this.isFloatArrowBgHover = !0
+        })) : e.type === TouchType.Up && Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
+          this.isFloatArrowBgHover = !1
+        }))
+      }));
+      Column.onClick((() => {
+        Context.animateTo({ duration: 150, curve: SHARP_CUBIC_BEZIER }, (() => {
+          this.isFloatBarShow = !1;
+          this.isFloatBarShowWithoutAnimation = !1
+        }));
+        this.isFloatShowAllFilter = !0;
+        this.isFloatShowAllFilterWithoutAnimation = !0;
+        Context.animateTo({ curve: INTER_POLATING_SPRING, onFinish: () => {
+          this.floatFilterBarPosition = 0
+        } }, (() => {
+          this.floatFilterPosition = 0;
+          this.floatFilterBarPosition = this.filterDynamicHeight
+        }))
+      }));
+      Column.onHover((e => {
+        e ? Context.animateTo({ curve: FRICTION_CUBIC_BEZIER, duration: 250 }, (() => {
           this.floatArrowBgColor = {
             id: -1,
             type: 10001,
@@ -2001,37 +2120,89 @@ export class Filter extends ViewPU {
           this.isFloatArrowBgHover = !1
         }))
       }));
-      Row.onTouch((o => {
-        o.type === TouchType.Down ? Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
-          this.floatArrowBgColor = {
-            id: -1,
-            type: 10001,
-            params: ["sys.color.ohos_id_color_click_effect"],
-            bundleName: "",
-            moduleName: ""
-          };
-          this.isFloatArrowBgHover = !0
-        })) : o.type === TouchType.Up && Context.animateTo({ curve: SHARP_CUBIC_BEZIER, duration: 100 }, (() => {
-          this.isFloatArrowBgHover = !1
-        }))
-      }));
-      Row.onClick((() => {
-        Context.animateTo({ duration: 150, curve: SHARP_CUBIC_BEZIER }, (() => {
-          this.isFloatBarShow = !1;
-          this.isFloatBarShowWithoutAnimation = !1
-        }));
-        this.isFloatShowAllFilter = !0;
-        this.isFloatShowAllFilterWithoutAnimation = !0;
-        Context.animateTo({ curve: INTER_POLATING_SPRING }, (() => {
-          this.floatFilterPosition = 0;
-          this.floatFilterBarPosition = this.filterDynamicHeight
-        }))
-      }));
-      e || Row.pop();
+      o || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      Row.create();
+      Row.height("100%");
+      Row.alignItems(VerticalAlign.Center);
+      o || Row.pop();
+      ViewStackProcessor.StopGetAccessRecording()
+    }));
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      ForEach.create();
+      this.forEachUpdateFunction(e, this.selectedFilters.slice(0, (this.colorRefresh, this.selectedFilters.length)), ((e, o) => {
+        const t = e;
+        this.observeComponentCreation(((e, i) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
+          If.create();
+          0 != o && null != t.value ? this.ifElseBranchUpdateFunction(0, (() => {
+            this.observeComponentCreation(((e, o) => {
+              ViewStackProcessor.StartGetAccessRecordingFor(e);
+              Text.create("/");
+              Text.fontColor({
+                id: -1,
+                type: 10001,
+                params: ["sys.color.ohos_id_color_text_primary_activated"],
+                bundleName: "",
+                moduleName: ""
+              });
+              Text.fontSize({
+                id: -1,
+                type: 10002,
+                params: ["sys.float.ohos_id_text_size_body3"],
+                bundleName: "",
+                moduleName: ""
+              });
+              o || Text.pop();
+              ViewStackProcessor.StopGetAccessRecording()
+            }));
+            Text.pop()
+          })) : If.branchId(1);
+          i || If.pop();
+          ViewStackProcessor.StopGetAccessRecording()
+        }));
+        If.pop();
+        this.observeComponentCreation(((e, o) => {
+          ViewStackProcessor.StartGetAccessRecordingFor(e);
+          Text.create(t.value);
+          Text.fontColor({
+            id: -1,
+            type: 10001,
+            params: ["sys.color.ohos_id_color_text_primary_activated"],
+            bundleName: "",
+            moduleName: ""
+          });
+          Text.fontSize({
+            id: -1,
+            type: 10002,
+            params: ["sys.float.ohos_id_text_size_body3"],
+            bundleName: "",
+            moduleName: ""
+          });
+          o || Text.pop();
+          ViewStackProcessor.StopGetAccessRecording()
+        }));
+        Text.pop()
+      }), void 0,!0,!1);
+      o || ForEach.pop();
+      ViewStackProcessor.StopGetAccessRecording()
+    }));
+    ForEach.pop();
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      Row.create();
+      Row.height(40);
+      Row.margin({ left: 8 });
+      Row.focusable(!0);
+      o || Row.pop();
+      ViewStackProcessor.StopGetAccessRecording()
+    }));
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Image.create({
         id: -1,
         type: 2e4,
@@ -2044,44 +2215,46 @@ export class Filter extends ViewPU {
       Image.fillColor({
         id: -1,
         type: 10001,
-        params: ["sys.color.ohos_id_color_tertiary"],
+        params: ["sys.color.ohos_id_color_text_primary_activated"],
         bundleName: "",
         moduleName: ""
       });
       Image.focusable(!0);
-      e || Image.pop();
+      o || Image.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     Row.pop();
+    Row.pop();
+    Column.pop();
     Row.pop()
   }
 
   initialRender() {
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Stack.create({ alignContent: Alignment.Top });
       Stack.clip(!0);
-      e || Stack.pop();
+      o || Stack.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     this.FloatFilterBar.bind(this)();
     this.FloatFilterHeader.bind(this)();
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
       Column.create();
       Column.zIndex(0);
-      e || Column.pop();
+      o || Column.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
-    this.observeComponentCreation(((o, e) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(o);
-      List.create({ initialIndex: 0, scroller: this.listScroller });
+    this.observeComponentCreation(((e, o) => {
+      ViewStackProcessor.StartGetAccessRecordingFor(e);
+      List.create({ initialIndex: 0 });
       List.listDirection(Axis.Vertical);
       List.width("100%");
       List.height("100%");
       List.edgeEffect(EdgeEffect.Spring);
-      List.onScroll(((o, e) => {
-        if (this.isFloatShowAllFilterWithoutAnimation && e == ScrollState.Scroll) {
+      List.onScroll(((e, o) => {
+        if (this.isFloatShowAllFilterWithoutAnimation && o == ScrollState.Scroll) {
           this.isFloatBarShowWithoutAnimation = !0;
           this.isFloatShowAllFilterWithoutAnimation = !1;
           Context.animateTo({ duration: 150, curve: SHARP_CUBIC_BEZIER }, (() => {
@@ -2095,62 +2268,56 @@ export class Filter extends ViewPU {
           }))
         }
       }));
-      e || List.pop();
+      o || List.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
     {
-      const o = !0;
-      const e = (e, t) => {
-        ViewStackProcessor.StartGetAccessRecordingFor(e);
-        ListItem.create(r, o);
+      const e = !0;
+      const o = (o, t) => {
+        ViewStackProcessor.StartGetAccessRecordingFor(o);
+        ListItem.create(i, e);
         ListItem.focusable(!0);
-        ListItem.onFocus((() => {
-          this.listScroller.scrollToIndex(0,!0)
-        }));
         t || ListItem.pop();
         ViewStackProcessor.StopGetAccessRecording()
       };
       const t = () => {
-        this.observeComponentCreation(e);
+        this.observeComponentCreation(o);
         this.FilterHeader.bind(this)();
         ListItem.pop()
       };
-      const r = (o, t) => {
-        e(o, t);
-        this.updateFuncByElmtId.set(o, e);
+      const i = (e, t) => {
+        o(e, t);
+        this.updateFuncByElmtId.set(e, o);
         this.FilterHeader.bind(this)();
         ListItem.pop()
       };
-      o ? (() => {
-        this.observeComponentCreation(e);
+      e ? (() => {
+        this.observeComponentCreation(o);
         ListItem.pop()
       })() : t()
     }
     {
-      const o = !0;
-      const e = (e, t) => {
-        ViewStackProcessor.StartGetAccessRecordingFor(e);
-        ListItem.create(r, o);
+      const e = !0;
+      const o = (o, t) => {
+        ViewStackProcessor.StartGetAccessRecordingFor(o);
+        ListItem.create(i, e);
         ListItem.focusable(!0);
-        ListItem.onFocus((() => {
-          this.listScroller.scrollToIndex(1,!0)
-        }));
         t || ListItem.pop();
         ViewStackProcessor.StopGetAccessRecording()
       };
       const t = () => {
-        this.observeComponentCreation(e);
+        this.observeComponentCreation(o);
         this.container.bind(this)();
         ListItem.pop()
       };
-      const r = (o, t) => {
-        e(o, t);
-        this.updateFuncByElmtId.set(o, e);
+      const i = (e, t) => {
+        o(e, t);
+        this.updateFuncByElmtId.set(e, o);
         this.container.bind(this)();
         ListItem.pop()
       };
-      o ? (() => {
-        this.observeComponentCreation(e);
+      e ? (() => {
+        this.observeComponentCreation(o);
         ListItem.pop()
       })() : t()
     }

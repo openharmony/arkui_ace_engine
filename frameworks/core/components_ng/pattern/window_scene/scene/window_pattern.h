@@ -33,6 +33,7 @@ public:
     ~WindowPattern() override = default;
 
     std::vector<Rosen::Rect> GetHotAreas();
+    sptr<Rosen::Session> GetSession();
 
 protected:
     void OnModifyDone() override;
@@ -50,7 +51,6 @@ protected:
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
 
-    void InitContent();
     void CreateStartingNode();
     void CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
 
@@ -77,8 +77,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     bool IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void AdapterRotation(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void SetWindowSceneConsumed(int32_t action);
+    void FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;

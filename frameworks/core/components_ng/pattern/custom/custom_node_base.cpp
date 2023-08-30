@@ -70,6 +70,7 @@ void CustomNodeBase::FireRecycleSelf()
             q.push(child);
         }
     }
+    needRebuild_ = true;
 
     if (recycleCustomNodeFunc_) {
         recycleCustomNodeFunc_(AceType::Claim<CustomNodeBase>(this));

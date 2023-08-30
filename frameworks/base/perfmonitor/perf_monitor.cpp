@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
-constexpr float SINGLE_FRAME_TIME = 16.6;
+constexpr float SINGLE_FRAME_TIME = 16600000;
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -141,12 +141,14 @@ void ReportPerfEventToUI(DataBase data)
     }
 }
 
-void SceneRecord::InitRecord(const std::string& sId, PerfActionType aType, PerfSourceType sType, const std::string& nt)
+void SceneRecord::InitRecord(const std::string& sId, PerfActionType aType, PerfSourceType sType, const std::string& nt,
+    int64_t time)
 {
     sceneId = sId;
     actionType = aType;
     sourceType = sType;
     note = nt;
+    inputTime = time;
     beginVsyncTime = GetCurrentRealTimeNs();
 }
 
@@ -188,9 +190,9 @@ void SceneRecord::RecordFrame(int64_t vsyncTime, int64_t duration, int32_t skipp
     totalFrames++;
 }
 
-void SceneRecord::Report(const std::string& sceneId, int64_t vsyncTime)
+void SceneRecord::Report(const std::string& sceneId, int64_t vsyncTime, bool isRsRender)
 {
-    if (vsyncTime <= beginVsyncTime) {
+    if (isRsRender || vsyncTime <= beginVsyncTime) {
         endVsyncTime = GetCurrentRealTimeNs();
     } else {
         endVsyncTime = vsyncTime;
@@ -231,26 +233,31 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 {
     AceAsyncTraceBegin(0, sceneId.c_str());
     std::lock_guard<std::mutex> Lock(mMutex);
+    // inactive animator start on inputtime
+    if (GetInputTime(type) <= 0) {
+        RecordInputEvent(type, UNKNOWN_SOURCE, 0);
+    }
+    int64_t inputTime = GetInputTime(type);
     SceneRecord* record = GetRecord(sceneId);
     if (record != nullptr) {
         record->Reset();
-        record->InitRecord(sceneId, type, mSourceType, note);
+        record->InitRecord(sceneId, type, mSourceType, note, inputTime);
     } else {
         record = new SceneRecord();
-        record->InitRecord(sceneId, type, mSourceType, note);
+        record->InitRecord(sceneId, type, mSourceType, note, inputTime);
         mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
     }
     RecordBaseInfo(record);
 }
 
-void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
+void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
     SceneRecord* record = GetRecord(sceneId);
     if (record != nullptr) {
         RecordBaseInfo(record);
-        record->Report(sceneId, mVsyncTime);
-        ReportAnimateEnd(sceneId, record, !isJsApi);
+        record->Report(sceneId, mVsyncTime, isRsRender);
+        ReportAnimateEnd(sceneId, record, !isRsRender);
         RemoveRecord(sceneId);
         AceAsyncTraceEnd(0, sceneId.c_str());
     }
@@ -389,10 +396,10 @@ void PerfMonitor::FlushDataBase(SceneRecord* record, DataBase& data, bool needCo
         return;
     }
     data.sceneId = record->sceneId;
-    data.inputTime = GetInputTime(record->actionType);
+    data.inputTime = record->inputTime;
     data.beginVsyncTime = record->beginVsyncTime;
     if (data.beginVsyncTime < data.inputTime) {
-        data.beginVsyncTime = data.inputTime;
+        data.inputTime = data.beginVsyncTime;
     }
     data.endVsyncTime = record->endVsyncTime;
     if (data.beginVsyncTime > data.endVsyncTime) {

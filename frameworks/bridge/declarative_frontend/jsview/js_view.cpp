@@ -637,6 +637,10 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
         recycleNode->ResetRecycle();
+        auto name = jsView->GetRecycleCustomNodeName();
+        if (name.empty()) {
+            return;
+        }
         AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
         jsView->jsViewFunction_->ExecuteAboutToRecycle();
@@ -644,6 +648,9 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     };
 
     auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active) -> void {
+        if (!AceApplicationInfo::GetInstance().IsDelayedUpdateOnInactive()) {
+            return;
+        }
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
@@ -805,9 +812,6 @@ bool ParseRecycleParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[PARAM
     if (!info[PARAM_IS_RECYCLE]->IsBoolean()) {
         return false;
     }
-    if (!info[PARAM_NODE_NAME]->IsString()) {
-        return false;
-    }
     if (!info[PARAM_RECYCLE_UPDATE_FUNC]->IsFunction()) {
         return false;
     }
@@ -836,6 +840,11 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     auto* view = viewObj->Unwrap<JSViewPartialUpdate>();
     if (!view) {
         LOGE("Invalid JSView");
+        return;
+    }
+    if (info[PARAM_NODE_NAME]->IsUndefined()) {
+        view->SetRecycleCustomNodeName("");
+        ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);
         return;
     }
     auto recycle = params[PARAM_IS_RECYCLE]->ToBoolean();

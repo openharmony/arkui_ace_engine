@@ -23,7 +23,7 @@ extern const char _binary_composetitlebar_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_composetitlebar_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_ComposeTitleBar_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_composetitlebar_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_composetitlebar_GetABCCode(const char **buf, int *bufle
 /*
  * Module define
  */
-static napi_module composetitlebarModule = {
+static napi_module ComposeTitleBarModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.composetitlebar",
+    .nm_modname = "arkui.advanced.ComposeTitleBar",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -48,7 +48,7 @@ static napi_module composetitlebarModule = {
 /*
  * Module registerfunction
  */
-extern "C" __attribute__((constructor)) void composetitlebarRegisterModule(void)
+extern "C" __attribute__((constructor)) void ComposeTitleBarRegisterModule(void)
 {
-    napi_module_register(&composetitlebarModule);
+    napi_module_register(&ComposeTitleBarModule);
 }

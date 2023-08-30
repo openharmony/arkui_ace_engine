@@ -94,6 +94,8 @@ ace_unittest("calendar_picker_test_ng") {
 
   sources += [
     # mock
+    "$ace_root/frameworks/base/thread/background_task_executor.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/subwindow_mock.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/button/mock_button_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/button/mock_button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid_container/mock_grid_container_layout_property.cpp",

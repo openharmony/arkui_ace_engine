@@ -1480,6 +1480,50 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPickerPattern ToJsonValue003
+ * @tc.desc: Test TextPickerPattern ToJsonValue(isCascade_ is false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPatternToJsonValue003, TestSize.Level1)
+{
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(false));
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, MIXTURE);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+
+    /**
+     * @tc.cases: case. cover cascadeOriginptions_ is not empty
+     */
+    NG::TextCascadePickerOptions option;
+    option.rangeResult = { "rangeResult1", "rangeResult2" };
+    std::vector<NG::TextCascadePickerOptions> options;
+    options.emplace_back(option);
+
+    textPickerPattern->SetCascadeOptions(options, options);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+
+    /**
+     * @tc.cases: case. cover isCascade_ == false
+     */
+    textPickerPattern->SetIsCascade(false);
+    textPickerPattern->ToJsonValue(json);
+    ASSERT_NE(json, nullptr);
+
+    /**
+     * @tc.cases: case. cover isCascade_ == true
+     */
+    textPickerPattern->SetIsCascade(true);
+    textPickerPattern->ToJsonValue(json);
+    ASSERT_NE(json, nullptr);
+}
+
+/**
  * @tc.name: TextPickerPatternProcessDepth001
  * @tc.desc: Test TextPickerPattern ProcessCascadeOptionDepth(child is empty).
  * @tc.type: FUNC
@@ -2975,6 +3019,45 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertySetSpecificSupportActi
 }
 
 /**
+ * @tc.name: TextPickerAlgorithmTest
+ * @tc.desc: Test Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateDefaultPickerItemHeight(Dimension(10));
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+
+    auto subNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
+    ASSERT_NE(subNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(subNode, subNode->GetGeometryNode(), nullptr);
+    EXPECT_NE(subLayoutWrapper, nullptr);
+    layoutWrapper.AppendChild(std::move(subLayoutWrapper));
+    EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 1);
+    TextPickerLayoutAlgorithm textPickerLayoutAlgorithm;
+    textPickerLayoutAlgorithm.currentOffset_.emplace_back(0.0f);
+
+    /**
+     * @tc.cases: case. cover branch isDefaultPickerItemHeight_ is true.
+     */
+    textPickerLayoutAlgorithm.isDefaultPickerItemHeight_ = true;
+    textPickerLayoutAlgorithm.Layout(&layoutWrapper);
+    auto childGeometryNode = subLayoutWrapper->GetGeometryNode();
+    childGeometryNode->SetMarginFrameOffset(CHILD_OFFSET);
+    EXPECT_EQ(childGeometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 10.0f));
+}
+
+/**
  * @tc.name: TextPickerAlgorithmTest001
  * @tc.desc: Test Measure.
  * @tc.type: FUNC
@@ -3149,6 +3232,120 @@ HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPickerAlgorithmTest006
+ * @tc.desc: Test Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest006, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.cases: case. cover branch isShowInDialog_ is true .
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    pickerPattern->SetIsShowInDialog(true);
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+
+    /**
+     * @tc.cases: case. cover branch defaultPickerItemHeightValue LessOrEqual 0 .
+     */
+    pickerProperty->UpdateDefaultPickerItemHeight(Dimension(10));
+
+    SizeF value(400.0f, 300.0f);
+    pickerProperty->UpdateMarginSelfIdealSize(value);
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subLayoutWrapper, nullptr);
+    RefPtr<LayoutWrapperNode> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subTwoLayoutWrapper, nullptr);
+    layoutWrapper.AppendChild(std::move(subLayoutWrapper));
+    layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
+    EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 2);
+
+    /**
+     * @tc.cases: case. cover branch dialogTheme pass non null check .
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .Times(::testing::AtLeast(6))
+        .WillOnce(Return(pickerTheme))
+        .WillOnce(Return(dialogTheme))
+        .WillRepeatedly(Return(pickerTheme));
+
+    TextPickerLayoutAlgorithm textPickerLayoutAlgorithm;
+    textPickerLayoutAlgorithm.Measure(&layoutWrapper);
+}
+
+/**
+ * @tc.name: TextPickerAlgorithmTest007
+ * @tc.desc: Test Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerAlgorithmTest007, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.cases: case. cover branch isShowInDialog_ is true .
+     */
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    pickerPattern->SetIsShowInDialog(true);
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+
+    /**
+     * @tc.cases: case. cover branch defaultPickerItemHeightValue LessOrEqual 0 .
+     */
+    pickerProperty->UpdateDefaultPickerItemHeight(Dimension(-10.0f));
+    SizeF value(400.0f, 300.0f);
+    pickerProperty->UpdateMarginSelfIdealSize(value);
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapperNode> subLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subLayoutWrapper, nullptr);
+    RefPtr<LayoutWrapperNode> subTwoLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subTwoLayoutWrapper, nullptr);
+    layoutWrapper.AppendChild(std::move(subLayoutWrapper));
+    layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
+    EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 2);
+
+    /**
+     * @tc.cases: case. cover branch dialogTheme pass non null check .
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .Times(::testing::AtLeast(6))
+        .WillOnce(Return(pickerTheme))
+        .WillOnce(Return(dialogTheme))
+        .WillRepeatedly(Return(pickerTheme));
+
+    TextPickerLayoutAlgorithm textPickerLayoutAlgorithm;
+    textPickerLayoutAlgorithm.Measure(&layoutWrapper);
+}
+
+/**
  * @tc.name: TextPickerPaintTest001
  * @tc.desc: Test GetForegroundDrawFunction.
  * @tc.type: FUNC
@@ -3240,7 +3437,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
     KeyEvent keyEventUp(KeyCode::KEY_DPAD_UP, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventUp);
     auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(propertyChangeFlag, 97);
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 
     /**
      * @tc.cases: case1. down KeyEvent.
@@ -3248,7 +3445,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest001, TestSize.Level1)
     KeyEvent keyEventDown(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN);
     focusHub->ProcessOnKeyEventInternal(keyEventDown);
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
-    EXPECT_EQ(propertyChangeFlag, 97);
+    EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 }
 
 /**
@@ -3274,6 +3471,7 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest002, TestSize.Level1)
     focusHub->ProcessOnKeyEventInternal(keyEventLeft);
     auto propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
+
     /**
      * @tc.cases: case1. right KeyEvent.
      */
@@ -4294,6 +4492,66 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PatternGetSelectedObject001
+ * @tc.desc: Test TextPickerPattern GetSelectedObject()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, PatternGetSelectedObject001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.step: step. cover branch GetIsDeclarative() is true.
+     */
+    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(true));
+
+    TextPickerModelNG::GetInstance()->MultiInit(theme);
+    std::vector<std::string> values = { "0", "1", "2" };
+    TextPickerModelNG::GetInstance()->SetValues(values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = AceType::DynamicCast<FrameNode>(frameNode)->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::GetInstance()->SetSelected(0);
+    auto result = textPickerPattern->GetSelectedObject(false, 1);
+    ASSERT_NE(result, EMPTY_TEXT);
+}
+
+/**
+ * @tc.name: PatternGetSelectedObject002
+ * @tc.desc: Test TextPickerPattern GetSelectedObject()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, PatternGetSelectedObject002, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.step: step. cover branch GetIsDeclarative() is true.
+     */
+    EXPECT_CALL(*pipeline, GetIsDeclarative()).WillRepeatedly(Return(true));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    std::vector<std::string> values = { "text", "rating", "qrcode" };
+    TextPickerModelNG::GetInstance()->SetValues(values);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<FrameNode>(frameNode)->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+    TextPickerModelNG::GetInstance()->SetSelected(1);
+    auto result = pattern->GetSelectedObject(false, 1);
+    ASSERT_NE(result, EMPTY_TEXT);
+}
+
+/**
  * @tc.name: TextPickerModelTest001
  * @tc.desc: Test SetDefaultPickerItemHeight, SetCanLoop, SetBackgroundColor
  * @tc.type: FUNC
@@ -4890,20 +5148,132 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest006, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto columnNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
     auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<StackPattern>(); });
+    auto geometryNode = stackNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
     buttonNode->MountToParent(stackNode);
+    columnNode->MountToParent(stackNode);
     stackNode->MountToParent(frameNode);
     SizeF frameSize(FONT_SIZE_20, FONT_SIZE_20);
     geometryNode->SetFrameSize(frameSize);
     textPickerPattern->SetButtonIdeaSize();
     EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->width_.value(), CalcLength(12.0));
+}
+
+/**
+ * @tc.name: TextPickerPatternTest007
+ * @tc.desc: Test TextPickerPattern CalculateHeight().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPatternTest007, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    Dimension dividerSpacing(FONT_SIZE_5, DimensionUnit::FP);
+    pickerTheme->dividerSpacing_ = dividerSpacing;
+    ASSERT_NE(pickerTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(pickerTheme));
+
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_PICKER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerLayoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case. cover branch HasDefaultPickerItemHeight() is true and DimensionUnit is PERCENT
+     */
+    Dimension dimension(10.0f);
+    dimension.SetUnit(DimensionUnit::PERCENT);
+    textPickerLayoutProperty->UpdateDefaultPickerItemHeight(dimension);
+    textPickerPattern->CalculateHeight();
+    EXPECT_EQ(textPickerLayoutProperty->GetDefaultPickerItemHeight(), dimension);
+
+    /**
+     * @tc.cases: case. cover branch NormalizeToPx(defaultPickerItemHeightValue) less or equals 0.
+     */
+    Dimension dimension1(-10.0f);
+    textPickerLayoutProperty->UpdateDefaultPickerItemHeight(dimension1);
+    textPickerPattern->CalculateHeight();
+    EXPECT_EQ(textPickerLayoutProperty->GetDefaultPickerItemHeight(), dimension1);
+
+    /**
+     * @tc.cases: case. cover branch NormalizeToPx(defaultPickerItemHeightValue) more than 0
+     */
+    Dimension dimension2(10.0f);
+    textPickerLayoutProperty->UpdateDefaultPickerItemHeight(dimension2);
+    textPickerPattern->CalculateHeight();
+    EXPECT_EQ(textPickerLayoutProperty->GetDefaultPickerItemHeight(), dimension2);
+}
+
+/**
+ * @tc.name: TextPickerPatternTest008
+ * @tc.desc: Test TextPickerPattern HandleDirectionKey().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPatternTest008, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+
+    /**
+     * @tc.cases: case. cover branch totalOptionCount more than 0.
+     */
+    auto pickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    std::vector<RangeContent> options { { "icon", "text" } };
+    pickerColumnPattern->SetOptions(options);
+
+    /**
+     * @tc.cases: case1. KeyCode : KEY_DPAD_UP.
+     */
+    bool ret = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_UP);
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.cases: case2. KeyCode : KEY_DPAD_DOWN.
+     */
+    bool retOne = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN);
+    EXPECT_TRUE(retOne);
+
+    /**
+     * @tc.cases: case3. KeyCode : KEY_ENTER.
+     */
+    bool retTwo = textPickerPattern->HandleDirectionKey(KeyCode::KEY_ENTER);
+    EXPECT_TRUE(retTwo);
+
+    /**
+     * @tc.cases: case4. KeyCode : KEY_DPAD_LEFT.
+     */
+    bool retThree = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_LEFT);
+    EXPECT_TRUE(retThree);
+
+    /**
+     * @tc.cases: case5. KeyCode : KEY_DPAD_RIGHT.
+     */
+    bool retFour = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_RIGHT);
+    EXPECT_TRUE(retFour);
 }
 
 /**
@@ -5211,5 +5581,12 @@ HWTEST_F(TextPickerTestNg, ChangeTextStyle001, TestSize.Level1)
     textPickerLayoutAlgorithm.ChangeTextStyle(index, showOptionCount, size, subLayoutWrapper, &layoutWrapper);
     auto frameSize = subLayoutWrapper->GetGeometryNode()->GetFrameSize();
     EXPECT_EQ(frameSize, TEST_TEXT_FRAME_SIZE);
+
+    /**
+     * @tc.case: cover branch index not equals selectedIndex .
+     */
+    uint32_t showOptionCount1 = 1;
+    textPickerLayoutAlgorithm.ChangeTextStyle(index, showOptionCount1, size, subLayoutWrapper, &layoutWrapper);
+    EXPECT_EQ(100.0f, subLayoutWrapper->GetGeometryNode()->GetFrameSize().Width());
 }
 } // namespace OHOS::Ace::NG

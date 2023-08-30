@@ -425,15 +425,23 @@ void TxtParagraph::SetIndents(const std::vector<float>& indents)
     paragraphTxt->SetIndents(indents);
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
 bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
 {
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph_.get());
+#else
+    auto* paragraphTxt = static_cast<OHOS::Rosen::Typography*>(paragraph_.get());
+#endif
     CHECK_NULL_RETURN(paragraphTxt, false);
+#ifndef USE_GRAPHIC_TEXT_GINE
     auto range = paragraphTxt->GetWordBoundary(static_cast<size_t>(offset));
     start = static_cast<int32_t>(range.start);
     end = static_cast<int32_t>(range.end);
+#else
+    auto range = paragraphTxt->GetWordBoundaryByIndex(static_cast<size_t>(offset));
+    start = static_cast<int32_t>(range.leftIndex);
+    end = static_cast<int32_t>(range.rightIndex);
+#endif
     return true;
 }
-#endif
 } // namespace OHOS::Ace::NG

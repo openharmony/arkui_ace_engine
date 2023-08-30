@@ -36,7 +36,7 @@ void IfElseModelImpl::Pop()
     ViewStackProcessor::GetInstance()->PopContainer();
 }
 
-void IfElseModelImpl::SetBranchId(int32_t value)
+void IfElseModelImpl::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
 {
     auto component = AceType::DynamicCast<IfElseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     component->SetBranchId(value);

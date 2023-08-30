@@ -44,9 +44,9 @@ void CustomNode::Build()
 
 void CustomNode::Render()
 {
+    needMarkParent_ = false;
     if (renderFunction_) {
         auto renderFunction = std::move(renderFunction_);
-        needMarkParent_ = false;
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
             FireOnAppear();
@@ -60,11 +60,11 @@ void CustomNode::Render()
                 child->MountToParent(Claim(this));
             }
         }
-        needMarkParent_ = true;
     }
     {
         FireRecycleRenderFunc();
     }
+    needMarkParent_ = true;
 }
 
 // used in HotReload to update root view @Component

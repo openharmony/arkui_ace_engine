@@ -32,4 +32,18 @@ void NavBarPattern::OnCoordScrollUpdate(float offset)
 void NavBarPattern::OnCoordScrollEnd()
 {
 }
+
+void NavBarPattern::NavBarMotion(double, double)
+{
+}
+
+bool NavBarPattern::GetFullStatus()
+{
+    return true;
+}
+
+bool NavBarPattern::GetIsMinTitle() const
+{
+    return true;
+}
 }; // namespace OHOS::Ace::NG

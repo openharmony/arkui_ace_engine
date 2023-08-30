@@ -117,6 +117,9 @@ void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void DialogPattern::HandleClick(const GestureEvent& info)
 {
+    if (info.GetSourceDevice() == SourceType::KEYBOARD) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto props = host->GetLayoutProperty<DialogLayoutProperty>();
@@ -514,20 +517,6 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         BindCloseCallBack(hub, -1);
     }
 
-    // register Register keyboard event
-    auto focusHub = buttonNode->GetOrCreateFocusHub();
-    auto onKeyEvent = [focusHub](const KeyEvent& event) -> bool {
-        if (event.action != KeyAction::DOWN) {
-            return false;
-        }
-        if (event.code == KeyCode::KEY_ENTER) {
-            focusHub->OnClick(event);
-            return true;
-        }
-        return false;
-    };
-    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
-
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
@@ -615,15 +604,6 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
         layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
         layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        auto buttonPipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(buttonPipeline, nullptr);
-        auto buttonTheme = buttonPipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_RETURN(buttonTheme, nullptr);
-        MeasureProperty layoutConstraint;
-        auto padding = dialogTheme_->GetActionsPadding();
-        layoutConstraint.UpdateMaxSizeWithCheck(
-            CalcSize(std::nullopt, CalcLength(padding.Top() + padding.Bottom() + buttonTheme->GetHeight())));
-        container->UpdateLayoutConstraint(layoutConstraint);
     } else {
         // use vertical layout
         isVertical = true;
@@ -674,6 +654,7 @@ void DialogPattern::AddButtonAndDivider(
         CHECK_NULL_VOID(buttonPattern);
         buttonPattern->SetSkipColorConfigurationUpdate();
         buttonNode->MountToParent(container);
+        buttonNode->MarkModifyDone();
     }
 }
 

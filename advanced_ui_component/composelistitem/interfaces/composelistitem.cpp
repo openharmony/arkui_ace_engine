@@ -23,7 +23,7 @@ extern const char _binary_composelistitem_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_composelistitem_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_ComposeListItem_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_composelistitem_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_composelistitem_GetABCCode(const char **buf, int *bufle
 /*
  * Module define
  */
-static napi_module composelistitemModule = {
+static napi_module ComposeListItemModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.composelistitem",
+    .nm_modname = "arkui.advanced.ComposeListItem",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -48,7 +48,7 @@ static napi_module composelistitemModule = {
 /*
  * Module registerfunction
  */
-extern "C" __attribute__((constructor)) void composelistitemRegisterModule(void)
+extern "C" __attribute__((constructor)) void ComposeListItemRegisterModule(void)
 {
-    napi_module_register(&composelistitemModule);
+    napi_module_register(&ComposeListItemModule);
 }

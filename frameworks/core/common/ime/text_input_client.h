@@ -39,6 +39,7 @@ public:
         return value;
     };
 #endif
+    virtual void UpdateInputFilterErrorText(const std::string& errorText) {};
 
     // Requests that this client Y point.
     virtual double GetEditingBoxY() const { return 0.0; };

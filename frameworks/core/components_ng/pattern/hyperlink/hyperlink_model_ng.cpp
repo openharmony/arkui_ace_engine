@@ -55,7 +55,7 @@ void HyperlinkModelNG::SetTextStyle(const RefPtr<FrameNode>& hyperlinkNode, cons
     textLayoutProperty->UpdateContent(content);
     auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(theme->GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());

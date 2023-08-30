@@ -31,6 +31,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
+constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 } // namespace
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
@@ -128,8 +129,11 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
 
     auto timePickerLayoutProperty = timePickerNode->GetLayoutProperty();
     CHECK_NULL_RETURN(timePickerLayoutProperty, nullptr);
-    timePickerLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
+
+    MarginProperty margin;
+    margin.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    margin.right = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    timePickerLayoutProperty->UpdateMargin(margin);
 
     buttonTitleNode->MountToParent(contentColumn);
     timePickerNode->MountToParent(contentColumn);

@@ -329,6 +329,9 @@ bool ImageSourceInfo::SupportObjCache() const
     if (IsPixmap()) {
         return false;
     }
+    if (!needCache_) {
+        return false;
+    }
     return !src_.empty() || resourceId_ != InternalResource::ResourceId::NO_ID;
 }
 

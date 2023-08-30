@@ -102,11 +102,23 @@ public:
     {
         return landscapeMenuNodeId_.has_value();
     }
-    
+
     void OnCoordScrollStart();
     void OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
+    void OnScrollStart();
+    void OnScrollUpdate(float offset);
+    void OnScrollEnd();
     bool GetDraggedDown();
+    bool GetFullStatus();
+    bool GetIsMinTitle() const;
+    void NavBarMotion(double velocity, double friction);
+    void StopNavBarMotion();
+
+    bool GetToolbarHideStatus()
+    {
+        return isHideToolbar_;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -129,6 +141,10 @@ private:
     std::vector<NG::BarItem> toolBarMenuItems_;
     std::optional<int32_t> menuNodeId_;
     std::optional<int32_t> landscapeMenuNodeId_;
+    RefPtr<FrictionMotion> motion_;
+    RefPtr<Animator> controller_;
+    float motionOffset_ = 0.0f;
+    bool isTitleMenuNodeShowing_ = false;
 };
 
 } // namespace OHOS::Ace::NG

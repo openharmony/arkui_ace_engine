@@ -51,6 +51,8 @@ void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
     borderRadius.SetRadius(theme->GetEntryBorderRadius());
     pickerNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
     pickerNode->GetRenderContext()->SetClipToFrame(true);
+    pickerNode->GetRenderContext()->SetClipToBounds(true);
+    pickerNode->GetRenderContext()->UpdateClipEdge(true);
     CHECK_NULL_VOID(pickerNode->GetLayoutProperty<LinearLayoutProperty>());
     pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateCrossAxisAlign(FlexAlign::CENTER);
@@ -103,18 +105,14 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonChild(int32_t id, bool isAd
     buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetEntryButtonWidth()), std::nullopt));
     buttonNode->GetLayoutProperty()->UpdateLayoutWeight(1);
-    BorderRadiusProperty borderRadius;
     BorderWidthProperty borderWidth;
     if (isAdd) {
         borderWidth.leftDimen = theme->GetEntryBorderWidth();
         borderWidth.bottomDimen = theme->GetEntryBorderWidth() / 2;
-        borderRadius.radiusTopRight = theme->GetEntryBorderRadius();
     } else {
         borderWidth.leftDimen = theme->GetEntryBorderWidth();
         borderWidth.topDimen = theme->GetEntryBorderWidth() / 2;
-        borderRadius.radiusBottomRight = theme->GetEntryBorderRadius();
     }
-    buttonLayoutProperty->UpdateBorderRadius(borderRadius);
     buttonNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
     BorderColorProperty borderColor;
     borderColor.SetColor(theme->GetEntryBorderColor());
@@ -277,5 +275,21 @@ void CalendarPickerModelNG::SetChangeEvent(SelectedChangeEvent&& onChange)
     auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
+}
+
+void CalendarPickerModelNG::SetPadding(const PaddingProperty& padding)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    if (!pickerPattern->HasContentNode()) {
+        return;
+    }
+    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(contentNode);
+    auto linearLayoutProperty = contentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(linearLayoutProperty);
+    linearLayoutProperty->UpdatePadding(padding);
 }
 } // namespace OHOS::Ace::NG

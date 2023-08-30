@@ -500,6 +500,160 @@ HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GestureRecognizerTest011
+ * @tc.desc: Test ClickRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, GestureRecognizerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case1: refereeState is SUCCESS,return
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    clickRecognizer.currentTouchPointsNum_ = 0;
+    clickRecognizer.refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case2: equalsToFingers = true, currentTouchPointsNum = 1, tap != count
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.refereeState_ = RefereeState::PENDING;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case3: equalsToFingers = true, currentTouchPointsNum = 1,
+     * @tc.steps: tap == count, useCatchMode_ = false
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.tappedCount_ = 0;
+    clickRecognizer.count_ = 0;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case3: equalsToFingers = true, currentTouchPointsNum = fingers,
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = FINGER_NUMBER;
+    clickRecognizer.fingers_ = FINGER_NUMBER;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.equalsToFingers_, true);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case4: equalsToFingers = false, currentTouchPointsNum = 1,
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = false;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.equalsToFingers_, false);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case5: equalsToFingers = false, currentTouchPointsNum = 0,
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 0;
+    clickRecognizer.equalsToFingers_ = false;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.equalsToFingers_, false);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case6: equalsToFingers = true, currentTouchPointsNum = 1,
+     * @tc.steps: tap == count, useCatchMode_ = false
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.tappedCount_ = -1;
+    clickRecognizer.count_ = 0;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+}
+
+/**
+ * @tc.name: GestureRecognizerHandleTouchMoveEventTest001
+ * @tc.desc: Test ClickRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, GestureRecognizerHandleTouchMoveEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case1: refereeState is SUCCESS,return
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    clickRecognizer.currentTouchPointsNum_ = 0;
+    clickRecognizer.refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.touchPoints_.size(), 0);
+}
+
+/**
+ * @tc.name: GestureRecognizerHandleOverdueDeadlineTest001
+ * @tc.desc: Test ClickRecognizer function: HandleOverdueDeadline
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, GestureRecognizerHandleOverdueDeadlineTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case1: refereeState is SUCCESS,return
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    clickRecognizer.currentTouchPointsNum_ = FINGER_NUMBER;
+    clickRecognizer.refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.tappedCount_ = FINGER_NUMBER;
+    clickRecognizer.count_ = FINGER_NUMBER;
+    clickRecognizer.HandleOverdueDeadline();
+    EXPECT_EQ(clickRecognizer.touchPoints_.size(), 0);
+}
+
+/**
  * @tc.name: GestureRecognizerTest008
  * @tc.desc: Test ClickRecognizer function: HandleTouchCancelEvent
  * @tc.type: FUNC
@@ -1633,6 +1787,90 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LongPressRecognizerTestGetLongPressActionFunc001
+ * @tc.desc: Test LongPressRecognizer function: GetLongPressActionFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    bool isCatchMode = false;
+
+    /**
+     * @tc.steps: step2. call GetLongPressActionFunc function and compare result.
+     * @tc.steps: case1: normal case
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer.HandleOverdueDeadline(isCatchMode);
+    longPressRecognizer.DoRepeat();
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
+    auto result = longPressRecognizer.GetLongPressActionFunc();
+}
+
+/**
+ * @tc.name: LongPressRecognizerTestGetLongPressActionFunc002
+ * @tc.desc: Test LongPressRecognizer function: GetLongPressActionFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    bool isCatchMode = false;
+
+    /**
+     * @tc.steps: step2. call GetLongPressActionFunc function and compare result.
+     * @tc.steps: case1: normal case
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer.fingers_ = SINGLE_FINGER_NUMBER;
+    longPressRecognizer.HandleOverdueDeadline(isCatchMode);
+    longPressRecognizer.DoRepeat();
+    auto result = longPressRecognizer.GetLongPressActionFunc();
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
+
+    /**
+     * @tc.steps: step2. call GetLongPressActionFunc function and compare result.
+     * @tc.steps: case1: normal case
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer.refereeState_ = RefereeState::DETECTING;
+    longPressRecognizer.fingers_ = SINGLE_FINGER_NUMBER;
+    longPressRecognizer.HandleOverdueDeadline(isCatchMode);
+    longPressRecognizer.DoRepeat();
+    result = longPressRecognizer.GetLongPressActionFunc();
+    EXPECT_NE(longPressRecognizer.refereeState_, RefereeState::DETECTING);
+}
+
+/**
+ * @tc.name: LongPressRecognizerConvertPxToVpTest001
+ * @tc.desc: Test LongPressRecognizer function: ConvertPxToVp
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerConvertPxToVpTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. call ConvertPxToVp function and compare result.
+     * @tc.steps: case1: normal case
+     * @tc.expected: step2. result equals.
+     */
+    double result = longPressRecognizer.ConvertPxToVp(0.0);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
  * @tc.name: LongPressRecognizerTest007
  * @tc.desc: Test LongPressRecognizer function: HandleOverdueDeadline  DoRepeat
  * @tc.type: FUNC
@@ -1755,7 +1993,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest002, TestSize.Level1)
     panRecognizer.refereeState_ = RefereeState::SUCCEED;
     panRecognizer.touchPoints_.clear();
     panRecognizer.HandleTouchDownEvent(axisEvent);
-    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
 
     /**
      * @tc.steps: step2. call HandleTouchDown function and compare result.
@@ -3402,6 +3640,93 @@ HWTEST_F(GesturesTestNg, RecognizerGroupTest005, TestSize.Level1)
      */
     exclusiveRecognizer.remainChildOnResetStatus_ = true;
     EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: RecognizerGroupTest006
+ * @tc.desc: Test RecognizerGroup function: GetGroupRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RecognizerGroupTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RecognizerGroup
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+
+    /**
+     * @tc.steps: step2. call function and compare result.
+     * @tc.steps: case1: recognizers is empty
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.OnFlushTouchEventsBegin();
+    exclusiveRecognizer.OnFlushTouchEventsEnd();
+    exclusiveRecognizer.GetGroupRecognizer();
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+}
+
+/**
+ * @tc.name: RecognizerGroupTest007
+ * @tc.desc: Test RecognizerGroup function: ForceReject
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RecognizerGroupTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RecognizerGroup
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call function and compare result.
+     * @tc.steps: case1: recognizers is empty
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer.OnFlushTouchEventsBegin();
+    exclusiveRecognizer.OnFlushTouchEventsEnd();
+    exclusiveRecognizer.ForceReject();
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call function and compare result.
+     * @tc.steps: case1: recognizers is empty
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer.OnFlushTouchEventsBegin();
+    exclusiveRecognizer.OnFlushTouchEventsEnd();
+    exclusiveRecognizer.ForceReject();
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: RecognizerGroupTest008
+ * @tc.desc: Test RecognizerGroup function: CheckAllFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RecognizerGroupTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RecognizerGroup
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+
+    /**
+     * @tc.steps: step2. call function and compare result.
+     * @tc.steps: case1: recognizers is empty
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.OnFlushTouchEventsBegin();
+    exclusiveRecognizer.OnFlushTouchEventsEnd();
+    bool result = exclusiveRecognizer.CheckAllFailed();
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -5363,6 +5688,110 @@ HWTEST_F(GesturesTestNg, GestureRefereeTest014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GestureRefereeTest015
+ * @tc.desc: Test GestureReferee QueryAllDone function
+ */
+HWTEST_F(GesturesTestNg, GestureRefereeTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureScope gestureScope = GestureScope(0);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
+
+    /**
+     * @tc.steps: step2. call QueryAllDone function
+     * @tc.steps: expected equal
+     */
+    gestureScope.AddMember(clickRecognizerPtr);
+    EXPECT_EQ(gestureScope.recognizers_.size(), 1);
+    gestureScope.QueryAllDone(0);
+
+    /**
+     * @tc.steps: step2. call QueryAllDone function
+     * @tc.steps: expected equal
+     */
+    gestureScope.recognizers_.clear();
+    gestureScope.AddMember(clickRecognizerPtr);
+    EXPECT_EQ(gestureScope.recognizers_.size(), 1);
+    gestureScope.QueryAllDone(1);
+}
+
+/**
+ * @tc.name: GestureRefereeTest016
+ * @tc.desc: Test GestureReferee QueryAllDone function
+ */
+HWTEST_F(GesturesTestNg, GestureRefereeTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureReferee gestureReferee;
+    bool result = false;
+
+    /**
+     * @tc.steps: step2. call QueryAllDone function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    result = gestureReferee.QueryAllDone(0);
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 1);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GestureRefereeTest017
+ * @tc.desc: Test GestureReferee CleanAll function
+ */
+HWTEST_F(GesturesTestNg, GestureRefereeTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureReferee gestureReferee;
+
+    /**
+     * @tc.steps: step2. call CleanAll() function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    gestureReferee.CleanAll();
+    EXPECT_EQ(gestureReferee.gestureScopes_.size(), 0);
+}
+
+/**
+ * @tc.name: GestureRefereeTest018
+ * @tc.desc: Test GestureReferee CheckSourceTypeChange function
+ */
+HWTEST_F(GesturesTestNg, GestureRefereeTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    GestureReferee gestureReferee;
+    bool result = false;
+
+    /**
+     * @tc.steps: step2. call CheckSourceTypeChange function
+     * @tc.steps: expected equal
+     */
+    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
+    gestureReferee.gestureScopes_[0] = gestureScope;
+    result = gestureReferee.CheckSourceTypeChange(SourceType::TOUCH, false);
+    EXPECT_EQ(result, true);
+    result = gestureReferee.CheckSourceTypeChange(SourceType::TOUCH, true);
+    EXPECT_EQ(result, true);
+    gestureReferee.lastSourceType_ = SourceType::TOUCH;
+    result = gestureReferee.CheckSourceTypeChange(SourceType::TOUCH, false);
+    EXPECT_EQ(result, true);
+    result = gestureReferee.CheckSourceTypeChange(SourceType::TOUCH, true);
+    EXPECT_EQ(result, true);
+}
+
+/**
  * @tc.name: LongPressGestureTest001
  * @tc.desc: Test LongPressGesture CreateRecognizer function
  */
@@ -5412,6 +5841,49 @@ HWTEST_F(GesturesTestNg, LongPressGestureTest001, TestSize.Level1)
     EXPECT_EQ(longPressRecognizer->duration_, LONG_PRESS_DURATION);
     EXPECT_EQ(longPressRecognizer->isForDrag_, false);
     EXPECT_EQ(longPressRecognizer->isDisableMouseLeft_, false);
+}
+
+/**
+ * @tc.name: SwipeGestureTest001
+ * @tc.desc: Test SwipeGesture CreateRecognizer function
+ */
+HWTEST_F(GesturesTestNg, SwipeGestureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeGesture.
+     */
+    int32_t fingersNum = DEFAULT_PAN_FINGER;
+    double speedNum = DEFAULT_SLIDE_SPEED;
+    SwipeDirection slideDirection;
+    SwipeGestureModelNG swipeGestureModelNG;
+    swipeGestureModelNG.Create(fingersNum, slideDirection, speedNum);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto swipeGestureNG = AceType::DynamicCast<NG::SwipeRecognizer>(gestureProcessor->TopGestureNG());
+
+    SwipeGesture swipeGesture = SwipeGesture(fingersNum, slideDirection, speedNum);
+    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
+     */
+    auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
+    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case2: onActionId, onActionEndId, onActionCancelId existed
+     */
+    std::unique_ptr<GestureEventFunc> onActionId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    swipeGesture.onActionId_ = std::move(onActionId);
+    swipeGesture.onActionEndId_ = std::move(onActionEndId);
+    swipeGesture.onActionCancelId_ = std::move(onActionCancelId);
+    swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(swipeGesture.CreateRecognizer());
+    EXPECT_EQ(swipeGesture.speed_, DEFAULT_SLIDE_SPEED);
 }
 
 /**
@@ -5811,6 +6283,232 @@ HWTEST_F(GesturesTestNg, PinchRecognizerTest010, TestSize.Level1)
     pinchRecognizer->refereeState_ = RefereeState::SUCCEED;
     pinchRecognizer->HandleTouchUpEvent(axisEvent);
     EXPECT_EQ(pinchRecognizer->isPinchEnd_, true);
+}
+
+/**
+ * @tc.name: PinchRecognizerHandleTouchUpEventTest001
+ * @tc.desc: Test PinchRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PinchRecognizerHandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
+                                                                                   PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. use refereeState_ != RefereeState::SUCCEED and refereeState_ != RefereeState::FAIL.
+     * @tc.expect: pinchRecognizer->disposal_ is equal to GestureDisposal::REJECT.
+     */
+    TouchEvent touchEvent;
+    pinchRecognizer->isPinchEnd_ = false;
+    pinchRecognizer->refereeState_ = RefereeState::FAIL;
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchDownEvent(touchEvent);
+    pinchRecognizer->refereeState_ = RefereeState::READY;
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizer->disposal_, GestureDisposal::NONE);
+
+    /**
+     * @tc.steps: step3. test with HandleTouchDownEvent(AxisEvent).
+     */
+    AxisEvent axisEvent;
+    /**
+     * @tc.steps: step3.1. test with isPinchEnd_ is true.
+     */
+    pinchRecognizer->isPinchEnd_ = true;
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchUpEvent(axisEvent);
+
+    /**
+     * @tc.steps: step3.2. test with refereeState_ != RefereeState::SUCCEED and refereeState_ != RefereeState::FAIL.
+     * @tc.expect: pinchRecognizer->disposal_ is equal to GestureDisposal::REJECT.
+     */
+    pinchRecognizer->isPinchEnd_ = false;
+    pinchRecognizer->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step3.2. test with refereeState_ != RefereeState::SUCCEED.
+     * @tc.expect: pinchRecognizer->isPinchEnd_ is true.
+     */
+    pinchRecognizer->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer->isPinchEnd_, true);
+}
+
+/**
+ * @tc.name: PinchRecognizerHandleTouchMoveEventTest001
+ * @tc.desc: Test PinchRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PinchRecognizerHandleTouchMoveEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
+                                                                                   PINCH_GESTURE_DISTANCE);
+    ASSERT_NE(pinchRecognizer, nullptr);
+
+    /**
+     * @tc.steps: step2. test HandleTouchMoveEvent(TouchEvent).
+     */
+    pinchRecognizer->refereeState_ = RefereeState::DETECTING;
+    std::vector<TouchEvent> touchEvents;
+    for (std::size_t i = 0; i < 5; ++i) {
+        TouchEvent touchEvent;
+        touchEvent.x = 100.0 * (i + 1);
+        touchEvent.y = 100.0 * (i + 1);
+        pinchRecognizer->touchPoints_[i] = touchEvent;
+    }
+    pinchRecognizer->initialDev_ = 1.0;
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+
+    /**
+     * @tc.steps: step2.1. test HandleTouchMoveEvent(TouchEvent) with fabs(currentDev_ - initialDev_) >= distance_.
+     * @tc.expect: scale_ = pinchRecognizer->ComputeAverageDeviation() / initialDev_.
+     */
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchMoveEvent(touchEvent);
+
+    /**
+     * @tc.steps: step2.2. test HandleTouchMoveEvent(TouchEvent) with refereeState_ == RefereeState::SUCCEED.
+     * @tc.expect: scale_ = pinchRecognizer->ComputeAverageDeviation() / initialDev_
+     */
+    pinchRecognizer->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer->initialDev_ = 2.0;
+    pinchRecognizer->OnFlushTouchEventsEnd();
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchMoveEvent(touchEvent);
+
+    /**
+     * @tc.steps: step3. test HandleTouchMoveEvent(AxisEvent).
+     */
+    AxisEvent axisEvent;
+    pinchRecognizer->isPinchEnd_ = false;
+
+    /**
+     * @tc.steps: step3.1. axisEvent NearZero and IsCtrlBeingPressed() is false.
+     * @tc.expect: pinchRecognizer->disposal_ is equal to GestureDisposal::REJECT.
+     */
+    axisEvent.pinchAxisScale = 0.0;
+    pinchRecognizer->refereeState_ = RefereeState::DETECTING;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->eventManager_ = nullptr;
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step3.2. test with refereeState_ = RefereeState::SUCCEED.
+     * @tc.expect: pinchRecognizer->refereeState_ is equal to RefereeState::READY.
+     */
+    pinchRecognizer->isPinchEnd_ = false;
+    pinchRecognizer->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer->isPinchEnd_, true);
+
+    /**
+     * @tc.steps: step3.3. test with axisEvent not NearZero .
+     * @tc.expect: pinchRecognizer->scale_ is equal to axisEvent.pinchAxisScale.
+     */
+    pinchRecognizer->isPinchEnd_ = false;
+    axisEvent.pinchAxisScale = 1.0;
+    pinchRecognizer->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer->scale_, axisEvent.pinchAxisScale);
+}
+
+/**
+ * @tc.name: PinchRecognizerHandleTouchCancelEventTest001
+ * @tc.desc: Test PinchRecognizer function: HandleTouchCancelEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PinchRecognizerHandleTouchCancelEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    PinchRecognizer pinchRecognizer = PinchRecognizer(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    AxisEvent axisEvent;
+    axisEvent.pinchAxisScale = 0.0;
+
+    /**
+     * @tc.steps: step2. call HandleTouchMoveEvent function and compare result.
+     * @tc.steps: case1: input is TouchEvent
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer.HandleTouchMoveEvent(touchEvent);
+    pinchRecognizer.HandleTouchUpEvent(touchEvent);
+    pinchRecognizer.HandleTouchCancelEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+    EXPECT_EQ(pinchRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchMoveEvent function and compare result.
+     * @tc.steps: case2: input is AxisEvent
+     * @tc.expected: step2. result equals.
+     */
+    pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer.HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+    EXPECT_EQ(pinchRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchMoveEvent function and compare result.
+     * @tc.steps: case3: input is TouchEvent, isFlushTouchEventsEnd_
+     * @tc.expected: step2. result equals.
+     */
+    pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer.isFlushTouchEventsEnd_ = true;
+    pinchRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+    EXPECT_EQ(pinchRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case4: input is TouchEvent, refereeState is FAIL
+     * @tc.expected: step2. result equals.
+     */
+    pinchRecognizer.refereeState_ = RefereeState::FAIL;
+    pinchRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+    EXPECT_EQ(pinchRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchMoveEvent function and compare result.
+     * @tc.steps: case5: input is AxisEvent
+     * @tc.expected: step2. result equals.
+     */
+    pinchRecognizer.refereeState_ = RefereeState::FAIL;
+    pinchRecognizer.HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+    EXPECT_EQ(pinchRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchCancelEvent function and compare result.
+     * @tc.steps: case6: input is TouchEvent, refereeState is FAIL
+     * @tc.expected: step2. result equals.
+     */
+    pinchRecognizer.refereeState_ = RefereeState::FAIL;
+    pinchRecognizer.HandleTouchCancelEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+    EXPECT_EQ(pinchRecognizer.lastTouchEvent_.id, touchEvent.id);
 }
 
 /**

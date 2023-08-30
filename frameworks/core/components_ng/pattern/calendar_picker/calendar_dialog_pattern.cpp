@@ -248,7 +248,7 @@ void CalendarDialogPattern::InitOnKeyEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto focusHub = host->GetFocusHub();
+    auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
 
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {

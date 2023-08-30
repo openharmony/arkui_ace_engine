@@ -540,6 +540,9 @@ void ScrollBar::InitPanRecognizer()
 
 void ScrollBar::HandleDragStart(const GestureEvent& info)
 {
+    if (frictionController_ && frictionController_->IsRunning()) {
+        frictionController_->Stop();
+    }
     if (scrollPositionCallback_) {
         scrollPositionCallback_(0, SCROLL_FROM_START);
     }
@@ -590,7 +593,11 @@ void ScrollBar::ProcessFrictionMotion(double value)
 {
     if (scrollPositionCallback_) {
         auto offset = CalcPatternOffset(value - frictionPosition_);
-        scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING);
+        if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING)) {
+            if (frictionController_ && frictionController_->IsRunning()) {
+                frictionController_->Stop();
+            }
+        }
     }
     frictionPosition_ = value;
 }

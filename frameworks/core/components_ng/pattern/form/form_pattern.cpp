@@ -217,7 +217,22 @@ void FormPattern::TakeSurfaceCaptureForUI()
 
 void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 {
+    ContainerScope scope(scopeId_);
     LOGI("OnSnapshot");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto uiTaskExecutor =
+        SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this), pixelMap] {
+        auto formPattern = weak.Upgrade();
+        CHECK_NULL_VOID(formPattern);
+        formPattern->HandleOnSnapshot(pixelMap);
+    });
+}
+
+void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    LOGI("HandleOnSnapshot");
     CHECK_NULL_VOID(pixelMap);
     pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     UpdateStaticCard();
@@ -577,7 +592,16 @@ void FormPattern::InitFormManagerDelegate()
         LOGI("HandleUnTrustForm");
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        formPattern->HandleUnTrustForm();
+        auto host = formPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak, instanceID] {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->HandleUnTrustForm();
+        });
     });
 
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID]() {
@@ -793,7 +817,7 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
     eventHub->FireOnAcquired(json->ToString());
 }
 
-void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) const
+void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 {
     LOGI("FireOnAcquiredEvent action: %{public}s", action->ToString().c_str());
     auto host = GetHost();
@@ -830,11 +854,17 @@ void FormPattern::OnLoadEvent()
     });
 }
 
-void FormPattern::OnActionEvent(const std::string& action) const
+void FormPattern::OnActionEvent(const std::string& action)
 {
+    CHECK_NULL_VOID_NOLOG(formManagerBridge_);
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         LOGE("get event action failed");
+        return;
+    }
+    auto uri = eventAction->GetValue("uri");
+    if (uri->IsValid()) {
+        formManagerBridge_->OnActionEvent(action);
         return;
     }
     auto actionType = eventAction->GetValue("action");
@@ -850,10 +880,18 @@ void FormPattern::OnActionEvent(const std::string& action) const
     }
 
     if ("router" == type) {
-        FireOnRouterEvent(eventAction);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto uiTaskExecutor =
+        SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak = WeakClaim(this), action] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto eventAction = JsonUtil::ParseJsonString(action);
+            pattern->FireOnRouterEvent(eventAction);
+        });
     }
 
-    CHECK_NULL_VOID_NOLOG(formManagerBridge_);
     formManagerBridge_->OnActionEvent(action);
 }
 

@@ -653,6 +653,7 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
         geometryTransitionOld ? geometryTransitionOld->GetId().c_str() : "empty",
         geometryTransitionNew ? id.c_str() : "empty");
     ElementRegister::GetInstance()->DumpGeometryTransition();
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
 }
 
 void LayoutProperty::UpdateLayoutDirection(TextDirection value)

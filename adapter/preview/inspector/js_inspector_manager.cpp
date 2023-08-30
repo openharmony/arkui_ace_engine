@@ -22,7 +22,11 @@
 #include <sstream>
 
 #include "adapter/preview/inspector/inspector_client.h"
+#ifdef NG_BUILD
+#include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#else
 #include "bridge/declarative_frontend/declarative_frontend.h"
+#endif
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -309,7 +313,11 @@ RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::uniqu
         LOGE("Get frontend Failed");
         return nullptr;
     }
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend);
+#else
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
+#endif
     if (!declarativeFrontend) {
         LOGE("Get declarativeFrontend Failed");
         return nullptr;
@@ -328,7 +336,11 @@ RefPtr<NG::UINode> JsInspectorManager::GetNewFrameNodeWithJsCode(const std::uniq
     }
     auto pipeline = context_.Upgrade();
     CHECK_NULL_RETURN(pipeline, nullptr);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(pipeline->GetFrontend());
+#else
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(pipeline->GetFrontend());
+#endif
 
     CHECK_NULL_RETURN(declarativeFrontend, nullptr);
     auto jsEngine = declarativeFrontend->GetJsEngine();

@@ -84,6 +84,7 @@ std::optional<float> OptionLayoutAlgorithm::GetIdealWidth(LayoutWrapper* layoutW
     auto optionProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(optionProps, std::nullopt);
     CHECK_NULL_RETURN(optionProps->GetCalcLayoutConstraint(), std::nullopt);
+    CHECK_NULL_RETURN(optionProps->GetCalcLayoutConstraint()->minSize, std::nullopt);
     if (optionProps->GetCalcLayoutConstraint()->minSize->Width()->IsValid()) {
         auto idealWidth = optionProps->GetCalcLayoutConstraint()->minSize->Width()->GetDimension().ConvertToPx();
         return idealWidth;

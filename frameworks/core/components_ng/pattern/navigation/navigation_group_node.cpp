@@ -26,7 +26,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -59,9 +59,8 @@ constexpr int32_t OPACITY_TITLE_DURATION = 150;
 constexpr int32_t OPACITY_BACKBUTTON_IN_DELAY = 150;
 constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
 constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
-constexpr int32_t DEFAULT_ANIMATION_DURATION = 400;
-const RefPtr<InterpolatingSpring> interpolatingSpringCurve =
-    AceType::MakeRefPtr<InterpolatingSpring>(18.0f, 1.0f, 324.0f, 36.0f);
+constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
+const RefPtr<CubicCurve> bezierCurve = AceType::MakeRefPtr<CubicCurve>(0.23f, 0.07f, 0.0f, 1.0f);
 } // namespace
 RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
@@ -235,7 +234,7 @@ void NavigationGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestinat
     CHECK_NULL_VOID(titleBarLayoutProperty);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     if (isVisible) {
         backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
@@ -321,7 +320,7 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
     AnimationOption option;
-    option.SetCurve(interpolatingSpringCurve);
+    option.SetCurve(bezierCurve);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
     auto size = GetGeometryNode()->GetFrameSize();
@@ -418,7 +417,7 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
 {
     CHECK_NULL_VOID(node);
     AnimationOption option;
-    option.SetCurve(interpolatingSpringCurve);
+    option.SetCurve(bezierCurve);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
     auto size = GetGeometryNode()->GetFrameSize();
@@ -495,7 +494,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
 {
     CHECK_NULL_VOID(node);
     AnimationOption option;
-    option.SetCurve(interpolatingSpringCurve);
+    option.SetCurve(bezierCurve);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
     auto size = GetGeometryNode()->GetFrameSize();
@@ -572,7 +571,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
 {
     CHECK_NULL_VOID(node);
     AnimationOption option;
-    option.SetCurve(interpolatingSpringCurve);
+    option.SetCurve(bezierCurve);
     option.SetFillMode(FillMode::FORWARDS);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
     auto size = GetGeometryNode()->GetFrameSize();

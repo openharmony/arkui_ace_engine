@@ -1418,4 +1418,45 @@ HWTEST_F(FrameNodeTestNg, FrameNodeUpdateAnimatableArithmeticProperty0038, TestS
     auto property = AceType::DynamicCast<NodeAnimatableArithmeticProperty>(iter->second);
     EXPECT_EQ(property, nullptr);
 }
+
+/**
+ * @tc.name: FrameNodeTestNg0039
+ * @tc.desc: Test of FramePorxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat childNode、create LazyForEachNode
+     * @tc.expected: childNode is not null
+     */
+    auto childNode = FrameNode::CreateFrameNode(
+        "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto itemNode = FrameNode::CreateFrameNode(
+        "itemNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    childNode->AddChild(itemNode);
+    /**
+     * @tc.steps: step2. call SetIsOverlayNode.
+     * @tc.expected: change IsOverlayNode().
+     */
+    AccessibilityManager::OnConfigurationChange configurationChange;
+    childNode->OnConfigurationUpdate(configurationChange);
+    configurationChange.languageUpdate = true;
+    childNode->OnConfigurationUpdate(configurationChange);
+    configurationChange.colorModeUpdate = true;
+    childNode->OnConfigurationUpdate(configurationChange);
+    configurationChange.DirectionOrDpiUpdate = true;
+    childNode->OnConfigurationUpdate(configurationChange);
+
+    childNode->SetBackgroundLayoutConstraint(itemNode);
+    childNode->ForceUpdateLayoutPropertyFlag(PROPERTY_UPDATE_MEASURE_SELF);
+    childNode->GetPaintRectWithTransform();
+    childNode->GetTransformScale();
+    childNode->SetJSViewActive(true);
+    auto layoutProperty = childNode->GetLayoutProperty();
+    EXPECT_FALSE(layoutProperty->IsOverlayNode());
+    layoutProperty->SetIsOverlayNode(true);
+    childNode->DumpOverlayInfo();
+    EXPECT_TRUE(layoutProperty->IsOverlayNode());
+}
 } // namespace OHOS::Ace::NG

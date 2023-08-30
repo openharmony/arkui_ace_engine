@@ -44,6 +44,28 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t ARRAY_SIZE = 2;
 constexpr int32_t PARTICLE_DEFAULT_EMITTER_RATE = 5;
+constexpr float MIN_BOUNDARY = -100.0f;
+constexpr float MIN_LIMIT = -10000.0f;
+constexpr float MAX_BOUNDARY = 100.0f;
+constexpr float MAX_LIMIT = 10000.0f;
+constexpr float DEFAULT_OPACITY = 1.0f;
+constexpr float DEFAULT_SCALE = 1.0f;
+constexpr float DEFAULT_SPIN = 0.0f;
+constexpr float DEFAULT_SPEED = 0.0f;
+constexpr float DEFAULT_ANGLE = 0.0f;
+constexpr float MIN_OPACITY = 0.0f;
+constexpr float MIN_SCALE = 0.0f;
+constexpr float MIN_SPIN = MIN_LIMIT;
+constexpr float MIN_SPEED = 0.0f;
+constexpr float MIN_ANGLE = MIN_LIMIT;
+constexpr float MAX_OPACITY = 1.0f;
+constexpr float MAX_SCALE = MAX_LIMIT;
+constexpr float MAX_SPIN = MAX_LIMIT;
+constexpr float MAX_SPEED = MAX_LIMIT;
+constexpr float MAX_ANGLE = MAX_LIMIT;
+
+constexpr int DEFAULT_COLOR = 0xffffffff;
+
 void ParsSize(std::pair<Dimension, Dimension>& size, JSRef<JSVal>& sizeJsValue)
 {
     if (sizeJsValue->IsArray()) {
@@ -51,10 +73,12 @@ void ParsSize(std::pair<Dimension, Dimension>& size, JSRef<JSVal>& sizeJsValue)
         if (static_cast<int32_t>(sizeJsArray->Length()) == ARRAY_SIZE) {
             CalcDimension xValue;
             CalcDimension yValue;
-            if (JSParticle::ParseJsDimensionVp(sizeJsArray->GetValueAt(0), xValue)) {
+            if (JSParticle::ParseJsDimensionVp(sizeJsArray->GetValueAt(0), xValue) &&
+                GreatOrEqual(xValue.Value(), 0.0)) {
                 size.first = xValue;
             }
-            if (JSParticle::ParseJsDimensionVp(sizeJsArray->GetValueAt(1), yValue)) {
+            if (JSParticle::ParseJsDimensionVp(sizeJsArray->GetValueAt(1), yValue) &&
+                GreatOrEqual(yValue.Value(), 0.0)) {
                 size.second = yValue;
             }
         }
@@ -62,20 +86,28 @@ void ParsSize(std::pair<Dimension, Dimension>& size, JSRef<JSVal>& sizeJsValue)
 }
 
 template<class T>
-std::optional<std::pair<T, T>> ParseParticleRange(JSRef<JSVal>& jsValue)
+std::optional<std::pair<T, T>> ParseParticleRange(JSRef<JSVal>& jsValue, T defaultValue)
 {
     std::optional<std::pair<T, T>> rangeOpt;
+    auto defaultPair = std::pair<T, T>(defaultValue, defaultValue);
     if (!jsValue->IsArray()) {
+        rangeOpt = defaultPair;
         return rangeOpt;
     }
     auto jsArray = JSRef<JSArray>::Cast(jsValue);
-    if (jsArray->Length() == ARRAY_SIZE && jsArray->GetValueAt(0)->IsNumber() && jsArray->GetValueAt(1)->IsNumber()) {
-        auto from = jsArray->GetValueAt(0)->ToNumber<T>();
-        auto to = jsArray->GetValueAt(1)->ToNumber<T>();
-        if (from <= to) {
-            rangeOpt = std::pair<T, T>(from, to);
-        }
+    if (jsArray->Length() != ARRAY_SIZE) {
+        rangeOpt = defaultPair;
+        return rangeOpt;
     }
+    auto from = defaultValue;
+    if (jsArray->GetValueAt(0)->IsNumber()) {
+        from = jsArray->GetValueAt(0)->ToNumber<T>();
+    }
+    auto to = defaultValue;
+    if (jsArray->GetValueAt(1)->IsNumber()) {
+        to = jsArray->GetValueAt(1)->ToNumber<T>();
+    }
+    rangeOpt = std::pair<T, T>(from, to);
     return rangeOpt;
 }
 
@@ -94,8 +126,9 @@ RefPtr<Curve> ParseCurve(JSRef<JSVal>& curveJsValue)
     return curve;
 }
 
-void ParseAnimationFloatArray(
-    JSRef<JSArray>& curveConfigJsArray, std::list<NG::ParticlePropertyAnimation<float>>& particleAnimationFloatArray)
+void ParseAnimationFloatArray(JSRef<JSArray>& curveConfigJsArray,
+    std::list<NG::ParticlePropertyAnimation<float>>& particleAnimationFloatArray, float defaultValue, float minValue,
+    float maxValue)
 {
     auto arraySize = static_cast<int32_t>(curveConfigJsArray->Length());
     for (int i = 0; i < arraySize; i++) {
@@ -106,29 +139,39 @@ void ParseAnimationFloatArray(
         }
         auto arrayItemJsObject = JSRef<JSObject>::Cast(arrayItemJsValue);
         auto fromJsValue = arrayItemJsObject->GetProperty("from");
-        float from;
-        if (fromJsValue->IsNumber() && OHOS::Ace::GreatOrEqual(fromJsValue->ToNumber<float>(), 0.0f)) {
+        float from = defaultValue;
+        if (fromJsValue->IsNumber()) {
             from = fromJsValue->ToNumber<float>();
-            continue;
+            if (GreatNotEqual(minValue, MIN_BOUNDARY) && LessNotEqual(from, minValue)) {
+                from = defaultValue;
+            }
+            if (LessNotEqual(maxValue, MAX_BOUNDARY) && GreatNotEqual(from, maxValue)) {
+                from = defaultValue;
+            }
         }
         floatPropertyAnimation.SetFrom(from);
         auto toJsValue = arrayItemJsObject->GetProperty("to");
-        float to;
-        if (toJsValue->IsNumber() && OHOS::Ace::GreatNotEqual(toJsValue->ToNumber<float>(), 0.0f)) {
+        float to = defaultValue;
+        if (toJsValue->IsNumber()) {
             to = toJsValue->ToNumber<float>();
-            continue;
+            if (GreatNotEqual(minValue, MIN_BOUNDARY) && LessNotEqual(to, minValue)) {
+                to = defaultValue;
+            }
+            if (LessNotEqual(maxValue, MAX_BOUNDARY) && GreatNotEqual(to, maxValue)) {
+                to = defaultValue;
+            }
         }
         floatPropertyAnimation.SetTo(to);
         auto startMillisJsValue = arrayItemJsObject->GetProperty("startMillis");
         auto startMillis = static_cast<int32_t>(0);
         if (!JSParticle::ParseJsInt32(startMillisJsValue, startMillis) || startMillis < 0) {
-            continue;
+            startMillis = 0;
         }
         floatPropertyAnimation.SetStartMills(startMillis);
         auto endMillisJsValue = arrayItemJsObject->GetProperty("endMillis");
         auto endMillis = static_cast<int32_t>(0);
         if (!JSParticle::ParseJsInt32(endMillisJsValue, endMillis) || endMillis < 0) {
-            continue;
+            endMillis = 0;
         }
         floatPropertyAnimation.SetEndMills(endMillis);
         auto curveJsValue = arrayItemJsObject->GetProperty("curve");
@@ -140,81 +183,136 @@ void ParseAnimationFloatArray(
     }
 }
 
-bool ParseFloatUpdater(JSRef<JSObject>& updaterJsObject, OHOS::Ace::NG::ParticleFloatPropertyUpdater& updater)
+bool ParseFloatRandomConfig(JSRef<JSVal>& configJsValue, OHOS::Ace::NG::ParticleFloatPropertyUpdater& updater)
+{
+    if (!configJsValue->IsArray()) {
+        return false;
+    }
+    auto randomConfigJsArray = JSRef<JSArray>::Cast(configJsValue);
+    auto randomArraySize = static_cast<int32_t>(randomConfigJsArray->Length());
+    if (randomArraySize != ARRAY_SIZE) {
+        return false;
+    }
+    auto randomRangePair = ParseParticleRange<float>(configJsValue, 0.0f);
+    if (!randomRangePair.has_value() || GreatNotEqual(randomRangePair->first, randomRangePair->second)) {
+        return false;
+    }
+    NG::ParticleFloatPropertyUpdaterConfig randomUpdaterConfig;
+    randomUpdaterConfig.SetRandomConfig(randomRangePair.value());
+    updater.SetConfig(randomUpdaterConfig);
+    return true;
+}
+
+bool ParseFloatCurveConfig(JSRef<JSVal>& configJsValue, OHOS::Ace::NG::ParticleFloatPropertyUpdater& updater,
+    float defaultValue, float minValue, float maxValue)
+{
+    if (!configJsValue->IsArray()) {
+        return false;
+    }
+    auto curveConfigJsArray = JSRef<JSArray>::Cast(configJsValue);
+    std::list<NG::ParticlePropertyAnimation<float>> particleAnimationFloatArray;
+    ParseAnimationFloatArray(curveConfigJsArray, particleAnimationFloatArray, defaultValue, minValue, maxValue);
+    NG::ParticleFloatPropertyUpdaterConfig updateConfig;
+    updateConfig.SetAnimations(particleAnimationFloatArray);
+    updater.SetConfig(updateConfig);
+    return true;
+}
+
+bool ParseFloatUpdater(JSRef<JSObject>& updaterJsObject, OHOS::Ace::NG::ParticleFloatPropertyUpdater& updater,
+    float defaultValue, float minValue, float maxValue)
 {
     auto typeJsValue = updaterJsObject->GetProperty("type");
     if (typeJsValue->IsNumber()) {
         auto typeIntValue = typeJsValue->ToNumber<int32_t>();
         if (typeIntValue < NG::UpdaterType::NONE_UPDATER || typeIntValue > NG::UpdaterType::CURVE) {
-            return false;
+            typeIntValue = NG::UpdaterType::NONE_UPDATER;
         }
         auto type = static_cast<NG::UpdaterType>(typeIntValue);
         updater.SetUpdaterType(type);
         auto configJsValue = updaterJsObject->GetProperty("config");
         if (type == NG::UpdaterType::RANDOM) {
-            if (!configJsValue->IsArray()) {
-                return false;
+            if (!ParseFloatRandomConfig(configJsValue, updater)) {
+                auto randomRangePair = std::pair<float, float>(0.0f, 0.0f);
+                NG::ParticleFloatPropertyUpdaterConfig randomUpdaterConfig;
+                randomUpdaterConfig.SetRandomConfig(randomRangePair);
+                updater.SetConfig(randomUpdaterConfig);
             }
-            auto randomConfigJsArray = JSRef<JSArray>::Cast(configJsValue);
-            auto randomArraySize = static_cast<int32_t>(randomConfigJsArray->Length());
-            if (randomArraySize != ARRAY_SIZE) {
-                return false;
-            }
-            auto randomRangePair = ParseParticleRange<float>(configJsValue);
-            if (!randomRangePair.has_value() || GreatNotEqual(randomRangePair->first, randomRangePair->second)) {
-                return false;
-            }
-            NG::ParticleFloatPropertyUpdaterConfig randomUpdaterConfig;
-            randomUpdaterConfig.SetRandomConfig(randomRangePair.value());
-            updater.SetConfig(randomUpdaterConfig);
+            return true;
         } else if (type == NG::UpdaterType::CURVE) {
-            if (!configJsValue->IsArray()) {
-                return false;
+            if (!ParseFloatCurveConfig(configJsValue, updater, defaultValue, minValue, maxValue)) {
+                std::list<NG::ParticlePropertyAnimation<float>> particleAnimationFloatArray;
+                NG::ParticleFloatPropertyUpdaterConfig updateConfig;
+                updateConfig.SetAnimations(particleAnimationFloatArray);
+                updater.SetConfig(updateConfig);
             }
-            auto curveConfigJsArray = JSRef<JSArray>::Cast(configJsValue);
-            std::list<NG::ParticlePropertyAnimation<float>> particleAnimationFloatArray;
-            ParseAnimationFloatArray(curveConfigJsArray, particleAnimationFloatArray);
-            NG::ParticleFloatPropertyUpdaterConfig updateConfig;
-            updateConfig.SetAnimations(particleAnimationFloatArray);
-            updater.SetConfig(updateConfig);
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
-bool ParseFloatOption(JSRef<JSObject>& floatJsObject, OHOS::Ace::NG::ParticleFloatPropertyOption& floatOption)
+void ParseFloatInitRange(JSRef<JSVal>& floatRangeJsValue, OHOS::Ace::NG::ParticleFloatPropertyOption& floatOption,
+    float defaultValue, float minValue, float maxValue)
 {
-    auto floatRangeJsValue = floatJsObject->GetProperty("range");
+    auto defaultPair = std::pair<float, float>(defaultValue, defaultValue);
     if (!floatRangeJsValue->IsArray()) {
-        return false;
+        floatOption.SetRange(defaultPair);
+        return;
     }
     auto floatRangeJsArray = JSRef<JSArray>::Cast(floatRangeJsValue);
     if (floatRangeJsArray->Length() != ARRAY_SIZE) {
-        return false;
+        floatOption.SetRange(defaultPair);
+        return;
     }
+    auto from = defaultValue;
     auto fromJsValue = floatRangeJsArray->GetValueAt(0);
-    if (!fromJsValue->IsNumber()) {
-        return false;
+    if (fromJsValue->IsNumber()) {
+        from = fromJsValue->ToNumber<float>();
+        if (GreatNotEqual(minValue, MIN_BOUNDARY) && LessNotEqual(from, minValue)) {
+            from = defaultValue;
+        }
+        if (LessNotEqual(maxValue, MAX_BOUNDARY) && GreatNotEqual(from, maxValue)) {
+            from = defaultValue;
+        }
     }
-    auto from = fromJsValue->ToNumber<float>();
+    auto to = defaultValue;
     auto toJsValue = floatRangeJsArray->GetValueAt(1);
-    if (!toJsValue->IsNumber()) {
-        return false;
+    if (toJsValue->IsNumber()) {
+        to = toJsValue->ToNumber<float>();
+        if (GreatNotEqual(minValue, MIN_BOUNDARY) && LessNotEqual(to, minValue)) {
+            to = defaultValue;
+        }
+        if (LessNotEqual(maxValue, MAX_BOUNDARY) && GreatNotEqual(to, maxValue)) {
+            to = defaultValue;
+        }
     }
-    auto to = toJsValue->ToNumber<float>();
-    if (OHOS::Ace::LessOrEqual(from, 0.0f) || OHOS::Ace::LessNotEqual(to, 0.0f) || GreatOrEqual(from, to)) {
-        return false;
+    if (GreatNotEqual(from, to)) {
+        from = defaultValue;
+        to = defaultValue;
     }
     auto range = std::pair<float, float>(from, to);
     floatOption.SetRange(range);
+}
+
+void ParseFloatOption(JSRef<JSObject>& floatJsObject, OHOS::Ace::NG::ParticleFloatPropertyOption& floatOption,
+    float defaultValue, float minValue, float maxValue)
+{
+    auto floatRangeJsValue = floatJsObject->GetProperty("range");
+    ParseFloatInitRange(floatRangeJsValue, floatOption, defaultValue, minValue, maxValue);
     auto updaterJsValue = floatJsObject->GetProperty("updater");
+    NG::ParticleFloatPropertyUpdater updater;
     if (updaterJsValue->IsObject()) {
         auto updaterJsObject = JSRef<JSObject>::Cast(updaterJsValue);
-        NG::ParticleFloatPropertyUpdater updater;
-        ParseFloatUpdater(updaterJsObject, updater);
-        floatOption.SetUpdater(updater);
+        if (ParseFloatUpdater(updaterJsObject, updater, defaultValue, minValue, maxValue)) {
+            floatOption.SetUpdater(updater);
+            return;
+        }
     }
-    return true;
+    updater.SetUpdaterType(NG::UpdaterType::NONE_UPDATER);
+    NG::ParticleFloatPropertyUpdaterConfig updateConfig;
+    updateConfig.SetNullStr("");
+    updater.SetConfig(updateConfig);
+    floatOption.SetUpdater(updater);
 }
 
 bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Particle& particle)
@@ -241,7 +339,10 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
         auto objectFitJsValue = configJsObject->GetProperty("objectFit");
         NG::ImageParticleParameter imageParameter;
         std::string src;
-        if (!JSParticle::ParseJsMedia(srcJsValue, src)) {
+        if (srcJsValue->IsString()) {
+            src = srcJsValue->ToString();
+        } else if (!JSParticle::ParseJsMedia(srcJsValue, src)) {
+            LOGD("particle can not parse image src.");
             return false;
         }
         imageParameter.SetImageSource(src);
@@ -253,8 +354,8 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
         auto fit = ImageFit::COVER;
         if (objectFitJsValue->IsNumber()) {
             auto fitIntValue = objectFitJsValue->ToNumber<int32_t>();
-            if (fitIntValue >= static_cast<int32_t>(ImageFit::SCALE_DOWN) &&
-                fitIntValue <= static_cast<int32_t>(ImageFit::FILL)) {
+            if (fitIntValue >= static_cast<int32_t>(ImageFit::FILL) &&
+                fitIntValue <= static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
                 fit = static_cast<ImageFit>(fitIntValue);
             }
         }
@@ -267,7 +368,7 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
         CalcDimension radius;
         JSParticle::ParseJsDimensionVp(radiusJsValue, radius);
         NG::PointParticleParameter pointParameter;
-        pointParameter.SetRadius(radius.ConvertToPx());
+        pointParameter.SetRadius(!radius.IsNonPositive() ? radius.ConvertToPx() : 0.0f);
         NG::ParticleConfig particleConfig;
         particleConfig.SetPointParticleParameter(pointParameter);
         particle.SetConfig(particleConfig);
@@ -324,25 +425,17 @@ bool ParseEmitterOption(JSRef<JSObject>& emitterJsObject, OHOS::Ace::NG::Emitter
         }
     }
     emitterOption.SetShape(emitShape);
-    auto positionX = 0.0f;
-    auto positionY = 0.0f;
     auto positionJsValue = emitterJsObject->GetProperty("position");
+    CalcDimension xValue(0.0);
+    CalcDimension yValue(0.0);
     if (positionJsValue->IsArray()) {
         auto positionJsArray = JSRef<JSArray>::Cast(positionJsValue);
-        if (positionJsArray->Length() == ARRAY_SIZE && positionJsArray->GetValueAt(0)->IsNumber() &&
-            positionJsArray->GetValueAt(1)->IsNumber()) {
-            auto positionXValue = positionJsArray->GetValueAt(0)->ToNumber<float>();
-            auto positionYValue = positionJsArray->GetValueAt(1)->ToNumber<float>();
-            if (GreatOrEqual(positionXValue, 0.0f)) {
-                positionX = positionXValue;
-            }
-            if (GreatOrEqual(positionYValue, 0.0f)) {
-                positionY = positionYValue;
-            }
+        if (positionJsArray->Length() == ARRAY_SIZE) {
+            JSParticle::ParseJsDimensionVp(positionJsArray->GetValueAt(0), xValue);
+            JSParticle::ParseJsDimensionVp(positionJsArray->GetValueAt(1), yValue);
         }
     }
-    auto positionValue = std::pair<Dimension, Dimension>(
-        Dimension(positionX, DimensionUnit::VP), Dimension(positionY, DimensionUnit::VP));
+    auto positionValue = std::pair<Dimension, Dimension>(xValue, yValue);
     emitterOption.SetPosition(positionValue);
 
     auto width = Dimension(1.0, DimensionUnit::PERCENT);
@@ -366,27 +459,23 @@ void ParseAnimationColorArray(
         }
         auto arrayItemJsObject = JSRef<JSObject>::Cast(arrayItemJsValue);
         auto fromJsValue = arrayItemJsObject->GetProperty("from");
-        Color from;
-        if (!JSParticle::ParseJsColor(fromJsValue, from)) {
-            continue;
-        }
+        Color from(DEFAULT_COLOR);
+        JSParticle::ParseJsColor(fromJsValue, from);
         colorPropertyAnimation.SetFrom(from);
         auto toJsValue = arrayItemJsObject->GetProperty("to");
-        Color to;
-        if (!JSParticle::ParseJsColor(toJsValue, to)) {
-            continue;
-        }
+        Color to(DEFAULT_COLOR);
+        JSParticle::ParseJsColor(toJsValue, to);
         colorPropertyAnimation.SetTo(to);
         auto startMillisJsValue = arrayItemJsObject->GetProperty("startMillis");
         auto startMillis = static_cast<int32_t>(0);
         if (!JSParticle::ParseJsInt32(startMillisJsValue, startMillis) || startMillis < 0) {
-            continue;
+            startMillis = 0;
         }
         colorPropertyAnimation.SetStartMills(startMillis);
         auto endMillisJsValue = arrayItemJsObject->GetProperty("endMillis");
         auto endMillis = static_cast<int32_t>(0);
         if (!JSParticle::ParseJsInt32(endMillisJsValue, endMillis) || endMillis < 0) {
-            continue;
+            endMillis = 0;
         }
         colorPropertyAnimation.SetEndMills(endMillis);
         auto curveJsValue = arrayItemJsObject->GetProperty("curve");
@@ -398,107 +487,137 @@ void ParseAnimationColorArray(
     }
 }
 
+void ParseColorRandomUpdater(JSRef<JSVal> configJsValue, OHOS::Ace::NG::ParticleColorPropertyUpdater& updater)
+{
+    NG::ParticleColorPropertyUpdaterConfig randomUpdaterConfig;
+    NG::ColorParticleRandomUpdateConfig colorRandomConfig;
+    if (!configJsValue->IsObject()) {
+        auto defaultPair = std::pair<float, float>(0.0f, 0.0f);
+        colorRandomConfig.SetRedRandom(defaultPair);
+        colorRandomConfig.SetGreenRandom(defaultPair);
+        colorRandomConfig.SetBlueRandom(defaultPair);
+        colorRandomConfig.SetAlphaRandom(defaultPair);
+        randomUpdaterConfig.SetRandomConfig(colorRandomConfig);
+        updater.SetConfig(randomUpdaterConfig);
+        return;
+    }
+    auto randomConfigJsObject = JSRef<JSObject>::Cast(configJsValue);
+    auto rJsValue = randomConfigJsObject->GetProperty("r");
+    auto gJsValue = randomConfigJsObject->GetProperty("g");
+    auto bJsValue = randomConfigJsObject->GetProperty("b");
+    auto aJsValue = randomConfigJsObject->GetProperty("a");
+    auto rRangeValue = ParseParticleRange<float>(rJsValue, 0.0f);
+    auto gRangeValue = ParseParticleRange<float>(gJsValue, 0.0f);
+    auto bRangeValue = ParseParticleRange<float>(bJsValue, 0.0f);
+    auto aRangeValue = ParseParticleRange<float>(aJsValue, 0.0f);
+    colorRandomConfig.SetRedRandom(rRangeValue.value());
+    colorRandomConfig.SetGreenRandom(gRangeValue.value());
+    colorRandomConfig.SetBlueRandom(bRangeValue.value());
+    colorRandomConfig.SetAlphaRandom(aRangeValue.value());
+    randomUpdaterConfig.SetRandomConfig(colorRandomConfig);
+    updater.SetConfig(randomUpdaterConfig);
+}
+
+void ParseColorCurveUpdater(JSRef<JSVal> configJsValue, OHOS::Ace::NG::ParticleColorPropertyUpdater& updater)
+{
+    std::list<NG::ParticlePropertyAnimation<Color>> particleAnimationColorArray;
+    NG::ParticleColorPropertyUpdaterConfig randomUpdaterConfig;
+    if (!configJsValue->IsArray()) {
+        randomUpdaterConfig.SetAnimationArray(particleAnimationColorArray);
+        updater.SetConfig(randomUpdaterConfig);
+        return;
+    }
+    auto curveConfigJsArray = JSRef<JSArray>::Cast(configJsValue);
+    ParseAnimationColorArray(curveConfigJsArray, particleAnimationColorArray);
+    randomUpdaterConfig.SetAnimationArray(particleAnimationColorArray);
+    updater.SetConfig(randomUpdaterConfig);
+}
+
 bool ParseColorUpdater(JSRef<JSObject>& updaterJsObject, OHOS::Ace::NG::ParticleColorPropertyUpdater& updater)
 {
     auto typeJsValue = updaterJsObject->GetProperty("type");
     if (typeJsValue->IsNumber()) {
         auto typeIntValue = typeJsValue->ToNumber<int32_t>();
         if (typeIntValue < NG::UpdaterType::NONE_UPDATER || typeIntValue > NG::UpdaterType::CURVE) {
-            return false;
+            typeIntValue = NG::UpdaterType::NONE_UPDATER;
         }
         auto type = static_cast<NG::UpdaterType>(typeIntValue);
         updater.SetUpdateType(type);
         auto configJsValue = updaterJsObject->GetProperty("config");
         if (type == NG::UpdaterType::RANDOM) {
-            if (!configJsValue->IsObject()) {
-                return false;
-            }
-            auto randomConfigJsObject = JSRef<JSObject>::Cast(configJsValue);
-            auto rJsValue = randomConfigJsObject->GetProperty("r");
-            auto gJsValue = randomConfigJsObject->GetProperty("g");
-            auto bJsValue = randomConfigJsObject->GetProperty("b");
-            auto aJsValue = randomConfigJsObject->GetProperty("a");
-            auto rRangeValue = ParseParticleRange<float>(rJsValue);
-            auto gRangeValue = ParseParticleRange<float>(gJsValue);
-            auto bRangeValue = ParseParticleRange<float>(bJsValue);
-            auto aRangeValue = ParseParticleRange<float>(aJsValue);
-            if (!rRangeValue.has_value() || !gRangeValue.has_value() || !bRangeValue.has_value() ||
-                !aRangeValue.has_value()) {
-                return false;
-            }
-            NG::ColorParticleRandomUpdateConfig colorRandomConfig;
-            colorRandomConfig.SetRedRandom(rRangeValue.value());
-            colorRandomConfig.SetGreenRandom(gRangeValue.value());
-            colorRandomConfig.SetBlueRandom(bRangeValue.value());
-            colorRandomConfig.SetAlphaRandom(aRangeValue.value());
-            NG::ParticleColorPropertyUpdaterConfig randomUpdaterConfig;
-            randomUpdaterConfig.SetRandomConfig(colorRandomConfig);
-            updater.SetConfig(randomUpdaterConfig);
+            ParseColorRandomUpdater(configJsValue, updater);
+            return true;
         } else if (type == NG::UpdaterType::CURVE) {
-            if (!configJsValue->IsArray()) {
-                return false;
-            }
-            auto curveConfigJsArray = JSRef<JSArray>::Cast(configJsValue);
-            std::list<NG::ParticlePropertyAnimation<Color>> particleAnimationColorArray;
-            ParseAnimationColorArray(curveConfigJsArray, particleAnimationColorArray);
-            NG::ParticleColorPropertyUpdaterConfig randomUpdaterConfig;
-            randomUpdaterConfig.SetAnimationArray(particleAnimationColorArray);
-            updater.SetConfig(randomUpdaterConfig);
+            ParseColorCurveUpdater(configJsValue, updater);
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
-bool ParseColorOption(JSRef<JSObject>& colorJsObject, OHOS::Ace::NG::ParticleColorPropertyOption& colorOption)
+void ParseColorInitRange(JSRef<JSVal> colorRangeJsValue, OHOS::Ace::NG::ParticleColorPropertyOption& colorOption)
 {
-    auto colorRangeJsValue = colorJsObject->GetProperty("range");
+    Color fromColor(DEFAULT_COLOR);
+    Color toColor(DEFAULT_COLOR);
+    auto defaultRange = std::pair<Color, Color>(fromColor, toColor);
     if (!colorRangeJsValue->IsArray()) {
-        return false;
+        colorOption.SetRange(defaultRange);
+        return;
     }
     auto colorRangeJsArray = JSRef<JSArray>::Cast(colorRangeJsValue);
     if (static_cast<int32_t>(colorRangeJsArray->Length()) != ARRAY_SIZE) {
-        return false;
+        colorOption.SetRange(defaultRange);
+        return;
     }
-    Color fromColor;
-    if (!JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(0), fromColor)) {
-        return false;
-    }
-    Color toColor;
-    if (!JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(1), toColor)) {
-        return false;
-    }
+    JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(0), fromColor);
+    JSParticle::ParseJsColor(colorRangeJsArray->GetValueAt(1), toColor);
     auto range = std::pair<Color, Color>(fromColor, toColor);
     colorOption.SetRange(range);
-    auto updaterJsValue = colorJsObject->GetProperty("updater");
-    if (updaterJsValue->IsObject()) {
-        auto updaterJsObject = JSRef<JSObject>::Cast(updaterJsValue);
-        NG::ParticleColorPropertyUpdater updater;
-        ParseColorUpdater(updaterJsObject, updater);
-        colorOption.SetUpdater(updater);
-    }
-    return true;
 }
 
-bool ParseParticleVelocity(JSRef<JSVal> jsValue, OHOS::Ace::NG::VelocityProperty& velocity)
+void ParseColorOption(JSRef<JSObject>& colorJsObject, OHOS::Ace::NG::ParticleColorPropertyOption& colorOption)
 {
+    auto colorRangeJsValue = colorJsObject->GetProperty("range");
+    ParseColorInitRange(colorRangeJsValue, colorOption);
+    auto updaterJsValue = colorJsObject->GetProperty("updater");
+    NG::ParticleColorPropertyUpdater updater;
+    if (updaterJsValue->IsObject()) {
+        auto updaterJsObject = JSRef<JSObject>::Cast(updaterJsValue);
+        if (ParseColorUpdater(updaterJsObject, updater)) {
+            colorOption.SetUpdater(updater);
+            return;
+        }
+    }
+    updater.SetUpdateType(NG::UpdaterType::NONE_UPDATER);
+    NG::ParticleColorPropertyUpdaterConfig noneUpdaterConfig;
+    noneUpdaterConfig.SetInValid(0);
+    updater.SetConfig(noneUpdaterConfig);
+    colorOption.SetUpdater(updater);
+}
+
+void ParseParticleVelocity(JSRef<JSVal> jsValue, OHOS::Ace::NG::VelocityProperty& velocity)
+{
+    auto defaultPair = std::pair<float, float>(0.0f, 0.0f);
     if (!jsValue->IsObject()) {
-        return false;
+        velocity.SetSpeedRange(defaultPair);
+        velocity.SetAngleRange(defaultPair);
+        return;
     }
     auto jsValueObj = JSRef<JSObject>::Cast(jsValue);
     auto speedJsValue = jsValueObj->GetProperty("speed");
     auto angleJsValue = jsValueObj->GetProperty("angle");
-    if (!speedJsValue->IsArray() || angleJsValue->IsArray()) {
-        return false;
-    }
-    auto speedPair = ParseParticleRange<float>(speedJsValue);
+    auto speedPair = ParseParticleRange<float>(speedJsValue, 0.0f);
     if (speedPair.has_value()) {
         velocity.SetSpeedRange(speedPair.value());
+    } else {
+        velocity.SetSpeedRange(defaultPair);
     }
-    auto anglePair = ParseParticleRange<float>(angleJsValue);
+    auto anglePair = ParseParticleRange<float>(angleJsValue, 0.0f);
     if (anglePair.has_value()) {
         velocity.SetAngleRange(anglePair.value());
+    } else {
+        velocity.SetAngleRange(defaultPair);
     }
-    return true;
 }
 
 void ParseParticleAcceleration(JSRef<JSVal> jsValue, OHOS::Ace::NG::AccelerationProperty& acceleration)
@@ -512,17 +631,14 @@ void ParseParticleAcceleration(JSRef<JSVal> jsValue, OHOS::Ace::NG::Acceleration
     OHOS::Ace::NG::ParticleFloatPropertyOption speedOption;
     if (speedValue->IsObject()) {
         auto speedObject = JSRef<JSObject>::Cast(speedValue);
-        if (ParseFloatOption(speedObject, speedOption)) {
-            acceleration.SetSpeed(speedOption);
-        }
+        ParseFloatOption(speedObject, speedOption, DEFAULT_SPEED, MIN_SPEED, MAX_SPEED);
+        acceleration.SetSpeed(speedOption);
     }
-
     OHOS::Ace::NG::ParticleFloatPropertyOption angleOption;
     if (alphaValue->IsObject()) {
         auto alphaObject = JSRef<JSObject>::Cast(alphaValue);
-        if (ParseFloatOption(alphaObject, angleOption)) {
-            acceleration.SetAngle(angleOption);
-        }
+        ParseFloatOption(alphaObject, angleOption, DEFAULT_ANGLE, MIN_ANGLE, MAX_ANGLE);
+        acceleration.SetAngle(angleOption);
     }
 }
 
@@ -532,43 +648,42 @@ bool ParseParticleOption(JSRef<JSObject>& particleJsObj, OHOS::Ace::NG::Particle
     if (!emitterJsValue->IsObject()) {
         return false;
     }
+
     auto emitterJsObj = JSRef<JSObject>::Cast(emitterJsValue);
     OHOS::Ace::NG::EmitterOption emitterOption;
     if (!ParseEmitterOption(emitterJsObj, emitterOption)) {
         return false;
     }
+
     particleOption.SetEmitterOption(emitterOption);
     auto colorJsValue = particleJsObj->GetProperty("color");
     if (colorJsValue->IsObject()) {
         auto colorJsObj = JSRef<JSObject>::Cast(colorJsValue);
         OHOS::Ace::NG::ParticleColorPropertyOption colorOption;
-        if (ParseColorOption(colorJsObj, colorOption)) {
-            particleOption.SetParticleColorOption(colorOption);
-        }
+        ParseColorOption(colorJsObj, colorOption);
+        particleOption.SetParticleColorOption(colorOption);
     }
+
     auto opacityJsValue = particleJsObj->GetProperty("opacity");
     if (opacityJsValue->IsObject()) {
         auto opacityJsObj = JSRef<JSObject>::Cast(opacityJsValue);
         OHOS::Ace::NG::ParticleFloatPropertyOption opacityOption;
-        if (ParseFloatOption(opacityJsObj, opacityOption)) {
-            particleOption.SetParticleOpacityOption(opacityOption);
-        }
+        ParseFloatOption(opacityJsObj, opacityOption, DEFAULT_OPACITY, MIN_OPACITY, MAX_OPACITY);
+        particleOption.SetParticleOpacityOption(opacityOption);
     }
 
     auto scaleJsValue = particleJsObj->GetProperty("scale");
     if (scaleJsValue->IsObject()) {
         auto scaleJsObj = JSRef<JSObject>::Cast(scaleJsValue);
         OHOS::Ace::NG::ParticleFloatPropertyOption scaleOption;
-        if (ParseFloatOption(scaleJsObj, scaleOption)) {
-            particleOption.SetParticleScaleOption(scaleOption);
-        }
+        ParseFloatOption(scaleJsObj, scaleOption, DEFAULT_SCALE, MIN_SCALE, MAX_SCALE);
+        particleOption.SetParticleScaleOption(scaleOption);
     }
 
     auto velocityJsValue = particleJsObj->GetProperty("velocity");
     OHOS::Ace::NG::VelocityProperty velocity;
-    if (ParseParticleVelocity(velocityJsValue, velocity)) {
-        particleOption.SetParticleVelocityOption(velocity);
-    }
+    ParseParticleVelocity(velocityJsValue, velocity);
+    particleOption.SetParticleVelocityOption(velocity);
 
     auto accelerationJsValue = particleJsObj->GetProperty("acceleration");
     OHOS::Ace::NG::AccelerationProperty acceleration;
@@ -579,9 +694,8 @@ bool ParseParticleOption(JSRef<JSObject>& particleJsObj, OHOS::Ace::NG::Particle
     if (spinJsValue->IsObject()) {
         auto spinJsObj = JSRef<JSObject>::Cast(spinJsValue);
         OHOS::Ace::NG::ParticleFloatPropertyOption spinOption;
-        if (ParseFloatOption(spinJsObj, spinOption)) {
-            particleOption.SetParticleSpinOption(spinOption);
-        }
+        ParseFloatOption(spinJsObj, spinOption, DEFAULT_SPIN, MIN_SPIN, MAX_SPIN);
+        particleOption.SetParticleSpinOption(spinOption);
     }
     return true;
 }

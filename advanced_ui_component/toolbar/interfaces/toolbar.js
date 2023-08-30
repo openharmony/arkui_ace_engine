@@ -387,7 +387,7 @@ export class ToolBar extends ViewPU {
       Tabs.onChange((e => {
       }));
       Tabs.width('100%');
-      Tabs.padding({ left: this.toolBarList.length < 5 ? 20: 0, right: this.toolBarList.length < 5 ? 20: 0})
+      Tabs.padding({ left: this.toolBarList.length < 5 ? 24: 0, right: this.toolBarList.length < 5 ? 24: 0})
       Tabs.backgroundColor({
         id: -1,
         type: 10001,
@@ -406,7 +406,7 @@ export class ToolBar extends ViewPU {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           If.create();
           this.toolBarList.length <= TOOLBAR_LIST_LENGTH ? this.ifElseBranchUpdateFunction(0, (() => {
-            this.observeComponentCreation(((e, r) => {
+            this.observeComponentCreation(((e, o) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
               TabContent.create();
               TabContent.tabBar({
@@ -416,12 +416,12 @@ export class ToolBar extends ViewPU {
               });
               TabContent.enabled(!(ITEM_DISABLE_STATE === this.toolBarList[t].state));
               TabContent.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[t].state));
-              r || TabContent.pop();
+              o || TabContent.pop();
               ViewStackProcessor.StopGetAccessRecording();
             }));
             TabContent.pop();
           })) : t < TOOLBAR_LIST_NORMORL && this.ifElseBranchUpdateFunction(1, (() => {
-            this.observeComponentCreation(((e, r) => {
+            this.observeComponentCreation(((e, o) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
               TabContent.create();
               TabContent.tabBar({
@@ -431,12 +431,12 @@ export class ToolBar extends ViewPU {
               });
               TabContent.enabled(!(ITEM_DISABLE_STATE === this.toolBarList[t].state));
               TabContent.focusOnTouch(!(ITEM_DISABLE_STATE === this.toolBarList[t].state));
-              r || TabContent.pop();
+              o || TabContent.pop();
               ViewStackProcessor.StopGetAccessRecording();
             }));
             TabContent.pop();
           }));
-          r || If.pop();
+          o || If.pop();
           ViewStackProcessor.StopGetAccessRecording();
         }));
         If.pop();

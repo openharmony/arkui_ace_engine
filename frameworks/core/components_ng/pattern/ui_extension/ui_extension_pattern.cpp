@@ -53,7 +53,7 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
         .bundleName_ = want.GetElement().GetBundleName(),
         .abilityName_ = want.GetElement().GetAbilityName(),
         .callerToken_ = callerToken,
-        .want = new (std::nothrow) Want(want),
+        .want = std::make_shared<Want>(want),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -75,7 +75,7 @@ UIExtensionPattern::UIExtensionPattern(const AAFwk::Want& want)
         .bundleName_ = want.GetElement().GetBundleName(),
         .abilityName_ = want.GetElement().GetAbilityName(),
         .callerToken_ = callerToken,
-        .want = new (std::nothrow) Want(want),
+        .want = std::make_shared<Want>(want),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -149,7 +149,7 @@ void UIExtensionPattern::OnDisconnect()
     CHECK_NULL_VOID_NOLOG(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID_NOLOG(taskExecutor);
-    isDestruction_ = true;
+    state_ = AbilityState::DESTRUCTION;
     taskExecutor->PostTask(
         [weak = WeakClaim(this)]() {
             auto extensionPattern = weak.Upgrade();
@@ -163,18 +163,18 @@ void UIExtensionPattern::OnDisconnect()
 
 void UIExtensionPattern::OnExtensionDied()
 {
-    LOGI("UIExtensionPattern OnExtensionDied called");
+    LOGI("UIExtension OnExtensionDied called");
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID_NOLOG(taskExecutor);
+    state_ = AbilityState::DESTRUCTION;
     taskExecutor->PostTask(
         [weak = WeakClaim(this)]() {
             auto extensionPattern = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(extensionPattern);
             if (extensionPattern->onReleaseCallback_) {
-                extensionPattern->isDestruction_ = true;
                 extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
             }
         },
@@ -215,6 +215,7 @@ void UIExtensionPattern::OnWindowHide()
 
 void UIExtensionPattern::RequestExtensionSessionActivation()
 {
+    LOGI("UIExtension request UIExtensionAbility foreground, AbilityState=%{public}d", static_cast<int>(state_));
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
@@ -232,14 +233,15 @@ void UIExtensionPattern::RequestExtensionSessionActivation()
             std::swap(lastError_, error);
             onErrorCallback_(error.code, error.name, error.message);
         }
+    } else {
+        state_ = AbilityState::FOREGROUND;
     }
 }
 
 void UIExtensionPattern::RequestExtensionSessionBackground()
 {
-    LOGI("UIExtension request UIExtensionAbility background, isDestruction_=%{public}u, isBackground_=%{public}u",
-            isDestruction_, isBackground_);
-    if (!isDestruction_ && !isBackground_) {
+    LOGI("UIExtension request UIExtensionAbility background, AbilityState=%{public}d", static_cast<int>(state_));
+    if (state_ == AbilityState::FOREGROUND) {
         sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
         auto errcode =
             Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession);
@@ -251,15 +253,15 @@ void UIExtensionPattern::RequestExtensionSessionBackground()
                 onErrorCallback_(code, name, message);
             }
         } else {
-            isBackground_ = true;
+            state_ = AbilityState::BACKGROUND;
         }
     }
 }
 
 void UIExtensionPattern::RequestExtensionSessionDestruction()
 {
-    LOGI("UIExtension request UIExtensionAbility destroy, isDestruction_=%{public}u", isDestruction_);
-    if (!isDestruction_) {
+    LOGI("UIExtension request UIExtensionAbility destroy, AbilityState=%{public}d", static_cast<int>(state_));
+    if (state_ != AbilityState::DESTRUCTION && state_ != AbilityState::NONE) {
         sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
         auto errcode =
             Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession);
@@ -270,6 +272,8 @@ void UIExtensionPattern::RequestExtensionSessionDestruction()
                 std::string message = "terminate ui extension ability failed, please check AMS log.";
                 onErrorCallback_(code, name, message);
             }
+        } else {
+            state_ = AbilityState::DESTRUCTION;
         }
     }
 }
@@ -570,10 +574,12 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferAbilityResultFunc_ =
         [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor](int32_t code, const AAFwk::Want& want) {
-            taskExecutor->PostTask([weak, instanceId, code, want]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(pattern);
+            pattern->state_ = AbilityState::DESTRUCTION;
+            taskExecutor->PostTask([pattern, instanceId, code, want]() {
                 ContainerScope scope(instanceId);
                 LOGI("UIExtension OnResult called");
-                auto pattern = weak.Upgrade();
                 if (pattern && pattern->onResultCallback_) {
                     pattern->onResultCallback_(code, want);
                 }

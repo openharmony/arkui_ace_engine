@@ -150,6 +150,10 @@ public:
         visibleAreaUserCallbacks_[ratio] = callback;
     }
 
+    void ClearVisibleAreaUserCallback()
+    {
+        visibleAreaUserCallbacks_.clear();
+    }
     void AddVisibleAreaInnerCallback(double ratio, const VisibleCallbackInfo& callback)
     {
         visibleAreaInnerCallbacks_[ratio] = callback;
@@ -510,6 +514,13 @@ public:
     void SyncGeometryNode();
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     bool CheckNeedForceMeasureAndLayout() override;
+
+    void ForceSyncGeometryNode()
+    {
+        CHECK_NULL_VOID_NOLOG(renderContext_);
+        oldGeometryNode_.Reset();
+        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
+    }
 
     template<typename T>
     RefPtr<T> FindFocusChildNodeOfClass()

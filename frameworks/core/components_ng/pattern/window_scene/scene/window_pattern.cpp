@@ -102,7 +102,7 @@ bool WindowPattern::IsMainWindow() const
     return session_->GetWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
 
-void WindowPattern::InitContent()
+void WindowPattern::OnAttachToFrameNode()
 {
     contentNode_ = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
@@ -183,13 +183,17 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
     snapshotNode_->SetHitTestMode(HitTestMode::HTMNONE);
 
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-    CHECK_NULL_VOID(session_);
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
-        CHECK_NULL_VOID(pixelMap);
+        if (!pixelMap) {
+            LOGE("pixelMap is null");
+            snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+            return;
+        }
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
     } else {
+        snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+        CHECK_NULL_VOID(session_);
         CHECK_NULL_VOID(session_->GetScenePersistence());
         ImageSourceInfo sourceInfo("file://" + session_->GetScenePersistence()->GetSnapshotFilePath());
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
@@ -204,15 +208,6 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
     }
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     snapshotNode_->MarkModifyDone();
-}
-
-void WindowPattern::OnAttachToFrameNode()
-{
-    InitContent();
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -288,36 +283,15 @@ void WindowPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
-void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
-{
-    LOGD("WindowPattern HandleTouchEvent enter");
-    const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID(pointerEvent);
-    if (IsFilterTouchEvent(pointerEvent)) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
-    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
-    SetWindowSceneConsumed(pointerEvent->GetPointerAction());
-    AdapterRotation(pointerEvent);
-    DispatchPointerEvent(pointerEvent);
-}
-
-void WindowPattern::AdapterRotation(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+int32_t CalculateTranslateDegree(int32_t hostId)
 {
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
-    CHECK_NULL_VOID(pointerEvent);
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto translateIter = translateIds.find(frameNode->GetId());
-    if (translateIter == translateIds.end()) {
-        return;
-    }
+    auto translateIter = translateIds.find(hostId);
     int32_t udegree = 0;
+    if (translateIter == translateIds.end()) {
+        return udegree;
+    }
     while (translateIter != translateIds.end()) {
         int32_t translateId = translateIter->second.parentId;
         auto translateCfgIter = translateCfg.find(translateId);
@@ -328,39 +302,57 @@ void WindowPattern::AdapterRotation(const std::shared_ptr<MMI::PointerEvent>& po
         translateIter = translateIds.find(translateId);
     }
     udegree = udegree % 360;
-    if (udegree == -1 || udegree == 0) {
-        return;
-    }
-    udegree = udegree < 0 ? udegree + 360 : udegree;
-    int32_t pointerId = pointerEvent->GetPointerId();
-    MMI::PointerEvent::PointerItem item;
-    bool ret = pointerEvent->GetPointerItem(pointerId, item);
-    if (!ret) {
-        return;
-    }
-    int32_t originWindowX = item.GetWindowX();
-    int32_t originWindowY = item.GetWindowY();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto rect = host->GetPaintRectWithTransform();
-    int32_t width = static_cast<int32_t>(rect.Width());
-    int32_t height = static_cast<int32_t>(rect.Height());
+    return udegree < 0 ? udegree + 360 : udegree;
+}
 
-    if (udegree == 90) {
-        item.SetWindowX(originWindowY);
-        item.SetWindowY(height - originWindowX);
+void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    LOGD("WindowPattern HandleTouchEvent enter");
+    const auto pointerEvent = info.GetPointerEvent();
+    CHECK_NULL_VOID(pointerEvent);
+    if (IsFilterTouchEvent(pointerEvent)) {
+        return;
     }
-    if (udegree == 180) {
-        item.SetWindowX(width - originWindowX);
-        item.SetWindowY(height - originWindowY);
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    FilterInvalidPointerItem(pointerEvent);
+    auto selfGlobalOffset = host->GetTransformRelativeOffset();
+    auto scale = host->GetTransformScale();
+    auto udegree = CalculateTranslateDegree(host->GetId());
+    Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+    SetWindowSceneConsumed(pointerEvent->GetPointerAction());
+    DispatchPointerEvent(pointerEvent);
+    if (SystemProperties::GetDebugEnabled()) {
+        int32_t pointerId = pointerEvent->GetPointerId();
+        MMI::PointerEvent::PointerItem item;
+        bool ret = pointerEvent->GetPointerItem(pointerId, item);
+        if (ret) {
+            LOGI("WindowPattern AdapterRotation udegree:%{public}d, windowX:%{public}d, windowY:%{public}d", udegree,
+                item.GetWindowX(), item.GetWindowY());
+        }
     }
-    if (udegree == 270) {
-        item.SetWindowX(width - originWindowY);
-        item.SetWindowY(originWindowX);
+}
+
+void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto ids = pointerEvent->GetPointerIds();
+    if (ids.size() <= 1) {
+        return;
     }
-    pointerEvent->UpdatePointerItem(pointerId, item);
-    LOGD("WindowPattern AdapterRotation udegree:%{public}d, windowX:%{public}d, windowY:%{public}d", udegree,
-        item.GetWindowX(), item.GetWindowY());
+    for (auto&& id : ids) {
+        MMI::PointerEvent::PointerItem item;
+        bool ret = pointerEvent->GetPointerItem(id, item);
+        if (!ret) {
+            LOGE("get pointer:%{public}d item failed", id);
+            continue;
+        }
+        const NG::PointF point { static_cast<float>(item.GetDisplayX()), static_cast<float>(item.GetDisplayY()) };
+        if (host->IsOutOfTouchTestRegion(point, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN)) {
+            pointerEvent->RemovePointerItem(id);
+        }
+    }
 }
 
 bool WindowPattern::IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -385,26 +377,23 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);
+    DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
+        host->GetId(), session_, pointerEvent);
     int32_t action = pointerEvent->GetPointerAction();
-    if ((action == MMI::PointerEvent::POINTER_ACTION_MOVE &&
-        pointerEvent->GetButtonId() == MMI::PointerEvent::BUTTON_NONE) ||
-        (action == MMI::PointerEvent::POINTER_ACTION_ENTER_WINDOW)) {
-        DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
-            AceType::DynamicCast<WindowNode>(host), pointerEvent);
-    }
     if (action == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE) {
         DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowDragEvent(
             AceType::DynamicCast<WindowNode>(host), pointerEvent);
-    }
-    if ((pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) &&
-        (action == MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW)) {
-        DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowMouseRecord();
     }
     if (action == MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         DelayedSingleton<WindowEventProcess>::GetInstance()->CleanWindowDragEvent();
     }
     SetWindowSceneConsumed(action);
     DispatchPointerEvent(pointerEvent);
+}
+
+sptr<Rosen::Session> WindowPattern::GetSession()
+{
+    return session_;
 }
 
 bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

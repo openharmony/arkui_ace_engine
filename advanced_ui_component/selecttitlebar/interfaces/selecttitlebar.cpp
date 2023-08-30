@@ -23,7 +23,7 @@ extern const char _binary_selecttitlebar_abc_end[];
 
 // Napi get abc code function
 extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_selecttitlebar_GetABCCode(const char **buf, int *buflen)
+void NAPI_arkui_advanced_SelectTitleBar_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_selecttitlebar_abc_start;
@@ -36,11 +36,11 @@ void NAPI_arkui_advanced_selecttitlebar_GetABCCode(const char **buf, int *buflen
 /*
  * Module define
  */
-static napi_module selecttitlebarModule = {
+static napi_module SelectTitleBarModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_modname = "arkui.advanced.selecttitlebar",
+    .nm_modname = "arkui.advanced.SelectTitleBar",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
@@ -48,7 +48,7 @@ static napi_module selecttitlebarModule = {
 /*
  * Module registerfunction
  */
-extern "C" __attribute__((constructor)) void selecttitlebarRegisterModule(void)
+extern "C" __attribute__((constructor)) void SelectTitleBarRegisterModule(void)
 {
-    napi_module_register(&selecttitlebarModule);
+    napi_module_register(&SelectTitleBarModule);
 }

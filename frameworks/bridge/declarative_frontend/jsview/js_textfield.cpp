@@ -486,6 +486,10 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
         return;
     }
     std::string inputFilter;
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetInputFilter(inputFilter, nullptr);
+        return;
+    }
     if (!ParseJsString(info[0], inputFilter)) {
         LOGI("Parse inputFilter failed");
         return;
@@ -538,6 +542,7 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
     }
     if (LessNotEqual(value.Value(), 0.0)) {
         LOGI("dimension value: %{public}f is invalid!", value.Value());
+        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return;
     }
     TextFieldModel::GetInstance()->SetHeight(value);

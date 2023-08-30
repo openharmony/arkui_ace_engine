@@ -30,6 +30,11 @@ ViewStackProcessor* ViewStackProcessor::GetInstance()
 
 ViewStackProcessor::ViewStackProcessor() = default;
 
+std::string ViewStackProcessor::ProcessViewId(const std::string& viewId)
+{
+    return "";
+}
+
 RefPtr<FrameNode> ViewStackProcessor::GetMainFrameNode() const
 {
     return AceType::DynamicCast<FrameNode>(GetMainElementNode());

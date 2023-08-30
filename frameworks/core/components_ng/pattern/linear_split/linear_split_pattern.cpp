@@ -251,10 +251,18 @@ void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
     }
 
     if (splitType_ == SplitType::ROW_SPLIT) {
-        childrenDragPos_[dragedSplitIndex_ + 1] += xOffset - preOffset_;
+        float locationDiff = childrenDragPos_[dragedSplitIndex_ + 1] - gestureOffsetX;
+        float offsetDiff = xOffset - preOffset_;
+        if (locationDiff * offsetDiff < 0) {
+            childrenDragPos_[dragedSplitIndex_ + 1] += offsetDiff;
+        }
         preOffset_ = xOffset;
     } else {
-        childrenDragPos_[dragedSplitIndex_ + 1] += yOffset - preOffset_;
+        float locationDiff = childrenDragPos_[dragedSplitIndex_ + 1] - gestureOffsetY;
+        float offsetDiff = yOffset - preOffset_;
+        if (locationDiff * offsetDiff < 0) {
+            childrenDragPos_[dragedSplitIndex_ + 1] += offsetDiff;
+        }
         preOffset_ = yOffset;
     }
 

@@ -160,7 +160,7 @@ bool FocusHub::RequestFocusImmediately(bool isWholePathFocusable)
         return true;
     }
 
-    if (!isWholePathFocusable && !IsFocusableWholePath()) {
+    if (!IsFocusable()) {
         return false;
     }
 
@@ -533,14 +533,16 @@ bool FocusHub::OnKeyEventNode(const KeyEvent& keyEvent)
         GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
 
     if (!retInternal && !retCallback && keyEvent.action == KeyAction::DOWN) {
+        auto ret = false;
         switch (keyEvent.code) {
             case KeyCode::KEY_SPACE:
             case KeyCode::KEY_ENTER:
             case KeyCode::KEY_NUMPAD_ENTER:
-                OnClick(keyEvent);
+                ret = OnClick(keyEvent);
                 break;
             default:;
         }
+        return ret;
     }
     return retInternal || retCallback;
 }
@@ -716,14 +718,14 @@ void FocusHub::RefreshParentFocusable(bool focusable)
     }
 }
 
-void FocusHub::OnClick(const KeyEvent& event)
+bool FocusHub::OnClick(const KeyEvent& event)
 {
     auto onClickCallback = GetOnClickCallback();
     if (onClickCallback) {
         auto info = GestureEvent();
         info.SetTimeStamp(event.timeStamp);
         auto geometryNode = GetGeometryNode();
-        CHECK_NULL_VOID_NOLOG(geometryNode);
+        CHECK_NULL_RETURN_NOLOG(geometryNode, false);
         auto rect = geometryNode->GetFrameRect();
         info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
         info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
@@ -735,7 +737,9 @@ void FocusHub::OnClick(const KeyEvent& event)
             GetFrameName().c_str(), GetFrameId(), info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(),
             info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetSourceDevice(), info.GetDeviceId());
         onClickCallback(info);
+        return true;
     }
+    return false;
 }
 
 void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
@@ -1462,13 +1466,16 @@ void FocusHub::HandleParentScroll() const
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (!context->GetIsFocusActive() || focusType_ == FocusType::DISABLE) {
+    if (!context->GetIsFocusActive() || (focusType_ != FocusType::NODE && !isFocusUnit_)) {
         return;
     }
     auto parent = GetParentFocusHub();
     RefPtr<FrameNode> parentFrame;
     RefPtr<Pattern> parentPattern;
     while (parent) {
+        if (parent->isFocusUnit_) {
+            return;
+        }
         parentFrame = parent->GetFrameNode();
         if (!parentFrame) {
             parent = parent->GetParentFocusHub();

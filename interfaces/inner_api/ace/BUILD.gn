@@ -98,7 +98,8 @@ ohos_shared_library("ace_forward_compatibility") {
   sources =
       [ "${ace_root}/interfaces/inner_api/ace/ace_forward_compatibility.cpp" ]
 
-  if (!use_mingw_win && !use_mac && !use_linux) {
+  if (current_os == "ohos") {
+    defines = [ "OHOS_PLATFORM" ]
     sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
     external_deps = [
       "hilog:libhilog",

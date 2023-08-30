@@ -32,6 +32,10 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
     auto videoNode = VideoNode::GetOrCreateVideoNode(
         V2::VIDEO_ETS_TAG, nodeId, [videoController]() { return AceType::MakeRefPtr<VideoPattern>(videoController); });
     CHECK_NULL_VOID(videoNode);
+    auto videoFocusHub = videoNode->GetFocusHub();
+    if (videoFocusHub) {
+        videoFocusHub->SetIsFocusUnit(true);
+    }
     stack->Push(videoNode);
     bool hasPreviewImageNode = videoNode->HasPreviewImageNode();
     bool hasControllerRowNode = videoNode->HasControllerRowNode();

@@ -90,6 +90,17 @@ std::string RenderSurfaceImpl::GetUniqueId() const
     return std::to_string(surfaceId_);
 }
 
+bool RenderSurfaceImpl::SetExtSurfaceBoundsSync(int32_t left, int32_t top, int32_t width, int32_t height)
+{
+    if (extSurface_) {
+        LOGI("RenderSurfaceImpl::SetBounds (%{public}d, %{public}d) - (%{public}d x %{public}d)", left, top,
+            width, height);
+        extSurface_->SetBounds(surfaceId_, left, top, width, height);
+        return true;
+    }
+    return false;
+}
+
 void RenderSurfaceImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t width, int32_t height)
 {
     LOGI("RenderSurfaceImpl::SetExtSurfaceBounds (%{public}d, %{public}d) - (%{public}d x %{public}d)", left, top,

@@ -83,7 +83,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
     if (refereeNG_->CheckSourceTypeChange(touchPoint.sourceType)) {
-        refereeNG_->CleanAll();
+        refereeNG_->CleanAll(true);
     }
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
@@ -117,7 +117,7 @@ void EventManager::TouchTest(
     ContainerScope scope(instanceId_);
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
-        refereeNG_->CleanAll();
+        refereeNG_->CleanAll(true);
     }
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
@@ -642,6 +642,9 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
             } else if (event.action == MouseAction::RELEASE) {
                 DoMouseActionRelease();
             }
+        }
+        if (event.pullAction == MouseAction::PULL_UP) {
+            DoMouseActionRelease();
         }
         for (const auto& mouseTarget : currMouseTestResults_) {
             if (mouseTarget &&

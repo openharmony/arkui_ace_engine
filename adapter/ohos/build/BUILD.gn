@@ -21,7 +21,7 @@ group("ace_packages") {
     "$ace_root/advanced_ui_component:advanced_ui_component",
     "$ace_root/build:libace",
     "$ace_root/build:libace_compatible",
-    "$ace_root/build:libace_engine_pa_ark_ohos",
+    "$ace_root/build:libace_engine_pa_ark",
     "$ace_root/frameworks/core/common/register:hdc_register",
     "$ace_root/interfaces/inner_api:innerkits_target",
     "$ace_root/interfaces/inner_api/ace:ace_forward_compatibility",

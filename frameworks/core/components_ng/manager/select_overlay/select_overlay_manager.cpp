@@ -45,8 +45,20 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     }
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+
+    // get keyboard index to put selet_overlay before keyboard node
+    int32_t slot = DEFAULT_NODE_SLOT;
+    int32_t index = 0;
+    for (const auto& it : rootNode->GetChildren()) {
+        if (it->GetTag() == V2::KEYBOARD_ETS_TAG) {
+            slot = index;
+            break;
+        }
+        index++;
+    }
+
     // mount to parent
-    selectOverlayNode->MountToParent(rootNode);
+    selectOverlayNode->MountToParent(rootNode, slot);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (!infoPtr->isUsingMouse) {
         auto node = DynamicCast<SelectOverlayNode>(selectOverlayNode);
@@ -138,10 +150,18 @@ bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
     }
     // get the menu rect not the out wrapper
-    auto menu = DynamicCast<FrameNode>(current->GetFirstChild());
-    CHECK_NULL_RETURN_NOLOG(menu, false);
-    auto menuRect = menu->GetGeometryNode()->GetFrameRect();
-    return menuRect.IsInRegion(point);
+    const auto& children = current->GetChildren();
+    for (const auto& it : children) {
+        auto child = DynamicCast<FrameNode>(it);
+        if (child == nullptr) {
+            continue;
+        }
+        auto frameRect = child->GetGeometryNode()->GetFrameRect();
+        if (frameRect.IsInRegion(point)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t overlayId)

@@ -59,6 +59,9 @@ void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper
             topPadding = padding->top.value_or(0.0f);
             bottomPadding = padding->bottom.value_or(0.0f);
         }
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            rightOffset = 0.0f;
+        }
         // Paint divider.
         float dividerVerticalOffset = (searchSize.Height() - iconHeight.ConvertToPx()) / 2.0;
         float dividerHorizontalOffset = searchSize.Width() - buttonSize_.Width() - dividerSpace - searchSpace -

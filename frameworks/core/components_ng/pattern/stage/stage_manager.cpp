@@ -90,7 +90,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page), instanceId = Container::CurrentId()]() {
             ContainerScope scope(instanceId);
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             LOGI("pageTransition in finish");
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
@@ -210,6 +210,8 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         return true;
     }
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
     return true;
 }
 

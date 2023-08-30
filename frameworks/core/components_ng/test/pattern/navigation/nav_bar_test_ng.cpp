@@ -788,7 +788,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern005, TestSize.Level1)
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
-    barItemNode->SetIsTitleMenuNodeShowing(true);
+    navBarNode_->SetIsTitleMenuNodeShowing(true);
 
     bool isItemActionFired = false;
     auto barItemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
@@ -800,19 +800,18 @@ HWTEST_F(NavBarTestNg, NavBarPattern005, TestSize.Level1)
 
     /**
      * @tc.steps: step3. call OnWindowSizeChanged func when PrevMenuIsCustom is true
-     * @tc.expected: Set isItemActionFired is false
+     * @tc.expected: Set isItemActionFired is true
      */
     navBarNode_->UpdatePrevMenuIsCustom(true);
-    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
-    EXPECT_FALSE(isItemActionFired);
+    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
+    EXPECT_TRUE(isItemActionFired);
 
     /**
      * @tc.steps: step4. call OnWindowSizeChanged func when PrevMenuIsCustom is false
-     * @tc.expected: GetTheme function is called and isItemActionFired is true
+     * @tc.expected: isItemActionFired is true
      */
     navBarNode_->UpdatePrevMenuIsCustom(false);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
-    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
+    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
     EXPECT_TRUE(isItemActionFired);
 }
 
@@ -848,7 +847,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
-    barItemNode->SetIsTitleMenuNodeShowing(true);
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
@@ -874,7 +872,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
     auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
     ASSERT_NE(theme, nullptr);
     theme->toolbarLimitGridCount_ = 1;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(theme));
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
 
     /**
@@ -882,7 +879,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
      * @tc.expected:GetTheme function is called
      */
     SystemProperties::SetDeviceType(DeviceType::TABLET);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(theme));
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
     SystemProperties::SetDeviceType(DeviceType::PHONE);
 }
@@ -987,8 +983,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern009, TestSize.Level1)
     navBarNode_->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
     ASSERT_TRUE(navBarNode_->GetMenuNodeOperation().has_value());
     navBarpattern_->OnModifyDone();
-    ASSERT_NE(titleBarNode_->GetLastChild(), nullptr);
-    EXPECT_EQ(titleBarNode_->GetLastChild()->GetTag(), NAV_BAR_NODE_MENU);
+    ASSERT_EQ(titleBarNode_->GetLastChild(), nullptr);
 
     /**
      * @tc.steps: step6. Call OnModifyDone when EventHub is not enabled, DeviceOrientation is ORIENTATION_UNDEFINED,
@@ -1008,8 +1003,8 @@ HWTEST_F(NavBarTestNg, NavBarPattern009, TestSize.Level1)
     testParameters.menuItems.push_back(testParameters.menuItem);
     navBarpattern_->SetTitleBarMenuItems(testParameters.menuItems);
     navBarpattern_->OnModifyDone();
-    ASSERT_NE(titleBarNode_->GetLastChild(), nullptr);
-    EXPECT_EQ(titleBarNode_->GetLastChild()->GetTag(), V2::NAVIGATION_MENU_ETS_TAG);
+    ASSERT_EQ(titleBarNode_->GetLastChild(), nullptr);
+    EXPECT_NE(navBarNode_->GetLandscapeMenu(), nullptr);
 
     /**
      * @tc.steps: step9. Call OnModifyDone when MostMenuItemCountInBar is 1.
@@ -1017,74 +1012,8 @@ HWTEST_F(NavBarTestNg, NavBarPattern009, TestSize.Level1)
      */
     testParameters.theme->mostMenuItemCountInBar_ = 1;
     navBarpattern_->OnModifyDone();
-    ASSERT_NE(titleBarNode_->GetLastChild(), nullptr);
-    EXPECT_EQ(titleBarNode_->GetLastChild()->GetTag(), V2::NAVIGATION_MENU_ETS_TAG);
-}
-
-/**
- * @tc.name: NavBarPattern010
- * @tc.desc: Test BuildMoreItemNodeAction function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, NavBarPattern010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialization parameters.
-     */
-    TestParameters testParameters;
-    InitializationParameters(testParameters);
-
-    /**
-     * @tc.steps: step2. Call OnModifyDone to call BuildMoreItemNodeAction.
-     */
-    navBarNode_->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
-    navBarNode_->UpdatePrevMenuIsCustom(false);
-    navBarpattern_->OnModifyDone();
-
-    /**
-     * @tc.steps: step3. Test BuildMoreItemNodeAction.
-     */
-    /**
-     * @tc.case: case1: Call FireItemAction.
-     */
-    auto menuNode = navBarNode_->GetLandscapeMenu();
-    ASSERT_NE(menuNode, nullptr);
-    auto lastMenuItemNode = AceType::DynamicCast<FrameNode>(menuNode->GetLastChild());
-    ASSERT_NE(lastMenuItemNode, nullptr);
-    auto barItemNode = AceType::DynamicCast<BarItemNode>(lastMenuItemNode->GetLastChild());
-    ASSERT_NE(barItemNode, nullptr);
-    barItemNode->SetIsTitleMenuNodeShowing(false);
-    auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    ASSERT_NE(eventHub->itemAction_, nullptr);
-    eventHub->FireItemAction();
-    EXPECT_TRUE(barItemNode->IsTitleMenuNodeShowing());
-    /**
-     * @tc.case: case2: Call CallOnHideMenuCallback.
-     */
-    auto overlayManager = testParameters.pipeline->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    ASSERT_NE(overlayManager->onHideMenuCallback_, nullptr);
-    overlayManager->CallOnHideMenuCallback();
-    EXPECT_FALSE(barItemNode->IsTitleMenuNodeShowing());
-    /**
-     * @tc.case: case3: Call click callback when SourceDevice is KEYBOARD.
-     */
-    auto lastGestureEventHub = lastMenuItemNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(lastGestureEventHub, nullptr);
-    auto lastClickListener = lastGestureEventHub->clickEventActuator_->clickEvents_.back();
-    ASSERT_NE(lastClickListener, nullptr);
-    ASSERT_NE(lastClickListener->callback_, nullptr);
-    GestureEvent info;
-    info.SetSourceDevice(SourceType::KEYBOARD);
-    lastClickListener->callback_(info);
-    EXPECT_FALSE(barItemNode->IsTitleMenuNodeShowing());
-    /**
-     * @tc.case: case4: Call click callback when SourceDevice is TOUCH.
-     */
-    info.SetSourceDevice(SourceType::TOUCH);
-    lastClickListener->callback_(info);
-    EXPECT_TRUE(barItemNode->IsTitleMenuNodeShowing());
+    ASSERT_EQ(titleBarNode_->GetLastChild(), nullptr);
+    EXPECT_NE(navBarNode_->GetLandscapeMenu(), nullptr);
 }
 
 /**

@@ -65,6 +65,7 @@
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
+struct TextConfig;
 } // namespace OHOS::MiscServices
 #endif
 #endif
@@ -161,6 +162,9 @@ public:
             textFieldOverlayModifier =
                 AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect());
             SetScrollBarOverlayModifier(textFieldOverlayModifier);
+        }
+        if (isCustomFont_) {
+            textFieldContentModifier_->SetIsCustomFont(true);
         }
         auto paint =
             MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier, textFieldContentModifier_);
@@ -278,6 +282,7 @@ public:
 
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void UpdateInputFilterErrorText(const std::string& errorText) override;
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
@@ -1004,10 +1009,26 @@ public:
     }
 
     void DumpInfo() override;
+    void OnColorConfigurationUpdate() override;
 
     void ShowPasswordIconChange()
     {
         caretUpdateType_ = CaretUpdateType::VISIBLE_PASSWORD_ICON;
+    }
+
+    void SetIsCustomFont(bool isCustomFont)
+    {
+        isCustomFont_ = isCustomFont;
+    }
+
+    bool GetIsCustomFont()
+    {
+        return isCustomFont_;
+    }
+
+    bool IsFocus()
+    {
+        return HasFocus();
     }
 
 private:
@@ -1094,6 +1115,7 @@ private:
     bool FilterWithRegex(
         const std::string& filter, const std::string& valueToUpdate, std::string& result, bool needToEscape = false);
     bool FilterWithAscii(const std::string& valueToUpdate, std::string& result);
+    bool FilterWithEmail(std::string& result);
     void EditingValueFilter(std::string& valueToUpdate, std::string& result, bool isInsertValue = false);
 #ifndef USE_GRAPHIC_TEXT_GINE
     bool LastTouchIsInSelectRegion(const std::vector<RSTypographyProperties::TextBox>& boxes);
@@ -1136,12 +1158,13 @@ private:
 
     bool ResetObscureTickCountDown();
     bool IsInPasswordMode() const;
-#ifndef USE_GRAPHIC_TEXT_GINE
     void GetWordBoundaryPositon(int32_t offset, int32_t& start, int32_t& end);
-#endif
     bool IsTouchAtLeftOffset(float currentOffsetX);
     void FilterExistText();
     void UpdateErrorTextMargin();
+#if defined(ENABLE_STANDARD_INPUT)
+    std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
+#endif
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1200,11 +1223,7 @@ private:
     bool focusEventInitialized_ = false;
     bool isMousePressed_ = false;
     bool needCloseOverlay_ = true;
-#if defined(ENABLE_STANDARD_INPUT) || defined(PREVIEW)
     bool textObscured_ = true;
-#else
-    bool textObscured_ = false;
-#endif
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;
@@ -1233,10 +1252,12 @@ private:
     float inlinePadding_ = 0.0f;
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
+    bool needApplyInlineSize_ = false;
     std::optional<DisplayMode> barState_;
     InputStyle preInputStyle_ = InputStyle::DEFAULT;
     bool preErrorState_ = false;
     float preErrorMargin_ = 0.0f;
+    bool restoreMarginState_ = false;
 
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
@@ -1299,6 +1320,7 @@ private:
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
     bool isTouchAtLeftOffset_ = true;
+    bool isCustomFont_ = false;
 };
 } // namespace OHOS::Ace::NG
 

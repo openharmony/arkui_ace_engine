@@ -115,7 +115,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
                 textFieldPattern->GetCountHeight());
     }
     canvas.Save();
-    if (showErrorState_->Get() && errorParagraph) {
+    if (showErrorState_->Get() && errorParagraph && !textFieldPattern->IsDisabled()) {
         errorParagraph->Paint(&canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
     }
 
@@ -130,7 +130,13 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID_NOLOG(passwordIconCanvasImage);
     UpdatePaintConfig(passwordIconCanvasImage, context, iconRect);
     const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
+    canvas.Save();
+    auto iconRight = std::min(textFrameRect.Width(), iconRect.Width()) + iconRect.GetX();
+    auto iconBottom = std::min(textFrameRect.Height(), iconRect.Height()) + iconRect.GetY();
+    clipInnerRect = RSRect(iconRect.GetX(), iconRect.GetY(), iconRight, iconBottom);
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     passwordIconImagePainter.DrawImage(canvas, iconRect.GetOffset(), iconRect.GetSize());
+    canvas.Restore();
 }
 
 void TextFieldContentModifier::UpdatePaintConfig(

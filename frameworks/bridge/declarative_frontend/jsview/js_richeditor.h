@@ -47,8 +47,8 @@ private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
-    static void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions,
-        NG::MenuParam& menuParam);
+    static void ParseMenuParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, SelectMenuParam& menuParam);
 };
 
 class JSRichEditorController final : public Referenced {
