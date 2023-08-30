@@ -36,7 +36,7 @@ AbilityComponentPattern::AbilityComponentPattern(const std::string& bundleName, 
             .bundleName_ = bundleName,
             .abilityName_ = abilityName,
             .callerToken_ = container->GetToken(),
-            .want = new (std::nothrow) Want(want),
+            .want = std::make_shared<Want>(want),
         };
         session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     }
