@@ -102,6 +102,18 @@ void BubblePattern::OnAttachToFrameNode()
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
     host->GetRenderContext()->SetClipToFrame(true);
+
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+    CHECK_NULL_VOID(targetNode);
+    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
+    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
+                                              const OffsetF& /* origin */) {
+        auto popupNode = popupNodeWk.Upgrade();
+        CHECK_NULL_VOID(popupNode);
+        popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
 }
 
 void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -110,6 +122,9 @@ void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+    CHECK_NULL_VOID(targetNode);
+    pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
 }
 
 void BubblePattern::InitTouchEvent()
