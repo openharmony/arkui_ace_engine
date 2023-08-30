@@ -525,7 +525,7 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
 #endif // ENABLE_DRAG_FRAMEWORK
 }
 
-void SubwindowOhos::ClearMenuNG()
+void SubwindowOhos::ClearMenuNG(bool inWindow)
 {
     LOGI("SubwindowOhos::ClearMenuNG");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -538,7 +538,9 @@ void SubwindowOhos::ClearMenuNG()
     HideWindow();
     context->FlushPipelineImmediately();
 #ifdef ENABLE_DRAG_FRAMEWORK
-    HideEventColumn();
+    if (inWindow) {
+        HideEventColumn();
+    }
     HidePixelMap();
     HideFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
