@@ -440,21 +440,22 @@ void NavigationPattern::UpdateContextRect(
     curDestination->GetRenderContext()->ClipWithRRect(
         RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
     curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
-    if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
-        auto navBarProperty = navBarNode->GetLayoutProperty();
-        navBarProperty->UpdateVisibility(VisibleType::VISIBLE);
-        curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+    
+    if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
         curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-        auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
-        CHECK_NULL_VOID_NOLOG(titleNode);
-        titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
+        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
         return;
     }
+    auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
     auto navBarProperty = navBarNode->GetLayoutProperty();
-    navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    navBarProperty->UpdateVisibility(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE));
+    curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
     curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-    navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
+    navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
+    auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
+    CHECK_NULL_VOID_NOLOG(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
 }
 
 bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode)
