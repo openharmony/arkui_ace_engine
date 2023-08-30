@@ -702,7 +702,7 @@ void VideoPattern::OnAttachToFrameNode()
     renderContextForMediaPlayer_->InitContext(false, param);
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
-    renderContext->SetClipToBounds(true);
+    renderContext->SetClipToFrame(true);
 }
 
 void VideoPattern::OnModifyDone()
@@ -873,27 +873,29 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto videoNodeSize = geometryNode->GetContentSize();
-    auto videoNodeOffset = geometryNode->GetContentOffset();
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    LOGD("Video node offset is %{public}s, size is %{public}s", videoNodeOffset.ToString().c_str(),
-        videoNodeSize.ToString().c_str());
+    LOGD("Video node size is %{public}s", videoNodeSize.ToString().c_str());
     auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
     // Change the surface layout for drawing video frames
     if (renderContextForMediaPlayer_) {
-        renderContextForMediaPlayer_->SetBounds(
-            videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-            videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
-            videoFrameSize.Width(), videoFrameSize.Height());
+        renderContextForMediaPlayer_->SetBounds((videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+            (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
+            videoFrameSize.Height());
         LOGD("Video renderContext for mediaPlayer position x is %{public}lf,y is %{public}lf,width is "
              "%{public}lf,height "
              "is %{public}lf.",
-            videoNodeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-            videoNodeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
-            videoFrameSize.Width(), videoFrameSize.Height());
+            (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+            (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
+            videoFrameSize.Height());
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto videoNodeFrameSize = geometryNode->GetFrameSize();
+    RectF rect(0, 0, videoNodeFrameSize.Width(), videoNodeFrameSize.Height());
+    renderContext->SetContentRectToFrame(rect);
     host->MarkNeedSyncRenderTree();
     return false;
 }
@@ -906,17 +908,15 @@ void VideoPattern::OnAreaChangedInner()
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto videoNodeSize = geometryNode->GetContentSize();
-        auto videoNodeOffset = geometryNode->GetContentOffset();
         auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
 
-        Rect rect = Rect(transformRelativeOffset.GetX() + videoNodeOffset.GetX() +
-                             (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-            transformRelativeOffset.GetY() + videoNodeOffset.GetY() +
-                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
-            videoFrameSize.Width(), videoFrameSize.Height());
+        Rect rect =
+            Rect(transformRelativeOffset.GetX() + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                transformRelativeOffset.GetY() + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
+                videoFrameSize.Width(), videoFrameSize.Height());
         if (renderSurface_ && (rect != lastBoundsRect_)) {
             renderSurface_->SetExtSurfaceBounds(rect.Left(), rect.Top(), rect.Width(), rect.Height());
             lastBoundsRect_ = rect;
