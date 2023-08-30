@@ -24,6 +24,10 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerModalViewEnhance : public ContainerModalView {
 public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
+    static void SetEnableSplit(bool enableSplit)
+    {
+        enableSplit_ = enableSplit;
+    }
 protected:
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
@@ -43,6 +47,7 @@ protected:
     static void ResetHoverTimer();
     static bool sIsMenuPending_;
     static bool sIsHovering;
+    static bool enableSplit_;
     static CancelableCallback<void()> sContextTimer_;
 };
 } // namespace OHOS::Ace::NG

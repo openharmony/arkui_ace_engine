@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 namespace OHOS::Ace::NG {
@@ -115,5 +118,44 @@ void ContainerModalPatternEnhance::ChangeTitleButtonIcon(
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateOpacity(isFocus ? FOCUS_ALPHA : UNFOCUS_ALPHA);
     ContainerModalPattern::ChangeTitleButtonIcon(buttonNode, icon, isFocus);
+}
+
+void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+{
+    LOGD("hideBtn hideSplit:%{public}d hideMaximize:%{public}d hideMinimize:%{public}d ", hideSplit,
+        hideMaximize, hideMinimize);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front()->GetChildren().front());
+    CHECK_NULL_VOID(titleNode);
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(host->GetChildren().back());
+    CHECK_NULL_VOID(floatingTitleNode);
+    ContainerModalViewEnhance::SetEnableSplit(!hideSplit);
+
+    if (hideMaximize) {
+        auto maximizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, MAX_RECOVER_BUTTON_INDEX));
+        CHECK_NULL_VOID(maximizeBtn);
+        maximizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        maximizeBtn->MarkDirtyNode();
+
+        auto floatingMaximizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingTitleNode,
+            MAX_RECOVER_BUTTON_INDEX));
+        CHECK_NULL_VOID(floatingMaximizeBtn);
+        floatingMaximizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        floatingMaximizeBtn->MarkDirtyNode();
+    }
+    
+    if (hideMinimize) {
+        auto minimizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(titleNode, MINIMIZE_BUTTON_INDEX));
+        CHECK_NULL_VOID(minimizeBtn);
+        minimizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        minimizeBtn->MarkDirtyNode();
+
+        auto floatingMinimizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingTitleNode,
+            MINIMIZE_BUTTON_INDEX));
+        CHECK_NULL_VOID(floatingMinimizeBtn);
+        floatingMinimizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        floatingMinimizeBtn->MarkDirtyNode();
+    }
 }
 } // namespace OHOS::Ace::NG
