@@ -3704,6 +3704,7 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
                 return;
             } else {
                 textChanged |= FilterWithRegex(EMAIL_WHITE_LIST, valueToUpdate, result);
+                textChanged |= FilterWithEmail(result);
             }
             break;
         }
@@ -3745,6 +3746,26 @@ bool TextFieldPattern::FilterWithAscii(const std::string& valueToUpdate, std::st
         LOGI("FilterWithAscii Error text %{private}s", errorText.c_str());
     }
     return textChange;
+}
+
+bool TextFieldPattern::FilterWithEmail(std::string& result)
+{
+    auto valueToUpdate = result;
+    bool first = true;
+    std::replace_if(
+        result.begin(), result.end(),
+        [&first](const char c) {
+            if (c == '@' && !first)
+                return true;
+            if (c == '@')
+                first = false;
+            return false;
+        },
+        ' ');
+
+    // remove the spaces
+    result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
+    return result != valueToUpdate;
 }
 
 float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
