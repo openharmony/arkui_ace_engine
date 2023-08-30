@@ -35,25 +35,29 @@ void SystemWindowScene::OnAttachToFrameNode()
     context->SetRSNode(surfaceNode);
 
     auto gestureHub = host->GetOrCreateGestureEventHub();
-    auto touchCallback = [this](TouchEventInfo& info) {
+    auto touchCallback = [weakSession = wptr(session_)](TouchEventInfo& info) {
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
         const auto pointerEvent = info.GetPointerEvent();
-        CHECK_NULL_VOID(session_);
         CHECK_NULL_VOID(pointerEvent);
-        session_->TransferPointerEvent(pointerEvent);
+        session->TransferPointerEvent(pointerEvent);
     };
     gestureHub->SetTouchEvent(std::move(touchCallback));
 
     auto mouseEventHub = host->GetOrCreateInputEventHub();
-    auto mouseCallback = [this](MouseInfo& info) {
+    auto mouseCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](MouseInfo& info) {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
         const auto pointerEvent = info.GetPointerEvent();
-        CHECK_NULL_VOID(session_);
         CHECK_NULL_VOID(pointerEvent);
-        auto host = GetHost();
+        auto host = self->GetHost();
         if (host != nullptr) {
             DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
-                host->GetId(), session_, pointerEvent);
+                host->GetId(), session, pointerEvent);
         }
-        session_->TransferPointerEvent(pointerEvent);
+        session->TransferPointerEvent(pointerEvent);
     };
     mouseEventHub->SetMouseEvent(std::move(mouseCallback));
 }
