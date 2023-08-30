@@ -36,7 +36,7 @@ enum class FontWeight;
 enum class FontStyle;
 enum class TextAlign;
 enum class TextDirection;
-enum class TextDecorationStyle;
+enum TextDecorationStyle; // Resolve class name conflicts
 } // namespace txt
 #else
 namespace OHOS::Rosen {
