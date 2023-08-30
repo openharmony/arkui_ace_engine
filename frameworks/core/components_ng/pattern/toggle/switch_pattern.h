@@ -104,6 +104,11 @@ public:
         return isOn_.value_or(false);
     }
 
+    void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
+    {
+        isUserSetResponseRegion_ = isUserSetResponseRegion;
+    }
+
     std::string ProvideRestoreInfo() override;
 
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -153,6 +158,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isTouch_ = false;
     bool isHover_ = false;
+    bool isUserSetResponseRegion_ = false;
 
     float width_ = 0.0f;
     float height_ = 0.0f;
