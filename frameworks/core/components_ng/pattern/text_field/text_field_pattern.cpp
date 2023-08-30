@@ -92,7 +92,6 @@ constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
 constexpr uint32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 const std::string DIGIT_WHITE_LIST = "[0-9]";
@@ -3472,19 +3471,6 @@ void TextFieldPattern::ProcessPasswordIcon()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
         return;
-    }
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(textFieldTheme);
-        const auto& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
-        if (!layoutConstraint || !layoutConstraint->selfIdealSize ||
-            !layoutConstraint->selfIdealSize->Height().has_value()) {
-            auto defaultHeight = textFieldTheme->GetPasswordStyleHeight().ConvertToPx();
-            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(defaultHeight)));
-        }
     }
 
     bool showPasswordIcon = layoutProperty->GetShowPasswordIconValue(true);

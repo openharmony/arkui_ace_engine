@@ -225,7 +225,6 @@ extern const char INLINE_TEXT_COLOR[];
 extern const char INLINE_RADIUS_SIZE[];
 extern const char INLINE_BG_COLOR[];
 extern const char INLINE_BORDER_COLOR[];
-extern const char PASSWORD_STYLE_HEIGHT[];
 extern const char DISABLE_UNDERLINE_ALPHA[];
 
 // linear split attributes
