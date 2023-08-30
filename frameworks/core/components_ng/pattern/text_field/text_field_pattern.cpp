@@ -3938,12 +3938,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
 #ifndef USE_GRAPHIC_TEXT_GINE
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
 #else
-    auto fontCollection = DynamicCast<TxtFontCollection>(FontCollection::Current());
-    if (fontCollection == nullptr) {
-        LOGE("fontCollection is nullptr");
-        return 0.0f;
-    }
-    auto builder = RSParagraphBuilder::Create(paraStyle, fontCollection->GetRawFontCollection());
+    auto builder = RSParagraphBuilder::Create(paraStyle, RSFontCollection::Create());
 #endif
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(textEditingValue_.text, static_cast<int32_t>(textStyle.GetTextCase()));
