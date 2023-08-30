@@ -59,6 +59,8 @@ public:
         return MakeRefPtr<NavDestinationEventHub>();
     }
 
+    void OnActive() override;
+
     void OnModifyDone() override;
 
     const RefPtr<ShallowBuilder>& GetShallowBuilder() const
