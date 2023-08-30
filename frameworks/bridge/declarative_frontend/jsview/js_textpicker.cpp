@@ -259,7 +259,7 @@ bool JSTextPicker::ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, Pa
     bool ret = true;
     auto getRange = paramObjec->GetProperty("range");
     if (getRange->IsNull() || getRange->IsUndefined()) {
-        return false;
+        return ret;
     }
     if (!JSTextPickerParser::ParseTextArray(paramObjec, param)) {
         if (!JSTextPickerParser::ParseIconTextArray(paramObjec, param.result, param.kind, param.selected)) {
