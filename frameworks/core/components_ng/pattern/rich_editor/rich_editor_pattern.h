@@ -195,9 +195,9 @@ public:
         return caretSpanIndex_;
     }
 
-    ParagraphManager* GetParagraphManager()
+    const std::list<ParagraphManager::ParagraphInfo>& GetParagraphs() const
     {
-        return &paragraphs_;
+        return paragraphs_.GetParagraphs();
     }
 
     void CloseSelectOverlay() override;

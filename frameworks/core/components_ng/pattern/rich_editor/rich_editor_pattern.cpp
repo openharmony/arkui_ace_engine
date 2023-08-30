@@ -157,7 +157,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         auto height = static_cast<float>(paragraphs_.GetHeight() + std::fabs(baselineOffset_));
         if (!context->GetClipEdge().value() && LessNotEqual(frameSize.Height(), height)) {
             RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
-            oModifier_->SetBoundsRect(boundsRect);
+            overlayMod_->SetBoundsRect(boundsRect);
         }
     }
     return ret;
@@ -693,7 +693,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
     auto children = host->GetChildren();
     if (NearZero(selectLineHeight)) {
         if (children.empty() || GetTextContentLength() == 0) {
-            float caretHeight = DynamicCast<RichEditorOverlayModifier>(oModifier_)->GetCareHeight();
+            float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCareHeight();
             return textPaintOffset - rootOffset - OffsetF(0.0f, caretHeight / 2.0f);
         }
         if (std::all_of(children.begin(), children.end(), [](RefPtr<UINode>& node) {
@@ -992,10 +992,10 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
             float caretHeight = 0.0f;
             SetCaretPosition(position);
             OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-            CHECK_NULL_VOID(oModifier_);
-            DynamicCast<RichEditorOverlayModifier>(oModifier_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+            CHECK_NULL_VOID(overlayMod_);
+            DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
             StartTwinkling();
-            if (oModifier_) {
+            if (overlayMod_) {
                 RequestKeyboard(false, true, true);
             }
         } else {
@@ -1151,7 +1151,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
-    if (oModifier_) {
+    if (overlayMod_) {
         RequestKeyboard(false, true, true);
     }
     StopTwinkling();
@@ -1277,7 +1277,6 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
 
     AceEngineExt::GetInstance().DragStartExt();
 
-    isDragMoving_ = false;
     StopTwinkling();
     CloseKeyboard(true);
     CloseSelectOverlay();
@@ -1288,7 +1287,6 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
 
 void RichEditorPattern::OnDragEnd()
 {
-    isDragMoving_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (dragResultObjects_.empty()) {
@@ -1302,15 +1300,11 @@ void RichEditorPattern::OnDragEnd()
 
 void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
-    if (!isDragMoving_ && !dragResultObjects_.empty()) {
-        UpdateSpanItemDragStatus(dragResultObjects_, true);
-    }
-    isDragMoving_ = true;
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
-    auto touchX = Dimension(event->GetX(), DimensionUnit::VP).ConvertToPx();
-    auto touchY = Dimension(event->GetY(), DimensionUnit::VP).ConvertToPx();
+    auto touchX = event->GetX();
+    auto touchY = event->GetY();
     auto contentRect = GetTextRect();
     contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
     Offset textOffset = { touchX - contentRect.GetX(), touchY - contentRect.GetY() };
@@ -1319,8 +1313,8 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     float caretHeight = 0.0f;
     SetCaretPosition(position);
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-    CHECK_NULL_VOID(oModifier_);
-    DynamicCast<RichEditorOverlayModifier>(oModifier_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+    CHECK_NULL_VOID(overlayMod_);
+    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
     StartTwinkling();
 }
 
@@ -1621,8 +1615,8 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     }
 
     if (insertValueTemp == std::string(" ")) {
-        CHECK_NULL_VOID(oModifier_);
-        auto caretOffset = DynamicCast<RichEditorOverlayModifier>(oModifier_)->GetCareOffset();
+        CHECK_NULL_VOID(overlayMod_);
+        auto caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCareOffset();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
@@ -3223,16 +3217,16 @@ void RichEditorPattern::BindSelectionMenu(ResponseType type, RichEditorType rich
 
 RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
 {
-    if (!cModifier_) {
-        cModifier_ = MakeRefPtr<RichEditorContentModifier>(textStyle_);
+    if (!contentMod_) {
+        contentMod_ = MakeRefPtr<RichEditorContentModifier>(textStyle_, &paragraphs_);
     }
-    if (!oModifier_) {
-        oModifier_ = MakeRefPtr<RichEditorOverlayModifier>();
+    if (!overlayMod_) {
+        overlayMod_ = MakeRefPtr<RichEditorOverlayModifier>();
     }
     if (GetIsCustomFont()) {
-        cModifier_->SetIsCustomFont(true);
+        contentMod_->SetIsCustomFont(true);
     }
-    return MakeRefPtr<RichEditorPaintMethod>(WeakClaim(this), &paragraphs_, baselineOffset_, cModifier_, oModifier_);
+    return MakeRefPtr<RichEditorPaintMethod>(WeakClaim(this), &paragraphs_, baselineOffset_, contentMod_, overlayMod_);
 }
 
 void RichEditorPattern::UpdateSelectionType(RichEditorSelection& selection)

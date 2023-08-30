@@ -16,9 +16,9 @@
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -28,8 +28,9 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     CHECK_NULL_RETURN(hostNode, nullptr);
     auto hostPattern = hostNode->GetPattern<TextDragBase>();
     const auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dragNode = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_DRAG_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorDragPattern>(); });
+    auto dragNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_DRAG_ETS_TAG, nodeId, [hostPattern]() {
+        return MakeRefPtr<RichEditorDragPattern>(DynamicCast<RichEditorPattern>(hostPattern));
+    });
     auto dragContext = dragNode->GetRenderContext();
     auto hostContext = hostNode->GetRenderContext();
     if (hostContext->HasForegroundColor()) {
@@ -40,8 +41,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
     }
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     auto data = CalculateTextDragData(hostPattern, dragNode);
-    auto richEditor = hostNode->GetPattern<RichEditorPattern>();
-    dragPattern->Initialize(richEditor->GetParagraphManager(), data);
+    dragPattern->Initialize(data);
     dragPattern->SetLastLineHeight(data.lineHeight_);
 
     CalcSize size(NG::CalcLength(dragPattern->GetFrameWidth()), NG::CalcLength(dragPattern->GetFrameHeight()));
@@ -53,7 +53,7 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren)
 {
     auto hostPattern = hostNode->GetPattern<TextDragBase>();
-    auto dragNode = RichEditorDragPattern::CreateDragNode(hostNode);
+    auto dragNode = CreateDragNode(hostNode);
     auto dragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     auto richEditor = hostNode->GetPattern<RichEditorPattern>();
     auto placeHolderIndex = richEditor->GetPlaceHolderIndex();

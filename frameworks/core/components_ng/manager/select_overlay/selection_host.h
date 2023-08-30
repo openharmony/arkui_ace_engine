@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 // selection interface of Patterns that can be selected
-// inherited directly by TextDragBase and ImagePattern
+// inherited directly by TextBase and ImagePattern
 class SelectionHost : public virtual AceType {
     DECLARE_ACE_TYPE(SelectionHost, AceType);
 

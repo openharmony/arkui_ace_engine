@@ -20,14 +20,13 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorDragPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(RichEditorDragPaintMethod, NodePaintMethod)
 public:
     RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
-        const RefPtr<TextDragOverlayModifier>& richEditorDragOverlayModifier);
+        const RefPtr<RichEditorDragOverlayModifier>& richEditorDragOverlayModifier);
 
     ~RichEditorDragPaintMethod() override = default;
 
@@ -35,7 +34,7 @@ public:
 
 private:
     WeakPtr<Pattern> pattern_;
-    RefPtr<TextDragOverlayModifier> overlayModifier_;
+    RefPtr<RichEditorDragOverlayModifier> overlayModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragPaintMethod);
 };

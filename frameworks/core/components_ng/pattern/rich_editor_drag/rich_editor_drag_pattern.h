@@ -18,6 +18,8 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.h"
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
@@ -28,34 +30,30 @@ class RichEditorDragPattern : public TextDragPattern {
     DECLARE_ACE_TYPE(RichEditorDragPattern, TextDragPattern);
 
 public:
-    RichEditorDragPattern() = default;
+    explicit RichEditorDragPattern(const RefPtr<RichEditorPattern>& hostPattern) : hostPattern_(hostPattern) {};
     ~RichEditorDragPattern() override = default;
 
-    static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
     static RefPtr<FrameNode> CreateDragNode(
         const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren);
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!overlayModifier_) {
-            overlayModifier_ = AceType::MakeRefPtr<RichEditorDragOverlayModifier>(WeakClaim(this));
+            overlayModifier_ = AceType::MakeRefPtr<RichEditorDragOverlayModifier>(WeakClaim(this), hostPattern_);
         }
         return MakeRefPtr<TextDragPaintMethod>(WeakClaim(this), overlayModifier_);
     }
 
-    void Initialize(ParagraphManager* paragraph, const TextDragData& data)
+    void Initialize(const TextDragData& data)
     {
-        paragraph_ = paragraph;
         textDragData_ = data;
     }
 
-    const ParagraphManager* GetParagraphManager() const
-    {
-        return paragraph_;
-    }
-
 private:
-    ParagraphManager* paragraph_;
+    static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
+
+    WeakPtr<RichEditorPattern> hostPattern_;
+
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorDragPattern);
 };
 } // namespace OHOS::Ace::NG

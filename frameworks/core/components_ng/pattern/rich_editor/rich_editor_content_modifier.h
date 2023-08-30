@@ -24,16 +24,15 @@ class RichEditorContentModifier : public TextContentModifier {
     DECLARE_ACE_TYPE(RichEditorContentModifier, TextContentModifier)
 
 public:
-    explicit RichEditorContentModifier(const std::optional<TextStyle>& textStyle) : TextContentModifier(textStyle) {}
+    RichEditorContentModifier(const std::optional<TextStyle>& textStyle, const ParagraphManager* pManager)
+        : TextContentModifier(textStyle), pManager_(pManager)
+    {}
+    ~RichEditorContentModifier() override = default;
 
-    void SetParagraphManager(ParagraphManager* pManager)
-    {
-        pManager_ = pManager;
-    }
     void onDraw(DrawingContext& drawingContext) override;
 
 private:
-    ParagraphManager* pManager_ = nullptr;
+    const ParagraphManager* pManager_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorContentModifier);
 };
 } // namespace OHOS::Ace::NG

@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
-RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, ParagraphManager* pManager,
+RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager,
     float baselineOffset, const RefPtr<TextContentModifier>& cModifier,
     const RefPtr<TextOverlayModifier>& oModifier)
     : TextPaintMethod(pattern, pManager->GetParagraphs().begin()->paragraph, baselineOffset, cModifier, oModifier),
@@ -67,7 +67,6 @@ void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     auto cModifier = DynamicCast<RichEditorContentModifier>(GetContentModifier(paintWrapper));
     CHECK_NULL_VOID(cModifier);
-    cModifier->SetParagraphManager(pManager_);
     TextPaintMethod::UpdateContentModifier(paintWrapper);
 }
 } // namespace OHOS::Ace::NG

@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorPaintMethod : public TextPaintMethod {
     DECLARE_ACE_TYPE(RichEditorPaintMethod, TextPaintMethod)
 public:
-    RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, ParagraphManager* pManager, float baselineOffset,
+    RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager, float baselineOffset,
         const RefPtr<TextContentModifier>& cModifier, const RefPtr<TextOverlayModifier>& oModifier);
 
     ~RichEditorPaintMethod() override = default;
@@ -36,7 +36,7 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    ParagraphManager* pManager_;
+    const ParagraphManager* pManager_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPaintMethod);
 };
 } // namespace OHOS::Ace::NG

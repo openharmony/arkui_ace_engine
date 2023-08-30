@@ -1735,7 +1735,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest001, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    textPattern->cModifier_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
@@ -1820,7 +1820,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     auto pipeline = frameNode->GetContext();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    textPattern->cModifier_ =
+    textPattern->contentMod_ =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(std::move(textStyle)));
     auto contentModifier = textPattern->GetContentModifier();
     textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier);
@@ -2562,8 +2562,8 @@ HWTEST_F(TextTestNg, TextPatternTest001, TestSize.Level1)
      */
     auto nodePaintMethod = textPattern->CreateNodePaintMethod();
     ASSERT_NE(nodePaintMethod, nullptr);
-    ASSERT_NE(textPattern->cModifier_, nullptr);
-    ASSERT_NE(textPattern->oModifier_, nullptr);
+    ASSERT_NE(textPattern->contentMod_, nullptr);
+    ASSERT_NE(textPattern->overlayMod_, nullptr);
 }
 
 /**

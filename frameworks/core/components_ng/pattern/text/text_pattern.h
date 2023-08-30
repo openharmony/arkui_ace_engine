@@ -127,7 +127,7 @@ public:
 
     RefPtr<TextContentModifier> GetContentModifier()
     {
-        return cModifier_;
+        return contentMod_;
     }
 
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
@@ -316,8 +316,8 @@ protected:
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     RefPtr<Clipboard> clipboard_;
-    RefPtr<TextContentModifier> cModifier_;
-    RefPtr<TextOverlayModifier> oModifier_;
+    RefPtr<TextContentModifier> contentMod_;
+    RefPtr<TextOverlayModifier> overlayMod_;
     CopyOptions copyOption_ = CopyOptions::None;
 
     std::string textForDisplay_;

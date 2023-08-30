@@ -1007,8 +1007,8 @@ void TextPattern::BeforeCreateLayoutWrapper()
     }
 
     // mark content dirty
-    if (cModifier_) {
-        cModifier_->ContentChange();
+    if (contentMod_) {
+        contentMod_->ContentChange();
     }
 }
 
@@ -1296,17 +1296,17 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
 
 RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 {
-    if (!cModifier_) {
-        cModifier_ = MakeRefPtr<TextContentModifier>(textStyle_);
+    if (!contentMod_) {
+        contentMod_ = MakeRefPtr<TextContentModifier>(textStyle_);
     }
-    if (!oModifier_) {
-        oModifier_ = MakeRefPtr<TextOverlayModifier>();
+    if (!overlayMod_) {
+        overlayMod_ = MakeRefPtr<TextOverlayModifier>();
     }
     if (isCustomFont_) {
-        cModifier_->SetIsCustomFont(true);
+        contentMod_->SetIsCustomFont(true);
     }
     auto paintMethod =
-        MakeRefPtr<TextPaintMethod>(WeakClaim(this), paragraph_, baselineOffset_, cModifier_, oModifier_);
+        MakeRefPtr<TextPaintMethod>(WeakClaim(this), paragraph_, baselineOffset_, contentMod_, overlayMod_);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, paintMethod);
     auto context = host->GetRenderContext();
@@ -1319,7 +1319,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         auto height = static_cast<float>(paragraph_->GetHeight() + std::fabs(baselineOffset_));
         if (!context->GetClipEdge().value() && LessNotEqual(frameSize.Height(), height)) {
             RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
-            oModifier_->SetBoundsRect(boundsRect);
+            overlayMod_->SetBoundsRect(boundsRect);
         }
     }
     return paintMethod;

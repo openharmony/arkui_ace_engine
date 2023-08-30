@@ -16,8 +16,8 @@
 
 namespace OHOS::Ace::NG {
 RichEditorDragPaintMethod::RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
-    const RefPtr<TextDragOverlayModifier>& textDragOverlayModifier) : pattern_(pattern),
-    overlayModifier_(textDragOverlayModifier) {}
+    const RefPtr<RichEditorDragOverlayModifier>& overlayMod) : pattern_(pattern),
+    overlayModifier_(overlayMod) {}
 
 RefPtr<Modifier> RichEditorDragPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
 {
