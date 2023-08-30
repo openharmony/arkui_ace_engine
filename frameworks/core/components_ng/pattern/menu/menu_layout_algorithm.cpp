@@ -493,8 +493,7 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
     CHECK_NULL_RETURN(pipeline, false);
     auto selectThemePtr = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(selectThemePtr, false);
-
-    if (!propNeedArrow_) {
+    if (!propNeedArrow_ || !menuProp->GetMenuPlacement().has_value()) {
         return false;
     }
 
@@ -518,14 +517,7 @@ bool MenuLayoutAlgorithm::GetIfNeedArrow(const LayoutWrapper* layoutWrapper, con
         }
     }
 
-    bool needArrow = menuPattern->IsContextMenu() && !targetTag_.empty()
-        && arrowInMenu_;
-    if (needArrow) {
-        if (!menuProp->GetMenuPlacement().has_value()) {
-            menuProp->UpdateMenuPlacement(Placement::TOP);
-        }
-    }
-    return needArrow;
+    return menuPattern->IsContextMenu() && !targetTag_.empty() && arrowInMenu_;
 }
 
 void MenuLayoutAlgorithm::UpdatePropArrowOffset()
