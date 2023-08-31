@@ -506,6 +506,9 @@ AnimationOption AnimationUtil::CreateKeyboardAnimationOption(
     if (config.curveType_ == "cubic" && config.curveParams_.size() == 4) {
         curve = AceType::MakeRefPtr<CubicCurve>(
             config.curveParams_[0], config.curveParams_[1], config.curveParams_[2], config.curveParams_[3]);
+    } else if (config.curveType_ == "interpolatingSpring" && config.curveParams_.size() == 4) {
+        curve = AceType::MakeRefPtr<InterpolatingSpring>(
+            config.curveParams_[0], config.curveParams_[1], config.curveParams_[2], config.curveParams_[3]);
     } else {
         auto index = BinarySearchFindIndex(curveMap, ArraySize(curveMap), config.curveType_.c_str());
         curve = index < 0 ? nullptr : curveMap[index].value;
