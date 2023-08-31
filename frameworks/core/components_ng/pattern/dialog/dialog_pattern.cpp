@@ -615,15 +615,6 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
         layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
         layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        auto buttonPipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(buttonPipeline, nullptr);
-        auto buttonTheme = buttonPipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_RETURN(buttonTheme, nullptr);
-        MeasureProperty layoutConstraint;
-        auto padding = dialogTheme_->GetActionsPadding();
-        layoutConstraint.UpdateMaxSizeWithCheck(
-            CalcSize(std::nullopt, CalcLength(padding.Top() + padding.Bottom() + buttonTheme->GetHeight())));
-        container->UpdateLayoutConstraint(layoutConstraint);
     } else {
         // use vertical layout
         isVertical = true;
