@@ -22,6 +22,7 @@
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -59,24 +60,24 @@ public:
         backgroundImageCanvas_->SetPaintConfig(backgroundConfig);
     }
 
-    void UpdateImageUri(
-        const std::string& foregroundUri, const std::string& secondaryUri, const std::string& backgroundUri)
+    void UpdateImageSourceInfo(
+        const ImageSourceInfo& foreground, const ImageSourceInfo& secondary, const ImageSourceInfo& background)
     {
-        foregroundUri_ = foregroundUri;
-        secondaryUri_ = secondaryUri;
-        backgroundUri_ = backgroundUri;
+        foreground_ = foreground;
+        secondary_ = secondary;
+        background_ = background;
     }
 
-    bool JudgeImageUri(const std::string& foregroundUri, const std::string& secondaryUri,
-        const std::string& backgroundUri, const ImagePaintConfig& foregroundConfig)
+    bool JudgeImageSourceInfo(const ImageSourceInfo& foreground, const ImageSourceInfo& secondary,
+        const ImageSourceInfo& background, const ImagePaintConfig& foregroundConfig)
     {
-        if (foregroundUri_ != foregroundUri) {
+        if (foreground_ != foreground) {
             return true;
         }
-        if (secondaryUri_ != secondaryUri) {
+        if (secondary_ != secondary) {
             return true;
         }
-        if (backgroundUri_ != backgroundUri) {
+        if (background_ != background) {
             return true;
         }
         CHECK_NULL_RETURN(foregroundImageCanvas_, true);
@@ -192,9 +193,9 @@ private:
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
-    std::string foregroundUri_;
-    std::string secondaryUri_;
-    std::string backgroundUri_;
+    ImageSourceInfo foreground_;
+    ImageSourceInfo secondary_;
+    ImageSourceInfo background_;
     // non-animatable property
     RefPtr<PropertyBool> needDraw_;
     RefPtr<PropertyInt> starNum_;
