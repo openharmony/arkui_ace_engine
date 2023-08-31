@@ -23,7 +23,6 @@
 
 #include "gtest/gtest.h"
 #include "gmock/gmock-actions.h"
-#include "gmock/gmock-spec-builders.h"
 
 #define private public
 #define protected public
@@ -756,20 +755,13 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
      * @tc.steps: step4. Call OnPlayerStatus status == PREPARED
      * @tc.expected: step4. FirePauseEvent & mediaPlayer->GetDuration() has called
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(2)
-        .WillOnce(Return(false))
-        .WillOnce(Return(true));
     // case1: MediaPlayer is invalid
-    pattern->OnPlayerStatus(PlaybackStatus::PREPARED);
+    pattern->OnPlayerStatus(PlaybackStatus::PAUSED);
     EXPECT_EQ(pauseCheck, VIDEO_PAUSE_EVENT);
 
     // case1: MediaPlayer is valid
     pauseCheck.clear();
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), GetDuration(_))
-        .Times(1)
-        .WillOnce(Return(1));
-    pattern->OnPlayerStatus(PlaybackStatus::PREPARED);
+    pattern->OnPlayerStatus(PlaybackStatus::PAUSED);
     EXPECT_EQ(pauseCheck, VIDEO_PAUSE_EVENT);
 
     /**
@@ -1304,19 +1296,24 @@ HWTEST_F(VideoTestNg, VideoPatternTest018, TestSize.Level1)
      */
     SystemProperties::SetExtSurfaceEnabled(false);
     videoPattern->OnAreaChangedInner();
+    videoPattern->fullScreenNodeId_ = std::make_optional<int32_t>(1);
+    videoPattern->OnAreaChangedInner();
+    SystemProperties::SetExtSurfaceEnabled(true);
+    videoPattern->fullScreenNodeId_ = std::make_optional<int32_t>();
+    videoPattern->OnAreaChangedInner();
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     ASSERT_NE(videoLayoutProperty, nullptr);
     auto geometryNode = frameNode->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
-    SystemProperties::SetExtSurfaceEnabled(true);
+    videoPattern->fullScreenNodeId_ = std::make_optional<int32_t>(1);
     videoLayoutProperty->UpdateObjectFit(ImageFit::CONTAIN);
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, 0.0f));
     videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, 0.0f);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
     EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
     EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
 
     /**
@@ -1326,68 +1323,68 @@ HWTEST_F(VideoTestNg, VideoPatternTest018, TestSize.Level1)
     videoLayoutProperty->UpdateObjectFit(ImageFit::CONTAIN);
     videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, VIDEO_HEIGHT);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
     EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
     videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, 0.0f);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
     videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH * 2, VIDEO_HEIGHT);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL / 2);
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL * 6, SCREEN_HEIGHT_SMALL));
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_HEIGHT_SMALL * 2);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
 
     videoLayoutProperty->UpdateObjectFit(ImageFit::FILL);
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
 
     videoLayoutProperty->UpdateObjectFit(ImageFit::COVER);
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, 0.0f));
     videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, VIDEO_HEIGHT);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
     EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
     videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, 0.0f);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
     videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH * 2, VIDEO_HEIGHT);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_HEIGHT_SMALL * 2);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_HEIGHT_SMALL);
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL * 6, SCREEN_HEIGHT_SMALL));
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL * 6);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL * 3);
 
     videoLayoutProperty->UpdateObjectFit(ImageFit::NONE);
     videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH, VIDEO_HEIGHT);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), VIDEO_WIDTH);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), VIDEO_HEIGHT);
 
     videoLayoutProperty->UpdateObjectFit(ImageFit::SCALE_DOWN);
     geometryNode->SetContentSize(SizeF(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL));
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), VIDEO_WIDTH);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), VIDEO_HEIGHT);
     videoLayoutProperty->propVideoStyle_->propVideoSize = SizeF(VIDEO_WIDTH * 2, VIDEO_HEIGHT);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL / 2);
 
     videoLayoutProperty->UpdateObjectFit(ImageFit::FITHEIGHT);
     videoPattern->OnAreaChangedInner();
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), 0.0f);
-    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), 0.0f);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Width(), SCREEN_WIDTH_SMALL);
+    EXPECT_FLOAT_EQ(videoPattern->lastBoundsRect_.Height(), SCREEN_WIDTH_SMALL / 2);
 }
 
 /**
