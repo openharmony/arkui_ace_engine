@@ -318,7 +318,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetrics& r
 #ifndef USE_GRAPHIC_TEXT_GINE
     double caretStart = isLtr ? textBox.rect.fRight : textBox.rect.fLeft;
 #else
-    double caretStart = isLtr ? textBox.rect.GetLeft() : textBox.rect.GetRight();
+    double caretStart = isLtr ? textBox.rect.GetRight() : textBox.rect.GetLeft();
 #endif
     double offsetX = std::min(caretStart, paragraph_->GetMaxWidth());
     result.offset.SetX(offsetX);
