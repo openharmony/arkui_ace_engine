@@ -166,6 +166,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(foregroundImageCanvas_, nullptr);
     CHECK_NULL_RETURN(secondaryImageCanvas_, nullptr);
     CHECK_NULL_RETURN(backgroundImageCanvas_, nullptr);
+    CHECK_NULL_RETURN(foregroundImageLoadingCtx_, nullptr);
+    CHECK_NULL_RETURN(secondaryImageLoadingCtx_, nullptr);
+    CHECK_NULL_RETURN(backgroundImageLoadingCtx_, nullptr);
     auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto starNum =
@@ -177,17 +180,17 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     if (!ratingModifier_) {
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
     }
-    // when frameNode mark dirty to update rendering, only when 3 images are all loaded successfully and JudgeImageUri
-    // is true, pattern will update ratingModifier's CanvasImage.
-    if (ratingModifier_->JudgeImageUri(
-        layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),
-            layoutProperty->GetSecondaryImageSourceInfo()->GetSrc(),
-            layoutProperty->GetBackgroundImageSourceInfo()->GetSrc(), foregroundConfig_) &&
+    // when frameNode mark dirty to update rendering, only when 3 images are all loaded successfully and
+    // JudgeImageSourceInfo is true, pattern will update ratingModifier's CanvasImage.
+    if (ratingModifier_->JudgeImageSourceInfo(
+        foregroundImageLoadingCtx_->GetSourceInfo(),
+            secondaryImageLoadingCtx_->GetSourceInfo(),
+            backgroundImageLoadingCtx_->GetSourceInfo(), foregroundConfig_) &&
         imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
-        ratingModifier_->UpdateImageUri(
-            layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),
-            layoutProperty->GetSecondaryImageSourceInfo()->GetSrc(),
-            layoutProperty->GetBackgroundImageSourceInfo()->GetSrc());
+        ratingModifier_->UpdateImageSourceInfo(
+            foregroundImageLoadingCtx_->GetSourceInfo(),
+            secondaryImageLoadingCtx_->GetSourceInfo(),
+            backgroundImageLoadingCtx_->GetSourceInfo());
         ratingModifier_->UpdateCanvasImage(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
             foregroundConfig_, secondaryConfig_, backgroundConfig_);
     }
@@ -469,24 +472,25 @@ void RatingPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t 
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
     auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
-    if (!iconPath.empty()) {
-        sourceInfo.SetSrc(iconPath, sourceInfo.GetFillColor());
-        auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
-        CHECK_NULL_VOID(ratingLayoutProperty);
-        switch (imageFlag) {
-            case 0b001:
-                ratingLayoutProperty->UpdateForegroundImageSourceInfo(sourceInfo);
-                break;
-            case 0b010:
-                ratingLayoutProperty->UpdateSecondaryImageSourceInfo(sourceInfo);
-                break;
-            case 0b100:
-                ratingLayoutProperty->UpdateBackgroundImageSourceInfo(sourceInfo);
-                break;
-            default:
-                break;
-        }
+    if (iconPath.empty()) {
+        return;
+    }
+    switch (imageFlag) {
+        case 0b001:
+            sourceInfo.SetSrc(iconPath, ratingTheme->GetStarColorActive());
+            break;
+        case 0b010:
+            sourceInfo.SetSrc(iconPath, ratingTheme->GetStarColorInactive());
+            break;
+        case 0b100:
+            sourceInfo.SetSrc(iconPath, ratingTheme->GetStarColorInactive());
+            break;
+        default:
+            sourceInfo.SetSrc(iconPath, sourceInfo.GetFillColor());
+            break;
     }
 }
 
