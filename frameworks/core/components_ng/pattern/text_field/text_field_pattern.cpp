@@ -3670,7 +3670,9 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     std::string oldText = textEditingValue_.text;
     auto caretStart = 0;
     std::string result;
-    auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto start = textSelector_.GetStart();
     auto end = textSelector_.GetEnd();
@@ -3709,8 +3711,6 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     selectionMode_ = SelectionMode::NONE;
     CloseSelectOverlay(true);
     StartTwinkling();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
     if (IsSearchParentNode()) {
         auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -3724,7 +3724,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnChange(textEditingValue_.text);
-    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (IsTextArea() && layoutProperty->HasMaxLength()) {
         HandleCounterBorder();
