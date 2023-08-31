@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/qrcode_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
@@ -64,7 +65,9 @@ void JSQRCode::SetQRCodeColor(const JSCallbackInfo& info)
     }
     Color qrcodeColor;
     if (!ParseJsColor(info[0], qrcodeColor)) {
-        return;
+        RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
+        CHECK_NULL_VOID_NOLOG(qrcodeTheme);
+        qrcodeColor = qrcodeTheme->GetQrcodeColor();
     }
     QRCodeModel::GetInstance()->SetQRCodeColor(qrcodeColor);
 }
@@ -77,7 +80,9 @@ void JSQRCode::SetBackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        return;
+        RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
+        CHECK_NULL_VOID_NOLOG(qrcodeTheme);
+        backgroundColor = qrcodeTheme->GetBackgroundColor();
     }
 
     QRCodeModel::GetInstance()->SetQRBackgroundColor(backgroundColor);
