@@ -768,7 +768,7 @@ void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t dura
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
     if (parentContainer->IsScenceBoardWindow()) {
-        ShowWindow();
+        ShowWindow(false);
         ResizeWindow();
         window_->SetTouchable(false);
     }
