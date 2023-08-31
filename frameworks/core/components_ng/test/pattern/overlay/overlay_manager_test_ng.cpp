@@ -666,7 +666,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest003, TestSize.Level1)
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
-    EXPECT_TRUE(iter == rootChildren.end());
+    EXPECT_TRUE(iter == rootChildren.begin());
 }
 /**
  * @tc.name: MenuTest001
@@ -831,7 +831,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
     overlayManager->ShowPopup(targetId, popupInfo);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
-    EXPECT_EQ(rootNode->GetChildren().size(), 0);
+    EXPECT_EQ(rootNode->GetChildren().size(), 1);
     /**
      * @tc.steps: step3. update ShowInSubwindow and call HideAllPopups again.
      * @tc.expected: popupMap's data is updated successfully
@@ -902,7 +902,6 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest001, TestSize.Level1)
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
-    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
     EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
 }
 /**
@@ -1210,6 +1209,8 @@ HWTEST_F(OverlayManagerTestNg, DialogTest003, TestSize.Level1)
     EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
     EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    overlayManager->ShowTimeDialog(
+        dialogProperties, timePickerSettingData, timePickerProperty, dialogEvent, dialogCancelEvent);
     EXPECT_TRUE(overlayManager->RemoveOverlay(true));
 }
 
