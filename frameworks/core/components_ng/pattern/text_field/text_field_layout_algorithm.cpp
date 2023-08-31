@@ -49,7 +49,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
-constexpr float INLINE_SAFE_BOUNDARY_VALUE = 2.0f;
 } // namespace
 
 void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -241,7 +240,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (isInlineStyle) {
         // for InlineStyle, max width is content width with safe boundary.
         float inlineBoxWidth = 0.0f;
-        auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2 + INLINE_SAFE_BOUNDARY_VALUE;
+        auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
         if (pattern->IsFocus()) {
             inlineBoxWidth = pattern->GetPreviewWidth() < layoutConstraint->maxSize.Width()
                                  ? (pattern->GetPreviewWidth() + safeBoundary)
