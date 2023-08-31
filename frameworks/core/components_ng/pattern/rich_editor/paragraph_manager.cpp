@@ -66,9 +66,9 @@ std::vector<Rect> ParagraphManager::GetRects(int32_t start, int32_t end) const
 std::vector<Rect> ParagraphManager::GetPlaceholderRects() const
 {
     std::vector<Rect> res;
-    std::vector<Rect> rects;
     float y = 0.0f;
     for (auto&& info : paragraphs_) {
+        std::vector<Rect> rects;
         info.paragraph->GetRectsForPlaceholders(rects);
         for (auto& rect : rects) {
             rect.SetTop(rect.Top() + y);
@@ -77,7 +77,7 @@ std::vector<Rect> ParagraphManager::GetPlaceholderRects() const
 
         res.insert(res.end(), rects.begin(), rects.end());
     }
-    return rects;
+    return res;
 }
 
 OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHeight) const
