@@ -29,6 +29,10 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    // if child has user defined width, reset 2c min width.
+    static LayoutConstraintF ResetLayoutConstraintMinWidth(
+        const RefPtr<LayoutWrapper>& child, const LayoutConstraintF& layoutConstraint);
+
 private:
     void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     float GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
