@@ -874,6 +874,7 @@ const char DOM_TEXTAREA_PLACEHOLDER[] = "placeholder";
 const char DOM_TEXTAREA_MAXLENGTH[] = "maxlength";
 const char DOM_TEXTAREA_MAXLINES[] = "maxlines";
 const char DOM_TEXTAREA_OBSCURE[] = "obscure";
+const char DOM_TEXTAREA_OVERFLOWX[] = "overflowx";
 const char DOM_INPUT_AUTO_FOCUS[] = "autoFocus";
 const char DOM_TEXTAREA_PLACEHOLDER_COLOR[] = "placeholderColor";
 const char DOM_TEXTAREA_CURSOR_COLOR[] = "cursorColor";

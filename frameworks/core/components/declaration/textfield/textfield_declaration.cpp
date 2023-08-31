@@ -132,8 +132,14 @@ bool TextFieldDeclaration::SetSpecializedAttr(const std::pair<std::string, std::
             } },
         { DOM_INPUT_OBSCURE, [](TextFieldDeclaration& declaration,
                                  const std::string& value) { declaration.SetObscure(StringToBool(value)); } },
+        { DOM_TEXTAREA_OVERFLOWX,
+            [](TextFieldDeclaration& declaration, const std::string& value) {
+                declaration.SetOverflowX(ConvertStrToTextFieldOverflowX(value));
+            } },
         { DOM_INPUT_PLACEHOLDER,
-            [](TextFieldDeclaration& declaration, const std::string& value) { declaration.SetPlaceholder(value); } },
+            [](TextFieldDeclaration& declaration, const std::string& value) {
+                declaration.SetPlaceholder(value);
+            } },
         { DOM_INPUT_SELECTED_END, [](TextFieldDeclaration& declaration,
                                       const std::string& value) { declaration.SetSelectedEnd(StringToInt(value)); } },
         { DOM_INPUT_SELECTED_START,

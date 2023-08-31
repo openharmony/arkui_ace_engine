@@ -137,6 +137,19 @@ public:
     RefPtr<RenderSlidingPanel> GetSlidingPanelAncest();
     void ResetOnFocusForTextFieldManager();
     void ResetSlidingPanelParentHeight();
+    void InitScrollBar(const RefPtr<TextFieldComponent>& component);
+    void SetScrollBarCallback();
+    void UpdateScrollPosition(double offset, int32_t source);
+    void SetEstimatedHeight(double val)
+    {
+        estimateHeight_ = val;
+    }
+
+    double GetEstimatedHeight() const
+    {
+        return estimateHeight_;
+    }
+
     void HandleSetSelection(int32_t start, int32_t end);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
@@ -351,6 +364,7 @@ public:
     std::string ProvideRestoreInfo() override;
 
     int32_t instanceId_ = -1;
+    int32_t scrollBarOpacity_ = 0;
 
     bool hasFocus_ = false;
     void SetEditingValue(TextEditingValue&& newValue, bool needFireChangeEvent = true, bool isClearRecords = true);
@@ -449,6 +463,10 @@ protected:
     virtual DirectionStatus GetDirectionStatusOfPosition(int32_t position) const = 0;
     virtual Size ComputeDeflateSizeOfErrorAndCountText() const = 0;
     virtual void ResetStatus() {};
+    virtual double GetLongestLine() const
+    {
+        return 0;
+    }
 
     void OnTouchTestHit(
         const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
@@ -474,6 +492,7 @@ protected:
     void UpdateDirectionStatus();
     void UpdateCaretInfoToController();
     Offset GetPositionForExtend(int32_t extend, bool isSingleHandle);
+    Offset GetLastOffset() const;
     /**
      * Get grapheme cluster length before or after extend.
      * For example, here is a sentence: 123🎉👍
@@ -482,6 +501,10 @@ protected:
      * When calling GetGraphemeClusterLength(3, true), '3' is in Utf16Bmp, so result is 1.
      */
     int32_t GetGraphemeClusterLength(int32_t extend, bool isPrefix) const;
+    bool IsOverflowX() const
+    {
+        return overflowX_ == TextFieldOverflowX::AUTO || overflowX_ == TextFieldOverflowX::SCROLL;
+    }
 
     bool HasConnection() const
     {
@@ -500,6 +523,7 @@ protected:
                 SystemProperties::GetDeviceType() != DeviceType::WATCH);
     }
 
+    void CalculateMainScrollExtent();
     void AddOutOfRectCallbackToContext();
 
     // Used for compare to the current value and decide whether to UpdateRemoteEditing().
@@ -582,7 +606,9 @@ protected:
     int32_t cursorPositionForShow_ = 0;
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
+    double estimateHeight_ = 0.0;
     CopyOptions copyOption_ = CopyOptions::Distributed;
+    TextFieldOverflowX overflowX_ = TextFieldOverflowX::HIDDEN;
 
     bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
     bool showCounter_ = false;     // Whether show counter, 10/100 means maxlength is 100 and 10 has been inputted.
@@ -625,6 +651,9 @@ protected:
     RefPtr<RenderImage> renderShowIcon_;
     RefPtr<RenderImage> renderHideIcon_;
 
+    RefPtr<ScrollBar> scrollBar_; // system defined scroll bar
+    double lastOffset_ = 0.0;
+    double currentOffset_ = 0.0;
     Offset clickOffset_;
     // For ensuring caret is visible on screen, we take a strategy that move the whole text painting area.
     // It maybe seems rough, and doesn't support scrolling smoothly.
@@ -686,6 +715,10 @@ private:
     // distribute
     void ApplyRestoreInfo();
     void OnTapCallback();
+    virtual double GetRealTextWidth() const
+    {
+        return 0;
+    }
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
 

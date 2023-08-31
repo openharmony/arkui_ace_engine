@@ -43,6 +43,7 @@
 #include "core/components_v2/inspector/utils.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/mouse_event.h"
+#include "core/components/text_field/text_field_scroll_bar_controller.h"
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
 #endif
@@ -194,6 +195,15 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     copyOption_ = textField->GetCopyOption();
     selection_ = textField->GetSelection();
     placeholder_ = textField->GetPlaceholder();
+    maxLines_ = textField->GetTextMaxLines();
+    overflowX_ = textField->GetOverflowX();
+    LOGI("get overflowX:%{public}d", static_cast<uint32_t>(overflowX_));
+    if (IsOverflowX()) {
+        maxLines_ = 1;
+        InitScrollBar(textField);
+    } else {
+        maxLines_ = textField->GetTextMaxLines();
+    }
     inputFilter_ = textField->GetInputFilter();
     inactivePlaceholderColor_ = textField->GetPlaceholderColor();
     focusPlaceholderColor_ = textField->GetFocusPlaceholderColor();
@@ -224,7 +234,6 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     errorBorderColor_ = textField->GetErrorBorderColor();
     needFade_ = textField->NeedFade();
     inactiveTextColor_ = style_.GetTextColor();
-    maxLines_ = textField->GetTextMaxLines();
     onTextChangeEvent_ = AceAsyncEvent<void(const std::string&)>::Create(textField->GetOnTextChange(), context_);
     onError_ = textField->GetOnError();
     onValueChangeEvent_ = textField->GetOnTextChange().GetUiStrFunction();
@@ -371,6 +380,52 @@ void RenderTextField::Update(const RefPtr<Component>& component)
     UpdateAccessibilityAttr();
 }
 
+void RenderTextField::SetScrollBarCallback()
+{
+    if (!scrollBar_ || !scrollBar_->NeedScrollBar()) {
+        return;
+    }
+    auto&& scrollCallback = [weakList = AceType::WeakClaim(this)](double value, int32_t source) {
+        auto textField = weakList.Upgrade();
+        if (!textField) {
+            LOGE("textField is released");
+            return false;
+        }
+        textField->UpdateScrollPosition(value, source);
+        return true;
+    };
+    auto&& barEndCallback = [weakList = AceType::WeakClaim(this)](int32_t value) {
+        auto textField = weakList.Upgrade();
+        if (!textField) {
+            LOGE("textField is released.");
+            return;
+        }
+        textField->scrollBarOpacity_ = value;
+        textField->MarkNeedRender();
+    };
+    scrollBar_->SetCallBack(scrollCallback, barEndCallback, nullptr);
+}
+
+void RenderTextField::UpdateScrollPosition(double offset, int32_t source)
+{
+    if (source == SCROLL_FROM_START) {
+        return;
+    }
+    if (NearZero(offset)) {
+        return;
+    }
+    currentOffset_ += offset;
+    if (scrollBar_ && scrollBar_->NeedScrollBar()) {
+        scrollBar_->SetActive(SCROLL_FROM_CHILD != source);
+    }
+    auto value = GetEditingValue();
+    auto position = GetCursorPositionForClick(Offset(lastOffset_, 0.0));
+    value.MoveToPosition(position);
+    SetEditingValue(std::move(value));
+    MarkNeedLayout(true);
+    return;
+}
+
 void RenderTextField::SetCallback(const RefPtr<TextFieldComponent>& textField)
 {
     if (textField->GetOnCopy()) {
@@ -406,6 +461,26 @@ void RenderTextField::SetCallback(const RefPtr<TextFieldComponent>& textField)
             });
         LOGI("Add position changed callback id %{public}d", callbackId);
         UpdateSurfacePositionChangedCallbackId(callbackId);
+    }
+}
+
+void RenderTextField::CalculateMainScrollExtent()
+{
+    if (!IsOverflowX()) {
+        return;
+    }
+    SetEstimatedHeight(GetLongestLine());
+    auto len = GetEditingValue().GetWideText().length();
+    if (len != 0) {
+        auto averageItemWidth = GetLongestLine() / len ;
+        lastOffset_ = initIndex_ * averageItemWidth - currentOffset_;
+    }
+    if (scrollBar_) {
+        if (GetLongestLine() > GetRealTextWidth()) {
+            scrollBar_->SetScrollable(true);
+        } else {
+            scrollBar_->SetScrollable(false);
+        }
     }
 }
 
@@ -525,6 +600,7 @@ void RenderTextField::PerformLayout()
     ApplyAspectRatio();
     SetLayoutSize(GetLayoutParam().Constrain(Measure()));
     UpdateFocusAnimation();
+    CalculateMainScrollExtent();
 
     LayoutParam layoutParam = GetLayoutParam();
     layoutParam.SetMinSize(Size());
@@ -584,6 +660,13 @@ void RenderTextField::HandleMouseHoverEvent(MouseState mouseState)
 void RenderTextField::OnTouchTestHit(
     const Offset& coordinateOffset, const TouchRestrict& touchRestrict, TouchTestResult& result)
 {
+    if (!GetVisible()) {
+        return;
+    }
+    if (scrollBar_ && scrollBar_->InBarRegion(globalPoint_ - coordinateOffset)) {
+        scrollBar_->AddScrollBarController(coordinateOffset, result);
+    }
+
     if (!enabled_) {
         return;
     }
@@ -661,6 +744,43 @@ void RenderTextField::OnTouchTestHit(
     rawRecognizer_->SetTouchRestrict(touchRestrict);
     rawRecognizer_->SetCoordinateOffset(coordinateOffset);
     result.emplace_back(rawRecognizer_);
+}
+
+void RenderTextField::InitScrollBar(const RefPtr<TextFieldComponent>& component)
+{
+    LOGD("Enter function RenderTextField::InitScrollBar:");
+    if (scrollBar_) {
+        scrollBar_->Reset();
+        return;
+    }
+    if (!component) {
+        LOGE("component is null, return");
+        return;
+    }
+
+    const RefPtr<ScrollBarTheme> theme = GetTheme<ScrollBarTheme>();
+    if (!theme) {
+        return;
+    }
+    scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO, theme->GetShapeMode());
+    RefPtr<TextFieldScrollBarController> controller = AceType::MakeRefPtr<TextFieldScrollBarController>();
+    scrollBar_->SetScrollBarController(controller);
+    scrollBar_->SetReservedHeight(theme->GetReservedHeight());
+    scrollBar_->SetMinHeight(theme->GetMinHeight());
+    scrollBar_->SetMinDynamicHeight(theme->GetMinDynamicHeight());
+    scrollBar_->SetForegroundColor(theme->GetForegroundColor());
+    scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
+    scrollBar_->SetPadding(theme->GetPadding());
+    scrollBar_->SetScrollable(true);
+    scrollBar_->SetInactiveWidth(theme->GetNormalWidth());
+    scrollBar_->SetNormalWidth(theme->GetNormalWidth());
+    // set the position mode bottom
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->SetActiveWidth(theme->GetActiveWidth());
+    scrollBar_->SetTouchWidth(theme->GetTouchWidth());
+    scrollBar_->InitScrollBar(AceType::WeakClaim(this), GetContext());
+    // set scrollbar callback
+    SetScrollBarCallback();
 }
 
 void RenderTextField::StartPressAnimation(bool pressDown)
@@ -2671,6 +2791,11 @@ Offset RenderTextField::GetPositionForExtend(int32_t extend, bool isSingleHandle
         extend = static_cast<int32_t>(GetEditingValue().GetWideText().length());
     }
     return GetHandleOffset(extend);
+}
+
+Offset RenderTextField::GetLastOffset() const
+{
+    return Offset(lastOffset_, 0.0);
 }
 
 int32_t RenderTextField::GetGraphemeClusterLength(int32_t extend, bool isPrefix) const

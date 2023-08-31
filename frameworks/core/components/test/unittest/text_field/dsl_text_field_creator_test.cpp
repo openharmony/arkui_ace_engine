@@ -184,4 +184,52 @@ HWTEST_F(TextFieldCreatorTest, TextFieldComponentCreator002, TestSize.Level1)
     EXPECT_EQ(textFieldComponent->GetCursorColor().GetValue(), TEXT_FIELD_ATTR_COLOR_DEFAULT);
 }
 
+/**
+ * @tc.name: TextFieldComponentCreator003
+ * @tc.desc: test textfield overflowx property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldCreatorTest, TextFieldComponentCreator003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the json string with default.
+     */
+
+    const std::string jsonTextFieldStr1 = ""
+                                         "{                                     "
+                                         "  \"className\": \"TextField\",       "
+                                         "  \"obscure\": false,                 "
+                                         "  \"enabled\": true,                  "
+                                         "  \"overflowx\": \"auto\",            "
+                                         "  \"textAlign\": 2,                   "
+                                         "  \"extend\": true                    "
+                                         "}";
+
+    const std::string jsonTextFieldStr2 = ""
+                                         "{                                     "
+                                         "  \"className\": \"TextField\",       "
+                                         "  \"obscure\": false,                 "
+                                         "  \"enabled\": true,                  "
+                                         "  \"overflowx\": \"hidden\",          "
+                                         "  \"textAlign\": 2,                   "
+                                         "  \"extend\": true                    "
+                                         "}";
+    /**
+     * @tc.steps: step2. Check overflowx properties matched.
+     * @tc.expected: step2. overflowx property is matched.
+     */
+    auto dslBuf = reinterpret_cast<const uint8_t*>(jsonTextFieldStr1.c_str());
+    size_t dslLen = jsonTextFieldStr1.length();
+    RefPtr<Component> component1 = ComponentFactory::GetInstance().CreateComponentFromDsl(dslBuf, dslLen);
+    RefPtr<TextFieldComponent> textFieldComponent1 = AceType::DynamicCast<TextFieldComponent>(component1);
+    EXPECT_TRUE(textFieldComponent1 != nullptr);
+    EXPECT_EQ(textFieldComponent1->GetOverflowX(), TextFieldOverflowX::AUTO);
+
+    dslBuf = reinterpret_cast<const uint8_t*>(jsonTextFieldStr2.c_str());
+    dslLen = jsonTextFieldStr2.length();
+    RefPtr<Component> component2 = ComponentFactory::GetInstance().CreateComponentFromDsl(dslBuf, dslLen);
+    RefPtr<TextFieldComponent> textFieldComponent2 = AceType::DynamicCast<TextFieldComponent>(component2);
+    EXPECT_TRUE(textFieldComponent2 != nullptr);
+    EXPECT_EQ(textFieldComponent2->GetOverflowX(), TextFieldOverflowX::HIDDEN);
+}
 } // namespace OHOS::Ace
