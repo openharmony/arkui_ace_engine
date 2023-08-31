@@ -70,7 +70,7 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
-#ifdef CROSS_PLATFORM
+#if defined(ANDROID_PLATFORM)  || defined(IOS_PLATFORM)
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
 #ifndef USE_ROSEN_DRAWING
@@ -253,7 +253,7 @@ void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transit
 void RosenRenderContext::SetSurfaceChangedCallBack(
     const std::function<void(float, float, float, float)>& callback)
 {
-#ifdef CROSS_PLATFORM
+#if defined(ANDROID_PLATFORM)  || defined(IOS_PLATFORM)
     if (rsNode_) {
         RSRenderThread::Instance().AddSurfaceChangedCallBack(rsNode_->GetId(), callback);
     }
@@ -262,7 +262,7 @@ void RosenRenderContext::SetSurfaceChangedCallBack(
 
 void RosenRenderContext::RemoveSurfaceChangedCallBack()
 {
-#ifdef CROSS_PLATFORM
+#if defined(ANDROID_PLATFORM)  || defined(IOS_PLATFORM)
     if (rsNode_) {
         RSRenderThread::Instance().RemoveSurfaceChangedCallBack(rsNode_->GetId());
     }
