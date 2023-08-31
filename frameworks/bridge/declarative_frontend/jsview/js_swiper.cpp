@@ -444,18 +444,20 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionVp(bottomValue, dimPosition);
     swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
-    parseOk = ParseJsDimensionVp(itemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
+    bool parseItemWOk =
+        ParseJsDimensionVp(itemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     auto defaultSize = swiperIndicatorTheme->GetSize();
-    swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    parseOk = ParseJsDimensionVp(itemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
-    swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    swiperParameters.itemWidth = parseItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    bool parseItemHOk =
+        ParseJsDimensionVp(itemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
+    swiperParameters.itemHeight = parseItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     bool parseSeleItemWOk =
         ParseJsDimensionVp(selectedItemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.selectedItemWidth = parseSeleItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     bool parseSeleItemHOk =
         ParseJsDimensionVp(selectedItemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.selectedItemHeight = parseSeleItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    if (parseSeleItemWOk == false && parseSeleItemHOk == false) {
+    if (parseSeleItemWOk == false && parseSeleItemHOk == false && parseItemWOk == false && parseItemHOk == false) {
         SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
     } else {
         SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
