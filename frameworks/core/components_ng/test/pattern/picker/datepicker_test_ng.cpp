@@ -2977,6 +2977,9 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest010, TestSize.Level1)
     dateTextProperties.upFontSize = Dimension(UP_FONT_SIZE);
     dateTextProperties.fontSize = Dimension(TEST_FONT_SIZE);
     dateTextProperties.downFontSize = Dimension(DOWN_FONT_SIZE);
+    dateTextProperties.upFontWeight = FontWeight::BOLD;
+    dateTextProperties.fontWeight = FontWeight::BOLDER;
+    dateTextProperties.downFontWeight = FontWeight::LIGHTER;
     dateTextProperties.upColor = Color::RED;
     dateTextProperties.currentColor = Color::BLUE;
     dateTextProperties.downColor = Color::GREEN;
@@ -2992,7 +2995,6 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest010, TestSize.Level1)
     columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 2, 0, false, 0.0f);
     columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 4, true, 0.0f);
     columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 4, true, 1.0f);
-    columnPattern_->CandidateWeight_ = FontWeight::BOLD;
     columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 2, true, 0.0f);
     columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 2, true, 1.0f);
     EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), FontWeight::BOLD);
@@ -3007,10 +3009,9 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest010, TestSize.Level1)
      * @tc.steps: step3. Call TextPropertiesLinearAnimation while index is one bigger than midIndex.
      * @tc.expected: textLayoutProperty's properties is changed.
      */
-    columnPattern_->SelectedWeight_ = FontWeight::BOLDER;
     columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 0, true, 0.0f);
     columnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 1, 0, true, 1.0f);
-    EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), FontWeight::BOLDER);
+    EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), FontWeight::BOLD);
     updateSize = columnPattern_->LinearFontSize(
         Dimension(TEST_FONT_SIZE), Dimension(UP_FONT_SIZE), columnPattern_->distancePercent_);
     EXPECT_EQ(textLayoutProperty->GetFontSize().value(), updateSize);

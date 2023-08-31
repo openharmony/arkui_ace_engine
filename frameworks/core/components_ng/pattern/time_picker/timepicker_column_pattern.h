@@ -36,10 +36,13 @@ using ColumnChangeCallback = std::function<void(const RefPtr<FrameNode>&, bool, 
 using ColumnFinishCallback = std::function<void(bool)>;
 using EventCallback = std::function<void(bool)>;
 
-struct TextProperties {
+struct TimeTextProperties {
     Dimension upFontSize;
     Dimension fontSize;
     Dimension downFontSize;
+    FontWeight upFontWeight;
+    FontWeight fontWeight;
+    FontWeight downFontWeight;
     Color upColor;
     Color currentColor;
     Color downColor;
@@ -403,7 +406,7 @@ private:
     RefPtr<CurveAnimation<double>> fromTopCurve_;
     RefPtr<TimePickerTossAnimationController> tossAnimationController_ =
         AceType::MakeRefPtr<TimePickerTossAnimationController>();
-    std::vector<TextProperties> animationProperties_;
+    std::vector<TimeTextProperties> animationProperties_;
     float dividerSpacing_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };
