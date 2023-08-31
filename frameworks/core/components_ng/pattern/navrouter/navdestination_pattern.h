@@ -86,16 +86,6 @@ public:
         return navDestinationNode_.Upgrade();
     }
 
-    void SetRouteInfo(const RefPtr<RouteInfo>& routeInfo)
-    {
-        routeInfo_ = routeInfo;
-    }
-
-    const RefPtr<RouteInfo>& GetRouteInfo()
-    {
-        return routeInfo_;
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -114,7 +104,6 @@ public:
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
-    RefPtr<RouteInfo> routeInfo_;
     WeakPtr<UINode> navDestinationNode_;
     bool isOnShow_ = false;
 };
