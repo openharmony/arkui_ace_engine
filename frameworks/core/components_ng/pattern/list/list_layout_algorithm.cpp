@@ -412,11 +412,23 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     int32_t endIndex = 0;
     float startPos = 0.0f;
     float endPos = 0.0f;
+    if (jumpIndex_) {
+        if (jumpIndex_.value() == LAST_ITEM) {
+            jumpIndex_ = totalItemCount_ - 1;
+        } else if ((jumpIndex_.value() < 0) || (jumpIndex_.value() >= totalItemCount_)) {
+            LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
+            jumpIndex_.reset();
+        }
+    }
     if (!itemPosition_.empty()) {
         startPos = itemPosition_.begin()->second.startPos;
         endPos = itemPosition_.rbegin()->second.endPos;
         startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
+        if (GetStartIndex() > totalItemCount_ - 1 && !jumpIndex_.has_value()) {
+            jumpIndex_ = totalItemCount_ - 1;
+            scrollAlign_ = ScrollAlign::END;
+        }
         if (IsScrollSnapAlignCenter(layoutWrapper) && overScrollFeature_) {
             float itemHeight = 0.0f;
             if (startIndex == 0) {
@@ -431,14 +443,6 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         OffScreenLayoutDirection();
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
-    }
-    if (jumpIndex_) {
-        if (jumpIndex_.value() == LAST_ITEM) {
-            jumpIndex_ = totalItemCount_ - 1;
-        } else if ((LessNotEqual(jumpIndex_.value(), 0)) || (GreatOrEqual(jumpIndex_.value(), totalItemCount_))) {
-            LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
-            jumpIndex_.reset();
-        }
     }
     if ((jumpIndex_ || targetIndex_) && scrollAlign_ == ScrollAlign::AUTO &&
         NoNeedJump(layoutWrapper, startPos, endPos, startIndex, endIndex)) {
