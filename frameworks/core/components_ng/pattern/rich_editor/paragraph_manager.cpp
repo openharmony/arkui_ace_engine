@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
 float ParagraphManager::GetHeight() const
 {
-    float res = 0;
+    float res = 0.0f;
     for (auto&& info : paragraphs_) {
         res += info.paragraph->GetHeight();
     }
@@ -29,6 +29,7 @@ float ParagraphManager::GetHeight() const
 
 int32_t ParagraphManager::GetIndex(Offset offset) const
 {
+    CHECK_NULL_RETURN(!paragraphs_.empty(), 0);
     for (auto&& info : paragraphs_) {
         if (offset.GetY() > info.paragraph->GetHeight()) {
             // get offset relative to each paragraph
@@ -43,7 +44,7 @@ int32_t ParagraphManager::GetIndex(Offset offset) const
 std::vector<Rect> ParagraphManager::GetRects(int32_t start, int32_t end) const
 {
     std::vector<Rect> res;
-    float y = 0;
+    float y = 0.0f;
     for (auto&& info : paragraphs_) {
         std::vector<Rect> rects;
         if (info.start > end) {
@@ -83,7 +84,7 @@ std::vector<Rect> ParagraphManager::GetPlaceholderRects() const
 OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHeight) const
 {
     auto it = paragraphs_.begin();
-    float y = 0;
+    float y = 0.0f;
     while (it != paragraphs_.end()) {
         if (index >= it->start && index < it->end) {
             break;

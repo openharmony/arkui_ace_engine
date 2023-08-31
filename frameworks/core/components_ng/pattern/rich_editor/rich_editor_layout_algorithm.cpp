@@ -63,7 +63,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
             continue;
         }
         auto firstSpan = *group.begin();
-        pManager_->AddParagraph( { .paragraph = paragraph,
+        pManager_->AddParagraph({ .paragraph = paragraph,
             .start = firstSpan->position - firstSpan->content.length(),
             .end = (*group.rbegin())->position });
     }

@@ -46,9 +46,9 @@ public:
     std::vector<Rect> GetPlaceholderRects() const;
     OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight) const;
 
-    void AddParagraph(ParagraphInfo info)
+    void AddParagraph(ParagraphInfo&& info)
     {
-        paragraphs_.push_back(std::move(info));
+        paragraphs_.emplace_back(std::move(info));
     }
 
     bool IsEmpty() const
