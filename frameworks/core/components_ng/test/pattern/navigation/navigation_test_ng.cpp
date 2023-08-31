@@ -24,8 +24,10 @@
 #include "base/json/json_util.h"
 #include "base/test/mock/mock_task_executor.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -2457,5 +2459,220 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0014, TestSize.Level1)
 
     navigation->SetBackButtonVisible(navDestination, false);
     ASSERT_EQ(backButtonLayoutProperty->propVisibility_.value(), VisibleType::GONE);
+}
+
+/**
+ * @tc.name: NavigationModelNG0015
+ * @tc.desc: Test NavigationModelNG::UpdateNavDestinationNodeWithoutMarkDirty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto navigationContentNode =
+        FrameNode::CreateFrameNode("navigationContent", 123, AceType::MakeRefPtr<ButtonPattern>());
+    navigation->contentNode_ = navigationContentNode;
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    /**
+     * @tc.steps: step2. create navDestination.
+     */
+    auto navDestination1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 124, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 125, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination3 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 126, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination4 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 127, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination5 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 129, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination6 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 130, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination7 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 131, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto child8 = FrameNode::CreateFrameNode("NavDestination", 132, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto temp = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 133, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    /**
+     * @tc.steps: step3. add element to navigationPattern->navigationStack_.
+     */
+    navigationPattern->navigationStack_->Add("navDestination1", navDestination1);
+    navigationPattern->navigationStack_->Add("navDestination2", navDestination2);
+    navigationPattern->navigationStack_->Add("navDestination3", navDestination3);
+
+    auto pattern5 = navDestination5->GetPattern<NavDestinationPattern>();
+    pattern5->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination5));
+
+    pattern5->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
+        []() { return FrameNode::CreateFrameNode("temp", 234, AceType::MakeRefPtr<ButtonPattern>()); });
+    navDestination5->contentNode_ = FrameNode::CreateFrameNode("temp", 235, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto pattern6 = navDestination6->GetPattern<NavDestinationPattern>();
+    pattern6->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination6));
+
+    auto pattern7 = navDestination7->GetPattern<NavDestinationPattern>();
+    pattern7->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination7));
+
+    ASSERT_NE(navDestination7->GetPattern<NavDestinationPattern>()->GetNavDestinationNode(), nullptr);
+    /**
+     * @tc.steps: step4. add element to navigationContentNode->children_.
+     */
+    navigationContentNode->children_.push_back(navDestination1);
+    navigationContentNode->children_.push_back(navDestination4);
+    navigationContentNode->children_.push_back(navDestination2);
+    navigationContentNode->children_.push_back(navDestination5);
+    navigationContentNode->children_.push_back(navDestination6);
+    navigationContentNode->children_.push_back(navDestination7);
+    navigationContentNode->children_.push_back(child8);
+
+    navigation->UpdateNavDestinationNodeWithoutMarkDirty(temp);
+}
+
+/**
+ * @tc.name: NavigationModelNG0016
+ * @tc.desc: Test NavigationModelNG::GetNavDestinationNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto navigationContentNode =
+        FrameNode::CreateFrameNode("navigationContent", 123, AceType::MakeRefPtr<ButtonPattern>());
+    navigation->contentNode_ = navigationContentNode;
+
+    auto result = navigation->GetNavDestinationNode(navigationContentNode);
+    ASSERT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: NavigationModelNG0017
+ * @tc.desc: Test NavigationModelNG::GetNavDestinationNodeToHandleBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto navigationContentNode =
+        FrameNode::CreateFrameNode("navigationContent", 123, AceType::MakeRefPtr<ButtonPattern>());
+    navigation->contentNode_ = navigationContentNode;
+
+    auto child = FrameNode::CreateFrameNode("navigationContent", 345, AceType::MakeRefPtr<ButtonPattern>());
+    navigationContentNode->children_.push_back(child);
+
+    navigation->GetNavDestinationNodeToHandleBack();
+    ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::AUTO);
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    navigation->GetNavDestinationNodeToHandleBack();
+    ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
+    auto child2 = FrameNode::CreateFrameNode("navigationContent", 346, AceType::MakeRefPtr<ButtonPattern>());
+    navigationContentNode->children_.push_back(child2);
+    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    navigation->GetNavDestinationNodeToHandleBack();
+    ASSERT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
+}
+
+/**
+ * @tc.name: NavigationModelNG0018
+ * @tc.desc: Test NavigationModelNG::UpdateNavDestinationNodeWithoutMarkDirty
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    auto navigationContentNode =
+        FrameNode::CreateFrameNode("navigationContent", 123, AceType::MakeRefPtr<ButtonPattern>());
+    navigation->contentNode_ = navigationContentNode;
+    ASSERT_NE(navigationPattern->navigationStack_, nullptr);
+    /**
+     * @tc.steps: step2. create navDestination.
+     */
+    auto navDestination1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 154, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 155, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination3 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 156, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination4 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 157, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination5 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 159, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination6 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 160, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestination7 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 161, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto child8 = FrameNode::CreateFrameNode("NavDestination", 132, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto temp = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "NavDestination", 163, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    auto pattern5 = navDestination5->GetPattern<NavDestinationPattern>();
+    pattern5->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination5));
+
+    pattern5->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
+        []() { return FrameNode::CreateFrameNode("temp", 236, AceType::MakeRefPtr<ButtonPattern>()); });
+    navDestination5->contentNode_ = FrameNode::CreateFrameNode("temp", 245, AceType::MakeRefPtr<ButtonPattern>());
+
+    auto pattern6 = navDestination6->GetPattern<NavDestinationPattern>();
+    pattern6->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(navDestination6));
+
+    auto pattern7 = navDestination7->GetPattern<NavDestinationPattern>();
+    pattern7->navDestinationNode_ = AceType::WeakClaim(AceType::RawPtr(temp));
+    navDestination7->eventHub_ = nullptr;
+
+    ASSERT_NE(navDestination7->GetPattern<NavDestinationPattern>()->GetNavDestinationNode(), nullptr);
+    /**
+     * @tc.steps: step4. add element to navigationContentNode->children_.
+     */
+    navigationContentNode->children_.push_back(navDestination1);
+    navigationContentNode->children_.push_back(navDestination4);
+    navigationContentNode->children_.push_back(navDestination2);
+    navigationContentNode->children_.push_back(navDestination5);
+    navigationContentNode->children_.push_back(navDestination6);
+    navigationContentNode->children_.push_back(navDestination7);
+    navigationContentNode->children_.push_back(child8);
+
+    navigation->UpdateNavDestinationNodeWithoutMarkDirty(temp);
+    ASSERT_EQ(navDestination7->eventHub_, nullptr);
 }
 } // namespace OHOS::Ace::NG
