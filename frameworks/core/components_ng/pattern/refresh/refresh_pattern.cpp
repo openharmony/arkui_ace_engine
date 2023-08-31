@@ -105,8 +105,7 @@ void RefreshPattern::InitOnKeyEvent()
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN_NOLOG(pattern, false);
-        pattern->OnKeyEvent(event);
-        return true;
+        return pattern->OnKeyEvent(event);
     };
     isKeyEventRegisted_ = true;
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
@@ -141,14 +140,16 @@ void RefreshPattern::QuickEndFresh()
     LoadingProgressExit();
 }
 
-void RefreshPattern::OnKeyEvent(const KeyEvent& event)
+bool RefreshPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_F5 || (event.IsCombinationKey() && event.IsCtrlWith(KeyCode::KEY_R))) {
         if (isRefreshing_) {
-            return;
+            return true;
         }
         QuickStartFresh();
+        return true;
     }
+    return false;
 }
 
 void RefreshPattern::CheckCoordinationEvent()

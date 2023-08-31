@@ -132,7 +132,7 @@ private:
     void UpdateLoadingMarginTop(float top);
     void SetAccessibilityAction();
     void InitOnKeyEvent();
-    void OnKeyEvent(const KeyEvent& event);
+    bool OnKeyEvent(const KeyEvent& event);
     void QuickEndFresh();
     void QuickStartFresh();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
