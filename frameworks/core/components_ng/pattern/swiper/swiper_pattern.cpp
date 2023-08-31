@@ -290,7 +290,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         }
         targetIndex_.reset();
         if (usePropertyAnimation_) {
-            StopPropertyTranslateAnimation();
+            StopPropertyTranslateAnimation(true);
             currentDelta_ = 0.0f;
             if (indicatorController_) {
                 indicatorController_->Stop();
@@ -1641,7 +1641,7 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     OnTranslateFinish(propertyAnimationIndex_, false);
 }
 
-void SwiperPattern::StopPropertyTranslateAnimation()
+void SwiperPattern::StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper)
 {
     if (!usePropertyAnimation_) {
         return;
@@ -1658,7 +1658,9 @@ void SwiperPattern::StopPropertyTranslateAnimation()
         frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
         item.second.finialOffset = OffsetF();
     }
-    UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
+    if (!isBeforeCreateLayoutWrapper) {
+        UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
+    }
     OnTranslateFinish(propertyAnimationIndex_, false, true);
 }
 
