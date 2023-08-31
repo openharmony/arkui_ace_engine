@@ -36,13 +36,13 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(titleBarLayoutProperty);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
+    auto buttonNode = backButtonNode->GetChildren().front();
+    CHECK_NULL_VOID(buttonNode);
+    auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
+    CHECK_NULL_VOID(backButtonImageNode);
+    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonImageLayoutProperty);
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR) {
-        auto buttonNode = backButtonNode->GetChildren().front();
-        CHECK_NULL_VOID(buttonNode);
-        auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
-        CHECK_NULL_VOID(backButtonImageNode);
-        auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(backButtonImageLayoutProperty);
         if (titleBarLayoutProperty->HasNoPixMap() && titleBarLayoutProperty->HasImageSource()) {
             backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
         }
@@ -59,15 +59,13 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         backButtonImageNode->MarkModifyDone();
         return;
     }
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(backButtonLayoutProperty);
     if (!titleBarLayoutProperty->HasNoPixMap()) {
         backButtonNode->MarkModifyDone();
         return;
     }
 
     if (titleBarLayoutProperty->HasImageSource()) {
-        backButtonLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
+        backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
         backButtonNode->MarkModifyDone();
         return;
     }
