@@ -792,7 +792,7 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
     eventHub->FireOnAcquired(json->ToString());
 }
 
-void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) const
+void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action)
 {
     LOGI("FireOnAcquiredEvent action: %{public}s", action->ToString().c_str());
     auto host = GetHost();
@@ -829,7 +829,7 @@ void FormPattern::OnLoadEvent()
     });
 }
 
-void FormPattern::OnActionEvent(const std::string& action) const
+void FormPattern::OnActionEvent(const std::string& action)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
@@ -849,7 +849,16 @@ void FormPattern::OnActionEvent(const std::string& action) const
     }
 
     if ("router" == type) {
-        FireOnRouterEvent(eventAction);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto uiTaskExecutor =
+        SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak = WeakClaim(this), action] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto eventAction = JsonUtil::ParseJsonString(action);
+            pattern->FireOnRouterEvent(eventAction);
+        });
     }
 
     CHECK_NULL_VOID_NOLOG(formManagerBridge_);
