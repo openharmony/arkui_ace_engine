@@ -147,9 +147,26 @@ ohos_unittest("drawable_descriptor_test") {
   ]
 }
 
+ohos_unittest("ace_forward_compatibility_test") {
+  module_out_path = "$interface_test_output_path/inner_api"
+
+  sources = [
+    "$ace_root/interfaces/inner_api/ace/ace_forward_compatibility.cpp",
+    "ace_forward_compatibility_test.cpp",
+  ]
+
+  include_dirs = [ "${ace_root}/interfaces/inner_api/ace" ]
+
+  external_deps = [
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+}
+
 group("interfaces_unittest") {
   testonly = true
   deps = [
+    ":ace_forward_compatibility_test",
     ":drawable_descriptor_test",
     ":form_render_test",
     ":ui_content_test",
