@@ -448,7 +448,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     asyncContext->callbacks.emplace("success");
     asyncContext->callbacks.emplace("cancel");
 
-    auto callBack = [asyncContext](int32_t callbackType, int32_t successType) {
+    auto callBack = [asyncContext](int32_t callbackType, int32_t successType) mutable {
         if (asyncContext == nullptr) {
             return;
         }
@@ -467,7 +467,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             return;
         }
         taskExecutor->PostTask(
-            [asyncContext]() mutable {
+            [asyncContext]() {
                 if (asyncContext == nullptr) {
                     LOGE("%{public}s, asyncContext is nullptr.", __func__);
                     return;
@@ -523,6 +523,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 napi_close_handle_scope(asyncContext->env, scope);
             },
             TaskExecutor::TaskType::JS);
+        asyncContext = nullptr;
     };
 
     PromptDialogAttr promptDialogAttr = {
@@ -665,7 +666,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         napi_get_undefined(env, &result);
     }
 
-    auto callBack = [asyncContext](int32_t callbackType, int32_t successType) {
+    auto callBack = [asyncContext](int32_t callbackType, int32_t successType) mutable {
         if (asyncContext == nullptr) {
             return;
         }
@@ -684,7 +685,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             return;
         }
         taskExecutor->PostTask(
-            [asyncContext]() mutable {
+            [asyncContext]() {
                 if (asyncContext == nullptr) {
                     LOGE("%{public}s, asyncContext is nullptr.", __func__);
                     return;
@@ -740,6 +741,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 napi_close_handle_scope(asyncContext->env, scope);
             },
             TaskExecutor::TaskType::JS);
+        asyncContext = nullptr;
     };
 
 #ifdef OHOS_STANDARD_SYSTEM
