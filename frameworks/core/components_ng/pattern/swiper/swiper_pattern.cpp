@@ -1398,6 +1398,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
     if (IsVisibleChildrenSizeLessThanSwiper()) {
+        UpdateItemRenderGroup(false);
         return;
     }
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
@@ -1863,6 +1864,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     info.currentOffset = GetCustomPropertyOffset() + Dimension(firstIndexStartPos, DimensionUnit::PX).ConvertToVp();
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
     currentIndexOffset_ = firstIndexStartPos;
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::OnFadeAnimationStart()
@@ -2756,6 +2758,17 @@ void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
             CHECK_NULL_VOID(context);
             context->UpdateRenderGroup(itemRenderGroup);
         }
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (auto child : host->GetChildren()) {
+        auto frameNode = DynamicCast<FrameNode>(child);
+        if (!frameNode || child->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+            continue;
+        }
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateRenderGroup(itemRenderGroup);
     }
 }
 
