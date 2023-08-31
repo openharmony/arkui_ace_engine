@@ -155,7 +155,11 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
     Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
-    if (offset.GetDistance() > MAX_THRESHOLD) {
+    auto longPressThreshold = MAX_THRESHOLD;
+    if (isForDrag_) {
+        longPressThreshold = DRAG_LONG_PRESS_THRESHOLD;
+    }
+    if (offset.GetDistance() > longPressThreshold) {
         LOGD("this gesture is not long press, try to reject it");
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;

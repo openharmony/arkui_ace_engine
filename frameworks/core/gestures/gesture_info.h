@@ -44,6 +44,7 @@ namespace OHOS::Ace {
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
 constexpr double DRAG_PAN_DISTANCE_MOUSE = 1.0;
+constexpr double DRAG_LONG_PRESS_THRESHOLD = 3.0;
 constexpr Dimension DEFAULT_SLIDE_DISTANCE = DEFAULT_PAN_DISTANCE;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 300.0;
