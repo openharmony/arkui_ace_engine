@@ -53,6 +53,7 @@ constexpr int8_t MASK_COUNT = 2;
 constexpr float FULL_OPACITY = 1.0f;
 constexpr float NEAR_FULL_OPACITY = 0.99f;
 constexpr float NO_OPACITY = 0.0f;
+constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
 } // namespace
 
 void TabBarPattern::OnAttachToFrameNode()
@@ -1897,6 +1898,11 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     } else if (LessOrEqual(turnPageRate, 0.0f)) {
         turnPageRate_ = 0.0f;
     } else {
+        if (turnPageRate_ <= TEXT_COLOR_THREDHOLD && turnPageRate > TEXT_COLOR_THREDHOLD) {
+            UpdateTextColor(index);
+        } else if (turnPageRate <= 1.0f - TEXT_COLOR_THREDHOLD && turnPageRate_ > 1.0f - TEXT_COLOR_THREDHOLD) {
+            UpdateTextColor(swiperStartIndex_);
+        }
         turnPageRate_ = turnPageRate;
     }
 
