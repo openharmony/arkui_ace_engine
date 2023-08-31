@@ -518,4 +518,40 @@ HWTEST_F(InputEventHubTestNg, DisableHoverEvent001, TestSize.Level1)
     inputEventHub->hoverEventActuator_->userCallback_->onHoverEventCallback_(true, hover2);
     EXPECT_EQ(result, RESULT_SUCCESS_TWO);
 }
+
+/**
+ * @tc.name: InputEventHubGetHoverEffectStr001
+ * @tc.desc: Create InputEventHub and invoke GetHoverEffectStr function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, InputEventHubGetHoverEffectStr001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+    inputEventHub->hoverEffectType_ = HoverEffectType::AUTO;
+
+    /**
+     * @tc.steps: step2. Invoke BindContextMenu when showMenu_ is nullptr or not.
+     * @tc.expected: mouseEventActuator_ is not nullptr.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            inputEventHub->GetHoverEffectStr();
+            if (i == 1) {
+                inputEventHub->hoverEffectType_ = HoverEffectType::NONE;
+                continue;
+            }
+            inputEventHub->hoverEffectType_ = HoverEffectType::SCALE;
+        }
+        inputEventHub->hoverEffectType_ = HoverEffectType::BOARD;
+    }
+    inputEventHub->hoverEffectType_ = HoverEffectType::OPACITY;
+    inputEventHub->GetHoverEffectStr();
+}
 } // namespace OHOS::Ace::NG
