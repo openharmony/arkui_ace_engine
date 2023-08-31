@@ -910,7 +910,8 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const T
     }
 
     // update style of spans in range [headIt, tailIt)
-    while (headIt != host->GetChildren().end() && *headIt != *tailIt) {
+    // SPECIAL CASE: only 1 span and *headIt == *tailIt, handled by do-while loop
+    do {
         auto spanNode = DynamicCast<SpanNode>(*headIt);
         if (spanNode) {
             if (updateSpanStyle_.updateTextAlign.has_value()) {
@@ -921,7 +922,7 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const T
             }
         }
         ++headIt;
-    }
+    } while (headIt != host->GetChildren().end() && *headIt != *tailIt);
 }
 
 void RichEditorPattern::ScheduleCaretTwinkling()
