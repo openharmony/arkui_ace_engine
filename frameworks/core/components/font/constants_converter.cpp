@@ -529,10 +529,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtShadow.color = spanShadow.GetColor().GetValue();
         txtShadow.offset.SetX(spanShadow.GetOffset().GetX());
         txtShadow.offset.SetY(spanShadow.GetOffset().GetY());
-#if defined(FLUTTER_2_5) || defined(NEW_SKIA)
-#else
         txtShadow.blurRadius = spanShadow.GetBlurRadius();
-#endif
         txtStyle.shadows.emplace_back(txtShadow);
     }
 
