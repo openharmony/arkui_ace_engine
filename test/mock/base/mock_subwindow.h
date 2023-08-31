@@ -39,7 +39,7 @@ public:
     MOCK_METHOD1(CancelPopup, bool(const std::string& id));
     MOCK_METHOD0(CloseMenu, void());
     MOCK_METHOD0(ClearMenu, void());
-    MOCK_METHOD0(ClearMenuNG, void());
+    MOCK_METHOD1(ClearMenuNG, void(bool inWindow));
     MOCK_METHOD2(
         ShowDialogNG, RefPtr<NG::FrameNode>(const DialogProperties& dialogProps, std::function<void()>&& buildFunc));
     MOCK_METHOD0(HideSubWindowNG, void());

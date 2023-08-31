@@ -48,7 +48,7 @@ public:
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
-    virtual void ClearMenuNG() = 0;
+    virtual void ClearMenuNG(bool inWindow = true) = 0;
     virtual RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, std::function<void()>&& buildFunc) = 0;
     virtual void HideSubWindowNG() = 0;
