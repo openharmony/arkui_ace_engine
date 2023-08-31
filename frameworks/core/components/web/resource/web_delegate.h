@@ -700,7 +700,8 @@ private:
     void NotifyPopupWindowResult(bool result);
 
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
-
+    void SurfaceOcclusionCallback(bool occlusion);
+    void RegisterSurfaceOcclusionChangeFun();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -780,6 +781,9 @@ private:
     uint32_t rosenWindowId_ = 0;
     RefPtr<WebDelegateObserver> observer_;
     std::shared_ptr<Rosen::RSNode> rsNode_;
+    Rosen::NodeId surfaceNodeId_ = 0;
+    bool surfaceOcclusion_ = true;
+    uint32_t delayTime_ = 500;
 #endif
 };
 
