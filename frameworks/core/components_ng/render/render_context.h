@@ -100,6 +100,8 @@ public:
 
     virtual void SyncGeometryProperties(const RectF& rectF) {}
 
+    virtual void SetBorderRadius(const BorderRadiusProperty& value) {}
+
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
     virtual void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) {};

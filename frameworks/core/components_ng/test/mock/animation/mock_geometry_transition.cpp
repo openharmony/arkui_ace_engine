@@ -25,7 +25,7 @@ GeometryTransition::GeometryTransition(const std::string& id, const WeakPtr<Fram
 void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn) {}
 void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
 void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper) {}
-void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger) {}
+void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const AnimationOption& option) {}
 
 bool GeometryTransition::OnAdditionalLayout(const WeakPtr<FrameNode>& frameNode)
 {

@@ -114,7 +114,7 @@ void ElementRegister::AddPendingRemoveNode(const RefPtr<NG::UINode>& node) {}
 
 void ElementRegister::ClearPendingRemoveNodes() {}
 
-void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger) {}
+void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger, const AnimationOption& option) {}
 
 RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
     const std::string& id, const WeakPtr<NG::FrameNode>& frameNode, bool followWithoutTransition)
