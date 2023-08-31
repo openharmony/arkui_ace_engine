@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -200,7 +201,7 @@ float MenuItemGroupLayoutAlgorithm::GetChildrenMaxWidth(
     float width = layoutConstraint.minSize.Width();
 
     for (const auto& child : children) {
-        child->Measure(layoutConstraint);
+        child->Measure(MultiMenuLayoutAlgorithm::ResetLayoutConstraintMinWidth(child, layoutConstraint));
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         width = std::max(width, childSize.Width());
     }

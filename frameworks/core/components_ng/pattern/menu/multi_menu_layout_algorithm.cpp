@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -56,7 +57,7 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float contentHeight = 0.0f;
     float contentWidth = childConstraint.minSize.Width();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(childConstraint);
+        child->Measure(ResetLayoutConstraintMinWidth(child, childConstraint));
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         LOGD("child finish measure, child %{public}s size = %{public}s", child->GetHostTag().c_str(),
             child->GetGeometryNode()->GetMarginFrameSize().ToString().c_str());
@@ -101,7 +102,7 @@ void MultiMenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(
 {
     // multiMenu children are menuItem or menuItemGroup, constrain width is same as the menu
     auto maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper, constraint);
-    constraint.minSize.SetWidth(maxChildrenWidth);
+    constraint.selfIdealSize.SetWidth(maxChildrenWidth);
 }
 
 float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
@@ -109,10 +110,25 @@ float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
 {
     float maxWidth = 0.0f;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(layoutConstraint);
+        auto childConstraint = ResetLayoutConstraintMinWidth(child, layoutConstraint);
+        child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetFrameSize();
         maxWidth = std::max(maxWidth, childSize.Width());
     }
     return maxWidth;
+}
+
+LayoutConstraintF MultiMenuLayoutAlgorithm::ResetLayoutConstraintMinWidth(
+    const RefPtr<LayoutWrapper>& child, const LayoutConstraintF& layoutConstraint)
+{
+    auto childLayoutProps = child->GetLayoutProperty();
+    CHECK_NULL_RETURN(childLayoutProps, layoutConstraint);
+    auto childConstraint = layoutConstraint;
+    const auto& calcConstraint = childLayoutProps->GetCalcLayoutConstraint();
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value() &&
+        calcConstraint->selfIdealSize.value().Width().has_value()) {
+        childConstraint.minSize.Reset();
+    }
+    return childConstraint;
 }
 } // namespace OHOS::Ace::NG
