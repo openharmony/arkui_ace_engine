@@ -99,21 +99,6 @@ common_bin = [
     part_name = "graphic_2d"
   },
   {
-    label = "//foundation/graphic/graphic_2d/rosen/modules/texgine:libtexgine"
-    subsystem_name = "graphic"
-    part_name = "graphic_2d"
-  },
-  {
-    label = "//foundation/graphic/graphic_2d/rosen/modules/texgine/texgine_drawing:libtexgine_drawing"
-    subsystem_name = "graphic"
-    part_name = "graphic_2d"
-  },
-  {
-    label = "//third_party/jsoncpp:jsoncpp"
-    subsystem_name = "thirdparty"
-    part_name = "jsoncpp"
-  },
-  {
     label = "//third_party/flutter/build/skia:skia_shared"
     subsystem_name = "thirdparty"
     part_name = "flutter"
