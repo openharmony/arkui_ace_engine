@@ -257,7 +257,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(
         navigationWidth = static_cast<float>(WINDOW_WIDTH.ConvertToPx());
     }
     if (usrNavigationMode == NavigationMode::AUTO) {
-        if (frameSize.Width() > navigationWidth) {
+        if (frameSize.Width() >= navigationWidth) {
             usrNavigationMode = NavigationMode::SPLIT;
         } else {
             usrNavigationMode = NavigationMode::STACK;
