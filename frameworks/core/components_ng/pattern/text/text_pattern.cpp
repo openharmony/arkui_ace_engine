@@ -17,6 +17,7 @@
 
 #include <stack>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
@@ -192,6 +193,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (IsDraggable(info.GetLocalLocation())) {
+        dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
 #ifdef ENABLE_DRAG_FRAMEWORK
         gestureHub->SetIsTextDraggable(true);
@@ -1268,5 +1270,31 @@ void TextPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+}
+
+OffsetF TextPattern::GetDragUpperLeftCoordinates()
+{
+    if (dragBoxes_.empty()) {
+        return { 0.0f, 0.0f };
+    }
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto startY = dragBoxes_.front().rect_.GetTop();
+    auto startX = dragBoxes_.front().rect_.GetLeft();
+
+    auto endY = dragBoxes_.back().rect_.GetTop();
+#else
+    auto startY = dragBoxes_.front().rect.GetTop();
+    auto startX = dragBoxes_.front().rect.GetLeft();
+
+    auto endY = dragBoxes_.back().rect.GetTop();
+#endif
+    OffsetF offset;
+    if (NearEqual(startY, endY)) {
+        offset = { contentRect_.GetX() + startX, startY + contentRect_.GetY() };
+    } else {
+        offset = { contentRect_.GetX(), startY + contentRect_.GetY() };
+    }
+    
+    return GetParentGlobalOffset() + offset;
 }
 } // namespace OHOS::Ace::NG

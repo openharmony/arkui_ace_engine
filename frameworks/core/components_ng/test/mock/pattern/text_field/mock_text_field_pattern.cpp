@@ -158,6 +158,10 @@ bool TextFieldPattern::CloseCustomKeyboard()
 {
     return true;
 }
+OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
+{
+    return {};
+}
 void TextFieldPattern::DumpInfo() {}
 void TextFieldPattern::OnColorConfigurationUpdate() {}
 } // namespace OHOS::Ace::NG
