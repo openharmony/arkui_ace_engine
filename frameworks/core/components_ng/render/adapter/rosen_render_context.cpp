@@ -2321,36 +2321,93 @@ void RosenRenderContext::OnSweepGradientUpdate(const NG::Gradient& gradient)
     RequestNextFrame();
 }
 
+void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize)
+{
+    auto basicShape = clip->GetClipShapeValue();
+#ifndef USE_ROSEN_DRAWING
+    auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
+    auto shapePath = Rosen::RSPath::CreateRSPath(skPath);
+    if (!clipBoundModifier_) {
+        auto prop = std::make_shared<RSProperty<std::shared_ptr<Rosen::RSPath>>>(shapePath);
+        clipBoundModifier_ = std::make_shared<Rosen::RSClipBoundsModifier>(prop);
+        rsNode_->AddModifier(clipBoundModifier_);
+    } else {
+        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSPath>>>(
+            clipBoundModifier_->GetProperty());
+        property->Set(shapePath);
+    }
+#else
+    auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
+    auto shapePath = Rosen::RSPath::CreateRSPath(rsPath);
+    if (!clipBoundModifier_) {
+        auto prop = std::make_shared<RSProperty<RSPath>>(shapePath);
+        clipBoundModifier_ = std::make_shared<Rosen::RSClipBoundsModifier>(prop);
+        rsNode_->AddModifier(clipBoundModifier_);
+    } else {
+        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<RSPath>>>(
+            clipBoundModifier_->GetProperty());
+        property->Set(shapePath);
+    }
+#endif
+}
+
+void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize)
+{
+    if (moonProgressModifier_) {
+        auto modifierAdapter =
+            std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(moonProgressModifier_));
+        rsNode_->RemoveModifier(modifierAdapter);
+        moonProgressModifier_ = nullptr;
+    }
+    auto basicShape = clip->GetClipMaskValue();
+#ifndef USE_ROSEN_DRAWING
+    auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
+    auto maskPath = Rosen::RSMask::CreatePathMask(skPath, SkiaDecorationPainter::CreateMaskSkPaint(basicShape));
+    if (!clipMaskModifier_) {
+        auto prop = std::make_shared<RSProperty<std::shared_ptr<Rosen::RSMask>>>(maskPath);
+        clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
+        rsNode_->AddModifier(clipMaskModifier_);
+    } else {
+        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<Rosen::RSMask>>>(
+            clipMaskModifier_->GetProperty());
+        property->Set(maskPath);
+    }
+#else
+    auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
+    auto maskPath = Rosen::RSMask::CreatePathMask(
+        rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
+    if (!clipMaskModifier_) {
+        auto prop = std::make_shared<RSProperty<RSMask>>(maskPath);
+        clipMaskModifier_ = std::make_shared<Rosen::RSMaskModifier>(prop);
+        rsNode_->AddModifier(clipMaskModifier_);
+    } else {
+        auto property = std::static_pointer_cast<RSProperty<std::shared_ptr<RSMask>>>(
+            clipMaskModifier_->GetProperty());
+        property->Set(maskPath);
+    }
+#endif
+}
+
+
 void RosenRenderContext::PaintClip(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
     auto& clip = GetOrCreateClip();
     if (clip->HasClipShape()) {
-        auto basicShape = clip->GetClipShapeValue();
-#ifndef USE_ROSEN_DRAWING
-        auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
-        rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
-#else
-        auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
-        rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
-#endif
+        PaintClipShape(clip, frameSize);
     }
 
     if (clip->HasClipMask()) {
-        auto basicShape = clip->GetClipMaskValue();
-#ifndef USE_ROSEN_DRAWING
-        auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
-        rsNode_->SetMask(Rosen::RSMask::CreatePathMask(skPath, SkiaDecorationPainter::CreateMaskSkPaint(basicShape)));
-#else
-        auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
-        rsNode_->SetMask(
-            Rosen::RSMask::CreatePathMask(rsPath, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape)));
-#endif
+        PaintClipMask(clip, frameSize);
     }
 }
 
 void RosenRenderContext::PaintProgressMask()
 {
+    if (clipMaskModifier_) {
+        rsNode_->RemoveModifier(clipMaskModifier_);
+        clipMaskModifier_ = nullptr;
+    }
     if (!moonProgressModifier_) {
         moonProgressModifier_ = AceType::MakeRefPtr<MoonProgressModifier>();
         auto modifierAdapter =
