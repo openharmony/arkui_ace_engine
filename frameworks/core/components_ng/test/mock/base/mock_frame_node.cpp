@@ -191,9 +191,9 @@ void FrameNode::InitializePatternAndContext()
     pattern_->AttachToFrameNode(WeakClaim(this));
 }
 
-std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
+void FrameNode::CreateLayoutTask(bool forceUseMainThread)
 {
-    return std::nullopt;
+    return;
 }
 
 std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
