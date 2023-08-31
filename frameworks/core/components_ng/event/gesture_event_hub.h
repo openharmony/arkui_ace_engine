@@ -110,6 +110,7 @@ constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
 constexpr float PIXELMAP_DRAG_WGR_TEXT_SCALE = 2.0f;
 constexpr float PIXELMAP_DRAG_WGR_SCALE = 3.0f;
+constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
 #endif
 class EventHub;
 
