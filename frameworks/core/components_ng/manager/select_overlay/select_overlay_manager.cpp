@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/pipeline/base/element_register.h"
@@ -27,8 +28,6 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host, bool animation)
 {
     host_ = host;
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(rootNode, nullptr);
     auto current = selectOverlayItem_.Upgrade();
     if (current) {
         if (info.isUsingMouse && IsSameSelectOverlayInfo(info)) {
@@ -46,25 +45,36 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
 
-    // get keyboard index to put selet_overlay before keyboard node
-    int32_t slot = DEFAULT_NODE_SLOT;
-    int32_t index = 0;
-    for (const auto& it : rootNode->GetChildren()) {
-        if (it->GetTag() == V2::KEYBOARD_ETS_TAG) {
-            slot = index;
-            break;
-        }
-        index++;
-    }
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    taskExecutor->PostTask(
+        [weakRoot = rootNodeWeak_, weakNode = AceType::WeakClaim(AceType::RawPtr(selectOverlayNode)), animation,
+        isUsingMouse = infoPtr->isUsingMouse] {
+            auto rootNode = weakRoot.Upgrade();
+            CHECK_NULL_VOID(rootNode);
+            auto selectOverlayNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(selectOverlayNode);
 
-    // mount to parent
-    selectOverlayNode->MountToParent(rootNode, slot);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    if (!infoPtr->isUsingMouse) {
-        auto node = DynamicCast<SelectOverlayNode>(selectOverlayNode);
-        CHECK_NULL_RETURN(node, nullptr);
-        node->ShowSelectOverlay(animation);
-    }
+            // get keyboard index to put selet_overlay before keyboard node
+            int32_t slot = DEFAULT_NODE_SLOT;
+            int32_t index = 0;
+            for (const auto& it : rootNode->GetChildren()) {
+                if (it->GetTag() == V2::KEYBOARD_ETS_TAG) {
+                    slot = index;
+                    break;
+                }
+                index++;
+            }
+
+            selectOverlayNode->MountToParent(rootNode, slot);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            if (!isUsingMouse) {
+                auto node = DynamicCast<SelectOverlayNode>(selectOverlayNode);
+                CHECK_NULL_VOID(node);
+                node->ShowSelectOverlay(animation);
+            }
+        },
+        TaskExecutor::TaskType::UI);
+
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
     selectOverlayItem_ = selectOverlayNode;
     return proxy;
