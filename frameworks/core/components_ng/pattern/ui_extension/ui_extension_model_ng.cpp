@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
+#include "want.h"
+
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
 #include "core/components/common/layout/constants.h"

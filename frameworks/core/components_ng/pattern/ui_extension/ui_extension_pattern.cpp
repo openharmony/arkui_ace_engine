@@ -18,7 +18,10 @@
 #include <cstdint>
 #include <memory>
 
+#include "key_event.h"
+#include "pointer_event.h"
 #include "session/host/include/extension_session.h"
+#include "session/host/include/session.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "ui/rs_surface_node.h"
 
@@ -40,6 +43,41 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class UIExtensionLifecycleListener : public Rosen::ILifecycleListener {
+public:
+    explicit UIExtensionLifecycleListener(const WeakPtr<UIExtensionPattern>& uiExtensionPattern_)
+        : uiExtensionPattern_(uiExtensionPattern_) {}
+    virtual ~UIExtensionLifecycleListener() = default;
+
+    void OnActivation() override {}
+    void OnForeground() override {}
+    void OnBackground() override {}
+
+    void OnConnect() override
+    {
+        auto uiExtensionPattern = uiExtensionPattern_.Upgrade();
+        CHECK_NULL_VOID(uiExtensionPattern);
+        uiExtensionPattern->OnConnect();
+    }
+
+    void OnDisconnect() override
+    {
+        auto uiExtensionPattern = uiExtensionPattern_.Upgrade();
+        CHECK_NULL_VOID(uiExtensionPattern);
+        uiExtensionPattern->OnDisconnect();
+    }
+
+    void OnExtensionDied() override
+    {
+        auto uiExtensionPattern = uiExtensionPattern_.Upgrade();
+        CHECK_NULL_VOID(uiExtensionPattern);
+        uiExtensionPattern->OnExtensionDied();
+    }
+
+private:
+    WeakPtr<UIExtensionPattern> uiExtensionPattern_;
+};
+
 UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
@@ -118,15 +156,19 @@ void UIExtensionPattern::OnConnect()
 
 void UIExtensionPattern::OnConnectInner()
 {
+    CHECK_NULL_VOID_NOLOG(session_);
     ContainerScope scope(instanceId_);
-    auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID_NOLOG(surfaceNode);
-    CHECK_NULL_VOID_NOLOG(contentNode_);
-    auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID_NOLOG(context);
-    context->SetRSNode(surfaceNode);
+    contentNode_ = FrameNode::CreateFrameNode(
+        V2::UI_EXTENSION_SURFACE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
     auto host = GetHost();
     CHECK_NULL_VOID_NOLOG(host);
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
+    CHECK_NULL_VOID_NOLOG(context);
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_VOID_NOLOG(surfaceNode);
+    context->SetRSNode(surfaceNode);
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->CreateNodeInRenderThread();
@@ -179,6 +221,19 @@ void UIExtensionPattern::OnExtensionDied()
             }
         },
         TaskExecutor::TaskType::UI);
+}
+
+void UIExtensionPattern::RegisterLifecycleListener()
+{
+    CHECK_NULL_VOID(session_);
+    lifecycleListener_ = std::make_shared<UIExtensionLifecycleListener>(WeakClaim(this));
+    session_->RegisterLifecycleListener(lifecycleListener_);
+}
+
+void UIExtensionPattern::UnregisterLifecycleListener()
+{
+    CHECK_NULL_VOID(session_);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
 }
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -344,14 +399,14 @@ void UIExtensionPattern::HandleFocusEvent()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline->GetIsFocusActive()) {
-        WindowPattern::DisPatchFocusActiveEvent(true);
+        DisPatchFocusActiveEvent(true);
     }
     TransferFocusState(true);
 }
 
 void UIExtensionPattern::HandleBlurEvent()
 {
-    WindowPattern::DisPatchFocusActiveEvent(false);
+    DisPatchFocusActiveEvent(false);
     TransferFocusState(false);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID_NOLOG(pipeline);
@@ -364,7 +419,7 @@ void UIExtensionPattern::HandleBlurEvent()
 bool UIExtensionPattern::KeyEventConsumed(const KeyEvent& event)
 {
     bool isConsumed = false;
-    WindowPattern::DispatchKeyEventForConsumed(event.rawKeyEvent, isConsumed);
+    DispatchKeyEventForConsumed(event.rawKeyEvent, isConsumed);
     return isConsumed;
 }
 
@@ -428,10 +483,9 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
-    auto hub = host->GetFocusHub();
-    CHECK_NULL_VOID(hub);
-    hub->RequestFocusImmediately();
-
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID_NOLOG(focusHub);
+    focusHub->RequestFocusImmediately();
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         auto touchOffsetToWindow = info.GetTouches().front().GetGlobalLocation();
@@ -440,8 +494,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         UpdateTextFieldManager({ rectToWindow.GetOffset().GetX(), touchOffsetToWindow.GetY() },
             rectToWindow.Height() - touchOffsetToFrameNode.GetY());
     }
-
-    WindowPattern::DispatchPointerEvent(pointerEvent);
+    DispatchPointerEvent(pointerEvent);
 }
 
 void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
@@ -467,7 +520,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         UpdateTextFieldManager({ rectToWindow.GetOffset().GetX(), mouseOffsetToWindow.GetY() },
             rectToWindow.Height() - mouseOffsetToFrameNode.GetY());
     }
-    WindowPattern::DispatchPointerEvent(pointerEvent);
+    DispatchPointerEvent(pointerEvent);
 }
 
 void UIExtensionPattern::OnModifyDone()
@@ -660,5 +713,37 @@ int32_t UIExtensionPattern::GetSessionId()
 {
     CHECK_NULL_RETURN(session_, 0);
     return session_->GetPersistentId();
+}
+
+void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(session_);
+    CHECK_NULL_VOID(pointerEvent);
+    session_->TransferPointerEvent(pointerEvent);
+}
+
+void UIExtensionPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
+{
+    CHECK_NULL_VOID(session_);
+    CHECK_NULL_VOID(keyEvent);
+    session_->TransferKeyEvent(keyEvent);
+}
+
+void UIExtensionPattern::DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferKeyEventForConsumed(keyEvent, isConsumed);
+}
+
+void UIExtensionPattern::DisPatchFocusActiveEvent(bool isFocusActive)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusActiveEvent(isFocusActive);
+}
+
+void UIExtensionPattern::TransferFocusState(bool focusState)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferFocusStateEvent(focusState);
 }
 } // namespace OHOS::Ace::NG

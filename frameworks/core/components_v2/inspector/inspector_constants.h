@@ -530,6 +530,7 @@ ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[];
 
 // ui_extension_component
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];
+ACE_EXPORT extern const char UI_EXTENSION_SURFACE_TAG[];
 ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
 
 // LocationButton
