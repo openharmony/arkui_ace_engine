@@ -21,6 +21,28 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
+SystemWindowScene::SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session)
+{
+    sizeChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->OnBoundsSizeChanged(bounds);
+    };
+}
+
+void SystemWindowScene::OnBoundsSizeChanged(const Rosen::Vector4f& bounds)
+{
+    Rosen::WSRect windowRect {
+        .posX_ = std::round(bounds.x_),
+        .posY_ = std::round(bounds.y_),
+        .width_ = std::round(bounds.z_),
+        .height_ = std::round(bounds.w_),
+    };
+
+    CHECK_NULL_VOID(session_);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+}
+
 void SystemWindowScene::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(session_);
@@ -33,6 +55,7 @@ void SystemWindowScene::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
+    surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
 
     auto gestureHub = host->GetOrCreateGestureEventHub();
     auto touchCallback = [weakSession = wptr(session_)](TouchEventInfo& info) {
@@ -60,26 +83,5 @@ void SystemWindowScene::OnAttachToFrameNode()
         session->TransferPointerEvent(pointerEvent);
     };
     mouseEventHub->SetMouseEvent(std::move(mouseCallback));
-}
-
-bool SystemWindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    CHECK_NULL_RETURN(dirty, false);
-    auto host = dirty->GetHostNode();
-    CHECK_NULL_RETURN(host, false);
-    auto globalOffsetWithTranslate = host->GetPaintRectGlobalOffsetWithTranslate();
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameRect = geometryNode->GetFrameRect();
-    Rosen::WSRect windowRect {
-        .posX_ = std::round(globalOffsetWithTranslate.GetX()),
-        .posY_ = std::round(globalOffsetWithTranslate.GetY()),
-        .width_ = std::round(frameRect.Width()),
-        .height_ = std::round(frameRect.Height())
-    };
-
-    CHECK_NULL_RETURN(session_, false);
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
-    return false;
 }
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SYSTEM_WINDOW_SCENE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SYSTEM_WINDOW_SCENE_H
 
+#include "common/rs_vector4.h"
 #include "session/host/include/session.h"
 
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -25,7 +26,7 @@ class SystemWindowScene : public StackPattern {
     DECLARE_ACE_TYPE(SystemWindowScene, StackPattern);
 
 public:
-    explicit SystemWindowScene(const sptr<Rosen::Session>& session) : session_(session) {}
+    explicit SystemWindowScene(const sptr<Rosen::Session>& session);
     ~SystemWindowScene() override = default;
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
@@ -33,13 +34,12 @@ public:
         return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
 protected:
     void OnAttachToFrameNode() override;
-
+    void OnBoundsSizeChanged(const Rosen::Vector4f& bounds);
 private:
     sptr<Rosen::Session> session_;
+    std::function<void(const Rosen::Vector4f&)> sizeChangedCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SystemWindowScene);
 };
