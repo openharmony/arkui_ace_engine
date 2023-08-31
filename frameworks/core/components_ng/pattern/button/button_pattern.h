@@ -249,6 +249,7 @@ protected:
 private:
     static void UpdateTextLayoutProperty(
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    bool IsNeedToHandleHoverOpacity();
     Color backgroundColor_;
     Color focusBorderColor_;
     bool isSetClickedColor_ = false;
