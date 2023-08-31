@@ -116,7 +116,7 @@ void OverlayManagerTestNg::CreateSheetStyle(SheetStyle& sheetStyle)
 }
 /**
  * @tc.name: PopupTest001
- * @tc.desc: Test OverlayManager::UpdatePopupNode.
+ * @tc.desc: Test OverlayManager::ShowPopup.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestNg, PopupTest001, TestSize.Level1)
@@ -138,14 +138,14 @@ HWTEST_F(OverlayManagerTestNg, PopupTest001, TestSize.Level1)
     popupInfo.isCurrentOnShow = true;
 
     /**
-     * @tc.steps: step2. create overlayManager and call UpdatePopupNode.
+     * @tc.steps: step2. create overlayManager and call HidePopup.
      * @tc.expected: popupMap's data is updated successfully
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     popupNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->HidePopup(targetId, popupInfo);
     EXPECT_FALSE(overlayManager->popupMap_[targetId].isCurrentOnShow);
 
     /**
@@ -575,16 +575,16 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
         popups.emplace_back(popupInfo);
     }
     /**
-     * @tc.steps: step2. create overlayManager and call UpdatePopupNode.
+     * @tc.steps: step2. create overlayManager and call ShowPopup.
      * @tc.expected: Push popup successfully
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     auto targetId1 = targetNodes[0]->GetId();
     auto targetId2 = targetNodes[1]->GetId();
-    overlayManager->UpdatePopupNode(targetId1, popups[0]);
+    overlayManager->ShowPopup(targetId1, popups[0]);
     EXPECT_TRUE(overlayManager->popupMap_[targetId1].isCurrentOnShow);
-    overlayManager->UpdatePopupNode(targetId2, popups[1]);
+    overlayManager->ShowPopup(targetId2, popups[1]);
     EXPECT_TRUE(overlayManager->popupMap_[targetId2].isCurrentOnShow);
     /**
      * @tc.steps: step3. call HidePopup when childCount is 2
@@ -596,8 +596,8 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
      * @tc.expected: remove successfully
      */
-    overlayManager->UpdatePopupNode(targetId1, popups[0]);
-    overlayManager->UpdatePopupNode(targetId2, popups[1]);
+    overlayManager->HidePopup(targetId1, popups[0]);
+    overlayManager->HidePopup(targetId2, popups[1]);
     EXPECT_TRUE(overlayManager->RemoveOverlay(false));
 }
 /**
@@ -721,7 +721,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->ShowPopup(targetId, popupInfo);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
 
@@ -730,7 +730,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
      * @tc.expected: popupMap's data is updated successfully
      */
     layoutProp->UpdateShowInSubWindow(true);
-    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->ShowPopup(targetId, popupInfo);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
 
@@ -845,7 +845,7 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest001, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->UpdatePopupNode(targetId, popupInfo);
+    overlayManager->HidePopup(targetId, popupInfo);
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
