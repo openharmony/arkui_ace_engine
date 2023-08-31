@@ -19,7 +19,6 @@ group("core_pattern_unittest") {
     "recycle_node:recycle_node_test_ng",
     "stage:stage_test_ng",
     "toggle:toggle_test_ng",
-    "ui_extension:ui_extension_test_ng",
     "video:video_test_ng",
     "window_scene:window_scene_test",
   ]

@@ -39,11 +39,11 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
+#ifndef PREVIEW
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#endif
 
 namespace OHOS::Ace::NG {
-
-using WindowSceneTouchEventCallback = std::function<void(const std::shared_ptr<MMI::PointerEvent>&)>;
-
 class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
@@ -204,7 +204,7 @@ public:
     void SetRootRect(double width, double height, double offset) override;
 
     void SetWindowSceneConsumed(bool isConsumed);
-    
+
     bool IsWindowSceneConsumed();
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
@@ -227,6 +227,13 @@ public:
     {
         return sharedTransitionManager_;
     }
+
+#ifndef PREVIEW
+    const RefPtr<UIExtensionManager>& GetUIExtensionManager()
+    {
+        return uiExtensionManager_;
+    }
+#endif
 
     const RefPtr<DragDropManager>& GetDragDropManager();
 
@@ -475,7 +482,6 @@ private:
     int32_t callbackId_ = 0;
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
-    std::unordered_map<int32_t, WindowSceneTouchEventCallback> windowSceneTouchEventCallback_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
@@ -487,6 +493,9 @@ private:
     RefPtr<DragDropManager> dragDropManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
+#ifndef PREVIEW
+    RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
+#endif
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
