@@ -134,16 +134,23 @@ void AnimatedImage::RenderFrame(uint32_t idx)
         return;
     }
     ImageUtils::PostToBg([weak = WeakClaim(this), idx] {
-        ACE_SCOPED_TRACE("decode frame %d", idx);
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         self->DecodeFrame(idx);
     });
 }
 
-// runs on Background thread
+// runs on Background threads
 void AnimatedImage::DecodeFrame(uint32_t idx)
 {
+    // max number of decoding thread = 2
+    if (queueSize_ >= 2) {
+        // skip frame
+        return;
+    }
+    ++queueSize_;
+
+    ACE_SCOPED_TRACE("decode %s frame %d", cacheKey_.c_str(), idx);
     std::scoped_lock<std::mutex> lock(decodeMtx_);
     DecodeImpl(idx);
 
@@ -154,6 +161,7 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
     });
 
     CacheFrame(cacheKey_ + std::to_string(idx));
+    --queueSize_;
 }
 
 bool AnimatedImage::GetCachedFrame(uint32_t idx)
