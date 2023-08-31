@@ -73,7 +73,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       offset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
       date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
-      color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLUE)),
+      color_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
       centerDeviation_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       cometOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_OPACITY_SCALE)),
       cometSizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_SIZE_SCALE)),
