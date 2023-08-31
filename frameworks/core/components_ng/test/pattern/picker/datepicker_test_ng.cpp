@@ -2518,7 +2518,7 @@ HWTEST_F(DatePickerTestNg, TossAnimationControllerTest002, TestSize.Level1)
     toss->SetEnd(YOFFSET_END2);
     toss->timeEnd_ = toss->GetCurrentTime() + TIME_PLUS;
     ret = toss->Play();
-    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
+    EXPECT_EQ(toss->yStart_, YOFFSET_START2);
     EXPECT_EQ(toss->yEnd_, YOFFSET_END2);
     EXPECT_FALSE(ret);
 }
