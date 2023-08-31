@@ -40,12 +40,10 @@ CanvasDrawFunction GaugePaintMethod::GetForegroundDrawFunction(PaintWrapper* pai
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto gauge = weak.Upgrade();
         if (gauge) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_ELEVEN) {
-                gauge->NewPaint(canvas, paintWrapper);
-            } else {
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 gauge->Paint(canvas, paintWrapper);
+            } else {
+                gauge->NewPaint(canvas, paintWrapper);
             }
         }
     };
@@ -298,16 +296,16 @@ void GaugePaintMethod::PaintMonochromeCircularShadow(RSCanvas& canvas, const Ren
     const RefPtr<GaugePaintProperty>& paintProperty, const float sweepDegree) const
 {
     CHECK_NULL_VOID(paintProperty);
-    GaugeShadowOptions shadowOptons;
+    GaugeShadowOptions shadowOptions;
     if (paintProperty->HasShadowOptions()) {
-        shadowOptons = paintProperty->GetShadowOptionsValue();
+        shadowOptions = paintProperty->GetShadowOptionsValue();
     }
-    if (!shadowOptons.isShadowVisible) {
+    if (!shadowOptions.isShadowVisible) {
         return;
     }
     float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
     RSFilter filter;
-    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowOptons.radius));
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowOptions.radius));
     RSPen shadowPen;
     shadowPen.SetAntiAlias(true);
     shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
@@ -323,7 +321,7 @@ void GaugePaintMethod::PaintMonochromeCircularShadow(RSCanvas& canvas, const Ren
     shadowPath.AddArc(rRect, data.startDegree - QUARTER_CIRCLE + offsetDegree, sweepDegree);
 
     canvas.Save();
-    canvas.Translate(shadowOptons.offsetX, shadowOptons.offsetY);
+    canvas.Translate(shadowOptions.offsetX, shadowOptions.offsetY);
     canvas.AttachPen(shadowPen);
     canvas.DrawPath(shadowPath);
     canvas.DetachPen();
@@ -379,17 +377,17 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircularShadow(RSCanvas& canvas
     const std::vector<float>& pos) const
 {
     CHECK_NULL_VOID(paintProperty);
-    GaugeShadowOptions shadowOptons;
+    GaugeShadowOptions shadowOptions;
     if (paintProperty->HasShadowOptions()) {
-        shadowOptons = paintProperty->GetShadowOptionsValue();
+        shadowOptions = paintProperty->GetShadowOptionsValue();
     }
-    if (!shadowOptons.isShadowVisible) {
+    if (!shadowOptions.isShadowVisible) {
         return;
     }
 
     float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
     RSFilter filter;
-    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowOptons.radius));
+    filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowOptions.radius));
     RSPen shadowPen;
     shadowPen.SetAntiAlias(true);
     shadowPen.SetWidth(data.thickness);
@@ -408,7 +406,7 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircularShadow(RSCanvas& canvas
     path.AddArc(rRect, offsetDegree, data.sweepDegree - 2.0f * offsetDegree);
 
     canvas.Save();
-    canvas.Translate(shadowOptons.offsetX, shadowOptons.offsetY);
+    canvas.Translate(shadowOptions.offsetX, shadowOptions.offsetY);
     canvas.Rotate(data.startDegree - QUARTER_CIRCLE, data.center.GetX(), data.center.GetY());
     canvas.AttachPen(shadowPen);
     canvas.DrawPath(path);
@@ -473,12 +471,12 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas,
     const std::vector<float>& weights) const
 {
     CHECK_NULL_VOID(paintProperty);
-    GaugeShadowOptions shadowOptons;
+    GaugeShadowOptions shadowOptions;
     if (paintProperty->HasShadowOptions()) {
-        shadowOptons = paintProperty->GetShadowOptionsValue();
+        shadowOptions = paintProperty->GetShadowOptionsValue();
     }
 
-    if (!shadowOptons.isShadowVisible) {
+    if (!shadowOptions.isShadowVisible) {
         return;
     }
     float totalWeight = 0.0f;
@@ -486,12 +484,12 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas,
         totalWeight += weight;
     }
     canvas.Save();
-    canvas.Translate(shadowOptons.offsetX, shadowOptons.offsetY);
+    canvas.Translate(shadowOptions.offsetX, shadowOptions.offsetY);
     canvas.Rotate(data.startDegree - QUARTER_CIRCLE, data.center.GetX(), data.center.GetY());
 
     SingleSegmentGradientInfo info;
     info.isDrawShadow = true;
-    info.shadowRadius = shadowOptons.radius;
+    info.shadowRadius = shadowOptions.radius;
     for (size_t index = 0; index < colors.size(); index++) {
         info.drawStartDegree = info.drawStartDegree + info.drawSweepDegree;
         info.drawSweepDegree = (weights[index] / totalWeight) * data.sweepDegree;

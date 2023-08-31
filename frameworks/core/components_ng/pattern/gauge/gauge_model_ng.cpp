@@ -23,7 +23,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
 void GaugeModelNG::Create(float value, float min, float max)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -69,6 +68,26 @@ void GaugeModelNG::SetGradientColors(
 void GaugeModelNG::SetStrokeWidth(const Dimension& strokeWidth)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, StrokeWidth, strokeWidth);
+}
+
+void GaugeModelNG::SetDescription(const RefPtr<AceType>& customNode)
+{
+    auto customDescriptionNode = AceType::DynamicCast<NG::UINode>(customNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID_NOLOG(frameNode);
+    auto gaugePattern = frameNode->GetPattern<GaugePattern>();
+    CHECK_NULL_VOID_NOLOG(gaugePattern);
+    gaugePattern->SetDescriptionNode(customDescriptionNode);
+}
+
+void GaugeModelNG::SetIsShowLimitValue(const bool isShowLimitValue)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowLimitValue, isShowLimitValue);
+}
+
+void GaugeModelNG::SetIsShowDescription(const bool isShowDescription)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, isShowDescription);
 }
 
 void GaugeModelNG::SetLabelMarkedText(std::string labelTextString) {}

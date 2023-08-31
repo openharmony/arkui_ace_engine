@@ -38,8 +38,14 @@ inline constexpr float CALC_INDICATOR_POINT_RIGHT_Y = 0.19f;
 inline constexpr float CALC_INDICATOR_CONTROL_POINT_RIGHT_X = 0.182f;
 inline constexpr float CALC_INDICATOR_CONTROL_POINT_RIGHT_Y = 0.002f;
 inline constexpr float INDICATOR_BORDER_WIDTH_RATIO = 0.03f;
-inline constexpr float LIMIT_VALUE_WIDTH_RATIO = 0.4444f;
-inline constexpr float LIMIT_VALUE_HEIGHT_RATIO = 0.254f;
+inline constexpr float DESCRIPTION_NODE_WIDTH_RATIO = 0.4444f;
+inline constexpr float DESCRIPTION_NODE_HEIGHT_RATIO = 0.254f;
+inline constexpr float DESCRIPTION_IMAGE_NODE_WIDTH_RATIO = 0.286f;
+inline constexpr float DESCRIPTION_IMAGE_NODE_HEIGHT_RATIO = 0.286f;
+inline constexpr float DESCRIPTION_X = 0.2778f;
+inline constexpr float DESCRIPTION_Y = 0.746f;
+inline constexpr float DESCRIPTION_IMAGE_X = 0.357f;
+inline constexpr float DESCRIPTION_IMAGE_Y = 0.714f;
 
 inline constexpr float LIMIT_VALUE_MIN_OR_MAX_WIDTH_RATIO = 0.247f;
 inline constexpr float LIMIT_VALUE_MIN_OR_MAX_HEIGHT_RATIO = 0.2222f;
@@ -47,15 +53,18 @@ inline constexpr float LIMIT_VALUE_MIN_X = 0.221f;
 inline constexpr float LIMIT_VALUE_Y = 0.722f;
 inline constexpr float LIMIT_VALUE_MAX_X = 0.532f;
 
-inline constexpr float DESCRIPTION_X = 0.2778f;
-inline constexpr float DESCRIPTION_Y = 0.746f;
 inline constexpr float DEFAULT_GAUGE_SHADOW_RADIUS = 5.0f;
 inline constexpr float DEFAULT_GAUGE_SHADOW_OFFSETX = 5.0f;
 inline constexpr float DEFAULT_GAUGE_SHADOW_OFFSETY = 5.0f;
 inline constexpr Dimension INDICATOR_DISTANCE_TO_TOP = 8.0_vp;
 inline constexpr Dimension LIMIT_VALUE_MAX_FONTSIZE = 40.0_vp;
 inline constexpr Dimension LIMIT_VALUE_MIN_FONTSIZE = 10.0_vp;
-inline constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 inline constexpr int32_t COLORS_MAX_COUNT = 9;
+inline constexpr float RADIUS_TO_DIAMETER = 2.0f;
+inline constexpr float INDICATOR_WIDTH_RADIO = 0.135f;
+inline constexpr float INDICATOR_HEIGHT_RADIO = 0.095f;
+inline constexpr Color INDICATOR_COLOR(0xFF182431);
+inline constexpr Color INDICATOR_BORDER_COLOR(0xFFFFFFFF);
+inline const std::vector<Color> GAUGE_DEFAULT_COLOR { Color(0xFF64BB5C), Color(0xFFF7CE00), Color(0xFFE84026) };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GAUGE_GAUGE_THEME_H

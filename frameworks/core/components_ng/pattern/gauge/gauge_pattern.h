@@ -18,18 +18,23 @@
 
 #include "core/components_ng/pattern/gauge/gauge_accessibility_property.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
+#include "core/components_ng/pattern/gauge/gauge_layout_property.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_method.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class GaugePattern : public Pattern {
     DECLARE_ACE_TYPE(GaugePattern, Pattern);
 
 public:
     GaugePattern() = default;
     ~GaugePattern() override = default;
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
@@ -39,6 +44,11 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<GaugePaintProperty>();
+    }
+
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<GaugeLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -56,15 +66,77 @@ public:
         return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
     }
 
+    bool HasDescriptionNode() const
+    {
+        return descriptionNodeId_.has_value();
+    }
+
+    bool HasMinValueTextNode() const
+    {
+        return minValueTextId_.has_value();
+    }
+
+    bool HasMaxValueTextNode() const
+    {
+        return maxValueTextId_.has_value();
+    }
+
+    bool HasTitleChildNode() const
+    {
+        return titleChildId_.has_value();
+    }
+
+    int32_t GetDescriptionNodeId()
+    {
+        if (!descriptionNodeId_.has_value()) {
+            descriptionNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return descriptionNodeId_.value();
+    }
+
+    int32_t GetMinValueTextId()
+    {
+        if (!minValueTextId_.has_value()) {
+            minValueTextId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return minValueTextId_.value();
+    }
+
+    int32_t GetMaxValueTextId()
+    {
+        if (!maxValueTextId_.has_value()) {
+            maxValueTextId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return maxValueTextId_.value();
+    }
+
+    int32_t GetTitleChildId()
+    {
+        if (!titleChildId_.has_value()) {
+            titleChildId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return titleChildId_.value();
+    }
+
+    void SetDescriptionNode(const RefPtr<UINode>& descriptionNode)
+    {
+        descriptionNode_ = descriptionNode;
+    }
     void OnModifyDone() override;
 
 private:
-    void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    void InitDescriptionNode();
+    void InitLimitValueText(const int32_t valueTextId, const bool isMin);
 
+    Color GetMaxValueColor(const RefPtr<GaugePaintProperty>& gaugePaintProperty) const;
+    std::optional<int32_t> descriptionNodeId_;
+    std::optional<int32_t> minValueTextId_;
+    std::optional<int32_t> maxValueTextId_;
+    std::optional<int32_t> titleChildId_;
+    RefPtr<UINode> descriptionNode_;
     ACE_DISALLOW_COPY_AND_MOVE(GaugePattern);
 };
 
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_GAUGE_PATTERN_H

@@ -17,9 +17,11 @@
 
 #include <string>
 
+#include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/gauge_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
@@ -64,6 +66,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("strokeWidth", &JSGauge::SetStrokeWidth);
     JSClass<JSGauge>::StaticMethod("labelConfig", &JSGauge::SetLabelConfig);
     JSClass<JSGauge>::StaticMethod("trackShadow", &JSGauge::SetShadowOptions);
+    JSClass<JSGauge>::StaticMethod("description", &JSGauge::SetDescription);
     JSClass<JSGauge>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSGauge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSGauge>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -90,6 +93,11 @@ void JSGauge::Create(const JSCallbackInfo& info)
     double gaugeMax = max->IsNumber() ? max->ToNumber<double>() : 100;
     double gaugeValue = value->IsNumber() ? value->ToNumber<double>() : 0;
     GaugeModel::GetInstance()->Create(gaugeValue, gaugeMin, gaugeMax);
+    if (min->IsNumber() || max->IsNumber()) {
+        GaugeModel::GetInstance()->SetIsShowLimitValue(true);
+    } else {
+        GaugeModel::GetInstance()->SetIsShowLimitValue(false);
+    }
 }
 
 void JSGauge::SetValue(const JSCallbackInfo& info)
@@ -121,9 +129,7 @@ void JSGauge::SetEndAngle(const JSCallbackInfo& info)
 
 void JSGauge::SetColors(const JSCallbackInfo& info)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= NG::PLATFORM_VERSION_ELEVEN) {
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SetGradientColors(info);
         return;
     }
@@ -173,6 +179,9 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
     if (info[0]->IsArray()) {
         auto jsColorsArray = JSRef<JSArray>::Cast(info[0]);
         for (size_t i = 0; i < jsColorsArray->Length(); ++i) {
+            if (static_cast<int32_t>(i) >= NG::COLORS_MAX_COUNT) {
+                break;
+            }
             JSRef<JSVal> jsValue = jsColorsArray->GetValueAt(i);
             if (!jsValue->IsArray()) {
                 continue;
@@ -295,5 +304,34 @@ void JSGauge::SetShadowOptions(const JSCallbackInfo& info)
     shadowOptions.offsetY = offsetY;
 
     GaugeModel::GetInstance()->SetShadowOptions(shadowOptions);
+}
+
+void JSGauge::SetDescription(const JSCallbackInfo& info)
+{
+    if (info[0]->IsNull()) {
+        GaugeModel::GetInstance()->SetIsShowLimitValue(false);
+        GaugeModel::GetInstance()->SetIsShowDescription(false);
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        GaugeModel::GetInstance()->SetIsShowLimitValue(true);
+        GaugeModel::GetInstance()->SetIsShowDescription(false);
+        return;
+    }
+
+    auto builderObject = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+    if (builderObject->IsFunction()) {
+        GaugeModel::GetInstance()->SetIsShowLimitValue(false);
+        GaugeModel::GetInstance()->SetIsShowDescription(true);
+        ViewStackModel::GetInstance()->NewScope();
+        JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+        ACE_SCORING_EVENT("Gauge.description.builder");
+        jsBuilderFunc.Execute();
+        auto customNode = ViewStackModel::GetInstance()->Finish();
+        GaugeModel::GetInstance()->SetDescription(customNode);
+    } else {
+        GaugeModel::GetInstance()->SetIsShowLimitValue(true);
+        GaugeModel::GetInstance()->SetIsShowDescription(false);
+    }
 }
 } // namespace OHOS::Ace::Framework

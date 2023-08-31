@@ -33,6 +33,9 @@ public:
     void SetGradientColors(const std::vector<NG::ColorStopArray>& colors, const std::vector<float>& values,
         const NG::GaugeType& type) override
     {}
+    void SetDescription(const RefPtr<AceType>& customNode) override {}
+    void SetIsShowLimitValue(const bool isShowLimitValue) override {}
+    void SetIsShowDescription(const bool isShowDescription) override {}
     void SetShadowOptions(const NG::GaugeShadowOptions& shadowOptions) override {}
 };
 
