@@ -68,7 +68,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto parentWidth = idealSize.Width();
     realSideBarWidth_ = ConvertToPx(realSideBarWidthDimension_, constraint->scaleProperty, parentWidth).value_or(-1.0f);
-    if (needInitRealSideBarWidth_) {
+    if (needInitRealSideBarWidth_ || NearZero(realSideBarWidth_)) {
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
             GetAllPropertyValue(layoutProperty, parentWidth);
