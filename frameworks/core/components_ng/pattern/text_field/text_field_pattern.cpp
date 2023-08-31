@@ -277,7 +277,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     auto paragraphWidth = textFieldLayoutAlgorithm->GetParagraphWidth();
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
-    if (!(needToRefreshSelectOverlay_ && (paragraphWidth != paragraphWidth_ || textRect != textRect_))) {
+    if (!(needToRefreshSelectOverlay_ &&
+            (!NearEqual(paragraphWidth, paragraphWidth_) || !NearEqual(textRect, textRect_))) ||
+        (LessOrEqual(paragraphWidth, -Infinity<float>()) && LessOrEqual(paragraphWidth_, -Infinity<float>()))) {
         needToRefreshSelectOverlay_ = false;
     }
     paragraphWidth_ = paragraphWidth;
