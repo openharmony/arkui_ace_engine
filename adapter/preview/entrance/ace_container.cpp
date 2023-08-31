@@ -1028,4 +1028,16 @@ void AceContainer::LoadDocument(const std::string& url, const std::string& compo
         },
         TaskExecutor::TaskType::JS);
 }
+
+void AceContainer::NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange)
+{
+    taskExecutor_->PostTask(
+        [weakContext = WeakPtr<PipelineBase>(pipelineContext_), configurationChange]() {
+            auto pipeline = weakContext.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->NotifyConfigurationChange();
+            pipeline->FlushReload(configurationChange);
+        },
+        TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace::Platform
