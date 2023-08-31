@@ -141,7 +141,7 @@ void RefreshPattern::QuickEndFresh()
     LoadingProgressExit();
 }
 
-void RefreshPattern::OnKeyEvent(const KeyEvent& event)
+bool RefreshPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_F5 || (event.IsCombinationKey() && event.IsCtrlWith(KeyCode::KEY_R))) {
         if (isRefreshing_) {
