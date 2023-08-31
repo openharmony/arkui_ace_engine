@@ -2375,4 +2375,87 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0012, TestSize.Level1)
     model.SetToolbarConfiguration(std::move(toolBarItems));
     ASSERT_EQ(navBarNode->GetToolBarNodeOperationValue(), ChildNodeOperation::REPLACE);
 }
+
+/**
+ * @tc.name: NavigationModelNG0013
+ * @tc.desc: Test NavigationContentLayoutAlgorithm::Measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 120, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto layoutWrapper = navigation->CreateLayoutWrapper();
+
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestination", 121, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationWrapper1 = navDestination->CreateLayoutWrapper();
+
+    ASSERT_EQ(layoutWrapper->GetTotalChildCount(), 0);
+    ASSERT_NE(layoutWrapper->GetLayoutProperty(), nullptr);
+    ASSERT_NE(navDestinationWrapper1->GetLayoutAlgorithm(), nullptr);
+    ASSERT_NE(navDestinationWrapper1->GetLayoutAlgorithm()->GetLayoutAlgorithm(), nullptr);
+
+    auto temp1 = AceType::MakeRefPtr<NavDestinationLayoutAlgorithm>();
+    navDestinationWrapper1->layoutAlgorithm_->layoutAlgorithm_ = temp1;
+
+    layoutWrapper->AppendChild(navDestinationWrapper1);
+
+    NavigationContentLayoutAlgorithm algorithm;
+    algorithm.Measure(AceType::RawPtr(layoutWrapper));
+
+    auto navDestination2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestination", 121, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationWrapper2 = navDestination2->CreateLayoutWrapper();
+    auto temp2 = AceType::MakeRefPtr<NavDestinationLayoutAlgorithm>();
+    temp2->isShown_ = true;
+    navDestinationWrapper2->layoutAlgorithm_->layoutAlgorithm_ = temp2;
+    layoutWrapper->AppendChild(navDestinationWrapper2);
+    algorithm.Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(temp2->isShown_);
+    temp1->isShown_ = true;
+    algorithm.Measure(AceType::RawPtr(layoutWrapper));
+    ASSERT_TRUE(temp1->isShown_);
+}
+
+/**
+ * @tc.name: NavigationModelNG0014
+ * @tc.desc: Test NavigationModelNG::SetBackButtonVisible  BackButtonAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationModelNG0014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG model;
+    model.Create();
+    model.SetNavigationStack();
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navigation, nullptr);
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestination", 123, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    auto backButtonNode2 = FrameNode::CreateFrameNode("backButtonNode", 126, AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(backButtonNode2->renderContext_, nullptr);
+    navigation->BackButtonAnimation(backButtonNode2, false);
+    navigation->BackButtonAnimation(backButtonNode2, true);
+
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 124, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestination->titleBarNode_ = titleBarNode;
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+
+    auto backButtonNode = FrameNode::CreateFrameNode("backButtonNode22", 125, AceType::MakeRefPtr<ButtonPattern>());
+    titleBarNode->backButton_ = backButtonNode;
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    navigation->SetBackButtonVisible(navDestination);
+    ASSERT_EQ(backButtonLayoutProperty->propVisibility_.value(), VisibleType::VISIBLE);
+
+    navigation->SetBackButtonVisible(navDestination, false);
+    ASSERT_EQ(backButtonLayoutProperty->propVisibility_.value(), VisibleType::GONE);
+}
 } // namespace OHOS::Ace::NG
