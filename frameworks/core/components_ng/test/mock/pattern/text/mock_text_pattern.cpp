@@ -69,9 +69,13 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
     return {};
 }
 
-void TextPattern::OnColorConfigurationUpdate() {}
+OffsetF TextPattern::GetDragUpperLeftCoordinates()
+{
+    return {};
+}
 
+void TextPattern::OnColorConfigurationUpdate() {}
 void TextPattern::InitSurfaceChangedCallback() {}
 void TextPattern::OnAttachToFrameNode() {}
-void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {};
+void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {}
 } // namespace OHOS::Ace::NG

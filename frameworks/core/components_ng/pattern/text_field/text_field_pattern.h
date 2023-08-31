@@ -492,10 +492,7 @@ public:
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
-        if (textEditingValue_.ToString().length() > 1) {
-            return true;
-        }
-        return false;
+        return textEditingValue_.ToString().length() > 1;
     }
 
     bool CursorMoveLeft();
@@ -515,6 +512,7 @@ public:
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
+    OffsetF GetDragUpperLeftCoordinates() override;
 
     std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override
     {

@@ -278,12 +278,11 @@ public:
         return imageOffset_;
     }
 
-    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
-    void CheckHandles(SelectHandleInfo& handleInfo);
     bool IsMeasureBoundary() const override
     {
         return isMeasureBoundary_;
     }
+
     void SetIsMeasureBoundary(bool isMeasureBoundary)
     {
         isMeasureBoundary_ = isMeasureBoundary;
@@ -298,6 +297,9 @@ public:
     {
         return isCustomFont_;
     }
+    void UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool animation = false);
+    void CheckHandles(SelectHandleInfo& handleInfo);
+    OffsetF GetDragUpperLeftCoordinates() override;
 
 protected:
     virtual void HandleOnCopy();
@@ -344,6 +346,9 @@ protected:
     SelectMenuInfo selectMenuInfo_;
     bool isMeasureBoundary_ = false;
     bool isCustomFont_ = false;
+    std::vector<RSTypographyProperties::TextBox> dragBoxes_;
+
+#endif
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
