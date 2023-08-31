@@ -272,6 +272,8 @@ private:
     bool longPointIsHover_ = false;
     bool isHover_ = false;
     bool isPressed_ = false;
+    bool longPointLeftAnimEnd_ = true;
+    bool longPointRightAnimEnd_ = true;
 
     bool indicatorMask_ = false;
     bool isCustomSize_ = false;
