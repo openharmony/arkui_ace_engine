@@ -924,7 +924,9 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto videoNodeFrameSize = geometryNode->GetFrameSize();
-    RectF rect(0, 0, videoNodeFrameSize.Width(), videoNodeFrameSize.Height());
+    auto videoNodeFrameOffset = geometryNode->GetFrameOffset();
+    RectF rect(videoNodeFrameOffset.GetX(), videoNodeFrameOffset.GetY(), videoNodeFrameSize.Width(),
+        videoNodeFrameSize.Height());
     renderContext->SetContentRectToFrame(rect);
     host->MarkNeedSyncRenderTree();
     return false;
@@ -1454,6 +1456,7 @@ void VideoPattern::EnableDrag()
             return;
         }
 
+        dragEndAutoPlay_ = true;
         videoLayoutProperty->UpdateVideoSource(videoSrc);
 
         auto frameNode = this->GetHost();
@@ -1492,6 +1495,7 @@ void VideoPattern::EnableDrag()
             return;
         }
 
+        dragEndAutoPlay_ = true;
         videoLayoutProperty->UpdateVideoSource(videoSrc);
         ImageSourceInfo imageSourceInfo = ImageSourceInfo(imageSrc);
         videoLayoutProperty->UpdatePosterImageInfo(imageSourceInfo);
