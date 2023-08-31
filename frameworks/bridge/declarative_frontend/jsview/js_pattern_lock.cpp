@@ -199,14 +199,24 @@ void JSPatternLock::SetCircleRadius(const JSCallbackInfo& info)
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     CalcDimension radius;
-    if (!ParseJsDimensionVp(info[0], radius) || radius.IsNonPositive()) {
-        RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
-        CHECK_NULL_VOID(patternLockTheme);
-        radius = patternLockTheme->GetCircleRadius();
+    if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (!ParseJsDimensionVp(info[0], radius)) {
+            return;
+        }
+        if (radius.IsNonNegative()) {
+            PatternLockModel::GetInstance()->SetCircleRadius(radius);
+        }
+    } else {
+        if (!ParseJsDimensionVp(info[0], radius) || radius.IsNonPositive()) {
+            RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();
+            CHECK_NULL_VOID(patternLockTheme);
+            radius = patternLockTheme->GetCircleRadius();
+        }
+        PatternLockModel::GetInstance()->SetCircleRadius(radius);
     }
-    
-    PatternLockModel::GetInstance()->SetCircleRadius(radius);
 }
 void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
 {
