@@ -147,10 +147,9 @@ template("build_component_ng") {
           "//third_party/openGLES:libGLES",
         ]
         external_deps += [ "graphic_2d:2d_graphics" ]
-        external_deps += [
-          "graphic_2d:2d_graphics",
-          "graphic_2d:rosen_text",
-        ]
+        if (enable_graphic_text_gine) {
+          external_deps += [ "graphic_2d:rosen_text" ]
+        }
       } else {
         deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
       }
