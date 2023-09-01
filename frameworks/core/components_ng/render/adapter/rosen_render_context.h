@@ -186,6 +186,7 @@ public:
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
+    void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
 

@@ -2681,6 +2681,12 @@ void RosenRenderContext::RemoveChild(const RefPtr<RenderContext>& renderContext)
     rsNode_->RemoveChild(child);
 }
 
+void RosenRenderContext::ClearChildren()
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->ClearChildren();
+}
+
 void RosenRenderContext::SetBounds(float positionX, float positionY, float width, float height)
 {
     CHECK_NULL_VOID(rsNode_);
