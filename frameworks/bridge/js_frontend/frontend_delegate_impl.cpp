@@ -852,6 +852,11 @@ void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task)
     taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
 }
 
+void FrontendDelegateImpl::PostUITask(std::function<void()>&& task)
+{
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
 void FrontendDelegateImpl::RemoveVisibleChangeNode(NodeId id)
 {
     auto task = [nodeId = id, pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get())]() {
