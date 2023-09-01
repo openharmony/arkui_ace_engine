@@ -138,7 +138,7 @@ public:
     virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
     virtual RichEditorSelection GetSpansInfo(int32_t start, int32_t end) = 0;
-    virtual RichEditorSelection GetParagraphsInfo(int32_t start, int32_t end) = 0;
+    virtual const std::vector<ParagraphInfo>& GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual void CloseSelectionMenu() = 0;
 };

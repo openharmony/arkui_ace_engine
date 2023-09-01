@@ -19,26 +19,20 @@
 #include <string>
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/jsview/js_textfield.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
-#ifdef PIXEL_MAP_SUPPORTED
-#include "pixel_map.h"
-#include "pixel_map_napi.h"
-#endif
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/richeditor_model_impl.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
@@ -98,7 +92,6 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
     textStyleObj->SetProperty<std::string>("fontColor", textStyleResult.fontColor);
     textStyleObj->SetProperty<double>("fontSize", textStyleResult.fontSize);
-    textStyleObj->SetProperty<double>("leadingMargin", textStyleResult.leadingMargin[0]);
     textStyleObj->SetProperty<int32_t>("fontStyle", textStyleResult.fontStyle);
     textStyleObj->SetProperty<int32_t>("fontWeight", textStyleResult.fontWeight);
     textStyleObj->SetProperty<std::string>("fontFamily", textStyleResult.fontFamily);
@@ -124,15 +117,23 @@ JSRef<JSObject> JSRichEditor::CreateJSImageStyleResult(const ImageStyleResult& i
     return imageSpanStyleObj;
 }
 
-JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo info)
+JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& info)
 {
     auto obj = JSRef<JSObject>::New();
     obj->SetProperty<int32_t>("textAlign", info.textAlign);
 
     auto lmObj = JSRef<JSObject>::New();
     auto size = JSRef<JSArray>::New();
+    size->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(info.leadingMarginSize[0])));
+    size->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(info.leadingMarginSize[1])));
     lmObj->SetProperty("size", size);
+#ifdef PIXEL_MAP_SUPPORTED
+    if (info.leadingMarginPixmap) {
+        lmObj->SetProperty("placeholder", ConvertPixmap(info.leadingMarginPixmap));
+    }
+#endif
     obj->SetPropertyObject("leadingMargin", lmObj);
+    return obj;
 }
 
 JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resultObject)
@@ -155,15 +156,9 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
     } else if (resultObject.type == RichEditorSpanType::TYPEIMAGE) {
         if (resultObject.valuePixelMap) {
 #ifdef PIXEL_MAP_SUPPORTED
-            std::shared_ptr<Media::PixelMap> pixelMap = resultObject.valuePixelMap->GetPixelMapSharedPtr();
-            auto engine = EngineHelper::GetCurrentEngine();
-            if (engine) {
-                NativeEngine* nativeEngine = engine->GetNativeEngine();
-                napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-                napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
-                NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-                auto jsPixelMap = JsConverter::ConvertNativeValueToJsVal(nativeValue);
-                resultObj->SetPropertyObject("valuePixelMap", jsPixelMap);
+            auto jsPixmap = ConvertPixmap(resultObject.valuePixelMap);
+            if (!jsPixmap->IsUndefined()) {
+                resultObj->SetPropertyObject("valuePixelMap", jsPixmap);
             }
 #endif
         } else {
@@ -191,8 +186,7 @@ JSRef<JSVal> JSRichEditor::CreateJSSelection(const RichEditorSelection& selectIn
     selectionArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[0])));
     selectionArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[1])));
 
-    selectionObject->SetPropertyObject("selection", selectionArray);
-    selectionObject->SetPropertyObject("spans", spanObjectArray);
+    selectionObject->SetPropertyObject("style", selectionArray);
     return JSRef<JSVal>::Cast(selectionObject);
 }
 
@@ -399,15 +393,9 @@ void JSRichEditor::CreateImageStyleObj(
     imageStyleObj->SetProperty<int32_t>("objectFit", static_cast<int32_t>(spanResult.GetObjectFit()));
     if (spanResult.GetValuePixelMap()) {
 #ifdef PIXEL_MAP_SUPPORTED
-        std::shared_ptr<Media::PixelMap> pixelMap = spanResult.GetValuePixelMap()->GetPixelMapSharedPtr();
-        auto engine = EngineHelper::GetCurrentEngine();
-        if (engine) {
-            NativeEngine* nativeEngine = engine->GetNativeEngine();
-            napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-            napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
-            NativeValue* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
-            auto jsPixelMap = JsConverter::ConvertNativeValueToJsVal(nativeValue);
-            spanResultObj->SetPropertyObject("value", jsPixelMap);
+        auto jsPixmap = ConvertPixmap(spanResult.GetValuePixelMap());
+        if (!jsPixmap->IsUndefined()) {
+            spanResultObj->SetPropertyObject("value", jsPixmap);
         }
 #endif
     } else {
@@ -1019,8 +1007,8 @@ void JSRichEditorController::GetParagraphsInfo(const JSCallbackInfo& args)
     auto [start, end] = ParseRange(JSRef<JSObject>::Cast(args[0]));
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
-        RichEditorSelection value = controller->GetParagraphsInfo(start, end);
-        args.SetReturnValue(CreateJSSpansInfo(value));
+        auto info = controller->GetParagraphsInfo(start, end);
+        args.SetReturnValue(CreateJSParagraphsInfo(info));
     }
 }
 
@@ -1066,5 +1054,15 @@ void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
         textStyle = ParseJsTextStyle(richEditorTextStyle, typingStyle_);
     }
     controller->SetTypingStyle(typingStyle_, textStyle);
+}
+
+JSRef<JSVal> JSRichEditorController::CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info)
+{
+    uint32_t idx = 0;
+    auto array = JSRef<JSArray>::New();
+    for (auto i = 0; i < info.size(); ++i) {
+        array->SetValueAt(i, JSRichEditor::CreateParagraphStyleResult(info[i]));
+    }
+    return JSRef<JSVal>::Cast(array);
 }
 } // namespace OHOS::Ace::Framework

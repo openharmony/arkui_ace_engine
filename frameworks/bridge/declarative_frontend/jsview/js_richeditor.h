@@ -38,24 +38,23 @@ public:
     static void SetCopyOptions(const JSCallbackInfo& info);
     static void BindSelectionMenu(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
-
-private:
-    static JSRef<JSVal> CreateJSSelection(const RichEditorSelection& selectInfo);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
+    static JSRef<JSVal> CreateJSSelection(const RichEditorSelection& selectInfo);
     static JSRef<JSObject> CreateJSTextStyleResult(const TextStyleResult& textStyleResult);
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
-    static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo info);
+    static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
 
+private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
-    static void CreateParagraphObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, SelectMenuParam& menuParam);
 
 #ifdef PIXEL_MAP_SUPPORTED
-    static 
+    static JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap);
 };
+#endif
 
 class JSRichEditorController final : public Referenced {
 public:
@@ -102,8 +101,8 @@ private:
     bool IsPixelMap(const JSRef<JSVal>& jsValue);
     bool IsDrawable(const JSRef<JSVal>& jsValue);
 
-    JSRef<JSVal> CreateJSSpansInfo(const RichEditorSelection& info);
-    JSRef<JSVal> CreateParagraphsInfo(const RichEditorSelection& info);
+    static JSRef<JSVal> CreateJSSpansInfo(const RichEditorSelection& info);
+    static JSRef<JSVal> CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info);
 
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
