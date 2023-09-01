@@ -85,11 +85,10 @@ void ParsSize(std::pair<Dimension, Dimension>& size, JSRef<JSVal>& sizeJsValue)
     }
 }
 
-template<class T>
-std::optional<std::pair<T, T>> ParseParticleRange(JSRef<JSVal>& jsValue, T defaultValue)
+std::optional<std::pair<float, float>> ParseParticleRange(JSRef<JSVal>& jsValue, float defaultValue)
 {
-    std::optional<std::pair<T, T>> rangeOpt;
-    auto defaultPair = std::pair<T, T>(defaultValue, defaultValue);
+    std::optional<std::pair<float, float>> rangeOpt;
+    auto defaultPair = std::pair<float, float>(defaultValue, defaultValue);
     if (!jsValue->IsArray()) {
         rangeOpt = defaultPair;
         return rangeOpt;
@@ -101,13 +100,17 @@ std::optional<std::pair<T, T>> ParseParticleRange(JSRef<JSVal>& jsValue, T defau
     }
     auto from = defaultValue;
     if (jsArray->GetValueAt(0)->IsNumber()) {
-        from = jsArray->GetValueAt(0)->ToNumber<T>();
+        from = jsArray->GetValueAt(0)->ToNumber<float>();
     }
     auto to = defaultValue;
     if (jsArray->GetValueAt(1)->IsNumber()) {
-        to = jsArray->GetValueAt(1)->ToNumber<T>();
+        to = jsArray->GetValueAt(1)->ToNumber<float>();
     }
-    rangeOpt = std::pair<T, T>(from, to);
+    if (GreatNotEqual(from, to)) {
+        rangeOpt = defaultPair;
+        return rangeOpt;
+    }
+    rangeOpt = std::pair<float, float>(from, to);
     return rangeOpt;
 }
 
@@ -193,8 +196,8 @@ bool ParseFloatRandomConfig(JSRef<JSVal>& configJsValue, OHOS::Ace::NG::Particle
     if (randomArraySize != ARRAY_SIZE) {
         return false;
     }
-    auto randomRangePair = ParseParticleRange<float>(configJsValue, 0.0f);
-    if (!randomRangePair.has_value() || GreatNotEqual(randomRangePair->first, randomRangePair->second)) {
+    auto randomRangePair = ParseParticleRange(configJsValue, 0.0f);
+    if (!randomRangePair.has_value()) {
         return false;
     }
     NG::ParticleFloatPropertyUpdaterConfig randomUpdaterConfig;
@@ -388,7 +391,7 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
     auto lifeTimeJsValue = particleJsObject->GetProperty("lifetime");
     if (lifeTimeJsValue->IsNumber()) {
         auto lifeTimeIntValue = lifeTimeJsValue->ToNumber<int64_t>();
-        if (lifeTimeIntValue >= 0) {
+        if (lifeTimeIntValue >= -1) {
             lifeTime = lifeTimeIntValue;
         }
     }
@@ -506,14 +509,15 @@ void ParseColorRandomUpdater(JSRef<JSVal> configJsValue, OHOS::Ace::NG::Particle
     auto gJsValue = randomConfigJsObject->GetProperty("g");
     auto bJsValue = randomConfigJsObject->GetProperty("b");
     auto aJsValue = randomConfigJsObject->GetProperty("a");
-    auto rRangeValue = ParseParticleRange<float>(rJsValue, 0.0f);
-    auto gRangeValue = ParseParticleRange<float>(gJsValue, 0.0f);
-    auto bRangeValue = ParseParticleRange<float>(bJsValue, 0.0f);
-    auto aRangeValue = ParseParticleRange<float>(aJsValue, 0.0f);
-    colorRandomConfig.SetRedRandom(rRangeValue.value());
-    colorRandomConfig.SetGreenRandom(gRangeValue.value());
-    colorRandomConfig.SetBlueRandom(bRangeValue.value());
-    colorRandomConfig.SetAlphaRandom(aRangeValue.value());
+    std::pair<float, float> defaultPair(0.0f, 0.0f);
+    auto rRangeValue = ParseParticleRange(rJsValue, 0.0f);
+    auto gRangeValue = ParseParticleRange(gJsValue, 0.0f);
+    auto bRangeValue = ParseParticleRange(bJsValue, 0.0f);
+    auto aRangeValue = ParseParticleRange(aJsValue, 0.0f);
+    colorRandomConfig.SetRedRandom(rRangeValue.value_or(defaultPair));
+    colorRandomConfig.SetGreenRandom(gRangeValue.value_or(defaultPair));
+    colorRandomConfig.SetBlueRandom(bRangeValue.value_or(defaultPair));
+    colorRandomConfig.SetAlphaRandom(aRangeValue.value_or(defaultPair));
     randomUpdaterConfig.SetRandomConfig(colorRandomConfig);
     updater.SetConfig(randomUpdaterConfig);
 }
@@ -606,13 +610,13 @@ void ParseParticleVelocity(JSRef<JSVal> jsValue, OHOS::Ace::NG::VelocityProperty
     auto jsValueObj = JSRef<JSObject>::Cast(jsValue);
     auto speedJsValue = jsValueObj->GetProperty("speed");
     auto angleJsValue = jsValueObj->GetProperty("angle");
-    auto speedPair = ParseParticleRange<float>(speedJsValue, 0.0f);
+    auto speedPair = ParseParticleRange(speedJsValue, 0.0f);
     if (speedPair.has_value()) {
         velocity.SetSpeedRange(speedPair.value());
     } else {
         velocity.SetSpeedRange(defaultPair);
     }
-    auto anglePair = ParseParticleRange<float>(angleJsValue, 0.0f);
+    auto anglePair = ParseParticleRange(angleJsValue, 0.0f);
     if (anglePair.has_value()) {
         velocity.SetAngleRange(anglePair.value());
     } else {

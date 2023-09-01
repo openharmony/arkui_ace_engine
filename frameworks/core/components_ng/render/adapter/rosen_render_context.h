@@ -436,6 +436,7 @@ private:
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
     bool hasDefaultTransition_ = false;
+    bool measureTriggered_ = false;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;

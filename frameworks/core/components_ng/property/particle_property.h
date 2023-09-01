@@ -421,7 +421,7 @@ public:
         return redRandom_;
     }
 
-    void SetRedRandom(std::pair<float, float>& redRandom)
+    void SetRedRandom(const std::pair<float, float>& redRandom)
     {
         redRandom_ = redRandom;
     }
@@ -431,7 +431,7 @@ public:
         return greenRandom_;
     }
 
-    void SetGreenRandom(std::pair<float, float>& greenRandom)
+    void SetGreenRandom(const std::pair<float, float>& greenRandom)
     {
         greenRandom_ = greenRandom;
     }
@@ -441,7 +441,7 @@ public:
         return blueRandom_;
     }
 
-    void SetBlueRandom(std::pair<float, float>& blueRandom)
+    void SetBlueRandom(const std::pair<float, float>& blueRandom)
     {
         blueRandom_ = blueRandom;
     }
@@ -451,7 +451,7 @@ public:
         return alphaRandom_;
     }
 
-    void SetAlphaRandom(std::pair<float, float>& alphaRandom)
+    void SetAlphaRandom(const std::pair<float, float>& alphaRandom)
     {
         alphaRandom_ = alphaRandom;
     }

@@ -420,7 +420,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
 
     if (propParticleOptionArray_.has_value()) {
-        OnParticleOptionArrayUpdate(propParticleOptionArray_.value());
+        CHECK_NULL_VOID(rsNode_);
+        if (!measureTriggered_ || !rsNode_->GetParticleAnimationFinish()) {
+            measureTriggered_ = true;
+            OnParticleOptionArrayUpdate(propParticleOptionArray_.value());
+        }
     }
 }
 
