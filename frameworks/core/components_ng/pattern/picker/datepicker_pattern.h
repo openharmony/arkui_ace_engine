@@ -111,7 +111,7 @@ public:
 
     void FlushColumn();
 
-    void AdjustLunarDate(LunarDate& date) const;
+    void AdjustLunarDate(LunarDate& date);
 
     int LunarDateCompare(const LunarDate& left, const LunarDate& right) const;
 
