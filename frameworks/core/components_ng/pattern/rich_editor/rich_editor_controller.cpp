@@ -80,6 +80,13 @@ void RichEditorController::UpdateSpanStyle(
     richEditorPattern->UpdateSpanStyle(start, end, textStyle, imageStyle);
 }
 
+void RichEditorController::SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+}
+
 void RichEditorController::SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle)
 {
     updateSpanStyle_ = updateSpanStyle;

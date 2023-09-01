@@ -124,6 +124,7 @@ public:
         return timestamp_;
     }
 
+    void ResetBeforePaste();
     void ResetAfterPaste();
 
     void OnVisibleChange(bool isVisible) override;
@@ -139,7 +140,7 @@ public:
     void InsertValueToSpanNode(
         RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
     void CreateTextSpanNode(
-        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void DeleteBackward(int32_t length = 0);
     void DeleteForward(int32_t length);
     void SetInputMethodStatus(bool keyboardShown);
@@ -164,8 +165,9 @@ public:
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
+    void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
-    int32_t AddTextSpan(const TextSpanOptions& options, int32_t index = -1);
+    int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(RefPtr<SpanItem> item, int32_t offset);
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle) override;
@@ -252,7 +254,7 @@ private:
     void OnCaretTwinkling();
     void StartTwinkling();
     void StopTwinkling();
-    void UpdateTextStyle(RefPtr<SpanNode>& spanNode, TextStyle textStyle);
+    void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, ImageSpanAttribute imageStyle);
     void InitTouchEvent();
     bool SelectOverlayIsOn();
@@ -309,6 +311,7 @@ private:
     void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
     void InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
     void SetCaretSpanIndex(int32_t index);
+    bool IsSameToTpyingStyle(const RefPtr<SpanNode>& spanNode);
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else
@@ -343,6 +346,8 @@ private:
     RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
     RectF frameRect_;
+    std::optional<struct UpdateSpanStyle> typingStyle_;
+    std::optional<TextStyle> typingTextStyle_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
 #endif // ENABLE_DRAG_FRAMEWORK
