@@ -1454,7 +1454,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
 {
     LOGI("Web ProcessVirtualKeyBoard width=%{public}d height=%{public}d keyboard=%{public}f", width, height, keyboard);
     CHECK_NULL_RETURN(delegate_, false);
-    if (!isFocus_) {
+    if (!isFocus_ || !isVisible_) {
         if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
             drawSize_.SetSize(drawSizeCache_);
             UpdateWebLayoutSize(width, height);
@@ -1463,12 +1463,12 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         return false;
     }
     if (NearZero(keyboard)) {
-        drawSize_.SetSize(drawSizeCache_);
-        UpdateWebLayoutSize(width, height);
-        if (isVirtualKeyBoardShow_ == VkState::VK_HIDE) {
+        if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
             LOGI("Web ProcessVirtualKeyBoard no need to process");
             return false;
         }
+        drawSize_.SetSize(drawSizeCache_);
+        UpdateWebLayoutSize(width, height);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);
