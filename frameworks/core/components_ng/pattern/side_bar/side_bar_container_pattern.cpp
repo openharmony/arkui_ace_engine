@@ -439,6 +439,10 @@ void SideBarContainerPattern::DoAnimation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
+    if (autoHide_) {
+        sideBarStatus_ = SideBarStatus::HIDDEN;
+    }
+
     UpdateAnimDir();
 
     AnimationOption option = AnimationOption();
@@ -629,9 +633,14 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
         isControlButtonClick_ = false;
     }
 
+    if (autoHide_ != layoutAlgorithm->GetAutoHide()) {
+        FireChangeEvent(layoutAlgorithm->GetSideBarStatus() == SideBarStatus::SHOW);
+    }
+
     adjustMaxSideBarWidth_ = layoutAlgorithm->GetAdjustMaxSideBarWidth();
     adjustMinSideBarWidth_ = layoutAlgorithm->GetAdjustMinSideBarWidth();
     type_ = layoutAlgorithm->GetSideBarContainerType();
+    autoHide_ = layoutAlgorithm->GetAutoHide();
 
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -749,8 +758,8 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     realSideBarWidth_ =
         isPercent ? ConvertPxToPercent(minSideBarWidth_) : Dimension(minSideBarWidth_, DimensionUnit::PX);
 
-    auto autoHide_ = layoutProperty->GetAutoHide().value_or(true);
-    if (autoHide_) {
+    auto autoHideProperty = layoutProperty->GetAutoHide().value_or(true);
+    if (autoHideProperty) {
         DoAnimation();
     }
 }
