@@ -157,7 +157,8 @@ public:
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
-    void UpdateParagraphStyle(int32_t start, int32_t end, const TextStyle& textStyle);
+    void UpdateParagraphStyle(int32_t start, int32_t end);
+    void GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);

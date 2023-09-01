@@ -33,6 +33,7 @@ public:
     void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) override;
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) override;
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end) override;
+    RichEditorSelection GetParagraphsInfo(int32_t start, int32_t end) override;
     void DeleteSpans(const RangeOptions& options) override;
     void CloseSelectionMenu() override;
 

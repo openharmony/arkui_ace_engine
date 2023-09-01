@@ -126,10 +126,12 @@ public:
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
+    virtual void UpdateParagraphStyle(int32_t start, int32_t end, const TextStyle& style) = 0;
     virtual void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
     virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
     virtual RichEditorSelection GetSpansInfo(int32_t start, int32_t end) = 0;
+    virtual RichEditorSelection GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual void CloseSelectionMenu() = 0;
 };

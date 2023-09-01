@@ -866,7 +866,7 @@ void RichEditorPattern::UpdateSpanStyle(
     }
 }
 
-void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const TextStyle& textStyle)
+void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
