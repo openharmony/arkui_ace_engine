@@ -338,6 +338,13 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
     spanItem->content = options.value;
     spanItem->SetTextStyle(options.style);
     AddSpanItem(spanItem, offset);
+
+    if (options.paraStyle) {
+        int32_t start, end;
+        spanItem->GetIndex(start, end);
+        UpdateParagraphStyle(start, end, *options.paraStyle);
+    }
+
     if (!isPaste && textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -870,14 +877,23 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
 {
     std::vector<ParagraphInfo> res;
     auto spanNodes = GetParagraphNodes(start, end);
+
+    auto&& firstSpan = spanNodes.front()->GetSpanItem();
+    auto paraStart = firstSpan->position - StringUtils::ToWstring(firstSpan->content).length();
+
     for (auto it = spanNodes.begin(); it != spanNodes.end(); ++it) {
         if (it == std::prev(spanNodes.end()) || StringUtils::ToWstring((*it)->GetSpanItem()->content).back() == L'\n') {
             ParagraphInfo info;
-            info.textAlign = static_cast<int32_t>((*it)->GetTextAlignValue(TextAlign::START));
-            auto leadingMarginSize = (*it)->GetLeadingMarginValue({}).size;
-            info.leadingMarginSize[0] = Dimension(leadingMarginSize.Width()).ConvertToVp();
-            info.leadingMarginSize[1] = Dimension(leadingMarginSize.Height()).ConvertToVp();
-            res.emplace_back(std::move(info));
+            auto lm = (*it)->GetLeadingMarginValue({});
+
+            res.emplace_back(ParagraphInfo {
+                .leadingMarginPixmap = lm.pixmap,
+                .leadingMarginSize = { Dimension(lm.size.Width()).ConvertToVp(),
+                    Dimension(lm.size.Height()).ConvertToVp() },
+                .textAlign = static_cast<int32_t>((*it)->GetTextAlignValue(TextAlign::START)),
+                .range = { paraStart, (*it)->GetSpanItem()->position },
+            });
+            paraStart = (*it)->GetSpanItem()->position;
         }
     }
 
@@ -2494,11 +2510,6 @@ TextStyleResult RichEditorPattern::GetTextStyleObject(const RefPtr<SpanNode>& no
     textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
-    // textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
-
-    // auto leadingMarginSize = node->GetLeadingMarginValue({}).size;
-    // textStyle.leadingMargin[0] = Dimension(leadingMarginSize.Width()).ConvertToVp();
-    // textStyle.leadingMargin[1] = Dimension(leadingMarginSize.Height()).ConvertToVp();
     return textStyle;
 }
 
