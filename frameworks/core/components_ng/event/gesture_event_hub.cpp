@@ -504,10 +504,19 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
     if (frameTag == V2::WEB_ETS_TAG) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
+    } else if (!NearEqual(scale, 1.0f)) {
+        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
+        result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else if (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
                frameTag == V2::TEXTINPUT_ETS_TAG) {
-        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
-        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
+        auto hostPattern = frameNode->GetPattern<TextDragBase>();
+        if (hostPattern) {
+            auto frameNodeOffset = hostPattern->GetDragUpperLeftCoordinates();
+            auto coordinateX = frameNodeOffset.GetX();
+            auto coordinateY = frameNodeOffset.GetY();
+            result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
+            result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
+        }
     } else {
         auto coordinateX = frameNodeOffset_.GetX() > SystemProperties::GetDeviceWidth()
                                ? frameNodeOffset_.GetX() - SystemProperties::GetDeviceWidth()
