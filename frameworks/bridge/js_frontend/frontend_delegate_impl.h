@@ -243,6 +243,7 @@ public:
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
     void PostJsTask(std::function<void()>&& task) override;
+    void PostUITask(std::function<void()>&& task) override;
 
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;

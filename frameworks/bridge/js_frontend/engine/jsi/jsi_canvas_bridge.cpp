@@ -171,23 +171,6 @@ inline NodeId GetCurrentNodeId(const shared_ptr<JsRuntime>& runtime, const share
     return id < 0 ? 0 : id;
 }
 
-void PushTaskToPageById(const shared_ptr<JsRuntime>& runtime, NodeId id,
-    const std::function<void(const RefPtr<CanvasTaskPool>&)>& task)
-{
-    auto command = Referenced::MakeRefPtr<JsCommandContextOperation>(id, task);
-    // push command
-    auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
-    if (!engine) {
-        LOGE("engine is null.");
-        return;
-    }
-    auto page = engine->GetRunningPage();
-    if (!page) {
-        LOGE("page is null.");
-        return;
-    }
-    page->PushCommand(command);
-}
 void PushTaskToPage(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& value,
     const std::function<void(const RefPtr<CanvasTaskPool>&)>& task)
 {
@@ -385,6 +368,7 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
 #endif
 
     LOGD("JsiCanvasBridge::HandleWebglContext");
+    renderContext_ = runtime->NewUndefined();
     auto engine = static_cast<JsiEngineInstance*>(runtime->GetEmbedderData());
     if (!engine) {
         LOGE("engine is null.");
@@ -445,11 +429,31 @@ void JsiCanvasBridge::HandleWebglContext(const shared_ptr<JsRuntime>& runtime,
 
     canvasRenderContext->Init();
 
-    auto onWebGLUpdateCallback = [runtime, id]() {
-        auto task = [](const RefPtr<CanvasTaskPool>& pool) {
-            pool->WebGLUpdate();
-        };
-        PushTaskToPageById(runtime, id, task);
+    auto canvas = AceType::DynamicCast<DOMCanvas>(page->GetDomDocument()->GetDOMNodeById(id));
+    if (!canvas) {
+        return;
+    }
+
+    auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
+    auto pool = paintChild->GetTaskPool();
+    if (!pool) {
+        return;
+    }
+
+    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(delegate));
+    auto weakPool = AceType::WeakClaim(AceType::RawPtr(pool));
+
+    auto onWebGLUpdateCallback = [weakDelegate, weakPool]() {
+        auto delegate = weakDelegate.Upgrade();
+        if (delegate) {
+            auto task = [weakPool]() {
+                auto pool = weakPool.Upgrade();
+                if (pool) {
+                    pool->WebGLUpdate();
+                }
+            };
+            delegate->PostUITask(task);
+        }
     };
     canvasRenderContext->SetUpdateCallback(onWebGLUpdateCallback);
 }
