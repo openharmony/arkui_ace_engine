@@ -21,6 +21,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -635,41 +636,6 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, 
             style.SetTextDecorationColor(decorationColor);
         }
     }
-    auto textAlignObj = styleObject->GetProperty("textAlign");
-    if (!textAlignObj->IsNull() && textAlignObj->IsNumber()) {
-        auto align = static_cast<TextAlign>(textAlignObj->ToNumber<int32_t>());
-        if (align < TextAlign::START || align > TextAlign::JUSTIFY) {
-            align = TextAlign::START;
-        }
-        updateSpanStyle_.updateTextAlign = align;
-        style.SetTextAlign(align);
-    }
-    auto leadingMarginObj = styleObject->GetProperty("leadingMargin");
-    JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(leadingMarginObj);
-    if (!leadingMarginObject->IsUndefined()) {
-        updateSpanStyle_.updateLeadingMargin = std::make_optional<NG::LeadingMargin>();
-        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("placeholder");
-        if (IsPixelMap(placeholder)) {
-#if defined(PIXEL_MAP_SUPPORTED)
-            auto pixelMap = CreatePixelMapFromNapiValue(placeholder);
-            updateSpanStyle_.updateLeadingMargin->pixmap = pixelMap;
-#endif
-        }
-
-        JSRef<JSVal> sizeVal = leadingMarginObject->GetProperty("size");
-        if (!sizeVal->IsUndefined() && sizeVal->IsArray()) {
-            auto rangeArray = JSRef<JSArray>::Cast(sizeVal);
-            JSRef<JSVal> widthVal = rangeArray->GetValueAt(0);
-            JSRef<JSVal> heightVal = rangeArray->GetValueAt(1);
-
-            CalcDimension width;
-            CalcDimension height;
-            JSContainerBase::ParseJsDimensionVp(widthVal, width);
-            JSContainerBase::ParseJsDimensionVp(heightVal, height);
-            auto size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
-            updateSpanStyle_.updateLeadingMargin->size = size;
-        }
-    }
     return style;
 }
 
@@ -824,7 +790,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
 
-JSRef<JSVal> JSRichEditorController::CreateCreateJSSpansInfo(const RichEditorSelection& info)
+JSRef<JSVal> JSRichEditorController::CreateJSSpansInfo(const RichEditorSelection& info)
 {
     uint32_t idx = 0;
 
@@ -858,7 +824,7 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
     }
     if (controllerWeak_.Upgrade()) {
         RichEditorSelection value = controllerWeak_.Upgrade()->GetSpansInfo(start, end);
-        args.SetReturnValue(CreateCreateJSSpansInfo(value));
+        args.SetReturnValue(CreateJSSpansInfo(value));
     }
 }
 
@@ -899,8 +865,11 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("setCaretOffset", &JSRichEditorController::SetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("updateSpanStyle", &JSRichEditorController::UpdateSpanStyle);
+    JSClass<JSRichEditorController>::CustomMethod(
+        "updateParagraphStyle", &JSRichEditorController::UpdateParagraphStyle);
     JSClass<JSRichEditorController>::CustomMethod("setTypingStyle", &JSRichEditorController::SetTypingStyle);
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
+    JSClass<JSRichEditorController>::CustomMethod("getParagraphs", &JSRichEditorController::GetParagraphsInfo);
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
     JSClass<JSRichEditorController>::Bind(
@@ -934,24 +903,79 @@ void JSRichEditorController::SetCaretOffset(const JSCallbackInfo& args)
     }
 }
 
-void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
+namespace {
+bool ValidationCheck(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGW("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
+        return false;
     }
     if (!info[0]->IsNumber() && !info[0]->IsObject()) {
         LOGW("info[0] not is Object or Number");
+        return false;
+    }
+    return true;
+}
+
+std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
+{
+    int32_t start = -1;
+    int32_t end = -1;
+    JSContainerBase::ParseJsInt32(object->GetProperty("start"), start);
+    JSContainerBase::ParseJsInt32(object->GetProperty("end"), end);
+    return std::make_pair(start, end);
+}
+} // namespace
+
+bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
+{
+    auto textAlignObj = styleObject->GetProperty("textAlign");
+    if (!textAlignObj->IsNull() && textAlignObj->IsNumber()) {
+        auto align = static_cast<TextAlign>(textAlignObj->ToNumber<int32_t>());
+        if (align < TextAlign::START || align > TextAlign::JUSTIFY) {
+            align = TextAlign::START;
+        }
+        style.textAlign = align;
+    }
+    auto leadingMarginObj = styleObject->GetProperty("leadingMargin");
+    JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(leadingMarginObj);
+    if (!leadingMarginObject->IsUndefined()) {
+        style.leadingMargin = std::make_optional<NG::LeadingMargin>();
+        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("placeholder");
+        if (IsPixelMap(placeholder)) {
+#if defined(PIXEL_MAP_SUPPORTED)
+            auto pixelMap = CreatePixelMapFromNapiValue(placeholder);
+            style.leadingMargin->pixmap = pixelMap;
+#endif
+        }
+
+        JSRef<JSVal> sizeVal = leadingMarginObject->GetProperty("size");
+        if (!sizeVal->IsUndefined() && sizeVal->IsArray()) {
+            auto rangeArray = JSRef<JSArray>::Cast(sizeVal);
+            JSRef<JSVal> widthVal = rangeArray->GetValueAt(0);
+            JSRef<JSVal> heightVal = rangeArray->GetValueAt(1);
+
+            CalcDimension width;
+            CalcDimension height;
+            JSContainerBase::ParseJsDimensionVp(widthVal, width);
+            JSContainerBase::ParseJsDimensionVp(heightVal, height);
+            auto size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
+            style.leadingMargin->size = size;
+        }
+    }
+    return true;
+}
+
+void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
+{
+    if (!ValidationCheck(info)) {
         return;
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
 
-    int32_t start = -1;
-    int32_t end = -1;
+    auto [start, end] = ParseRange(jsObject);
     TextStyle textStyle;
     ImageSpanAttribute imageStyle;
-    JSContainerBase::ParseJsInt32(jsObject->GetProperty("start"), start);
-    JSContainerBase::ParseJsInt32(jsObject->GetProperty("end"), end);
     auto richEditorTextStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("textStyle"));
     auto richEditorImageStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("imageStyle"));
     updateSpanStyle_.ResetStyle();
@@ -966,6 +990,42 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     if (controller) {
         controller->SetUpdateSpanStyle(updateSpanStyle_);
         controller->UpdateSpanStyle(start, end, textStyle, imageStyle);
+    }
+}
+
+void JSRichEditorController::GetParagraphsInfo(const JSCallbackInfo& args) {
+
+    if (!args[0]->IsObject()) {
+        return;
+    }
+    auto [start, end] = ParseRange(JSRef<JSObject>::Cast(args[0]));
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        RichEditorSelection value = controller->GetParagraphsInfo(start, end);
+        args.SetReturnValue(CreateJSSpansInfo(value));
+    }
+}
+
+void JSRichEditorController::UpdateParagraphStyle(const JSCallbackInfo& info)
+{
+    if (!ValidationCheck(info)) {
+        return;
+    }
+    auto object = JSRef<JSObject>::Cast(info[0]);
+    auto [start, end] = ParseRange(object);
+    auto styleObj = JSRef<JSObject>::Cast(object->GetProperty("style"));
+
+    if (styleObj->IsUndefined()) {
+        return;
+    }
+
+    struct UpdateParagraphStyle style;
+    if (!ParseParagraphStyle(styleObj, style)) {
+        return;
+    }
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->UpdateParagraphStyle(start, end, style);
     }
 }
 

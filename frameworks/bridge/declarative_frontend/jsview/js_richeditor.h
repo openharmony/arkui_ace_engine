@@ -45,6 +45,7 @@ public:
 
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
+    static void CreateParagraphObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void ParseMenuParam(
@@ -82,17 +83,23 @@ public:
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
-    bool IsDrawable(const JSRef<JSVal>& jsValue);
-    bool IsPixelMap(const JSRef<JSVal>& jsValue);
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);
     void UpdateSpanStyle(const JSCallbackInfo& info);
+    void UpdateParagraphStyle(const JSCallbackInfo& info);
     void GetSpansInfo(const JSCallbackInfo& args);
+    void GetParagraphsInfo(const JSCallbackInfo& args);
     void SetTypingStyle(const JSCallbackInfo& info);
     void CloseSelectionMenu();
-    JSRef<JSVal> CreateCreateJSSpansInfo(const RichEditorSelection& info);
 
 private:
+    bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
+    bool IsPixelMap(const JSRef<JSVal>& jsValue);
+    bool IsDrawable(const JSRef<JSVal>& jsValue);
+
+    JSRef<JSVal> CreateJSSpansInfo(const RichEditorSelection& info);
+    JSRef<JSVal> CreateParagraphsInfo(const RichEditorSelection& info);
+
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
     struct UpdateSpanStyle updateSpanStyle_;

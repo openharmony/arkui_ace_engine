@@ -83,8 +83,6 @@ struct UpdateSpanStyle {
         updateFontFamily.reset();
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
-        updateTextAlign.reset();
-        updateLeadingMargin.reset();
 
         updateImageWidth.reset();
         updateImageHeight.reset();
@@ -99,13 +97,21 @@ struct UpdateSpanStyle {
     std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
-    std::optional<TextAlign> updateTextAlign = std::nullopt;
-    std::optional<NG::LeadingMargin> updateLeadingMargin = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
     std::optional<VerticalAlign> updateImageVerticalAlign = std::nullopt;
     std::optional<ImageFit> updateImageFit = std::nullopt;
+};
+
+struct UpdateParagraphStyle {
+    void Reset()
+    {
+        textAlign.reset();
+        leadingMargin.reset();
+    }
+    std::optional<TextAlign> textAlign;
+    std::optional<NG::LeadingMargin> leadingMargin;
 };
 
 struct RangeOptions {
@@ -126,7 +132,7 @@ public:
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
-    virtual void UpdateParagraphStyle(int32_t start, int32_t end, const TextStyle& style) = 0;
+    virtual void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style) = 0;
     virtual void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
     virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
