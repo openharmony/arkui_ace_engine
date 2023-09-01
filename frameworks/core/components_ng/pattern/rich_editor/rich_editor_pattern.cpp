@@ -16,6 +16,7 @@
 
 #include <chrono>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
 #include "core/common/clipboard/paste_data.h"
 #include "core/common/container.h"
@@ -975,6 +976,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+        dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
 #ifdef ENABLE_DRAG_FRAMEWORK
         gestureHub->SetIsTextDraggable(true);
