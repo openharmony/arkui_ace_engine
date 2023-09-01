@@ -46,7 +46,7 @@ public:
     void AddMember(const RefPtr<NGGestureRecognizer>& recognizer);
     void DelMember(const RefPtr<NGGestureRecognizer>& recognizer);
 
-    void Close();
+    void Close(bool isBlocked = false);
 
     bool IsPending(size_t touchId);
 
@@ -116,7 +116,7 @@ public:
     }
     bool QueryAllDone(size_t touchId);
     bool CheckSourceTypeChange(SourceType type, bool isAxis = false);
-    void CleanAll();
+    void CleanAll(bool isBlocked = false);
 private:
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
