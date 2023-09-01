@@ -406,7 +406,9 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
         auto eventHub = GetEventHub<VideoEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireStartEvent(param);
-    } else {
+    }
+
+    if (status == PlaybackStatus::PAUSED) {
         auto json = JsonUtil::Create(true);
         json->Put("pause", "");
         auto param = json->ToString();
