@@ -2711,6 +2711,15 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
+    if (GetTextContentLength() == 0) {
+        float caretHeight = richEditorOverlayModifier_->GetCareHeight();
+        firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight };
+        secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight };
+        firstHandleOffset =
+            OffsetF(contentRect_.GetX() + startOffset.GetX(), contentRect_.GetY() + startOffset.GetY() - caretHeight);
+        secondHandleOffset =
+            OffsetF(contentRect_.GetX() + endOffset.GetX(), contentRect_.GetY() + endOffset.GetY() - caretHeight);
+    }
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
     RectF firstHandle;
@@ -2836,8 +2845,9 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     }
 }
 
-void RichEditorPattern::BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>&
-    menuBuilder, std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear)
+void RichEditorPattern::BindSelectionMenu(ResponseType type, RichEditorType richEditorType,
+    std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
+    std::function<void()>& onDisappear)
 {
     selectionMenuParams_ =
         std::make_shared<SelectionMenuParams>(richEditorType, menuBuilder, onAppear, onDisappear, type);
