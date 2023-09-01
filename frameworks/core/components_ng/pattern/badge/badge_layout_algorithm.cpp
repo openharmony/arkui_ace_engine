@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/badge/badge_theme.h"
@@ -48,14 +49,30 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 1);
     CHECK_NULL_VOID(textWrapper);
-    if (textWrapper) {
-        textWrapper->Measure(textFirstLayoutConstraint);
-    }
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto textGeometryNode = textWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(textGeometryNode);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
+
+    auto badgeFontSize = layoutProperty->GetBadgeFontSize();
+    if (badgeFontSize.has_value() && GreatOrEqual(badgeFontSize.value().ConvertToPx(), 0)) {
+        hasFontSize_ = true;
+        textLayoutProperty->UpdateFontSize(badgeFontSize.value());
+    } else {
+        hasFontSize_ = false;
+        auto badgeThemeFontSize = badgeTheme->GetBadgeFontSize();
+        layoutProperty->UpdateBadgeFontSize(badgeThemeFontSize);
+        textLayoutProperty->UpdateFontSize(badgeThemeFontSize);
+    }
+    if (textWrapper) {
+        textWrapper->Measure(textFirstLayoutConstraint);
+    }
+
     auto badgeCircleSize = badgeTheme->GetBadgeCircleSize();
     auto badgeValue = layoutProperty->GetBadgeValue();
     if (badgeValue.has_value() && badgeValue.value().empty()) {
@@ -69,20 +86,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto badgeHeight = badgeCircleDiameter;
     auto countLimit = layoutProperty->GetBadgeMaxCountValue();
     auto badgeCircleRadius = badgeCircleDiameter / 2;
-
-    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto textGeometryNode = textWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(textGeometryNode);
-    auto badgeFontSize = layoutProperty->GetBadgeFontSize();
-    if (badgeFontSize.has_value()) {
-        textLayoutProperty->UpdateFontSize(badgeFontSize.value());
-    } else {
-        hasFontSize_ = false;
-        auto badgeThemeFontSize = badgeTheme->GetBadgeFontSize();
-        layoutProperty->UpdateBadgeFontSize(badgeThemeFontSize);
-        textLayoutProperty->UpdateFontSize(badgeThemeFontSize);
-    }
 
     std::string textData;
     if (textLayoutProperty->HasContent()) {
