@@ -1058,9 +1058,8 @@ void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
 
 JSRef<JSVal> JSRichEditorController::CreateJSParagraphsInfo(const std::vector<ParagraphInfo>& info)
 {
-    uint32_t idx = 0;
     auto array = JSRef<JSArray>::New();
-    for (auto i = 0; i < info.size(); ++i) {
+    for (size_t i = 0; i < info.size(); ++i) {
         array->SetValueAt(i, JSRichEditor::CreateParagraphStyleResult(info[i]));
     }
     return JSRef<JSVal>::Cast(array);

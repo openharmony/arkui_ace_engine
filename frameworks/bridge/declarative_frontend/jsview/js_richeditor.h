@@ -50,11 +50,7 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, SelectMenuParam& menuParam);
-
-#ifdef PIXEL_MAP_SUPPORTED
-    static JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap);
 };
-#endif
 
 class JSRichEditorController final : public Referenced {
 public:
