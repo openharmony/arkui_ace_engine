@@ -34,10 +34,10 @@ public:
     static const char* GetAceLibName();
 private:
     AceForwardCompatibility() = default;
-    static bool isForceOldPipeline_;
-    static bool isNewPipeline_;
-    static bool isNewAppspawn_;
-    static bool isInited_;
+    static inline bool isForceOldPipeline_ = true;
+    static inline bool isNewPipeline_ = true;
+    static inline bool isNewAppspawn_ = true;
+    static inline bool isInited_ = false;
 };
 } // namespace Ace
 } // namespace OHOS
