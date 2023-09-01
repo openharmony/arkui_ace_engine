@@ -33,6 +33,8 @@
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components/theme/app_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1983,5 +1985,174 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0045, TestSize.Level1)
     frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
     focusHub->RefreshFocus();
     EXPECT_TRUE(focusHub->currentFocus_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0046
+ * @tc.desc: Test the function IsFocusableScopeByTab.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->isFocusActive_ = true;
+    focusHub->isFocusUnit_ = true;
+    auto parentNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto parentFocusHub = parentNode->GetOrCreateFocusHub();
+    parentFocusHub->focusType_ = FocusType::SCOPE;
+    frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
+    focusHub->onPaintFocusStateCallback_ = []() { return true; };
+    focusHub->PaintAllFocusState();
+    focusHub->HandleParentScroll();
+    EXPECT_TRUE(focusHub->isFocusUnit_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg0047
+ * @tc.desc: Test the function CalculatePosition and PaintAllFocusState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode1 = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    eventHub1->AttachHost(frameNode1);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_EQ(itNewFocusNode, focusNodes.end());
+    focusHub->ClearAllFocusState();
+    focusHub->PaintAllFocusState();
+    focusHub->CalculatePosition();
+    focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
+    EXPECT_TRUE(focusHub->CalculatePosition());
+    focusHub1->focusType_ = FocusType::NODE;
+    EXPECT_FALSE(focusHub->PaintAllFocusState());
+    EXPECT_TRUE(focusHub->CalculatePosition());
+}
+
+/**
+ * @tc.name: FocusHubTestNg0048
+ * @tc.desc: Test the function ClearFocusState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    child->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    RoundRect focusRectInner;
+    context->isFocusActive_ = true;
+    focusHub->focusType_ = FocusType::NODE;
+    EXPECT_FALSE(focusHub->PaintInnerFocusState(focusRectInner));
+    focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_EQ(itNewFocusNode, focusNodes.end());
+    EXPECT_TRUE(focusHub->PaintInnerFocusState(focusRectInner));
+    focusHub->focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
+    focusHub->focusPaintParamsPtr_->paintColor = Color::RED;
+    focusHub->focusPaintParamsPtr_->paintWidth = Dimension(10);
+    EXPECT_TRUE(focusHub->PaintInnerFocusState(focusRectInner));
+}
+
+/**
+ * @tc.name: FocusHubTestNg0049
+ * @tc.desc: Test the function PaintFocusState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    child->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child);
+    frameNode->AddChild(child2);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->isFocusActive_ = true;
+    focusHub->focusType_ = FocusType::NODE;
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_EQ(itNewFocusNode, focusNodes.end());
+    focusHub->focusStyleType_ = FocusStyleType::CUSTOM_REGION;
+    RoundRect paintRect;
+    focusHub->getInnerFocusRectFunc_ = [](RoundRect) {};
+    EXPECT_FALSE(focusHub->PaintFocusState(false));
+    focusHub->focusStyleType_ = FocusStyleType::CUSTOM_BORDER;
+    EXPECT_FALSE(focusHub->PaintFocusState(false));
+    focusHub->focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
+    focusHub->focusPaintParamsPtr_->paintColor = Color::RED;
+    focusHub->focusPaintParamsPtr_->paintWidth = Dimension(10);
+    EXPECT_FALSE(focusHub->PaintFocusState(false));
+}
+
+/**
+ * @tc.name: FocusHubTestNg0050
+ * @tc.desc: Test the function ScrollToLastFocusIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    auto parentNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto parentFocusHub = parentNode->GetOrCreateFocusHub();
+    parentFocusHub->focusType_ = FocusType::SCOPE;
+    frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
+    focusHub->SetLastFocusNodeIndex(focusHub);
+    focusHub->ScrollToLastFocusIndex();
+    focusHub->lastFocusNodeIndex_ = 1;
+    focusHub->ScrollToLastFocusIndex();
+    EXPECT_NE(focusHub->focusType_, FocusType::SCOPE);
 }
 } // namespace OHOS::Ace::NG
