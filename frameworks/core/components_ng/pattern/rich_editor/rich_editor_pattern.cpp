@@ -866,10 +866,28 @@ void RichEditorPattern::UpdateSpanStyle(
     }
 }
 
-void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end)
+std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, int32_t end)
+{
+    std::vector<ParagraphInfo> res;
+    auto spanNodes = GetParagraphNodes(start, end);
+    for (auto it = spanNodes.begin(); it != spanNodes.end(); ++it) {
+        if (it == std::prev(spanNodes.end()) || StringUtils::ToWstring((*it)->GetSpanItem()->content).back() == L'\n') {
+            ParagraphInfo info;
+            info.textAlign = static_cast<int32_t>((*it)->GetTextAlignValue(TextAlign::START));
+            auto leadingMarginSize = (*it)->GetLeadingMarginValue({}).size;
+            info.leadingMarginSize[0] = Dimension(leadingMarginSize.Width()).ConvertToVp();
+            info.leadingMarginSize[1] = Dimension(leadingMarginSize.Height()).ConvertToVp();
+            res.emplace_back(std::move(info));
+        }
+    }
+
+    return res;
+}
+
+std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start, int32_t end)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, {});
     int32_t spanStart = -1;
     int32_t spanEnd = -1;
 
@@ -907,23 +925,34 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end)
 
     // filter illegal iterator
     if (tailIt == host->GetChildren().rend() || headIt == host->GetChildren().end()) {
-        return;
+        return {};
     }
 
-    // update style of spans in range [headIt, tailIt)
+    std::vector<RefPtr<SpanNode>> res;
+    // return spans in range [headIt, tailIt)
     // SPECIAL CASE: only 1 span and *headIt == *tailIt, handled by do-while loop
     do {
         auto spanNode = DynamicCast<SpanNode>(*headIt);
         if (spanNode) {
-            if (updateSpanStyle_.updateTextAlign.has_value()) {
-                spanNode->UpdateTextAlign(*updateSpanStyle_.updateTextAlign);
-            }
-            if (updateSpanStyle_.updateLeadingMargin.has_value()) {
-                spanNode->UpdateLeadingMargin(*updateSpanStyle_.updateLeadingMargin);
-            }
+            res.emplace_back(spanNode);
         }
         ++headIt;
     } while (headIt != host->GetChildren().end() && *headIt != *tailIt);
+
+    return res;
+}
+
+void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style)
+{
+    auto spanNodes = GetParagraphNodes(start, end);
+    for (const auto& spanNode : spanNodes) {
+        if (style.textAlign.has_value()) {
+            spanNode->UpdateTextAlign(*style.textAlign);
+        }
+        if (style.leadingMargin.has_value()) {
+            spanNode->UpdateLeadingMargin(*style.leadingMargin);
+        }
+    }
 }
 
 void RichEditorPattern::ScheduleCaretTwinkling()
@@ -2465,11 +2494,11 @@ TextStyleResult RichEditorPattern::GetTextStyleObject(const RefPtr<SpanNode>& no
     textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
-    textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
+    // textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
 
-    auto leadingMarginSize = node->GetLeadingMarginValue({}).size;
-    textStyle.leadingMargin[0] = Dimension(leadingMarginSize.Width()).ConvertToVp();
-    textStyle.leadingMargin[1] = Dimension(leadingMarginSize.Height()).ConvertToVp();
+    // auto leadingMarginSize = node->GetLeadingMarginValue({}).size;
+    // textStyle.leadingMargin[0] = Dimension(leadingMarginSize.Width()).ConvertToVp();
+    // textStyle.leadingMargin[1] = Dimension(leadingMarginSize.Height()).ConvertToVp();
     return textStyle;
 }
 

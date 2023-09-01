@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #if not defined(ACE_UNITTEST)
@@ -157,8 +158,8 @@ public:
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
-    void UpdateParagraphStyle(int32_t start, int32_t end);
-    void GetParagraphInfo(int32_t start, int32_t end);
+    void UpdateParagraphStyle(int32_t start, int32_t end, const UpdateParagraphStyle& style);
+    std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
@@ -295,6 +296,7 @@ private:
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 
+    std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end);
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
     RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;

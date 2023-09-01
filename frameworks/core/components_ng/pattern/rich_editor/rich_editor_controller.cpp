@@ -77,10 +77,6 @@ void RichEditorController::UpdateSpanStyle(
         return;
     }
     richEditorPattern->SetUpdateSpanStyle(updateSpanStyle_);
-    if (updateSpanStyle_.updateTextAlign.has_value() || updateSpanStyle_.updateLeadingMargin.has_value()) {
-        richEditorPattern->UpdateParagraphStyle(start, end, textStyle);
-    }
-
     richEditorPattern->UpdateSpanStyle(start, end, textStyle, imageStyle);
 }
 
@@ -119,6 +115,14 @@ void RichEditorController::CloseSelectionMenu()
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     if (richEditorPattern) {
         richEditorPattern->CloseSelectionMenu();
+    }
+}
+
+void RichEditorController::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle &style)
+{
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    if (richEditorPattern) {
+        richEditorPattern->UpdateParagraphStyle(start, end, style);
     }
 }
 } // namespace OHOS::Ace::NG
