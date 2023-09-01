@@ -327,7 +327,12 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
                            layoutConstraint->maxSize.Height() - childSize.Height()) /
                        2.0;
     }
-    return AdjustChildPosition(topLeftPoint, dialogOffset, childSize);
+    const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
+    bool needAvoidKeyboard = true;
+    if (expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) {
+        needAvoidKeyboard = false;
+    }
+    return AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
 }
 
 bool DialogLayoutAlgorithm::SetAlignmentSwitch(
@@ -403,7 +408,7 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
 }
 
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
-    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize) const
+    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
@@ -416,7 +421,7 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
     auto childBottom = childOffset.GetY() + childSize.Height();
-    if (keyboardInsert.Length() > 0 && childBottom > keyboardInsert.start) {
+    if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > keyboardInsert.start) {
         childOffset.SetY(childOffset.GetY() - (childBottom - keyboardInsert.start));
     }
     return childOffset;

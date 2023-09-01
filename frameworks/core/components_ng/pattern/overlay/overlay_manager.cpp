@@ -93,6 +93,27 @@ RefPtr<FrameNode> GetLastPage()
 }
 } // namespace
 
+void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    // animation finish event should be posted to UI thread.
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this), nodeWk, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            LOGD("Execute dialog OnDialogCloseEvent");
+            auto overlayManager = weak.Upgrade();
+            auto node = nodeWk.Upgrade();
+            CHECK_NULL_VOID_NOLOG(overlayManager && node);
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_NONE };
+            node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+            overlayManager->OnDialogCloseEvent(node);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
@@ -206,6 +227,8 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(theme);
 
     ResetLowerNodeFocusable(node);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_KEYBOARD };
+    node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 
     // default opacity animation params
     AnimationOption option;
@@ -221,21 +244,9 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 
     option.SetOnFinishEvent([weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), id = Container::CurrentId()] {
         ContainerScope scope(id);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
-        // animation finish event should be posted to UI thread.
-        taskExecutor->PostTask(
-            [weak, nodeWk, id]() {
-                ContainerScope scope(id);
-                LOGI("Execute dialog OnDialogCloseEvent");
-                auto overlayManager = weak.Upgrade();
-                auto node = nodeWk.Upgrade();
-                CHECK_NULL_VOID(overlayManager && node);
-                overlayManager->OnDialogCloseEvent(node);
-            },
-            TaskExecutor::TaskType::UI);
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(overlayManager);
+        overlayManager->PostDialogFinishEvent(nodeWk);
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
