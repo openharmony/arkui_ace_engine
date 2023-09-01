@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/common/clipboard/paste_data.h"
 #include "core/common/container.h"
@@ -883,7 +884,7 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const T
             if (start >= spanStart) {
                 break;
             }
-            if (info->content.back() == '\n') {
+            if (StringUtils::ToWstring(info->content).back() == L'\n') {
                 headIt = std::next(it);
             }
         }
@@ -898,7 +899,7 @@ void RichEditorPattern::UpdateParagraphStyle(int32_t start, int32_t end, const T
             if (spanEnd < end) {
                 break;
             }
-            if (info->content.back() == '\n') {
+            if (StringUtils::ToWstring(info->content).back() == L'\n') {
                 tailIt = std::prev(it);
             }
         }
