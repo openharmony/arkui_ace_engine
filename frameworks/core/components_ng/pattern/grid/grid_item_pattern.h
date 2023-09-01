@@ -19,6 +19,8 @@
 #include "core/components_ng/pattern/grid/grid_item_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_item_model.h"
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
@@ -28,6 +30,9 @@ class ACE_EXPORT GridItemPattern : public Pattern {
 
 public:
     explicit GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
+    explicit GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, GridItemStyle gridItemStyle)
+        : shallowBuilder_(shallowBuilder), gridItemStyle_(gridItemStyle)
+    {}
     ~GridItemPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -45,7 +50,6 @@ public:
         return MakeRefPtr<GridItemEventHub>();
     }
 
-    
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<GridItemAccessibilityProperty>();
@@ -78,7 +82,14 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::SCOPE, true, FocusStyleType::INNER_BORDER };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto theme = pipeline->GetTheme<GridItemTheme>();
+        CHECK_NULL_RETURN(theme, FocusPattern());
+        auto focusColor = theme->GetGridItemFocusColor();
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(focusColor);
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -104,10 +115,26 @@ protected:
     void OnModifyDone() override;
 private:
     void SetAccessibilityAction();
+    void OnAttachToFrameNode() override;
+    void InitFocusPaintRect(const RefPtr<FocusHub>& focusHub);
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    Color GetBlendGgColor();
+    void InitHoverEvent();
+    void HandleHoverEvent(bool isHover);
+    void InitPressEvent();
+    void HandlePressEvent(bool isPressed);
+    void InitDisableStyle();
+
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;
     bool selectable_ = true;
     bool isSelected_ = false;
+
+    RefPtr<InputEvent> hoverEvent_;
+    RefPtr<TouchEventImpl> touchListener_;
+    bool isHover_ = false;
+    bool isPressed_ = false;
+    GridItemStyle gridItemStyle_ = GridItemStyle::NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridItemPattern);
 };

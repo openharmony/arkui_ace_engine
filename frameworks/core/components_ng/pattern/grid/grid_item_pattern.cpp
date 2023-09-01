@@ -14,16 +14,41 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
-
+#include "core/pipeline_ng/pipeline_context.h"
 #include "base/utils/utils.h"
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 } // namespace
+void GridItemPattern::OnAttachToFrameNode()
+{
+    if (gridItemStyle_ == GridItemStyle::PLAIN) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<GridItemTheme>();
+        CHECK_NULL_VOID(theme);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
+    }
+}
+
 void GridItemPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     SetAccessibilityAction();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitFocusPaintRect(focusHub);
+    InitDisableStyle();
+    if (gridItemStyle_ == GridItemStyle::PLAIN) {
+        InitHoverEvent();
+        InitPressEvent();
+    }
 }
 
 void GridItemPattern::MarkIsSelected(bool isSelected)
@@ -99,5 +124,158 @@ void GridItemPattern::BeforeCreateLayoutWrapper()
         shallowBuilder_->ExecuteDeepRender();
         shallowBuilder_.Reset();
     }
+}
+
+Color GridItemPattern::GetBlendGgColor()
+{
+    Color color = Color::TRANSPARENT;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, color);
+    auto theme = pipeline->GetTheme<GridItemTheme>();
+    CHECK_NULL_RETURN(theme, color);
+    if (isPressed_) {
+        color = color.BlendColor(theme->GetGridItemPressColor());
+    } else if (isHover_) {
+        color = color.BlendColor(theme->GetGridItemHoverColor());
+    }
+    return color;
+}
+
+void GridItemPattern::InitHoverEvent()
+{
+    if (hoverEvent_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleHoverEvent(isHover);
+        }
+    };
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(hoverEvent_);
+}
+
+void GridItemPattern::HandleHoverEvent(bool isHover)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<GridItemTheme>();
+    CHECK_NULL_VOID(theme);
+
+    isHover_ = isHover;
+    auto hoverColor = GetBlendGgColor();
+    AnimationUtils::BlendBgColorAnimation(
+        renderContext, hoverColor, theme->GetHoverAnimationDuration(), Curves::FRICTION);
+}
+
+void GridItemPattern::InitPressEvent()
+{
+    if (touchListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
+            pattern->HandlePressEvent(touchType == TouchType::DOWN);
+        }
+    };
+    auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchListener_);
+}
+
+void GridItemPattern::HandlePressEvent(bool isPressed)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<GridItemTheme>();
+    CHECK_NULL_VOID(theme);
+    auto duration = isHover_ ? theme->GetHoverToPressAnimationDuration() : theme->GetHoverAnimationDuration();
+    isPressed_ = isPressed;
+    Color color = GetBlendGgColor();
+    AnimationUtils::BlendBgColorAnimation(renderContext, color, duration, Curves::SHARP);
+}
+
+void GridItemPattern::InitDisableStyle()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<GridItemTheme>();
+    CHECK_NULL_VOID(theme);
+
+    if (!eventHub->IsEnabled()) {
+        renderContext->UpdateOpacity(theme->GetGridItemDisabledAlpha());
+    } else {
+        renderContext->UpdateOpacity(theme->GetGridItemEnabledAlpha());
+    }
+}
+
+void GridItemPattern::InitFocusPaintRect(const RefPtr<FocusHub>& focusHub)
+{
+    auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->GetInnerFocusPaintRect(paintRect);
+        }
+    };
+    focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+}
+
+void GridItemPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto gridItemSize = geometryNode->GetFrameSize();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<GridItemTheme>();
+    CHECK_NULL_VOID(theme);
+    auto focusPaintPadding = theme->GetFocusPaintPadding().ConvertToPx();
+    float width = gridItemSize.Width() + 2 * focusPaintPadding;
+    float height = gridItemSize.Height() + 2 * focusPaintPadding;
+    paintRect.SetRect({ -focusPaintPadding, -focusPaintPadding, width, height });
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto radius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusPaintPadding),
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + focusPaintPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusPaintPadding),
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + focusPaintPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusPaintPadding),
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + focusPaintPadding));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding),
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + focusPaintPadding));
 }
 } // namespace OHOS::Ace::NG

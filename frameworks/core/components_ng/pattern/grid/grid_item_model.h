@@ -19,16 +19,17 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
 
 namespace OHOS::Ace {
-
 class GridItemModel {
 public:
     static GridItemModel* GetInstance();
     virtual ~GridItemModel() = default;
 
-    virtual void Create() = 0;
-    virtual void Create(std::function<void(int32_t)>&& deepRenderFunc, bool isLazy) = 0;
+    virtual void Create(NG::GridItemStyle gridItemStyle) = 0;
+    virtual void Create(
+        std::function<void(int32_t)>&& deepRenderFunc, bool isLazy, NG::GridItemStyle gridItemStyle) = 0;
     virtual void SetRowStart(int32_t value) = 0;
     virtual void SetRowEnd(int32_t value) = 0;
     virtual void SetColumnStart(int32_t value) = 0;

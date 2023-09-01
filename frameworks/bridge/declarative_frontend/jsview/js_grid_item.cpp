@@ -55,14 +55,14 @@ void JSGridItem::Create(const JSCallbackInfo& args)
         CreateForPartialUpdate(args);
         return;
     }
-    GridItemModel::GetInstance()->Create();
+    GridItemModel::GetInstance()->Create(NG::GridItemStyle::NONE);
 }
 
 void JSGridItem::CreateForPartialUpdate(const JSCallbackInfo& args)
 {
     if (args.Length() < 2 || !args[0]->IsFunction() || !args[1]->IsBoolean()) {
         LOGE("parameter not valid");
-        GridItemModel::GetInstance()->Create();
+        GridItemModel::GetInstance()->Create(NG::GridItemStyle::NONE);
         return;
     }
 
@@ -80,7 +80,16 @@ void JSGridItem::CreateForPartialUpdate(const JSCallbackInfo& args)
         jsDeepRenderFunc->ExecuteJS(2, jsParams);
         LOGD("GridItem elmtId %{public}d DeepRender JS function execution - done ", elmtId);
     };
-    GridItemModel::GetInstance()->Create(std::move(gridItemDeepRenderFunc), isLazy);
+
+    NG::GridItemStyle gridItemStyle = NG::GridItemStyle::NONE;
+    bool versionControl = Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN);
+    if (!versionControl && args[2]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[2]);
+        JSRef<JSVal> styleObj = obj->GetProperty("style");
+        gridItemStyle = styleObj->IsNumber() ? static_cast<NG::GridItemStyle>(styleObj->ToNumber<int32_t>())
+                                             : NG::GridItemStyle::NONE;
+    }
+    GridItemModel::GetInstance()->Create(std::move(gridItemDeepRenderFunc), isLazy, gridItemStyle);
 }
 
 void JSGridItem::SetColumnStart(int32_t columnStart)

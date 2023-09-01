@@ -22,19 +22,19 @@
 
 namespace OHOS::Ace::NG {
 
-void GridItemModelNG::Create()
+void GridItemModelNG::Create(GridItemStyle gridItemStyle)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr); });
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, nodeId,
+        [itemStyle = gridItemStyle]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
     stack->Push(frameNode);
 }
 
-void GridItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, bool isLazy)
+void GridItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, bool isLazy, GridItemStyle gridItemStyle)
 {
     if (!isLazy) {
-        Create();
+        Create(gridItemStyle);
         return;
     }
 
@@ -46,9 +46,9 @@ void GridItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, bool
         deepRenderFunc(nodeId);
         return ViewStackProcessor::GetInstance()->Finish();
     };
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::GRID_ITEM_ETS_TAG, nodeId, [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
-            return AceType::MakeRefPtr<GridItemPattern>(shallowBuilder);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, nodeId,
+        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = gridItemStyle]() {
+            return AceType::MakeRefPtr<GridItemPattern>(shallowBuilder, itemStyle);
         });
     stack->Push(frameNode);
 }

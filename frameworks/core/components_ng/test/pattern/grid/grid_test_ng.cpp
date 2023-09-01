@@ -51,6 +51,8 @@ namespace {
 constexpr float ITEM_WIDTH = 100.f;
 constexpr float ITEM_HEIGHT = 100.f;
 constexpr float GRID_HEIGHT = 300.f;
+constexpr Dimension GRIDITEM_FOCUS_INTERVAL = 4.0_vp;
+constexpr Dimension BORDER_RADIUS = 8.0_vp;
 } // namespace
 
 class GridTestNg : public testing::Test, public TestNG {
@@ -100,7 +102,9 @@ void GridTestNg::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    auto gridItemTheme = AceType::MakeRefPtr<GridItemTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    EXPECT_CALL(*themeManager, GetTheme(GridItemTheme::TypeId())).WillRepeatedly(Return(gridItemTheme));
 }
 
 void GridTestNg::TearDownTestSuite()
@@ -155,7 +159,7 @@ void GridTestNg::CreateGridItem(
 {
     for (int32_t i = 0; i < count; i++) {
         GridItemModelNG gridItemModel;
-        gridItemModel.Create();
+        gridItemModel.Create(GridItemStyle::NONE);
         if (width != -1) {
             SetWidth(Dimension(width));
         }
@@ -175,7 +179,7 @@ void GridTestNg::CreateSingleGridItem(
     int32_t rowStart, int32_t rowEnd, int32_t colStart, int32_t colEnd, float width, float height)
 {
         GridItemModelNG gridItemModel;
-        gridItemModel.Create();
+        gridItemModel.Create(GridItemStyle::NONE);
         if (rowStart != -1) {
             gridItemModel.SetRowStart(rowStart);
         }
@@ -366,7 +370,7 @@ HWTEST_F(GridTestNg, Property003, TestSize.Level1)
      * @tc.steps: step1. Create gridItem and Set properties.
      */
     GridItemModelNG gridItemModelNG;
-    gridItemModelNG.Create();
+    gridItemModelNG.Create(GridItemStyle::NONE);
     gridItemModelNG.SetRowStart(1);
     gridItemModelNG.SetRowEnd(2);
     gridItemModelNG.SetColumnStart(1);
@@ -2263,7 +2267,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest008, TestSize.Level1)
      * @tc.steps: step1. Create heading GridItem.
      */
     GridItemModelNG gridItemModel;
-    gridItemModel.Create();
+    gridItemModel.Create(GridItemStyle::NONE);
     gridItemModel.SetColumnStart(0);
     gridItemModel.SetColumnEnd(3);
     SetHeight(Dimension(ITEM_HEIGHT));
@@ -2453,7 +2457,7 @@ HWTEST_F(GridTestNg, MouseSelect004, TestSize.Level1)
     auto selectCallback = [&isSixthItemSelected](bool) { isSixthItemSelected = true; };
     for (int32_t i = 0; i < 10; i++) {
         GridItemModelNG gridItemModel;
-        gridItemModel.Create();
+        gridItemModel.Create(GridItemStyle::NONE);
         SetHeight(Dimension(ITEM_HEIGHT));
         if (i == 1) {
             gridItemModel.SetSelectable(false);
@@ -3596,7 +3600,7 @@ HWTEST_F(GridTestNg, GridScrollTest005, TestSize.Level1)
      * @tc.steps: step2. Create heading GridItem.
      */
     GridItemModelNG gridItemModelNG;
-    gridItemModelNG.Create();
+    gridItemModelNG.Create(GridItemStyle::NONE);
     gridItemModelNG.SetRowStart(-1);
     gridItemModelNG.SetRowEnd(-1);
     gridItemModelNG.SetColumnStart(-1);
@@ -3695,5 +3699,154 @@ HWTEST_F(GridTestNg, GetAverageHeight001, TestSize.Level1)
     CreateGrid();
     height = pattern_->GetAverageHeight();
     EXPECT_EQ(height, 25.f);
+}
+
+/**
+ * @tc.name: GridItemHoverEventTest001
+ * @tc.desc: GirdItem hover event test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridItemHoverEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create girdItem and initialize related properties.
+     */
+    GridItemModelNG gridItemModelNG;
+    gridItemModelNG.Create(GridItemStyle::PLAIN);
+
+    /**
+     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto gridItemPattern = frameNode->GetPattern<GridItemPattern>();
+    ASSERT_NE(gridItemPattern, nullptr);
+    gridItemPattern->isPressed_ = false;
+    gridItemPattern->HandleHoverEvent(true);
+    EXPECT_TRUE(gridItemPattern->isHover_);
+    gridItemPattern->HandleHoverEvent(false);
+    EXPECT_FALSE(gridItemPattern->isHover_);
+
+    /**
+     * @tc.steps: step3. Test gridItem hover event when hoverEvent_ has value.
+     * @tc.expected: InitHoverEvent func will return.
+     */
+    gridItemPattern->hoverEvent_ = AceType::MakeRefPtr<InputEvent>([](MouseInfo&) {});
+    gridItemPattern->InitHoverEvent();
+}
+
+/**
+ * @tc.name: GridItemPressEventTest001
+ * @tc.desc: GirdItem press event test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridItemPressEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create girdItem and initialize related properties.
+     */
+    GridItemModelNG gridItemModelNG;
+    gridItemModelNG.Create(GridItemStyle::PLAIN);
+
+    /**
+     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto gridItemPattern = frameNode->GetPattern<GridItemPattern>();
+    ASSERT_NE(gridItemPattern, nullptr);
+    gridItemPattern->isHover_ = false;
+    gridItemPattern->HandlePressEvent(true);
+    EXPECT_TRUE(gridItemPattern->isPressed_);
+    gridItemPattern->HandlePressEvent(false);
+    EXPECT_FALSE(gridItemPattern->isPressed_);
+
+    /**
+     * @tc.steps: step3. Test gridItem press event when touchListener_ has value.
+     * @tc.expected: InitPressEvent func will return.
+     */
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gridItemPattern->touchListener_ = touchEvent;
+    gridItemPattern->InitPressEvent();
+}
+
+/**
+ * @tc.name: GridItemDisableEventTest001
+ * @tc.desc: GirdItem disable event test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridItemDisableEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create girdItem and initialize related properties.
+     */
+    GridItemModelNG gridItemModelNG;
+    gridItemModelNG.Create(GridItemStyle::PLAIN);
+
+    /**
+     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto gridItemEvent = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(gridItemEvent, nullptr);
+    auto gridItemPattern = frameNode->GetPattern<GridItemPattern>();
+    ASSERT_NE(gridItemPattern, nullptr);
+    gridItemEvent->SetEnabled(false);
+    gridItemPattern->InitDisableStyle();
+    gridItemEvent->SetEnabled(true);
+    gridItemPattern->InitDisableStyle();
+}
+
+/**
+ * @tc.name: GridItemGetInnerFocusPaintRectTest001
+ * @tc.desc: GirdItem GetInnerFocusPaintRect test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GridItemGetInnerFocusPaintRectTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create girdItem and initialize related properties.
+     */
+    GridItemModelNG gridItemModelNG;
+    gridItemModelNG.Create(GridItemStyle::NONE);
+
+    /**
+     * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
+     * @tc.expected: Related function is called.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto gridItemPattern = frameNode->GetPattern<GridItemPattern>();
+    ASSERT_NE(gridItemPattern, nullptr);
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    gridItemPattern->InitFocusPaintRect(focusHub);
+    RoundRect paintRect;
+
+    /**
+     * @tc.steps: step3. Set paintRect when grid item does not have border radius.
+     * @tc.expected: Focus border radius is equal to 4.0_vp.
+     */
+    gridItemPattern->GetInnerFocusPaintRect(paintRect);
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x, GRIDITEM_FOCUS_INTERVAL.ConvertToPx());
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y, GRIDITEM_FOCUS_INTERVAL.ConvertToPx());
+
+    /**
+     * @tc.steps: step4. Set paintRect when grid item has border radius.
+     * @tc.expected: Focus border radius is equal to 12.0_vp.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdateBorderRadius({ BORDER_RADIUS, BORDER_RADIUS, BORDER_RADIUS, BORDER_RADIUS });
+    gridItemPattern->GetInnerFocusPaintRect(paintRect);
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
+        GRIDITEM_FOCUS_INTERVAL.ConvertToPx() + BORDER_RADIUS.ConvertToPx());
+    EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).y,
+        GRIDITEM_FOCUS_INTERVAL.ConvertToPx() + BORDER_RADIUS.ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

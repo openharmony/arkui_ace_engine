@@ -23,8 +23,8 @@ namespace OHOS::Ace::Framework {
 
 class GridItemModelImpl : public OHOS::Ace::GridItemModel {
 public:
-    void Create() override;
-    void Create(std::function<void(int32_t)>&& deepRenderFunc, bool isLazy) override;
+    void Create(NG::GridItemStyle gridItemStyle) override;
+    void Create(std::function<void(int32_t)>&& deepRenderFunc, bool isLazy, NG::GridItemStyle gridItemStyle) override;
     void SetRowStart(int32_t value) override;
     void SetRowEnd(int32_t value) override;
     void SetColumnStart(int32_t value) override;
