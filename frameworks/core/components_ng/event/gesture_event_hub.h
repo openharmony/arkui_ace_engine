@@ -40,6 +40,11 @@ struct DragNotifyMsg;
 namespace OHOS::Ace {
 class UnifiedData;
 }
+enum class MenuPreviewMode {
+    NONE,
+    IMAGE,
+    CUSTOM,
+};
 #endif
 namespace OHOS::Ace::NG {
 
@@ -411,6 +416,16 @@ public:
     {
         return isTextDraggable_;
     }
+
+    void SetPreviewMode(MenuPreviewMode mode)
+    {
+        previewMode_ = mode;
+    }
+
+    MenuPreviewMode GetPreviewMode()
+    {
+        return previewMode_;
+    }
 #endif // ENABLE_DRAG_FRAMEWORK
 
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
@@ -509,6 +524,7 @@ private:
     bool isReceivedDragGestureInfo_ = false;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
+    MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     std::function<void()> callback_;
