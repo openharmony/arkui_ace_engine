@@ -175,20 +175,6 @@ void VideoPattern::ResetStatus()
 #endif
 }
 
-void VideoPattern::UpdateMediaPlayer()
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask([weak = WeakClaim(this)] {
-        auto video = weak.Upgrade();
-        CHECK_NULL_VOID(video);
-        auto targetNode = video->GetTargetVideoPattern();
-        CHECK_NULL_VOID(targetNode);
-        targetNode->UpdateMediaPlayerOnBg();
-    });
-}
-
 void VideoPattern::ResetMediaPlayer()
 {
     mediaPlayer_->ResetMediaPlayer();
@@ -418,9 +404,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
     if (status == PlaybackStatus::PREPARED) {
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        if (!mediaPlayer_->IsMediaPlayerValid()) {
-            return;
-        }
+        CHECK_NULL_VOID(mediaPlayer_);
 
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
@@ -451,9 +435,7 @@ void VideoPattern::OnError(const std::string& errorId)
 
 void VideoPattern::OnResolutionChange() const
 {
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        return;
-    }
+    CHECK_NULL_VOID(mediaPlayer_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     SizeF videoSize =
@@ -733,7 +715,7 @@ void VideoPattern::OnModifyDone()
     // Update the media player when video node is not in full screen or current node is full screen node
     if (!fullScreenNodeId_.has_value() || InstanceOf<VideoFullScreenNode>(this)) {
         LOGI("trigger modify media player");
-        UpdateMediaPlayer();
+        UpdateMediaPlayerOnBg();
     }
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
@@ -1183,10 +1165,7 @@ void VideoPattern::SetMethodCall()
 void VideoPattern::Start()
 {
     LOGI("Video start to play");
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        LOGE("media player is invalid.");
-        return;
-    }
+    CHECK_NULL_VOID(mediaPlayer_);
 
     if (isStop_ && mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player has not prepared");
@@ -1206,20 +1185,14 @@ void VideoPattern::Start()
 
 void VideoPattern::Pause()
 {
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        LOGE("media player is invalid.");
-        return;
-    }
+    CHECK_NULL_VOID(mediaPlayer_);
     LOGD("Video Pause");
     mediaPlayer_->Pause();
 }
 
 void VideoPattern::Stop()
 {
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        LOGE("media player is invalid.");
-        return;
-    }
+    CHECK_NULL_VOID(mediaPlayer_);
 
     OnCurrentTimeChange(0);
     LOGD("Video Stop");
@@ -1315,9 +1288,7 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
 void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode)
 {
     LOGD("Set current pos: %{public}lf, mode: %{public}d", currentPos, seekMode);
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
-        return;
-    }
+    CHECK_NULL_VOID(mediaPlayer_);
     if (GreatOrEqual(currentPos, 0.0)) {
         LOGD("Video Seek");
         mediaPlayer_->Seek(static_cast<int32_t>(currentPos * MILLISECONDS_TO_SECONDS), seekMode);
