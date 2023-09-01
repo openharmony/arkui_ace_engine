@@ -25,8 +25,6 @@ constexpr int32_t CHILDREN_SIZE = 5;
 void CalendarPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CalendarPickerContentMeasure(layoutWrapper);
-    CalendarPickerFlexMeasure(layoutWrapper);
-
     SelfMeasure(layoutWrapper);
 }
 
@@ -85,28 +83,6 @@ void CalendarPickerLayoutAlgorithm::CalendarPickerContentMeasure(LayoutWrapper* 
     contentGeometryNode->SetFrameSize(contentMeasure_);
 }
 
-void CalendarPickerLayoutAlgorithm::CalendarPickerFlexMeasure(LayoutWrapper* layoutWrapper)
-{
-    auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
-    CHECK_NULL_VOID(contentWrapper);
-    auto layoutProperty = AceType::DynamicCast<CalendarPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-    auto flexLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(contentWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(flexLayoutProperty);
-    auto contentGeometryNode = contentWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(contentGeometryNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    CHECK_NULL_VOID(theme);
-    flexLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(theme->GetEntryButtonWidth()), CalcLength(contentMeasure_.Height())));
-
-    auto contentLayoutConstraint = layoutProperty->CreateChildConstraint();
-    contentWrapper->Measure(contentLayoutConstraint);
-    flexMeasure_ = contentGeometryNode->GetFrameSize();
-}
-
 void CalendarPickerLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = AceType::DynamicCast<CalendarPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -125,15 +101,34 @@ void CalendarPickerLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
         currentBorderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
     }
 
-    auto width = contentMeasure_.Width() + flexMeasure_.Width();
+    auto width = contentMeasure_.Width() + theme->GetEntryButtonWidth().ConvertToPx();
     width += currentBorderWidth.topDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
     width += currentBorderWidth.bottomDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
-    auto height = flexMeasure_.Height();
-    height += currentBorderWidth.leftDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
-    height += currentBorderWidth.rightDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
+    auto height = contentMeasure_.Height();
 
+    if (layoutProperty->HasAspectRatio() && layoutProperty->GetAspectRatio() != 0) {
+        height = width / layoutProperty->GetAspectRatio();
+    } else {
+        height += currentBorderWidth.leftDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
+        height += currentBorderWidth.rightDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
+    }
     SizeF idealSize(width, height);
     geometryNode->SetFrameSize(idealSize);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(idealSize.Width()), CalcLength(idealSize.Height())));
+
+    auto flexWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
+    CHECK_NULL_VOID(flexWrapper);
+    auto flexLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(flexWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(flexLayoutProperty);
+    auto flexGeometryNode = flexWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(flexGeometryNode);
+
+    auto flexHeight = height - currentBorderWidth.leftDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
+    flexHeight -= currentBorderWidth.rightDimen.value_or(theme->GetEntryBorderWidth()).ConvertToPx();
+    CalcSize flexCalcSize((CalcLength(theme->GetEntryButtonWidth().ConvertToPx())), CalcLength(flexHeight));
+    flexLayoutProperty->UpdateUserDefinedIdealSize(flexCalcSize);
+    auto flexLayoutConstraint = layoutProperty->CreateChildConstraint();
+    flexWrapper->Measure(flexLayoutConstraint);
+    flexMeasure_ = SizeF(theme->GetEntryButtonWidth().ConvertToPx(), flexHeight);
+    flexGeometryNode->SetFrameSize(flexMeasure_);
 }
 } // namespace OHOS::Ace::NG

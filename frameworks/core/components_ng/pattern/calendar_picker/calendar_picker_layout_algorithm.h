@@ -32,7 +32,6 @@ public:
 
 private:
     void CalendarPickerContentMeasure(LayoutWrapper* layoutWrapper);
-    void CalendarPickerFlexMeasure(LayoutWrapper* layoutWrapper);
     void SelfMeasure(LayoutWrapper* layoutWrapper);
 
     SizeF contentMeasure_;

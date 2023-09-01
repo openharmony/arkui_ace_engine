@@ -153,14 +153,12 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonImageChild(bool isAdd, cons
 RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonFlexChild(int32_t buttonFlexId, const RefPtr<CalendarTheme>& theme)
 {
     auto flexNode = FrameNode::GetOrCreateFrameNode(
-        V2::FLEX_ETS_TAG, buttonFlexId, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(); });
+        V2::COLUMN_ETS_TAG, buttonFlexId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     CHECK_NULL_RETURN(flexNode, nullptr);
-    flexNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(theme->GetEntryButtonWidth()), CalcLength(theme->GetEntryHeight())));
-    auto flexLayoutProperty = flexNode->GetLayoutProperty<FlexLayoutProperty>();
+    auto flexLayoutProperty = flexNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(flexLayoutProperty, nullptr);
     flexLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
-    flexLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
+    flexLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     return flexNode;
 }
 
