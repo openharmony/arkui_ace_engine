@@ -416,7 +416,7 @@ void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(patternLockPaintProperty);
     float circleRadius =
         patternLockPaintProperty->GetCircleRadius().value_or(patternLockTheme->GetCircleRadius()).ConvertToPx();
-    auto activeCircleRadiusScale = patternLockTheme->GetActiveCircleRadiusScale();
+    auto backgroundRadiusScale = patternLockTheme->GetBackgroundRadiusScale();
     auto focusPaddingRadius = patternLockTheme->GetFocusPaddingRadius();
     auto focusPaintWidth = patternLockTheme->GetFocusPaintWidth();
     auto geometryNode = host->GetGeometryNode();
@@ -424,10 +424,7 @@ void PatternLockPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     OffsetF contentOffset = geometryNode->GetContentOffset();
     float sideLength = geometryNode->GetContentSize().Width();
     float offset = sideLength / PATTERN_LOCK_COL_COUNT;
-    if (NearZero(activeCircleRadiusScale)) {
-        return;
-    }
-    float foucusCircleRadius = std::min(circleRadius, offset / activeCircleRadiusScale / RADIUS_TO_DIAMETER) +
+    float foucusCircleRadius = std::min(circleRadius * backgroundRadiusScale, offset / RADIUS_TO_DIAMETER) +
                                (focusPaddingRadius).ConvertToPx() + focusPaintWidth.ConvertToPx() / RADIUS_TO_DIAMETER;
     float outRadius = offset / RADIUS_TO_DIAMETER - foucusCircleRadius;
     float offsetX = contentOffset.GetX() + (currentPoint_.first - 1) * offset + outRadius;

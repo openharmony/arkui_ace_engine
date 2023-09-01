@@ -48,7 +48,6 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->SetHoverColor(hoverColor_);
     patternlockModifier_->SetWrongColor(wrongColor_);
     patternlockModifier_->SetCorrectColor(correctColor_);
-    patternlockModifier_->SetPressColor(pressColor_);
     patternlockModifier_->SetPathStrokeWidth(pathStrokeWidth_.ConvertToPx());
     patternlockModifier_->SetIsMoveEventValid(isMoveEventValid_);
     patternlockModifier_->SetCellCenterOffset(cellCenter_);
@@ -58,7 +57,6 @@ void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     patternlockModifier_->SetBackgroundCircleRadiusScale(scaleBackgroundCircleRadius_);
     patternlockModifier_->SetLightRingRadiusStartScale(scaleWaveCircleRadiusStart_);
     patternlockModifier_->SetLightRingRadiusEndScale(scaleWaveCircleRadiusEnd_);
-    patternlockModifier_->SetPressRadiusScale(pressRadiusScale_);
     patternlockModifier_->SetHoverRadiusScale(hoverRadiusScale_);
 }
 
@@ -75,14 +73,12 @@ void PatternLockPaintMethod::GetThemeProp()
     hoverColor_ = patternLockTheme->GetHoverColor();
     wrongColor_ = patternLockTheme->GetWrongColor();
     correctColor_ = patternLockTheme->GetCorrectColor();
-    pressColor_ = patternLockTheme->GetPressColor();
     circleRadius_ = patternLockTheme->GetCircleRadius();
     pathStrokeWidth_ = patternLockTheme->GetPathStrokeWidth();
     scaleActiveCircleRadius_ = patternLockTheme->GetActiveCircleRadiusScale();
     scaleBackgroundCircleRadius_ = patternLockTheme->GetBackgroundRadiusScale();
     scaleWaveCircleRadiusStart_ = patternLockTheme->GetLightRingCircleRadiusStartScale();
     scaleWaveCircleRadiusEnd_ = patternLockTheme->GetLightRingCircleRadiusEndScale();
-    pressRadiusScale_ = patternLockTheme->GetPressRadiusScale();
     hoverRadiusScale_ = patternLockTheme->GetHoverRadiusScale();
 }
 } // namespace OHOS::Ace::NG
