@@ -79,12 +79,17 @@ public:
     static void SetUpTestSuite()
     {
         MockContainer::SetUp();
+        auto taskRunner = MakeTaskRunner();
+        flutterTaskExecutor_ = AceType::MakeRefPtr<FlutterTaskExecutor>(taskRunner);
     }
     static void TeardownTestSuite()
     {
         MockContainer::TearDown();
     }
+    static RefPtr<FlutterTaskExecutor> flutterTaskExecutor_;
 };
+
+RefPtr<FlutterTaskExecutor> FlutterTest::flutterTaskExecutor_ = nullptr;
 
 /**
  * @tc.name: Flutter_Task_ExecutorTest01
@@ -94,17 +99,12 @@ public:
 HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest01, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Build a flutterTaskExecutor object is null.
-     */
-    FlutterTaskExecutor flutterTaskExecutor;
-
-    /**
      * @tc.steps2: callback WillRunOnCurrentThread.
      * @tc.expected: The return run thread is false.
      */
     for (int32_t id = 0; id < 7; id++) {
         auto taskType = static_cast<TaskExecutor::TaskType>(id);
-        auto result = flutterTaskExecutor.WillRunOnCurrentThread(taskType);
+        auto result = flutterTaskExecutor_->WillRunOnCurrentThread(taskType);
         switch (taskType) {
             case TaskExecutor::TaskType::PLATFORM:
             case TaskExecutor::TaskType::UI:
@@ -128,32 +128,27 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest01, TestSize.Level1)
 HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest02, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Build a flutterTaskExecutor object is not null.
-     */
-    auto flutterTaskExecutor = MakeTaskExecutor();
-
-    /**
      * @tc.steps2: callback WillRunOnCurrentThread.
      * @tc.expected: The return run thread is task type.
      */
     for (int32_t id = 0; id < 7; id++) {
         auto taskType = static_cast<TaskExecutor::TaskType>(id);
-        auto result = flutterTaskExecutor->WillRunOnCurrentThread(taskType);
+        auto result = flutterTaskExecutor_->WillRunOnCurrentThread(taskType);
         switch (taskType) {
             case TaskExecutor::TaskType::PLATFORM:
-                EXPECT_EQ(result, flutterTaskExecutor->platformRunner_->RunsTasksOnCurrentThread());
+                EXPECT_EQ(result, flutterTaskExecutor_->platformRunner_->RunsTasksOnCurrentThread());
                 break;
             case TaskExecutor::TaskType::UI:
-                EXPECT_EQ(result, flutterTaskExecutor->uiRunner_->RunsTasksOnCurrentThread());
+                EXPECT_EQ(result, flutterTaskExecutor_->uiRunner_->RunsTasksOnCurrentThread());
                 break;
             case TaskExecutor::TaskType::IO:
-                EXPECT_EQ(result, flutterTaskExecutor->ioRunner_->RunsTasksOnCurrentThread());
+                EXPECT_EQ(result, flutterTaskExecutor_->ioRunner_->RunsTasksOnCurrentThread());
                 break;
             case TaskExecutor::TaskType::GPU:
-                EXPECT_EQ(result, flutterTaskExecutor->gpuRunner_->RunsTasksOnCurrentThread());
+                EXPECT_EQ(result, flutterTaskExecutor_->gpuRunner_->RunsTasksOnCurrentThread());
                 break;
             case TaskExecutor::TaskType::JS:
-                EXPECT_EQ(result, flutterTaskExecutor->jsRunner_->RunsTasksOnCurrentThread());
+                EXPECT_EQ(result, flutterTaskExecutor_->jsRunner_->RunsTasksOnCurrentThread());
                 break;
             case TaskExecutor::TaskType::BACKGROUND:
                 EXPECT_FALSE(result);
@@ -172,23 +167,18 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest02, TestSize.Level1)
 HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest03, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Build a flutterTaskExecutor object is not null.
-     */
-    auto flutterTaskExecutor = MakeTaskExecutor();
-
-    /**
      * @tc.steps2: callback InitJsThread push newThread is true.
      * @tc.expected: Return expected results.
      */
-    flutterTaskExecutor->InitJsThread(true);
-    EXPECT_EQ(flutterTaskExecutor->jsRunner_, flutterTaskExecutor->jsThread_->GetTaskRunner());
+    flutterTaskExecutor_->InitJsThread(true);
+    EXPECT_EQ(flutterTaskExecutor_->jsRunner_, flutterTaskExecutor_->jsThread_->GetTaskRunner());
 
     /**
      * @tc.steps3: callback InitJsThread push newThread is false.
      * @tc.expected: Return expected results.
      */
-    flutterTaskExecutor->InitJsThread(false);
-    EXPECT_EQ(flutterTaskExecutor->jsRunner_, flutterTaskExecutor->uiRunner_);
+    flutterTaskExecutor_->InitJsThread(false);
+    EXPECT_EQ(flutterTaskExecutor_->jsRunner_, flutterTaskExecutor_->uiRunner_);
 }
 
 /**
@@ -199,25 +189,20 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest03, TestSize.Level1)
 HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest04, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Build a flutterTaskExecutor object is not null.
-     */
-    auto flutterTaskExecutor = MakeTaskExecutor();
-
-    /**
      * @tc.steps2: callback InitPlatformThread push useCurrentEventRunner is true.
      * @tc.expected: Return expected results.
      */
-    flutterTaskExecutor->InitPlatformThread(true);
-    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.size(), 1);
+    flutterTaskExecutor_->InitPlatformThread(true);
+    EXPECT_EQ(flutterTaskExecutor_->taskTypeTable_.size(), 2);
 
     /**
      * @tc.steps3: callback InitOtherThreads.
      * @tc.expected: Return expected results.
      */
     flutter::TaskRunners taskRunner = MakeTaskRunner();
-    flutterTaskExecutor->InitOtherThreads(taskRunner);
-    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.size(), 1);
-    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.bucket_count(), 2);
+    flutterTaskExecutor_->InitOtherThreads(taskRunner);
+    EXPECT_EQ(flutterTaskExecutor_->taskTypeTable_.size(), 2);
+    EXPECT_EQ(flutterTaskExecutor_->taskTypeTable_.bucket_count(), 2);
 }
 
 /**
@@ -228,7 +213,7 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest04, TestSize.Level1)
 HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest05, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Build a flutterTaskExecutor object is not null.
+     * @tc.steps1: Build a flutterTaskExecutor_ object is not null.
      */
     auto taskExecutor = MakeTaskExecutor();
     FlutterTaskExecutor flutterTaskExecutor(taskExecutor);
@@ -268,24 +253,19 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest05, TestSize.Level1)
 HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest06, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Build a flutterTaskExecutor object is not null.
-     */
-    auto flutterTaskExecutor = MakeTaskExecutor();
-
-    /**
      * @tc.steps2: callback FillTaskTypeTable push weak is null..
      * @tc.expected: Return expected results.
      */
-    flutterTaskExecutor->FillTaskTypeTable(nullptr, TaskExecutor::TaskType::UI);
-    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.size(), 0);
+    flutterTaskExecutor_->FillTaskTypeTable(nullptr, TaskExecutor::TaskType::UI);
+    EXPECT_EQ(flutterTaskExecutor_->taskTypeTable_.size(), 2);
 
     /**
-     * @tc.steps3: callback FillTaskTypeTable push weak is flutterTaskExecutor.
+     * @tc.steps3: callback FillTaskTypeTable push weak is flutterTaskExecutor_->
      * @tc.expected: Return expected results.
      */
-    flutterTaskExecutor->FillTaskTypeTable(flutterTaskExecutor, TaskExecutor::TaskType::UI);
-    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.size(), 1);
-    EXPECT_EQ(flutterTaskExecutor->taskTypeTable_.bucket_count(), 2);
+    flutterTaskExecutor_->FillTaskTypeTable(flutterTaskExecutor_, TaskExecutor::TaskType::UI);
+    EXPECT_EQ(flutterTaskExecutor_->taskTypeTable_.size(), 3);
+    EXPECT_EQ(flutterTaskExecutor_->taskTypeTable_.bucket_count(), 5);
 }
 
 /**
@@ -295,11 +275,6 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest06, TestSize.Level1)
  */
 HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest07, TestSize.Level1)
 {
-    /**
-     * @tc.steps1: Build a flutterTaskExecutor object is not null.
-     */
-    auto flutterTaskExecutor = MakeTaskExecutor();
-
     /**
      * @tc.steps2: Create a callBack task.
      */
@@ -315,7 +290,7 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest07, TestSize.Level1)
      */
     for (int32_t id = 0; id < 7; id++) {
         auto taskType = static_cast<TaskExecutor::TaskType>(id);
-        auto result = flutterTaskExecutor->OnPostTask(callBack, taskType, 1);
+        auto result = flutterTaskExecutor_->OnPostTask(callBack, taskType, 1);
         switch (taskType) {
             case TaskExecutor::TaskType::PLATFORM:
             case TaskExecutor::TaskType::UI:
@@ -342,11 +317,6 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest07, TestSize.Level1)
 HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest08, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Build a flutterTaskExecutor object is null.
-     */
-    auto flutterTaskExecutor = MakeTaskExecutor();
-
-    /**
      * @tc.steps2: Create a callBack task.
      */
     std::string backgroudTask = "";
@@ -360,7 +330,7 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest08, TestSize.Level1)
      * @tc.expected: task gets executed.
      */
     Container::UpdateCurrent(-1);
-    flutterTaskExecutor->OnPostTask(callBack, TaskExecutor::TaskType::BACKGROUND, 2);
+    flutterTaskExecutor_->OnPostTask(callBack, TaskExecutor::TaskType::BACKGROUND, 2);
     EXPECT_EQ(backgroudTask, "");
     sleep(2);
     EXPECT_EQ(backgroudTask, BACKGROUNDSYNCTASK);
@@ -369,8 +339,8 @@ HWTEST_F(FlutterTest, Flutter_Task_ExecutorTest08, TestSize.Level1)
      * @tc.steps4: call WrapTaskWithTraceId.
      * @tc.expected: The return result is true.
      */
-    flutterTaskExecutor->RemoveTaskObserver();
-    auto result = flutterTaskExecutor->WrapTaskWithTraceId(callBack, 1);
+    flutterTaskExecutor_->RemoveTaskObserver();
+    auto result = flutterTaskExecutor_->WrapTaskWithTraceId(callBack, 1);
     EXPECT_TRUE(result);
 }
 
