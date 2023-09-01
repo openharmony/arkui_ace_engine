@@ -284,6 +284,8 @@ public:
         containerSdkPath_ = containerSdkPath;
     }
 
+    void NotifyConfigurationChange(bool, const OnConfigurationChange& configurationChange) override;
+
 private:
     void InitializeFrontend();
     void InitializeCallback();

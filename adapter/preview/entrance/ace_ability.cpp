@@ -402,6 +402,9 @@ void AceAbility::SurfaceChanged(
         ((width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) && configChanges_.watchLayout)) {
         container->NativeOnConfigurationUpdated(ACE_INSTANCE_ID);
     }
+    if (orientation != runArgs_.deviceConfig.orientation || resolution != runArgs_.deviceConfig.density) {
+        container->NotifyConfigurationChange(false, AceType::OnConfigurationChange({ false, false, true }));
+    }
     runArgs_.deviceConfig.orientation = orientation;
     runArgs_.deviceConfig.density = resolution;
     runArgs_.deviceWidth = width;

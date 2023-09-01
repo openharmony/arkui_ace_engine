@@ -687,8 +687,14 @@ void AceContainer::InitializeCallback()
     auto&& densityChangeCallback = [context = pipelineContext_, id = instanceId_](double density) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("DensityChangeCallback(%lf)", density);
-        context->GetTaskExecutor()->PostTask(
-            [context, density]() { context->OnSurfaceDensityChanged(density); }, TaskExecutor::TaskType::UI);
+        auto callback = [context, density]() { context->OnSurfaceDensityChanged(density); };
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            callback();
+        } else {
+            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI);
+        }
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
 
