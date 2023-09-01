@@ -36,7 +36,10 @@ public:
         IfElseModel::GetInstance()->Pop();
     }
 
-    static void SetBranchId(const JSCallbackInfo& info);
+    static void SetBranchId(int32_t value)
+    {
+        IfElseModel::GetInstance()->SetBranchId(value);
+    }
 
     static int32_t GetBranchId()
     {

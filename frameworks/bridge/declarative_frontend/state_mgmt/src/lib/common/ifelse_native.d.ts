@@ -24,6 +24,6 @@
 declare class If  {
     static create(): void;
     static pop() : void;
-    static branchId(id: number, removedChildelmtIds: Array<number>): void;
+    static branchId(id: number): void;
     static getBranchId() : number;
 }

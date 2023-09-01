@@ -25,7 +25,7 @@ public:
     ~IfElseModelImpl() override = default;
     void Create() override;
     void Pop() override;
-    void SetBranchId(int32_t value, std::list<int32_t>& removedElmtId) override;
+    void SetBranchId(int32_t value) override;
     int32_t GetBranchId() override;
     bool CanRetake(const std::string& id) override
     {
