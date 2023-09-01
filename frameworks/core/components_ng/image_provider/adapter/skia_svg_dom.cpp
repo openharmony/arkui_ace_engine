@@ -37,6 +37,7 @@ RefPtr<SkiaSvgDom> SkiaSvgDom::CreateSkiaSvgDom(SkStream& svgStream, const std::
         skColor.valid = 1;
     }
     auto skiaDom = SkSVGDOM::MakeFromStream(svgStream, skColor.value);
+    CHECK_NULL_RETURN(skiaDom, nullptr);
     return AceType::MakeRefPtr<SkiaSvgDom>(skiaDom);
 }
 
