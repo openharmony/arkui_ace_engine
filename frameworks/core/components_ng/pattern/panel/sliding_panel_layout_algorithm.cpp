@@ -71,12 +71,20 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
-    if (layoutProperty->GetPanelType() != PanelType::CUSTOM) {
-        childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height()));
+    auto type = layoutProperty->GetPanelType();
+    if (type != PanelType::CUSTOM) {
+        childLayoutConstraint.minSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
     }
-    childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height()));
+    childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
     childLayoutConstraint.parentIdealSize =
-        OptionalSizeF(width, static_cast<float>(idealSize.Height()));
+        OptionalSizeF(width, static_cast<float>(idealSize.Height() - currentOffset_));
+    if (type == PanelType::CUSTOM) {
+        auto calc = layoutProperty->GetCustomHeight().value();
+        if (!calc.CalcValue().empty() && calc.CalcValue().find("wrapContent") != std::string::npos) {
+            childLayoutConstraint.maxSize = SizeF(width, static_cast<float>(idealSize.Height()));
+            childLayoutConstraint.parentIdealSize = OptionalSizeF(width, static_cast<float>(idealSize.Height()));
+        }
+    }
     childLayoutConstraint.percentReference = childLayoutConstraint.maxSize;
     layoutConstraint->percentReference = childLayoutConstraint.maxSize;
     auto colunmNodeWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::COLUMN_ETS_TAG);
