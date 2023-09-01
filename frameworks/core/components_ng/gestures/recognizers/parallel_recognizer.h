@@ -46,6 +46,7 @@ public:
     void OnBlocked() override;
 
     bool HandleEvent(const TouchEvent& point) override;
+    bool HandleEvent(const AxisEvent& event) override;
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};

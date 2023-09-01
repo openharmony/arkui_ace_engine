@@ -95,6 +95,19 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& point)
     return true;
 }
 
+bool ParallelRecognizer::HandleEvent(const AxisEvent& event)
+{
+    if (refereeState_ == RefereeState::READY) {
+        refereeState_ = RefereeState::DETECTING;
+    }
+    for (const auto& recognizer : recognizers_) {
+        if (recognizer) {
+            recognizer->HandleEvent(event);
+        }
+    }
+    return true;
+}
+
 void ParallelRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
 {
     CHECK_NULL_VOID(recognizer);
