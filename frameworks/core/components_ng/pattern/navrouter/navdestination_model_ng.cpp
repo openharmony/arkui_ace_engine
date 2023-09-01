@@ -100,10 +100,12 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
 
     auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
+    auto paintProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(paintProperty);
     if (!navDestinationEventHub->IsEnabled()) {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
     } else {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
+        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor());
     }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
