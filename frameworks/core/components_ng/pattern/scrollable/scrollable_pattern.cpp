@@ -99,9 +99,6 @@ bool ScrollablePattern::ProcessNavBarReactOnUpdate(bool isDraggedDown, float off
     auto minTitle = navBarPattern_ ? navBarPattern_->GetIsMinTitle() : false;
     navBarPattern_->OnCoordScrollUpdate(offset);
     DraggedDownScrollEndProcess();
-    if (isDraggedDown && Negative(offset) && !OutBoundaryCallback()) {
-        return false;
-    }
     if (minTitle) {
         return scrollEffect_ && scrollEffect_->IsNoneEffect();
     }
@@ -144,17 +141,16 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
         ProcessNavBarReactOnEnd();
     }
     if (isReactInParentMovement_) {
-        bool needMove = ProcessNavBarReactOnUpdate(isDraggedDown, offset);
+        ProcessNavBarReactOnUpdate(isDraggedDown, offset);
         if (coordinationEvent_) {
             auto onScroll = coordinationEvent_->GetOnScroll();
-            CHECK_NULL_RETURN(onScroll, needMove);
+            CHECK_NULL_RETURN(onScroll, false);
             if (!onScroll(offset)) {
                 isReactInParentMovement_ = false;
                 return true;
             }
-            return needMove || (scrollEffect_ && scrollEffect_->IsSpringEffect());
+            return scrollEffect_ && scrollEffect_->IsSpringEffect();
         }
-        return needMove;
     }
     if (source == SCROLL_FROM_START) {
         SetParentScrollable();
