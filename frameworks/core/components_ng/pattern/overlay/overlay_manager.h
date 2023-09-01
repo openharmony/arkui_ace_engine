@@ -293,6 +293,7 @@ private:
     void BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bool isInSubWindow = false);
     void BlurLowerNode(const RefPtr<FrameNode>& currentOverlay);
     void ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOverlay);
+    void PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk);
     void OnDialogCloseEvent(const RefPtr<FrameNode>& node);
 
     void SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
