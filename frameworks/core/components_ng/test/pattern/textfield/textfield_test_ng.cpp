@@ -4068,7 +4068,6 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     layoutAlgorithm->errorParagraph_ = std::make_shared<RSParagraph>();
     layoutAlgorithm->errorParagraph_ = std::make_shared<RSParagraph>();
     textFieldPattern->needToRefreshSelectOverlay_ = true;
-    textFieldPattern->setSelectionFlag_ = true;
     textFieldPattern->mouseStatus_ = MouseStatus::RELEASED;
     auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
@@ -5058,39 +5057,6 @@ HWTEST_F(TextFieldPatternTestNg, CaretMoveToLastNewLineChar, TestSize.Level2)
     pattern->UpdateEditingValue("New\nLine\nChar", 10);
     pattern->CaretMoveToLastNewLineChar();
     EXPECT_EQ(pattern->textEditingValue_.caretPosition, 8);
-}
-
-/**
- * @tc.name: SetSelectionFlag.
- * @tc.desc: test SetSelectionFlag.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, SetSelectionFlag, TestSize.Level2)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern.
-     * @tc.expected: Check it is not nullptr.
-     */
-    auto frameNode = CreatTextFieldNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call SetSelectionFlag with expectd parameters.
-     * @tc.expected: Check the value of the updated property.
-     */
-    pattern->selectionStart_ = 0;
-    pattern->selectionEnd_ = 0;
-    pattern->SetSelectionFlag(5, 8);
-    EXPECT_EQ(pattern->selectionStart_, 0);
-    EXPECT_EQ(pattern->selectionEnd_, 0);
-
-    auto focusHub = frameNode->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-    pattern->SetSelectionFlag(5, 8);
-    EXPECT_EQ(pattern->selectionStart_, 5);
-    EXPECT_EQ(pattern->selectionEnd_, 8);
 }
 
 /**

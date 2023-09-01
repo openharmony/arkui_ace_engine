@@ -1226,10 +1226,7 @@ private:
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
-    bool setSelectionFlag_ = false;
     bool scrollable_ = true;
-    int32_t selectionStart_ = 0;
-    int32_t selectionEnd_ = 0;
     // controls redraw of overlay modifier, update when need to redraw
     int32_t drawOverlayFlag_ = 0;
     bool isTextInput_ = false;
