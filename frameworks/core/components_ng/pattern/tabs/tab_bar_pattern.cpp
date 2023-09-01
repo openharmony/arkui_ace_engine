@@ -232,7 +232,7 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
     if (totalCount < 0) {
         return;
     }
-    auto index = CalculateSelectedIndex(info.GetGlobalLocation());
+    auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if (index < 0 || index >= totalCount) {
         if (hoverIndex_.has_value() && !touchingIndex_.has_value()) {
             HandleMoveAway(hoverIndex_.value());
@@ -620,7 +620,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         return;
     }
 
-    auto index = CalculateSelectedIndex(info.GetGlobalLocation());
+    auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if (index < 0 || index >= totalCount || !swiperController_ ||
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
@@ -960,7 +960,7 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
         return;
     }
     auto touchType = info.GetTouchType();
-    auto index = CalculateSelectedIndex(info.GetGlobalLocation());
+    auto index = CalculateSelectedIndex(info.GetLocalLocation());
     if (touchType == TouchType::DOWN && index >= 0 && index < totalCount) {
         HandleTouchDown(index);
         touchingIndex_ = index;
@@ -985,8 +985,7 @@ int32_t TabBarPattern::CalculateSelectedIndex(const Offset& info)
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, -1);
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
-    auto local = OffsetF(info.GetX() - host->GetPaintRectGlobalOffsetWithTranslate().GetX(),
-        info.GetY() - host->GetPaintRectGlobalOffsetWithTranslate().GetY());
+    auto local = OffsetF(info.GetX(), info.GetY());
     if (axis == Axis::VERTICAL) {
         auto clickRange = std::make_pair(tabItemOffsets_[0].GetY(), tabItemOffsets_[tabItemOffsets_.size() - 1].GetY());
         if (LessNotEqual(local.GetY(), clickRange.first) || GreatNotEqual(local.GetY(), clickRange.second)) {
