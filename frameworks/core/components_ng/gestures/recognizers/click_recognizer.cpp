@@ -35,6 +35,7 @@ constexpr int32_t MULTI_TAP_TIMEOUT_TOUCH = 350;
 constexpr int32_t MULTI_TAP_TIMEOUT_MOUSE = 300;
 constexpr int32_t MAX_THRESHOLD_MANYTAP = 60;
 constexpr int32_t MAX_TAP_FINGERS = 10;
+constexpr double MAX_THRESHOLD = 20.0;
 
 } // namespace
 
@@ -206,6 +207,11 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
     InitGlobalValue(event.sourceType);
     LOGD("click recognizer receives touch move event");
+    Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
+    if (offset.GetDistance() > MAX_THRESHOLD) {
+        LOGI("this gesture is out of offset, try to reject it");
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+    }
 }
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
