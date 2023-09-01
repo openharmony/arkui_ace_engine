@@ -364,6 +364,7 @@ HWTEST_F(TitleBarTestNg, GetMenu001, TestSize.Level1)
  */
 HWTEST_F(TitleBarTestNg, GetOrCreateTitleBarNode001, TestSize.Level1)
 {
+    ElementRegister::GetInstance()->Clear();
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto barNode = AceType::MakeRefPtr<TitleBarNode>(barTag, nodeId);
