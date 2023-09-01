@@ -2135,6 +2135,47 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PanRecognizerHandleTouchUpEventTest001
+ * @tc.desc: Test PanRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUp function and compare result.
+     * @tc.steps: case1: refereeState is SUCCEED
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    panRecognizer.refereeState_ = RefereeState::SUCCEED;
+    panRecognizer.currentFingers_ = panRecognizer.fingers_;
+    panRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(panRecognizer.globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(panRecognizer.globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(panRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUp function and compare result.
+     * @tc.steps: case2: refereeState is SUCCEED, size > 1
+     * @tc.expected: step2. result equals.
+     */
+    panRecognizer.touchPoints_[0] = touchEvent;
+    panRecognizer.touchPoints_[1] = touchEvent;
+    panRecognizer.currentFingers_ = panRecognizer.fingers_;
+    panRecognizer.refereeState_ = RefereeState::FAIL;
+    panRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(panRecognizer.globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(panRecognizer.globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(panRecognizer.lastTouchEvent_.id, touchEvent.id);
+}
+
+/**
  * @tc.name: PanRecognizerHandleTouchMoveEventTest001
  * @tc.desc: Test PanRecognizer function: HandleTouchMoveEvent
  * @tc.type: FUNC
@@ -3947,6 +3988,276 @@ HWTEST_F(GesturesTestNg, RotationRecognizerTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RotationRecognizerHandleTouchDownEventTest001
+ * @tc.desc: Test RotationRecognizer function: TouchDown TouchUp TouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleTouchDownEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case1: touchPoints.size == fingers
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    rotationRecognizer.fingers_ = FINGER_NUMBER_OVER_MAX;
+    rotationRecognizer.HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case2: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.fingers_ = FINGER_NUMBER_OVER_MAX;
+    rotationRecognizer.HandleTouchDownEvent(touchEvent);
+    rotationRecognizer.HandleTouchUpEvent(touchEvent);
+    rotationRecognizer.HandleTouchMoveEvent(touchEvent);
+    rotationRecognizer.HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case3: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.refereeState_ = RefereeState::FAIL;
+    rotationRecognizer.fingers_ = FINGER_NUMBER_OVER_MAX;
+    rotationRecognizer.HandleTouchDownEvent(touchEvent);
+    rotationRecognizer.HandleTouchUpEvent(touchEvent);
+    rotationRecognizer.HandleTouchMoveEvent(touchEvent);
+    rotationRecognizer.HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+}
+
+/**
+ * @tc.name: RotationRecognizerHandleTouchDownEventTest002
+ * @tc.desc: Test RotationRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleTouchDownEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case1: touchPoints.size == fingers
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    rotationRecognizer.fingers_ = 0;
+    rotationRecognizer.HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case2: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.fingers_ = 0;
+    rotationRecognizer.HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case3: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.refereeState_ = RefereeState::FAIL;
+    rotationRecognizer.fingers_ = 0;
+    rotationRecognizer.HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+}
+
+/**
+ * @tc.name: RotationRecognizerHandleTouchUpEventTest001
+ * @tc.desc: Test RotationRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case1: touchPoints.size == fingers
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case2: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.fingers_ = FINGER_NUMBER;
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.currentFingers_ = rotationRecognizer.fingers_;
+    rotationRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case3: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.fingers_ = FINGER_NUMBER;
+    rotationRecognizer.refereeState_ = RefereeState::FAIL;
+    rotationRecognizer.currentFingers_ = rotationRecognizer.fingers_;
+    rotationRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+}
+
+/**
+ * @tc.name: RotationRecognizerHandleTouchMoveEventTest001
+ * @tc.desc: Test RotationRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleTouchMoveEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case1: touchPoints.size == fingers
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case2: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.fingers_ = FINGER_NUMBER;
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.currentFingers_ = rotationRecognizer.fingers_;
+    rotationRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case3: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.fingers_ = FINGER_NUMBER;
+    rotationRecognizer.refereeState_ = RefereeState::FAIL;
+    rotationRecognizer.currentFingers_ = rotationRecognizer.fingers_;
+    rotationRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+}
+
+/**
+ * @tc.name: RotationRecognizerHandleTouchMoveEventTest002
+ * @tc.desc: Test RotationRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleTouchMoveEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case1: touchPoints.size == fingers
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case2: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.fingers_ = FINGER_NUMBER_OVER_MAX;
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.currentFingers_ = rotationRecognizer.fingers_;
+    rotationRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case3: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.fingers_ = 0;
+    rotationRecognizer.refereeState_ = RefereeState::FAIL;
+    rotationRecognizer.currentFingers_ = rotationRecognizer.fingers_;
+    rotationRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+}
+
+/**
+ * @tc.name: RotationRecognizerHandleTouchMoveEventTest003
+ * @tc.desc: Test RotationRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RotationRecognizerHandleTouchMoveEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RotationRecognizer.
+     */
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case1: touchPoints.size == fingers
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case2: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.fingers_ = FINGER_NUMBER_OVER_MAX;
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.currentFingers_ = rotationRecognizer.fingers_;
+    rotationRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case3: touchPoints.size < fingers
+     * @tc.expected: step2. result equals.
+     */
+    rotationRecognizer.fingers_ = 0;
+    rotationRecognizer.refereeState_ = RefereeState::SUCCEED;
+    rotationRecognizer.currentFingers_ = rotationRecognizer.fingers_;
+    rotationRecognizer.HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::SUCCEED);
+    EXPECT_EQ(rotationRecognizer.resultAngle_, 0);
+}
+
+/**
  * @tc.name: RotationRecognizerTest003
  * @tc.desc: Test RotationRecognizer function: ChangeValueRange
  * @tc.type: FUNC
@@ -4597,6 +4908,31 @@ HWTEST_F(GesturesTestNg, SequencedRecognizerTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SequencedRecognizerHandleOverdueDeadlineTest001
+ * @tc.desc: Test SequencedRecognizer function: HandleOverdueDeadline
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SequencedRecognizerHandleOverdueDeadlineTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call UpdateCurrentIndex function and compare result.
+     * @tc.steps: case1: currentIndex != size - 1
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer.currentIndex_ = 0;
+    sequencedRecognizer.refereeState_ = RefereeState::SUCCEED;
+    sequencedRecognizer.HandleOverdueDeadline();
+    EXPECT_EQ(sequencedRecognizer.currentIndex_, 0);
+}
+
+/**
  * @tc.name: SequencedRecognizerTest009
  * @tc.desc: Test SequencedRecognizer function: UpdateCurrentIndex
  * @tc.type: FUNC
@@ -4813,6 +5149,95 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerTest003, TestSize.Level1)
     swipeRecognizer.HandleTouchUpEvent(touchEvent);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
     EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+}
+
+/**
+ * @tc.name: SwipeRecognizerHandleTouchUpEventTest001
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
+    swipeRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.downEvents_[touchEvent.id] = touchEvent;
+    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
+    swipeRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), touchEvent.x);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), touchEvent.y);
+    EXPECT_EQ(swipeRecognizer.lastTouchEvent_.id, touchEvent.id);
+}
+
+/**
+ * @tc.name: SwipeRecognizerHandleTouchUpEventTest002
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchUpEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUp function
+     * @tc.expected: step2. result equals.
+     */
+    AxisEvent axisEvent;
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+}
+
+/**
+ * @tc.name: SwipeRecognizerHandleTouchMoveEventTest001
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchMoveEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
+    /**
+     * @tc.steps: step2. call HandleTouchMove function
+     * @tc.expected: step2. result equals.
+     */
+    AxisEvent axisEvent;
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.currentFingers_ = swipeRecognizer.fingers_;
+    swipeRecognizer.HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer.axisVerticalTotal_, 0);
+    EXPECT_EQ(swipeRecognizer.axisHorizontalTotal_, 0);
 }
 
 /**
