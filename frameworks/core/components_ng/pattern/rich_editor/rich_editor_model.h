@@ -67,12 +67,6 @@ struct SpanPositionInfo {
     int32_t spanOffset_ = 0;
 };
 
-struct TextSpanOptions {
-    std::optional<int32_t> offset;
-    std::string value;
-    std::optional<TextStyle> style;
-};
-
 struct UpdateSpanStyle {
     void ResetStyle()
     {
@@ -122,6 +116,13 @@ struct RangeOptions {
 struct SelectMenuParam {
     std::function<void(int32_t, int32_t)> onAppear;
     std::function<void()> onDisappear;
+};
+
+struct TextSpanOptions {
+    std::optional<int32_t> offset;
+    std::string value;
+    std::optional<TextStyle> style;
+    std::optional<UpdateParagraphStyle> paraStyle;
 };
 
 class ACE_EXPORT RichEditorControllerBase : public AceType {

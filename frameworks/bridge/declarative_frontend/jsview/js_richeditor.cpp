@@ -781,6 +781,14 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             TextStyle style = ParseJsTextStyle(styleObject, updateSpanStyle_);
             options.style = style;
         }
+        auto paraStyle = spanObject->GetProperty("paragraphStyle");
+        auto paraStyleObj = JSRef<JSObject>::Cast(paraStyle);
+        if (!paraStyleObj->IsUndefined()) {
+            struct UpdateParagraphStyle style;
+            if (ParseParagraphStyle(paraStyleObj, style)) {
+                options.paraStyle = style;
+            }
+        }
     }
     auto controller = controllerWeak_.Upgrade();
     int32_t spanIndex = 0;
@@ -993,8 +1001,8 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     }
 }
 
-void JSRichEditorController::GetParagraphsInfo(const JSCallbackInfo& args) {
-
+void JSRichEditorController::GetParagraphsInfo(const JSCallbackInfo& args)
+{
     if (!args[0]->IsObject()) {
         return;
     }
