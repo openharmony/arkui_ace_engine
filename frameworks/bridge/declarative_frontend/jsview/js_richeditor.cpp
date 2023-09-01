@@ -101,7 +101,6 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     textStyleObj->SetProperty<double>("leadingMargin", textStyleResult.leadingMargin[0]);
     textStyleObj->SetProperty<int32_t>("fontStyle", textStyleResult.fontStyle);
     textStyleObj->SetProperty<int32_t>("fontWeight", textStyleResult.fontWeight);
-    textStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
     textStyleObj->SetProperty<std::string>("fontFamily", textStyleResult.fontFamily);
     JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
     decorationObj->SetProperty<int32_t>("type", textStyleResult.decorationType);
@@ -123,6 +122,17 @@ JSRef<JSObject> JSRichEditor::CreateJSImageStyleResult(const ImageStyleResult& i
     imageSpanStyleObj->SetProperty<int32_t>("objectFit", imageStyleResult.objectFit);
 
     return imageSpanStyleObj;
+}
+
+JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo info)
+{
+    auto obj = JSRef<JSObject>::New();
+    obj->SetProperty<int32_t>("textAlign", info.textAlign);
+
+    auto lmObj = JSRef<JSObject>::New();
+    auto size = JSRef<JSArray>::New();
+    lmObj->SetProperty("size", size);
+    obj->SetPropertyObject("leadingMargin", lmObj);
 }
 
 JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resultObject)

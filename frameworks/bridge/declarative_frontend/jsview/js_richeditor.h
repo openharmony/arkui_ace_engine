@@ -26,10 +26,6 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetOnReady(const JSCallbackInfo& args);
     static void SetOnSelect(const JSCallbackInfo& args);
-    static JSRef<JSVal> CreateJSSelection(const RichEditorSelection& selectInfo);
-    static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
-    static JSRef<JSObject> CreateJSTextStyleResult(const TextStyleResult& textStyleResult);
-    static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static void SetAboutToIMEInput(const JSCallbackInfo& args);
     static void SetOnIMEInputComplete(const JSCallbackInfo& args);
     static void SetAboutToDelete(const JSCallbackInfo& args);
@@ -44,12 +40,21 @@ public:
     static void SetOnPaste(const JSCallbackInfo& info);
 
 private:
+    static JSRef<JSVal> CreateJSSelection(const RichEditorSelection& selectInfo);
+    static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
+    static JSRef<JSObject> CreateJSTextStyleResult(const TextStyleResult& textStyleResult);
+    static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
+    static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo info);
+
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateParagraphObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, SelectMenuParam& menuParam);
+
+#ifdef PIXEL_MAP_SUPPORTED
+    static 
 };
 
 class JSRichEditorController final : public Referenced {
