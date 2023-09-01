@@ -16,9 +16,11 @@
 #include "core/components_ng/pattern/qrcode/qrcode_napi.h"
 
 #include "base/utils/utils.h"
+#include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/common_napi_utils/common_napi_utils.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
+#include "core/pipeline/pipeline_base.h"
 
 extern const char _binary_arkui_qrcode_js_start[];
 extern const char _binary_arkui_qrcode_abc_start[];
@@ -37,6 +39,16 @@ static constexpr const int32_t ARG_NUM_1 = 1;
 } // namespace
 
 std::unique_ptr<QRCodeModel> QRCodeModel::instance_ = nullptr;
+
+template<typename T>
+RefPtr<T> GetTheme()
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN_NOLOG(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN_NOLOG(themeManager, nullptr);
+    return themeManager->GetTheme<T>();
+}
 
 QRCodeModel* QRCodeModel::GetInstance()
 {
@@ -68,11 +80,13 @@ napi_value JsColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= ARG_NUM_1, "QRCodeModelNapi color wrong number of arguments");
 
-    Color colorResult;
-    if (!CommonNapiUtils::ParseColor(env, argv[0], colorResult)) {
-        return CommonNapiUtils::CreateNull(env);
+    Color qrcodeColor;
+    if (!CommonNapiUtils::ParseColor(env, argv[0], qrcodeColor)) {
+        RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
+        CHECK_NULL_RETURN_NOLOG(qrcodeTheme, CommonNapiUtils::CreateNull(env));
+        qrcodeColor = qrcodeTheme->GetQrcodeColor();
     }
-    QRCodeModel::GetInstance()->SetQRCodeColor(colorResult);
+    QRCodeModel::GetInstance()->SetQRCodeColor(qrcodeColor);
     return CommonNapiUtils::CreateNull(env);
 }
 
@@ -84,11 +98,13 @@ napi_value JsBackgroundColor(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVal, nullptr));
     NAPI_ASSERT(env, argc >= ARG_NUM_1, "QRCodeModelNapi backgroundColor wrong number of arguments");
 
-    Color colorResult;
-    if (!CommonNapiUtils::ParseColor(env, argv[0], colorResult)) {
-        return CommonNapiUtils::CreateNull(env);
+    Color backgroundColor;
+    if (!CommonNapiUtils::ParseColor(env, argv[0], backgroundColor)) {
+        RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
+        CHECK_NULL_RETURN_NOLOG(qrcodeTheme, CommonNapiUtils::CreateNull(env));
+        backgroundColor = qrcodeTheme->GetBackgroundColor();
     }
-    QRCodeModel::GetInstance()->SetQRBackgroundColor(colorResult);
+    QRCodeModel::GetInstance()->SetQRBackgroundColor(backgroundColor);
     return CommonNapiUtils::CreateNull(env);
 }
 
