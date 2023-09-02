@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
@@ -62,11 +63,15 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
-    auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
-
-    result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
-
-    return result;
+    if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
+        auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+        result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+        return result;
+    } else {
+        auto result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
+        result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+        return result;
+    }
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
@@ -319,8 +324,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (!isConfigScrollable_ || !scrollable_) {
         return true;
     }
-    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
+
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     // check edgeEffect is not springEffect
     if (!HandleEdgeEffect(offset, source, GetContentSize())) {
         if (IsOutOfBoundary()) {
@@ -330,9 +336,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     SetScrollSource(source);
 
-    CHECK_NULL_RETURN(host, false);
     // When finger moves down, offset is positive.
     // When finger moves up, offset is negative.
+    auto itemsHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(GetMainGap());
     if (gridLayoutInfo_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
             auto overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
@@ -367,7 +373,10 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return true;
     }
-    gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    // maybe no measure after last update
+    if (LessNotEqual(std::abs(gridLayoutInfo_.currentOffset_), gridLayoutInfo_.lastMainSize_)) {
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    }
     gridLayoutInfo_.currentOffset_ += offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;

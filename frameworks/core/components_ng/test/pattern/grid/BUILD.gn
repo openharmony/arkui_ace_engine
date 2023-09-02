@@ -99,6 +99,7 @@ ace_unittest("grid_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_position_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_utils.cpp",
     "$ace_root/frameworks/core/components_v2/grid/grid_event.cpp",
     "grid_test_ng.cpp",

@@ -1869,7 +1869,7 @@ HWTEST_F(GridTestNg, EventHub001, TestSize.Level1)
     gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItem(8, -1, ITEM_HEIGHT);
     GetInstance();
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, GRID_HEIGHT);
     EXPECT_CALL(
         *(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_))),
@@ -2225,7 +2225,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest007, TestSize.Level1)
     gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItem(20, -1, ITEM_HEIGHT);
     GetInstance();
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
     auto itemAccessibility = GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1);
 
     /**
@@ -2273,7 +2273,7 @@ HWTEST_F(GridTestNg, GridAccessibilityTest008, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     CreateGridItem(10, -1, ITEM_HEIGHT);
     GetInstance();
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 
     /**
      * @tc.steps: step2. Run GetCollectionItemInfo func.
@@ -2556,7 +2556,7 @@ HWTEST_F(GridTestNg, Drag001, TestSize.Level1)
     gridModelNG.SetOnItemDragStart(onItemDragStart);
     CreateGridItem(8, -1, ITEM_HEIGHT);
     GetInstance();
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
     eventHub_->onItemDragStart_ = onItemDragStart;
 
     GestureEvent info;
@@ -2775,7 +2775,7 @@ HWTEST_F(GridTestNg, FocusStep001, TestSize.Level1)
     gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItem(10, -1, ITEM_HEIGHT, true);
     GetInstance();
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 
     /**
      * @tc.steps: step1. GetNextFocusNode from left_top.
@@ -2875,7 +2875,7 @@ HWTEST_F(GridTestNg, FocusStep002, TestSize.Level1)
     gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItem(10, ITEM_WIDTH, -1, true);
     GetInstance();
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 400.f);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, 400.f);
 
     /**
      * @tc.steps: step1. GetNextFocusNode from left_top.
@@ -2975,7 +2975,7 @@ HWTEST_F(GridTestNg, FocusStep003, TestSize.Level1)
     gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItem(10, -1, ITEM_HEIGHT, true);
     GetInstance();
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 
     /**
      * @tc.steps: step1. GetNextFocusNode from 1st item and FocusStep::RIGHT.
@@ -2998,13 +2998,13 @@ HWTEST_F(GridTestNg, FocusStep004, TestSize.Level1)
     gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItem(18, -1, ITEM_HEIGHT, true);
     GetInstance();
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 
     /**
      * @tc.steps: step1. Scroll to second row
      */
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT - 1.f, SCROLL_FROM_UPDATE);
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 
     /**
      * @tc.steps: step2. UP
@@ -3026,13 +3026,13 @@ HWTEST_F(GridTestNg, FocusStep005, TestSize.Level1)
     gridModelNG.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateGridItem(18, -1, ITEM_HEIGHT, true);
     GetInstance();
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 
     /**
      * @tc.steps: step1. Scroll to first row
      */
     pattern_->UpdateCurrentOffset(-ITEM_HEIGHT + 1.f, SCROLL_FROM_UPDATE);
-    OldRunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
+    RunMeasureAndLayout(frameNode_, DEVICE_WIDTH, GRID_HEIGHT);
 
     /**
      * @tc.steps: step2. DOWN
@@ -3611,7 +3611,7 @@ HWTEST_F(GridTestNg, GridScrollTest005, TestSize.Level1)
     auto gridScrollLayoutAlgorithm = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(pattern_->gridLayoutInfo_, 2, 0);
     ASSERT_NE(gridScrollLayoutAlgorithm, nullptr);
     auto itemWrapper = frameNode_->GetOrCreateChildByIndex(0);
-    gridScrollLayoutAlgorithm->AdjustRowColSpan(itemWrapper);
+    gridScrollLayoutAlgorithm->AdjustRowColSpan(itemWrapper, nullptr, 0);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto layoutProperty = item->GetLayoutProperty<GridItemLayoutProperty>();
     EXPECT_EQ(layoutProperty->GetRowStart(), -1);
