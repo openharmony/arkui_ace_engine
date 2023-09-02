@@ -18,8 +18,8 @@
 
 #include <mutex>
 #include <map>
+#include <unordered_set>
 
-#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "base/json/json_util.h"
@@ -51,6 +51,7 @@ public:
         const AAFwk::Want& want, const std::string& pluginName, const std::string& data, const std::string& extraData);
     void RegisterCallBack(
         const AAFwk::Want& want, const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType);
+    void UnregisterCallBack(const std::shared_ptr<PluginComponentCallBack>& callback);
     void UnregisterCallBack(const AAFwk::Want& want);
 
     bool GetTemplatePathFromJsonFile(const std::string& packagePathStr,
@@ -69,6 +70,7 @@ public:
         };
 
         void ResgisterListener(const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType);
+        void UnresgisterListener(const std::shared_ptr<PluginComponentCallBack>& callback);
         void OnPushCallBack(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
             const std::string& data, const std::string& extraData) override;
         void OnRequestCallBack(const AAFwk::Want& want, const std::string& name,  const std::string& data) override;
@@ -79,6 +81,7 @@ public:
     private:
         std::recursive_mutex mutex_;
         std::map<std::shared_ptr<PluginComponentCallBack>, CallBackType> callbackVec_;
+        std::unordered_set<std::shared_ptr<PluginComponentCallBack>> callbacks_;
     };
 
 private:

@@ -101,6 +101,11 @@ size_t JSPluginCallback::GetID(void)
     return uuid_;
 }
 
+int32_t JSPluginCallback::GetContainerId()
+{
+    return cbInfo_.containerId;
+}
+
 void JSPluginCallback::SendRequestEventResult(napi_value jsObject)
 {
     napi_value jsTemplate = AceGetPropertyValueByPropertyName(cbInfo_.env, jsObject, "template", napi_string);
