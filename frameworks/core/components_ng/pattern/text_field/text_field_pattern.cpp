@@ -2381,7 +2381,6 @@ void TextFieldPattern::OnModifyDone()
         operationRecords_.clear();
         redoOperationRecords_.clear();
     }
-#if defined(ENABLE_STANDARD_INPUT)
     auto maxLength = GetMaxLength();
     if (GreatNotEqual(textWidth, maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
@@ -2391,7 +2390,6 @@ void TextFieldPattern::OnModifyDone()
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateNeedFireOnChange(true);
     }
-#endif
     FireOnChangeIfNeeded();
     if (IsTextArea() || IsNormalInlineState()) {
         SetAxis(Axis::VERTICAL);
