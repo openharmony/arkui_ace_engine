@@ -78,11 +78,15 @@ public:
             if (!dotIndicatorModifier_) {
                 dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
             }
+            auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+            CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
             auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
             paintMethod->SetAxis(swiperPattern->GetDirection());
             paintMethod->SetCurrentIndex(swiperPattern->GetCurrentFirstIndex());
             paintMethod->SetItemCount(swiperPattern->TotalCount());
+            paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
             paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
+            paintMethod->SetIsLoop(swiperPattern->IsLoop());
             paintMethod->SetIsHover(isHover_);
             paintMethod->SetIsPressed(isPressed_);
             paintMethod->SetHoverPoint(hoverPoint_);
