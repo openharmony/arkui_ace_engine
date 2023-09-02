@@ -186,7 +186,8 @@ JSRef<JSVal> JSRichEditor::CreateJSSelection(const RichEditorSelection& selectIn
     selectionArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[0])));
     selectionArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[1])));
 
-    selectionObject->SetPropertyObject("style", selectionArray);
+    selectionObject->SetPropertyObject("selection", selectionArray);
+    selectionObject->SetPropertyObject("spans", spanObjectArray);
     return JSRef<JSVal>::Cast(selectionObject);
 }
 
