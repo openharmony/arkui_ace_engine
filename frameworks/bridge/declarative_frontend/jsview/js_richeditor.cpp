@@ -1061,7 +1061,9 @@ JSRef<JSVal> JSRichEditorController::CreateJSParagraphsInfo(const std::vector<Pa
 {
     auto array = JSRef<JSArray>::New();
     for (size_t i = 0; i < info.size(); ++i) {
-        array->SetValueAt(i, JSRichEditor::CreateParagraphStyleResult(info[i]));
+        auto obj = JSRef<JSObject>::New();
+        obj->SetProperty("style", JSRichEditor::CreateParagraphStyleResult(info[i]));
+        array->SetValueAt(i, obj);
     }
     return JSRef<JSVal>::Cast(array);
 }
