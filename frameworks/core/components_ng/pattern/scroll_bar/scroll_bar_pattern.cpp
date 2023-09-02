@@ -329,6 +329,9 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     auto velocity = info.GetMainVelocity();
     if (NearZero(velocity)) {
         if (scrollEndCallback_) {
+            if (scrollBarProxy_) {
+                scrollBarProxy_->NotifyScrollStop();
+            }
             scrollEndCallback_();
         }
         return;
