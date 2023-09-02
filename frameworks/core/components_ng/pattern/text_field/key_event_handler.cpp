@@ -73,7 +73,7 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
                 pattern->HandleOnUndoAction();
             } else if (keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_A }) ||
                        keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_A })) {
-                pattern->HandleOnSelectAll();
+                pattern->HandleOnSelectAll(true);
             } else if (keyEvent.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_C }) ||
                        keyEvent.IsKey({ KEY_META_OR_CTRL_RIGHT, KeyCode::KEY_C })) {
                 pattern->HandleOnCopy();
