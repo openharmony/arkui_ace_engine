@@ -477,7 +477,7 @@ private:
 
     // use property animation feature
     void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f);
-    void StopPropertyTranslateAnimation();
+    void StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     RefPtr<Curve> GetCurveIncludeMotion(float velocity = 0.0f) const;
