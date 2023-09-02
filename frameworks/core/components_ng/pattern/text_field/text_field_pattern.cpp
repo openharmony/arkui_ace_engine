@@ -6303,7 +6303,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
     auto startY = textBoxes_.front().rect_.GetTop();
     auto startX = textBoxes_.front().rect_.GetLeft();
 
-    auto endY = dragBoxes_.back().rect_.GetTop();
+    auto endY = textBoxes_.back().rect_.GetTop();
 #else
     auto startY = textBoxes_.front().rect.GetTop();
     auto startX = textBoxes_.front().rect.GetLeft();
