@@ -68,7 +68,6 @@ RichEditorPattern::~RichEditorPattern()
 
 void RichEditorPattern::OnModifyDone()
 {
-    TextPattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
