@@ -30,6 +30,14 @@ constexpr int32_t DEFAULT_ROTATION_FINGERS = 2;
 
 } // namespace
 
+RotationRecognizer::RotationRecognizer(int32_t fingers, double angle) : MultiFingersRecognizer(fingers), angle_(angle)
+{
+    if (fingers_ > MAX_ROTATION_FINGERS || fingers_ < DEFAULT_ROTATION_FINGERS) {
+        LOGW("rotationRecognizer fingers_ is illegal, change to DEFAULT_ROTATION_FINGERS.");
+        fingers_ = DEFAULT_ROTATION_FINGERS;
+    }
+}
+
 void RotationRecognizer::OnAccepted()
 {
     LOGD("rotation gesture has been accepted!");
