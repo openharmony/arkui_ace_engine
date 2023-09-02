@@ -148,8 +148,6 @@ public:
 
     void OnAreaChangedInner() override;
 
-    void UpdateMediaPlayer();
-
     // It is used to init mediaplayer on background.
     void UpdateMediaPlayerOnBg();
     void ResetMediaPlayer();
