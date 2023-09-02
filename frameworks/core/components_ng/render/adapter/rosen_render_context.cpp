@@ -869,9 +869,13 @@ Rosen::EmitterConfig RosenRenderContext::ConvertParticleEmitterOption(
 
 void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource)
 {
-    if (particleImageMap_.find(imageSource) != particleImageMap_.end()) {
-        auto image = particleImageMap_[imageSource];
-        CHECK_NULL_VOID_NOLOG(image);
+    if (particleImageMap_.find(imageSource) == particleImageMap_.end()) {
+        return;
+    }
+    auto image = particleImageMap_[imageSource];
+    CHECK_NULL_VOID_NOLOG(image);
+
+    if (InstanceOf<PixelMapImage>(image)) {
         auto pixmap = image->GetPixelMap();
         CHECK_NULL_VOID_NOLOG(pixmap);
         auto pixMapPtr = pixmap->GetPixelMapSharedPtr();
@@ -879,6 +883,42 @@ void RosenRenderContext::SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsI
         if (pixMapPtr) {
             rsImagePtr->SetSrcRect(Rosen::RectF(0, 0, pixMapPtr->GetWidth(), pixMapPtr->GetHeight()));
         }
+#ifndef USE_ROSEN_DRAWING
+    } else if (InstanceOf<SkiaImage>(image)) {
+        auto skiaImage = DynamicCast<SkiaImage>(image);
+        CHECK_NULL_VOID_NOLOG(skiaImage);
+        auto compressData = skiaImage->GetCompressData();
+        if (compressData) {
+            rsImagePtr->SetCompressData(
+                compressData, skiaImage->GetUniqueID(), skiaImage->GetCompressWidth(), skiaImage->GetCompressHeight());
+            rsImagePtr->SetSrcRect(Rosen::RectF(0, 0, skiaImage->GetCompressWidth(), skiaImage->GetCompressHeight()));
+        } else {
+            rsImagePtr->SetImage(skiaImage->GetImage());
+            if (skiaImage->GetImage()) {
+                rsImagePtr->SetSrcRect(
+                    Rosen::RectF(0, 0, skiaImage->GetImage()->width(), skiaImage->GetImage()->height()));
+            }
+        }
+        rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+#else
+    } else if (InstanceOf<DrawingImage>(image)) {
+        auto drawingImage = DynamicCast<DrawingImage>(image);
+        CHECK_NULL_VOID_NOLOG(drawingImage);
+        auto compressData = drawingImage->GetCompressData();
+        if (compressData) {
+            rsImagePtr->SetCompressData(compressData, drawingImage->GetUniqueID(), drawingImage->GetCompressWidth(),
+                drawingImage->GetCompressHeight());
+            rsImagePtr->SetSrcRect(
+                Rosen::RectF(0, 0, drawingImage->GetCompressWidth(), drawingImage->GetCompressHeight()));
+        } else {
+            rsImagePtr->SetImage(drawingImage->GetImage());
+            if (drawingImage->GetImage()) {
+                rsImagePtr->SetSrcRect(
+                    Rosen::RectF(0, 0, drawingImage->GetImage()->width(), drawingImage->GetImage()->height()));
+            }
+        }
+        rsImagePtr->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
+#endif
     }
 }
 
@@ -911,8 +951,7 @@ void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& wi
         renderContent->OnParticleImageLoaded(imageSrc, nullptr);
     };
     LoadNotifier loadNotifier(preLoadCallback, loadingSuccessCallback, loadingErrorCallback);
-    auto particleImageLoadingCtx =
-        AceType::MakeRefPtr<ImageLoadingContext>(imageSourceInfo, std::move(loadNotifier));
+    auto particleImageLoadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(imageSourceInfo, std::move(loadNotifier));
     imageSourceInfo.SetSrc(src, Color(0x00000000));
     particleImageLoadingCtx->LoadImageData();
     particleImageContextMap_.try_emplace(src, particleImageLoadingCtx);
