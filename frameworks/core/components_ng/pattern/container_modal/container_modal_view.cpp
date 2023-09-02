@@ -263,6 +263,7 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     ImageSourceInfo imageSourceInfo;
     auto imageIcon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ImagePattern>());
+    imageIcon->SetDraggable(false);
     auto imageFocus = imageIcon->GetFocusHub();
     if (imageFocus) {
         imageFocus->SetFocusable(false);
