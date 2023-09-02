@@ -3500,6 +3500,16 @@ LoadFailNotifyTask TextFieldPattern::CreateLoadFailCallback(bool checkHidePasswo
 void TextFieldPattern::OnImageLoadFail(bool checkHidePasswordIcon)
 {
     LOGE("Image data load fail for %{public}s", checkHidePasswordIcon ? "hide icon" : "show icon");
+    if (checkHidePasswordIcon && hideUserDefinedIcon_) {
+        hideUserDefinedIcon_ = false;
+        ProcessPasswordIcon();
+        hideUserDefinedIcon_ = true;
+    }
+    if (!checkHidePasswordIcon && showUserDefinedIcon_) {
+        showUserDefinedIcon_ = false;
+        ProcessPasswordIcon();
+        showUserDefinedIcon_ = true;
+    }
 }
 
 void TextFieldPattern::OnImageDataReady(bool checkHidePasswordIcon)
@@ -5509,8 +5519,8 @@ std::string TextFieldPattern::GetShowResultImageSrc() const
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    if (showUserDefinedIcon_ && layoutProperty->HasShowPasswordSourceInfo()) {
-        return layoutProperty->GetShowPasswordSourceInfo()->GetSrc();
+    if (showUserDefinedIcon_) {
+        return showUserDefinedIconSrc_;
     }
     return SHOW_PASSWORD_SVG;
 }
@@ -5519,8 +5529,8 @@ std::string TextFieldPattern::GetHideResultImageSrc() const
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    if (hideUserDefinedIcon_ && layoutProperty->HasHidePasswordSourceInfo()) {
-        return layoutProperty->GetHidePasswordSourceInfo()->GetSrc();
+    if (hideUserDefinedIcon_) {
+        return hideUserDefinedIconSrc_;
     }
     return HIDE_PASSWORD_SVG;
 }
