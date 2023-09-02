@@ -325,6 +325,9 @@ void TitleBarPattern::ProcessTittleDragStart(float offset)
 
 void TitleBarPattern::ProcessTittleDragUpdate(float offset)
 {
+    if (NearZero(offset)) {
+        return;
+    }
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
