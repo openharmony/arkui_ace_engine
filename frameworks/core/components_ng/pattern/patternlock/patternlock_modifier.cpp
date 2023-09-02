@@ -60,6 +60,8 @@ constexpr float CANCELED_LINE_SPRING_RESPONSE = 0.22f;
 constexpr float CANCELED_LINE_SPRING_DAMPING = 0.88f;
 constexpr int32_t ANIMATABLE_POINT_COUNT = 2;
 constexpr float DIAMETER_TO_RADIUS = 0.5f;
+constexpr float GRADUAL_CHANGE_POINT = 0.5;
+constexpr int32_t MAX_ALPHA = 255;
 } // namespace
 
 PatternLockCell::PatternLockCell(int32_t column, int32_t row)
@@ -138,6 +140,12 @@ PatternLockModifier::PatternLockModifier()
 
 void PatternLockModifier::onDraw(DrawingContext& context)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        DrawForApiNine(context);
+        return;
+    }
     auto& canvas = context.canvas;
     PaintLockLine(canvas, offset_->Get());
     canvas.Save();
@@ -147,6 +155,118 @@ void PatternLockModifier::onDraw(DrawingContext& context)
         }
     }
     canvas.Restore();
+}
+
+void PatternLockModifier::DrawForApiNine(DrawingContext& context)
+{
+    auto& canvas = context.canvas;
+    PaintLockLineForApiNine(canvas, offset_->Get());
+    canvas.Save();
+    for (int i = 0; i < PATTERN_LOCK_COL_COUNT; i++) {
+        for (int j = 0; j < PATTERN_LOCK_COL_COUNT; j++) {
+            PaintLockCircleForApiNine(canvas, offset_->Get(), i + 1, j + 1);
+        }
+    }
+    canvas.Restore();
+}
+
+void PatternLockModifier::PaintLockLineForApiNine(RSCanvas& canvas, const OffsetF& offset)
+{
+    size_t count = choosePoint_.size();
+    if (count == 0) {
+        return;
+    }
+
+    float sideLength = sideLength_->Get();
+    float pathStrokeWidth = pathStrokeWidth_->Get();
+    if (LessOrEqual(pathStrokeWidth, 0.0)) {
+        return;
+    }
+    float handleStrokeWidth = std::min(pathStrokeWidth, sideLength / PATTERN_LOCK_COL_COUNT);
+    pathStrokeWidth = std::max(handleStrokeWidth, 0.0f);
+
+    auto pathColor = pathColor_->Get();
+    auto cellCenter = cellCenter_->Get();
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetColor(ToRSColor(pathColor));
+    pen.SetWidth(pathStrokeWidth);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+
+    Color pathColorAlpha255 = pathColor.ToColor().ChangeAlpha(MAX_ALPHA);
+    pen.SetColor(pathColorAlpha255.GetValue());
+    canvas.AttachPen(pen);
+    for (size_t i = 0; i < count - 1; i++) {
+        OffsetF pointBegin = GetCircleCenterByXY(offset, choosePoint_[i].GetColumn(), choosePoint_[i].GetRow());
+        OffsetF pointEnd = GetCircleCenterByXY(offset, choosePoint_[i + 1].GetColumn(), choosePoint_[i + 1].GetRow());
+        canvas.DrawLine(RSPoint(pointBegin.GetX(), pointBegin.GetY()), RSPoint(pointEnd.GetX(), pointEnd.GetY()));
+    }
+    if (isMoveEventValid_->Get()) {
+        OffsetF pointBegin =
+            GetCircleCenterByXY(offset, choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
+        float x1 = pointBegin.GetX();
+        float y1 = pointBegin.GetY();
+        float x2 = cellCenter.GetX();
+        float y2 = cellCenter.GetY();
+        x2 = x2 > offset.GetX() + sideLength ? offset.GetX() + sideLength : x2;
+        x2 = x2 < offset.GetX() ? offset.GetX() : x2;
+        y2 = y2 > offset.GetY() + sideLength ? offset.GetY() + sideLength : y2;
+        y2 = y2 < offset.GetY() ? offset.GetY() : y2;
+
+        std::vector<RSColorQuad> colors = { pathColorAlpha255.GetValue(), pathColorAlpha255.GetValue(),
+            pathColorAlpha255.ChangeOpacity(0.0).GetValue() };
+        std::vector<RSScalar> pos = { 0.0, GRADUAL_CHANGE_POINT, 1.0 };
+        auto shader = pen.GetShaderEffect();
+        shader->CreateLinearGradient(RSPoint(x1, y1), RSPoint(x2, y2), colors, pos, RSTileMode::CLAMP);
+        pen.SetShaderEffect(shader);
+        canvas.DrawLine(RSPoint(x1, y1), RSPoint(x2, y2));
+    }
+    canvas.DetachPen();
+    canvas.Restore();
+}
+
+void PatternLockModifier::PaintLockCircleForApiNine(RSCanvas& canvas, const OffsetF& offset, int32_t x, int32_t y)
+{
+    auto activeColor = activeColor_->Get();
+    auto regularColor = regularColor_->Get();
+    auto selectedColor = selectedColor_->Get();
+    auto sideLength = sideLength_->Get();
+    auto circleRadius = circleRadius_->Get();
+
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(ToRSColor(regularColor));
+    OffsetF cellcenter = GetCircleCenterByXY(offset, x, y);
+    OffsetF firstCellcenter = GetCircleCenterByXY(offset, 1, 1);
+    float offsetX = cellcenter.GetX();
+    float offsetY = cellcenter.GetY();
+    const int32_t radiusCount = RADIUS_TO_DIAMETER * PATTERN_LOCK_COL_COUNT;
+    float handleCircleRadius = std::min(circleRadius, sideLength / scaleBackgroundCircleRadius_ / radiusCount);
+    circleRadius = std::max(handleCircleRadius, 0.0f);
+    if (CheckChoosePoint(x, y)) {
+        const int32_t lastIndexFir = 1;
+        if (CheckChoosePointIsLastIndex(x, y, lastIndexFir)) {
+            if (isMoveEventValid_->Get()) {
+                brush.SetColor(ToRSColor(activeColor));
+                canvas.AttachBrush(brush);
+                auto radius = circleRadius * scaleBackgroundCircleRadius_;
+                canvas.DrawCircle(
+                    RSPoint(offsetX, offsetY), std::min(static_cast<float>(radius), firstCellcenter.GetX()));
+            } else {
+                brush.SetColor(ToRSColor(selectedColor));
+                canvas.AttachBrush(brush);
+                canvas.DrawCircle(RSPoint(offsetX, offsetY), circleRadius * scaleActiveCircleRadius_);
+            }
+        } else {
+            brush.SetColor(ToRSColor(selectedColor));
+            canvas.AttachBrush(brush);
+            canvas.DrawCircle(RSPoint(offsetX, offsetY), circleRadius * scaleActiveCircleRadius_);
+        }
+    } else {
+        canvas.AttachBrush(brush);
+        canvas.DrawCircle(RSPoint(offsetX, offsetY), circleRadius);
+    }
+    canvas.DetachBrush();
 }
 
 void PatternLockModifier::PaintLockLine(RSCanvas& canvas, const OffsetF& offset)

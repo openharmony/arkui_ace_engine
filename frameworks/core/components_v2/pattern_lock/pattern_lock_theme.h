@@ -15,11 +15,13 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_PATTERN_LOCK_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_PATTERN_LOCK_PATTERN_LOCK_THEME_H
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::V2 {
 class PatternLockTheme : public virtual Theme {
     DECLARE_ACE_TYPE(PatternLockTheme, Theme);
@@ -42,32 +44,48 @@ public:
         static constexpr Dimension FOCUS_PADDING_RADIUS = 2.0_vp;
         static constexpr Dimension FOCUS_PAINT_WIDTH = 2.0_vp;
 
+        static constexpr Dimension DEFAULT_SIDE_LENGTH_API9 = 300.0_vp;
+        static constexpr Dimension DEFAULT_CIRCLE_RADIUS_API9 = 14.0_vp;
+        static constexpr Dimension DEFAULT_PATH_STROKE_WIDTH_API9 = 34.0_vp;
+        static constexpr Dimension DEFAULT_ACTIVE_CIRCLE_RADIUS_API9 = 16.0_vp;
+        static constexpr Dimension DEFAULT_BACKGROUND_CIRCLE_RADIUS_API9 = 26.0_vp;
+
         RefPtr<PatternLockTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<PatternLockTheme> theme = AceType::Claim(new PatternLockTheme());
             if (!themeConstants) {
                 return theme;
             }
-            theme->regularColor_ = Color::BLACK;
-            theme->activeColor_ = Color::BLACK;
-            theme->selectedColor_ = Color::BLACK;
-            theme->pathColor_ = Color::BLUE;
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN_NOLOG(pipeline, theme);
             theme->wrongColor_ = Color::RED;
             theme->correctColor_ = Color::BLUE;
             theme->hoverColor_ = Color::BLACK;
             theme->focusColor_ = Color::BLACK;
-            theme->sideLength_ = DEFAULT_SIDE_LENGTH;
-            theme->circleRadius_ = DEFAULT_CIRCLE_RADIUS;
-            theme->pathStrokeWidth_ = DEFAULT_PATH_STROKE_WIDTH;
-            theme->activeCircleRadius_ = DEFAULT_ACTIVE_CIRCLE_RADIUS;
-            theme->backgroundCircleRadius_ = DEFAULT_BACKGROUND_CIRCLE_RADIUS;
             theme->lightRingRadiusStart_ = DEFAULT_LIGHT_RING_CIRCLE_RADIUS_START;
             theme->lightRingRadiusEnd_ = DEFAULT_LIGHT_RING_CIRCLE_RADIUS_END;
             theme->hoverRadius_ = DEFAULT_HOVER_CIRCLE_RADIUS;
             theme->hotSpotCircleRadius_ = HOTSPOT_CIRCLE_RADIUS;
             theme->focusPaddingRadius_ = FOCUS_PADDING_RADIUS;
             theme->focusPaintWidth_ = FOCUS_PAINT_WIDTH;
-            ParsePattern(themeConstants->GetThemeStyle(), theme);
+            if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+                theme->regularColor_ = Color::BLACK;
+                theme->activeColor_ = Color::BLACK;
+                theme->selectedColor_ = Color::BLACK;
+                theme->pathColor_ = Color::BLUE;
+                theme->sideLength_ = DEFAULT_SIDE_LENGTH_API9;
+                theme->circleRadius_ = DEFAULT_CIRCLE_RADIUS_API9;
+                theme->pathStrokeWidth_ = DEFAULT_PATH_STROKE_WIDTH_API9;
+                theme->activeCircleRadius_ = DEFAULT_ACTIVE_CIRCLE_RADIUS_API9;
+                theme->backgroundCircleRadius_ = DEFAULT_BACKGROUND_CIRCLE_RADIUS_API9;
+            } else {
+                theme->sideLength_ = DEFAULT_SIDE_LENGTH;
+                theme->circleRadius_ = DEFAULT_CIRCLE_RADIUS;
+                theme->pathStrokeWidth_ = DEFAULT_PATH_STROKE_WIDTH;
+                theme->activeCircleRadius_ = DEFAULT_ACTIVE_CIRCLE_RADIUS;
+                theme->backgroundCircleRadius_ = DEFAULT_BACKGROUND_CIRCLE_RADIUS;
+                ParsePattern(themeConstants->GetThemeStyle(), theme);
+            }
             return theme;
         }
 
