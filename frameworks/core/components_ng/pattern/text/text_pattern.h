@@ -327,7 +327,6 @@ protected:
     float baselineOffset_ = 0.0f;
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
-    bool ignoreEvent_ = false;
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> dragBoxes_;
 #else

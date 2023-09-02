@@ -701,7 +701,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
     auto children = host->GetChildren();
     if (NearZero(selectLineHeight)) {
         if (children.empty() || GetTextContentLength() == 0) {
-            float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCareHeight();
+            float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
             return textPaintOffset - rootOffset - OffsetF(0.0f, caretHeight / 2.0f);
         }
         if (std::all_of(children.begin(), children.end(), [](RefPtr<UINode>& node) {
@@ -1663,7 +1663,7 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
 
     if (insertValueTemp == std::string(" ")) {
         CHECK_NULL_VOID(overlayMod_);
-        auto caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCareOffset();
+        auto caretOffset = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretOffset();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
@@ -3093,7 +3093,7 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
     if (GetTextContentLength() == 0) {
-        float caretHeight = richEditorOverlayModifier_->GetCareHeight();
+        float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
         firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight };
         secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight };
         firstHandleOffset =
