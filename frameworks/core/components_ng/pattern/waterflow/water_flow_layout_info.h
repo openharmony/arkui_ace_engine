@@ -44,6 +44,7 @@ public:
     float GetMainHeight(int32_t crossIndex, int32_t itemIndex);
     float GetStartMainPos(int32_t crossIndex, int32_t itemIndex);
     void Reset();
+    void Reset(int32_t resetFrom);
     int32_t GetCrossCount() const;
     int32_t GetMainCount() const;
     void ClearCacheAfterIndex(int32_t currentIndex);
