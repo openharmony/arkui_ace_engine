@@ -48,6 +48,7 @@ constexpr Dimension CONTROL_BUTTON_PADDING = 12.0_vp;
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    autoHide_ = false;
     UpdateDefaultValueByVersion();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
@@ -92,6 +93,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             type_ = SideBarContainerType::OVERLAY;
         } else {
             sideBarStatus_ = SideBarStatus::HIDDEN;
+            autoHide_ = true;
         }
     }
     if (type_ != SideBarContainerType::OVERLAY) {
