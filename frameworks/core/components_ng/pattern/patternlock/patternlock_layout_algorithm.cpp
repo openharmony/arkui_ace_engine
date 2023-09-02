@@ -29,7 +29,8 @@ std::optional<SizeF> PatternLockLayoutAlgorithm::MeasureContent(
     auto patternLockLayoutProperty = DynamicCast<PatternLockLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(patternLockLayoutProperty, std::nullopt);
     sideLength_ = patternLockLayoutProperty->GetSideLength().value_or(sideLength_);
-    auto length = static_cast<float>(sideLength_.ConvertToPx());
+    auto size = patternLockLayoutProperty->GetLayoutConstraint()->percentReference;
+    auto length = static_cast<float>(sideLength_.ConvertToPxWithSize(std::min(size.Height(), size.Width())));
     float maxWidth = std::max(contentConstraint.maxSize.Width(), contentConstraint.minSize.Width());
     float maxHeight = std::max(contentConstraint.maxSize.Height(), contentConstraint.minSize.Height());
     float maxLength = std::min(maxWidth, maxHeight);
