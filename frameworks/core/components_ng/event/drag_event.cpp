@@ -336,6 +336,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
     };
     panRecognizer_->SetIsForDrag(true);
+    panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE);
     actionCancel_ = actionCancel;
     panRecognizer_->SetOnActionCancel(actionCancel);
     auto gestureHub = gestureEventHub_.Upgrade();

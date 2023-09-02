@@ -19,6 +19,7 @@
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
@@ -37,8 +38,8 @@ constexpr int32_t AXIS_PAN_FINGERS = 1;
 } // namespace
 
 PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance)
-    : MultiFingersRecognizer(fingers), direction_(direction), distance_(distance), newFingers_(fingers_),
-      newDistance_(distance_), newDirection_(direction_)
+    : MultiFingersRecognizer(fingers), direction_(direction), distance_(distance), mouseDistance_(distance),
+      newFingers_(fingers_), newDistance_(distance_), newDirection_(direction_)
 {
     if ((direction_.type & PanDirection::VERTICAL) == 0) {
         velocityTracker_ = VelocityTracker(Axis::HORIZONTAL);
@@ -72,6 +73,7 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
 
     newFingers_ = fingers_;
     newDistance_ = distance_;
+    mouseDistance_ = distance_;
     newDirection_ = direction_;
 
     PanFingersFuncType changeFingers = [weak = AceType::WeakClaim(this)](int32_t fingers) {
@@ -121,6 +123,11 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     if (direction_.type == PanDirection::NONE) {
         LOGI("the direction type is none");
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+    if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
+        LOGI("mouse pan is not allowed");
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -374,8 +381,8 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
         }
     }
     auto judgeDistance = distance_;
-    if (deviceType_ == SourceType::MOUSE && isForDrag_) {
-        judgeDistance = DRAG_PAN_DISTANCE_MOUSE;
+    if (deviceType_ == SourceType::MOUSE) {
+        judgeDistance = mouseDistance_;
     }
     return GreatNotEqual(totalDistance, judgeDistance) && totalFingers >= fingers_;
 }
@@ -383,9 +390,10 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
 {
     auto judgeDistance = distance_;
-    if (deviceType_ == SourceType::MOUSE && isForDrag_) {
-        judgeDistance = DRAG_PAN_DISTANCE_MOUSE;
+    if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
+        judgeDistance = mouseDistance_;
     }
+
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
         double offset = averageDistance_.GetDistance();
         if (fabs(offset) < judgeDistance) {
@@ -506,6 +514,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     newDirection_.type = curr->newDirection_.type;
     distance_ = curr->distance_;
     newDistance_ = curr->newDistance_;
+    mouseDistance_ = curr->mouseDistance_;
 
     onActionStart_ = std::move(curr->onActionStart_);
     onActionUpdate_ = std::move(curr->onActionUpdate_);
@@ -547,6 +556,7 @@ void PanRecognizer::ChangeDistance(double distance)
             distance_ = distance;
         }
         newDistance_ = distance;
+        mouseDistance_ = distance;
     }
 }
 
