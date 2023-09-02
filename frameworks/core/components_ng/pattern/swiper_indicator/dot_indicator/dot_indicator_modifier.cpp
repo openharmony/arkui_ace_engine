@@ -273,8 +273,12 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
     indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()));
 
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
-    longPointLeftCenterX_->Set(longPointCenterX.first);
-    longPointRightCenterX_->Set(longPointCenterX.second);
+    if (longPointLeftAnimEnd_) {
+        longPointLeftCenterX_->Set(longPointCenterX.first);
+    }
+    if (longPointRightAnimEnd_) {
+        longPointRightCenterX_->Set(longPointCenterX.second);
+    }
     itemHalfSizes_->Set(normalItemHalfSizes);
     normalToHoverPointDilateRatio_->Set(1.0f);
     hoverToNormalPointDilateRatio_->Set(1.0f);
@@ -291,8 +295,12 @@ void DotIndicatorModifier::UpdateDilatePaintProperty(
     indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()));
 
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
-    longPointLeftCenterX_->Set(longPointCenterX.first);
-    longPointRightCenterX_->Set(longPointCenterX.second);
+    if (longPointLeftAnimEnd_) {
+        longPointLeftCenterX_->Set(longPointCenterX.first);
+    }
+    if (longPointRightAnimEnd_) {
+        longPointRightCenterX_->Set(longPointCenterX.second);
+    }
     itemHalfSizes_->Set(hoverItemHalfSizes);
     backgroundWidthDilateRatio_->Set(1.0f);
     backgroundHeightDilateRatio_->Set(1.0f);
@@ -453,18 +461,24 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
     AnimationUtils::Animate(blackPointOption, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
 
     AnimationOption longPointLeftOption;
+    longPointLeftAnimEnd_ = false;
     longPointLeftOption.SetDuration(POINT_ANIMATION_DURATION);
     longPointLeftOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
         isForward ? LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
-    AnimationUtils::Animate(longPointLeftOption, [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); });
+    AnimationUtils::Animate(longPointLeftOption,
+                            [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); },
+                            [&]() { longPointLeftAnimEnd_ = true; });
 
     AnimationOption longPointRightOption;
+    longPointRightAnimEnd_ = false;
     longPointRightOption.SetDuration(POINT_ANIMATION_DURATION);
     longPointRightOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
         isForward ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
-    AnimationUtils::Animate(longPointRightOption, [&]() { longPointRightCenterX_->Set(longPointCenterX.second); });
+    AnimationUtils::Animate(longPointRightOption,
+                            [&]() { longPointRightCenterX_->Set(longPointCenterX.second); },
+                            [&]() { longPointRightAnimEnd_ = true; });
 }
 
 void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
@@ -494,8 +508,12 @@ void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBotto
         modifier->backgroundWidthDilateRatio_->Set(backgroundWidthDilateRatio);
         modifier->backgroundHeightDilateRatio_->Set(backgroundHeightDilateRatio);
         modifier->vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
-        modifier->longPointLeftCenterX_->Set(longPointCenterX.first);
-        modifier->longPointRightCenterX_->Set(longPointCenterX.second);
+        if (modifier->longPointLeftAnimEnd_) {
+            modifier->longPointLeftCenterX_->Set(longPointCenterX.first);
+        }
+        if (modifier->longPointRightAnimEnd_) {
+            modifier->longPointRightCenterX_->Set(longPointCenterX.second);
+        }
     });
 }
 } // namespace OHOS::Ace::NG
