@@ -348,8 +348,6 @@ protected:
     bool isCustomFont_ = false;
     std::vector<RSTypographyProperties::TextBox> dragBoxes_;
 
-#endif
-
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToFrameNode() override;
