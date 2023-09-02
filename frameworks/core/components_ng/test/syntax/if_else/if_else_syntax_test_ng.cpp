@@ -36,7 +36,6 @@ constexpr int32_t IF_ELSE_BRANCH_ID_2 = 2;
 constexpr int32_t IF_ELSE_CHILDREN_COUNT = 1;
 constexpr int32_t IF_ELSE_CHILDREN_COUNT_2 = 0;
 constexpr int32_t IF_ELSE_NODE_ID = 1;
-std::list<int32_t> removedElmtIds;
 constexpr bool IS_ATOMIC_NODE = false;
 } // namespace
 
@@ -105,7 +104,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest003, TestSize.Level1)
 {
     IfElseModelNG ifElse;
     ifElse.Create();
-    ifElse.SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds);
+    ifElse.SetBranchId(IF_ELSE_BRANCH_ID);
 
     EXPECT_EQ(ifElse.GetBranchId(), IF_ELSE_BRANCH_ID);
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -122,7 +121,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest003, TestSize.Level1)
     ifElseNodeNode->AddChild(childFrameNode);
     EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT);
     // ifElse node will clean its children when its branch id has changed.
-    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2, removedElmtIds);
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2);
     ifElseNodeNode->FlushUpdateAndMarkDirty();
     EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT_2);
 
@@ -130,7 +129,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest003, TestSize.Level1)
      * @tc.steps: step1. Set branch id which is same as before.
      * @tc.expected: OnDirtyLayoutWrapperSwap return the true only when the canvas images all have been initialized.
      */
-    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds);
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID);
     ifElseNodeNode->FlushUpdateAndMarkDirty();
     EXPECT_FALSE(ifElseNodeNode->branchIdChanged_);
 }
@@ -144,7 +143,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest004, TestSize.Level1)
 {
     IfElseModelNG ifElse;
     ifElse.Create();
-    ifElse.SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds);
+    ifElse.SetBranchId(IF_ELSE_BRANCH_ID);
 
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(ifElseNodeNode != nullptr && ifElseNodeNode->GetTag() == V2::JS_IF_ELSE_ETS_TAG);
@@ -160,7 +159,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest005, TestSize.Level1)
 {
     IfElseModelNG ifElse;
     ifElse.Create();
-    ifElse.SetBranchId(IF_ELSE_BRANCH_ID, removedElmtIds);
+    ifElse.SetBranchId(IF_ELSE_BRANCH_ID);
 
     EXPECT_EQ(ifElse.GetBranchId(), IF_ELSE_BRANCH_ID);
     auto ifElseNodeNode = AceType::DynamicCast<IfElseNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -177,7 +176,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest005, TestSize.Level1)
     ifElseNodeNode->AddChild(childFrameNode);
     EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT);
     // ifElse node will clean its children when its branch id has changed.
-    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2, removedElmtIds);
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2);
     ifElseNodeNode->FlushUpdateAndMarkDirty();
     EXPECT_EQ(ifElseNodeNode->GetChildren().size(), IF_ELSE_CHILDREN_COUNT_2);
 
@@ -185,7 +184,7 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxBranchIDTest005, TestSize.Level1)
      * @tc.steps: step1. Set branch id which is same as before.
      * @tc.expected: OnDirtyLayoutWrapperSwap return the true only when the canvas images all have been initialized.
      */
-    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2, removedElmtIds);
+    ifElseNodeNode->SetBranchId(IF_ELSE_BRANCH_ID_2);
     ifElseNodeNode->FlushUpdateAndMarkDirty();
     EXPECT_FALSE(ifElseNodeNode->branchIdChanged_);
 }
