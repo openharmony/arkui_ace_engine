@@ -29,8 +29,10 @@ class ACE_EXPORT SelectOverlayLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(SelectOverlayLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    explicit SelectOverlayLayoutAlgorithm(std::shared_ptr<SelectOverlayInfo> info, const OffsetF& defaultMenuEndOffset)
-        : info_(std::move(info)), defaultMenuEndOffset_(defaultMenuEndOffset)
+    explicit SelectOverlayLayoutAlgorithm(std::shared_ptr<SelectOverlayInfo> info, const OffsetF& defaultMenuEndOffset,
+        const std::optional<float>& menuWidth, const std::optional<float>& menuHeight)
+        : info_(std::move(info)), defaultMenuEndOffset_(defaultMenuEndOffset), menuWidth_(menuWidth),
+          menuHeight_(menuHeight)
     {}
     ~SelectOverlayLayoutAlgorithm() override = default;
 
@@ -48,6 +50,11 @@ public:
         return menuWidth_;
     }
 
+    const std::optional<float>& GetMenuHeight() const
+    {
+        return menuHeight_;
+    }
+
     bool GetHasExtensionMenu() const
     {
         return hasExtensionMenu_;
@@ -62,6 +69,7 @@ private:
 
     OffsetF defaultMenuEndOffset_;
     std::optional<float> menuWidth_;
+    std::optional<float> menuHeight_;
     bool hasExtensionMenu_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayLayoutAlgorithm);
