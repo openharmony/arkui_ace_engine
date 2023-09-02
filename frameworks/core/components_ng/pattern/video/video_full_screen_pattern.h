@@ -16,21 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_FULL_SCREEN_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_FULL_SCREEN_PATTERN_H
 
-#include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components/video/video_controller_v2.h"
 #include "core/components_ng/pattern/video/video_node.h"
+#include "core/components_ng/pattern/video/video_pattern.h"
 
 namespace OHOS::Ace::NG {
 class VideoFullScreenPattern : public VideoPattern {
     DECLARE_ACE_TYPE(VideoFullScreenPattern, VideoPattern);
+
 public:
     VideoFullScreenPattern() = default;
-    explicit VideoFullScreenPattern(const RefPtr<VideoControllerV2>& videoController): VideoPattern(videoController) {}
+    explicit VideoFullScreenPattern(const RefPtr<VideoControllerV2>& videoController) : VideoPattern(videoController) {}
     ~VideoFullScreenPattern() override = default;
-    void InitFullScreenParam(const RefPtr<VideoPattern>& video,
-                             const RefPtr<RenderSurface>& renderSurface,
-                             const RefPtr<MediaPlayer>& mediaPlayer,
-                             const RefPtr<RenderContext>& context);
+    void InitFullScreenParam(const RefPtr<VideoPattern>& video, const RefPtr<RenderSurface>& renderSurface,
+        const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderContext>& context);
     void RequestFullScreen(const RefPtr<VideoNode>& videoNode);
 
     void ExitFullScreen();
@@ -70,8 +69,9 @@ public:
             return MakeRefPtr<VideoLayoutProperty>();
         }
         auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>()->Clone();
-        layoutProperty->ResetAspectRatio();
+        auto src_ = DynamicCast<VideoLayoutProperty>(layoutProperty)->GetVideoSourceValue("");
         layoutProperty->Reset();
+        DynamicCast<VideoLayoutProperty>(layoutProperty)->UpdateVideoSource(src_);
         return layoutProperty;
     }
 
@@ -87,5 +87,5 @@ private:
     WeakPtr<VideoPattern> videoPattern_;
     RefPtr<EventHub> eventHub_;
 };
-}
+} // namespace OHOS::Ace::NG
 #endif
