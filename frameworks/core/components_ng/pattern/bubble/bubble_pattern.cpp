@@ -565,9 +565,6 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
         case WindowSizeChangeReason::DRAG_END: {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             break;
         }
         default: {
