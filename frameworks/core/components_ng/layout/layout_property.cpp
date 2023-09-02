@@ -1001,4 +1001,61 @@ void LayoutProperty::UpdateAllGeometryTransition(const RefPtr<UINode>& parent)
         }
     }
 }
+
+std::pair<bool, bool> LayoutProperty::GetPercentSensitive()
+{
+    if (!contentConstraint_.has_value()) {
+        return { false, false };
+    }
+    std::pair<bool, bool> res = { false, false };
+    const auto& constraint = contentConstraint_.value();
+    if (GreaterOrEqualToInfinity(constraint.maxSize.Height())) {
+        if (calcLayoutConstraint_ && calcLayoutConstraint_->PercentHeight()) {
+            res.second = true;
+        }
+    }
+    if (GreaterOrEqualToInfinity(constraint.maxSize.Width())) {
+        if (calcLayoutConstraint_ && calcLayoutConstraint_->PercentWidth()) {
+            res.first = true;
+        }
+    }
+    return res;
+}
+
+std::pair<bool, bool> LayoutProperty::UpdatePercentSensitive(bool width, bool height)
+{
+    if (!contentConstraint_.has_value()) {
+        return { false, false };
+    }
+    const auto& constraint = contentConstraint_.value();
+    if (GreaterOrEqualToInfinity(constraint.maxSize.Height())) {
+        heightPercentSensitive_ = heightPercentSensitive_ || height;
+    }
+    if (GreaterOrEqualToInfinity(constraint.maxSize.Width())) {
+        widthPercentSensitive_ = heightPercentSensitive_ || width;
+    }
+    return { widthPercentSensitive_, heightPercentSensitive_ };
+}
+
+bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
+    const std::optional<LayoutConstraintF>& preContentConstraint)
+{
+    if (!preLayoutConstraint || !layoutConstraint_) {
+        return false;
+    }
+    if (!preContentConstraint || !contentConstraint_) {
+        return false;
+    }
+    const auto& layout = layoutConstraint_.value();
+    const auto& content = contentConstraint_.value();
+    if (GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {
+        return (layout.EqualWithoutPercentWidth(preLayoutConstraint.value()) &&
+            content.EqualWithoutPercentWidth(preContentConstraint.value()));
+    }
+    if (GreaterOrEqualToInfinity(layout.maxSize.Height()) && !heightPercentSensitive_) {
+        return (layout.EqualWithoutPercentHeight(preLayoutConstraint.value()) &&
+            content.EqualWithoutPercentHeight(preContentConstraint.value()));
+    }
+    return (preLayoutConstraint == layoutConstraint_ && preContentConstraint == contentConstraint_);
+}
 } // namespace OHOS::Ace::NG
