@@ -542,7 +542,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubGetHoverEffectStr001, TestSize.Level1
      */
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
-            inputEventHub->GetHoverEffectStr();
+            EXPECT_EQ(inputEventHub->GetHoverEffectStr(), i==0&&j==0?"HoverEffect.Auto":(i==0&&j==1?"HoverEffect.Scale":(i==1&&j==0?"HoverEffect.Highlight":"HoverEffect.None")));
             if (i == 1) {
                 inputEventHub->hoverEffectType_ = HoverEffectType::NONE;
                 continue;
@@ -552,6 +552,6 @@ HWTEST_F(InputEventHubTestNg, InputEventHubGetHoverEffectStr001, TestSize.Level1
         inputEventHub->hoverEffectType_ = HoverEffectType::BOARD;
     }
     inputEventHub->hoverEffectType_ = HoverEffectType::OPACITY;
-    inputEventHub->GetHoverEffectStr();
+    EXPECT_EQ(inputEventHub->GetHoverEffectStr(), "HoverEffect.Auto");
 }
 } // namespace OHOS::Ace::NG
