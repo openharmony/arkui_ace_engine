@@ -20,7 +20,7 @@
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
-
+#include "core/commonents_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/render/drawing.h"
 #endif
 #include "core/components_ng/image_provider/image_object.h"
@@ -45,7 +45,7 @@ RefPtr<NG::ImageData> FlutterImageCache::GetDataFromCacheFile(const std::string&
     return data ? AceType::MakeRefPtr<NG::SkiaImageData>(data) : nullptr;
 #else
     auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
-    return rsData ? AceType::MakeRefPtr<RosenCachedImageData>(rsData) : nullptr;
+    return rsData ? AceType::MakeRefPtr<NG::DrawingImageData>(rsData) : nullptr;
 #endif
 }
 

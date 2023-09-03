@@ -191,9 +191,9 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(cacheData->GetDataWrapper());
     return *skData;
 #else
-    auto rosenCachedImageData = AceType::DynamicCast<RosenCachedImageData>(cacheData);
+    auto rosenCachedImageData = AceType::DynamicCast<NG::DrawingImageData>(cacheData);
     CHECK_NULL_RETURN(rosenCachedImageData, nullptr);
-    return rosenCachedImageData->GetRsData();
+    return rosenCachedImageData->GetRSData();
 #endif
 }
 
@@ -244,7 +244,7 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
         }
         rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
-        ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<RosenCachedImageData>(rsData));
+        ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<NG::DrawingImageData>(rsData));
     } while (0);
     return NG::ImageData::MakeFromDataWrapper(reinterpret_cast<void*>(&rsData));
 #endif

@@ -52,7 +52,7 @@ public:
         const RefPtr<SkiaImageData>& data, const ResizeParam& size, const std::string& url);
 #else
     static RefPtr<CanvasImage> Create(
-        const RefPtr<DrawingImageData>& data, const SizeParam& size, const std::string& url);
+        const RefPtr<DrawingImageData>& data, const ResizeParam& size, const std::string& url);
 #endif
     void ControlAnimation(bool play) override;
     void SetRedrawCallback(std::function<void()>&& callback) override

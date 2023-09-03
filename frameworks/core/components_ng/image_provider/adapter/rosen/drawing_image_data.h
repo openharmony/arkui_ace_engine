@@ -18,6 +18,7 @@
 
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 
 namespace OHOS::Ace::NG {
 class DrawingImageData : public ImageData {
