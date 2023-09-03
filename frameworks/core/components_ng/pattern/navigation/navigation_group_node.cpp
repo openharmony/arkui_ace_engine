@@ -234,7 +234,7 @@ void NavigationGroupNode::SetBackButtonVisible(const RefPtr<UINode>& navDestinat
     CHECK_NULL_VOID(titleBarLayoutProperty);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     if (isVisible) {
         backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
