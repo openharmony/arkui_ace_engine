@@ -1569,7 +1569,7 @@ float TabBarPattern::CalculateBackChildrenMainSize(int32_t indicator)
         auto childFrameSize = childGeometryNode->GetMarginFrameSize();
         backChildrenMainSize += childFrameSize.MainSize(axis_);
     }
-    return indicator == childCount - 1 ? 0.0f : backChildrenMainSize;
+    return indicator == static_cast<int32_t>(childCount - 1) ? 0.0f : backChildrenMainSize;
 }
 
 void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
