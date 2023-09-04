@@ -96,6 +96,10 @@ public:
     RefPtr<TextFieldLayoutProperty> GetLayoutProperty();
     RefPtr<FrameNode> CreatTextFieldNode(const std::optional<std::string>& placeholder = PLACEHOLDER,
         const std::optional<std::string>& value = EMPTY_TEXT_VALUE, bool isTextArea = false);
+    void RunSetUp();
+    RefPtr<FrameNode> host_;
+    RefPtr<TextFieldPattern> pattern_;
+    RefPtr<TextFieldLayoutProperty> layoutProperty_;
 };
 
 void TextFieldPatternTestNg::SetUpTestSuite()
@@ -108,6 +112,21 @@ void TextFieldPatternTestNg::SetUpTestSuite()
 void TextFieldPatternTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void TextFieldPatternTestNg::RunSetUp()
+{
+    host_ = CreatTextFieldNode();
+    ASSERT_NE(host_, nullptr);
+    pattern_ = host_->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern_, nullptr);
+    layoutProperty_ = host_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    pattern_->clipboard_ = clipboard;
+    pattern_->paragraph_ = std::make_shared<RSParagraph>();
 }
 
 RefPtr<FrameNode> TextFieldPatternTestNg::CreatTextFieldNode(
@@ -6466,6 +6485,143 @@ HWTEST_F(TextFieldPatternTestNg, CalcCursorOffsetByPosition, TestSize.Level1)
     EXPECT_FALSE(textFieldPattern->AdjustTextRectOffsetX());
     layoutProperty->UpdateMaxLines(2);
     EXPECT_TRUE(textFieldPattern->IsTextArea());
+}
+
+/**
+ * @tc.name: GetDragUpperLeftCoordinates
+ * @tc.desc: test GetDragUpperLeftCoordinates
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetDragUpperLeftCoordinates, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    layoutProperty_->UpdateMaxLines(1);
+
+    /**
+     * @tc.steps: step2. call GetDragUpperLeftCoordinates.
+     * @tc.expected: Check result.
+     */
+    pattern_->textBoxes_.clear();
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
+
+    RSTextRect front = {};
+    front.rect.top_ = 0;
+    front.rect.left_ = 0;
+    pattern_->textBoxes_.push_back(front);
+    RSTextRect back = {};
+    back.rect.top_ = 10;
+    pattern_->textBoxes_.push_back(back);
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
+
+    pattern_->textBoxes_.clear();
+    front.rect.top_ = -100;
+    front.rect.left_ = -100;
+    pattern_->textBoxes_.push_back(front);
+    back.rect.top_ = -100;
+    pattern_->textBoxes_.push_back(back);
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: ProcessOverlay
+ * @tc.desc: test ProcessOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ProcessOverlay, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call ProcessOverlay.
+     * @tc.expected: Check result.
+     */
+    pattern_->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    pattern_->UpdateEditingValue("", 0);
+    pattern_->isSingleHandle_ = false;
+    pattern_->ProcessOverlay(false);
+    EXPECT_TRUE(pattern_->isSingleHandle_) << "create single handle";
+
+    pattern_->UpdateEditingValue("X", 0);
+    pattern_->textRect_.SetLeft(50);
+    pattern_->lastTouchOffset_.SetX(25);
+    pattern_->isSingleHandle_ = false;
+    pattern_->ProcessOverlay(false);
+    EXPECT_TRUE(pattern_->isSingleHandle_) << "create single handle";
+    EXPECT_EQ(pattern_->textSelector_.GetStart(), 0) << "update selection to 0";
+    EXPECT_EQ(pattern_->textSelector_.GetEnd(), 0) << "update selection to 0";
+
+    pattern_->UpdateEditingValue("X", 1);
+    pattern_->textRect_.SetLeft(25);
+    pattern_->lastTouchOffset_.SetX(50);
+    pattern_->isSingleHandle_ = false;
+    pattern_->ProcessOverlay(false);
+    EXPECT_TRUE(pattern_->isSingleHandle_) << "create single handle";
+    EXPECT_EQ(pattern_->textSelector_.GetStart(), 1) << "update selection to caretPosition";
+    EXPECT_EQ(pattern_->textSelector_.GetEnd(), 1) << "update selection to caretPosition";
+
+    pattern_->UpdateEditingValue("XXX", 1);
+    pattern_->isSingleHandle_ = false;
+    pattern_->textRect_.SetLeft(25);
+    pattern_->lastTouchOffset_.SetX(25);
+    pattern_->ProcessOverlay(false);
+    EXPECT_FALSE(pattern_->isSingleHandle_) << "create handles";
+    EXPECT_EQ(pattern_->textSelector_.GetStart(), 1);
+    EXPECT_EQ(pattern_->textSelector_.GetEnd(), 2);
+}
+
+/**
+ * @tc.name: UpdateRectByAlignment
+ * @tc.desc: test UpdateRectByAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateRectByAlignment, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call UpdateRectByAlignment.
+     * @tc.expected: Check result.
+     */
+    pattern_->contentRect_.SetHeight(25);
+    pattern_->frameRect_.SetHeight(200);
+    RectF rect(0, 0, 100, 100);
+    pattern_->UpdateRectByAlignment(rect);
+    EXPECT_EQ(rect.Top(), 0);
+
+    struct TestItem {
+        Alignment alignment;
+        float expectedTop;
+        std::string message;
+    };
+    pattern_->contentRect_.SetHeight(150);
+    layoutProperty_->positionProperty_ = std::make_unique<PositionProperty>();
+    std::vector<TestItem> testItems = {
+        { .alignment = Alignment::CENTER_LEFT, .expectedTop = 50, .message = "Alignment::CENTER_LEFT" },
+        { .alignment = Alignment::CENTER, .expectedTop = 50, .message = "Alignment::CENTER" },
+        { .alignment = Alignment::CENTER_RIGHT, .expectedTop = 50, .message = "Alignment::CENTER_RIGHT" },
+        { .alignment = Alignment::BOTTOM_LEFT, .expectedTop = 100, .message = "Alignment::BOTTOM_LEFT" },
+        { .alignment = Alignment::BOTTOM_CENTER, .expectedTop = 100, .message = "Alignment::BOTTOM_CENTER" },
+        { .alignment = Alignment::BOTTOM_RIGHT, .expectedTop = 100, .message = "Alignment::BOTTOM_RIGHT" },
+        { .alignment = Alignment::TOP_LEFT, .expectedTop = 0, .message = "Alignment::TOP_LEFT" },
+        { .alignment = Alignment::TOP_CENTER, .expectedTop = 0, .message = "Alignment::TOP_CENTER" },
+        { .alignment = Alignment::TOP_RIGHT, .expectedTop = 0, .message = "Alignment::TOP_RIGHT" },
+        { .alignment = Alignment(2, 2), .expectedTop = 0, .message = "Alignment(2, 2)" },
+    };
+    for (auto testItem : testItems) {
+        layoutProperty_->GetPositionProperty()->UpdateAlignment(testItem.alignment);
+        pattern_->UpdateRectByAlignment(rect);
+        EXPECT_EQ(rect.Top(), testItem.expectedTop) << testItem.message;
+    }
 }
 
 } // namespace OHOS::Ace::NG
