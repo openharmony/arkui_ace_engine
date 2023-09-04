@@ -128,6 +128,7 @@ public:
         gridLayoutInfo_.endIndex_ = gridLayoutInfo_.startIndex_ - 1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.ResetPositionFlags();
+        gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;

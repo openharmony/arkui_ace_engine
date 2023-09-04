@@ -130,6 +130,7 @@ build_component_ng("pattern_ng") {
     "grid/grid_pattern.cpp",
     "grid/grid_position_controller.cpp",
     "grid/grid_scroll/grid_scroll_layout_algorithm.cpp",
+    "grid/grid_scroll/grid_scroll_with_options_layout_algorithm.cpp",
     "grid/grid_utils.cpp",
     "grid_col/grid_col_layout_algorithm.cpp",
     "grid_col/grid_col_layout_property.cpp",
