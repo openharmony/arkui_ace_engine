@@ -119,7 +119,6 @@ class ContentItemStruct extends ViewPU {
                 bundleName: "",
                 moduleName: ""
               });
-              Image.backgroundColor(Color.Blue);
               Image.focusable(!0);
               Image.draggable(!1);
               t || Image.pop();
@@ -143,7 +142,6 @@ class ContentItemStruct extends ViewPU {
                 bundleName: "",
                 moduleName: ""
               });
-              Image.backgroundColor(Color.Blue);
               Image.focusable(!0);
               Image.draggable(!1);
               t || Image.pop();
