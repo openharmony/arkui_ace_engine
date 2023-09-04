@@ -257,6 +257,10 @@ private:
     void InitTouchEvent();
     bool SelectOverlayIsOn();
     void HandleLongPress(GestureEvent& info);
+    void FireOnSelect(int32_t selectStart, int32_t selectEnd);
+    void MouseRightFocus(const MouseInfo& info);
+    void HandleMouseLeftButton(const MouseInfo& info);
+    void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -347,6 +351,7 @@ private:
     std::list<ResultObject> dragResultObjects_;
 #endif // ENABLE_DRAG_FRAMEWORK
     bool isCustomKeyboardAttached_ = false;
+    bool usingMouseRightButton_ = false;
     std::function<void()> customKeyboardBulder_;
     std::map<std::pair<RichEditorType, ResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
     std::optional<RichEditorType> selectedType_;

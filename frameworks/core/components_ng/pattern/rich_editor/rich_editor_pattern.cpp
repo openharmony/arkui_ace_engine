@@ -945,7 +945,9 @@ void RichEditorPattern::HandleFocusEvent()
     UseHostToUpdateTextFieldManager();
     SetCaretOffset(GetTextContentLength());
     StartTwinkling();
-    RequestKeyboard(false, true, true);
+    if (!usingMouseRightButton_) {
+        RequestKeyboard(false, true, true);
+    }
 }
 
 void RichEditorPattern::UseHostToUpdateTextFieldManager()
@@ -1055,14 +1057,7 @@ void RichEditorPattern::HandleOnSelectAll()
     selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<RichEditorEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto textSelectInfo =
-        GetSpansInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
-    if (textSelectInfo.GetSelection().resultObjects.size() > 0) {
-        eventHub->FireOnSelect(&textSelectInfo);
-    }
-    UpdateSelectionType(textSelectInfo);
+    FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     SetCaretPosition(textSize);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -2044,22 +2039,9 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
-void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
+void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
 {
-    if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
-        if (info.GetAction() == MouseAction::PRESS) {
-            LOGI("Handle mouse right button press");
-            isMousePressed_ = true;
-        }
-        if (info.GetAction() == MouseAction::RELEASE) {
-            LOGI("Handle mouse right button release");
-            rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
-                static_cast<float>(info.GetGlobalLocation().GetY()));
-            ShowSelectOverlay(RectF(), RectF());
-        }
-        return;
-    }
-    if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::MOVE) {
+    if (info.GetAction() == MouseAction::MOVE) {
         if (blockPress_ || !leftMousePress_) {
             return;
         }
@@ -2076,13 +2058,13 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         } else {
             int32_t extend = paragraph_->GetHandlePositionForClick(textOffset);
             textSelector_.Update(textSelector_.baseOffset, extend);
-            SetCaretPosition(extend);
+            SetCaretPosition(std::max(textSelector_.baseOffset, extend));
         }
         isMouseSelect_ = true;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    } else if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+    } else if (info.GetAction() == MouseAction::PRESS) {
         isMousePressed_ = true;
         if (BetweenSelectedPosition(info.GetGlobalLocation())) {
             blockPress_ = true;
@@ -2091,24 +2073,97 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
         leftMousePress_ = true;
         mouseStatus_ = MouseStatus::PRESSED;
         blockPress_ = false;
-    } else if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+    } else if (info.GetAction() == MouseAction::RELEASE) {
         blockPress_ = false;
         leftMousePress_ = false;
         mouseStatus_ = MouseStatus::RELEASED;
         isMouseSelect_ = false;
         isMousePressed_ = false;
         isFirstMouseSelect_ = true;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<RichEditorEventHub>();
-        CHECK_NULL_VOID(eventHub);
         auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
         auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-        auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-        if (!textSelectInfo.GetSelection().resultObjects.empty()) {
-            eventHub->FireOnSelect(&textSelectInfo);
+        FireOnSelect(selectStart, selectEnd);
+    }
+}
+
+void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
+{
+    if (info.GetAction() == MouseAction::PRESS) {
+        isMousePressed_ = true;
+        usingMouseRightButton_ = true;
+        CloseSelectionMenu();
+    } else if (info.GetAction() == MouseAction::RELEASE) {
+        rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
+            static_cast<float>(info.GetGlobalLocation().GetY()));
+        if (textSelector_.IsValid()) {
+            if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+                ShowSelectOverlay(RectF(), RectF());
+                isMousePressed_ = false;
+                usingMouseRightButton_ = false;
+                return;
+            } else {
+                CloseSelectOverlay();
+                ResetSelection();
+                isMouseSelect_ = false;
+            }
         }
-        UpdateSelectionType(textSelectInfo);
+        ShowSelectOverlay(RectF(), RectF());
+        MouseRightFocus(info);
+
+        TextInsertValueInfo spanInfo;
+        CalcInsertValueObj(spanInfo);
+        auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
+        if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG && spanInfo.GetOffsetInSpan() == 0) {
+            textSelector_.Update(GetCaretPosition() - 1, GetCaretPosition());
+            auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+            auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+            FireOnSelect(selectStart, selectEnd);
+            isMouseSelect_ = true;
+        }
+        isMousePressed_ = false;
+        usingMouseRightButton_ = false;
+    }
+}
+
+void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
+{
+    auto contentRect = GetTextRect();
+    contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
+    contentRect.SetHeight(contentRect.Height() - std::max(baselineOffset_, 0.0f));
+    Offset textOffset = { info.GetLocalLocation().GetX() - contentRect.GetX(),
+        info.GetLocalLocation().GetY() - contentRect.GetY() };
+    CHECK_NULL_VOID(paragraph_);
+    auto position = paragraph_->GetHandlePositionForClick(textOffset);
+    float caretHeight = 0.0f;
+    OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
+    SetCaretPosition(position);
+    CHECK_NULL_VOID(richEditorOverlayModifier_);
+    richEditorOverlayModifier_->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+    StartTwinkling();
+}
+
+void RichEditorPattern::FireOnSelect(int32_t selectStart, int32_t selectEnd)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
+    if (!textSelectInfo.GetSelection().resultObjects.empty()) {
+        eventHub->FireOnSelect(&textSelectInfo);
+    }
+    UpdateSelectionType(textSelectInfo);
+}
+
+void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
+        HandleMouseLeftButton(info);
+    } else if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
+        HandleMouseRightButton(info);
     }
 }
 
@@ -2806,8 +2861,7 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
     auto offset = host->GetPaintRectOffset();
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     auto eventHub = host->GetEventHub<EventHub>();
-    bool draggable = eventHub->HasOnDragStart();
-    if (draggable && GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
+    if (GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         std::vector<Rect> selectedRects;
         paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
