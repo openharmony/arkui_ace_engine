@@ -18,6 +18,9 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
+#include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
@@ -26,6 +29,7 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -224,12 +228,12 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& max
     hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(event)));
 
     // add long press event
-    auto longPressCallback = [maximizeBtn](GestureEvent& info) {
+    auto longPressCallback = [containerNode, maximizeBtn](GestureEvent& info) {
         LOGD("maximize btn long press,call showMaxMenu func");
         auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
         auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
         OffsetF menuPosition { menuPosX, menuPosY };
-        ShowMaxMenu(maximizeBtn, menuPosition);
+        ShowMaxMenu(containerNode, maximizeBtn, menuPosition);
     };
     // diable mouse left!
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
@@ -248,19 +252,20 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     auto hub = maximizeBtn->GetOrCreateInputEventHub();
-    auto hoverMoveFuc = [maximizeBtn, pipeline](MouseInfo& info) {
+    auto hoverMoveFuc = [containerNode, maximizeBtn, pipeline](MouseInfo& info) {
         LOGD("container window on hover event action_ = %{public}d sIsMenuPending_ %{public}d", info.GetAction(),
             sIsMenuPending_);
         if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE) {
-            auto&& callback = [maximizeBtn, info]() {
+            auto&& callback = [containerNode, maximizeBtn, info]() {
                 auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() -
                     MENU_FLOAT_X.ConvertToPx();
                 auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() +
                     MENU_FLOAT_Y.ConvertToPx();
                 OffsetF menuPosition {menuPosX, menuPosY};
-                ShowMaxMenu(maximizeBtn, menuPosition);
+                ShowMaxMenu(containerNode, maximizeBtn, menuPosition);
             };
             sContextTimer_.Reset(callback);
+            ACE_SCOPED_TRACE("ContainerModalEnhance::PendingMaxMenu");
             pipeline->GetTaskExecutor()->PostDelayedTask(sContextTimer_, TaskExecutor::TaskType::UI,
                 MENU_TASK_DELAY_TIME);
             sIsMenuPending_ = true;
@@ -280,14 +285,16 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
     hub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
 }
 
-RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition)
+RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>& containerNode,
+    const RefPtr<FrameNode>& targetNode, OffsetF menuPosition)
 {
     LOGI("ShowMaxMenu called");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-
+    auto pattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
     // menu list
     auto menuList = FrameNode::CreateFrameNode(
         V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
@@ -302,8 +309,12 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
         menuList->AddChild(BuildLeftSplitMenuItem());
         menuList->AddChild(BuildRightSplitMenuItem());
     }
-    if ((!SubwindowManager::GetInstance()->GetCurrentWindow()
-        || !SubwindowManager::GetInstance()->GetCurrentWindow()->GetShown())) {
+    auto subWindowManger = SubwindowManager::GetInstance();
+    CHECK_NULL_RETURN(subWindowManger, nullptr);
+    if ((!subWindowManger->GetSubwindow(Container::CurrentId())
+        || !subWindowManger->GetSubwindow(Container::CurrentId())->GetShown())) {
+        ACE_SCOPED_TRACE("ContainerModalViewEnhance::ShowMaxMenu");
+        pattern->SetOnShowFloatingSubWindow(true);
         MenuParam menu {};
         menu.isAboveApps = true;
         ViewAbstract::BindMenuWithCustomNode(menuList, targetNode, MenuType::CONTEXT_MENU, menuPosition, menu);
@@ -330,6 +341,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
         if (MaximizeMode::MODE_AVOID_SYSTEM_BAR == windowManager->GetCurrentWindowMaximizeMode()) {
             windowManager->WindowRecover();
         } else {
+            ACE_SCOPED_TRACE("ContainerModalViewEnhance::SwithToMaximize");
             windowManager->SetWindowMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
             windowManager->WindowMaximize(true);
         }
@@ -361,16 +373,18 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
         }
         ResetHoverTimer();
         LOGD("Enhance Menu, MODE_FULLSCREEN selected");
-        if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode()) {
+        if (MaximizeMode::MODE_FULL_FILL == windowManager->GetCurrentWindowMaximizeMode() &&
+            WindowMode::WINDOW_MODE_FULLSCREEN == windowManager->GetWindowMode()) {
             windowManager->WindowRecover();
         } else {
+            ACE_SCOPED_TRACE("ContainerModalViewEnhance::SwithToFULLFILL");
             windowManager->SetWindowMaximizeMode(MaximizeMode::MODE_FULL_FILL);
             windowManager->WindowMaximize(true);
         }
     };
     auto fullScreenEvent = AceType::MakeRefPtr<ClickEvent>(std::move(fullScreenClickFunc));
-    auto curMaxMode = windowManager->GetCurrentWindowMaximizeMode();
-    auto fullScreenTitle = Localization::GetInstance()->GetEntryLetters(curMaxMode == MaximizeMode::MODE_FULL_FILL ?
+    auto fullScreenTitle = Localization::GetInstance()->GetEntryLetters(
+        WindowMode::WINDOW_MODE_FULLSCREEN == windowManager->GetWindowMode() ?
         "window.exitFullScreen" : "window.fullScreen");
     auto fullScreenRow = BuildMenuItem(fullScreenTitle, InternalResource::ResourceId::IC_WINDOW_MENU_FULLSCREEN,
         fullScreenEvent, windowManager->GetWindowMaximizeMode() == MaximizeMode::MODE_FULL_FILL);
