@@ -3270,6 +3270,40 @@ RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
     return MakeRefPtr<RichEditorPaintMethod>(WeakClaim(this), &paragraphs_, baselineOffset_, contentMod_, overlayMod_);
 }
 
+int32_t RichEditorPattern::GetHandleIndex(const Offset& offset) const
+{
+    return paragraphs_.GetIndex(offset);
+}
+
+#ifndef USE_GRAPHIC_TEXT_GINE
+std::vector<RSTypographyProperties::TextBox> RichEditorPattern::GetTextBoxes()
+#else
+std::vector<RSTextRect> RichEditorPattern::GetTextBoxes()
+#endif
+{
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetStart(), textSelector_.GetEnd());
+#ifndef USE_GRAPHIC_TEXT_GINE
+    std::vector<RSTypographyProperties::TextBox> res;
+#else
+    std::vector<RSTextRect> res;
+#endif
+    res.reserve(selectedRects.size());
+    for (auto&& rect : selectedRects) {
+        if (NearZero(rect.Width())) {
+            continue;
+        }
+        res.emplace_back(ConvertRect(rect));
+    }
+    return res;
+}
+
+float RichEditorPattern::GetLineHeight() const
+{
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetStart(), textSelector_.GetEnd());
+    CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
+    return selectedRects.front().Height();
+}
+
 void RichEditorPattern::UpdateSelectionType(RichEditorSelection& selection)
 {
     selectedType_.reset();
