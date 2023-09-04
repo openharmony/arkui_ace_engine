@@ -1423,17 +1423,19 @@ VectorF FrameNode::GetTransformScale() const
     return renderContext_->GetTransformScaleValue({ 1.0f, 1.0f });
 }
 
-bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType)
+bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t sourceType)
 {
     bool isInChildRegion = false;
-    auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto paintRect = renderContext_->GetPaintRectWithoutTransform();
     auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
-    auto localPoint = parentLocalPoint - paintRect.GetOffset();
     auto renderContext = GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    renderContext->GetPointWithTransform(localPoint);
+
+    auto revertPoint = parentRevertPoint;
+    renderContext->GetPointWithRevert(revertPoint);
+    auto subRevertPoint = revertPoint - paintRect.GetOffset();
     auto clip = renderContext->GetClipEdge().value_or(false);
-    if (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) {
+    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable()) {
         if (clip) {
             if (SystemProperties::GetDebugEnabled()) {
                 LOGI("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
@@ -1442,7 +1444,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t s
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = iter->Upgrade();
-            if (child && !child->IsOutOfTouchTestRegion(localPoint, sourceType)) {
+            if (child && !child->IsOutOfTouchTestRegion(subRevertPoint, sourceType)) {
                 if (SystemProperties::GetDebugEnabled()) {
                     LOGI("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
                 }
@@ -1461,7 +1463,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t s
 }
 
 HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
+    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         if (SystemProperties::GetDebugEnabled()) {
@@ -1484,8 +1486,9 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
         translateIds[GetId()] = ancestorNodeInfo;
     }
-    auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
+
     if (SystemProperties::GetDebugEnabled()) {
+        auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
         LOGI("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
             GetTag().c_str(), GetDepth());
         for (const auto& rect : responseRegionList) {
@@ -1495,7 +1498,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        if (IsOutOfTouchTestRegion(parentLocalPoint, static_cast<int32_t>(touchRestrict.sourceType))) {
+        if (IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType))) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
@@ -1512,6 +1515,11 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     renderContext_->GetPointWithTransform(tmp);
     const auto localPoint = tmp;
     auto localTransformOffset = preLocation - localPoint;
+
+    auto origRect = renderContext_->GetPaintRectWithoutTransform();
+    auto revertPoint = parentRevertPoint;
+    renderContext_->GetPointWithRevert(revertPoint);
+    auto subRevertPoint = revertPoint - origRect.GetOffset();
     bool consumed = false;
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
         if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
@@ -1522,7 +1530,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (!child) {
             continue;
         }
-        auto childHitResult = child->TouchTest(globalPoint, localPoint, touchRestrict, newComingTargets, touchId);
+        auto childHitResult = child->TouchTest(globalPoint, localPoint, subRevertPoint, touchRestrict,
+            newComingTargets, touchId);
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
@@ -1552,8 +1561,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         testResult = HitTestResult::STOP_BUBBLING;
     }
 
-    if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
-        (InResponseRegionList(parentLocalPoint, responseRegionList))) {
+    if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE)) {
         pattern_->OnTouchTestHit(touchRestrict.hitTestType);
         consumed = true;
         if (touchRestrict.hitTestType == SourceType::TOUCH) {
