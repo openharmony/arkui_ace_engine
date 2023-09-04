@@ -342,9 +342,8 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
         auto icurve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
         float maxDis = sqrt(pow(halfSize, 2.0)+ pow(halfSize, 2.0));
-        float currentX = buttonPattern -> GetLocalLocation().GetX();
-        float currentY = buttonPattern -> GetLocalLocation().GetY();
-        float curDis = sqrt(pow(currentX - halfSize, 2.0)+ pow(currentY - halfSize, 2.0));
+        float curDis = sqrt(pow( buttonPattern -> GetLocalLocation().GetX() - halfSize, 2.0)
+            + pow(buttonPattern -> GetLocalLocation().GetY() - halfSize, 2.0));
         float currentScale = 1+ 0.1 * icurve -> Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
         float imageTranslate = 2 * icurve -> Move((maxDis - curDis) / (maxDis));
