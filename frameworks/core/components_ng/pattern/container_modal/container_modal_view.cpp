@@ -37,7 +37,6 @@
 #include "core/event/mouse_event.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char SPLIT_LEFT_KEY[] = "container_modal_split_left_button";
@@ -341,10 +340,11 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         CHECK_NULL_VOID(buttonPattern);
         buttonPattern->SetInHover(isHover);
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
-
-        auto icurve = MakeRefPtr<CubicCurve>(0.2f,0.0f,0.2f,1.0f);
-        float maxDis = sqrt(pow(halfSize, 2.0)+pow(halfSize,2.0));
-        float curDis = sqrt(pow(buttonPattern->GetLocalLocation().GetX()-halfSize, 2.0)+pow(buttonPattern->GetLocalLocation().GetY(),2.0));
+        auto icurve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
+        float maxDis = sqrt(pow(halfSize, 2.0)+ pow(halfSize, 2.0));
+        float currentX = buttonPattern -> GetLocalLocation().GetX();
+        float currentY = buttonPattern -> GetLocalLocation().GetY();
+        float curDis = sqrt(pow(currentX - halfSize, 2.0)+ pow(currentY - halfSize, 2.0));
         float currentScale = 1+ 0.1 * icurve -> Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
         float imageTranslate = 2 * icurve -> Move((maxDis - curDis) / (maxDis));
@@ -359,7 +359,6 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         AnimationOption option = AnimationOption();
         auto motion = MakeRefPtr<ResponsiveSpringMotion>(0.35, 0.86, 0.25);
         option.SetCurve(motion);
-        
         TranslateOptions translate;
         translate.x = isHover ? translateX : 0.0f;
         translate.y = isHover ? translateY : 0.0f;
@@ -403,9 +402,11 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         auto imageIconRenderContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageIconRenderContext);
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
-        auto icurve = MakeRefPtr<CubicCurve>(0.2f,0.0f,0.2f,1.0f);
-        float maxDis = sqrt(pow(halfSize, 2.0)+pow(halfSize,2.0));
-        float curDis = sqrt(pow(buttonPattern->GetLocalLocation().GetX()-halfSize, 2.0)+pow(buttonPattern->GetLocalLocation().GetY(),2.0));
+        auto icurve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
+        float maxDis = sqrt(pow(halfSize, 2.0)+ pow(halfSize, 2.0));
+        float currentX = info.GetLocalLocation().GetX();
+        float currentY = info.GetLocalLocation().GetY();
+        float curDis = sqrt(pow(currentX - halfSize, 2.0)+pow(currentY - halfSize, 2.0));
         float currentScale = 1+ 0.1 * icurve -> Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
         float imageScale = baseScale;
