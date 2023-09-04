@@ -150,6 +150,7 @@ void SwiperPattern::StopAndResetSpringAnimation()
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
     }
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::OnLoopChange()
@@ -1457,6 +1458,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         }
 
         if (edgeEffect == EdgeEffect::NONE) {
+            UpdateItemRenderGroup(false);
             return;
         }
     }
@@ -2599,6 +2601,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
         OnIndexChange();
         oldIndex_ = currentIndex_;
     }
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
