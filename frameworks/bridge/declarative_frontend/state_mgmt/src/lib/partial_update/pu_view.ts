@@ -62,6 +62,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // inActive means updates are delayed
   private isActive_ : boolean = true;
 
+  private runReuse_: boolean = false;
+
+  private paramsGenerator_: () => { [key: string]: unknown };
+
   // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
   private isDeleting_: boolean = false;
 
@@ -166,6 +170,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // that the View and thereby all properties
   // are about to be deleted
   abstract aboutToBeDeleted(): void;
+
+  abstract aboutToReuse(params: { [key: string]: unknown }): void;
+
+  abstract aboutToRecycle(): void;
 
   // super class will call this function from
   // its aboutToBeDeleted implementation
@@ -415,7 +423,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.syncInstanceId();
 
       if (dependentElmtIds.size && !this.isFirstRender()) {
-        if (!this.dirtDescendantElementIds_.size) {
+        if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
           // mark ComposedElement dirty when first elmtIds are added
           // do not need to do this every time
           this.markNeedUpdate();
@@ -571,6 +579,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
     } while(this.dirtDescendantElementIds_.size);
   }
 
+  public updateRecycleDirtyElements() {
+    Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+        this.UpdateElement(elmtId);
+    });
+    this.dirtDescendantElementIds_.clear();
+  }
+
   //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
   purgeDeletedElmtIds(rmElmtIds: number[]) {
     if (rmElmtIds.length == 0) {
@@ -690,6 +705,39 @@ abstract class ViewPU extends NativeViewPartialUpdate
     node.updateId(newElmtId);
     node.updateRecycleElmtId(oldElmtId, newElmtId);
     SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+  }
+
+  aboutToReuseInternal() {
+      this.runReuse_ = true;
+      if (this.aboutToReuse && typeof this.aboutToReuse === "function") {
+          stateMgmtTrace.scopedTrace(() => {
+              this.aboutToReuse(this?.paramsGenerator_());
+          }, "aboutToReuse", this.constructor.name);
+      }
+      this.updateRecycleDirtyElements()
+      this.childrenWeakrefMap_.forEach((weakRefChild) => {
+          const child = weakRefChild.deref();
+          if (child) {
+              child.aboutToReuseInternal();
+          }
+      });
+      this.runReuse_ = false;
+  }
+
+  aboutToRecycleInternal() {
+      this.runReuse_ = true;
+      if (this.aboutToRecycle && typeof this.aboutToRecycle === "function") {
+          stateMgmtTrace.scopedTrace(() => {
+              this.aboutToRecycle();
+          }, "aboutToRecycle", this.constructor.name);
+      }
+      this.childrenWeakrefMap_.forEach((weakRefChild) => {
+          const child = weakRefChild.deref();
+          if (child) {
+              child.aboutToRecycleInternal();
+          }
+      });
+      this.runReuse_ = false;
   }
 
   // add current JS object to it's parent recycle manager
