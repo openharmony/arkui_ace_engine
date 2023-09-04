@@ -886,6 +886,10 @@ bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
 
 void TextFieldPattern::OnScrollEndCallback()
 {
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->ScheduleDisapplearDelayTask();
+    }
     auto selectOverlayProxy = GetSelectOverlay();
     CHECK_NULL_VOID_NOLOG(selectOverlayProxy);
     if (originalIsMenuShow_) {
