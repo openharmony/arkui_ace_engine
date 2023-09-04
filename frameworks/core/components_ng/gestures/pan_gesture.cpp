@@ -26,14 +26,13 @@ RefPtr<NGGestureRecognizer> PanGesture::CreateRecognizer()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
 
-    double distance = context->NormalizeToPx(Dimension(distance_, DimensionUnit::VP));
     RefPtr<PanRecognizer> panRecognizer;
     if (panGestureOption_) {
         LOGD("AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(panGestureOption_)");
         panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption_);
     } else {
         LOGD("AceType::MakeRefPtr<OHOS::Ace::PanRecognizer>(fingers_, direction_, distance)");
-        panRecognizer = AceType::MakeRefPtr<PanRecognizer>(fingers_, direction_, distance);
+        panRecognizer = AceType::MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
     }
     if (onActionStartId_) {
         panRecognizer->SetOnActionStart(*onActionStartId_);
