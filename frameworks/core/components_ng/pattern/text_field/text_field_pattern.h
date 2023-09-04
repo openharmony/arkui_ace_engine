@@ -769,6 +769,15 @@ public:
         dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
     }
 
+    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->RemoveDragFrameNode(frameNode->GetId());
+    }
+
     void CreateHandles() override;
 
     void CreateHandles(bool animation);
@@ -1037,6 +1046,7 @@ private:
     void InitClickEvent();
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
+    void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
 #endif
     bool CaretPositionCloseToTouchPosition();
