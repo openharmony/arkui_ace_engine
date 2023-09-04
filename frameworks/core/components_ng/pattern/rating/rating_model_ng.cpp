@@ -56,7 +56,7 @@ void RatingModelNG::SetStepSize(double value)
 void RatingModelNG::SetForegroundSrc(const std::string& value, bool flag)
 {
     if (flag) {
-        ACE_RESET_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(RatingLayoutProperty, ForegroundImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo, ImageSourceInfo(value));
     }
@@ -65,7 +65,7 @@ void RatingModelNG::SetForegroundSrc(const std::string& value, bool flag)
 void RatingModelNG::SetSecondarySrc(const std::string& value, bool flag)
 {
     if (flag) {
-        ACE_RESET_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(RatingLayoutProperty, SecondaryImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo, ImageSourceInfo(value));
     }
@@ -74,7 +74,7 @@ void RatingModelNG::SetSecondarySrc(const std::string& value, bool flag)
 void RatingModelNG::SetBackgroundSrc(const std::string& value, bool flag)
 {
     if (flag) {
-        ACE_RESET_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo);
+        ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(RatingLayoutProperty, BackgroundImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     } else {
         ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, ImageSourceInfo(value));
     }
