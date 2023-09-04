@@ -497,7 +497,7 @@ protected:
 
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
-        for (const auto& child : children_) {
+        for (const auto& child : GetChildren()) {
             child->OnGenerateOneDepthAllFrame(allList);
         }
     }
