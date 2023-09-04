@@ -346,7 +346,7 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
             + pow(buttonPattern->GetLocalLocation().GetY() - halfSize, 2.0));
         float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
-        float imageTranslate = 2 * icurve -> Move((maxDis - curDis) / (maxDis));
+        float imageTranslate = 2 * icurve->Move((maxDis - curDis) / (maxDis));
         imageMaxTranslate = imageTranslate > imageMaxTranslate ? imageTranslate : imageMaxTranslate;
         float translateX = (buttonPattern->GetLocalLocation().GetX() - halfSize) / halfSize * imageMaxTranslate;
         float translateY = (buttonPattern->GetLocalLocation().GetY() - halfSize) / halfSize * imageMaxTranslate;
