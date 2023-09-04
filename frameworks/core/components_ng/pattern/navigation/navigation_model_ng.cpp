@@ -910,6 +910,10 @@ void NavigationModelNG::SetSubtitle(const std::string& subtitle)
             navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::REPLACE);
             break;
         }
+        auto renderContext = subtitleNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->UpdateOpacity(1.0);
+        }
         auto subtitleProperty = subtitleNode->GetLayoutProperty<TextLayoutProperty>();
         if (!subtitleProperty) {
             navBarNode->UpdateSubtitleNodeOperation(ChildNodeOperation::REPLACE);
