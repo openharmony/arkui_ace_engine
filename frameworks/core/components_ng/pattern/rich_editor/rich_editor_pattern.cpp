@@ -2095,17 +2095,16 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
     } else if (info.GetAction() == MouseAction::RELEASE) {
         rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
             static_cast<float>(info.GetGlobalLocation().GetY()));
+        if (textSelector_.IsValid() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+            ShowSelectOverlay(RectF(), RectF());
+            isMousePressed_ = false;
+            usingMouseRightButton_ = false;
+            return;
+        }
         if (textSelector_.IsValid()) {
-            if (BetweenSelectedPosition(info.GetGlobalLocation())) {
-                ShowSelectOverlay(RectF(), RectF());
-                isMousePressed_ = false;
-                usingMouseRightButton_ = false;
-                return;
-            } else {
-                CloseSelectOverlay();
-                ResetSelection();
-                isMouseSelect_ = false;
-            }
+            CloseSelectOverlay();
+            ResetSelection();
+            isMouseSelect_ = false;
         }
         ShowSelectOverlay(RectF(), RectF());
         MouseRightFocus(info);
