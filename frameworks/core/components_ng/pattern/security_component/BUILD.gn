@@ -34,14 +34,15 @@ build_component_ng("security_component_pattern_ng") {
   if (is_standard_system) {
     configs = [ ":ohos_security_component_config" ]
     external_deps = []
+
     if (security_component_enable) {
       sources += [ "security_component_probe.cpp" ]
       external_deps += [
         "ability_runtime:abilitykit_native",
         "access_token:libaccesstoken_sdk",
         "napi:ace_napi",
-        "security_component:libsecurity_component_framework",
-        "security_component:libsecurity_component_sdk",
+        "security_component_manager:libsecurity_component_framework",
+        "security_component_manager:libsecurity_component_sdk",
       ]
     }
   }
