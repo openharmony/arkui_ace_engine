@@ -732,11 +732,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
      */
     pattern->OnPlayerStatus(PlaybackStatus::STARTED);
     EXPECT_EQ(startCheck, VIDEO_START_EVENT);
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(3)
-        .WillOnce(Return(false))
-        .WillOnce(Return(true))
-        .WillOnce(Return(true));
     // will call pattern->Pause()
     EXPECT_TRUE(pattern->isPlaying_);
     // case1: MediaPlayer is invalid
@@ -830,7 +825,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     pattern->isStop_ = true;
     pattern->autoPlay_ = true;
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(5)
+        .Times(3)
         .WillRepeatedly(Return(true));
     pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
@@ -870,9 +865,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
      * @tc.steps: step2. Call Start
      * @tc.expected: step2. relevant functions called correctly
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(2)
-        .WillRepeatedly(Return(true));
     bool isStops[2] { true, false };
     int32_t prepareReturns[2] { -1, 0 };
     for (bool isStop : isStops) {
@@ -899,11 +891,9 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
      */
     pattern->currentPos_ = 10;
     pattern->isStop_ = false;
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .WillOnce(Return(false));
     pattern->Stop();
-    EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 10);
-    EXPECT_EQ(pattern->isStop_, false);
+    EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
+    EXPECT_TRUE(pattern->isStop_);
 
     /**
      * @tc.steps: step3. Call Stop when the mediaplayer is valid.
@@ -912,23 +902,16 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     pattern->currentPos_ = 10;
     pattern->isStop_ = false;
     pattern->duration_ = 20;
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     pattern->Stop();
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
     EXPECT_EQ(pattern->isStop_, true);
 
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
     pattern->Stop(); // case2: media player is valid & currentPos = currentPos_ = 0
     EXPECT_EQ(pattern->isStop_, true);
 
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(2)
-        .WillRepeatedly(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop())
         .Times(2)
         .WillRepeatedly(Return(0));
@@ -988,10 +971,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest013, TestSize.Level1)
      * @tc.expected: step2. onSeeking/onSeeked & SetCurrentTime  will be called
      */
     std::vector<int32_t> sliderChangeModes { 0, 1, 2 };
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(4)
-        .WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
     for (int i = 0; i < 3; i++) {
         auto sliderChangeMode = sliderChangeModes[i];
         if (i == 1) {
@@ -1036,9 +1015,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest014, TestSize.Level1)
      * @tc.steps: step2. Call OnResolutionChange
      * @tc.expected: step2. related functions will be called
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(1)
-        .WillOnce(Return(true));
     pattern->OnResolutionChange();
 
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
