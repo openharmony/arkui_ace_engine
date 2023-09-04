@@ -395,11 +395,12 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
                                   PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
         CalcDimension size;
-        if (versionTenOrLarger ? !ParseJsDimensionVpNG(fontSize, size) : !ParseJsDimensionVp(fontSize, size) ||
-            !ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            font.fontSize = Dimension(-1);
-        } else {
+        if (versionTenOrLarger ? ParseJsDimensionVpNG(fontSize, size) : ParseJsDimensionVp(fontSize, size) &&
+            size.Unit() != DimensionUnit::PERCENT) {
+            ParseJsDimensionFp(fontSize, size);
             font.fontSize = size;
+        } else {
+            font.fontSize = Dimension(-1);
         }
     }
 
