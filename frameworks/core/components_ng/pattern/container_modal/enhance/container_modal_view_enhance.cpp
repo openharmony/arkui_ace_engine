@@ -255,7 +255,8 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
     auto hoverMoveFuc = [containerNode, maximizeBtn, pipeline](MouseInfo& info) {
         LOGD("container window on hover event action_ = %{public}d sIsMenuPending_ %{public}d", info.GetAction(),
             sIsMenuPending_);
-        if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE) {
+        bool isLeftButtonPressed = info.GetButton() == MouseButton::LEFT_BUTTON;
+        if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE && !isLeftButtonPressed) {
             auto&& callback = [containerNode, maximizeBtn, info]() {
                 auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() -
                     MENU_FLOAT_X.ConvertToPx();
