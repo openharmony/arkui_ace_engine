@@ -288,4 +288,38 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
+
+/**
+ * @tc.name: DragEventTestNg001
+ * @tc.desc: Create DragEventActuator and invoke OnCollectTouchTarget function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, 0, 50.0f);
+    dragEventActuator->StartDragTaskForWeb(GestureEvent());
+    auto actionStart = [](GestureEvent&) {};
+    auto longPressUpdate = [](GestureEvent&) {};
+    dragEventActuator->actionStart_ = actionStart;
+    dragEventActuator->StartDragTaskForWeb(GestureEvent());
+
+    dragEventActuator->CancelDragForWeb();
+    auto actionCancel = []() {};
+    dragEventActuator->actionCancel_ = actionCancel;
+    dragEventActuator->CancelDragForWeb();
+
+    dragEventActuator->StartLongPressActionForWeb();
+    dragEventActuator->isReceivedLongPress_ = true;
+    dragEventActuator->StartLongPressActionForWeb();
+    dragEventActuator->isReceivedLongPress_ = true;
+    dragEventActuator->longPressUpdate_ = longPressUpdate;
+    dragEventActuator->StartLongPressActionForWeb();
+    ASSERT_FALSE(dragEventActuator->isReceivedLongPress_);
+}
 } // namespace OHOS::Ace::NG
