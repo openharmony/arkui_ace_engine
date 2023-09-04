@@ -90,21 +90,25 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
     OffsetF menuPosition;
+    bool isExtension = false;
 
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
     double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
 
-    auto menuWidth = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
-    auto menuHeight = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
+    auto width = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
+    auto height = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
 
     // When the extended menu is displayed, the default menu becomes circular, but the position of the circle is aligned
     // with the end of the original menu.
-    if (GreatNotEqual(menuWidth, menuHeight)) {
-        menuWidth_ = menuWidth;
+    if (GreatNotEqual(width, height)) {
+        menuWidth_ = width;
+        menuHeight_ = height;
     } else {
-        return defaultMenuEndOffset_ - OffsetF(menuWidth, 0.0f);
+        isExtension = true;
     }
+    auto menuWidth = menuWidth_.value_or(width);
+    auto menuHeight = menuHeight_.value_or(height);
 
     // paint rect is in global position, need to convert to local position
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
@@ -168,6 +172,9 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     }
     LOGD("select_overlay menuPosition: %{public}s", menuPosition.ToString().c_str());
     defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
+    if (isExtension) {
+        return defaultMenuEndOffset_ - OffsetF(width, 0);
+    }
     return menuPosition;
 }
 
