@@ -387,10 +387,13 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
-        font.fontSize = Dimension(-1);
+        font.fontSize = themeFontSize;
     } else {
         auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
                                   PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
@@ -400,7 +403,7 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
             ParseJsDimensionFp(fontSize, size);
             font.fontSize = size;
         } else {
-            font.fontSize = Dimension(-1);
+            font.fontSize = themeFontSize;
         }
     }
 
@@ -435,14 +438,17 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");
-    CalcDimension size = Dimension(-1);
+    CalcDimension size = themeFontSize;
     if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
         GreatOrEqual(size.Value(), 0.0)) {
         ParseJsDimensionFp(fontSize, size);
     } else {
-        size = Dimension(-1);
+        size = themeFontSize;
     }
     font.fontSize = size;
 
