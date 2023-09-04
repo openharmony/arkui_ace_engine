@@ -2618,7 +2618,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
     RefPtr<UINode> child;
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
-    LOGI("InsertValueByPaste spanIndex: %{public}d,  offset inspan:  %{public}d, caretPosition: %{public}d",
+    LOGD("InsertValueByPaste spanIndex: %{public}d,  offset inspan:  %{public}d, caretPosition: %{public}d",
         info.GetSpanIndex(), info.GetOffsetInSpan(), caretPosition_);
     TextSpanOptions options;
     options.value = insertValue;
@@ -2640,13 +2640,13 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
             } else {
                 InsertValueToSpanNode(spanNode, insertValue, info);
             }
-            LOGI("insert first record after SpanNode, caretSpanIndex: %{public}d ", caretSpanIndex_);
+            LOGD("insert first record after SpanNode, caretSpanIndex: %{public}d ", caretSpanIndex_);
             return;
         } else if (!child) {
             auto spanNodeBefore = DynamicCast<SpanNode>(GetChildByIndex(info.GetSpanIndex() - 1));
             if (spanNodeBefore == nullptr) {
                 caretSpanIndex_ = AddTextSpan(options, true);
-                LOGI("insert the first record at the end, caretSpanIndex: %{public}d ", caretSpanIndex_);
+                LOGD("insert the first record at the end, caretSpanIndex: %{public}d ", caretSpanIndex_);
                 return;
             }
             if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNodeBefore)) {
@@ -2657,7 +2657,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
                 InsertValueToBeforeSpan(spanNodeBefore, insertValue);
                 caretSpanIndex_ = info.GetSpanIndex() - 1;
             }
-            LOGI("insert the first record at the before spanNode, caretSpanIndex: "
+            LOGD("insert the first record at the before spanNode, caretSpanIndex: "
                     "%{public}d",
                 caretSpanIndex_);
             return;
@@ -2667,7 +2667,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
         if (child && child->GetTag() == V2::SPAN_ETS_TAG) {
             auto spanNode = DynamicCast<SpanNode>(child);
             CHECK_NULL_VOID(spanNode);
-            LOGI("insert record after spanNode at caretSpanIndex: %{public}d ", caretSpanIndex_);
+            LOGD("insert record after spanNode at caretSpanIndex: %{public}d ", caretSpanIndex_);
             if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNode)) {
                 options.offset = newSpanOffset;
                 caretSpanIndex_ = AddTextSpan(options, true);
@@ -2678,7 +2678,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
         }
     }
     if (child && child->GetTag() == V2::IMAGE_ETS_TAG) {
-        LOGI("InsertValueByPaste after imageNode");
+        LOGD("InsertValueByPaste after imageNode");
         auto spanNodeBefore = DynamicCast<SpanNode>(GetChildByIndex(info.GetSpanIndex() - 1));
         if (spanNodeBefore != nullptr && caretSpanIndex_ == -1) {
             if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNodeBefore)) {
@@ -2688,26 +2688,26 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
                 InsertValueToBeforeSpan(spanNodeBefore, insertValue);
                 caretSpanIndex_ = info.GetSpanIndex() - 1;
             }
-            LOGI("child is image and insert the first record at the before spanNode, "
+            LOGD("child is image and insert the first record at the before spanNode, "
                  "caretSpanIndex: %{public}d",
                 caretSpanIndex_);
         } else {
             auto imageNode = DynamicCast<FrameNode>(child);
             if (imageNode && caretSpanIndex_ == -1) {
                 caretSpanIndex_ = AddTextSpan(options, true, info.GetSpanIndex());
-                LOGI("child is image and insert the first record after imageNode, "
+                LOGD("child is image and insert the first record after imageNode, "
                      "caretSpanIndex: %{public}d",
                     caretSpanIndex_);
             } else {
                 caretSpanIndex_ = AddTextSpan(options, true, caretSpanIndex_ + 1);
-                LOGI("child is image and insert the record after imageNode, "
+                LOGD("child is image and insert the record after imageNode, "
                      "caretSpanIndex: %{public}d",
                     caretSpanIndex_);
             }
         }
     } else {
         caretSpanIndex_ = AddTextSpan(options, true);
-        LOGI("after insert, caretSpanIndex: %{public}d ", caretSpanIndex_);
+        LOGD("after insert, caretSpanIndex: %{public}d ", caretSpanIndex_);
     }
 }
 
