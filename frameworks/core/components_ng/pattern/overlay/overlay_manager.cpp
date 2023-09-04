@@ -1963,7 +1963,7 @@ void OverlayManager::MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnN
 void OverlayManager::MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
 {
     CHECK_NULL_VOID(windowScene);
-    columnNode->MountToParent(windowScene, 1);
+    columnNode->MountToParent(windowScene);
     columnNode->OnMountToParentDone();
     eventColumnNodeWeak_ = columnNode;
     hasEvent_ = true;

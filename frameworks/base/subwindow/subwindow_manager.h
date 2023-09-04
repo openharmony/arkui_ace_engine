@@ -75,7 +75,7 @@ public:
     bool CancelPopup(const std::string& id);
     void CloseMenu();
     void ClearMenu();
-    void ClearMenuNG(int32_t instanceId = -1);
+    void ClearMenuNG(int32_t instanceId = -1, bool inWindow = true);
     RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, std::function<void()>&& buildFunc);
     void HideSubWindowNG();
 
