@@ -43,10 +43,12 @@ constexpr char SPLIT_LEFT_KEY[] = "container_modal_split_left_button";
 constexpr char MAXIMIZE_KEY[] = "container_modal_maximize_button";
 constexpr char MINIMIZE_KEY[] = "container_modal_minimize_button";
 constexpr char CLOSE_KEY[] = "container_modal_close_button";
-float imageMaxTranslate = 0.0f;
-float baseScale = 1.0f;
+constexpr float springMotionResponse = 0.55f;
+constexpr float currentRatio = 0.86f;
+constexpr float currentDuration = 0.25f;
 } // namespace
-
+float ContainerModalView::imageMaxTranslate = 0.0f;
+float ContainerModalView::baseScale = 1.0f;
 /**
  * The structure of container_modal is designed as follows :
  * |--container_modal(stack)
@@ -356,7 +358,7 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         CHECK_NULL_VOID(imageIconRenderContext);
         float imageScale = isHover ? baseScale : 1.0f;
         AnimationOption option = AnimationOption();
-        auto motion = MakeRefPtr<ResponsiveSpringMotion>(0.35, 0.86, 0.25);
+        auto motion = MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, currentRatio, currentDuration);
         option.SetCurve(motion);
         TranslateOptions translate;
         translate.x = isHover ? translateX : 0.0f;
