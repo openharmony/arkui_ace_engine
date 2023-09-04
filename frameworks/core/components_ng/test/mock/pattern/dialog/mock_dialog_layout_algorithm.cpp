@@ -37,13 +37,13 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 }
 
 OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
-    const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& selfSize) const
+    const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& selfSize)
 {
     return OffsetF(0, 0);
 }
 
 bool DialogLayoutAlgorithm::SetAlignmentSwitch(
-    const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint) const
+    const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint)
 {
     return false;
 }
