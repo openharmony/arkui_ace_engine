@@ -34,8 +34,31 @@ public:
 
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    bool HasCustomBuilderIndex() const
+    {
+        return customBuilderIndex_.has_value();
+    }
+
+    void SetCustomBuilderIndex(int32_t index)
+    {
+        customBuilderIndex_ = index;
+    }
+
+    void SetCustomBuilderOffset(float offset)
+    {
+        customBuilderOffset_ = offset;
+    }
+
+    void SetScrollOffset(float offset)
+    {
+        scrollOffset_ = offset;
+    }
+
 private:
-    static void PerformLayout(LayoutWrapper* layoutWrapper);
+    void PerformLayout(LayoutWrapper* layoutWrapper);
+    float customBuilderOffset_ = 0.0f;
+    float scrollOffset_ = 0.0f;
+    std::optional<int32_t> customBuilderIndex_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
