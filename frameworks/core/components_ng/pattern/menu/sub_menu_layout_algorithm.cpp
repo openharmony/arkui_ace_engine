@@ -34,6 +34,8 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto parentMenuItem = menuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(parentMenuItem);
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
+    auto parentFrameSize = parentMenuItem->GetGeometryNode()->GetMarginFrameSize();
+    position_ = parentMenuItem->GetPaintRectOffset() + OffsetF(parentFrameSize.Width(), 0.0);
 
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
     float y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
