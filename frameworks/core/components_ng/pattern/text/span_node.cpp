@@ -148,6 +148,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         builder->PushStyle(themeTextStyle);
     }
     UpdateTextStyle(builder, textStyle);
+    textStyle_ = textStyle;
     for (const auto& child : children) {
         if (child) {
             child->UpdateParagraph(frameNode, builder);
