@@ -216,7 +216,7 @@ void TextDragPattern::GenerateBackgroundPoints(std::vector<TextPoint>& points, f
             startX -= delta / 2.0f; // 2 : half
             endX += delta / 2.0f;   // 2 : half
         }
-        points.push_back(TextPoint(startX - offset, endY - offset));
+        points.push_back(TextPoint(startX - offset, startY - offset));
         points.push_back(TextPoint(endX + offset, endY - offset));
         points.push_back(TextPoint(endX + offset, endY + lineHeight + offset));
         points.push_back(TextPoint(startX - offset, endY + lineHeight + offset));

@@ -1919,8 +1919,8 @@ void TextFieldPattern::InitDragDropEvent()
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto touchX = Dimension(event->GetX(), DimensionUnit::VP).ConvertToPx();
-        auto touchY = Dimension(event->GetY(), DimensionUnit::VP).ConvertToPx();
+        auto touchX = event->GetX();
+        auto touchY = event->GetY();
         Offset offset = Offset(touchX, touchY) - Offset(pattern->textRect_.GetX(), pattern->textRect_.GetY()) -
                         Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
