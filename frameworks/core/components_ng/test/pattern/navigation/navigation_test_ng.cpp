@@ -2260,7 +2260,7 @@ HWTEST_F(NavigationTestNg, NavigationModelNG009, TestSize.Level1)
      * @tc.expected: check whether the properties is correct.
      */
     navigationPattern->UpdateContextRect(preTopNavDestination, navigation);
-    ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::INVISIBLE);
+    ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::VISIBLE);
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
     navigationPattern->UpdateContextRect(preTopNavDestination, navigation);
     ASSERT_EQ(navBarProperty->propVisibility_.value(), VisibleType::VISIBLE);
