@@ -341,10 +341,10 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         buttonPattern->SetInHover(isHover);
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
         auto icurve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
-        float maxDis = sqrt(pow(halfSize, 2.0)+ pow(halfSize, 2.0));
+        float maxDis = sqrt(pow(halfSize, 2.0) + pow(halfSize, 2.0));
         float curDis = sqrt(pow(buttonPattern->GetLocalLocation().GetX() - halfSize, 2.0)
             + pow(buttonPattern->GetLocalLocation().GetY() - halfSize, 2.0));
-        float currentScale = 1+ 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
+        float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
         float imageTranslate = 2 * icurve -> Move((maxDis - curDis) / (maxDis));
         imageMaxTranslate = imageTranslate > imageMaxTranslate ? imageTranslate : imageMaxTranslate;
@@ -402,14 +402,14 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         CHECK_NULL_VOID(imageIconRenderContext);
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
         auto icurve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
-        float maxDis = sqrt(pow(halfSize, 2.0)+ pow(halfSize, 2.0));
+        float maxDis = sqrt(pow(halfSize, 2.0) + pow(halfSize, 2.0));
         float currentX = info.GetLocalLocation().GetX();
         float currentY = info.GetLocalLocation().GetY();
-        float curDis = sqrt(pow(currentX - halfSize, 2.0)+pow(currentY - halfSize, 2.0));
-        float currentScale = 1+ 0.1 * icurve -> Move((maxDis - curDis) / (maxDis));
+        float curDis = sqrt(pow(currentX - halfSize, 2.0) +pow(currentY - halfSize, 2.0));
+        float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
         baseScale = currentScale > baseScale ? currentScale : baseScale;
         float imageScale = baseScale;
-        float imageTranslate = 2 * icurve -> Move((maxDis - curDis) / (maxDis));
+        float imageTranslate = 2 * icurve->Move((maxDis - curDis) / (maxDis));
         imageMaxTranslate = imageTranslate > imageMaxTranslate ? imageTranslate : imageMaxTranslate;
         float translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * imageMaxTranslate;
         float translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * imageMaxTranslate;
