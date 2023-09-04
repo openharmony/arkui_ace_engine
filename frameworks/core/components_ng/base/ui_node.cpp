@@ -683,7 +683,7 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
 // for Grid refresh GridItems
 void UINode::ChildrenUpdatedFrom(int32_t index)
 {
-    childrenUpdatedFrom_ = index;
+    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
 bool UINode::MarkRemoving()
