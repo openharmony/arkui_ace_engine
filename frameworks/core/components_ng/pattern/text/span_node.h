@@ -169,11 +169,11 @@ public:
     virtual void EndDrag();
     virtual bool IsDragging();
 #endif // ENABLE_DRAG_FRAMEWORK
-    std::optional<TextStyle> GetTextStyle()
+    std::optional<TextStyle> GetTextStyle() const
     {
         return textStyle_;
     }
-    void SetTextStyle(std::optional<TextStyle> textStyle)
+    void SetTextStyle(const std::optional<TextStyle>& textStyle)
     {
         textStyle_ = textStyle;
     }
