@@ -1617,6 +1617,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
         LOGW("ShowContainerTitle failed, Window modal is not container.");
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
