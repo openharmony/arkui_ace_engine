@@ -127,9 +127,9 @@ void RichEditorTestNg::AddSpan(const std::string& content)
     spanModelNG.SetLineHeight(LINE_HEIGHT_VALUE);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
     spanNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
-    richEditorPattern->spanItemChildren_.emplace_back(spanNode->spanItem_);
+    richEditorPattern->spans_.emplace_back(spanNode->spanItem_);
     int32_t spanTextLength = 0;
-    for (auto child = richEditorPattern->spanItemChildren_.begin(); child != richEditorPattern->spanItemChildren_.end();
+    for (auto child = richEditorPattern->spans_.begin(); child != richEditorPattern->spans_.end();
          child++) {
         spanTextLength += StringUtils::ToWstring((*child)->content).length();
         (*child)->position = spanTextLength;
@@ -152,9 +152,9 @@ void RichEditorTestNg::AddImageSpan()
     spanItem->placeHolderIndex = 0;
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->spanItemChildren_.emplace_back(spanItem);
+    richEditorPattern->spans_.emplace_back(spanItem);
     int32_t spanTextLength = 0;
-    for (auto child = richEditorPattern->spanItemChildren_.begin(); child != richEditorPattern->spanItemChildren_.end();
+    for (auto child = richEditorPattern->spans_.begin(); child != richEditorPattern->spans_.end();
          child++) {
         spanTextLength += StringUtils::ToWstring((*child)->content).length();
         (*child)->position = spanTextLength;
@@ -167,7 +167,7 @@ void RichEditorTestNg::ClearSpan()
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorNode_->children_.clear();
-    richEditorPattern->spanItemChildren_.clear();
+    richEditorPattern->spans_.clear();
     richEditorPattern->caretPosition_ = 0;
 }
 
@@ -327,7 +327,7 @@ HWTEST_F(RichEditorTestNg, RichEditorModel007, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    eventHub->FireOndeleteComplete();
+    eventHub->FireOnDeleteComplete();
     EXPECT_EQ(testOnDeleteComplete, 1);
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
@@ -786,7 +786,7 @@ HWTEST_F(RichEditorTestNg, HandleFocusEvent001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto func = std::bind(&RichEditorTestNg::MockKeyboardBuilder);
-    richEditorPattern->customKeyboardBulder_ = std::move(func);
+    richEditorPattern->customKeyboardBuilder_ = std::move(func);
     richEditorPattern->HandleFocusEvent();
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
     EXPECT_TRUE(richEditorPattern->isCustomKeyboardAttached_);
@@ -803,7 +803,7 @@ HWTEST_F(RichEditorTestNg, RequestKeyboard001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto func = std::bind(&RichEditorTestNg::MockKeyboardBuilder);
-    richEditorPattern->customKeyboardBulder_ = std::move(func);
+    richEditorPattern->customKeyboardBuilder_ = std::move(func);
     auto ret1 = richEditorPattern->RequestKeyboard(true, false, true);
     EXPECT_TRUE(ret1);
 }
@@ -819,7 +819,7 @@ HWTEST_F(RichEditorTestNg, CloseKeyboard001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto func = std::bind(&RichEditorTestNg::MockKeyboardBuilder);
-    richEditorPattern->customKeyboardBulder_ = std::move(func);
+    richEditorPattern->customKeyboardBuilder_ = std::move(func);
     richEditorPattern->HandleFocusEvent();
     richEditorPattern->CloseKeyboard(true);
     EXPECT_FALSE(richEditorPattern->isCustomKeyboardAttached_);
