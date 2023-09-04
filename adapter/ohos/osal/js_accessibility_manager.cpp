@@ -1734,6 +1734,14 @@ static void DumpTreeNG(
         "clickable: " + std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityClickable() : false));
     DumpLog::GetInstance().AddDesc(
         "checkable: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsCheckable()));
+    DumpLog::GetInstance().AddDesc(
+        "longclickable: " + std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityLongClickable() : false));
+    DumpLog::GetInstance().AddDesc(
+        "scrollable: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsScrollable()));
+    DumpLog::GetInstance().AddDesc(
+        "checked: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsChecked()));
+    DumpLog::GetInstance().AddDesc(
+        "hint: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetHintText());
 
     std::vector<int32_t> children;
     for (const auto& item : node->GetChildren()) {
