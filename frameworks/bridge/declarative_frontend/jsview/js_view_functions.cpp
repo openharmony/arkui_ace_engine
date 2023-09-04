@@ -429,7 +429,7 @@ void ViewFunctions::InitViewFunctions(
             LOGD("View is not a recycle node");
         }
 
-        JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycle");
+        JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycleInternal");
         if (jsAboutToRecycleFunc->IsFunction()) {
             jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
         }
@@ -602,7 +602,7 @@ void ViewFunctions::ExecuteDisappear()
 
 void ViewFunctions::ExecuteAboutToRecycle()
 {
-    ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycle");
+    ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycleInternal");
 }
 
 bool ViewFunctions::HasLayout() const

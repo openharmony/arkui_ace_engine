@@ -4235,6 +4235,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // flag if active of inActive
         // inActive means updates are delayed
         this.isActive_ = true;
+        this.runReuse_ = false;
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
         this.isDeleting_ = false;
         this.watchedProps = new Map();
@@ -4495,7 +4496,7 @@ class ViewPU extends NativeViewPartialUpdate {
             
             this.syncInstanceId();
             if (dependentElmtIds.size && !this.isFirstRender()) {
-                if (!this.dirtDescendantElementIds_.size) {
+                if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
                     // mark ComposedElement dirty when first elmtIds are added
                     // do not need to do this every time
                     this.markNeedUpdate();
@@ -4629,6 +4630,12 @@ class ViewPU extends NativeViewPartialUpdate {
             }
         } while (this.dirtDescendantElementIds_.size);
     }
+    updateRecycleDirtyElements() {
+        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+            this.UpdateElement(elmtId);
+        });
+        this.dirtDescendantElementIds_.clear();
+    }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
     purgeDeletedElmtIds(rmElmtIds) {
         if (rmElmtIds.length == 0) {
@@ -4731,6 +4738,37 @@ class ViewPU extends NativeViewPartialUpdate {
         node.updateId(newElmtId);
         node.updateRecycleElmtId(oldElmtId, newElmtId);
         SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+    }
+    aboutToReuseInternal() {
+        this.runReuse_ = true;
+        if (this.aboutToReuse && typeof this.aboutToReuse === "function") {
+            stateMgmtTrace.scopedTrace(() => {
+                this.aboutToReuse(this === null || this === void 0 ? void 0 : this.paramsGenerator_());
+            }, "aboutToReuse", this.constructor.name);
+        }
+        this.updateRecycleDirtyElements();
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                child.aboutToReuseInternal();
+            }
+        });
+        this.runReuse_ = false;
+    }
+    aboutToRecycleInternal() {
+        this.runReuse_ = true;
+        if (this.aboutToRecycle && typeof this.aboutToRecycle === "function") {
+            stateMgmtTrace.scopedTrace(() => {
+                this.aboutToRecycle();
+            }, "aboutToRecycle", this.constructor.name);
+        }
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                child.aboutToRecycleInternal();
+            }
+        });
+        this.runReuse_ = false;
     }
     // add current JS object to it's parent recycle manager
     recycleSelf(name) {
@@ -4931,6 +4969,15 @@ class RecycleManager {
         });
         this.cachedRecycleNodes.clear();
     }
+}
+function createWeakRef(o) {
+    if (typeof o !== "object") {
+        return o;
+    }
+    if (o instanceof ObservedPropertyAbstract) {
+        return new WeakRef(o.getUnmonitored());
+    }
+    return new WeakRef(o);
 }
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
