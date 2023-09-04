@@ -439,11 +439,9 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             ((swiperLayoutProperty->GetDisplayCount().has_value() &&
                  swiperLayoutProperty->GetDisplayCountValue() == 1) ||
                 (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
-        if (isSingleCase && jumpIndex_) {
-            if (!mainSizeIsDefined_) {
-                endMainPos = startPos + itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-                endMainPos_ = endMainPos;
-            }
+        if (isSingleCase && !mainSizeIsDefined_) {
+            endMainPos = startPos + itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+            endMainPos_ = endMainPos;
         }
         if ((currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) || isLoop_) {
             currentEndPos += spaceWidth_;
