@@ -119,9 +119,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
-                return;
-            }
             // Send event to accessibility when scroll start.
             auto context = scroll->GetContext().Upgrade();
             if (context) {
@@ -137,9 +134,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionUpdate = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
-                return;
-            }
             scroll->HandleDragUpdate(info);
         }
     };
@@ -147,9 +141,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionEnd = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
-                return;
-            }
             scroll->HandleDragEnd(info);
             // Send event to accessibility when scroll stop.
             auto context = scroll->GetContext().Upgrade();
@@ -175,7 +166,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     if (Container::IsCurrentUseNewPipeline()) {
         panRecognizerNG_ = AceType::MakeRefPtr<NG::PanRecognizer>(
             DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
-
+        panRecognizerNG_->SetIsAllowMouse(false);
         panRecognizerNG_->SetOnActionStart(actionStart);
         panRecognizerNG_->SetOnActionUpdate(actionUpdate);
         panRecognizerNG_->SetOnActionEnd(actionEnd);
