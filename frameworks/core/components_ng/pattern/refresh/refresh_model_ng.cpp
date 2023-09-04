@@ -59,7 +59,6 @@ void RefreshModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, TriggerRefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefresh, true);
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, false);
 }
 
 void RefreshModelNG::Pop()
@@ -70,7 +69,9 @@ void RefreshModelNG::Pop()
     CHECK_NULL_VOID(layoutProperty);
     auto refreshRenderProperty = refreshNode->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshRenderProperty);
-    if (!layoutProperty->GetIsCustomBuilderExistValue()) {
+    auto pattern = refreshNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetIsCustomBuilderExist()) {
         if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
             LOGI("%{public}s have %{public}d child", refreshNode->GetTag().c_str(), refreshNode->TotalChildCount());
             return;

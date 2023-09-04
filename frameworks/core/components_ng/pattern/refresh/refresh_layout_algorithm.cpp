@@ -75,7 +75,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         }
         auto paddingOffsetChild = paddingOffset;
         auto alignChild = align;
-        if (!layoutProperty->GetIsCustomBuilderExistValue(false)) {
+        if (!HasCustomBuilderIndex()) {
             if (index == layoutWrapper->GetTotalChildCount() - 2) {
                 paddingOffsetChild += layoutProperty->GetShowTimeOffsetValue();
                 alignChild = Alignment::TOP_CENTER;
@@ -83,9 +83,9 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                 alignChild = Alignment::TOP_CENTER;
             }
         } else {
-            if (index == layoutProperty->GetCustomBuilderIndexValue(-1)) {
+            if (index == customBuilderIndex_.value_or(0)) {
                 alignChild = Alignment::TOP_CENTER;
-                paddingOffsetChild += layoutProperty->GetCustomBuilderOffsetValue();
+                paddingOffsetChild += OffsetF(0.0f, customBuilderOffset_);
                 auto geometryNode = child->GetGeometryNode();
                 CHECK_NULL_VOID(geometryNode);
                 customBuilderHeight = geometryNode->GetMarginFrameSize().Height();
@@ -98,7 +98,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                     auto refreshingPosition = Positive(customBuilderHeight) ? distance + customBuilderHeight : 0.0f;
                     paddingOffsetChild += OffsetF(0.0f, refreshingPosition);
                 } else {
-                    paddingOffsetChild += pattern->GetScrollOffsetValue();
+                    paddingOffsetChild += OffsetF(0.0f, scrollOffset_);
                 }
             }
         }
