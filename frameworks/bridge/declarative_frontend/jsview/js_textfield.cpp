@@ -111,7 +111,7 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else {
+        } else if (paramObject->HasProperty("text")) {
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
@@ -159,7 +159,7 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else {
+        } else if (paramObject->HasProperty("text")) {
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
