@@ -420,8 +420,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     }
 
     if (propParticleOptionArray_.has_value()) {
-        CHECK_NULL_VOID(rsNode_);
-        if (!measureTriggered_ || !rsNode_->GetParticleAnimationFinish()) {
+        if (!measureTriggered_ || particleAnimationPlaying_) {
             measureTriggered_ = true;
             OnParticleOptionArrayUpdate(propParticleOptionArray_.value());
         }
@@ -740,11 +739,17 @@ void RosenRenderContext::OnParticleOptionArrayUpdate(const std::list<ParticleOpt
     if (NeedPreloadImage(optionList, rect)) {
         return;
     }
+    particleAnimationPlaying_ = true;
     std::vector<OHOS::Rosen::ParticleParams> particleParams;
     for (auto& item : optionList) {
         particleParams.emplace_back(ConvertParticleOptionToParams(item, rect));
     }
-    rsNode_->SetParticleParams(particleParams);
+    auto finishCallback = [weak = WeakClaim(this)]() {
+        auto renderContext = weak.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->particleAnimationPlaying_ = false;
+    };
+    rsNode_->SetParticleParams(particleParams, finishCallback);
     RequestNextFrame();
 }
 
