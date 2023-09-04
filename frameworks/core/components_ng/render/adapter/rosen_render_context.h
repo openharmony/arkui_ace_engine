@@ -350,6 +350,8 @@ private:
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);
 
     void PaintBackground();
+    void PaintClipShape(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize);
+    void PaintClipMask(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize);
     void PaintClip(const SizeF& frameSize);
     void PaintProgressMask();
     void PaintGradient(const SizeF& frameSize);
@@ -451,6 +453,8 @@ private:
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
     RefPtr<MoonProgressModifier> moonProgressModifier_;
+    std::shared_ptr<Rosen::RSClipBoundsModifier> clipBoundModifier_;
+    std::shared_ptr<Rosen::RSMaskModifier> clipMaskModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::shared_ptr<FocusStateModifier> accessibilityFocusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
