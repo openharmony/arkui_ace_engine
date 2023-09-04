@@ -30,7 +30,7 @@ void QRCodeModelImpl::Create(const std::string& value)
     ViewStackProcessor::GetInstance()->Push(qrcode);
 }
 
-void QRCodeModelImpl::SetQRCodeColor(Color color)
+void QRCodeModelImpl::SetQRCodeColor(const Color& color)
 {
     auto qrcode = AceType::DynamicCast<QrcodeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (qrcode) {
@@ -38,7 +38,7 @@ void QRCodeModelImpl::SetQRCodeColor(Color color)
     }
 }
 
-void QRCodeModelImpl::SetQRBackgroundColor(Color color)
+void QRCodeModelImpl::SetQRBackgroundColor(const Color& color)
 {
     auto qrcode = AceType::DynamicCast<QrcodeComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (qrcode) {
