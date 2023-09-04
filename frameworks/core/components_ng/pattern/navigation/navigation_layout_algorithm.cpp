@@ -166,6 +166,7 @@ void FitScrollFullWindow(SizeF& frameSize)
 
 bool NavigationLayoutAlgorithm::IsAutoHeight(const RefPtr<LayoutProperty>& layoutProperty)
 {
+    CHECK_NULL_RETURN(layoutProperty, false);
     auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
     if (!calcLayoutConstraint || !calcLayoutConstraint->selfIdealSize.has_value() ||
         !calcLayoutConstraint->selfIdealSize->Height().has_value() ||
