@@ -132,6 +132,14 @@ private:
         }
     }
 
+    void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override
+    {
+        // LazyForEachNode::GetChildren() may add some children to disappearingChildren_, execute earlier to ensure
+        // disappearingChildren_ is correct before calling GenerateOneDepthVisibleFrameWithTransition.
+        GetChildren();
+        UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
+    }
+
     void NotifyDataCountChanged(int32_t index);
 
     // The index values of the start and end of the current children nodes and the corresponding keys.
