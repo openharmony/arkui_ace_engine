@@ -262,7 +262,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(
 
     // Fit popup to opposite position
     fitPosition = fitPosition == topPosition ? bottomPosition : topPosition;
-    arrowPosition_ = arrowPosition_ == topArrowPosition ? bottomArrowPosition : topArrowPosition;
+    arrowPosition_ = arrowPlacement_ == Placement::TOP ? bottomArrowPosition : topArrowPosition;
     arrowPlacement_ = arrowPlacement_ == Placement::TOP ? Placement::BOTTOM : Placement::TOP;
 
     childPosition = FitToScreen(fitPosition, childSize);
