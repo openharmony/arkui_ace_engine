@@ -346,9 +346,6 @@ private:
     bool blockPress_ = false;
     bool isCustomKeyboardAttached_ = false;
     bool usingMouseRightButton_ = false;
-#ifdef ENABLE_DRAG_FRAMEWORK
-    bool isDragMoving_ = false;
-#endif
 
     int32_t moveLength_ = 0;
     int32_t instanceId_ = -1;
