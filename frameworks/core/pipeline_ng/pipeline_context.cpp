@@ -285,8 +285,7 @@ void PipelineContext::InspectDrew()
 {
     CHECK_RUN_ON(UI);
     if (!needRenderNode_.empty()) {
-        auto needRenderNode = std::move(needRenderNode_);
-        for (auto&& node : needRenderNode) {
+        for (auto node : needRenderNode_) {
             if (node) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
