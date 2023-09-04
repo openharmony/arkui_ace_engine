@@ -3066,7 +3066,7 @@ void RosenDecorationPainter::PaintShadow(
             ShadowPaint.setStrokeMiter(paint->getStrokeMiter());
             ShadowPaint.setStrokeCap(paint->getStrokeCap());
             ShadowPaint.setStrokeJoin(paint->getStrokeJoin());
-            ShadowPaint.setAlphaf(paint->getAlphaf());
+            ShadowPaint.setAlphaf(paint->getAlphaf() * ShadowPaint.getAlphaf());
         }
         ShadowPaint.setMaskFilter(
             SkMaskFilter::MakeBlur(kNormal_SkBlurStyle, ConvertRadiusToSigma(shadow.GetBlurRadius())));
