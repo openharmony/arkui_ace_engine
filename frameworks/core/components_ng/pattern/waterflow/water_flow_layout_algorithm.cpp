@@ -120,7 +120,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
-        layoutInfo_.Reset();
+        layoutInfo_.Reset(layoutWrapper->GetHostNode()->GetChildrenUpdated());
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
 
