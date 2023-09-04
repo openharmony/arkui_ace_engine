@@ -86,7 +86,7 @@ const double TIME_PLUS = 1 * 100.0;
 const double TIME_PLUS_LARGE = 10 * 1000.0;
 constexpr double DISTANCE = 20.0;
 const OffsetF CHILD_OFFSET(0.0f, 10.0f);
-const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 5.0f };
+const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 0.0f };
 } // namespace
 
 class TextPickerTestNg : public testing::Test {
@@ -2488,6 +2488,105 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds001, TestSize.Level1)
     EXPECT_EQ(0, pickerProperty->GetSelecteds().value().at(0));
     EXPECT_EQ(1, pickerProperty->GetSelecteds().value().at(1));
     EXPECT_EQ(2, pickerProperty->GetSelecteds().value().at(2));
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetSelecteds002
+ * @tc.desc: Test TextPickerModelNG SetSelecteds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds002, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->MultiInit(theme);
+
+    /**
+     * @tc.cases: case. cover branch isHasSelectAttr_ == false.
+     */
+
+    TextPickerModel::GetInstance()->SetHasSelectAttr(false);
+
+    /**
+     * @tc.cases: case. cover isCascade_ == true
+     */
+    TextPickerModel::GetInstance()->SetIsCascade(true);
+
+    /**
+     * @tc.cases: case. cover branch ProcessCascadeOptions values_ size more than 0.
+     */
+    std::vector<std::string> values;
+    values.emplace_back("1");
+    values.emplace_back("2");
+    TextPickerModelNG::GetInstance()->SetValues(values);
+
+    std::vector<NG::TextCascadePickerOptions> options;
+    NG::TextCascadePickerOptions options1;
+    options1.rangeResult = { "11", "12", "13" };
+    options.emplace_back(options1);
+    NG::TextCascadePickerOptions options2;
+    options2.rangeResult = { "21", "22", "23" };
+    options.emplace_back(options2);
+    TextPickerModelNG::GetInstance()->SetColumns(options);
+
+    std::vector<uint32_t> selecteds = { 0, 1, 2 };
+    TextPickerModelNG::GetInstance()->SetSelecteds(selecteds);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step. Get pickerProperty and compare the result.
+     * @tc.expected: the result of SetSelecteds is correct.
+     */
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    ASSERT_TRUE(pickerProperty->HasSelecteds());
+    EXPECT_EQ(2, pickerProperty->GetSelecteds().value().at(2));
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetSelecteds003
+ * @tc.desc: Test TextPickerModelNG SetSelecteds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelecteds003, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->MultiInit(theme);
+
+    /**
+     * @tc.cases: case. cover branch isHasSelectAttr_ == true.
+     */
+    TextPickerModel::GetInstance()->SetHasSelectAttr(true);
+
+    /**
+     * @tc.cases: case. cover isCascade_ == true
+     */
+    TextPickerModel::GetInstance()->SetIsCascade(true);
+
+    std::vector<NG::TextCascadePickerOptions> options;
+    NG::TextCascadePickerOptions options1;
+    options1.rangeResult = { "11", "12", "13" };
+    options.emplace_back(options1);
+    NG::TextCascadePickerOptions options2;
+    options2.rangeResult = { "21", "22", "23" };
+    options.emplace_back(options2);
+    TextPickerModelNG::GetInstance()->SetColumns(options);
+    std::vector<uint32_t> selecteds = { 1, 3, 5 };
+    TextPickerModelNG::GetInstance()->SetSelecteds(selecteds);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step. Get pickerProperty and compare the result.
+     * @tc.expected: the result of SetSelecteds is correct.
+     */
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    ASSERT_TRUE(pickerProperty->HasSelecteds());
+    EXPECT_EQ(3, pickerProperty->GetSelecteds().value().at(1));
+    EXPECT_EQ(5, pickerProperty->GetSelecteds().value().at(2));
 }
 
 /**
@@ -5274,6 +5373,132 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest008, TestSize.Level1)
      */
     bool retFour = textPickerPattern->HandleDirectionKey(KeyCode::KEY_DPAD_RIGHT);
     EXPECT_TRUE(retFour);
+}
+
+/**
+ * @tc.name: TextPickerPatternTest009
+ * @tc.desc: Test TextPickerPattern OnColorConfigurationUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPatternTest009, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild());
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+
+    /**
+     * @tc.cases: case. cover branch dialogTheme pass non null check .
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .Times(::testing::AtLeast(3))
+        .WillOnce(Return(pickerTheme))
+        .WillOnce(Return(dialogTheme))
+        .WillRepeatedly(Return(pickerTheme));
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+
+    /**
+     * @tc.cases: case. cover branch OnColorConfigurationUpdate isPicker_ == true.
+     */
+    pickerPattern->OnColorConfigurationUpdate();
+    ASSERT_EQ(Color::BLACK, dialogTheme->GetBackgroundColor());
+}
+
+/**
+ * @tc.name: TextPickerPatternTest010
+ * @tc.desc: Test TextPickerPattern OnColorConfigurationUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPatternTest010, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+
+    /**
+     * @tc.cases: case. cover branch dialogTheme pass non null check .
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .Times(::testing::AtLeast(3))
+        .WillOnce(Return(pickerTheme))
+        .WillOnce(Return(dialogTheme))
+        .WillRepeatedly(Return(pickerTheme));
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+
+    /**
+     * @tc.cases: case. cover branch isPicker_ == false.
+     */
+    pickerPattern->SetPickerTag(false);
+    pickerPattern->OnColorConfigurationUpdate();
+    ASSERT_EQ(Color::BLACK, dialogTheme->GetBackgroundColor());
+}
+
+/**
+ * @tc.name: TextPickerPatternTest011
+ * @tc.desc: Test TextPickerPattern OnColorConfigurationUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPatternTest011, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+
+    /**
+     * @tc.cases: case. cover branch dialogTheme pass non null check .
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .Times(::testing::AtLeast(3))
+        .WillOnce(Return(pickerTheme))
+        .WillOnce(Return(dialogTheme))
+        .WillRepeatedly(Return(pickerTheme));
+
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+
+    /**
+     * @tc.cases: case. cover branch isPicker_ == false.
+     */
+    pickerPattern->SetPickerTag(false);
+
+    /**
+     * @tc.cases: case. cover branch contentRowNode_ is not null.
+     */
+    auto columnNode = pickerPattern->GetColumnNode();
+    pickerPattern->SetContentRowNode(columnNode);
+    pickerPattern->OnColorConfigurationUpdate();
+    ASSERT_EQ(Color::BLACK, dialogTheme->GetBackgroundColor());
 }
 
 /**
