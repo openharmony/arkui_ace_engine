@@ -619,6 +619,10 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->SetCopyOption(CopyOptions::Local);
+        return;
+    }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
         auto emunNumber = info[0]->ToNumber<int>();
