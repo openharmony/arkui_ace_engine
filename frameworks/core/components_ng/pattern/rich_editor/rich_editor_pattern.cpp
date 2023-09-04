@@ -2333,6 +2333,7 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
             blockPress_ = true;
             return;
         }
+        leftMousePress_ = true;
         mouseStatus_ = MouseStatus::PRESSED;
         blockPress_ = false;
     } else if (info.GetAction() == MouseAction::RELEASE) {
@@ -2393,16 +2394,16 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     contentRect.SetHeight(contentRect.Height() - std::max(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - contentRect.GetX(),
         info.GetLocalLocation().GetY() - contentRect.GetY() };
-    CHECK_NULL_VOID(paragraph_);
-    auto position = paragraph_->GetHandlePositionForClick(textOffset);
+    CHECK_NULL_VOID(paragraphs_.IsEmpty());
+    auto position = paragraphs_.GetIndex(textOffset);
     float caretHeight = 0.0f;
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     SetCaretPosition(position);
-    CHECK_NULL_VOID(richEditorOverlayModifier_);
-    richEditorOverlayModifier_->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+    CHECK_NULL_VOID(overlayMod_);
+    DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
     StartTwinkling();
 }
 
