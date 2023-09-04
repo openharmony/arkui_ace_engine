@@ -406,6 +406,7 @@ const char MENU_ETS_TAG[] = "Menu";
 const char MENU_ITEM_ETS_TAG[] = "MenuItem";
 const char MENU_ITEM_GROUP_ETS_TAG[] = "MenuItemGroup";
 const char MENU_WRAPPER_ETS_TAG[] = "MenuWrapper";
+const char MENU_PREVIEW_ETS_TAG[] = "MenuPreview";
 
 // textarea
 const char TEXTAREA_COMPONENT_TAG[] = "TextFieldComponent";

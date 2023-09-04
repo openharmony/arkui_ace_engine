@@ -33,9 +33,12 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -1537,8 +1540,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg1, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
     Placement placements[] = { Placement::TOP, Placement::BOTTOM, Placement::RIGHT, Placement::LEFT,
         Placement::TOP_LEFT, Placement::BOTTOM_LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
-        Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::TOP_RIGHT, Placement::BOTTOM_RIGHT
-    };
+        Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::TOP_RIGHT, Placement::BOTTOM_RIGHT };
     for (Placement placementValue : placements) {
         layoutAlgorithm->arrowPlacement_ = placementValue;
         layoutAlgorithm->UpdatePropArrowOffset();
@@ -3637,8 +3639,8 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level1)
     optionParams.emplace_back("MenuItem1", "", action);
     optionParams.emplace_back("MenuItem2", "", action);
     MenuParam menuParam;
-    auto menuWrapperNode = MenuView::Create(std::move(optionParams),
-        1, "", MenuType::SELECT_OVERLAY_EXTENSION_MENU, menuParam);
+    auto menuWrapperNode =
+        MenuView::Create(std::move(optionParams), 1, "", MenuType::SELECT_OVERLAY_EXTENSION_MENU, menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -5227,7 +5229,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate003, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     MenuParam menuParam;
     menuParam.positionOffset = { 10.0f, 10.0f };
-    auto menuWrapperNode = MenuView::Create(textNode, TARGET_ID, "", TYPE, menuParam);
+    auto menuWrapperNode = MenuView::Create(textNode, TARGET_ID, "", menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
@@ -5254,7 +5256,8 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate004, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     MenuParam menuParam;
     menuParam.positionOffset = { 10.0f, 10.0f };
-    auto menuNode = MenuView::Create(textNode, TARGET_ID, "", MenuType::SUB_MENU, menuParam);
+    menuParam.type = MenuType::SUB_MENU;
+    auto menuNode = MenuView::Create(textNode, TARGET_ID, "", menuParam);
     ASSERT_NE(menuNode, nullptr);
     /**
      * @tc.steps: step2: get menuNode layoutProperty
@@ -5501,7 +5504,8 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetMenuPlacement002, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     MenuParam menuParam;
     menuParam.placement = OHOS::Ace::Placement::BOTTOM;
-    auto menuWrapperNode = MenuView::Create(textNode, TARGET_ID, "", TYPE, menuParam);
+    menuParam.type = TYPE;
+    auto menuWrapperNode = MenuView::Create(textNode, TARGET_ID, "", menuParam);
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));

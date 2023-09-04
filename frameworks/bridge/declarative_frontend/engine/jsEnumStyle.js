@@ -818,6 +818,12 @@ var ResponseType;
   ResponseType[ResponseType["LongPress"] = 1] = "LongPress";
 })(ResponseType || (ResponseType = {}));
 
+var MenuPreviewMode;
+(function (MenuPreviewMode) {
+  MenuPreviewMode[MenuPreviewMode["NONE"] = 0] = "NONE";
+  MenuPreviewMode[MenuPreviewMode["IMAGE"] = 1] = "IMAGE";
+})(MenuPreviewMode || (MenuPreviewMode = {}));
+
 var HoverEffect;
 (function (HoverEffect) {
   HoverEffect[HoverEffect["Auto"] = 4] = "Auto";

@@ -318,7 +318,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
         pattern->SetOnShowFloatingSubWindow(true);
         MenuParam menu {};
         menu.isAboveApps = true;
-        ViewAbstract::BindMenuWithCustomNode(menuList, targetNode, MenuType::CONTEXT_MENU, menuPosition, menu);
+        menu.type = MenuType::CONTEXT_MENU;
+        ViewAbstract::BindMenuWithCustomNode(menuList, targetNode, menuPosition, menu);
     }
     ResetHoverTimer();
     return menuList;

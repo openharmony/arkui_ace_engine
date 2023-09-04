@@ -356,6 +356,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
+
     AnimationUtils::Animate(
         option,
         [context, menuAnimationOffset]() {
@@ -927,9 +928,18 @@ void OverlayManager::CleanMenuInSubWindow()
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            for (auto& childNode : node->GetChildren()) {
+                auto frameNode = DynamicCast<FrameNode>(childNode);
+                if (frameNode && frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+                    node->RemoveChild(frameNode);
+                }
+            }
             rootNode->RemoveChild(node);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            break;
+            continue;
+        }
+        if (node && node->GetTag() == V2::COLUMN_ETS_TAG) {
+            rootNode->RemoveChild(node);
         }
     }
 }
