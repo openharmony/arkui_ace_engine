@@ -1349,7 +1349,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
 {
     auto algorithm = AceType::MakeRefPtr<NavBarLayoutAlgorithm>();
     auto navBar =
-        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
