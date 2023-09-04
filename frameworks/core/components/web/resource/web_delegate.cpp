@@ -47,6 +47,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
+#include "nweb_helper.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "transaction/rs_interfaces.h"
@@ -91,6 +92,11 @@ const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
+
+static bool IsDeviceTabletOr2in1()
+{
+    return OHOS::system::GetDeviceType() == "tablet" || OHOS::system::GetDeviceType() == "2in1";
+}
 } // namespace
 
 #define EGLCONFIG_VERSION 3
@@ -624,7 +630,7 @@ void WebDelegateObserver::NotifyDestory()
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
-    if (OHOS::system::GetDeviceType() == "tablet" || OHOS::system::GetDeviceType() == "2in1") {
+    if (IsDeviceTabletOr2in1()) {
         OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
     }
     if (nweb_) {
@@ -2513,6 +2519,12 @@ void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
         return;
     }
     surfaceOcclusion_ = occlusion;
+
+    if (!NWebHelper::GetWebOptimizationValue()) {
+        LOGD("web optimization switch is closed.");
+        return;
+    }
+
     if (surfaceOcclusion_) {
         nweb_->OnUnoccluded();
     } else {
@@ -2533,7 +2545,7 @@ void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
 
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
-    if (OHOS::system::GetDeviceType() != "tablet" && OHOS::system::GetDeviceType() != "2in1") {
+    if (!IsDeviceTabletOr2in1()) {
         LOGD("only pad and pc will RegisterSurfaceOcclusionChangeCallback");
         return;
     }
@@ -5221,6 +5233,7 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(rosenRenderContext);
     rsNode_ = rosenRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode_);
     surfaceNodeId_ = rsNode_->GetId();
 }
 #endif
