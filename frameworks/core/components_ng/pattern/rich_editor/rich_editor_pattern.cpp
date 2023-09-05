@@ -2085,21 +2085,9 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
         if (textSelector_.IsValid()) {
             CloseSelectOverlay();
             ResetSelection();
-            isMouseSelect_ = false;
         }
-        ShowSelectOverlay(RectF(), RectF());
         MouseRightFocus(info);
-
-        TextInsertValueInfo spanInfo;
-        CalcInsertValueObj(spanInfo);
-        auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
-        if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG && spanInfo.GetOffsetInSpan() == 0) {
-            textSelector_.Update(GetCaretPosition() - 1, GetCaretPosition());
-            auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
-            auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-            FireOnSelect(selectStart, selectEnd);
-            isMouseSelect_ = true;
-        }
+        ShowSelectOverlay(RectF(), RectF());
         isMousePressed_ = false;
         usingMouseRightButton_ = false;
     }
@@ -2113,12 +2101,32 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     Offset textOffset = { info.GetLocalLocation().GetX() - contentRect.GetX(),
         info.GetLocalLocation().GetY() - contentRect.GetY() };
     CHECK_NULL_VOID(paragraph_);
+    InitSelection(textOffset);
+    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
+    SetCaretPosition(selectEnd);
+
+    TextInsertValueInfo spanInfo;
+    CalcInsertValueObj(spanInfo);
+    auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanInfo.GetSpanIndex() - 1));
+    if (spanNode && spanNode->GetTag() == V2::IMAGE_ETS_TAG && spanInfo.GetOffsetInSpan() == 0 &&
+            selectEnd == selectStart + 1) {
+        FireOnSelect(selectStart, selectEnd);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        StopTwinkling();
+        return;
+    }
+    if (textSelector_.IsValid()) {
+        ResetSelection();
+    }
     auto position = paragraph_->GetHandlePositionForClick(textOffset);
     float caretHeight = 0.0f;
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
     SetCaretPosition(position);
     CHECK_NULL_VOID(richEditorOverlayModifier_);
     richEditorOverlayModifier_->SetCaretOffsetAndHeight(caretOffset, caretHeight);
@@ -2897,7 +2905,13 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     textSelector_.Update(currentPosition, nextPosition);
     std::vector<Rect> selectedRects;
     paragraph_->GetRectsForRange(currentPosition, nextPosition, selectedRects);
-    if (selectedRects.size() == 1 && (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top())) {
+    bool selectedSingle = selectedRects.size() == 1 &&
+                            (pos.GetX() < selectedRects[0].Left() || pos.GetY() < selectedRects[0].Top());
+    bool selectedLast = selectedRects.size() == 0 && currentPosition == GetTextContentLength();
+    if (selectedSingle || selectedLast) {
+        if (selectedLast) {
+            nextPosition = currentPosition + 1;
+        }
         std::vector<Rect> selectedNextRects;
         paragraph_->GetRectsForRange(currentPosition - 1, nextPosition - 1, selectedNextRects);
         if (selectedNextRects.size() == 1) {
