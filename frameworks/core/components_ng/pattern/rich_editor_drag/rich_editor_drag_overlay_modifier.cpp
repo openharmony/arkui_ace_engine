@@ -36,21 +36,12 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     brush.SetColor(ToRSColor(color));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
-#ifdef NEW_SKIA
     if (!isAnimating_) {
         canvas.DrawPath(*pattern->GetBackgroundPath());
     } else {
         canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
     }
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
-#else
-    if (!isAnimating_) {
-        canvas.DrawPath(*pattern->GetBackgroundPath());
-    } else {
-        canvas.DrawPath(*pattern->GenerateBackgroundPath(backgroundOffset_->Get()));
-    }
-    canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
-#endif
     auto hostPattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(hostPattern);
     OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
