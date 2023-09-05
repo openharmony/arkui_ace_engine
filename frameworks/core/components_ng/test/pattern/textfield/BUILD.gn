@@ -29,6 +29,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/ime/text_editing_value.cpp",
+    "$ace_root/frameworks/core/common/ime/text_input_connection.cpp",
     "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
