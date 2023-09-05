@@ -130,7 +130,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     parentGlobalOffset_ = richEditorLayoutAlgorithm->GetParentGlobalOffset();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
-    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+    if (textSelector_.baseOffset != -1 && textSelector_.destinationOffset != -1) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
@@ -208,13 +208,13 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     auto imageNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    
+
     // Disable the image itself event
     imageNode->SetDraggable(false);
     auto gesture = imageNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gesture, -1);
     gesture->SetHitTestMode(HitTestMode::HTMNONE);
-    
+
     int32_t spanIndex = 0;
     int32_t offset = -1;
     if (options.offset.has_value()) {
@@ -726,6 +726,8 @@ void RichEditorPattern::SetTypingStyle(struct UpdateSpanStyle typingStyle, TextS
 void RichEditorPattern::UpdateTextStyle(
     RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
@@ -754,6 +756,8 @@ void RichEditorPattern::UpdateTextStyle(
         spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
 }
 
 bool RichEditorPattern::IsSameToTpyingStyle(const RefPtr<SpanNode>& spanNode)
@@ -2146,8 +2150,8 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
         usingMouseRightButton_ = true;
         CloseSelectionMenu();
     } else if (info.GetAction() == MouseAction::RELEASE) {
-        rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
-            static_cast<float>(info.GetGlobalLocation().GetY()));
+        rightClickOffset_ = OffsetF(
+            static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
         if (textSelector_.IsValid() && BetweenSelectedPosition(info.GetGlobalLocation())) {
             ShowSelectOverlay(RectF(), RectF());
             isMousePressed_ = false;
@@ -2712,7 +2716,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
                 caretSpanIndex_ = info.GetSpanIndex() - 1;
             }
             LOGD("insert the first record at the before spanNode, caretSpanIndex: "
-                    "%{public}d",
+                 "%{public}d",
                 caretSpanIndex_);
             return;
         }
