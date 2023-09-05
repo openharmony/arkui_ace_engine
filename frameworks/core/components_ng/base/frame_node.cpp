@@ -1474,6 +1474,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
     auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
+    auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto param = renderContext_->GetTrans();
     if (param.empty()) {
         translateCfg[GetId()] = { .id = GetId() };
@@ -1487,13 +1488,13 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         translateIds[GetId()] = ancestorNodeInfo;
     }
 
+    auto responseRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
-        auto responseRegionList = GetResponseRegionList(paintRect, static_cast<int32_t>(touchRestrict.sourceType));
-        LOGI("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentLocalPoint.ToString().c_str(),
+        LOGI("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentRevertPoint.ToString().c_str(),
             GetTag().c_str(), GetDepth());
         for (const auto& rect : responseRegionList) {
             LOGI("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
-                parentLocalPoint.ToString().c_str());
+                parentRevertPoint.ToString().c_str());
         }
     }
     {
@@ -1516,7 +1517,6 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const auto localPoint = tmp;
     auto localTransformOffset = preLocation - localPoint;
 
-    auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto revertPoint = parentRevertPoint;
     renderContext_->GetPointWithRevert(revertPoint);
     auto subRevertPoint = revertPoint - origRect.GetOffset();
@@ -1561,7 +1561,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         testResult = HitTestResult::STOP_BUBBLING;
     }
 
-    if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE)) {
+    if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
+        (InResponseRegionList(revertPoint, responseRegionList))) {
         pattern_->OnTouchTestHit(touchRestrict.hitTestType);
         consumed = true;
         if (touchRestrict.hitTestType == SourceType::TOUCH) {
