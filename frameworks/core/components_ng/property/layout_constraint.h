@@ -62,6 +62,22 @@ struct LayoutConstraintT {
         return !(*this == layoutConstraint);
     }
 
+    bool EqualWithoutPercentWidth(const LayoutConstraintT& layoutConstraint) const
+    {
+        return (scaleProperty == layoutConstraint.scaleProperty) && (minSize == layoutConstraint.minSize) &&
+            (maxSize == layoutConstraint.maxSize) && (parentIdealSize == layoutConstraint.parentIdealSize) &&
+            (percentReference.Height() == layoutConstraint.percentReference.Height()) &&
+            (selfIdealSize == layoutConstraint.selfIdealSize);
+    }
+
+    bool EqualWithoutPercentHeight(const LayoutConstraintT& layoutConstraint) const
+    {
+        return (scaleProperty == layoutConstraint.scaleProperty) && (minSize == layoutConstraint.minSize) &&
+            (maxSize == layoutConstraint.maxSize) && (parentIdealSize == layoutConstraint.parentIdealSize) &&
+            (percentReference.Width() == layoutConstraint.percentReference.Width()) &&
+            (selfIdealSize == layoutConstraint.selfIdealSize);
+    }
+
     bool UpdateSelfMarginSizeWithCheck(const OptionalSize<T>& size)
     {
         if (selfIdealSize == size) {
