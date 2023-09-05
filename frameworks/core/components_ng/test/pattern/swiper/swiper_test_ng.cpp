@@ -11095,13 +11095,11 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForwardItem001, TestSize.Level
     swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
     AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())->UpdateDisplayCount(1);
     AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())->ResetMinSize();
-    AceType::DynamicCast<SwiperLayoutProperty>(firstLayoutWrapper->GetLayoutProperty())
-        ->UpdateVisibility(VisibleType::INVISIBLE);
+    firstLayoutWrapper->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
     for (int i = 0; i <= 1; i++) {
         swiperLayoutAlgorithm->LayoutForwardItem(
             &layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
-        AceType::DynamicCast<SwiperLayoutProperty>(firstLayoutWrapper->GetLayoutProperty())
-            ->UpdateVisibility(VisibleType::GONE);
+        firstLayoutWrapper->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
     }
 }
 } // namespace OHOS::Ace::NG
