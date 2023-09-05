@@ -574,7 +574,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    CheckMarkDirtyNodeForRenderIndicator();
+    if (!targetIndex_) {
+        CheckMarkDirtyNodeForRenderIndicator();
+    }
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     if (jumpIndex_) {
@@ -1534,6 +1536,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
             }
         }
         if (!startNewAnimationFlag) {
+            stopIndicatorAnimation_ = false;
             return;
         }
         std::optional<int32_t> targetIndex;
@@ -1698,6 +1701,10 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion(float velocity) const
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
 {
+    if (!stopIndicatorAnimation_) {
+        stopIndicatorAnimation_ = true;
+        return;
+    }
     const auto& turnPageRateCallback = swiperController_->GetTurnPageRateCallback();
     if (!indicatorId_.has_value() && !turnPageRateCallback) {
         return;
