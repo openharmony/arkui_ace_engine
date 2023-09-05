@@ -118,7 +118,8 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     auto textRect = textFieldPattern->GetTextRect();
     bool isTextArea = textFieldPattern->IsTextArea();
     float clipRectHeight = 0.0f;
-    if (showCounter_->Get() && textFieldPattern->GetCounterParagraph()) {
+    if (showCounter_->Get() && textFieldPattern->GetCounterParagraph() &&
+        !textFieldPattern->GetIsCounterIdealHeight()) {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height() - textFieldPattern->GetCountHeight();
     } else {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
@@ -163,7 +164,8 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     canvas.AttachBrush(brush);
     auto paintOffset = contentOffset_->Get() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
     float clipRectHeight = 0.0f;
-    if (showCounter_->Get() && textFieldPattern->GetCounterParagraph()) {
+    if (showCounter_->Get() && textFieldPattern->GetCounterParagraph() &&
+        !textFieldPattern->GetIsCounterIdealHeight()) {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height() - textFieldPattern->GetCountHeight();
     } else {
         clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();

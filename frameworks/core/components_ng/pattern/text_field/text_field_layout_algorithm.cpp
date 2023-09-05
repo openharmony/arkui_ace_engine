@@ -305,6 +305,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
                           textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
             idealWidth = paragraph_->GetLongestLine();
         }
+        if (counterParagraph_ && idealHeight < useHeight) {
+            pattern->SetISCounterIdealHeight(true);
+            idealHeight = idealHeight - counterParagraph_->GetHeight();
+        }
         textRect_.SetSize(SizeF(
             idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
             paragraph_->GetHeight()));
