@@ -571,7 +571,6 @@ bool FlexLayoutAlgorithm::HandleBlankFirstTimeMeasure(
     UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
     CheckSizeValidity(childLayoutWrapper);
     UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
-    CheckSizeValidity(childLayoutWrapper);
     return true;
 }
 
