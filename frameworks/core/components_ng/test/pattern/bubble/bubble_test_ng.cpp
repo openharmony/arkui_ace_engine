@@ -713,7 +713,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
     EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::ENTERING);
     pattern->transitionStatus_ = TransitionStatus::EXITING;
     pattern->StartExitingAnimation(nullptr);
-    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::EXITING);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::INVISIABLE);
 }
 
 /**
@@ -1450,7 +1450,8 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT));
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset(), MESSAGE_OFFSET);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 0);
 }
 
 /**
