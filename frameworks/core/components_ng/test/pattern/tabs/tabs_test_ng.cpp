@@ -33,6 +33,8 @@
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -41,10 +43,8 @@
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
@@ -541,7 +541,7 @@ HWTEST_F(TabsTestNg, TabsModelMeasure003, TestSize.Level1)
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TABBAR_WIDTH), CalcLength(FIRST_ITEM_WIDTH)));
-    
+
     RefPtr<GeometryNode> tabbarChildGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<LayoutWrapperNode> tabBarChild =
         AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, tabbarChildGeometryNode, tabBarNode->GetLayoutProperty());
@@ -8804,5 +8804,133 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetricExtensi
     tabBarLayoutAlgorithm->CalculateItemWidthsForSymmetricExtensible(
         &layoutWrapper, childCount, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
     EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_[0], 60.0f);
+}
+
+/**
+ * @tc.name: TabBarOnAttachToMainTree001.
+ * @tc.desc: Test the OnAttachToMainTree function in the TabContentNode class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarOnAttachToMainTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TabContentNode.
+     */
+    TabContentModelNG tabContentModel;
+    LabelStyle labelStyle;
+    tabContentModel.Create();
+    tabContentModel.SetLabelStyle(labelStyle);
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    /**
+     * @tc.steps: step2. Invoke OnAttachToMainTree.
+     */
+    tabContentFrameNode->useOffscreenProcess_ = false;
+    tabContentFrameNode->OnAttachToMainTree(true);
+    EXPECT_EQ(tabContentFrameNode->useOffscreenProcess_, false);
+    tabContentFrameNode->useOffscreenProcess_ = true;
+    tabContentFrameNode->OnAttachToMainTree(true);
+    EXPECT_EQ(tabContentFrameNode->useOffscreenProcess_, true);
+}
+
+/**
+ * @tc.name: TabBarAddChildToGroup001.
+ * @tc.desc: Test the AddChildToGroup function in the TabContentNode class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, AddChildToGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TabContentNode.
+     */
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    TabsItemDivider divider;
+    Dimension strokeWidth = 10.0_vp;
+    Dimension startMargin = 3.0_vp;
+    Dimension endMargin = 4.0_vp;
+    Color color = Color::BLACK;
+
+    divider.strokeWidth = strokeWidth;
+    divider.startMargin = startMargin;
+    divider.endMargin = endMargin;
+    divider.color = color;
+    divider.isNull = false;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto tabsNode =
+        TabsModelNG::GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    ASSERT_NE(tabsNode, nullptr);
+    MockPipelineContextGetTheme();
+    const std::string text_test = "text_test";
+    TabContentModelNG tabContentModel;
+    SelectedMode selectedMode = SelectedMode::INDICATOR;
+    tabContentModel.Create();
+    tabContentModel.SetSelectedMode(selectedMode);
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    /**
+     * @tc.steps: step2. Invoke OnAttachToMainTree.
+     */
+    
+    tabsNode->AddChildToGroup(tabContentFrameNode, 1);
+    EXPECT_NE(tabsNode, nullptr);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree001.
+ * @tc.desc: Test the OnDetachFromMainTree function in the TabContentNode class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, OnDetachFromMainTree001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TabContentNode.
+     */
+    TabContentModelNG tabContentModel;
+    LabelStyle labelStyle;
+    tabContentModel.Create();
+    tabContentModel.SetLabelStyle(labelStyle);
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    /**
+     * @tc.steps: step2. Invoke OnDetachFromMainTree.
+     */
+
+    tabContentFrameNode->OnDetachFromMainTree(true);
+    EXPECT_NE(tabContentFrameNode, nullptr);
+}
+
+/**
+ * @tc.name: SetOnChangeEvent001.
+ * @tc.desc: Test the SetOnChangeEvent function in the TabsPattern class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetOnChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    Color color = Color::RED;
+    TabsItemDivider divider;
+    divider.color = color;
+    instance.SetDivider(divider);
+
+    /**
+     * @tc.steps: step2. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
+     * @tc.expected: step2. related function is called.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    pattern->onChangeEvent_ = std::make_shared<ChangeEvent>();
+    pattern->SetOnChangeEvent([](const BaseEventInfo* info) {});
+    ASSERT_NE(tabsFrameNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

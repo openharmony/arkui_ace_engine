@@ -16,7 +16,6 @@
 #include <cstddef>
 #include <utility>
 
-
 #include "gtest/gtest.h"
 #define private public
 #include "core/components_ng/base/view_stack_processor.h"
@@ -583,7 +582,8 @@ HWTEST_F(CustomTestNg, CustomTest010, TestSize.Level1)
     customNode->needRebuild_ = false;
     customNode->SetRecycleFunction(nullptr);
     customNode->FireRecycleSelf();
-    EXPECT_TRUE(customNode->needRebuild_ = true);
+    bool test = customNode->needRebuild_;
+    EXPECT_EQ(test, true);
 }
 
 /**
@@ -627,7 +627,8 @@ HWTEST_F(CustomTestNg, CustomTest011, TestSize.Level1)
     customNode->SetRecycleRenderFunc([&recycleRenderFunc]() { recycleRenderFunc = true; });
     customNode->MarkNeedUpdate();
     customNode->MarkNeedUpdate();
-    EXPECT_TRUE(customNode->needRebuild_ = true);
+    bool test = customNode->needRebuild_;
+    EXPECT_NE(test, true);
 }
 
 /**
