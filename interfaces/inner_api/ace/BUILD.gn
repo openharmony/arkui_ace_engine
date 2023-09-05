@@ -25,6 +25,13 @@ config("uicontent_config") {
     "//base/notification/common_event_service/interfaces/inner_api",
     "//foundation/graphic/graphic_2d/rosen/modules/platform/utils",
   ]
+  if (!use_mingw_win && !use_mac && !use_linux) {
+    defines = uicast_configs.uicast_defines
+  }
+}
+
+config("preview_config") {
+  visibility = [ ":*" ]
   if (use_mingw_win) {
     defines = [
       "PREVIEW",
@@ -40,8 +47,6 @@ config("uicontent_config") {
       "PREVIEW",
       "LINUX_PLATFORM",
     ]
-  } else {
-    defines = uicast_configs.uicast_defines
   }
 }
 
@@ -59,6 +64,7 @@ ohos_shared_library("ace_uicontent") {
 
   configs = [
     ":uicontent_config",
+    ":preview_config",
     "$ace_root:ace_config",
     "$ace_root:ace_coverage_config",
   ]
@@ -98,13 +104,17 @@ ohos_shared_library("ace_forward_compatibility") {
   sources =
       [ "${ace_root}/interfaces/inner_api/ace/ace_forward_compatibility.cpp" ]
 
+  configs = [
+    ":preview_config",
+    "$ace_root:ace_config",
+    "$ace_root:ace_coverage_config",
+  ]
+
+  external_deps = [ "hilog:libhilog" ]
+
   if (current_os == "ohos") {
     defines = [ "OHOS_PLATFORM" ]
-    sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
-    external_deps = [
-      "hilog:libhilog",
-      "init:libbegetutil",
-    ]
+    external_deps += [ "init:libbegetutil" ]
   }
 
   subsystem_name = ace_engine_subsystem
