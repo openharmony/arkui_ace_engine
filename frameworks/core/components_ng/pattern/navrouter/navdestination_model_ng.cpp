@@ -45,7 +45,12 @@ void NavDestinationModelNG::Create()
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     if (!navDestinationNode->GetTitleBarNode()) {
-        CreateBackButton(navDestinationNode);
+        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
+            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
     }
     // content node
     if (!navDestinationNode->GetTitleBarNode()) {
@@ -57,6 +62,35 @@ void NavDestinationModelNG::Create()
     }
 
     stack->Push(navDestinationNode);
+}
+
+void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
+{
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->AddChild(titleBarNode);
+    navDestinationNode->SetTitleBarNode(titleBarNode);
+
+    int32_t backButtonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto backButtonNode =
+        FrameNode::CreateFrameNode(V2::BACK_BUTTON_ETS_TAG, backButtonNodeId, AceType::MakeRefPtr<ImagePattern>());
+    titleBarNode->AddChild(backButtonNode);
+    titleBarNode->SetBackButton(backButtonNode);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonLayoutProperty);
+    backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    backButtonNode->MarkModifyDone();
+
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
 }
 
 void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
@@ -100,10 +134,12 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
 
     auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(navDestinationEventHub);
+    auto paintProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(paintProperty);
     if (!navDestinationEventHub->IsEnabled()) {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
     } else {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
+        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor());
     }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -139,10 +175,13 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
         });
-    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    CHECK_NULL_VOID(navDestinationPattern);
     if (!navDestinationNode->GetTitleBarNode()) {
-        CreateBackButton(navDestinationNode);
+        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
+            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+            CreateImageButton(navDestinationNode);
+        } else {
+            CreateBackButton(navDestinationNode);
+        }
     }
     // content node
     if (!navDestinationNode->GetContentNode()) {

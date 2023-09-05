@@ -69,7 +69,7 @@ UINode::~UINode()
 #endif
 
     if (!removeSilently_) {
-        ElementRegister::GetInstance()->RemoveItem(nodeId_);
+        ElementRegister::GetInstance()->RemoveItem(nodeId_, tag_);
     } else {
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId_);
     }
@@ -518,13 +518,14 @@ RefPtr<PipelineContext> UINode::GetContext()
 }
 
 HitTestResult UINode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
+    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, touchId);
+        auto hitResult = child->TouchTest(globalPoint, parentLocalPoint, parentRevertPoint,
+            touchRestrict, result, touchId);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
@@ -689,7 +690,7 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
 // for Grid refresh GridItems
 void UINode::ChildrenUpdatedFrom(int32_t index)
 {
-    childrenUpdatedFrom_ = index;
+    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
 bool UINode::MarkRemoving()

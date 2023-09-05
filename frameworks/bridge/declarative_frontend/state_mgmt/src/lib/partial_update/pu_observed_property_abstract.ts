@@ -61,6 +61,75 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.owningView_ = undefined;
   }
 
+  // dump info about variable decorator to string
+  // e.g. @State/Provide, @Link/Consume, etc.
+  public abstract debugInfoDecorator() : string;
+
+  // dump basic info about this variable to a string, non-recursive, no subscriber info
+  public debugInfo() : string {
+    const propSource : string | false = this.isPropSourceObservedPropertyFakeName();
+    return (propSource)
+    ? `internal source (ObservedPropertyPU) of @Prop ${propSource} [${this.id__()}]`
+    : `${this.debugInfoDecorator()} '${this.info()}'[${this.id__()}] <${this.debugInfoOwningView()}>`;
+  }
+
+  public debugInfoOwningView() : string {
+    return `${this.owningView_ ? this.owningView_.debugInfo() : "owning @Component UNKNOWN"}`;
+  }
+
+  // dump info about owning view and subscribers (PU ones only)
+  // use function only for debug output and DFX.
+  public debugInfoSubscribers(): string {
+    return (this.owningView_)
+      ? `owned by ${this.debugInfoOwningView()} `
+      : `owned by: owning view not known`;
+  }
+
+  public debugInfoSyncPeers(): string {
+    if (!this.subscriberRefs_.size) {
+      return "sync peers: none";
+    }
+    let result: string = `sync peers:\n`;
+    let sepa: string = "";
+    this.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
+      if ("debugInfo" in subscriber) {
+        result += `    ${sepa}${(subscriber as ObservedPropertyAbstractPU<any>).debugInfo()}`;
+        sepa = ", ";
+      }
+    });
+    return result;
+  }
+
+  public debugInfoDependentElmtIds(): string {
+    if (!this.dependentElementIds_.size) {
+      return `dependent components: no dependent elmtIds`;
+    }
+    let result: string = this.dependentElementIds_.size < 25
+      ? `dependent components: ${this.dependentElementIds_.size} elmtIds: `
+      : `WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
+    let sepa: string = "";
+    this.dependentElementIds_.forEach((elmtId: number) => {
+      result+=`${sepa}${this.owningView_.debugInfoElmtId(elmtId)}`;
+      sepa = ", ";
+    });
+    return result;
+  }
+
+  /* for @Prop value from source we need to generate a @State
+     that observes when this value changes. This ObservedPropertyPU
+     sits inside SynchedPropertyOneWayPU.
+     below methods invent a fake variable name for it
+  */
+  protected getPropSourceObservedPropertyFakeName(): string {
+    return `${this.info()}_prop_fake_state_source___`;
+  }
+
+  protected isPropSourceObservedPropertyFakeName(): string | false {
+    return this.info().endsWith("_prop_fake_state_source___")
+      ? this.info().substring(0, this.info().length - "_prop_fake_state_source___".length)
+      : false;
+  }
+
   /*
     Virtualized version of the subscription mechanism - add subscriber
     Overrides implementation in ObservedPropertyAbstract<T>
@@ -114,18 +183,20 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     const result = (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending)
       ? this.dependentElementIds_
       : undefined;
-    stateMgmtConsole.debug(`${this.constructor.name}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);
+    stateMgmtConsole.debug(`${this.debugInfo()}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update \
+                      ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);
     this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
     return result;
   }
 
   protected notifyPropertyRead() {
-    stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
-        notifyPropertyRead, DO NOT USE with PU. Use notifyPropertyHasBeenReadPU`);
+    stateMgmtConsole.error(`${this.debugInfo()}: notifyPropertyRead, DO NOT USE with PU. Use \ 
+                      notifyPropertyHasBeenReadPU`);
+
   }
 
   protected notifyPropertyHasBeenReadPU() {
-    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyHasBeenReadPU.`)
+    stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasBeenReadPU.`)
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
         // TODO
@@ -141,7 +212,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   } 
 
   protected notifyPropertyHasChangedPU() {
-    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertyHasChangedPU.`)
+    stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`)
     if (this.owningView_) {
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
@@ -156,7 +227,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         if ('syncPeerHasChanged' in subscriber) {
           (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this);
         } else  {
-          stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
+          stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
         }
       }
     });
@@ -166,7 +237,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   public markDependentElementsDirty(view: ViewPU) {
     // TODO ace-ets2bundle, framework, complicated apps need to update together
     // this function will be removed after a short transition period.
-    stateMgmtConsole.warn(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: markDependentElementsDirty no longer supported. App will work ok, but
+    stateMgmtConsole.warn(`${this.debugInfo()}: markDependentElementsDirty no longer supported. App will work ok, but
         please update your ace-ets2bundle and recompile your application!`);
   }
 
@@ -216,17 +287,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       () => (value == undefined || typeof value == "number" || typeof value == "string" || typeof value == "boolean")
     );
   }
-    
-  private static readonly mapDeco = new Map<string, string>([
-    ["ObservedPropertyObjectPU", "@State/@Provide"],
-    ["ObservedPropertySimplePU", "@State/@Provide (error, should not be used)"],
-    ["SynchedPropertyObjectOneWayPU", "@Prop"],
-    ["SynchedPropertySimpleOneWayPU", "@Prop  (error, should not be used)"],
-    ["SynchedPropertyObjectTwoWayPU", "@Link/@Consume"],
-    ["SynchedPropertySimpleTwoWayPU", "@Link/@Consume (error, should not be used)"],
-    ["SynchedPropertyNestedObjectPU", "@ObjectLink (only class-objects supported"],
-    ["SynchedPropertyNesedObjectPU", "@ObjectLink (only class-objects supported"]
-  ]);
 
   protected checkNewValue(isAllowedComment : string, newValue: T, validator: (value: T) => boolean) : boolean {
     if (validator(newValue)) {
@@ -236,8 +296,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     // report error
     // current implementation throws an Exception
     errorReport.varValueCheckFailed({
-      customComponent: this.owningView_? this.owningView_.constructor.name : "unknown owningView / internal error",
-      variableDeco: ObservedPropertyAbstractPU.mapDeco.get(this.constructor.name),
+      customComponent: this.debugInfoOwningView(),
+      variableDeco: this.debugInfoDecorator(),
       variableName: this.info(),
       expectedType: isAllowedComment,
       value: newValue
@@ -276,13 +336,13 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       // not access recording 
       return;
     }
-    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: recordDependentUpdate on elmtId ${elmtId}.`)
+    stateMgmtConsole.debug(`${this.debugInfo()}: recordDependentUpdate on elmtId ${elmtId}.`)
     this.dependentElementIds_.add(elmtId);
   }
 
   
   public purgeDependencyOnElmtId(rmElmtId: number): void {
-    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']:purgeDependencyOnElmtId ${rmElmtId}`);
+    stateMgmtConsole.debug(`${this.debugInfo()}: purgeDependencyOnElmtId ${rmElmtId}`);
     this.dependentElementIds_.delete(rmElmtId);
   }
 
@@ -295,12 +355,12 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // unified Appstorage, what classes to use, and the API
   public createLink(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstractPU<T> {
-    throw new Error("Can not create a AppStorage 'Link' from a @State property. ");
+      throw new Error(`${this.debugInfo()}: createLink: Can not create a AppStorage 'Link' from this property.`);
   }
 
   public createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstractPU<T> {
-    throw new Error("Can not create a AppStorage 'Prop' from a @State property. ");
+      throw new Error(`${this.debugInfo()}: createProp: Can not create a AppStorage 'Prop' from a @State property. `);
   }
 
   /*
@@ -308,8 +368,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     ObservedPropertyAbstract. Need to overwrite these functions to do nothing for PU
     */
     protected notifyHasChanged(_: T) {
-      stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
-          notifyHasChanged, DO NOT USE with PU. Use syncPeerHasChanged() or objectPropertyHasChangedPU()`);
+      stateMgmtConsole.error(`${this.debugInfo()}: notifyHasChanged, DO NOT USE with PU. Use syncPeerHasChanged() \ 
+                                            or objectPropertyHasChangedPU()`);
     }
   
     hasChanged(_: T): void {

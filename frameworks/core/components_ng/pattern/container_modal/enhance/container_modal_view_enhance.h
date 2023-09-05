@@ -33,7 +33,8 @@ protected:
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
     static void BondingMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
     static void BondingMaxBtnInputEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
-    static RefPtr<FrameNode> ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition);
+    static RefPtr<FrameNode> ShowMaxMenu(const RefPtr<FrameNode>& containerNode, const RefPtr<FrameNode>& targetNode,
+        OffsetF menuPosition);
     static void BondingMenuItemEvent(RefPtr<FrameNode> item);
     static RefPtr<FrameNode> BuildMenuItem(std::string title, InternalResource::ResourceId resourceId,
         RefPtr<ClickEvent> event, bool chooseCurrent);

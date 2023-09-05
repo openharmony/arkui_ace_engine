@@ -47,7 +47,7 @@ public:
     ~ViewAbstractModelNG() override = default;
 
     static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
-        const MenuType& menuType, const NG::OffsetF& offset, const MenuParam& menuParam = MenuParam());
+        const NG::OffsetF& offset, std::function<void()>& previewBuildFunc, const MenuParam& menuParam = MenuParam());
 
     void SetWidth(const CalcDimension& width) override
     {
@@ -893,7 +893,7 @@ public:
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam,
-        const MenuType& menuType = MenuType::CONTEXT_MENU) override;
+        std::function<void()>& previewBuildFunc) override;
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
@@ -973,8 +973,8 @@ private:
     void RegisterMenuDisappearCallback(std::function<void()>&& buildFunc, const MenuParam& menuParam);
     void RegisterContextMenuAppearCallback(ResponseType type, const MenuParam& menuParam);
     void RegisterContextMenuDisappearCallback(const MenuParam& menuParam);
-    void RegisterContextMenuKeyEvent(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
-        const MenuParam& menuParam, const MenuType& menuType);
+    void RegisterContextMenuKeyEvent(
+        const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) override

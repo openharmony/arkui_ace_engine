@@ -208,6 +208,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     imageSourceInfo.SetResourceId(resourceId, theme->GetEntryArrowColor());
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+    imageNode->SetDraggable(false);
     imageNode->MarkModifyDone();
     imageNode->MountToParent(buttonNode);
 

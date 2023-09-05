@@ -132,6 +132,16 @@ public:
         return height_ && height_->GetDimension().Unit() != DimensionUnit::PERCENT;
     }
 
+    bool PercentWidth() const
+    {
+        return width_ && width_->GetDimension().Unit() == DimensionUnit::PERCENT;
+    }
+
+    bool PercentHeight() const
+    {
+        return height_ && height_->GetDimension().Unit() == DimensionUnit::PERCENT;
+    }
+
     std::string ToString() const
     {
         static const int32_t precision = 2;
@@ -210,6 +220,34 @@ struct MeasureProperty {
         }
         minSize = size;
         return true;
+    }
+
+    bool PercentWidth() const
+    {
+        if (selfIdealSize.has_value()) {
+            return selfIdealSize->PercentWidth();
+        }
+        if (maxSize.has_value()) {
+            return maxSize->PercentWidth();
+        }
+        if (minSize.has_value()) {
+            return minSize->PercentWidth();
+        }
+        return false;
+    }
+
+    bool PercentHeight() const
+    {
+        if (selfIdealSize.has_value()) {
+            return selfIdealSize->PercentHeight();
+        }
+        if (maxSize.has_value()) {
+            return maxSize->PercentHeight();
+        }
+        if (minSize.has_value()) {
+            return minSize->PercentHeight();
+        }
+        return false;
     }
 
     std::string ToString() const

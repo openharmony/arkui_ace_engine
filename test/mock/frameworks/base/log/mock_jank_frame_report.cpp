@@ -27,8 +27,6 @@ void JankFrameReport::StartRecord(const std::string& pageUrl) {}
 
 void JankFrameReport::FlushRecord() {}
 
-void JankFrameReport::SetRefreshPeriod(int64_t refreshPeriod) {}
-
 void JankFrameReport::RecordFrameUpdate() {}
 
 PerfMonitor* PerfMonitor::GetPerfMonitor()

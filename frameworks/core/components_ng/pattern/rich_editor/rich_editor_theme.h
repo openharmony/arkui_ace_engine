@@ -59,6 +59,7 @@ public:
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
             theme->defaultCaretHeight_ = pattern->GetAttr<Dimension>("default_caret_height", 18.5_vp);
+            theme->disabledAlpha_ = static_cast<float>(pattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
         }
     };
 
@@ -74,10 +75,16 @@ public:
         return defaultCaretHeight_;
     }
 
+    float GetDisabledAlpha() const
+    {
+        return disabledAlpha_;
+    }
+
 protected:
     RichEditorTheme() = default;
 
 private:
+    float disabledAlpha_ = 0.0f;
     bool draggable_ = false;
     Dimension defaultCaretHeight_ = 18.5_vp;
 };

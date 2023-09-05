@@ -23,7 +23,8 @@ bool SelectOverlayProxy::IsClosed() const
     return isClosed;
 }
 
-void SelectOverlayProxy::Close(bool animation) const {
+void SelectOverlayProxy::Close(bool animation) const
+{
     isClosed = true;
 }
 

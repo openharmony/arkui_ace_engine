@@ -614,7 +614,7 @@ void ScrollablePattern::ScrollTo(float position)
 
 void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
 {
-    LOGI("AnimateTo:%f, duration:%f", position, duration);
+    LOGI("AnimateTo:%{public}f, duration:%{public}f", position, duration);
     float currVelocity = 0.0f;
     if (!IsScrollableStopped()) {
         CHECK_NULL_VOID(scrollableEvent_);
@@ -688,9 +688,11 @@ void ScrollablePattern::PlaySpringAnimation(
         CHECK_NULL_VOID(scrollableEvent_);
         scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
             auto pattern = weakScroll.Upgrade();
-            CHECK_NULL_RETURN_NOLOG(pattern, 0.0);
-            CHECK_NULL_RETURN_NOLOG(pattern->springMotion_, 0.0);
-            return pattern->springMotion_->GetCurrentVelocity();
+            CHECK_NULL_RETURN_NOLOG(pattern, 0.0f);
+            CHECK_NULL_RETURN_NOLOG(pattern->springMotion_, 0.0f);
+            CHECK_NULL_RETURN_NOLOG(pattern->animator_, 0.0f);
+            auto velocity = pattern->animator_->IsStopped() ? 0.0f : pattern->springMotion_->GetCurrentVelocity();
+            return velocity;
         });
     } else {
         springMotion_->Reset(start, position, velocity, DEFAULT_OVER_SPRING_PROPERTY);

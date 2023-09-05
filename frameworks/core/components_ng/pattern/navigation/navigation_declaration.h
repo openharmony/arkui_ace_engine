@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<NavigationBarTheme>();
     return theme;
 }

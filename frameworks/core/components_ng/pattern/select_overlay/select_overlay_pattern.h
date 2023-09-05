@@ -53,7 +53,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SelectOverlayLayoutAlgorithm>(info_, defaultMenuEndOffset_);
+        return MakeRefPtr<SelectOverlayLayoutAlgorithm>(info_, defaultMenuEndOffset_, menuWidth_, menuHeight_);
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -119,7 +119,7 @@ public:
 
     float GetMenuWidth() const
     {
-        return menuWidth_;
+        return menuWidth_.value_or(0);
     }
 
     const RectF& GetHandleRegion(bool isFirst) const
@@ -190,7 +190,8 @@ private:
     bool hasShowAnimation_ = false;
 
     int32_t greatThanMaxWidthIndex_ = -1;
-    float menuWidth_ = 0.0f;
+    std::optional<float> menuWidth_;
+    std::optional<float> menuHeight_;
 
     std::string selectInfo_;
 

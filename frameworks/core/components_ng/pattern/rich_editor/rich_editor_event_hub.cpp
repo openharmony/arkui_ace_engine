@@ -318,7 +318,7 @@ void RichEditorEventHub::SetOnDeleteComplete(std::function<void()>&& func)
 {
     onDeleteComplete_ = std::move(func);
 }
-void RichEditorEventHub::FireOndeleteComplete()
+void RichEditorEventHub::FireOnDeleteComplete()
 {
     if (onDeleteComplete_)
         onDeleteComplete_();

@@ -495,10 +495,7 @@ public:
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool IsOperation() const
     {
-        if (textEditingValue_.ToString().length() > 1) {
-            return true;
-        }
-        return false;
+        return textEditingValue_.ToString().length() > 1;
     }
 
     bool CursorMoveLeft();
@@ -518,6 +515,7 @@ public:
     void HandleSetSelection(int32_t start, int32_t end, bool showHandle = true);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
+    OffsetF GetDragUpperLeftCoordinates() override;
 
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> GetTextBoxes() override
@@ -778,6 +776,15 @@ public:
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    }
+
+    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->RemoveDragFrameNode(frameNode->GetId());
     }
 
     void CreateHandles() override;
@@ -1053,6 +1060,7 @@ private:
     void InitClickEvent();
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
+    void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
 #endif
     bool CaretPositionCloseToTouchPosition();
@@ -1250,10 +1258,7 @@ private:
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
-    bool setSelectionFlag_ = false;
     bool scrollable_ = true;
-    int32_t selectionStart_ = 0;
-    int32_t selectionEnd_ = 0;
     // controls redraw of overlay modifier, update when need to redraw
     int32_t drawOverlayFlag_ = 0;
     bool isTextInput_ = false;

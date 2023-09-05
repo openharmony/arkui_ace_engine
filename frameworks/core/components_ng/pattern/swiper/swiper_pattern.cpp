@@ -150,6 +150,7 @@ void SwiperPattern::StopAndResetSpringAnimation()
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
     }
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::OnLoopChange()
@@ -574,7 +575,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    CheckMarkDirtyNodeForRenderIndicator();
+    if (!targetIndex_) {
+        CheckMarkDirtyNodeForRenderIndicator();
+    }
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     if (jumpIndex_) {
@@ -716,8 +719,9 @@ void SwiperPattern::SwipeTo(int32_t index)
     CHECK_NULL_VOID(host);
     auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
     targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
-    if (currentIndex_ == targetIndex) {
-        LOGD("Target index is same with current index.");
+    // If targetIndex_ has a value, means animation is still running, stop it before play new animation.
+    if (currentIndex_ == targetIndex && !targetIndex_.has_value()) {
+        LOGD("Target index %{public}d is same with current index %{public}d.", targetIndex, currentIndex_);
         return;
     }
     StopFadeAnimation();
@@ -1357,6 +1361,12 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart()
 {
+    if (usePropertyAnimation_) {
+        StopPropertyTranslateAnimation();
+    }
+    if (indicatorController_) {
+        indicatorController_->Stop();
+    }
     StopTranslateAnimation();
     StopSpringAnimation();
     StopAutoPlay();
@@ -1456,6 +1466,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         }
 
         if (edgeEffect == EdgeEffect::NONE) {
+            UpdateItemRenderGroup(false);
             return;
         }
     }
@@ -1535,6 +1546,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
             }
         }
         if (!startNewAnimationFlag) {
+            stopIndicatorAnimation_ = false;
             return;
         }
         std::optional<int32_t> targetIndex;
@@ -1542,7 +1554,6 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
             targetIndex = targetIndex_;
         }
         StopPropertyTranslateAnimation();
-        itemPositionInAnimation_.clear();
         if (indicatorController_) {
             indicatorController_->Stop();
         }
@@ -1637,6 +1648,7 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
         }
         item.second.finialOffset = OffsetF();
     }
+    itemPositionInAnimation_.clear();
     // update postion info.
     UpdateOffsetAfterPropertyAnimation(offset.GetMainOffset(GetDirection()));
     OnTranslateFinish(propertyAnimationIndex_, false);
@@ -1659,6 +1671,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrap
         frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
         item.second.finialOffset = OffsetF();
     }
+    itemPositionInAnimation_.clear();
     if (!isBeforeCreateLayoutWrapper) {
         UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
     }
@@ -1698,6 +1711,10 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion(float velocity) const
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate)
 {
+    if (!stopIndicatorAnimation_) {
+        stopIndicatorAnimation_ = true;
+        return;
+    }
     const auto& turnPageRateCallback = swiperController_->GetTurnPageRateCallback();
     if (!indicatorId_.has_value() && !turnPageRateCallback) {
         return;
@@ -2598,6 +2615,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
         OnIndexChange();
         oldIndex_ = currentIndex_;
     }
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)

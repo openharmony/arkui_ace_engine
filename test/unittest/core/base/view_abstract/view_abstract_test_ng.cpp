@@ -1669,6 +1669,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     std::vector<NG::OptionParam> params = {};
     std::function<void()> buildFunc;
     MenuParam menuParam;
+    std::function<void()> previewBuildFunc = nullptr;
     /**
      * @tc.steps: step2. call Bind and BindContextMenu multiple times with unless parameters
      * @tc.expected: The show or hide method will not call flagFunc.
@@ -1680,7 +1681,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
     EXPECT_TRUE(MockPipelineBase::GetCurrent()->GetOverlayManager()->onShowMenuCallback_);
     params.push_back(OptionParam());
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
-    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam);
+    menuParam.type = MenuType::CONTEXT_MENU;
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam, previewBuildFunc);
     CallShowHideFunc();
     EXPECT_EQ(flag, 0);
     /**
@@ -1689,8 +1691,10 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
      */
     menuParam.onAppear = flagFunc;
     menuParam.onDisappear = flagFunc;
+    menuParam.type = MenuType::MENU;
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
-    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam);
+    menuParam.type = MenuType::CONTEXT_MENU;
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
     CallShowHideFunc();
     EXPECT_EQ(flag, 4);
     /**
@@ -1729,11 +1733,13 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest040, TestSize.Level1)
         FrameNode::CreateFrameNode("targetNode", nodeId, AceType::MakeRefPtr<Pattern>(), true);
     std::vector<OptionParam> param;
     ViewAbstract::BindMenuWithItems(std::move(param), targetNode, OFFSETF, menuParam);
-    ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, MenuType::MULTI_MENU, OFFSETF, menuParam);
+    menuParam.type = MenuType::MULTI_MENU;
+    ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, OFFSETF, menuParam);
     EXPECT_TRUE(mouseInfo.IsStopPropagation());
     param.push_back(OptionParam());
     ViewAbstract::BindMenuWithItems(std::move(param), targetNode, OFFSETF, menuParam);
-    ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, MenuType::CONTEXT_MENU, OFFSETF, menuParam);
+    menuParam.type = MenuType::CONTEXT_MENU;
+    ViewAbstract::BindMenuWithCustomNode(mainNode, targetNode, OFFSETF, menuParam);
     EXPECT_TRUE(mouseInfo.IsStopPropagation());
 }
 

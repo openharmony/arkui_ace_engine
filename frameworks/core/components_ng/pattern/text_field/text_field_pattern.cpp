@@ -312,10 +312,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         StopTwinkling();
         needToRefreshSelectOverlay_ = false;
     }
-    if (setSelectionFlag_) {
-        SetTextSelection(selectionStart_, selectionEnd_);
-        setSelectionFlag_ = false;
-    }
     if (inlineSelectAllFlag_) {
         HandleOnSelectAll(false, true);
         inlineSelectAllFlag_ = false;
@@ -795,7 +791,7 @@ CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position, boo
 
 float TextFieldPattern::AdjustTextRectOffsetX()
 {
-    auto cursorWidth = static_cast<float>(CURSOR_WIDTH.ConvertToPx());
+    auto cursorWidth = caretRect_.Width();
     auto contentLeftBoundary = contentRect_.GetX();
     auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width() - unitWidth_;
     if (IsTextArea()) {
@@ -897,6 +893,10 @@ bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
 
 void TextFieldPattern::OnScrollEndCallback()
 {
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->ScheduleDisapplearDelayTask();
+    }
     auto selectOverlayProxy = GetSelectOverlay();
     CHECK_NULL_VOID_NOLOG(selectOverlayProxy);
     if (originalIsMenuShow_) {
@@ -1514,7 +1514,6 @@ void TextFieldPattern::HandleBlurEvent()
     }
     needToRequestKeyboardInner_ = false;
     isFocusedBeforeClick_ = false;
-    caretRect_.Reset();
     StopTwinkling();
     CloseKeyboard(true);
     MarkRedrawOverlay();
@@ -2070,6 +2069,8 @@ void TextFieldPattern::InitDragDropEvent()
                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         if (extraParams.empty()) {
             pattern->dragStatus_ = DragStatus::ON_DROP;
             pattern->textFieldContentModifier_->ChangeDragStatus();
@@ -2111,9 +2112,27 @@ void TextFieldPattern::InitDragDropEvent()
             }
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
+            host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
     };
     eventHub->SetOnDrop(std::move(onDrop));
+}
+
+void TextFieldPattern::ClearDragDropEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTextDraggable(false);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(nullptr);
+    eventHub->SetOnDragEnter(nullptr);
+    eventHub->SetOnDragMove(nullptr);
+    eventHub->SetOnDragLeave(nullptr);
+    eventHub->SetOnDragEnd(nullptr);
+    eventHub->SetOnDrop(nullptr);
 }
 #endif
 
@@ -2348,6 +2367,9 @@ void TextFieldPattern::OnModifyDone()
     if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) != TextInputType::VISIBLE_PASSWORD) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
+    } else {
+        ClearDragDropEvent();
+        RemoveDragFrameNodeFromManager(host);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
     ProcessPasswordIcon();
@@ -2382,7 +2404,6 @@ void TextFieldPattern::OnModifyDone()
         operationRecords_.clear();
         redoOperationRecords_.clear();
     }
-#if defined(ENABLE_STANDARD_INPUT)
     auto maxLength = GetMaxLength();
     if (GreatNotEqual(textWidth, maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
@@ -2392,7 +2413,6 @@ void TextFieldPattern::OnModifyDone()
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateNeedFireOnChange(true);
     }
-#endif
     FireOnChangeIfNeeded();
     if (IsTextArea() || IsNormalInlineState()) {
         SetAxis(Axis::VERTICAL);
@@ -5108,11 +5128,9 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
     if (!HasFocus()) {
         return;
     }
-    setSelectionFlag_ = true;
     cursorVisible_ = false;
     MarkRedrawOverlay();
-    selectionStart_ = selectionStart;
-    selectionEnd_ = selectionEnd;
+    SetTextSelection(selectionStart, selectionEnd);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -6291,7 +6309,41 @@ void TextFieldPattern::DumpInfo()
 
 bool TextFieldPattern::IsTouchAtLeftOffset(float currentOffsetX)
 {
-    return LessNotEqual(currentOffsetX, contentRect_.GetX() + contentRect_.Width() * 0.5) ? true : false;
+    return LessNotEqual(currentOffsetX, contentRect_.GetX() + contentRect_.Width() * 0.5);
+}
+
+OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
+{
+    if (textBoxes_.empty()) {
+        return { 0.0f, 0.0f };
+    }
+#ifndef USE_GRAPHIC_TEXT_GINE
+    auto startY = textBoxes_.front().rect_.GetTop();
+    auto startX = textBoxes_.front().rect_.GetLeft();
+
+    auto endY = textBoxes_.back().rect_.GetTop();
+#else
+    auto startY = textBoxes_.front().rect.GetTop();
+    auto startX = textBoxes_.front().rect.GetLeft();
+
+    auto endY = textBoxes_.back().rect.GetTop();
+#endif
+    OffsetF startOffset;
+    if (NearEqual(startY, endY)) {
+        startOffset = { (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()) + startX,
+            startY + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) };
+    } else {
+        startOffset = { contentRect_.GetX(),
+            startY + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) };
+    }
+
+    if (startOffset.GetY() < contentRect_.GetY()) {
+        startOffset.SetY(contentRect_.GetY());
+    }
+    if (startOffset.GetX() < contentRect_.GetX()) {
+        startOffset.SetX(contentRect_.GetX());
+    }
+    return startOffset + parentGlobalOffset_;
 }
 
 void TextFieldPattern::OnColorConfigurationUpdate()

@@ -16,26 +16,24 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_PAINT_METHOD_H
 
-#include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/text_content_modifier.h"
+#include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorPaintMethod : public TextPaintMethod {
     DECLARE_ACE_TYPE(RichEditorPaintMethod, TextPaintMethod)
 public:
-    RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset,
-        RefPtr<RichEditorContentModifier> richEditorContentModifier,
-        RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier);
+    RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager, float baselineOffset,
+        const RefPtr<TextContentModifier>& contentMod, const RefPtr<TextOverlayModifier>& overlayMod);
 
-    ~RichEditorPaintMethod() override;
+    ~RichEditorPaintMethod() override = default;
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    WeakPtr<Pattern> pattern_;
-    RefPtr<Paragraph> paragraph_;
-    RefPtr<RichEditorOverlayModifier> richEditorOverlayModifier_;
+    const ParagraphManager* pManager_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPaintMethod);
 };
 } // namespace OHOS::Ace::NG

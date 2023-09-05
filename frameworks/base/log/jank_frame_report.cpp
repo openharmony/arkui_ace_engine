@@ -100,7 +100,7 @@ int32_t JankFrameReport::currentFrameUpdateCount_ = 0;
 JankFrameFlag JankFrameReport::recordStatus_ = JANK_IDLE;
 int64_t JankFrameReport::startTime_ = 0;
 int64_t JankFrameReport::prevEndTimeStamp_ = 0;
-int64_t JankFrameReport::refreshPeriod_ = 0;
+int64_t JankFrameReport::refreshPeriod_ = 16666666;
 std::string JankFrameReport::pageUrl_;
 bool JankFrameReport::needReport_ = false;
 
@@ -135,11 +135,6 @@ void JankFrameReport::RecordJankStatus(double jank)
         jankFrameCount_++;
         ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
     }
-}
-
-void JankFrameReport::SetRefreshPeriod(int64_t refreshPeriod)
-{
-    refreshPeriod_ = refreshPeriod;
 }
 
 void JankFrameReport::RecordPreviousEnd()

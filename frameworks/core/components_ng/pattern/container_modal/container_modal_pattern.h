@@ -68,6 +68,11 @@ public:
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
 
     void SetCloseButtonStatus(bool isEnabled);
+    
+    void SetOnShowFloatingSubWindow(bool onShowFloatingSubWindow)
+    {
+        onShowFloatingSubWindow_ = onShowFloatingSubWindow;
+    }
 
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& titleNode, int32_t originIndex)
@@ -97,6 +102,7 @@ private:
     bool hasDeco_ = true;
     bool isFocus_ = true;
     bool hideSplitButton_ = false;
+    bool onShowFloatingSubWindow_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H

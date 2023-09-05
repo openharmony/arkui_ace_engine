@@ -2391,6 +2391,10 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
         if (JSViewAbstract::ParseJsMedia(indexObject->GetProperty("icon"), iconPath)) {
             params[i].icon = iconPath;
         }
+        auto enabled = indexObject->GetProperty("enabled");
+        if (enabled->IsBoolean()) {
+            params[i].enabled = enabled->ToBoolean();
+        }
     }
     return params;
 }
@@ -2475,10 +2479,36 @@ void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
     ParseMenuParam(info, menuOptions, menuParam);
 }
 
-void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam)
+void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args, NG::MenuParam& menuParam,
+    std::function<void()>& previewBuildFunc)
 {
     auto menuContentOptions = JSRef<JSObject>::Cast(args);
     ParseMenuParam(info, menuContentOptions, menuParam);
+    RefPtr<JsFunction> previewBuilderFunc;
+    auto preview = menuContentOptions->GetProperty("preview");
+    if (!preview->IsObject() && !preview->IsNumber()) {
+        return;
+    }
+
+    if (preview->IsNumber()) {
+        if (preview->ToNumber<int32_t>() == 1) {
+            menuParam.hasPreview = true;
+        }
+    } else {
+        menuParam.hasPreview = true;
+        auto previewObj = JSRef<JSObject>::Cast(preview);
+        auto previewBuilder = previewObj->GetProperty("builder");
+        if (!previewBuilder->IsFunction()) {
+            return;
+        }
+        previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(previewBuilder));
+        CHECK_NULL_VOID(previewBuilderFunc);
+        previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("BuildContextMenuPreviwer");
+            func->Execute();
+        };
+    }
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
@@ -5226,11 +5256,15 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     };
 
     NG::MenuParam menuParam;
+    std::function<void()> previewBuildFunc = nullptr;
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
-        ParseBindContentOptionParam(info, info[2], menuParam);
+        ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
-
-    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam);
+    if (responseType != ResponseType::LONG_PRESS) {
+        menuParam.hasPreview = false;
+    }
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
 }
 
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)

@@ -16,7 +16,14 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 
 namespace OHOS::Ace::NG {
-RichEditorContentModifier::RichEditorContentModifier(const std::optional<TextStyle> textStyle)
-    : TextContentModifier(textStyle)
-{}
+void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
+{
+    CHECK_NULL_VOID(pManager_);
+    auto&& paragraphs = pManager_->GetParagraphs();
+    auto offset = GetPaintOffset();
+    for (auto&& info : paragraphs) {
+        info.paragraph->Paint(drawingContext.canvas, offset.GetX(), offset.GetY());
+        offset.AddY(info.paragraph->GetHeight());
+    }
+}
 } // namespace OHOS::Ace::NG

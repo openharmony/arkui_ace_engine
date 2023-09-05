@@ -21,9 +21,14 @@
 #include <dlfcn.h>
 #endif
 
+#ifdef PIXEL_MAP_SUPPORTED
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
+#endif
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"
 #include "base/want/want_wrap.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -164,4 +169,17 @@ bool IsDisableEventVersion()
     LOGW("The version doesn't support disable event callback.");
     return false;
 }
+
+#ifdef PIXEL_MAP_SUPPORTED
+JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, {});
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto* env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap->GetPixelMapSharedPtr());
+    auto* nativeValue = reinterpret_cast<NativeValue*>(napiValue);
+    return JsConverter::ConvertNativeValueToJsVal(nativeValue);
+}
+#endif
 } // namespace OHOS::Ace::Framework

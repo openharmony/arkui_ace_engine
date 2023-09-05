@@ -208,6 +208,10 @@ void ContainerModalPattern::InitContainerEvent()
 
         if ((info.GetLocalLocation().GetY() >= titlePopupDistance || action == MouseAction::WINDOW_LEAVE) &&
             floatingLayoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
+            if (action == MouseAction::WINDOW_LEAVE && container->onShowFloatingSubWindow_) {
+                container->SetOnShowFloatingSubWindow(false);
+                return;
+            }
             AnimationUtils::Animate(
                 option,
                 [context, titlePopupDistance]() {

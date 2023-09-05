@@ -429,7 +429,7 @@ void ViewFunctions::InitViewFunctions(
             LOGD("View is not a recycle node");
         }
 
-        JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycle");
+        JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycleInternal");
         if (jsAboutToRecycleFunc->IsFunction()) {
             jsAboutToRecycleFunc_ = JSRef<JSFunc>::Cast(jsAboutToRecycleFunc);
         }
@@ -602,7 +602,7 @@ void ViewFunctions::ExecuteDisappear()
 
 void ViewFunctions::ExecuteAboutToRecycle()
 {
-    ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycle");
+    ExecuteFunction(jsAboutToRecycleFunc_, "aboutToRecycleInternal");
 }
 
 bool ViewFunctions::HasLayout() const
@@ -708,9 +708,13 @@ void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
     }
     ACE_SCOPED_TRACE("%s", debugInfo);
     JSRef<JSVal> jsObject = jsObject_.Lock();
-    std::string functionName(debugInfo);
-    AceScopedPerformanceCheck scoped(functionName);
+    if (!jsObject->IsUndefined()) {
+        std::string functionName(debugInfo);
+        AceScopedPerformanceCheck scoped(functionName);
     func.Lock()->Call(jsObject);
+    } else {
+        LOGE("jsObject is undefined. Internal error while trying to exec %{public}s", debugInfo);
+    }
 }
 
 JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, const char* debugInfo)

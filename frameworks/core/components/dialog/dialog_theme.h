@@ -159,6 +159,8 @@ public:
             theme->contentAdjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
             theme->defaultPaddingBottomFixed_ =
                 dialogPattern->GetAttr<Dimension>("default_padding_bottom_fixed", 24.0_vp);
+            theme->defaultDialogMarginBottom_ =
+                dialogPattern->GetAttr<Dimension>("default_dialog_margin_bottom", 16.0_vp);
             theme->buttonHighlightBgColor_ =
                 dialogPattern->GetAttr<Color>("button_bg_highlight_color", Color(0xff007dff));
             theme->buttonHighlightFontColor_ = dialogPattern->GetAttr<Color>("first_button_text_color", Color::WHITE);
@@ -522,6 +524,11 @@ public:
         return defaultPaddingBottomFixed_;
     }
 
+    const Dimension& GetDefaultDialogMarginBottom()
+    {
+        return defaultDialogMarginBottom_;
+    }
+
 protected:
     DialogTheme() = default;
 
@@ -583,6 +590,7 @@ private:
     Dimension minButtonWidth_;
     Dimension maxButtonWidth_;
     Dimension defaultPaddingBottomFixed_;
+    Dimension defaultDialogMarginBottom_;
     Dimension buttonPaddingBottom_;
     Dimension singleButtonPaddingStart_;
     Dimension singleButtonPaddingEnd_;

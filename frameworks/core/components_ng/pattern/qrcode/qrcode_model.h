@@ -27,9 +27,9 @@ public:
     static QRCodeModel* GetInstance();
     virtual ~QRCodeModel() = default;
     virtual void Create(const std::string& value) = 0;
-    virtual void SetQRCodeColor(Color color) = 0;
-    virtual void SetQRBackgroundColor(Color color) = 0;
-    virtual void SetContentOpacity(double opacity) = 0;
+    virtual void SetQRCodeColor(const Color& color) = 0;
+    virtual void SetQRBackgroundColor(const Color& color) = 0;
+    virtual void SetContentOpacity(const double opacity) = 0;
 
 private:
     static std::unique_ptr<QRCodeModel> instance_;

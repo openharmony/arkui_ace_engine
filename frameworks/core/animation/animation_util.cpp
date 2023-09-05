@@ -504,9 +504,11 @@ AnimationOption AnimationUtil::CreateKeyboardAnimationOption(
     NearZero(keyboardHeight) ? option.SetDuration(config.durationOut_) : option.SetDuration(config.durationIn_);
     RefPtr<Curve> curve;
     if (config.curveType_ == "cubic" && config.curveParams_.size() == 4) {
+        // cubic curve needs 4 params
         curve = AceType::MakeRefPtr<CubicCurve>(
             config.curveParams_[0], config.curveParams_[1], config.curveParams_[2], config.curveParams_[3]);
     } else if (config.curveType_ == "interpolatingSpring" && config.curveParams_.size() == 4) {
+        // interpolatingSpring needs 4 params
         curve = AceType::MakeRefPtr<InterpolatingSpring>(
             config.curveParams_[0], config.curveParams_[1], config.curveParams_[2], config.curveParams_[3]);
     } else {

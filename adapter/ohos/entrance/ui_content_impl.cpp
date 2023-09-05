@@ -278,11 +278,7 @@ private:
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime) : runtime_(runtime)
 {
     CHECK_NULL_VOID(context);
-    const auto& obj = context->GetBindingObject();
-    auto ref = obj->Get<NativeReference>();
-    auto object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(ref->Get());
-    auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(object->GetNativePointer());
-    context_ = *weak;
+    context_ = context->weak_from_this();
     LOGI("Create UIContentImpl successfully.");
 }
 
@@ -300,23 +296,14 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     minCompatibleVersionCode_ = applicationInfo->minCompatibleVersionCode;
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     SetConfiguration(context->GetConfiguration());
-    const auto& obj = context->GetBindingObject();
-    CHECK_NULL_VOID(obj);
-    auto ref = obj->Get<NativeReference>();
-    CHECK_NULL_VOID(ref);
-    auto object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(ref->Get());
-    CHECK_NULL_VOID(object);
-    auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(object->GetNativePointer());
-    CHECK_NULL_VOID(weak);
-    context_ = *weak;
+    context_ = context->weak_from_this();
     LOGI("Create form UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
-    auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>>(ability->GetAbilityContext());
-    context_ = weak;
+    context_ = ability->GetAbilityContext();
     LOGI("Create UIContentImpl successfully.");
 }
 

@@ -781,6 +781,21 @@ template("ace_core_ng_source_set") {
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
         "//foundation/appframework/ability/ability_runtime/cross_platform/interfaces/inner_api/error",
       ]
+      sources -= [ "components/declaration/common/declaration.cpp" ]
+      sources += [
+        "animation/card_transition_controller.cpp",
+        "components/common/properties/animatable_path.cpp",
+        "components/common/properties/border_image_edge.cpp",
+        "components/common/properties/color_factory.cpp",
+        "components/common/properties/edge.cpp",
+        "components/common/properties/page_transition_option.cpp",
+        "components/common/properties/scroll_bar.cpp",
+        "components/custom_paint/rosen_render_offscreen_canvas.cpp",
+        "components/declaration/common/event.cpp",
+        "components/svg/svg_transform.cpp",
+        "components/video/resource/ext_surface.cpp",
+        "components/video/resource/resource.cpp",
+      ]
     }
 
     if (platform == "ohos" || platform == "ohos_ng") {
@@ -798,14 +813,6 @@ template("ace_core_ng_source_set") {
       configs += [ "$ace_flutter_engine_root:flutter_config" ]
 
       if (is_cross_platform_build) {
-        sources += [ "components/common/painter/rosen_svg_painter.cpp" ]
-
-        sources -= [
-          "components/common/painter/flutter_decoration_painter.cpp",
-          "components/common/painter/flutter_svg_painter.cpp",
-          "components/font/flutter_font_collection.cpp",
-        ]
-
         deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
       }
 
@@ -814,11 +821,6 @@ template("ace_core_ng_source_set") {
         sources += [
           "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
           "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-        ]
-      } else {
-        sources += [
-          "$flutter_root/engine/flutter/common/task_runners.cc",
-          "$flutter_root/engine/flutter/shell/common/thread_host.cc",
         ]
       }
     } else {
@@ -863,6 +865,9 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
     ]
+    if (is_cross_platform_build) {
+      deps -= [ "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform" ]
+    }
 
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
@@ -976,6 +981,12 @@ template("ace_core_ng_source_set") {
         "$ace_root/frameworks/core/components/scene_viewer:ace_core_components_scene_viewer_$platform",
         "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_model_component_ng_$platform",
       ]
+    }
+
+    if (defined(config.enable_image_compression) &&
+        config.enable_image_compression) {
+      deps += [ "//third_party/opencl-headers:libcl" ]
+      defines += [ "ENABLE_OPENCL" ]
     }
 
     cflags_cc = []

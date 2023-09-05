@@ -544,6 +544,8 @@ void JsiDeclarativeEngineInstance::InitGroupJsBridge()
         LOGE("Js Engine Initialize GroupJsBridge failed!");
         EventReport::SendJsException(JsExcepType::JS_ENGINE_INIT_ERR);
     }
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
+    JsUINodeRegisterCleanUp(JSNApi::GetGlobalObject(runtime->GetEcmaVm()));
 }
 
 void JsiDeclarativeEngineInstance::RootViewHandle(panda::Local<panda::ObjectRef> value)

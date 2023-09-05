@@ -96,7 +96,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
     // For root node, the parent local point is the same as global point.
-    frameNode->TouchTest(point, point, touchRestrict, hitTestResult, touchPoint.id);
+    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id);
     if (needAppend) {
 #ifdef OHOS_STANDARD_SYSTEM
         for (const auto& entry : hitTestResult) {
@@ -129,7 +129,7 @@ void EventManager::TouchTest(
     }
     // For root node, the parent local point is the same as global point.
     TouchTestResult hitTestResult;
-    frameNode->TouchTest(point, point, touchRestrict, hitTestResult, event.id);
+    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
 }
 
@@ -577,7 +577,7 @@ void EventManager::MouseTest(
         std::vector<NG::RectF> rect;
         frameNode->CheckSecurityComponentStatus(rect);
     }
-    frameNode->TouchTest(point, point, touchRestrict, testResult, event.GetId());
+    frameNode->TouchTest(point, point, point, touchRestrict, testResult, event.GetId());
     if (testResult.empty()) {
         LOGD("mouse hover test result is empty");
     }
@@ -1123,7 +1123,12 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
         std::vector<std::vector<KeyCode>> keyCodes;
         std::vector<uint8_t> permutation;
         AddKeyboardShortcutKeys(keyboardShortcut.keys, keyCodes, permutation);
-        if (event.ConvertInputCodeToString().find(keyboardShortcut.value) == std::string::npos) {
+        // FunctionKey
+        if (event.IsFunctionKey() || event.IsEscapeKey()) {
+            if (event.ConvertInputCodeToString() != keyboardShortcut.value) {
+                continue;
+            }
+        } else if (event.ConvertInputCodeToString().find(keyboardShortcut.value) == std::string::npos) {
             continue;
         }
         // Handle left and right the keys problem.

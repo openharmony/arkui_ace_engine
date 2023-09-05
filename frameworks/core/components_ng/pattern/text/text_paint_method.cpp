@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset,
     RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier)
     : pattern_(pattern), paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset),
-      textContentModifier_(textContentModifier), textOverlayModifier_(textOverlayModifier)
+      textContentModifier_(std::move(textContentModifier)), textOverlayModifier_(std::move(textOverlayModifier))
 {}
 
 RefPtr<Modifier> TextPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
@@ -65,8 +65,6 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     } else {
         textContentModifier_->StopTextRace();
     }
-
-    textContentModifier_->ContentChange();
 
     auto reasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
     textContentModifier_->SetObscured(reasons);

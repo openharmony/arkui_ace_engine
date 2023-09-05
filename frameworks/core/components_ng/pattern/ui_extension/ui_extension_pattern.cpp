@@ -179,8 +179,14 @@ void UIExtensionPattern::OnConnectInner()
     if (onModalRemoteReadyCallback_) {
         onModalRemoteReadyCallback_(std::make_shared<ModalUIExtensionProxyImpl>(session_));
     }
+    bool isFocused = IsCurrentFocus();
     RegisterVisibleAreaChange();
-    TransferFocusState(IsCurrentFocus());
+    TransferFocusState(isFocused);
+    if (isFocused) {
+        auto context = AceType::DynamicCast<PipelineContext>(pipeline);
+        auto uiExtensionManager = context->GetUIExtensionManager();
+        uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
+    }
 }
 
 void UIExtensionPattern::OnDisconnect()
@@ -221,6 +227,13 @@ void UIExtensionPattern::OnExtensionDied()
             }
         },
         TaskExecutor::TaskType::UI);
+}
+
+bool UIExtensionPattern::OnBackPressed()
+{
+    bool isConsumed = false;
+    DispatchBackpressedEventForConsumed(isConsumed);
+    return isConsumed;
 }
 
 void UIExtensionPattern::RegisterLifecycleListener()
@@ -402,18 +415,22 @@ void UIExtensionPattern::HandleFocusEvent()
         DisPatchFocusActiveEvent(true);
     }
     TransferFocusState(true);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
 }
 
 void UIExtensionPattern::HandleBlurEvent()
 {
     DisPatchFocusActiveEvent(false);
     TransferFocusState(false);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID_NOLOG(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField();
     }
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    uiExtensionManager->RegisterUIExtensionInFocus(nullptr);
 }
 
 bool UIExtensionPattern::KeyEventConsumed(const KeyEvent& event)
@@ -713,6 +730,12 @@ int32_t UIExtensionPattern::GetSessionId()
 {
     CHECK_NULL_RETURN(session_, 0);
     return session_->GetPersistentId();
+}
+
+void UIExtensionPattern::DispatchBackpressedEventForConsumed(bool& isConsumed)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferBackPressedEventForConsumed(isConsumed);
 }
 
 void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

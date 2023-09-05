@@ -231,7 +231,8 @@ public:
 
     // If return true, will prevent TouchTest Bubbling to parent and brother nodes.
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override;
+        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict,
+        TouchTestResult& result, int32_t touchId) override;
 
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
@@ -599,6 +600,9 @@ private:
 
     // set costom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
+
+    void GetPercentSensitive();
+    void UpdatePercentSensitive();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

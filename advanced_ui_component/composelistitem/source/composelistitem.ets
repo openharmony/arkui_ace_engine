@@ -128,7 +128,6 @@ struct ContentItemStruct {
           .width(ICON_SIZE_MAP.get(this.iconStyle))
           .height(ICON_SIZE_MAP.get(this.iconStyle))
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-          .backgroundColor(Color.Blue)
           .focusable(true)
           .draggable(false)
       }
@@ -142,7 +141,6 @@ struct ContentItemStruct {
             maxHeight: ICON_SIZE_MAP.get(this.iconStyle)
           })
           .borderRadius($r('sys.float.ohos_id_corner_radius_default_m'))
-          .backgroundColor(Color.Blue)
           .focusable(true)
           .draggable(false)
       }
@@ -316,6 +314,7 @@ struct OperateItemStruct {
         }
       }
     })
+    .onClick((icon.action))
   }
 
   @Builder
@@ -530,6 +529,7 @@ struct OperateItemStruct {
         }
       }
     })
+    .onClick(icon.action)
   }
 
   build() {

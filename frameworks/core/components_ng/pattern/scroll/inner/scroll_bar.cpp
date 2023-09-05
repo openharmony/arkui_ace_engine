@@ -351,9 +351,9 @@ void ScrollBar::SetGestureEvent()
                 info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
-                    scrollBar->SetPressed(false);
                     scrollBar->ScheduleDisapplearDelayTask();
                 }
+                scrollBar->SetPressed(false);
             }
         });
     }
@@ -519,6 +519,7 @@ void ScrollBar::InitPanRecognizer()
     PanDirection panDirection;
     panDirection.type = positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
     panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE);
     panRecognizer_->SetOnActionUpdate([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {

@@ -18,7 +18,9 @@
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -136,6 +138,10 @@ void TxtParagraph::Build()
 #else
     paragraph_ = builder_->CreateTypography();
 #endif
+
+    if (paraStyle_.leadingMargin) {
+        SetIndents( { paraStyle_.leadingMargin->size.Width() });
+    }
 }
 
 void TxtParagraph::Reset()
@@ -226,6 +232,16 @@ void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
     SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
+    if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
+        auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
+        auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
+        CHECK_NULL_VOID(pixelMapImage);
+        auto& rsCanvas = const_cast<RSCanvas&>(canvas);
+        auto size = paraStyle_.leadingMargin->size;
+        auto width = size.Width();
+        auto height = size.Height();
+        pixelMapImage->DrawRect(rsCanvas, ToRSRect(RectF(x, y, width, height)));
+    }
 }
 
 void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)

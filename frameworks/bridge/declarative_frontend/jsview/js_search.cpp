@@ -387,19 +387,23 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
-        font.fontSize = Dimension(-1);
+        font.fontSize = themeFontSize;
     } else {
         auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
                                   PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
         CalcDimension size;
-        if (versionTenOrLarger ? !ParseJsDimensionVpNG(fontSize, size) : !ParseJsDimensionVp(fontSize, size) ||
-            !ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            font.fontSize = Dimension(-1);
-        } else {
+        if (versionTenOrLarger ? ParseJsDimensionVpNG(fontSize, size) : ParseJsDimensionVp(fontSize, size) &&
+            size.Unit() != DimensionUnit::PERCENT) {
+            ParseJsDimensionFp(fontSize, size);
             font.fontSize = size;
+        } else {
+            font.fontSize = themeFontSize;
         }
     }
 
@@ -434,14 +438,17 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
         return;
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");
-    CalcDimension size = Dimension(-1);
+    CalcDimension size = themeFontSize;
     if (ParseJsDimensionVpNG(fontSize, size) && size.Unit() != DimensionUnit::PERCENT &&
         GreatOrEqual(size.Value(), 0.0)) {
         ParseJsDimensionFp(fontSize, size);
     } else {
-        size = Dimension(-1);
+        size = themeFontSize;
     }
     font.fontSize = size;
 
@@ -616,6 +623,10 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
 void JSSearch::SetCopyOption(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
+        return;
+    }
+    if (info[0]->IsUndefined()) {
+        SearchModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
     auto copyOptions = CopyOptions::None;

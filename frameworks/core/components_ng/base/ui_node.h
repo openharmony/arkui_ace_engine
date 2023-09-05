@@ -233,7 +233,8 @@ public:
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId);
+        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict,
+        TouchTestResult& result, int32_t touchId);
     virtual HitTestMode GetHitTestMode() const
     {
         return HitTestMode::HTMDEFAULT;
@@ -497,7 +498,7 @@ protected:
 
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
-        for (const auto& child : children_) {
+        for (const auto& child : GetChildren()) {
             child->OnGenerateOneDepthAllFrame(allList);
         }
     }

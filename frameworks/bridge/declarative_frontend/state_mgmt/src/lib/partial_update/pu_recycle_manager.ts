@@ -51,3 +51,13 @@ class RecycleManager {
     this.cachedRecycleNodes.clear();
   }
 }
+
+function createWeakRef<T>(o: T) {
+  if (typeof o !== "object") {
+    return o;
+  }
+  if (o instanceof ObservedPropertyAbstract) {
+    return new WeakRef(o.getUnmonitored());
+  }
+  return new WeakRef(o);
+}

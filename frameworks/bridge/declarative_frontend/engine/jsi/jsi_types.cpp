@@ -267,6 +267,14 @@ JsiRef<JsiValue> JsiObject::GetProperty(const char* prop) const
     return refValue;
 }
 
+bool JsiObject::HasProperty(const char* prop) const
+{
+    auto vm = GetEcmaVM();
+    auto stringRef = panda::StringRef::NewFromUtf8(vm, prop);
+    bool has = GetHandle()->Has(vm, stringRef);
+    return has;
+}
+
 JsiRef<JsiValue> JsiObject::ToJsonObject(const char* value) const
 {
     auto vm = GetEcmaVM();

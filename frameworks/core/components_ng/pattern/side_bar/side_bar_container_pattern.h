@@ -185,6 +185,7 @@ private:
     SideBarAnimationDirection animDir_ = SideBarAnimationDirection::LTR;
     bool isControlButtonClick_ = false;
     bool hasInit_ = false;
+    bool autoHide_ = false;
 
     Dimension realSideBarWidth_ = -1.0_vp;
     Dimension preSidebarWidth_;

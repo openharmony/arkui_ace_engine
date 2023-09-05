@@ -161,6 +161,11 @@ public:
         return preSideBarWidth_;
     }
 
+    bool GetAutoHide() const
+    {
+        return autoHide_;
+    }
+
 private:
     void MeasureControlButton(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& buttonLayoutWrapper, float parentWidth);
@@ -207,6 +212,7 @@ private:
     OffsetF sideBarOffset_;
     SideBarContainerType type_ = SideBarContainerType::EMBED;
     bool isControlButtonClick_ = false;
+    bool autoHide_ = false;
 
     Dimension adjustMaxSideBarWidth_;
     Dimension adjustMinSideBarWidth_;

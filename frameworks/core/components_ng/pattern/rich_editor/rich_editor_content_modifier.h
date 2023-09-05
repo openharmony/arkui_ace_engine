@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_TEXT_CONTENT_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_TEXT_CONTENT_MODIFIER_H
 
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -23,7 +24,15 @@ class RichEditorContentModifier : public TextContentModifier {
     DECLARE_ACE_TYPE(RichEditorContentModifier, TextContentModifier)
 
 public:
-    RichEditorContentModifier(const std::optional<TextStyle> textStyle);
+    RichEditorContentModifier(const std::optional<TextStyle>& textStyle, const ParagraphManager* pManager)
+        : TextContentModifier(textStyle), pManager_(pManager)
+    {}
+    ~RichEditorContentModifier() override = default;
+
+    void onDraw(DrawingContext& drawingContext) override;
+
+private:
+    const ParagraphManager* pManager_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorContentModifier);
 };
 } // namespace OHOS::Ace::NG

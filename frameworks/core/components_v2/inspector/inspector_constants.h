@@ -95,6 +95,7 @@ ACE_EXPORT extern const char TEXT_ATTRS_MAX_LINES[];
 
 // rich editor
 ACE_EXPORT extern const char RICH_EDITOR_ETS_TAG[];
+ACE_EXPORT extern const char RICH_EDITOR_DRAG_ETS_TAG[];
 
 // stack
 ACE_EXPORT extern const char STACK_COMPONENT_TAG[];
@@ -416,6 +417,7 @@ ACE_EXPORT extern const char MENU_ETS_TAG[];
 ACE_EXPORT extern const char MENU_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char MENU_ITEM_GROUP_ETS_TAG[];
 ACE_EXPORT extern const char MENU_WRAPPER_ETS_TAG[];
+ACE_EXPORT extern const char MENU_PREVIEW_ETS_TAG[];
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
