@@ -15,13 +15,18 @@
 
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 
+bool isClosed = false;
+
 namespace OHOS::Ace::NG {
 bool SelectOverlayProxy::IsClosed() const
 {
-    return false;
+    return isClosed;
 }
 
-void SelectOverlayProxy::Close(bool animation) const {}
+void SelectOverlayProxy::Close(bool animation) const
+{
+    isClosed = true;
+}
 
 void SelectOverlayProxy::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info) const {}
 
