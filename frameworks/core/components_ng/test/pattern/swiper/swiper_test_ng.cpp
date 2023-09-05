@@ -11155,7 +11155,18 @@ HWTEST_F(SwiperTestNg, SwiperFlushFocus002, TestSize.Level1)
     ASSERT_NE(swiperPaintProperty, nullptr);
 
     /**
-     * @tc.steps: step2. test FlushFocus with IsShowIndicator() is true.
+     * @tc.steps: step2. Create curShowFrameNode, addChild to frameNode.
+     */
+    auto curShowFrame = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
+    auto child1 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<SwiperPattern>());
+    child->GetOrCreateFocusHub();
+    child1->GetOrCreateFocusHub();
+    curShowFrame->AddChild(child);
+    swiperFrameNode->AddChild(child1);
+
+    /**
+     * @tc.steps: step3. test FlushFocus with IsShowIndicator() is true.
      * @tc.expected: the related function runs ok.
      */
     swiperLayoutProperty->UpdateShowIndicator(true);
