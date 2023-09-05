@@ -3165,8 +3165,6 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     if (info.GetAction() == MouseAction::RELEASE) {
         LOGI("Handle mouse left button release");
         if (blockPress_) {
-            caretUpdateType_ = CaretUpdateType::PRESSED;
-            UpdateCaretPositionByPressOffset();
             blockPress_ = false;
         }
         CloseSelectOverlay(true);
