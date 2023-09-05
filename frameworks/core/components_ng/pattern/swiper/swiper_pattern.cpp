@@ -718,8 +718,9 @@ void SwiperPattern::SwipeTo(int32_t index)
     CHECK_NULL_VOID(host);
     auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
     targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
-    if (currentIndex_ == targetIndex) {
-        LOGD("Target index is same with current index.");
+    // If targetIndex_ has a value, means animation is still running, stop it before play new animation.
+    if (currentIndex_ == targetIndex && !targetIndex_.has_value()) {
+        LOGD("Target index %{public}d is same with current index %{public}d.", targetIndex, currentIndex_);
         return;
     }
     StopFadeAnimation();
