@@ -69,6 +69,7 @@ void InputEventActuator::OnCollectHoverEvent(
         for (const auto& callback : actuator->inputEvents_) {
             if (callback) {
                 (*callback)(info);
+                (*callback)(info, hoverInfo);
             }
         }
         if (actuator->userCallback_) {
