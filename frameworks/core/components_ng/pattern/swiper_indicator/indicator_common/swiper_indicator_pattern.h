@@ -101,17 +101,16 @@ public:
             CHECK_NULL_RETURN(host, nullptr);
             auto indicatorGeometryNode = host->GetGeometryNode();
             CHECK_NULL_RETURN(indicatorGeometryNode, nullptr);
-            auto indicatorFrameOffset = indicatorGeometryNode->GetFrameOffset();
             auto boundsValue =
                 (geometryNode->GetFrameSize().Width() - indicatorGeometryNode->GetFrameSize().Width()) * 0.5f;
             auto boundsRectOriginX = -boundsValue;
-            auto boundsRectOriginY = indicatorFrameOffset.GetY();
+            auto boundsRectOriginY = 0.0f;
             auto boundsRectWidth = geometryNode->GetFrameSize().Width();
             auto boundsRectHeight = indicatorGeometryNode->GetFrameSize().Height();
             if (swiperPattern->GetDirection() == Axis::VERTICAL) {
                 boundsValue =
                     (geometryNode->GetFrameSize().Height() - indicatorGeometryNode->GetFrameSize().Height()) * 0.5f;
-                boundsRectOriginX = indicatorFrameOffset.GetX();
+                boundsRectOriginX = 0.0f;
                 boundsRectOriginY = -boundsValue;
                 boundsRectWidth = indicatorGeometryNode->GetFrameSize().Width();
                 boundsRectHeight = geometryNode->GetFrameSize().Height();
