@@ -803,12 +803,11 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
 
 void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
-    CHECK_NULL_VOID(rootNode_);
-    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     CHECK_NULL_VOID(stageManager_);
     auto page = stageManager_->GetLastPage();
     if (page) {
-        page->MarkDirtyNode(onKeyboard ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
+        page->MarkDirtyNode(onKeyboard && !safeAreaManager_->KeyboardSafeAreaEnabled() ? PROPERTY_UPDATE_LAYOUT
+                                                                                       : PROPERTY_UPDATE_MEASURE);
     }
     if (overlayManager_) {
         overlayManager_->MarkDirty(PROPERTY_UPDATE_MEASURE);

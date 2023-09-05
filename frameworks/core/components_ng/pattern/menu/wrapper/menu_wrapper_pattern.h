@@ -116,7 +116,7 @@ protected:
     void CheckAndShowAnimation();
 
 private:
-    bool ShouldAvoidKeyboard() const override
+    bool AvoidKeyboard() const override
     {
         return false;
     }

@@ -22,18 +22,19 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/animator_info.h"
 #include "core/animation/page_transition_common.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
 #include "core/components_ng/pattern/stage/page_transition_effect.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<FrameNode>>;
 using JSAnimatorMap = std::unordered_map<std::string, RefPtr<Framework::AnimatorInfo>>;
 // PagePattern is the base class for page root render node.
-class ACE_EXPORT PagePattern : public Pattern {
-    DECLARE_ACE_TYPE(PagePattern, Pattern);
+class ACE_EXPORT PagePattern : public ContentRootPattern {
+    DECLARE_ACE_TYPE(PagePattern, ContentRootPattern);
 
 public:
     explicit PagePattern(const RefPtr<PageInfo>& pageInfo) : pageInfo_(pageInfo) {}
@@ -146,6 +147,12 @@ private:
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
+
+    bool AvoidKeyboard() const override;
+    bool AvoidTop() const override
+    {
+        return true;
+    }
 
     RefPtr<PageInfo> pageInfo_;
     RefPtr<Animator> controller_;

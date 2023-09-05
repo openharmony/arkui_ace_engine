@@ -15,5 +15,4 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 
 namespace OHOS::Ace::NG {
-void PopupBasePattern::BeforeCreateLayoutWrapper() {}
 } // namespace OHOS::Ace::NG
