@@ -582,24 +582,24 @@ ImageSpanAttribute JSRichEditorController::ParseJsImageSpanAttribute(JSRef<JSObj
     return imageStyle;
 }
 
-TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject)
+TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject, struct UpdateSpanStyle& updateSpanStyle)
 {
     TextStyle style;
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     Color textColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsColor(fontColor, textColor)) {
-        updateSpanStyle_.updateTextColor = textColor;
+        updateSpanStyle.updateTextColor = textColor;
         style.SetTextColor(textColor);
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
     if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFp(fontSize, size)) {
-        updateSpanStyle_.updateFontSize = size;
+        updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
     }
     JSRef<JSVal> fontStyle = styleObject->GetProperty("fontStyle");
     if (!fontStyle->IsNull() && fontStyle->IsNumber()) {
-        updateSpanStyle_.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
+        updateSpanStyle.updateItalicFontStyle = static_cast<FontStyle>(fontStyle->ToNumber<int32_t>());
         style.SetFontStyle(static_cast<FontStyle>(fontStyle->ToNumber<int32_t>()));
     }
     JSRef<JSVal> fontWeight = styleObject->GetProperty("fontWeight");
@@ -608,13 +608,13 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject)
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
         }
-        updateSpanStyle_.updateFontWeight = ConvertStrToFontWeight(weight);
+        updateSpanStyle.updateFontWeight = ConvertStrToFontWeight(weight);
         style.SetFontWeight(ConvertStrToFontWeight(weight));
     }
     JSRef<JSVal> fontFamily = styleObject->GetProperty("fontFamily");
     std::vector<std::string> family;
     if (!fontFamily->IsNull() && JSContainerBase::ParseJsFontFamilies(fontFamily, family)) {
-        updateSpanStyle_.updateFontFamily = family;
+        updateSpanStyle.updateFontFamily = family;
         style.SetFontFamilies(family);
     }
     auto decorationObj = styleObject->GetProperty("decoration");
@@ -622,13 +622,13 @@ TextStyle JSRichEditorController::ParseJsTextStyle(JSRef<JSObject> styleObject)
     if (!decorationObject->IsUndefined()) {
         JSRef<JSVal> type = decorationObject->GetProperty("type");
         if (!type->IsNull()) {
-            updateSpanStyle_.updateTextDecoration = static_cast<TextDecoration>(type->ToNumber<int32_t>());
+            updateSpanStyle.updateTextDecoration = static_cast<TextDecoration>(type->ToNumber<int32_t>());
             style.SetTextDecoration(static_cast<TextDecoration>(type->ToNumber<int32_t>()));
         }
         JSRef<JSVal> color = decorationObject->GetProperty("color");
         Color decorationColor;
         if (!color->IsNull() && JSContainerBase::ParseJsColor(color, decorationColor)) {
-            updateSpanStyle_.updateTextDecorationColor = decorationColor;
+            updateSpanStyle.updateTextDecorationColor = decorationColor;
             style.SetTextDecorationColor(decorationColor);
         }
     }
@@ -761,7 +761,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         auto styleObj = spanObject->GetProperty("style");
         JSRef<JSObject> styleObject = JSRef<JSObject>::Cast(styleObj);
         if (!styleObject->IsUndefined()) {
-            TextStyle style = ParseJsTextStyle(styleObject);
+            TextStyle style = ParseJsTextStyle(styleObject, updateSpanStyle_);
             options.style = style;
         }
     }
@@ -848,6 +848,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("setCaretOffset", &JSRichEditorController::SetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("updateSpanStyle", &JSRichEditorController::UpdateSpanStyle);
+    JSClass<JSRichEditorController>::CustomMethod("setTypingStyle", &JSRichEditorController::SetTypingStyle);
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::Method("closeSelectionMenu", &JSRichEditorController::CloseSelectionMenu);
@@ -904,7 +905,7 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     auto richEditorImageStyle = JSRef<JSObject>::Cast(jsObject->GetProperty("imageStyle"));
     updateSpanStyle_.ResetStyle();
     if (!richEditorTextStyle->IsUndefined()) {
-        textStyle = ParseJsTextStyle(richEditorTextStyle);
+        textStyle = ParseJsTextStyle(richEditorTextStyle, updateSpanStyle_);
     }
     if (!richEditorImageStyle->IsUndefined()) {
         imageStyle = ParseJsImageSpanAttribute(richEditorImageStyle);
@@ -915,5 +916,26 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
         controller->SetUpdateSpanStyle(updateSpanStyle_);
         controller->UpdateSpanStyle(start, end, textStyle, imageStyle);
     }
+}
+
+void JSRichEditorController::SetTypingStyle(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    if (info.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGW("info[0] not is Object");
+        return;
+    }
+    TextStyle textStyle;
+    JSRef<JSObject> richEditorTextStyle = JSRef<JSObject>::Cast(info[0]);
+    typingStyle_.ResetStyle();
+    if (!richEditorTextStyle->IsUndefined()) {
+        textStyle = ParseJsTextStyle(richEditorTextStyle, typingStyle_);
+    }
+    controller->SetTypingStyle(typingStyle_, textStyle);
 }
 } // namespace OHOS::Ace::Framework

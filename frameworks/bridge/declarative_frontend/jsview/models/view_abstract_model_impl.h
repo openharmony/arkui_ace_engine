@@ -199,7 +199,7 @@ public:
         const NG::MenuParam& menuParam) override;
 
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
-        const NG::MenuType& menuType) override;
+        std::function<void()>& previewBuildFunc) override;
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear) override {}

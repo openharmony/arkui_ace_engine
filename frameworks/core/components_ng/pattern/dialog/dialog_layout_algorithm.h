@@ -56,14 +56,15 @@ private:
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
 
     OffsetF ComputeChildPosition(
-        const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize) const;
-    bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint) const;
+        const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
+    bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
 
     void UpdateTouchRegion();
 
     double GetPaddingBottom() const;
 
-    OffsetF AdjustChildPosition(OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize) const;
+    OffsetF AdjustChildPosition(
+        OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const;
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;

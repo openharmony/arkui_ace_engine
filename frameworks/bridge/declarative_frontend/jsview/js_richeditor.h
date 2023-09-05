@@ -80,13 +80,14 @@ public:
     void AddTextSpan(const JSCallbackInfo& args);
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
-    TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject);
+    TextStyle ParseJsTextStyle(JSRef<JSObject> styleObject, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
     bool IsDrawable(const JSRef<JSVal>& jsValue);
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);
     void UpdateSpanStyle(const JSCallbackInfo& info);
     void GetSpansInfo(const JSCallbackInfo& args);
+    void SetTypingStyle(const JSCallbackInfo& info);
     void CloseSelectionMenu();
     JSRef<JSVal> CreateCreateJSSpansInfo(const RichEditorSelection& info);
 
@@ -94,6 +95,7 @@ private:
     WeakPtr<RichEditorControllerBase> controllerWeak_;
     ACE_DISALLOW_COPY_AND_MOVE(JSRichEditorController);
     struct UpdateSpanStyle updateSpanStyle_;
+    struct UpdateSpanStyle typingStyle_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RICHEDITOR_H

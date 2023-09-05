@@ -35,7 +35,6 @@ public:
     static void ClearFrameJankFlag(JankFrameFlag flag);
     static void StartRecord(const std::string& pageUrl);
     static void FlushRecord();
-    static void SetRefreshPeriod(int64_t refreshPeriod);
     static void RecordFrameUpdate();
 
 private:

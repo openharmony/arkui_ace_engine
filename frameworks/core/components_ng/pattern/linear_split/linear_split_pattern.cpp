@@ -511,7 +511,10 @@ void LinearSplitPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<LinearSplitLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     resizeable_ = layoutProperty->GetResizeable().value_or(false);
-    childrenDragPos_.clear();
+    auto layoutFlag = layoutProperty->GetPropertyChangeFlag();
+    if (!CheckNoChanged(layoutFlag)) {
+        childrenDragPos_.clear();
+    }
 
     InitPanEvent(gestureHub);
 

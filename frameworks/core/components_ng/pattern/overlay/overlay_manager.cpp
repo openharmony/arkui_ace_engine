@@ -93,6 +93,27 @@ RefPtr<FrameNode> GetLastPage()
 }
 } // namespace
 
+void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    // animation finish event should be posted to UI thread.
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this), nodeWk, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            LOGD("Execute dialog OnDialogCloseEvent");
+            auto overlayManager = weak.Upgrade();
+            auto node = nodeWk.Upgrade();
+            CHECK_NULL_VOID_NOLOG(overlayManager && node);
+            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_NONE };
+            node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+            overlayManager->OnDialogCloseEvent(node);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
@@ -206,6 +227,8 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(theme);
 
     ResetLowerNodeFocusable(node);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_KEYBOARD };
+    node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 
     // default opacity animation params
     AnimationOption option;
@@ -221,21 +244,9 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 
     option.SetOnFinishEvent([weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), id = Container::CurrentId()] {
         ContainerScope scope(id);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
-        // animation finish event should be posted to UI thread.
-        taskExecutor->PostTask(
-            [weak, nodeWk, id]() {
-                ContainerScope scope(id);
-                LOGI("Execute dialog OnDialogCloseEvent");
-                auto overlayManager = weak.Upgrade();
-                auto node = nodeWk.Upgrade();
-                CHECK_NULL_VOID(overlayManager && node);
-                overlayManager->OnDialogCloseEvent(node);
-            },
-            TaskExecutor::TaskType::UI);
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(overlayManager);
+        overlayManager->PostDialogFinishEvent(nodeWk);
     });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -345,6 +356,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
+
     AnimationUtils::Animate(
         option,
         [context, menuAnimationOffset]() {
@@ -916,9 +928,18 @@ void OverlayManager::CleanMenuInSubWindow()
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            for (auto& childNode : node->GetChildren()) {
+                auto frameNode = DynamicCast<FrameNode>(childNode);
+                if (frameNode && frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+                    node->RemoveChild(frameNode);
+                }
+            }
             rootNode->RemoveChild(node);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            break;
+            continue;
+        }
+        if (node && node->GetTag() == V2::COLUMN_ETS_TAG) {
+            rootNode->RemoveChild(node);
         }
     }
 }

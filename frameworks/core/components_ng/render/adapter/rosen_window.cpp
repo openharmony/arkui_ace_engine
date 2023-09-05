@@ -50,7 +50,6 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
 #else
     int64_t refreshPeriod = window->GetVSyncPeriod();
 #endif
-    JankFrameReport::SetRefreshPeriod(refreshPeriod);
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();

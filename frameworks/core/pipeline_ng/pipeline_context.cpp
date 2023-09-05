@@ -23,7 +23,6 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
-
 #endif
 
 #include "base/geometry/ng/offset_t.h"
@@ -63,6 +62,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -285,8 +285,7 @@ void PipelineContext::InspectDrew()
 {
     CHECK_RUN_ON(UI);
     if (!needRenderNode_.empty()) {
-        auto needRenderNode = std::move(needRenderNode_);
-        for (auto&& node : needRenderNode) {
+        for (auto node : needRenderNode_) {
             if (node) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
@@ -903,6 +902,12 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
+#ifndef PREVIEW
+    if (uiExtensionManager_->OnBackPressed()) {
+        return true;
+    }
+#endif
+
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
         LOGI("Exit full screen: back press accepted");
@@ -993,6 +998,7 @@ bool PipelineContext::OnBackPressed()
 
 RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 {
+    CHECK_NULL_RETURN(stageManager_, nullptr);
     auto lastPage = stageManager_->GetLastPage();
     CHECK_NULL_RETURN(lastPage, nullptr);
     return FindNavDestinationNodeToHandleBack(lastPage);
@@ -1617,6 +1623,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
         LOGW("ShowContainerTitle failed, Window modal is not container.");
         return;
     }
+    CHECK_NULL_VOID(rootNode_);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();

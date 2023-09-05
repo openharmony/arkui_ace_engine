@@ -339,6 +339,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
     };
     panRecognizer_->SetIsForDrag(true);
+    panRecognizer_->SetMouseDistance(DRAG_PAN_DISTANCE_MOUSE);
     actionCancel_ = actionCancel;
     panRecognizer_->SetOnActionCancel(actionCancel);
     auto gestureHub = gestureEventHub_.Upgrade();
@@ -400,15 +401,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(imageNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        AnimationOption option;
-        option.SetDuration(PIXELMAP_ANIMATION_TIME);
-        option.SetCurve(motion);
-        AnimationUtils::Animate(
-            option,
-            [imageContext]() {
-                imageContext->UpdateTransformScale({ PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE });
-            },
-            option.GetOnFinishEvent());
+        if (gestureHub->GetPreviewMode() == MenuPreviewMode::NONE) {
+            AnimationOption option;
+            option.SetDuration(PIXELMAP_ANIMATION_TIME);
+            option.SetCurve(motion);
+            AnimationUtils::Animate(
+                option,
+                [imageContext]() {
+                    imageContext->UpdateTransformScale({ PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE });
+                },
+                option.GetOnFinishEvent());
+        } else {
+            imageContext->UpdateOpacity(0.0);
+        }
         actuator->SetEventColumn(actuator);
     };
     longPressUpdate_ = longPressUpdate;

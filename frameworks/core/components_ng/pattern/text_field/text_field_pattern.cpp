@@ -312,10 +312,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         StopTwinkling();
         needToRefreshSelectOverlay_ = false;
     }
-    if (setSelectionFlag_) {
-        SetTextSelection(selectionStart_, selectionEnd_);
-        setSelectionFlag_ = false;
-    }
     if (inlineSelectAllFlag_) {
         HandleOnSelectAll(false, true);
         inlineSelectAllFlag_ = false;
@@ -897,6 +893,10 @@ bool TextFieldPattern::OffsetInContentRegion(const Offset& offset)
 
 void TextFieldPattern::OnScrollEndCallback()
 {
+    auto scrollBar = GetScrollBar();
+    if (scrollBar) {
+        scrollBar->ScheduleDisapplearDelayTask();
+    }
     auto selectOverlayProxy = GetSelectOverlay();
     CHECK_NULL_VOID_NOLOG(selectOverlayProxy);
     if (originalIsMenuShow_) {
@@ -2070,6 +2070,8 @@ void TextFieldPattern::InitDragDropEvent()
                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         if (extraParams.empty()) {
             pattern->dragStatus_ = DragStatus::ON_DROP;
             pattern->textFieldContentModifier_->ChangeDragStatus();
@@ -2111,6 +2113,7 @@ void TextFieldPattern::InitDragDropEvent()
             }
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
+            host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
     };
     eventHub->SetOnDrop(std::move(onDrop));
@@ -2382,7 +2385,6 @@ void TextFieldPattern::OnModifyDone()
         operationRecords_.clear();
         redoOperationRecords_.clear();
     }
-#if defined(ENABLE_STANDARD_INPUT)
     auto maxLength = GetMaxLength();
     if (GreatNotEqual(textWidth, maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
@@ -2392,7 +2394,6 @@ void TextFieldPattern::OnModifyDone()
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateNeedFireOnChange(true);
     }
-#endif
     FireOnChangeIfNeeded();
     if (IsTextArea() || IsNormalInlineState()) {
         SetAxis(Axis::VERTICAL);
@@ -5108,11 +5109,9 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
     if (!HasFocus()) {
         return;
     }
-    setSelectionFlag_ = true;
     cursorVisible_ = false;
     MarkRedrawOverlay();
-    selectionStart_ = selectionStart;
-    selectionEnd_ = selectionEnd;
+    SetTextSelection(selectionStart, selectionEnd);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -6303,7 +6302,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
     auto startY = textBoxes_.front().rect_.GetTop();
     auto startX = textBoxes_.front().rect_.GetLeft();
 
-    auto endY = dragBoxes_.back().rect_.GetTop();
+    auto endY = textBoxes_.back().rect_.GetTop();
 #else
     auto startY = textBoxes_.front().rect.GetTop();
     auto startX = textBoxes_.front().rect.GetLeft();

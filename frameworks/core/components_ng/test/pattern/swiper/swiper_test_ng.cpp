@@ -10812,4 +10812,296 @@ HWTEST_F(SwiperTestNg, SwiperModelNGSetDisplayCount001, TestSize.Level1)
      */
     mode.SetDisplayCount(displayCount);
 }
+
+/**
+ * @tc.name: SwiperPatternUpdateCurrentOffset002
+ * @tc.desc: UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto dimension = Dimension(1);
+    dimension.unit_ = DimensionUnit::NONE;
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateMinSize(dimension);
+    float offset = 0.1f;
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_.reset();
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    swiperNode->AddChild(leftArrow);
+    swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
+    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::SPRING);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdatePrevMargin(Dimension(0));
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateNextMargin(Dimension(0));
+    swiperPattern->contentMainSize_ = 1;
+    swiperPattern->currentOffset_ = 1;
+    swiperPattern->isDragging_ = true;
+    swiperPattern->currentDelta_ = 1.0f;
+    swiperPattern->currentIndexOffset_ = 1.0f;
+
+    /**
+     * @tc.steps: step2. call UpdateCurrentOffset.
+     * @tc.expected: Related function runs ok.
+     */
+    swiperPattern->UpdateCurrentOffset(offset);
+    EXPECT_EQ(swiperPattern->currentDelta_, 1.0f);
+    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.0f);
+    swiperPattern->currentOffset_ = 0;
+    swiperPattern->isDragging_ = true;
+    swiperPattern->UpdateCurrentOffset(offset);
+    EXPECT_EQ(swiperPattern->currentDelta_, 0.712f);
+    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
+    swiperPattern->isDragging_ = false;
+    swiperPattern->UpdateCurrentOffset(offset);
+    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
+}
+
+/**
+ * @tc.name: SwiperPatternUpdateCurrentOffset003
+ * @tc.desc: UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto dimension = Dimension(1);
+    dimension.unit_ = DimensionUnit::NONE;
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateMinSize(dimension);
+    float offset = 0.1f;
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_.reset();
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    swiperNode->AddChild(leftArrow);
+    swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
+    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::FADE);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdatePrevMargin(Dimension(0));
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateNextMargin(Dimension(0));
+    swiperPattern->contentMainSize_ = 1;
+    swiperPattern->currentOffset_ = 1;
+    swiperPattern->currentDelta_ = 1.0f;
+
+    /**
+     * @tc.steps: step2. call UpdateCurrentOffset.
+     * @tc.expected: Related function runs ok.
+     */
+    swiperPattern->UpdateCurrentOffset(offset);
+    EXPECT_EQ(swiperPattern->currentDelta_, 0.9f);
+    swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+    swiperPattern->UpdateCurrentOffset(offset);
+    EXPECT_EQ(swiperPattern->currentDelta_, 0.8f);
+}
+
+/**
+ * @tc.name: SwiperPatternUpdateCurrentOffset004
+ * @tc.desc: UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    auto dimension = Dimension(1);
+    dimension.unit_ = DimensionUnit::NONE;
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateMinSize(dimension);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetDisplayCount();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetMinSize();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    float offset = 0.1f;
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, swiperPattern->GetRightButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(rightArrow, nullptr);
+    swiperNode->AddChild(leftArrow);
+    swiperNode->AddChild(rightArrow);
+    swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
+    swiperPattern->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 2 }));
+    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::FADE);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdatePrevMargin(Dimension(0));
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateNextMargin(Dimension(0));
+    swiperPattern->contentMainSize_ = 1;
+    swiperPattern->currentOffset_ = 1;
+    swiperPattern->isDragging_ = true;
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_.reset();
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    swiperPattern->currentDelta_ = 1.0f;
+    swiperPattern->currentIndexOffset_ = 1.0f;
+
+    /**
+     * @tc.steps: step2. call UpdateCurrentOffset.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperPattern->UpdateCurrentOffset(offset);
+            if (i == 1) {
+                swiperPattern->itemPosition_.clear();
+                swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
+                swiperPattern->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
+                continue;
+            }
+            swiperPattern->itemPosition_.clear();
+            swiperPattern->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
+            swiperPattern->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 2 }));
+        }
+        swiperPattern->itemPosition_.clear();
+        swiperPattern->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
+        swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
+    }
+    EXPECT_EQ(swiperPattern->currentDelta_, 0.6f);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.1f);
+    swiperPattern->UpdateCurrentOffset(offset);
+    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.2f);
+    EXPECT_EQ(swiperPattern->currentDelta_, 0.5f);
+    swiperPattern->isDragging_ = false;
+    swiperPattern->UpdateCurrentOffset(offset);
+    EXPECT_EQ(swiperPattern->currentDelta_, 0.4f);
+    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.3f);
+}
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmMeasureSwiper003
+ * @tc.desc: MeasureSwiper
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmMeasureSwiper003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(swiperPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(swiperLayoutAlgorithm, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = LayoutWrapperNode(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    layoutWrapper.currentChildCount_ = 2;
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    Axis axis = Axis::HORIZONTAL;
+    swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 0 }));
+    swiperLayoutAlgorithm->prevMargin_ = -1.0f;
+
+    /**
+     * @tc.steps: step2. call MeasureSwiper
+     * @tc.expected: Related function runs ok.
+     */
+    swiperLayoutAlgorithm->MeasureSwiper(&layoutWrapper, layoutConstraint, axis);
+}
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmLayoutForwardItem001
+ * @tc.desc: LayoutForwardItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForwardItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = LayoutWrapperNode(swiperNode, geometryNode, swiperNode->GetLayoutProperty());
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    Axis axis = Axis::HORIZONTAL;
+    int32_t currentIndex = 0;
+    float endPos = 0.1f;
+    float startPos = 0.2f;
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(swiperPattern->CreateLayoutAlgorithm());
+    swiperLayoutAlgorithm->isLoop_ = true;
+    auto firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    layoutWrapper.currentChildCount_ = 1;
+    layoutWrapper.AppendChild(firstLayoutWrapper);
+    swiperLayoutAlgorithm->totalItemCount_ = 2;
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    indicatorNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())->ResetDisplayCount();
+    AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())
+        ->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+
+    /**
+     * @tc.steps: step2. call LayoutForwardItem.
+     * @tc.expected: Related function runs ok.
+     */
+    swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
+    AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())->UpdateDisplayCount(1);
+    AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())->ResetMinSize();
+    AceType::DynamicCast<SwiperLayoutProperty>(firstLayoutWrapper->GetLayoutProperty())
+        ->UpdateVisibility(VisibleType::INVISIBLE);
+    for (int i = 0; i <= 1; i++) {
+        swiperLayoutAlgorithm->LayoutForwardItem(
+            &layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
+        AceType::DynamicCast<SwiperLayoutProperty>(firstLayoutWrapper->GetLayoutProperty())
+            ->UpdateVisibility(VisibleType::GONE);
+    }
+}
 } // namespace OHOS::Ace::NG

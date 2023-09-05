@@ -542,6 +542,14 @@ struct KeyEvent final {
     {
         return pressedCodes.size() > 1;
     }
+    bool IsFunctionKey() const
+    {
+        return KeyCode::KEY_F1 <= code && code <= KeyCode::KEY_F12;
+    }
+    bool IsEscapeKey() const
+    {
+        return KeyCode::KEY_ESCAPE == code;
+    }
     std::string ConvertCodeToString() const
     {
         if (KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) {

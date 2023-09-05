@@ -46,11 +46,6 @@ public:
         return MakeRefPtr<RefreshLayoutProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<RefreshLayoutAlgorithm>();
-    }
-
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<RefreshRenderProperty>();
@@ -81,6 +76,7 @@ public:
         return scrollOffset_;
     }
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     void OnModifyDone() override;
     void FireStateChange(int32_t value);
     void FireRefreshing();
@@ -88,10 +84,30 @@ public:
     void OnActive() override {}
     void CheckCoordinationEvent();
     RefPtr<FrameNode> FindScrollableChild();
-    void AddCustomBuilderNode(const RefPtr<NG::UINode>& builder) const;
+    void AddCustomBuilderNode(const RefPtr<NG::UINode>& builder);
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
+    }
+
+    float GetLoadingDistance() const
+    {
+        return triggerLoadingDistance_;
+    }
+
+    float GetCustomBuilderOffset() const
+    {
+        return customBuilderOffset_;
+    }
+
+    bool GetIsCustomBuilderExist() const
+    {
+        return isCustomBuilderExist_;
+    }
+
+    bool HasCustomBuilderIndex() const
+    {
+        return customBuilderIndex_.has_value();
     }
 
 private:
@@ -135,6 +151,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void QuickEndFresh();
     void QuickStartFresh();
+    void UpdateCustomBuilderIndex(int32_t index);
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;
@@ -145,6 +162,10 @@ private:
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> customBuilder_;
     WeakPtr<FrameNode> scrollableNode_;
+    // customBuilder
+    bool isCustomBuilderExist_ = false;
+    float customBuilderOffset_ = 0.0f;
+    std::optional<int32_t> customBuilderIndex_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
 };
 } // namespace OHOS::Ace::NG

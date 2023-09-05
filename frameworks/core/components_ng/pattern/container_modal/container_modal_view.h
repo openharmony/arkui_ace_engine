@@ -34,6 +34,10 @@ protected:
         GestureEventFunc&& clickCallback, bool isCloseButton = false, bool canDrag = false);
     static void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);
     static void AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);
+
+private:
+    static float imageMaxTranslate;
+    static float baseScale;
 };
 
 } // namespace OHOS::Ace::NG

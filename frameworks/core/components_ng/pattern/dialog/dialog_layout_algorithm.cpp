@@ -309,7 +309,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 }
 
 OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
-    const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& selfSize) const
+    const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& selfSize)
 {
     OffsetF topLeftPoint;
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -327,11 +327,15 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
                            layoutConstraint->maxSize.Height() - childSize.Height()) /
                        2.0;
     }
-    return AdjustChildPosition(topLeftPoint, dialogOffset, childSize);
+    const auto& expandSafeAreaOpts = prop->GetSafeAreaExpandOpts();
+    bool needAvoidKeyboard = true;
+    if (expandSafeAreaOpts && (expandSafeAreaOpts->type | SAFE_AREA_TYPE_KEYBOARD)) {
+        needAvoidKeyboard = false;
+    }
+    return AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
 }
 
-bool DialogLayoutAlgorithm::SetAlignmentSwitch(
-    const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint) const
+bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint)
 {
     if (alignment_ != DialogAlignment::DEFAULT) {
         switch (alignment_) {
@@ -398,17 +402,21 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
     CHECK_NULL_RETURN(pipelineContext, 0);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, 0);
-    auto bottom = dialogTheme->GetDefaultPaddingBottomFixed();
+    auto bottom = dialogTheme->GetDefaultDialogMarginBottom();
     return pipelineContext->NormalizeToPx(bottom);
 }
 
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
-    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize) const
+    OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard) const
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
+    if (customSize_) {
+        // customStyle is true, no need adjust position by system
+        return topLeftPoint + dialogOffset;
+    }
     auto systemInset = pipelineContext->GetSafeArea();
-    if (!customSize_ && topLeftPoint.GetY() < systemInset.top_.end) {
+    if (topLeftPoint.GetY() < systemInset.top_.end) {
         topLeftPoint.SetY(systemInset.top_.end);
     }
     auto childOffset = topLeftPoint + dialogOffset;
@@ -416,8 +424,9 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
     auto childBottom = childOffset.GetY() + childSize.Height();
-    if (keyboardInsert.Length() > 0 && childBottom > keyboardInsert.start) {
-        childOffset.SetY(childOffset.GetY() - (childBottom - keyboardInsert.start));
+    auto paddingBottom = static_cast<float>(GetPaddingBottom());
+    if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
+        childOffset.SetY(childOffset.GetY() - (childBottom - (keyboardInsert.start - paddingBottom)));
     }
     return childOffset;
 }
