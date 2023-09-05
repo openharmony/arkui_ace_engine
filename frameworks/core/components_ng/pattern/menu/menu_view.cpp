@@ -163,6 +163,9 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateMenuOption(
             optionsHasIcon, params[i].value, std::move(params[i].action), i, params[i].icon);
+        if (!optionNode) {
+            continue;
+        }
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
         OptionKeepMenu(optionNode, menuWeak);
