@@ -405,9 +405,9 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 
     if (status == PlaybackStatus::PREPARED) {
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        CHECK_NULL_VOID(mediaPlayer_);
-
+        if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+            return;
+        }
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         Size videoSize = Size(mediaPlayer_->GetVideoWidth(), mediaPlayer_->GetVideoHeight());
         int32_t milliSecondDuration = 0;
@@ -437,7 +437,9 @@ void VideoPattern::OnError(const std::string& errorId)
 
 void VideoPattern::OnResolutionChange() const
 {
-    CHECK_NULL_VOID(mediaPlayer_);
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     SizeF videoSize =
@@ -686,8 +688,7 @@ void VideoPattern::OnAttachToFrameNode()
     renderContextForMediaPlayer_->InitContext(false, param);
     auto isFullScreen = IsFullScreen();
     if (SystemProperties::GetExtSurfaceEnabled() && !isFullScreen) {
-        auto OnAreaChangedCallBack =
-            [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
+        auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(videoPattern);
 
@@ -700,10 +701,9 @@ void VideoPattern::OnAttachToFrameNode()
             CHECK_NULL_VOID(layoutProperty);
             auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
 
-            Rect rect = Rect(x +
-                (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE, y +
-                (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
-                videoFrameSize.Width(),  videoFrameSize.Height());
+            Rect rect = Rect(x + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+                y + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
+                videoFrameSize.Height());
 
             if (videoPattern->renderSurface_) {
                 if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(rect.Left(),
@@ -1198,7 +1198,9 @@ void VideoPattern::SetMethodCall()
 void VideoPattern::Start()
 {
     LOGI("Video start to play");
-    CHECK_NULL_VOID(mediaPlayer_);
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+        return;
+    }
 
     if (isStop_ && mediaPlayer_->PrepareAsync() != 0) {
         LOGE("Player has not prepared");
@@ -1218,14 +1220,18 @@ void VideoPattern::Start()
 
 void VideoPattern::Pause()
 {
-    CHECK_NULL_VOID(mediaPlayer_);
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+        return;
+    }
     LOGD("Video Pause");
     mediaPlayer_->Pause();
 }
 
 void VideoPattern::Stop()
 {
-    CHECK_NULL_VOID(mediaPlayer_);
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+        return;
+    }
 
     OnCurrentTimeChange(0);
     LOGD("Video Stop");
@@ -1321,7 +1327,9 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
 void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode)
 {
     LOGD("Set current pos: %{public}lf, mode: %{public}d", currentPos, seekMode);
-    CHECK_NULL_VOID(mediaPlayer_);
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+        return;
+    }
     if (GreatOrEqual(currentPos, 0.0)) {
         LOGD("Video Seek");
         mediaPlayer_->Seek(static_cast<int32_t>(currentPos * MILLISECONDS_TO_SECONDS), seekMode);
