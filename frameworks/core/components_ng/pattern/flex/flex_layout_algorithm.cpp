@@ -318,7 +318,7 @@ void FlexLayoutAlgorithm::MeasureOutOfLayoutChildren(LayoutWrapper* layoutWrappe
 void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
     LayoutWrapper* containerLayoutWrapper, FlexItemProperties& flexItemProperties)
 {
-    if (GreatNotEqual(totalFlexWeight_, 0.0f) && !isInfiniteLayout_) {
+    if (GreatNotEqual(totalFlexWeight_, 0.0f)) {
         auto newTotalFlexWeight = totalFlexWeight_;
         /**
          * The child elements with layoutWeight=0 are measured first.
@@ -785,7 +785,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitFlexProperties(layoutWrapper);
     Axis axis = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) ? Axis::HORIZONTAL
                                                                                                : Axis::VERTICAL;
-    auto realSize = CreateIdealSize(layoutConstraint.value(), axis, measureType).ConvertToSizeT();
+    auto realSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType).ConvertToSizeT();
     if (children.empty()) {
         LOGD("layoutWrapper children is empty");
         layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
@@ -840,10 +840,6 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         mainAxisSize_ = 0.0f;
     }
     TravelChildrenFlexProps(layoutWrapper, realSize);
-    if (GreatNotEqual(totalFlexWeight_, 0.0f)) {
-        LOGD("Flex weight only supported in match parent");
-        isInfiniteLayout_ = false;
-    }
     selfIdealCrossAxisSize_ = GetCrossAxisSizeHelper(realSize, direction_);
     FlexItemProperties flexItemProperties;
 
