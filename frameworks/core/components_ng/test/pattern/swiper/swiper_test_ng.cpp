@@ -10858,16 +10858,16 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset002, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_EQ(swiperPattern->currentDelta_, 1.0f);
-    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.0f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 1.0f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.0f);
     swiperPattern->currentOffset_ = 0;
     swiperPattern->isDragging_ = true;
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_EQ(swiperPattern->currentDelta_, 0.712f);
-    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.712f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
     swiperPattern->isDragging_ = false;
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
 }
 
 /**
@@ -10913,10 +10913,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset003, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_EQ(swiperPattern->currentDelta_, 0.9f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.9f);
     swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_EQ(swiperPattern->currentDelta_, 0.8f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.8f);
 }
 
 /**
@@ -10989,16 +10989,16 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset004, TestSize.Level1)
         swiperPattern->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
         swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
     }
-    EXPECT_EQ(swiperPattern->currentDelta_, 0.6f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.6f);
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
-    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.1f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.1f);
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.2f);
-    EXPECT_EQ(swiperPattern->currentDelta_, 0.5f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.2f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.5f);
     swiperPattern->isDragging_ = false;
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_EQ(swiperPattern->currentDelta_, 0.4f);
-    EXPECT_EQ(swiperPattern->currentIndexOffset_, 1.3f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.4f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.3f);
 }
 
 /**
@@ -11093,13 +11093,73 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForwardItem001, TestSize.Level
      * @tc.expected: Related function runs ok.
      */
     swiperLayoutAlgorithm->LayoutForwardItem(&layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
-    AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())->UpdateDisplayCount(1);
-    AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty())->ResetMinSize();
-    firstLayoutWrapper->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-    for (int i = 0; i <= 1; i++) {
-        swiperLayoutAlgorithm->LayoutForwardItem(
-            &layoutWrapper, layoutConstraint, axis, currentIndex, endPos, startPos);
-        firstLayoutWrapper->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
-    }
+}
+
+/**
+ * @tc.name: SwiperPatternOnModifyDone001
+ * @tc.desc: Test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnModifyDone001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    RefPtr<SwiperPattern> indicatorPattern = indicatorNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    indicatorPattern->panEvent_ =
+        AceType::MakeRefPtr<PanEvent>([](GestureEvent&) {}, [](GestureEvent&) {}, [](GestureEvent&) {}, [] {});
+    indicatorPattern->OnModifyDone();
+}
+
+/**
+ * @tc.name: SwiperFlushFocus002
+ * @tc.desc: Swiper FlushFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperFlushFocus002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode, pattern.
+     */
+    auto swiperFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(swiperFrameNode, nullptr);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(swiperFrameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = true;
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test FlushFocus with IsShowIndicator() is true.
+     * @tc.expected: the related function runs ok.
+     */
+    swiperLayoutProperty->UpdateShowIndicator(true);
+    swiperPattern->isLastIndicatorFocused_ = true;
+    swiperPattern->FlushFocus(curShowFrame);
 }
 } // namespace OHOS::Ace::NG
