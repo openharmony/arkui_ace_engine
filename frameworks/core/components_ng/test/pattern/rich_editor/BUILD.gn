@@ -19,9 +19,6 @@ ace_unittest("rich_editor_test_ng") {
   sources = [
     "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
