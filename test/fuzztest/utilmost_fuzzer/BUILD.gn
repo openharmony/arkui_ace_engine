@@ -44,6 +44,7 @@ ohos_fuzztest("UtilMostFuzzTest") {
     "$ace_root/frameworks/core/animation/spring_curve.cpp",
     "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/components/common/properties/clip_path.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "//third_party/cJSON/cJSON.c",
     "utilmost_fuzzer.cpp",
   ]
@@ -62,6 +63,7 @@ ohos_fuzztest("UtilMostFuzzTest") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
+    "//third_party/googletest:gmock_main",
     "//third_party/icu/icu4c:shared_icui18n",
     "//third_party/icu/icu4c:shared_icuuc",
   ]
