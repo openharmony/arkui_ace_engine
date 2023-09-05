@@ -381,7 +381,7 @@ bool ParseParticleObject(JSRef<JSObject>& particleJsObject, OHOS::Ace::NG::Parti
     auto countJsValue = particleJsObject->GetProperty("count");
     if (countJsValue->IsNumber()) {
         auto countIntValue = countJsValue->ToNumber<int32_t>();
-        if (countIntValue >= 0) {
+        if (countIntValue >= -1) {
             count = countIntValue;
         }
     }
