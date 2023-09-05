@@ -85,6 +85,11 @@ public:
 
     void SetFontReady(bool value);
 
+protected:
+    OffsetF GetPaintOffset() const
+    {
+        return paintOffset_;
+    }
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);

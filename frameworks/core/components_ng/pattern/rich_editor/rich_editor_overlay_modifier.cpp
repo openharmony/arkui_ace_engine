@@ -62,12 +62,12 @@ void RichEditorOverlayModifier::SetCaretVisible(bool value)
     caretVisible_->Set(value);
 }
 
-float RichEditorOverlayModifier::GetCareHeight() const
+float RichEditorOverlayModifier::GetCaretHeight() const
 {
     return caretHeight_->Get();
 }
 
-OffsetF RichEditorOverlayModifier::GetCareOffset() const
+OffsetF RichEditorOverlayModifier::GetCaretOffset() const
 {
     return caretOffset_->Get();
 }

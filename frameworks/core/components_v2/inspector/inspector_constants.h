@@ -95,6 +95,7 @@ ACE_EXPORT extern const char TEXT_ATTRS_MAX_LINES[];
 
 // rich editor
 ACE_EXPORT extern const char RICH_EDITOR_ETS_TAG[];
+ACE_EXPORT extern const char RICH_EDITOR_DRAG_ETS_TAG[];
 
 // stack
 ACE_EXPORT extern const char STACK_COMPONENT_TAG[];

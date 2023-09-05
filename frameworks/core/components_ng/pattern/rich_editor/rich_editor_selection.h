@@ -21,6 +21,7 @@
 #include "base/geometry/offset.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
 namespace OHOS::Ace {
@@ -56,13 +57,13 @@ struct SpanPosition {
 };
 
 struct TextStyleResult {
-    std::string fontColor = "";
+    std::string fontColor;
     double fontSize = 0.0;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
-    std::string fontFamily = "";
+    std::string fontFamily;
     int32_t decorationType = 0;
-    std::string decorationColor = "";
+    std::string decorationColor;
 };
 
 struct ImageStyleResult {
@@ -75,7 +76,7 @@ struct ResultObject {
     SpanPosition spanPosition;
     RichEditorSpanType type = RichEditorSpanType::TYPESPAN;
     int32_t offsetInSpan[2] = { 0, 0 };
-    std::string valueString = "";
+    std::string valueString;
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
     ImageStyleResult imageStyle;
@@ -118,6 +119,15 @@ public:
 
 private:
     Selection selection_;
+};
+
+struct ParagraphInfo {
+    // style
+    RefPtr<PixelMap> leadingMarginPixmap;
+    float leadingMarginSize[2] = { 0.0, 0.0 };
+    int32_t textAlign = 0;
+
+    std::pair<int32_t, int32_t> range;
 };
 } // namespace OHOS::Ace
 

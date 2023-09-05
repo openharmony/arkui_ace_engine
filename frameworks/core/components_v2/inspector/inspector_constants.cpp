@@ -90,6 +90,7 @@ const char TEXT_ATTRS_MAX_LINES[] = "maxLines";
 
 // rich editor
 const char RICH_EDITOR_ETS_TAG[] = "RichEditor";
+const char RICH_EDITOR_DRAG_ETS_TAG[] = "RichEditorDRAG";
 
 // stack
 const char STACK_COMPONENT_TAG[] = "StackComponent";

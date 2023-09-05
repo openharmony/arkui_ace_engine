@@ -43,6 +43,12 @@ public:
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
+protected:
+    WeakPtr<Pattern> GetPattern() const
+    {
+        return pattern_;
+    }
+
 private:
     WeakPtr<Pattern> pattern_;
     RefPtr<Paragraph> paragraph_;

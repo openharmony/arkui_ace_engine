@@ -20,11 +20,13 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 
 namespace OHOS::Ace::NG {
+class RichEditorPattern;
+
 class ACE_EXPORT RichEditorController : public RichEditorControllerBase {
     DECLARE_ACE_TYPE(RichEditorController, RichEditorControllerBase);
 
 public:
-    void SetPattern(const WeakPtr<Pattern>& pattern);
+    void SetPattern(const WeakPtr<RichEditorPattern>& pattern);
     int32_t AddImageSpan(const ImageSpanOptions& options) override;
     int32_t AddTextSpan(const TextSpanOptions& options) override;
     int32_t GetCaretOffset() override;
@@ -33,11 +35,13 @@ public:
     void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) override;
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) override;
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end) override;
+    std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) override;
     void DeleteSpans(const RangeOptions& options) override;
     void CloseSelectionMenu() override;
+    void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style) override;
 
 private:
-    WeakPtr<Pattern> pattern_;
+    WeakPtr<RichEditorPattern> pattern_;
     struct UpdateSpanStyle updateSpanStyle_;
 };
 } // namespace OHOS::Ace::NG

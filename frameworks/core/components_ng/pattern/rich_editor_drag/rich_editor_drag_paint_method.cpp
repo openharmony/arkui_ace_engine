@@ -12,18 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.h"
 
 namespace OHOS::Ace::NG {
-void RichEditorContentModifier::onDraw(DrawingContext& drawingContext)
+RichEditorDragPaintMethod::RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
+    const RefPtr<RichEditorDragOverlayModifier>& overlayMod) : pattern_(pattern),
+    overlayModifier_(overlayMod) {}
+
+RefPtr<Modifier> RichEditorDragPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_VOID(pManager_);
-    auto&& paragraphs = pManager_->GetParagraphs();
-    auto offset = GetPaintOffset();
-    for (auto&& info : paragraphs) {
-        info.paragraph->Paint(drawingContext.canvas, offset.GetX(), offset.GetY());
-        offset.AddY(info.paragraph->GetHeight());
-    }
+    return overlayModifier_;
 }
 } // namespace OHOS::Ace::NG
