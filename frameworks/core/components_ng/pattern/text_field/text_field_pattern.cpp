@@ -791,7 +791,7 @@ CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position, boo
 
 float TextFieldPattern::AdjustTextRectOffsetX()
 {
-    auto cursorWidth = static_cast<float>(CURSOR_WIDTH.ConvertToPx());
+    auto cursorWidth = caretRect_.Width();
     auto contentLeftBoundary = contentRect_.GetX();
     auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width() - unitWidth_;
     if (IsTextArea()) {
@@ -1514,7 +1514,6 @@ void TextFieldPattern::HandleBlurEvent()
     }
     needToRequestKeyboardInner_ = false;
     isFocusedBeforeClick_ = false;
-    caretRect_.Reset();
     StopTwinkling();
     CloseKeyboard(true);
     MarkRedrawOverlay();
