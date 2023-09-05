@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
 
-#include <variant>
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/rect.h"
 #include "base/utils/utils.h"
