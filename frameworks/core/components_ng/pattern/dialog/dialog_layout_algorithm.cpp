@@ -411,12 +411,8 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, topLeftPoint + dialogOffset);
-    if (customSize_) {
-        // customStyle is true, no need adjust position by system
-        return topLeftPoint + dialogOffset;
-    }
     auto systemInset = pipelineContext->GetSafeArea();
-    if (topLeftPoint.GetY() < systemInset.top_.end) {
+    if (!customSize_ && topLeftPoint.GetY() < systemInset.top_.end) {
         topLeftPoint.SetY(systemInset.top_.end);
     }
     auto childOffset = topLeftPoint + dialogOffset;
