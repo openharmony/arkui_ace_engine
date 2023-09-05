@@ -1869,6 +1869,68 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc001, TestS
 }
 
 /**
+ * @tc.name: LongPressRecognizerTestGetLongPressActionFunc003
+ * @tc.desc: Test LongPressRecognizer function: GetLongPressActionFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    bool isCatchMode = false;
+
+    /**
+     * @tc.steps: step2. call GetLongPressActionFunc function and compare result.
+     * @tc.steps: case1: normal case
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer.HandleOverdueDeadline(isCatchMode);
+    longPressRecognizer.DoRepeat();
+    GestureEventFunc click;
+    GestureEvent info;
+    click = longPressRecognizer.GetLongPressActionFunc();
+    click(info);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: LongPressRecognizerTestGetLongPressActionFunc004
+ * @tc.desc: Test LongPressRecognizer function: GetLongPressActionFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    bool isCatchMode = false;
+
+    /**
+     * @tc.steps: step2. call GetLongPressActionFunc function and compare result.
+     * @tc.steps: case1: normal case
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer.HandleOverdueDeadline(isCatchMode);
+    longPressRecognizer.DoRepeat();
+    GestureEventFunc click;
+    GestureEvent info;
+    auto onActionStart = [](GestureEvent& info) { return true; };
+    auto onActionUpdate = [](GestureEvent& info) { return true; };
+    auto onActionEnd = [](GestureEvent& info) { return true; };
+    longPressRecognizer.SetOnActionUpdate(onActionUpdate);
+    longPressRecognizer.SetOnAction(onActionStart);
+    longPressRecognizer.SetOnActionEnd(onActionEnd);
+    click = longPressRecognizer.GetLongPressActionFunc();
+    click(info);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::SUCCEED);
+}
+
+/**
  * @tc.name: LongPressRecognizerTestGetLongPressActionFunc002
  * @tc.desc: Test LongPressRecognizer function: GetLongPressActionFunc
  * @tc.type: FUNC
@@ -3661,6 +3723,96 @@ HWTEST_F(GesturesTestNg, RecognizerGroupTest002, TestSize.Level1)
     exclusiveRecognizer.recognizers_.clear();
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
     exclusiveRecognizer.OnFinishGestureReferee(0);
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+}
+
+/**
+ * @tc.name: RecognizerGroupCheckStatesTest001
+ * @tc.desc: Test RecognizerGroup function: CheckStates
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RecognizerGroupCheckStatesTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RecognizerGroup
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call CheckStates function and compare result.
+     * @tc.steps: case1: recognizers_ is empty
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer.CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call CheckStates function and compare result.
+     * @tc.steps: case2: recognizers has nullptr
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer.CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call CheckStates function and compare result.
+     * @tc.steps: case3: recognizers has ptr
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer.CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: RecognizerGroupOnResetStatusTest001
+ * @tc.desc: Test RecognizerGroup function: OnResetStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, RecognizerGroupOnResetStatusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RecognizerGroup
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call OnResetStatus function and compare result.
+     * @tc.steps: case1: recognizers_ is empty
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer.remainChildOnResetStatus_ = true;
+    exclusiveRecognizer.OnResetStatus();
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call OnResetStatus function and compare result.
+     * @tc.steps: case2: recognizers has nullptr
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer.recognizers_.push_back(nullptr);
+    exclusiveRecognizer.remainChildOnResetStatus_ = false;
+    exclusiveRecognizer.OnResetStatus();
+    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call OnResetStatus function and compare result.
+     * @tc.steps: case3: recognizers has ptr
+     * @tc.expected: step2. result equals.
+     */
+    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer.remainChildOnResetStatus_ = false;
+    exclusiveRecognizer.OnResetStatus();
     EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
 }
 
