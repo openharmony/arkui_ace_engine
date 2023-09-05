@@ -169,6 +169,15 @@ public:
         stopPropagation_ = stopPropagation;
     }
 
+    bool IsPreventDefault() const
+    {
+        return preventDefault_;
+    }
+    void SetPreventDefault(bool preventDefault)
+    {
+        preventDefault_ = preventDefault;
+    }
+
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
@@ -183,6 +192,7 @@ protected:
     int64_t deviceId_ = 0;
     int32_t targetDisplayId_ = 0;
     bool stopPropagation_ = false;
+    bool preventDefault_ = false;
 };
 
 class PropagationEventInfo : public virtual TypeInfoBase {

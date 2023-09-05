@@ -64,6 +64,13 @@ private:
     std::string insertValue_;
 };
 
+class TextCommonEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(TextCommonEvent, BaseEventInfo)
+public:
+    TextCommonEvent() : BaseEventInfo("TextCommonEvent") {}
+    ~TextCommonEvent() override = default;
+};
+
 enum class SpanResultType { TEXT, IMAGE };
 
 class RichEditorAbstractSpanResult {
@@ -201,22 +208,21 @@ public:
         timestamp_ = timestamp;
     }
 
-    void SetOnPaste(std::function<bool()>&& func)
+    void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func)
     {
         onPaste_ = std::move(func);
     }
 
-    bool FireOnPaste()
+    void FireOnPaste(NG::TextCommonEvent& value)
     {
         if (onPaste_) {
-            return onPaste_();
+            onPaste_(value);
         }
-        return false;
     }
 
 private:
     long long timestamp_;
-    std::function<bool()> onPaste_;
+    std::function<void(NG::TextCommonEvent&)> onPaste_;
     std::function<void()> onReady_;
     std::function<void(const BaseEventInfo*)> onSelect_;
     std::function<bool(const RichEditorInsertValue&)> aboutToIMEInput_;

@@ -34,7 +34,7 @@ public:
     void SetCopyOption(CopyOptions& copyOptions) override;
     void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
-    void SetOnPaste(std::function<bool()>&& func) override;
+    void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) override;
 
 private:
     void SetDraggable(bool draggable);

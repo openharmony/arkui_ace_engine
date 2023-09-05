@@ -144,7 +144,7 @@ public:
     virtual void SetCopyOption(CopyOptions& copyOptions) = 0;
     virtual void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam) = 0;
-    virtual void SetOnPaste(std::function<bool()>&& func) = 0;
+    virtual void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;
