@@ -41,7 +41,10 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     ACE_UPDATE_LAYOUT_PROPERTY(ProgressLayoutProperty, Type, type);
 
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        return;
+    }
     RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
     auto progressFocusNode = frameNode->GetFocusHub();
     CHECK_NULL_VOID(progressFocusNode);
