@@ -1082,6 +1082,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
     currentMainLineIndex_++; // if it fails to fill a new line backward, do [currentMainLineIndex_--]
     lastCross_ = 0;
     bool hasNormalItem = false;
+    bool doneFillLine = false;
     // TODO: shoule we use policy of adaptive layout according to size of [GridItem] ?
 
     for (uint32_t i = 0; i < crossCount_; i++) {
@@ -1112,10 +1113,15 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
 
         gridLayoutInfo_.endIndex_ = currentIndex;
         currentIndex++;
+        doneFillLine = true;
     }
 
-    gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
-    gridLayoutInfo_.endMainLineIndex_ = currentMainLineIndex_;
+    if (doneFillLine) {
+        gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
+        gridLayoutInfo_.endMainLineIndex_ = currentMainLineIndex_;
+    } else {
+        currentMainLineIndex_--;
+    }
     return cellAveLength_;
 }
 
