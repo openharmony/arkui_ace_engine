@@ -229,6 +229,8 @@ public:
         return {};
     }
 
+    virtual void GetPointWithRevert(PointF& point) {}
+
     virtual void GetPointWithTransform(PointF& point) {}
 
     virtual RectF GetPaintRectWithoutTransform()
