@@ -854,7 +854,7 @@ public:
     void HandleSelectionEnd();
     void HandleOnUndoAction();
     void HandleOnRedoAction();
-    void HandleOnSelectAll(bool inlineStyle = false);
+    void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false);
     void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
