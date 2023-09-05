@@ -181,7 +181,9 @@ void CanvasPaintMethod::DrawImage(
 
     const auto skCanvas = skCanvas_.get();
     if (HasShadow()) {
-        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+        double shadowWidth = (canvasImage.flag == 0) ? static_cast<double>(image->width()) : canvasImage.dWidth;
+        double shadowHeight = (canvasImage.flag == 0) ? static_cast<double>(image->height()) : canvasImage.dHeight;
+        SkRect skRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, shadowWidth, shadowHeight);
         SkPath path;
         path.addRect(skRect);
         PaintShadow(path, shadow_, skCanvas, &imagePaint_);
