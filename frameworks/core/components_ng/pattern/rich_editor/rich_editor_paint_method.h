@@ -26,7 +26,7 @@ class ACE_EXPORT RichEditorPaintMethod : public TextPaintMethod {
     DECLARE_ACE_TYPE(RichEditorPaintMethod, TextPaintMethod)
 public:
     RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager, float baselineOffset,
-        const RefPtr<TextContentModifier>& cModifier, const RefPtr<TextOverlayModifier>& oModifier);
+        const RefPtr<TextContentModifier>& contentMod, const RefPtr<TextOverlayModifier>& overlayMod);
 
     ~RichEditorPaintMethod() override = default;
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;

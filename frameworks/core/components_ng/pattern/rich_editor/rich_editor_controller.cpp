@@ -118,7 +118,7 @@ void RichEditorController::CloseSelectionMenu()
     }
 }
 
-void RichEditorController::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle &style)
+void RichEditorController::UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style)
 {
     auto richEditorPattern = pattern_.Upgrade();
     if (richEditorPattern) {

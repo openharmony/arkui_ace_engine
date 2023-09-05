@@ -23,9 +23,9 @@
 
 namespace OHOS::Ace::NG {
 RichEditorPaintMethod::RichEditorPaintMethod(const WeakPtr<Pattern>& pattern, const ParagraphManager* pManager,
-    float baselineOffset, const RefPtr<TextContentModifier>& cModifier,
-    const RefPtr<TextOverlayModifier>& oModifier)
-    : TextPaintMethod(pattern, pManager->GetParagraphs().begin()->paragraph, baselineOffset, cModifier, oModifier),
+    float baselineOffset, const RefPtr<TextContentModifier>& contentMod,
+    const RefPtr<TextOverlayModifier>& overlayMod)
+    : TextPaintMethod(pattern, pManager->GetParagraphs().begin()->paragraph, baselineOffset, contentMod, overlayMod),
       pManager_(pManager)
 {}
 
@@ -34,23 +34,23 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     TextPaintMethod::UpdateOverlayModifier(paintWrapper);
     auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
-    auto oModifier = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
     if (!richEditorPattern->HasFocus()) {
-        oModifier->SetCaretVisible(false);
+        overlayMod->SetCaretVisible(false);
         return;
     }
     auto caretVisible = richEditorPattern->GetCaretVisible();
-    oModifier->SetCaretVisible(caretVisible);
-    oModifier->SetCaretColor(Color::BLUE.GetValue());
-    oModifier->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
+    overlayMod->SetCaretVisible(caretVisible);
+    overlayMod->SetCaretColor(Color::BLUE.GetValue());
+    overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
     if (richEditorPattern->GetTextContentLength() > 0) {
         float caretHeight = 0;
         OffsetF caretOffset =
             richEditorPattern->CalcCursorOffsetByPosition(richEditorPattern->GetCaretPosition(), caretHeight);
-        oModifier->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+        overlayMod->SetCaretOffsetAndHeight(caretOffset, caretHeight);
     } else {
         auto rect = richEditorPattern->GetTextContentRect();
-        oModifier->SetCaretOffsetAndHeight(
+        overlayMod->SetCaretOffsetAndHeight(
             OffsetF(rect.GetX(), rect.GetY()), Dimension(DEFAULT_CARET_HEIGHT, DimensionUnit::VP).ConvertToPx());
     }
     std::vector<Rect> selectedRects;
@@ -59,14 +59,14 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         selectedRects = pManager_->GetRects(selection.GetTextStart(), selection.GetTextEnd());
     }
     auto contentRect = richEditorPattern->GetTextContentRect();
-    oModifier->SetContentRect(contentRect);
-    oModifier->SetSelectedRects(selectedRects);
+    overlayMod->SetContentRect(contentRect);
+    overlayMod->SetSelectedRects(selectedRects);
 }
 
 void RichEditorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
-    auto cModifier = DynamicCast<RichEditorContentModifier>(GetContentModifier(paintWrapper));
-    CHECK_NULL_VOID(cModifier);
+    auto contentMod = DynamicCast<RichEditorContentModifier>(GetContentModifier(paintWrapper));
+    CHECK_NULL_VOID(contentMod);
     TextPaintMethod::UpdateContentModifier(paintWrapper);
 }
 } // namespace OHOS::Ace::NG

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "paragraph_manager.h"
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
 #include "base/utils/utils.h"
 
