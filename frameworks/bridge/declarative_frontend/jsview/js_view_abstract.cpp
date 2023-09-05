@@ -4897,11 +4897,10 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined()) {
-        auto shape = AceType::MakeRefPtr<BasicShape>();
-        shape->SetColor(Color::TRANSPARENT);
-        // const RefPtr<BasicShape> shape;
-        ViewAbstractModel::GetInstance()->SetClipShape(shape);
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    if (info[0]->IsUndefined() && !renderContext->GetClipEdge().has_value()) {
         ViewAbstractModel::GetInstance()->SetClipEdge(false);
         return;
     }
