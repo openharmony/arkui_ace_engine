@@ -1740,6 +1740,12 @@ void RichEditorPattern::DeleteBackward(int32_t length)
 
 void RichEditorPattern::DeleteForward(int32_t length)
 {
+    if (textSelector_.IsValid()) {
+        length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+        SetCaretPosition(textSelector_.GetTextStart());
+        CloseSelectOverlay();
+        ResetSelection();
+    }
     if (caretPosition_ == GetTextContentLength()) {
         return;
     }
