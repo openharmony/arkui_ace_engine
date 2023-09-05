@@ -323,7 +323,7 @@ private:
     void AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
     void InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
     void SetCaretSpanIndex(int32_t index);
-    bool IsSameToTpyingStyle(const RefPtr<SpanNode>& spanNode);
+    bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
 #else

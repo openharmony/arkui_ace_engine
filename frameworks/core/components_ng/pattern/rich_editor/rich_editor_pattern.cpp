@@ -789,15 +789,15 @@ void RichEditorPattern::UpdateTextStyle(
     }
 }
 
-bool RichEditorPattern::IsSameToTpyingStyle(const RefPtr<SpanNode>& spanNode)
+bool RichEditorPattern::HasSameTypingStyle(const RefPtr<SpanNode>& spanNode)
 {
     auto spanItem = spanNode->GetSpanItem();
     CHECK_NULL_RETURN(spanItem, false);
-    auto spanTextstyle = spanItem->GetTextStyle();
-    if (spanTextstyle.has_value() && typingTextStyle_.has_value()) {
-        return spanTextstyle.value() == typingTextStyle_.value();
+    auto spanTextStyle = spanItem->GetTextStyle();
+    if (spanTextStyle.has_value() && typingTextStyle_.has_value()) {
+        return spanTextStyle.value() == typingTextStyle_.value();
     } else {
-        return !(spanTextstyle.has_value() || typingTextStyle_.has_value());
+        return !(spanTextStyle.has_value() || typingTextStyle_.has_value());
     }
 }
 
@@ -1699,7 +1699,7 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
             CreateTextSpanNode(spanNode, info, insertValueTemp);
             return;
         }
-        if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNodeBefore)) {
+        if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
             CreateTextSpanNode(spanNode, info, insertValueTemp);
             return;
         }
@@ -1711,7 +1711,7 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     if (info.GetOffsetInSpan() == 0) {
         auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
         if (spanNodeBefore != nullptr && !IsLineSeparatorInLast(spanNodeBefore)) {
-            if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNodeBefore)) {
+            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
                 CreateTextSpanNode(spanNode, info, insertValueTemp);
                 return;
             }
@@ -1721,7 +1721,7 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
             return;
         }
     }
-    if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNode)) {
+    if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
         TextSpanOptions options;
         options.value = insertValueTemp;
         options.offset = caretPosition_;
@@ -2899,7 +2899,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
         if (child && child->GetTag() == V2::SPAN_ETS_TAG) {
             auto spanNode = DynamicCast<SpanNode>(child);
             CHECK_NULL_VOID(spanNode);
-            if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNode)) {
+            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
                 options.offset = newSpanOffset;
                 caretSpanIndex_ = AddTextSpan(options, true);
             } else {
@@ -2914,7 +2914,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
                 LOGD("insert the first record at the end, caretSpanIndex: %{public}d ", caretSpanIndex_);
                 return;
             }
-            if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNodeBefore)) {
+            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
                 auto spanNode = DynamicCast<SpanNode>(child);
                 CreateTextSpanNode(spanNode, info, insertValue, false);
                 caretSpanIndex_ = info.GetSpanIndex();
@@ -2933,7 +2933,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
             auto spanNode = DynamicCast<SpanNode>(child);
             CHECK_NULL_VOID(spanNode);
             LOGD("insert record after spanNode at caretSpanIndex: %{public}d ", caretSpanIndex_);
-            if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNode)) {
+            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
                 options.offset = newSpanOffset;
                 caretSpanIndex_ = AddTextSpan(options, true);
             } else {
@@ -2946,7 +2946,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
         LOGD("InsertValueByPaste after imageNode");
         auto spanNodeBefore = DynamicCast<SpanNode>(GetChildByIndex(info.GetSpanIndex() - 1));
         if (spanNodeBefore != nullptr && caretSpanIndex_ == -1) {
-            if (typingStyle_.has_value() && !IsSameToTpyingStyle(spanNodeBefore)) {
+            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
                 options.offset = newSpanOffset;
                 caretSpanIndex_ = AddTextSpan(options, true);
             } else {
