@@ -754,17 +754,7 @@ bool CanvasPaintMethod::UpdateParagraph(const OffsetF& offset, const std::string
         txtShadow.offset.SetX(shadow_.GetOffset().GetX());
         txtShadow.offset.SetY(shadow_.GetOffset().GetY());
 #endif
-#ifndef NEW_SKIA
-#ifndef USE_GRAPHIC_TEXT_GINE
-        txtShadow.blur_radius = shadow_.GetBlurRadius();
-#else
         txtShadow.blurRadius = shadow_.GetBlurRadius();
-#endif
-#else
-#ifndef USE_GRAPHIC_TEXT_GINE
-        txtShadow.blur_sigma = shadow_.GetBlurRadius();
-#endif
-#endif
 #ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.text_shadows.emplace_back(txtShadow);
 #else
