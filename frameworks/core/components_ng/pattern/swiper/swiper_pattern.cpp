@@ -1361,6 +1361,12 @@ void SwiperPattern::HandleTouchUp()
 
 void SwiperPattern::HandleDragStart()
 {
+    if (usePropertyAnimation_) {
+        StopPropertyTranslateAnimation();
+    }
+    if (indicatorController_) {
+        indicatorController_->Stop();
+    }
     StopTranslateAnimation();
     StopSpringAnimation();
     StopAutoPlay();
