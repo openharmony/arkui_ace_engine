@@ -77,6 +77,7 @@ public:
     void OnConnect();
     void OnDisconnect();
     void OnExtensionDied();
+    bool OnBackPressed();
 
     void RequestExtensionSessionActivation();
     void RequestExtensionSessionBackground();
@@ -121,6 +122,7 @@ private:
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
+    void DispatchBackpressedEventForConsumed(bool& isConsumed);
     void DispatchKeyEventForConsumed(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool& isConsumed);
     void DisPatchFocusActiveEvent(bool isFocusActive);
     void TransferFocusState(bool focusState);
