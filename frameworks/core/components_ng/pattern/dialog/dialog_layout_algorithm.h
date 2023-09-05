@@ -56,8 +56,8 @@ private:
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
 
     OffsetF ComputeChildPosition(
-        const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
-    bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
+        const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize) const;
+    bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint) const;
 
     void UpdateTouchRegion();
 
