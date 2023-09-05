@@ -28,12 +28,12 @@
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ProgressPaintMethod::GetThemeDate()
+void ProgressPaintMethod::GetThemeData()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID_NOLOG(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
-    CHECK_NULL_VOID(progressTheme);
+    CHECK_NULL_VOID_NOLOG(progressTheme);
     color_ = progressTheme->GetTrackSelectedColor();
     if (progressType_ == ProgressType::CAPSULE) {
         color_ = progressTheme->GetCapsuleSelectColor();
@@ -49,6 +49,18 @@ void ProgressPaintMethod::GetThemeDate()
     capsuleBorderWidth_ = progressTheme->GetBorderWidth();
     ringProgressEndSideColor_ = progressTheme->GetRingProgressEndSideColor();
     ringProgressBeginSideColor_ = progressTheme->GetRingProgressBeginSideColor();
+}
+
+void ProgressPaintMethod::GetThemeDataForApiNine()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID_NOLOG(progressTheme);
+    color_ = progressTheme->GetTrackSelectedColor();
+    bgColor_ = progressTheme->GetTrackBgColor();
+    scaleWidth_ = progressTheme->GetScaleWidth().ConvertToPx();
+    scaleCount_ = progressTheme->GetScaleNumber();
 }
 
 void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
