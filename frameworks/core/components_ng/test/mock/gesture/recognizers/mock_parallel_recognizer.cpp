@@ -29,6 +29,11 @@ bool ParallelRecognizer::HandleEvent(const TouchEvent& /* point */)
     return true;
 }
 
+bool ParallelRecognizer::HandleEvent(const AxisEvent& /* event */)
+{
+    return true;
+}
+
 void ParallelRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) {}
 
 bool ParallelRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& /* recognizer */)
