@@ -18,6 +18,8 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/event/ace_events.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -184,9 +186,9 @@ void SwiperIndicatorPattern::InitHoverMouseEvent()
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
 
-    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover, HoverInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && info.GetSourceDevice() != SourceType::TOUCH) {
             pattern->HandleHoverEvent(isHover);
         }
     };
@@ -211,6 +213,9 @@ void SwiperIndicatorPattern::InitHoverMouseEvent()
 
 void SwiperIndicatorPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    if (info.GetSourceDevice() == SourceType::TOUCH) {
+        return;
+    }
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
 
