@@ -918,7 +918,7 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
         result = DumpInfo(params);
         const auto& infoFile = DumpLog::GetInstance().GetDumpFile();
         auto* ostringstream = static_cast<std::ostringstream*>(infoFile.get());
-        info.emplace_back(ostringstream->str().substr(0, DumpLog::MAX_DUMP_LENGTH));
+        info.emplace_back(ostringstream->str());
         DumpLog::GetInstance().Reset();
     } else {
         auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
