@@ -15,7 +15,9 @@
 #include <algorithm>
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -26,6 +28,7 @@
 #include "mock_schedule_task.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/common/mock_frontend.h"
 #include "test/mock/core/common/mock_window.h"
 
@@ -38,6 +41,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/event_manager.h"
+#include "core/common/font_manager.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -59,6 +63,7 @@
 #include "core/components_ng/test/mock/pattern/mock_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/event/mouse_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 using namespace testing;
@@ -89,6 +94,7 @@ constexpr double DEFAULT_DOUBLE4 = 4.0;
 constexpr int32_t CLOSE_BUTTON_INDEX = 5;
 const std::string TEST_TAG("test");
 const std::string ACCESS_TAG("-accessibility");
+const std::string TEST_FORM_INFO("test_info");
 } // namespace
 
 class PipelineContextTestNg : public testing::Test {
@@ -1140,6 +1146,27 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.pressedCodes = { KeyCode::KEY_CLEAR };
     EXPECT_FALSE(context_->OnKeyEvent(event));
     EXPECT_TRUE(context_->GetIsFocusActive());
+
+    /**
+    * @tc.steps5: Call the function OnKeyEvent with isFocusActive_ = true, action = KeyAction::UP and
+    #             pressedCodes = { KeyCode::KEY_CLEAR }.
+    * @tc.expected: The return value of OnKeyEvent is false.
+    */
+    context_->rootNode_.Reset();
+    eventManager->SetInstanceId(DEFAULT_INT1);
+    context_->SetIsFocusActive(true);
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_ESCAPE;
+    event.pressedCodes = { KeyCode::KEY_ESCAPE };
+
+    auto pageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, pageNodeId, nullptr);
+    auto childNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, childNodeId, nullptr);
+    pageNode->AddChild(childNode);
+    context_->stageManager_->stageNode_ = pageNode;
+    EXPECT_FALSE(context_->OnKeyEvent(event));
+    EXPECT_TRUE(context_->dragDropManager_->isDragCancel_);
 }
 
 /**
@@ -2494,7 +2521,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg051, TestSize.Level1)
 
 /**
  * @tc.name: PipelineContextTestNg052
- * @tc.desc: Test the function SetIsLayoutFullScreen.
+ * @tc.desc: Test the function SyncSafeArea.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg052, TestSize.Level1)
@@ -2505,8 +2532,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg052, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     /**
-     * @tc.steps2: call SetIsLayoutFullScreen.
-     * @tc.expected: The ignoreSafeArea_ is true.
+     * @tc.steps2: call SyncSafeArea.
+     * @tc.expected: The isLayoutDirtyMarked_ is true.
      */
     context_->SetupRootElement();
     auto frameNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -2518,7 +2545,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg052, TestSize.Level1)
 
 /**
  * @tc.name: PipelineContextTestNg053
- * @tc.desc: Test the function SetIsLayoutFullScreen.
+ * @tc.desc: Test the function FindNavDestinationNodeToHandleBack.
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
@@ -2529,8 +2556,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     /**
-     * @tc.steps2: call SetIsLayoutFullScreen.
-     * @tc.expected: The ignoreSafeArea_ is true.
+     * @tc.steps2: call FindNavDestinationNodeToHandleBack.
+     * @tc.expected: The ret is nullptr.
      */
     context_->SetupRootElement();
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -2540,5 +2567,88 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg053, TestSize.Level1)
     auto childNode = NavigationGroupNode::GetOrCreateFrameNode(TEST_TAG, childId, nullptr);
     node->AddChild(childNode);
     EXPECT_EQ(context_->FindNavDestinationNodeToHandleBack(node), nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg054
+ * @tc.desc: Test the function AddAfterLayoutTask and AddAfterRenderTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg054, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps2: call AddAfterLayoutTask.
+     * @tc.expected: The afterLayoutTasks_ size is 1.
+     */
+    context_->SetupRootElement();
+    context_->AddAfterLayoutTask([]() -> void {});
+    EXPECT_EQ(context_->taskScheduler_->afterLayoutTasks_.size(), 1);
+    /**
+     * @tc.steps3: call AddAfterLayoutTask.
+     * @tc.expected: The afterLayoutTasks_ size is 1.
+     */
+    context_->AddAfterRenderTask([]() -> void {});
+    EXPECT_EQ(context_->taskScheduler_->afterRenderTasks_.size(), 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg055
+ * @tc.desc: Test the function AddFontNodeNG and RemoveFontNodeNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg055, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps2: call AddFontNodeNG.
+     * @tc.expected: fontNodesNG_.size() is 1.
+     */
+    context_->SetupRootElement();
+    context_->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
+    auto fontNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto fontNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, fontNodeId, nullptr);
+    context_->AddFontNodeNG(fontNode);
+    EXPECT_EQ(context_->GetFontManager()->fontNodesNG_.size(), 1);
+    /**
+     * @tc.steps2: call RemoveFontNodeNG.
+     * @tc.expected: fontNodesNG_.size() is 0.
+     */
+    context_->RemoveFontNodeNG(fontNode);
+    EXPECT_EQ(context_->GetFontManager()->fontNodesNG_.size(), 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg056
+ * @tc.desc: Test the function AddFontNodeNG and RemoveFontNodeNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg056, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps2: call IsWindowSceneConsumed.
+     * @tc.expected: The return is false.
+     */
+    context_->SetupRootElement();
+    EXPECT_FALSE(context_->IsWindowSceneConsumed());
+    /**
+     * @tc.steps2: call SetWindowSceneConsumed(true) and IsWindowSceneConsumed.
+     * @tc.expected: The return is true.
+     */
+    context_->SetWindowSceneConsumed(true);
+    EXPECT_TRUE(context_->IsWindowSceneConsumed());
 }
 } // namespace OHOS::Ace::NG
