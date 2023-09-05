@@ -95,7 +95,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     if (errorParagraph) {
         errorViewHeight = textFrameRect.Bottom() - textFrameRect.Top() + errorMargin;
     }
-    if (showCounter_->Get() && counterParagraph) {
+    if (showCounter_->Get() && counterParagraph && !textFieldPattern->GetIsCounterIdealHeight()) {
         clipRectHeight = contentOffset.GetY() + contentSize.Height() - textFieldPattern->GetCountHeight();
     } else {
         clipRectHeight = contentOffset.GetY() + contentSize.Height() + errorViewHeight;

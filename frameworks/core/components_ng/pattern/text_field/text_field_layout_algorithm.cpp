@@ -323,6 +323,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             idealWidth = paragraph_->GetActualWidth();
 #endif
         }
+        if (counterParagraph_ && idealHeight < useHeight) {
+            pattern->SetISCounterIdealHeight(true);
+            idealHeight = idealHeight - counterParagraph_->GetHeight();
+        }
         textRect_.SetSize(
             SizeF(idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
                 paragraph_->GetHeight()));
