@@ -93,4 +93,13 @@ size_t TextLayoutAlgorithm::GetLineCount() const
 }
 
 void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper) {}
+
+void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<Rect>& rects) {}
+
+ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
+{
+    return {};
+}
+
+void TextLayoutAlgorithm::ApplyIndent(const TextStyle& textStyle, double width) {}
 } // namespace OHOS::Ace::NG

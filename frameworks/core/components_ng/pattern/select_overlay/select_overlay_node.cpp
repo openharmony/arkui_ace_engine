@@ -470,8 +470,9 @@ RefPtr<FrameNode> CreateCustomSelectMenu(const std::shared_ptr<SelectOverlayInfo
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     info->menuInfo.menuBuilder();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    auto menuNode =
-        MenuView::Create(customNode, -1, "", MenuType::SELECT_OVERLAY_CUSTOM_MENU, MenuParam(), info->isUsingMouse);
+    MenuParam menuParam;
+    menuParam.type = MenuType::SELECT_OVERLAY_CUSTOM_MENU;
+    auto menuNode = MenuView::Create(customNode, -1, "", menuParam, info->isUsingMouse);
     auto eventHub = menuNode->GetEventHub<EventHub>();
     if (eventHub && info->menuCallback.onAppear) {
         eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));

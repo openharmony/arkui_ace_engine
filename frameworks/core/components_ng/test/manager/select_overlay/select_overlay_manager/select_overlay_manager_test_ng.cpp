@@ -16,6 +16,8 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -41,18 +43,22 @@ const bool IS_USING_MOUSE = true;
 
 class SelectOverlayManagerTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
 
-void SelectOverlayManagerTestNg::SetUpTestCase()
+void SelectOverlayManagerTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    MockContainer::SetUp();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    EXPECT_CALL(*(MockContainer::Current()), GetTaskExecutor()).WillRepeatedly(Return(taskExecutor));
 }
 
-void SelectOverlayManagerTestNg::TearDownTestCase()
+void SelectOverlayManagerTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+    MockContainer::TearDown();
 }
 
 /**

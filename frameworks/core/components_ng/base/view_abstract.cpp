@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/calc_length.h"
@@ -1189,17 +1190,18 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
 }
 
 void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-    MenuType menuType, const NG::OffsetF& offset, const MenuParam& menuParam)
+    const NG::OffsetF& offset, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode)
 {
     LOGD("ViewAbstract::BindMenuWithCustomNode");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
-    auto type = menuType;
+    auto type = menuParam.type;
 #ifdef PREVIEW
     // unable to use the subWindow in the Previewer.
     type = MenuType::MENU;
 #endif
-    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), type, menuParam);
+    auto menuNode =
+        MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
     if (type == MenuType::CONTEXT_MENU) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;

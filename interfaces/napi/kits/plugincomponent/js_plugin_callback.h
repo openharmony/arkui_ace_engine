@@ -66,6 +66,7 @@ public:
         const std::shared_ptr<AceJSPluginRequestParam>& param);
 
     size_t GetID(void);
+    int32_t GetContainerId() override;
     void OnPushEvent(const AAFwk::Want& want, const PluginComponentTemplate& pluginTemplate, const std::string& data,
         const std::string& extraData) override;
     void OnRequestEvent(const AAFwk::Want& want, const std::string& name, const std::string& data) override;

@@ -51,10 +51,15 @@ private:
     NativeScopeManager* manager_;
     NativeScope* scope_;
 };
+
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj);
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
 RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj);
+#endif
+
+#ifdef PIXEL_MAP_SUPPORTED
+JSRef<JSVal> ConvertPixmap(const RefPtr<PixelMap>& pixelMap);
 #endif
 
 bool IsDisableEventVersion();

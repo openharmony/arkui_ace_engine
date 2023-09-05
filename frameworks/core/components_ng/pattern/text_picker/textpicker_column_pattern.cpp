@@ -367,7 +367,9 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
+        if (!isUpateTextContentOnly) {
+            UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
+        }
         if (NotLoopOptions() && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent("");
         } else {

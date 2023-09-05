@@ -37,15 +37,18 @@
 #include "core/event/mouse_event.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char SPLIT_LEFT_KEY[] = "container_modal_split_left_button";
 constexpr char MAXIMIZE_KEY[] = "container_modal_maximize_button";
 constexpr char MINIMIZE_KEY[] = "container_modal_minimize_button";
 constexpr char CLOSE_KEY[] = "container_modal_close_button";
+constexpr float SPRINGMOTION_RESPONSE = 0.55f;
+constexpr float CURRENT_RATIO = 0.86f;
+constexpr float CURRENT_DURATION = 0.25f;
 } // namespace
-
+float ContainerModalView::imageMaxTranslate = 0.0f;
+float ContainerModalView::baseScale = 1.0f;
 /**
  * The structure of container_modal is designed as follows :
  * |--container_modal(stack)
@@ -340,17 +343,24 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         CHECK_NULL_VOID(buttonPattern);
         buttonPattern->SetInHover(isHover);
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
-        float translateX = (buttonPattern->GetLocalLocation().GetX() - halfSize) / halfSize * 2;
-        float translateY = (buttonPattern->GetLocalLocation().GetY() - halfSize) / halfSize * 2;
+        auto icurve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
+        float maxDis = sqrt(pow(halfSize, 2.0) + pow(halfSize, 2.0));
+        float curDis = sqrt(pow(buttonPattern->GetLocalLocation().GetX() - halfSize, 2.0)
+            + pow(buttonPattern->GetLocalLocation().GetY() - halfSize, 2.0));
+        float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
+        baseScale = currentScale > baseScale ? currentScale : baseScale;
+        float imageTranslate = 2 * icurve->Move((maxDis - curDis) / (maxDis));
+        imageMaxTranslate = imageTranslate > imageMaxTranslate ? imageTranslate : imageMaxTranslate;
+        float translateX = (buttonPattern->GetLocalLocation().GetX() - halfSize) / halfSize * imageMaxTranslate;
+        float translateY = (buttonPattern->GetLocalLocation().GetY() - halfSize) / halfSize * imageMaxTranslate;
         auto buttonNodeRenderContext = buttonNode->GetRenderContext();
         auto imageIconRenderContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(buttonNodeRenderContext);
         CHECK_NULL_VOID(imageIconRenderContext);
-        double imageScale = isHover ? 1.10 : 1.0;
+        float imageScale = isHover ? baseScale : 1.0f;
         AnimationOption option = AnimationOption();
-        option.SetDuration(100);
-        auto icurve = MakeRefPtr<CubicCurve>(0.5f, 0.0f, 0.5f, 1.0f);
-        option.SetCurve(icurve);
+        auto motion = MakeRefPtr<ResponsiveSpringMotion>(SPRINGMOTION_RESPONSE, CURRENT_RATIO, CURRENT_DURATION);
+        option.SetCurve(motion);
         TranslateOptions translate;
         translate.x = isHover ? translateX : 0.0f;
         translate.y = isHover ? translateY : 0.0f;
@@ -362,6 +372,8 @@ void ContainerModalView::AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
                     imageIconRenderContext->UpdateTransformTranslate(translate);
                 });
         } else {
+            baseScale = 1.0f;
+            imageMaxTranslate = 0.0f;
             AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
                 buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
                 imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
@@ -388,11 +400,21 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
             buttonPattern->SetLocalLocation(info.GetLocalLocation());
             return;
         }
+        auto buttonNodeRenderContext = buttonNode->GetRenderContext();
         auto imageIconRenderContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageIconRenderContext);
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
-        float translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * 2;
-        float translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * 2;
+        auto icurve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
+        float maxDis = sqrt(pow(halfSize, 2.0) + pow(halfSize, 2.0));
+        float curDis = sqrt(pow(info.GetLocalLocation().GetX() - halfSize, 2.0)
+            + pow(info.GetLocalLocation().GetY() - halfSize, 2.0));
+        float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
+        baseScale = currentScale > baseScale ? currentScale : baseScale;
+        float imageScale = baseScale;
+        float imageTranslate = 2 * icurve->Move((maxDis - curDis) / (maxDis));
+        imageMaxTranslate = imageTranslate > imageMaxTranslate ? imageTranslate : imageMaxTranslate;
+        float translateX = (info.GetLocalLocation().GetX() - halfSize) / halfSize * imageMaxTranslate;
+        float translateY = (info.GetLocalLocation().GetY() - halfSize) / halfSize * imageMaxTranslate;
         float response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
         float dampingRatio = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_DAMPING_RATIO;
         float blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
@@ -402,7 +424,9 @@ void ContainerModalView::AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<Fr
         TranslateOptions translate;
         translate.x = translateX;
         translate.y = translateY;
-        AnimationUtils::Animate(option, [imageIconRenderContext, translate]() {
+        AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, translate]() {
+            buttonNodeRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
+            imageIconRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
             imageIconRenderContext->UpdateTransformTranslate(translate);
         });
     };

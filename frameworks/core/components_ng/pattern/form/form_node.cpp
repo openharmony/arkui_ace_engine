@@ -73,7 +73,7 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 }
 
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-    const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
+    const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
     // The mousetest has been merged into touchtest.
     // FormComponent does not support some mouse event(eg. Hover, HoverAnimation..).
@@ -82,7 +82,8 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
         return HitTestResult::OUT_OF_REGION;
     }
 
-    auto testResult = FrameNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, touchId);
+    auto testResult = FrameNode::TouchTest(globalPoint, parentLocalPoint, parentRevertPoint,
+        touchRestrict, result, touchId);
     if (testResult == HitTestResult::OUT_OF_REGION) {
         return HitTestResult::OUT_OF_REGION;
     }

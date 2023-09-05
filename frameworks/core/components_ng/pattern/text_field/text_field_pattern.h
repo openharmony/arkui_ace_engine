@@ -778,6 +778,15 @@ public:
         dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
     }
 
+    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
+    {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->RemoveDragFrameNode(frameNode->GetId());
+    }
+
     void CreateHandles() override;
 
     void CreateHandles(bool animation);
@@ -1051,6 +1060,7 @@ private:
     void InitClickEvent();
 #ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
+    void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
 #endif
     bool CaretPositionCloseToTouchPosition();
@@ -1248,10 +1258,7 @@ private:
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
-    bool setSelectionFlag_ = false;
     bool scrollable_ = true;
-    int32_t selectionStart_ = 0;
-    int32_t selectionEnd_ = 0;
     // controls redraw of overlay modifier, update when need to redraw
     int32_t drawOverlayFlag_ = 0;
     bool isTextInput_ = false;

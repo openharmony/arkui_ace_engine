@@ -61,12 +61,8 @@ OffsetF TextPattern::GetParentGlobalOffset() const
     return {};
 }
 
-void TextPattern::CloseSelectOverlay()
-{
-}
-void TextPattern::CreateHandles()
-{
-}
+void TextPattern::CloseSelectOverlay() {}
+void TextPattern::CreateHandles() {}
 
 bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 {
@@ -77,9 +73,18 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
 {
     return {};
 }
+RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
+{
+    return nullptr;
+};
 
 void TextPattern::OnColorConfigurationUpdate() {}
 void TextPattern::InitSurfaceChangedCallback() {}
 void TextPattern::OnAttachToFrameNode() {}
-void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {}
+void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {};
+
+int32_t TextPattern::GetHandleIndex(const Offset& offset) const
+{
+    return 0;
+}
 } // namespace OHOS::Ace::NG

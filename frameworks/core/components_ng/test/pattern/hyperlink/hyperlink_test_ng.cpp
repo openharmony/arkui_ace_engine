@@ -15,11 +15,11 @@
 
 #include "gtest/gtest.h"
 
-#include "core/event/mouse_event.h"
-
 #define private public
 #define protected public
 #include "base/memory/ace_type.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -29,6 +29,9 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/key_event.h"
+#include "core/event/touch_event.h"
+#include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
@@ -57,20 +60,12 @@ void HyperlinkTestNg::SetUpTestSuite()
     MockPipelineBase::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<HyperlinkTheme>()));
 }
 
 void HyperlinkTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
-}
-
-RefPtr<FrameNode> HyperlinkTestNg::CreateHyperlinkNode(const std::string& address, const std::string& content)
-{
-    HyperlinkModelNG hyperlink;
-    hyperlink.Create(address, content);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    return frameNode;
 }
 
 /**
@@ -80,9 +75,14 @@ RefPtr<FrameNode> HyperlinkTestNg::CreateHyperlinkNode(const std::string& addres
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
 {
-    auto frameNode = HyperlinkTestNg::CreateHyperlinkNode(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::HYPERLINK_ETS_TAG);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(HYPERLINK_CONTENT);
     frameNode->SetDraggable(true);
     frameNode->MarkModifyDone();
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
@@ -106,7 +106,9 @@ HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
  */
 HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
 {
-    auto frameNode = HyperlinkTestNg::CreateHyperlinkNode(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
     ASSERT_NE(frameNode, nullptr);
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
@@ -205,10 +207,13 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest003, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_TAB;
     bool result = hyperlinkPattern->OnKeyEvent(event);
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
     event.code = KeyCode::KEY_SPACE;
     result = hyperlinkPattern->OnKeyEvent(event);
-    EXPECT_EQ(result, true);
+    EXPECT_TRUE(result);
+    event.action = KeyAction::CLICK;
+    result = hyperlinkPattern->OnKeyEvent(event);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -303,5 +308,153 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest007, TestSize.Level1)
     hyperlinkPattern->OnHoverEvent(false);
     hyperlinkLayoutProperty->UpdateTextDecoration(TextDecoration::NONE);
     EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration(), TextDecoration::NONE);
+}
+
+/**
+ * @tc.name: HyperlinkPatternTest008
+ * @tc.desc: Test HyperlinkPattern OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
+     */
+    auto hyperlinkNode =
+        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    ASSERT_NE(hyperlinkNode, nullptr);
+    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnModifyDone while gestureHub is able or enable.
+     * @tc.expected: TextColor of hyperlink is set different.
+     */
+    auto hub = hyperlinkNode->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+    auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(hyperlinkLayoutProperty, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    ASSERT_NE(theme, nullptr);
+    hub->SetEnabled(true);
+    hyperlinkNode->SetDraggable(false);
+    hyperlinkLayoutProperty->UpdateTextColor(Color::BLUE);
+    hyperlinkPattern->isLinked_ = true;
+    hyperlinkPattern->OnModifyDone();
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::BLUE);
+    EXPECT_FALSE(hyperlinkPattern->isLinked_);
+    hub->SetEnabled(false);
+    hyperlinkNode->SetDraggable(true);
+    theme->textDisabledColor_ = Color::RED;
+    hyperlinkPattern->isLinked_ = true;
+    hyperlinkPattern->OnModifyDone();
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::RED);
+    EXPECT_FALSE(hyperlinkPattern->isLinked_);
+}
+
+/**
+ * @tc.name: HyperlinkPatternTest009
+ * @tc.desc: Test HyperlinkPattern OnTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
+     */
+    auto hyperlinkNode =
+        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    ASSERT_NE(hyperlinkNode, nullptr);
+    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnTouchEvent while isLinked_ is true or false.
+     * @tc.expected: DecorationColor of hyperlink text is set.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->textColor_ = Color::RED;
+    theme->textLinkedColor_ = Color::GREEN;
+    theme->textTouchedColor_ = Color::GRAY;
+    theme->textUnSelectedDecoration_ = TextDecoration::UNDERLINE;
+    auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(hyperlinkLayoutProperty, nullptr);
+    hyperlinkLayoutProperty->UpdateTextColor(Color::BLACK);
+    hyperlinkLayoutProperty->UpdateTextDecorationColor(Color::BLACK);
+    hyperlinkPattern->isLinked_ = true;
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchInfo(1);
+    touchInfo.SetTouchType(TouchType::DOWN);
+    touchEventInfo.changedTouches_.clear();
+    touchEventInfo.changedTouches_.emplace_back(touchInfo);
+    hyperlinkPattern->OnTouchEvent(touchEventInfo);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::GREEN));
+
+    hyperlinkPattern->isLinked_ = false;
+    hyperlinkPattern->OnTouchEvent(touchEventInfo);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextColor().value(), Color::RED.BlendColor(Color::GRAY));
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::GRAY));
+
+    /**
+     * @tc.steps: step3. Call OnTouchEvent while TouchType is UP or DOWN or else.
+     * @tc.expected: DecorationColor of hyperlink text is set.
+     */
+    touchInfo.SetTouchType(TouchType::UP);
+    touchEventInfo.changedTouches_.clear();
+    touchEventInfo.changedTouches_.emplace_back(touchInfo);
+    hyperlinkPattern->OnTouchEvent(touchEventInfo);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    touchInfo.SetTouchType(TouchType::CANCEL);
+    touchEventInfo.changedTouches_.clear();
+    touchEventInfo.changedTouches_.emplace_back(touchInfo);
+    hyperlinkPattern->OnTouchEvent(touchEventInfo);
+}
+
+/**
+ * @tc.name: HyperlinkPatternTest010
+ * @tc.desc: Test HyperlinkPattern OnHoverEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Hyperlink and get HyperlinkPattern.
+     */
+    auto hyperlinkNode =
+        FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<HyperlinkPattern>(HYPERLINK_ADDRESS); });
+    ASSERT_NE(hyperlinkNode, nullptr);
+    auto hyperlinkPattern = hyperlinkNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(hyperlinkPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnHoverEvent while isLinked_ is true or false.
+     * @tc.expected: DecorationColor of hyperlink text is set.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<HyperlinkTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->textColor_ = Color::RED;
+    theme->textLinkedColor_ = Color::GREEN;
+    theme->textUnSelectedDecoration_ = TextDecoration::UNDERLINE;
+    auto hyperlinkLayoutProperty = hyperlinkNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(hyperlinkLayoutProperty, nullptr);
+    hyperlinkLayoutProperty->UpdateTextDecorationColor(Color::BLACK);
+    hyperlinkPattern->isLinked_ = true;
+    hyperlinkPattern->OnHoverEvent(true);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED.BlendColor(Color::GREEN));
+    hyperlinkPattern->isLinked_ = false;
+    hyperlinkPattern->OnHoverEvent(true);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecorationColor().value(), Color::RED);
+    hyperlinkPattern->OnHoverEvent(false);
+    EXPECT_EQ(hyperlinkLayoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
 }
 } // namespace OHOS::Ace::NG

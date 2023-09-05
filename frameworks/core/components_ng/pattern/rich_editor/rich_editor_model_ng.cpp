@@ -34,7 +34,7 @@ void RichEditorModelNG::Create()
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
 
     richEditorPattern->InitSurfaceChangedCallback();
     richEditorPattern->InitSurfacePositionChangedCallback();

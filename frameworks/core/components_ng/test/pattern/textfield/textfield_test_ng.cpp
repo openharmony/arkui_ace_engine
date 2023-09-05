@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/test/mock/pattern/text_field/mock_text_input_connection.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -96,6 +97,10 @@ public:
     RefPtr<TextFieldLayoutProperty> GetLayoutProperty();
     RefPtr<FrameNode> CreatTextFieldNode(const std::optional<std::string>& placeholder = PLACEHOLDER,
         const std::optional<std::string>& value = EMPTY_TEXT_VALUE, bool isTextArea = false);
+    void RunSetUp();
+    RefPtr<FrameNode> host_;
+    RefPtr<TextFieldPattern> pattern_;
+    RefPtr<TextFieldLayoutProperty> layoutProperty_;
 };
 
 void TextFieldPatternTestNg::SetUpTestSuite()
@@ -108,6 +113,21 @@ void TextFieldPatternTestNg::SetUpTestSuite()
 void TextFieldPatternTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void TextFieldPatternTestNg::RunSetUp()
+{
+    host_ = CreatTextFieldNode();
+    ASSERT_NE(host_, nullptr);
+    pattern_ = host_->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern_, nullptr);
+    layoutProperty_ = host_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    pattern_->clipboard_ = clipboard;
+    pattern_->paragraph_ = std::make_shared<RSParagraph>();
 }
 
 RefPtr<FrameNode> TextFieldPatternTestNg::CreatTextFieldNode(
@@ -668,7 +688,7 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
      */
     layoutProperty->UpdateMaxLines(1);
     EXPECT_EQ(pattern->AdjustTextAreaOffsetY(), 0.0f);
-    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), 1.5f);
+    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), 0.0f);
     pattern->caretRect_.SetLeft(10);
     pattern->contentRect_.SetLeft(8);
     pattern->contentRect_.SetWidth(4);
@@ -676,7 +696,7 @@ HWTEST_F(TextFieldPatternTestNg, AdjustTextRectOffset, TestSize.Level2)
     pattern->caretRect_.SetLeft(7);
     EXPECT_EQ(pattern->AdjustTextRectOffsetX(), 1.0f);
     pattern->caretRect_.SetLeft(15);
-    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), -4.5f);
+    EXPECT_EQ(pattern->AdjustTextRectOffsetX(), -3.0f);
 }
 
 /**
@@ -4264,7 +4284,6 @@ HWTEST_F(TextFieldPatternTestNg, OnDirtyLayoutWrapperSwap, TestSize.Level2)
     layoutAlgorithm->errorParagraph_ = std::make_shared<RSParagraph>();
     layoutAlgorithm->errorParagraph_ = std::make_shared<RSParagraph>();
     textFieldPattern->needToRefreshSelectOverlay_ = true;
-    textFieldPattern->setSelectionFlag_ = true;
     textFieldPattern->mouseStatus_ = MouseStatus::RELEASED;
     auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
@@ -5159,39 +5178,6 @@ HWTEST_F(TextFieldPatternTestNg, CaretMoveToLastNewLineChar, TestSize.Level2)
     pattern->UpdateEditingValue("New\nLine\nChar", 10);
     pattern->CaretMoveToLastNewLineChar();
     EXPECT_EQ(pattern->textEditingValue_.caretPosition, 8);
-}
-
-/**
- * @tc.name: SetSelectionFlag.
- * @tc.desc: test SetSelectionFlag.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, SetSelectionFlag, TestSize.Level2)
-{
-    /**
-     * @tc.steps: step1. Create TextFieldPattern.
-     * @tc.expected: Check it is not nullptr.
-     */
-    auto frameNode = CreatTextFieldNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. call SetSelectionFlag with expectd parameters.
-     * @tc.expected: Check the value of the updated property.
-     */
-    pattern->selectionStart_ = 0;
-    pattern->selectionEnd_ = 0;
-    pattern->SetSelectionFlag(5, 8);
-    EXPECT_EQ(pattern->selectionStart_, 0);
-    EXPECT_EQ(pattern->selectionEnd_, 0);
-
-    auto focusHub = frameNode->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-    pattern->SetSelectionFlag(5, 8);
-    EXPECT_EQ(pattern->selectionStart_, 5);
-    EXPECT_EQ(pattern->selectionEnd_, 8);
 }
 
 /**
@@ -6466,6 +6452,534 @@ HWTEST_F(TextFieldPatternTestNg, CalcCursorOffsetByPosition, TestSize.Level1)
     EXPECT_FALSE(textFieldPattern->AdjustTextRectOffsetX());
     layoutProperty->UpdateMaxLines(2);
     EXPECT_TRUE(textFieldPattern->IsTextArea());
+}
+
+/**
+ * @tc.name: GetDragUpperLeftCoordinates
+ * @tc.desc: test GetDragUpperLeftCoordinates
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetDragUpperLeftCoordinates, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    layoutProperty_->UpdateMaxLines(1);
+
+    /**
+     * @tc.steps: step2. call GetDragUpperLeftCoordinates.
+     * @tc.expected: Check result.
+     */
+    pattern_->textBoxes_.clear();
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
+
+    RSTextRect front = {};
+    front.rect.top_ = 0;
+    front.rect.left_ = 0;
+    pattern_->textBoxes_.push_back(front);
+    RSTextRect back = {};
+    back.rect.top_ = 10;
+    pattern_->textBoxes_.push_back(back);
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
+
+    pattern_->textBoxes_.clear();
+    front.rect.top_ = -100;
+    front.rect.left_ = -100;
+    pattern_->textBoxes_.push_back(front);
+    back.rect.top_ = -100;
+    pattern_->textBoxes_.push_back(back);
+    EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: ProcessOverlay
+ * @tc.desc: test ProcessOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ProcessOverlay, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call ProcessOverlay.
+     * @tc.expected: Check result.
+     */
+    pattern_->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    pattern_->UpdateEditingValue("", 0);
+    pattern_->isSingleHandle_ = false;
+    pattern_->ProcessOverlay(false);
+    EXPECT_TRUE(pattern_->isSingleHandle_) << "create single handle";
+
+    pattern_->UpdateEditingValue("X", 0);
+    pattern_->textRect_.SetLeft(50);
+    pattern_->lastTouchOffset_.SetX(25);
+    pattern_->isSingleHandle_ = false;
+    pattern_->ProcessOverlay(false);
+    EXPECT_TRUE(pattern_->isSingleHandle_) << "create single handle";
+    EXPECT_EQ(pattern_->textSelector_.GetStart(), 0) << "update selection to 0";
+    EXPECT_EQ(pattern_->textSelector_.GetEnd(), 0) << "update selection to 0";
+
+    pattern_->UpdateEditingValue("X", 1);
+    pattern_->textRect_.SetLeft(25);
+    pattern_->lastTouchOffset_.SetX(50);
+    pattern_->isSingleHandle_ = false;
+    pattern_->ProcessOverlay(false);
+    EXPECT_TRUE(pattern_->isSingleHandle_) << "create single handle";
+    EXPECT_EQ(pattern_->textSelector_.GetStart(), 1) << "update selection to caretPosition";
+    EXPECT_EQ(pattern_->textSelector_.GetEnd(), 1) << "update selection to caretPosition";
+
+    pattern_->UpdateEditingValue("XXX", 1);
+    pattern_->isSingleHandle_ = false;
+    pattern_->textRect_.SetLeft(25);
+    pattern_->lastTouchOffset_.SetX(25);
+    pattern_->ProcessOverlay(false);
+    EXPECT_FALSE(pattern_->isSingleHandle_) << "create handles";
+    EXPECT_EQ(pattern_->textSelector_.GetStart(), 1);
+    EXPECT_EQ(pattern_->textSelector_.GetEnd(), 2);
+}
+
+/**
+ * @tc.name: UpdateRectByAlignment
+ * @tc.desc: test UpdateRectByAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateRectByAlignment, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call UpdateRectByAlignment.
+     * @tc.expected: Check result.
+     */
+    pattern_->contentRect_.SetHeight(25);
+    pattern_->frameRect_.SetHeight(200);
+    RectF rect(0, 0, 100, 100);
+    pattern_->UpdateRectByAlignment(rect);
+    EXPECT_EQ(rect.Top(), 0);
+
+    struct TestItem {
+        Alignment alignment;
+        float expectedTop;
+        std::string message;
+    };
+    pattern_->contentRect_.SetHeight(150);
+    layoutProperty_->positionProperty_ = std::make_unique<PositionProperty>();
+    std::vector<TestItem> testItems = {
+        { .alignment = Alignment::CENTER_LEFT, .expectedTop = 50, .message = "Alignment::CENTER_LEFT" },
+        { .alignment = Alignment::CENTER, .expectedTop = 50, .message = "Alignment::CENTER" },
+        { .alignment = Alignment::CENTER_RIGHT, .expectedTop = 50, .message = "Alignment::CENTER_RIGHT" },
+        { .alignment = Alignment::BOTTOM_LEFT, .expectedTop = 100, .message = "Alignment::BOTTOM_LEFT" },
+        { .alignment = Alignment::BOTTOM_CENTER, .expectedTop = 100, .message = "Alignment::BOTTOM_CENTER" },
+        { .alignment = Alignment::BOTTOM_RIGHT, .expectedTop = 100, .message = "Alignment::BOTTOM_RIGHT" },
+        { .alignment = Alignment::TOP_LEFT, .expectedTop = 0, .message = "Alignment::TOP_LEFT" },
+        { .alignment = Alignment::TOP_CENTER, .expectedTop = 0, .message = "Alignment::TOP_CENTER" },
+        { .alignment = Alignment::TOP_RIGHT, .expectedTop = 0, .message = "Alignment::TOP_RIGHT" },
+        { .alignment = Alignment(2, 2), .expectedTop = 0, .message = "Alignment(2, 2)" },
+    };
+    for (auto testItem : testItems) {
+        layoutProperty_->GetPositionProperty()->UpdateAlignment(testItem.alignment);
+        pattern_->UpdateRectByAlignment(rect);
+        EXPECT_EQ(rect.Top(), testItem.expectedTop) << testItem.message;
+    }
+}
+
+/**
+ * @tc.name: TextAreaInputRectUpdate
+ * @tc.desc: test TextAreaInputRectUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextAreaInputRectUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call TextAreaInputRectUpdate.
+     * @tc.expected: Check result.
+     */
+    RectF rect (0, 0, 100, 100);
+    layoutProperty_->UpdateMaxLines(1);
+    pattern_->TextAreaInputRectUpdate(rect);
+    EXPECT_EQ(rect.Left(), 0);
+    EXPECT_EQ(rect.Width(), 100);
+
+    layoutProperty_->UpdateMaxLines(10);
+    pattern_->UpdateEditingValue("", 0);
+    pattern_->TextAreaInputRectUpdate(rect);
+    EXPECT_EQ(rect.Left(), 0);
+    EXPECT_EQ(rect.Width(), 100);
+
+    layoutProperty_->UpdateMaxLines(10);
+    pattern_->UpdateEditingValue("XXX", 0);
+
+    struct TestItem {
+        TextAlign align;
+        float contentWidth;
+        float expectedLeft;
+        float expectedWidth;
+        float textIsEmptyRectExpectedLeft;
+    };
+    std::vector<TestItem> testItems = {
+        { TextAlign::START, 10, 0, 1, 0 },
+        { TextAlign::START, 0, 0, 10, 0 },
+        { TextAlign::CENTER, 10, 4.5, 1, 5 },
+        {TextAlign::CENTER, 0, 0, 10, 0 },
+        { TextAlign::END, 10, 7.5, 1, 8.5 },
+        { TextAlign::END, 0, 0, 10, -1.5 },
+        { TextAlign::LEFT, 0, 0, 10, 0 },
+    };
+
+    for (auto testItem : testItems) {
+        rect.SetLeft(0);
+        rect.SetWidth(10);
+        layoutProperty_->UpdateTextAlign(testItem.align);
+        pattern_->contentRect_.SetWidth(testItem.contentWidth);
+        pattern_->TextAreaInputRectUpdate(rect);
+        EXPECT_EQ(rect.Left(), testItem.expectedLeft);
+        EXPECT_EQ(rect.Width(), testItem.expectedWidth);
+        pattern_->TextIsEmptyRect(rect);
+    }
+    pattern_->UpdateEditingValue("", 0);
+    for (auto testItem : testItems) {
+        rect.SetLeft(0);
+        rect.SetWidth(10);
+        layoutProperty_->UpdateTextAlign(testItem.align);
+        pattern_->contentRect_.SetWidth(testItem.contentWidth);
+        pattern_->TextIsEmptyRect(rect);
+        EXPECT_EQ(rect.Left(), testItem.textIsEmptyRectExpectedLeft);
+    }
+}
+
+/**
+ * @tc.name: GetNakedCharPosition
+ * @tc.desc: test GetNakedCharPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetNakedCharPosition, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call GetNakedCharPosition.
+     * @tc.expected: Check result.
+     */
+    layoutProperty_->UpdateMaxLines(2);
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    layoutProperty_->UpdateMaxLines(1);
+    layoutProperty_->UpdateTextInputType(TextInputType::TEXT);
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern_->obscureTickCountDown_ = 0;
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->textObscured_ = false;
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    pattern_->textObscured_ = true;
+    pattern_->UpdateEditingValue("", 0);
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), -1);
+    layoutProperty_->UpdateValue("xxx");
+    pattern_->nakedCharPosition_ = 1;
+    EXPECT_EQ(pattern_->GetNakedCharPosition(), 1);
+}
+
+/**
+ * @tc.name: OnBackPressed
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnBackPressed, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call OnBackPressed.
+     * @tc.expected: Check result.
+     */
+    struct TestItem {
+        bool attached;
+        bool imeShow;
+        bool customKeyboardAttached;
+        bool expected;
+        std::string message;
+    };
+    std::vector<TestItem> testItems = {
+        { false, false, false, false, "A" },
+        { false, false, true, true, "B" },
+        { false, true, false, false, "C" },
+        { false, true, true, true, "D" },
+        { true, false, false, false, "E" },
+        { true, false, true, true, "F" },
+        { true, true, false, true, "G" },
+        { true, true, true, true, "H" },
+    };
+
+    for (auto testItem : testItems) {
+        pattern_->imeAttached_ = testItem.attached;
+        pattern_->imeShown_ = testItem.imeShow;
+        pattern_->isCustomKeyboardAttached_ = testItem.customKeyboardAttached;
+        pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>();
+        EXPECT_EQ(pattern_->OnBackPressed(), testItem.expected) << testItem.message;
+    }
+    pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>();
+}
+
+/**
+ * @tc.name: HandleSelection001
+ * @tc.desc: test HandleSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleSelectionEnd.
+     * @tc.expected: Check result.
+     */
+    auto switchSelectMode = [pattern = pattern_](int32_t start, int32_t end) {
+        pattern->selectionMode_ = SelectionMode::SELECT;
+        pattern->textSelector_.baseOffset = start;
+        pattern->textSelector_.destinationOffset = end;
+    };
+
+    auto switchNormalMode = [pattern = pattern_]() {
+        pattern->selectionMode_ = SelectionMode::NONE;
+    };
+
+    pattern_->UpdateEditingValue("ABCD", 4);
+    pattern_->HandleSelectionEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchNormalMode();
+    pattern_->HandleSelectionEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(0, 2);
+    pattern_->HandleSelectionEnd();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 4);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(4, 2);
+    pattern_->HandleSelectionEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: HandleSelection002
+ * @tc.desc: test HandleSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleSelectionEnd.
+     * @tc.expected: Check result.
+     */
+    auto switchSelectMode = [pattern = pattern_](int32_t start, int32_t end) {
+        pattern->selectionMode_ = SelectionMode::SELECT;
+        pattern->textSelector_.baseOffset = start;
+        pattern->textSelector_.destinationOffset = end;
+    };
+
+    auto switchNormalMode = [pattern = pattern_]() {
+        pattern->selectionMode_ = SelectionMode::NONE;
+    };
+
+    /**
+     * @tc.steps: step1. call HandleSelectionLineEnd.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    pattern_->HandleSelectionLineEnd();
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchNormalMode();
+    pattern_->HandleSelectionLineEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchSelectMode(0, 2);
+    pattern_->HandleSelectionLineEnd();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 4);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(4, 2);
+    pattern_->HandleSelectionLineEnd();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+
+    /**
+     * @tc.steps: step2. call HandleSelectionRightWord.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    pattern_->HandleSelectionRightWord();
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchNormalMode();
+    pattern_->HandleSelectionRightWord();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchSelectMode(0, 4);
+    pattern_->HandleSelectionRightWord();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 4);
+
+    pattern_->UpdateEditingValue("ABCD", 3);
+    switchSelectMode(4, 2);
+    pattern_->HandleSelectionRightWord();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: HandleSelection003
+ * @tc.desc: test HandleSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelection003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleSelectionEnd.
+     * @tc.expected: Check result.
+     */
+    auto switchSelectMode = [pattern = pattern_](int32_t start, int32_t end) {
+        pattern->selectionMode_ = SelectionMode::SELECT;
+        pattern->textSelector_.baseOffset = start;
+        pattern->textSelector_.destinationOffset = end;
+    };
+
+    auto switchNormalMode = [pattern = pattern_]() {
+        pattern->selectionMode_ = SelectionMode::NONE;
+    };
+
+    /**
+     * @tc.steps: step3. call HandleSelectionHome.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    pattern_->HandleSelectionHome();
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchNormalMode();
+    pattern_->HandleSelectionHome();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(1, 3);
+    pattern_->HandleSelectionHome();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(0, 3);
+    pattern_->HandleSelectionHome();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+}
+
+/**
+ * @tc.name: HandleSelection004
+ * @tc.desc: test HandleSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleSelection004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleSelectionEnd.
+     * @tc.expected: Check result.
+     */
+    auto switchSelectMode = [pattern = pattern_](int32_t start, int32_t end) {
+        pattern->selectionMode_ = SelectionMode::SELECT;
+        pattern->textSelector_.baseOffset = start;
+        pattern->textSelector_.destinationOffset = end;
+    };
+
+    auto switchNormalMode = [pattern = pattern_]() {
+        pattern->selectionMode_ = SelectionMode::NONE;
+    };
+
+     /**
+     * @tc.steps: step3. call HandleSelectionLineBegin.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    pattern_->HandleSelectionLineBegin();
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchNormalMode();
+    pattern_->HandleSelectionLineBegin();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(1, 3);
+    pattern_->HandleSelectionLineBegin();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(0, 3);
+    pattern_->HandleSelectionLineBegin();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
+
+    /**
+     * @tc.steps: step4. call HandleSelectionLeftWord.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    pattern_->HandleSelectionLeftWord();
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchNormalMode();
+    pattern_->HandleSelectionLeftWord();
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::SELECT);
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(1, 3);
+    pattern_->HandleSelectionLeftWord();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    switchSelectMode(0, 3);
+    pattern_->HandleSelectionLeftWord();
+    EXPECT_EQ(pattern_->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
 }
 
 } // namespace OHOS::Ace::NG

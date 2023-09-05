@@ -14,13 +14,13 @@
  */
 
 #include <string>
+
 #include "gtest/gtest.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/text/span_node.h"
 
 #define private public
 #define protected public
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -320,7 +321,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest005, TestSize.Lev
     columnFrameNode1->AddChild(spanNode);
 
     std::list<RefPtr<FrameNode>> children;
-    
+
     auto columnAccessibilityProperty1 = columnFrameNode1->GetAccessibilityProperty<AccessibilityProperty>();
     columnAccessibilityProperty1->SetAccessibilityGroup(true);
     columnAccessibilityProperty1->SetAccessibilityLevel("yes");

@@ -78,12 +78,15 @@ void RefreshPattern::OnModifyDone()
     auto paintProperty = GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
-    if (layoutProperty->GetIsCustomBuilderExistValue()) {
-        CustomBuilderReset();
+    if (isCustomBuilderExist_ && HasCustomBuilderIndex()) {
+        if (!customBuilder_) {
+            customBuilder_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(customBuilderIndex_.value_or(0)));
+            UpdateCustomBuilderProperty(RefreshState::STATE_LOADING, 0.0f);
+        }
     } else if (!progressChild_) {
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
     }
-    if (layoutProperty->GetIsCustomBuilderExistValue() || isRefreshing_ != refreshingProp) {
+    if (isRefreshing_ != refreshingProp) {
         if (refreshingProp) {
             QuickStartFresh();
         } else {
@@ -91,6 +94,17 @@ void RefreshPattern::OnModifyDone()
         }
     }
     SetAccessibilityAction();
+}
+
+RefPtr<LayoutAlgorithm> RefreshPattern::CreateLayoutAlgorithm()
+{
+    auto refreshLayoutAlgorithm = MakeRefPtr<RefreshLayoutAlgorithm>();
+    if (HasCustomBuilderIndex()) {
+        refreshLayoutAlgorithm->SetCustomBuilderIndex(customBuilderIndex_.value_or(0));
+        refreshLayoutAlgorithm->SetCustomBuilderOffset(customBuilderOffset_);
+    }
+    refreshLayoutAlgorithm->SetScrollOffset(scrollOffset_.GetY());
+    return refreshLayoutAlgorithm;
 }
 
 void RefreshPattern::InitOnKeyEvent()
@@ -113,11 +127,7 @@ void RefreshPattern::InitOnKeyEvent()
 
 void RefreshPattern::QuickStartFresh()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetIsCustomBuilderExistValue()) {
+    if (isCustomBuilderExist_) {
         CustomBuilderAppear();
         if (!isRefreshing_) {
             TriggerRefresh();
@@ -131,9 +141,7 @@ void RefreshPattern::QuickStartFresh()
 
 void RefreshPattern::QuickEndFresh()
 {
-    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetIsCustomBuilderExistValue()) {
+    if (isCustomBuilderExist_) {
         CustomBuilderExit();
         return;
     }
@@ -263,9 +271,13 @@ void RefreshPattern::LoadingProgressReset()
 
 void RefreshPattern::OnExitAnimationFinish()
 {
-    if (customBuilder_) {
+    if (isCustomBuilderExist_ && customBuilder_) {
+        scrollOffset_.Reset();
         CustomBuilderReset();
         TriggerFinish();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
     ReplaceLoadingProgressNode();
@@ -337,7 +349,7 @@ void RefreshPattern::HandleDragStart()
     }
     TriggerStatusChange(RefreshStatus::DRAG);
     if (customBuilder_) {
-        scrollOffset_.SetY(0.0f);
+        scrollOffset_.Reset();
         return;
     }
     CHECK_NULL_VOID(progressChild_);
@@ -604,33 +616,29 @@ void RefreshPattern::ResetLoadingProgressColor()
     paintProperty->UpdateColor(theme->GetProgressColor());
 }
 
-void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder) const
+void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
 {
     CHECK_NULL_VOID(builder);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto refreshLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(refreshLayoutProperty);
-    if (!refreshLayoutProperty->HasCustomBuilderIndex()) {
+
+    if (!HasCustomBuilderIndex()) {
         host->AddChild(builder);
-        refreshLayoutProperty->UpdateCustomBuilderIndex(host->TotalChildCount() - 1);
+        UpdateCustomBuilderIndex(host->TotalChildCount() - 1);
     } else {
-        auto customNodeChild = host->GetChildAtIndex(refreshLayoutProperty->GetCustomBuilderIndexValue());
+        auto customNodeChild = host->GetChildAtIndex(customBuilderIndex_.value_or(0));
         CHECK_NULL_VOID(customNodeChild);
         if (builder->GetId() != customNodeChild->GetId()) {
             host->ReplaceChild(customNodeChild, builder);
         }
     }
-    refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
+    isCustomBuilderExist_ = true;
 }
 
 void RefreshPattern::CustomBuilderAppear()
 {
-    auto hostLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(hostLayoutProperty);
-    auto customBuilderOffset = hostLayoutProperty->GetCustomBuilderOffsetValue().GetY();
     auto refreshingDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-    if (GreatOrEqual(static_cast<double>(customBuilderOffset), refreshingDistance)) {
+    if (GreatOrEqual(static_cast<double>(customBuilderOffset_), refreshingDistance)) {
         return;
     }
     AnimationOption option;
@@ -650,10 +658,7 @@ void RefreshPattern::CustomBuilderAppear()
 
 void RefreshPattern::CustomBuilderExit()
 {
-    auto hostLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(hostLayoutProperty);
-    auto customBuilderOffset = hostLayoutProperty->GetCustomBuilderOffsetValue().GetY();
-    if (LessNotEqual(static_cast<double>(customBuilderOffset), static_cast<double>(triggerLoadingDistance_))) {
+    if (LessNotEqual(static_cast<double>(customBuilderOffset_), static_cast<double>(triggerLoadingDistance_))) {
         return;
     }
     AnimationOption option;
@@ -679,8 +684,6 @@ void RefreshPattern::HandleCustomBuilderDragUpdateStage()
     CHECK_NULL_VOID(customBuilder_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hostLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(hostLayoutProperty);
     auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
     auto maxScroll = MAX_SCROLL_DISTANCE.ConvertToPx();
     if (NearZero(static_cast<double>(customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height()))) {
@@ -696,7 +699,7 @@ void RefreshPattern::HandleCustomBuilderDragUpdateStage()
     } else {
         auto refreshFollowRadio = GetCustomBuilderOpacityRatio();
         UpdateCustomBuilderProperty(RefreshState::STATE_DRAG, refreshFollowRadio);
-        if (GreatNotEqual(static_cast<double>(hostLayoutProperty->GetCustomBuilderOffsetValue().GetY()),
+        if (GreatNotEqual(static_cast<double>(customBuilderOffset_),
             TRIGGER_REFRESH_DISTANCE.ConvertToPx())) {
             TriggerStatusChange(RefreshStatus::OVER_DRAG);
         }
@@ -710,22 +713,19 @@ void RefreshPattern::HandleCustomBuilderDragEndStage()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
-    auto hostLayoutProperty = host->GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(hostLayoutProperty);
     auto maxScroll = MAX_SCROLL_DISTANCE.ConvertToPx();
     if (LessNotEqual(static_cast<double>(maxScroll - customBuilderSize.Height()),
         static_cast<double>(triggerLoadingDistance_))) {
         return;
     }
 
-    if (GreatNotEqual(static_cast<double>(hostLayoutProperty->GetCustomBuilderOffsetValue().GetY()),
-                      TRIGGER_REFRESH_DISTANCE.ConvertToPx())) {
+    if (GreatNotEqual(static_cast<double>(customBuilderOffset_), TRIGGER_REFRESH_DISTANCE.ConvertToPx())) {
         TriggerRefresh();
         CustomBuilderRefreshingAnimation();
         scrollOffset_.SetY(TRIGGER_REFRESH_DISTANCE.ConvertToPx() + customBuilderSize.Height());
     } else {
         CustomBuilderExit();
-        scrollOffset_.SetY(0.0f);
+        scrollOffset_.Reset();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -734,21 +734,16 @@ void RefreshPattern::CustomBuilderReset()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(refreshLayoutProperty);
-    customBuilder_ = AceType::DynamicCast<FrameNode>(
-        host->GetChildAtIndex(refreshLayoutProperty->GetCustomBuilderIndexValue()));
+    if (isCustomBuilderExist_ && HasCustomBuilderIndex()) {
+        customBuilder_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(customBuilderIndex_.value_or(0)));
+    }
     CHECK_NULL_VOID(customBuilder_);
-    scrollOffset_.SetY(0.0f);
     UpdateCustomBuilderProperty(RefreshState::STATE_LOADING, 0.0f);
-    customBuilder_->MarkDirtyNode();
 }
 
 void RefreshPattern::UpdateCustomBuilderProperty(RefreshState state, float ratio)
 {
     CHECK_NULL_VOID(customBuilder_);
-    auto refreshLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(refreshLayoutProperty);
     ratio = std::clamp(ratio, 0.0f, 1.0f);
     auto verticalOffset = scrollOffset_.GetY();
     auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
@@ -758,13 +753,13 @@ void RefreshPattern::UpdateCustomBuilderProperty(RefreshState state, float ratio
         std::clamp(custombuilderOffset, triggerLoadingDistance_, maxScroll - customBuilderSize.Height());
     switch (state) {
         case RefreshState::STATE_LOADING:
-            refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(0.0f, triggerLoadingDistance_));
+            customBuilderOffset_ = triggerLoadingDistance_;
             break;
         case RefreshState::STATE_DRAG:
-            refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(0.0f, custombuilderOffset));
+            customBuilderOffset_ = custombuilderOffset;
             break;
         case RefreshState::STATE_RECYCLE:
-            refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(0.0f, TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+            customBuilderOffset_ = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
             break;
         default:;
     }
@@ -775,11 +770,8 @@ void RefreshPattern::UpdateCustomBuilderProperty(RefreshState state, float ratio
 
 void RefreshPattern::CustomBuilderRefreshingAnimation()
 {
-    auto hostLayoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(hostLayoutProperty);
-    auto customBuilderOffset = hostLayoutProperty->GetCustomBuilderOffsetValue().GetY();
     auto refreshingDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-    if (LessNotEqual(static_cast<double>(customBuilderOffset), refreshingDistance)) {
+    if (LessNotEqual(static_cast<double>(customBuilderOffset_), refreshingDistance)) {
         return;
     }
     AnimationOption option;
@@ -854,5 +846,12 @@ void RefreshPattern::SetAccessibilityAction()
         }
         pattern->HandleDragEnd();
     });
+}
+
+void RefreshPattern::UpdateCustomBuilderIndex(int32_t index)
+{
+    if (!HasCustomBuilderIndex() || customBuilderIndex_.value() != index) {
+        customBuilderIndex_ = index;
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -34,8 +34,7 @@ public:
     void StartAnimate();
     void SetBackgroundOffset(float offset);
 
-private:
-
+protected:
     WeakPtr<Pattern> pattern_;
     bool isAnimating_ = false;
     RefPtr<AnimatablePropertyFloat> backgroundOffset_;

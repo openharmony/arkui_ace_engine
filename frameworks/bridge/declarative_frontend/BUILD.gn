@@ -27,7 +27,7 @@ template("declarative_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
 
-    if (platform == "ohos_ng") {
+    if (platform == "ohos_ng" || is_cross_platform_build) {
       sources = [
         "ng/declarative_frontend_ng.cpp",
         "ng/frontend_delegate_declarative_ng.cpp",
@@ -614,7 +614,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
       "sharedata/js_share_data.cpp",
-      "view_stack_processor.cpp",
 
       # jsviews
       "interfaces/profiler/js_profiler.cpp",
@@ -850,6 +849,15 @@ template("declarative_js_engine_ng") {
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {
+      sources -= [
+        "interfaces/profiler/js_profiler.cpp",
+        "jsview/js_location_button.cpp",
+        "jsview/js_paste_button.cpp",
+        "jsview/js_richeditor.cpp",
+        "jsview/js_save_button.cpp",
+        "jsview/js_sec_button_base.cpp",
+        "jsview/menu/js_context_menu.cpp",
+      ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [ "$ark_ets_path:libark_jsruntime_static" ]
       if (defined(config.pixel_map_support) && config.pixel_map_support) {

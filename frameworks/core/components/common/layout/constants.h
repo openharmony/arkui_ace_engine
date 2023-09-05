@@ -165,27 +165,27 @@ enum class PositionType {
 };
 
 enum class TextAlign {
-    LEFT,
-    RIGHT,
-    CENTER,
+    LEFT = 4,
+    RIGHT = 5,
+    CENTER = 1,
     /*
         render the text to fit the size of the text container by adding space
     */
-    JUSTIFY,
+    JUSTIFY = 3,
     /*
         align the text from the start of the text container
 
         For Direction.ltr, from left side
         For Direction.rtl, from right side
     */
-    START,
+    START = 0,
     /*
         align the text from the end of the text container
 
         For Direction.ltr, from right side
         For Direction.rtl, from left side
     */
-    END,
+    END = 2,
 };
 
 enum class WhiteSpace {

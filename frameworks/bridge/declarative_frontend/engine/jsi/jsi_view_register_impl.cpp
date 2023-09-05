@@ -791,6 +791,38 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     (*func).second(globalObj);
 }
 
+void JsUINodeRegisterCleanUp(BindingTarget globalObj)
+{
+    // globalObj is panda::Local<panda::ObjectRef>
+    const auto globalObject = JSRef<JSObject>::Make(globalObj);
+    const JSRef<JSVal> globalFuncVal = globalObject->GetProperty("UINodeRegisterCleanUpFunction");
+
+    if (globalFuncVal->IsFunction()) {
+        LOGD("UINodeRegisterCleanUpFunction is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(globalFuncVal);
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
+        };
+        ElementRegister::GetInstance()->RegisterJSUINodeRegisterCallbackFunc(callback);
+    } else {
+        LOGE("Could not find UINodeRegisterCleanUpFunction JS function.ElmtId unregistration Internal error!");
+    }
+
+    // Added below implementation for element unregister during a diff flow of App execution
+    const JSRef<JSVal> globalCleanUpFunc = globalObject->GetProperty("globalRegisterCleanUpFunction");
+
+    if (globalCleanUpFunc->IsFunction()) {
+        LOGD("globalRegisterCleanUpFunction is a valid function");
+        const auto globalFunc = JSRef<JSFunc>::Cast(globalCleanUpFunc);
+        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
+            jsFunc->Call(globalObject);
+        };
+        ElementRegister::GetInstance()->RegisterJSUINodeRegisterGlobalFunc(callback);
+    } else {
+        LOGE("Could not find globalRegisterCleanUpFunction JS function.ElmtId unregistration Internal error!");
+    }
+}
+
 void JsRegisterModules(BindingTarget globalObj, std::string modules)
 {
     std::stringstream input(modules);
@@ -798,6 +830,8 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     while (std::getline(input, moduleName, ',')) {
         RegisterModuleByName(globalObj, moduleName);
     }
+    JsUINodeRegisterCleanUp(globalObj);
+    
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);

@@ -1381,6 +1381,32 @@ RectF RosenRenderContext::GetPaintRectWithTranslate()
     return rect;
 }
 
+void RosenRenderContext::GetPointWithRevert(PointF& point)
+{
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+    int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+
+    RectF rect = GetPaintRectWithoutTransform();
+    auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
+    auto centerPos = rect.GetOffset() + centOffset;
+
+    auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
+    auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+        Matrix4::CreateRotate(degree, 0, 0, 1) *
+        Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+        Matrix4::CreateScale(scale[0], scale[1], 1) *
+        Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+
+    auto invertMat = Matrix4::Invert(translateMat * rotationMat * scaleMat);
+    Point tmp(point.GetX(), point.GetY());
+    auto invertPoint = invertMat * tmp;
+    point.SetX(invertPoint.GetX());
+    point.SetY(invertPoint.GetY());
+}
+
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
     // TODO: add rotation and center support

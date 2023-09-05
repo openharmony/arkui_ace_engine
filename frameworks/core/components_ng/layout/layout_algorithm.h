@@ -158,11 +158,33 @@ public:
         return frameId != UITaskScheduler::GetFrameId();
     }
 
+    void SetPercentHeight(bool value)
+    {
+        percentHeight_ = value;
+    }
+
+    void SetPercentWidth(bool value)
+    {
+        percentWidth_ = value;
+    }
+
+    bool GetPercentHeight() const
+    {
+        return percentHeight_;
+    }
+
+    bool GetPercentWidth() const
+    {
+        return percentHeight_;
+    }
+
 private:
     RefPtr<LayoutAlgorithm> layoutAlgorithm_;
 
     bool skipMeasure_ = false;
     bool skipLayout_ = false;
+    bool percentHeight_ = false;
+    bool percentWidth_ = false;
     uint64_t frameId = UITaskScheduler::GetFrameId();
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithmWrapper);

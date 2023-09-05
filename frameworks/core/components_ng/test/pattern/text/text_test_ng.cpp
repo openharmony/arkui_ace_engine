@@ -17,6 +17,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 #define private public
@@ -52,8 +53,9 @@
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #undef private
 #undef protected
-#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "test/mock/core/common/mock_container.h"
 
+#include "core/components_ng/pattern/text/span_model_ng.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -158,7 +160,7 @@ void TestUpdateScenario(const RefPtr<TextPattern>& pattern)
     for (const auto& child : host->GetChildren()) {
         auto spanNode = AceType::DynamicCast<SpanNode>(child);
         ASSERT_NE(spanNode, nullptr);
-        auto inheritPropertyInfo = spanNode->CaculateInheritPropertyInfo();
+        auto inheritPropertyInfo = spanNode->CalculateInheritPropertyInfo();
         auto iter = inheritPropertyInfo.find(PropertyInfo::FONTSIZE);
         if (iter != inheritPropertyInfo.end()) {
             EXPECT_EQ(spanNode->GetFontSize().value(), ADAPT_UPDATE_FONTSIZE_VALUE);
@@ -189,6 +191,8 @@ struct TestProperty {
 
 class TextTestNg : public testing::Test {
 public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
     void InitTextObject();
@@ -201,17 +205,25 @@ protected:
     static void UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutProperty);
 };
 
-void TextTestNg::SetUp()
+void TextTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    MockContainer::SetUp();
+}
+
+void TextTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+    MockContainer::TearDown();
+    MockTxtParagraph::SetCanConstruct();
+}
+
+void TextTestNg::SetUp()
+{
     InitTextObject();
 }
 
-void TextTestNg::TearDown()
-{
-    MockPipelineBase::TearDown();
-    MockTxtParagraph::SetCanConstruct();
-}
+void TextTestNg::TearDown() {}
 
 void TextTestNg::InitTextObject() {}
 
@@ -653,31 +665,14 @@ HWTEST_F(TextTestNg, ShowSelectOverlay001, TestSize.Level1)
      * @tc.steps: step2. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
-    auto current = selectOverlayManager->selectOverlayItem_.Upgrade();
-    ASSERT_NE(current, nullptr);
-    proxy->selectOverlayId_ = current->GetId();
-    pattern->selectOverlayProxy_ = proxy;
-    ASSERT_NE(pattern->selectOverlayProxy_, nullptr);
+    pattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(0);
     RectF firstHandle = CONTENT_RECT;
     RectF secondHandle = CONTENT_RECT;
     pattern->ShowSelectOverlay(firstHandle, secondHandle);
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
-}
-
-/**
- * @tc.name: ShowSelectOverlay002
- * @tc.desc: Test TextPattern ShowSelectOverlay when SelectOverlayProxy is nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, ShowSelectOverlay002, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->selectOverlayProxy_ = nullptr;
-    RectF firstHandle;
-    RectF secondHandle;
+    pattern->selectOverlayProxy_->Close();
     pattern->ShowSelectOverlay(firstHandle, secondHandle);
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+    EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
 
 /**
@@ -1740,7 +1735,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest001, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    textPattern->textContentModifier_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
@@ -1825,7 +1820,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
     auto pipeline = frameNode->GetContext();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    textPattern->textContentModifier_ =
+    textPattern->contentMod_ =
         AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(std::move(textStyle)));
     auto contentModifier = textPattern->GetContentModifier();
     textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier);
@@ -2567,8 +2562,8 @@ HWTEST_F(TextTestNg, TextPatternTest001, TestSize.Level1)
      */
     auto nodePaintMethod = textPattern->CreateNodePaintMethod();
     ASSERT_NE(nodePaintMethod, nullptr);
-    ASSERT_NE(textPattern->textContentModifier_, nullptr);
-    ASSERT_NE(textPattern->textOverlayModifier_, nullptr);
+    ASSERT_NE(textPattern->contentMod_, nullptr);
+    ASSERT_NE(textPattern->overlayMod_, nullptr);
 }
 
 /**
@@ -2734,7 +2729,7 @@ HWTEST_F(TextTestNg, ApplyIndents001, TestSize.Level1)
     auto rowLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     TextStyle textStyle;
     LayoutConstraintF contentConstraint;
-    rowLayoutAlgorithm->ApplyIndents(textStyle, RECT_WIDTH_VALUE);
+    rowLayoutAlgorithm->ApplyIndent(textStyle, RECT_WIDTH_VALUE);
     auto ret = rowLayoutAlgorithm->CreateParagraph(textStyle, "", nullptr);
     EXPECT_TRUE(ret);
 }
@@ -3269,7 +3264,7 @@ HWTEST_F(TextTestNg, HandleClickEvent002, TestSize.Level1)
     std::list<RefPtr<SpanItem>> spanItemChildren;
     auto spanItemChild1 = AceType::MakeRefPtr<SpanItem>();
     spanItemChildren.emplace_back(spanItemChild1);
-    pattern->spanItemChildren_ = spanItemChildren;
+    pattern->spans_ = spanItemChildren;
 
     /**
      * @tc.steps: step3. create paragraph
@@ -3620,7 +3615,8 @@ HWTEST_F(TextTestNg, HandleOnSelectAll001, TestSize.Level1)
      * @tc.expected:The function exits normally
      */
     pattern->HandleOnSelectAll();
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), pattern->textForDisplay_.length());
 }
 
 /**
@@ -3663,7 +3659,7 @@ HWTEST_F(TextTestNg, HandleOnSelectAll002, TestSize.Level1)
      * @tc.expected: Related function is called
      */
     pattern->CloseSelectOverlay();
-    EXPECT_FALSE(pattern->selectOverlayProxy_->IsClosed());
+    EXPECT_TRUE(pattern->selectOverlayProxy_->IsClosed());
 }
 
 /**
@@ -4259,7 +4255,7 @@ HWTEST_F(TextTestNg, ApplyIndents002, TestSize.Level1)
      * @tc.steps: step3. run the ApplyIndents Func.
      * @tc.expected: paragraph_.rawPtr_ is nullptr.
      */
-    rowLayoutAlgorithm->ApplyIndents(textStyle, 10.0);
+    rowLayoutAlgorithm->ApplyIndent(textStyle, 10.0);
     EXPECT_NE(rowLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
 }
 
@@ -4287,7 +4283,7 @@ HWTEST_F(TextTestNg, ApplyIndents003, TestSize.Level1)
      * @tc.steps: step3. run the ApplyIndents Func.
      * @tc.expected: paragraph_.rawPtr_ is nullptr.
      */
-    rowLayoutAlgorithm->ApplyIndents(textStyle, 10.0);
+    rowLayoutAlgorithm->ApplyIndent(textStyle, 10.0);
     EXPECT_NE(rowLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
 }
 

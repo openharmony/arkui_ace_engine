@@ -256,7 +256,7 @@ public:
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
-        const NG::MenuType& menuType = NG::MenuType::CONTEXT_MENU) = 0;
+        std::function<void()>& previewBuildFunc) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear) = 0;

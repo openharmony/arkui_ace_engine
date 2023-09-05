@@ -72,8 +72,6 @@ public:
     ~TextDragPattern() override = default;
 
     static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode);
-    static RefPtr<FrameNode> CreateDragNode(
-        const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren);
 
     void Initialize(const ParagraphT& paragraph, const TextDragData& data)
     {
@@ -94,7 +92,7 @@ public:
         return paragraph_;
     }
 
-    const RefPtr<TextDragOverlayModifier>& GetOverlayModifier() const
+    virtual const RefPtr<TextDragOverlayModifier>& GetOverlayModifier() const
     {
         return overlayModifier_;
     }
@@ -179,27 +177,30 @@ public:
         return rectsForPlaceholders_;
     }
 
-private:
-    void SetLastLineHeight(float lineHeight)
-    {
-        lastLineHeight_ = lineHeight;
-    }
-
+protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& hostPattern, RefPtr<FrameNode>& dragContext);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset);
     void CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path);
 
+    void SetLastLineHeight(float lineHeight)
+    {
+        lastLineHeight_ = lineHeight;
+    }
+
+protected:
+    RefPtr<TextDragOverlayModifier> overlayModifier_;
+
+    TextDragData textDragData_;
+private:
     float lastLineHeight_ = 0.0f;
     OffsetF contentOffset_;
     ParagraphT paragraph_;
-    TextDragData textDragData_;
     std::shared_ptr<RSPath> clipPath_;
     std::shared_ptr<RSPath> backGroundPath_;
     std::list<RefPtr<FrameNode>> imageChildren_;
     std::vector<Rect> rectsForPlaceholders_;
-    RefPtr<TextDragOverlayModifier> overlayModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextDragPattern);
 };

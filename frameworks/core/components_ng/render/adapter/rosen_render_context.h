@@ -207,6 +207,8 @@ public:
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;
 
+    void GetPointWithRevert(PointF& point) override;
+
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;

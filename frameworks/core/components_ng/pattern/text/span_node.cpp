@@ -148,6 +148,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         builder->PushStyle(themeTextStyle);
     }
     UpdateTextStyle(builder, textStyle);
+    textStyle_ = textStyle;
     for (const auto& child : children) {
         if (child) {
             child->UpdateParagraph(frameNode, builder);
@@ -298,5 +299,12 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;
+}
+
+void SpanItem::GetIndex(int32_t& start, int32_t& end) const
+{
+    auto contentLen = StringUtils::ToWstring(content).length();
+    start = position - contentLen;
+    end = position;
 }
 } // namespace OHOS::Ace::NG

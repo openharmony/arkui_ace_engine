@@ -59,6 +59,18 @@ private:
         TOP_LEFT_ERROR,
         BOTTOM_RIGHT_ERROR,
     };
+    struct PreviewMenuParam {
+        SizeF windowGlobalSizeF;
+        float windowsOffsetX = 0.0f;
+        float windowsOffsetY = 0.0f;
+        float top = 0.0f;
+        float bottom = 0.0f;
+        float topSecurity = 0.0f;
+        float bottomSecurity = 0.0f;
+        float previewMenuGap = 0.0f;
+        float menuItemTotalHeight = 0.0f;
+    };
+
     void Initialize(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
@@ -111,11 +123,31 @@ private:
 
     RefPtr<PipelineContext> GetCurrentPipelineContext();
 
+    void LayoutPreviewMenu(LayoutWrapper* layoutWrapper);
+    bool IsPreviewMenu(LayoutWrapper* layoutWrapper);
+    void ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
+    void ModifyPhonePreviewMenuPlacement(LayoutWrapper* layoutWrapper);
+    void ModifyPhonePreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper);
+    SizeF GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
+        RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
+
+    void LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrapper);
+    void LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<GeometryNode>& previewGeometryNode,
+        const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
+    void LayoutOtherDeviceLeftPreviewRightMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
+        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+    void LayoutOtherDeviceLeftPreviewRightMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
+        const RefPtr<GeometryNode>& menuGeometryNode, const PreviewMenuParam& param, SizeF& totalSize);
+    void UpdateScrollAndColumnLayoutConstraint(
+        const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
+    float GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& menuLayoutWrapper);
+
     OffsetF targetOffset_;
     SizeF targetSize_;
     Placement placement_ = Placement::BOTTOM_LEFT;
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
+    float targetSecurity_ = TARGET_SECURITY.ConvertToPx();
 
     // current page offset relative to window.
     float topSpace_ = 0.0f;
