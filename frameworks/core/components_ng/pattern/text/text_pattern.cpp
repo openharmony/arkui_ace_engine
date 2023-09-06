@@ -691,11 +691,9 @@ bool TextPattern::IsDraggable(const Offset& offset)
 void TextPattern::HandlePanUpdate(const GestureEvent& info)
 {
     if (dragWindow_) {
-        if (dragWindow_) {
-            dragWindow_->TextDragWindowMove(info.GetOffsetX(), info.GetOffsetY());
-        }
-        return;
+        dragWindow_->TextDragWindowMove(info.GetOffsetX(), info.GetOffsetY());
     }
+    return;
 }
 
 void TextPattern::HandlePanEnd(const GestureEvent& info)
