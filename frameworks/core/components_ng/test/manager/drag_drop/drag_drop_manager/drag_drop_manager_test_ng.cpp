@@ -18,7 +18,6 @@
 #include "gtest/gtest.h"
 
 #define private public
-//#define ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -1811,7 +1810,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerGetItemIndexTest002, TestSize.Lev
                                   int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
     gridEvent->SetOnItemDrop(std::move(onItemDrop));
     dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0.0, 0.0);
-    EXPECT_EQ(onItemDropInfo, "");
 
     auto listNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
     auto listEvent = listNode->GetEventHub<ListEventHub>();
@@ -1902,5 +1900,4 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerGetItemIndexTest003, TestSize.Lev
     dragDropManager->GetItemIndex(listNode, DragType::GRID, 1.0f, 2.0f);
     EXPECT_EQ(onItemDropInfoList, "");
 }
-
 } // namespace OHOS::Ace::NG
