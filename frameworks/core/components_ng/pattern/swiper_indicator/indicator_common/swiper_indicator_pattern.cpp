@@ -122,6 +122,7 @@ void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestu
 void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 {
     if (info.GetSourceDevice() == SourceType::MOUSE) {
+        isClicked_ = true;
         HandleMouseClick(info);
     } else {
         HandleTouchClick(info);
@@ -130,6 +131,9 @@ void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
 
 void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /* info */)
 {
+    if (isRepeatClicked_) {
+        return;
+    }
     GetMouseClickIndex();
     CHECK_NULL_VOID_NOLOG(mouseClickIndex_);
     auto swiperNode = GetSwiperNode();
@@ -218,7 +222,14 @@ void SwiperIndicatorPattern::HandleMouseEvent(const MouseInfo& info)
     }
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-
+    auto mouseAction = info.GetAction();
+    if ((mouseAction == MouseAction::PRESS || mouseAction == MouseAction::RELEASE) &&
+        isClicked_ && NearEqual(hoverPoint_, PointF(mouseOffsetX, mouseOffsetY))) {
+        isRepeatClicked_ = true;
+        return;
+    }
+    isClicked_ = false;
+    isRepeatClicked_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     hoverPoint_.SetX(mouseOffsetX);

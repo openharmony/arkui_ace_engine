@@ -460,25 +460,29 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
     AnimationUtils::Animate(blackPointOption, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
 
-    AnimationOption longPointLeftOption;
-    longPointLeftAnimEnd_ = false;
-    longPointLeftOption.SetDuration(POINT_ANIMATION_DURATION);
-    longPointLeftOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
-        isForward ? LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
-        CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
-    AnimationUtils::Animate(longPointLeftOption,
-                            [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); },
-                            [&]() { longPointLeftAnimEnd_ = true; });
+    if (longPointLeftAnimEnd_) {
+        AnimationOption longPointLeftOption;
+        longPointLeftAnimEnd_ = false;
+        longPointLeftOption.SetDuration(POINT_ANIMATION_DURATION);
+        longPointLeftOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
+            isForward ? LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
+            CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
+        AnimationUtils::Animate(longPointLeftOption,
+                                [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); },
+                                [&]() { longPointLeftAnimEnd_ = true; });
+    }
 
-    AnimationOption longPointRightOption;
-    longPointRightAnimEnd_ = false;
-    longPointRightOption.SetDuration(POINT_ANIMATION_DURATION);
-    longPointRightOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
-        isForward ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
-        CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
-    AnimationUtils::Animate(longPointRightOption,
-                            [&]() { longPointRightCenterX_->Set(longPointCenterX.second); },
-                            [&]() { longPointRightAnimEnd_ = true; });
+    if (longPointRightAnimEnd_) {
+        AnimationOption longPointRightOption;
+        longPointRightAnimEnd_ = false;
+        longPointRightOption.SetDuration(POINT_ANIMATION_DURATION);
+        longPointRightOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(
+            isForward ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
+            CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
+        AnimationUtils::Animate(longPointRightOption,
+                                [&]() { longPointRightCenterX_->Set(longPointCenterX.second); },
+                                [&]() { longPointRightAnimEnd_ = true; });
+    }
 }
 
 void DotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
