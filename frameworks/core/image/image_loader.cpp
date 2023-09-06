@@ -356,15 +356,12 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();
     CHECK_NULL_RETURN(dataProvider, nullptr);
-    int32_t fd = dataProvider->GetDataProviderFile(src, "r");
-    CHECK_NULL_RETURN(fd >= 0, nullptr);
+    auto res = dataProvider->GetDataProviderResFromUri(src);
+    CHECK_NULL_RETURN(res, nullptr);
 #ifndef USE_ROSEN_DRAWING
-    auto data = SkData::MakeFromFD(fd);
-    close(fd);
-    CHECK_NULL_RETURN(data, nullptr);
+    auto data = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
 #else
-    auto skData = SkData::MakeFromFD(fd);
-    close(fd);
+    auto skData = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
     CHECK_NULL_RETURN(skData, nullptr);
     auto data = std::make_shared<RSData>();
     data->GetImpl<Rosen::Drawing::SkiaData>()->SetSkData(skData);
