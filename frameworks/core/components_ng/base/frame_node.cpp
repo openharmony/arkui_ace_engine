@@ -2191,6 +2191,39 @@ bool FrameNode::IsSecurityComponent()
            GetTag() == V2::SAVE_BUTTON_ETS_TAG;
 }
 
+void FrameNode::GetPercentSensitive()
+{
+    auto res = layoutProperty_->GetPercentSensitive();
+    if (res.first) {
+        if (layoutAlgorithm_) {
+            layoutAlgorithm_->SetPercentWidth(true);
+        }
+    }
+    if (res.second) {
+        if (layoutAlgorithm_) {
+            layoutAlgorithm_->SetPercentHeight(true);
+        }
+    }
+}
+
+void FrameNode::UpdatePercentSensitive()
+{
+    auto res = layoutProperty_->UpdatePercentSensitive(
+        layoutAlgorithm_->GetPercentHeight(), layoutAlgorithm_->GetPercentWidth());
+    if (res.first) {
+        auto parent = GetAncestorNodeOfFrame();
+        if (parent && parent->layoutAlgorithm_) {
+            parent->layoutAlgorithm_->SetPercentWidth(true);
+        }
+    }
+    if (res.second) {
+        auto parent = GetAncestorNodeOfFrame();
+        if (parent && parent->layoutAlgorithm_) {
+            parent->layoutAlgorithm_->SetPercentHeight(true);
+        }
+    }
+}
+
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
@@ -2236,12 +2269,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
     geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
 
-    isConstraintNotChanged_ = preConstraint ? preConstraint == layoutProperty_->GetLayoutConstraint() : false;
+    isConstraintNotChanged_ = layoutProperty_->ConstraintEqual(preConstraint, contentConstraint);
 
-    if (!isConstraintNotChanged_) {
-        isConstraintNotChanged_ =
-            contentConstraint ? contentConstraint == layoutProperty_->GetContentLayoutConstraint() : false;
-    }
     LOGD("Measure: %{public}s, depth: %{public}d, Constraint: %{public}s", GetTag().c_str(), GetDepth(),
         layoutProperty_->GetLayoutConstraint()->ToString().c_str());
 
@@ -2260,10 +2289,12 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     if (size.has_value()) {
         geometryNode_->SetContentSize(size.value());
     }
+    GetPercentSensitive();
     layoutAlgorithm_->Measure(this);
     if (overlayNode_) {
         overlayNode_->Measure(layoutProperty_->CreateChildConstraint());
     }
+    UpdatePercentSensitive();
     // check aspect radio.
     if (pattern_ && pattern_->IsNeedAdjustByAspectRatio()) {
         const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();

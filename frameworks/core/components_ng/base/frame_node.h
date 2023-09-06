@@ -599,6 +599,9 @@ private:
     // set costom background layoutConstraint
     void SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode);
 
+    void GetPercentSensitive();
+    void UpdatePercentSensitive();
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();

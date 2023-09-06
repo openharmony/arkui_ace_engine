@@ -270,6 +270,11 @@ public:
 
     static void UpdateAllGeometryTransition(const RefPtr<UINode>& parent);
 
+    std::pair<bool, bool> GetPercentSensitive();
+    std::pair<bool, bool> UpdatePercentSensitive(bool width, bool height);
+    bool ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
+        const std::optional<LayoutConstraintF>& preContentConstraint);
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -311,6 +316,9 @@ private:
     bool isOverlayNode_ = false;
     Dimension overlayOffsetX_;
     Dimension overlayOffsetY_;
+
+    bool heightPercentSensitive_ = false;
+    bool widthPercentSensitive_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
