@@ -476,6 +476,7 @@ void JsBindViews(BindingTarget globalObj)
     JSPatternLockController::JSBind(globalObj);
 #endif
     // add missing binds to ng build
+#ifndef CROSS_PLATFORM
     JsDragFunction::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
@@ -493,6 +494,7 @@ void JsBindViews(BindingTarget globalObj)
 #ifdef WEB_SUPPORTED
     JSWeb::JSBind(globalObj);
     JSWebController::JSBind(globalObj);
+#endif
 #endif
 }
 

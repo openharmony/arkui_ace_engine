@@ -160,6 +160,7 @@ T FastConvertFromJSValue(const JSRef<JSVal>& jsValue)
 template<class C, class V, class T, size_t N>
 void JSViewSetProperty(void (C::*setMethod)(V), int32_t param, const T (&enumValues)[N], T defValue)
 {
+#ifndef NG_BUILD
     auto component = AceType::DynamicCast<C>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<C>());
@@ -170,23 +171,31 @@ void JSViewSetProperty(void (C::*setMethod)(V), int32_t param, const T (&enumVal
         value = enumValues[param];
     }
     ((*component).*setMethod)(value);
+#else
+    LOGE("do not support JSViewSetProperty in new pipeline");
+#endif
 }
 
 template<class C, class V, class T>
 void JSViewSetProperty(void (C::*setMethod)(V), T&& param)
 {
+#ifndef NG_BUILD
     auto component = AceType::DynamicCast<C>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (!component) {
         LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<C>());
         return;
     }
     ((*component).*setMethod)(std::forward<T>(param));
+#else
+    LOGE("do not support JSViewSetProperty in new pipeline");
+#endif
 }
 
 template<class C, class F>
 bool JSViewBindEvent(
     void (C::*setMethod)(std::function<F>&&), const JSExecutionContext& context, const JSRef<JSVal>& jsValue)
 {
+#ifndef NG_BUILD
     if (!jsValue->IsFunction()) {
         LOGW("Argument is not a function object");
         return false;
@@ -198,6 +207,10 @@ bool JSViewBindEvent(
     }
     ((*component).*setMethod)(JsEventCallback<F>(context, JSRef<JSFunc>::Cast(jsValue)));
     return true;
+#else
+    LOGE("do not support JSViewBindEvent in new pipeline");
+    return false;
+#endif
 }
 
 template<class C, class F>

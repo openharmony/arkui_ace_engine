@@ -2586,6 +2586,7 @@ void JSWeb::JsEnabled(bool isJsEnabled)
 
 void JSWeb::ContentAccessEnabled(bool isContentAccessEnabled)
 {
+#ifndef NG_BUILD
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2593,6 +2594,9 @@ void JSWeb::ContentAccessEnabled(bool isContentAccessEnabled)
         return;
     }
     webComponent->SetContentAccessEnabled(isContentAccessEnabled);
+#else
+    LOGE("do not support components in new pipeline mode");
+#endif
 }
 
 void JSWeb::FileAccessEnabled(bool isFileAccessEnabled)

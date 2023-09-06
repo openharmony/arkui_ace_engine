@@ -30,7 +30,7 @@ template("libace_static") {
 
     deps = [ "$ace_root/frameworks/base:ace_base_$platform" ]
 
-    if (platform == "ohos_ng") {
+    if (platform == "ohos_ng" || is_cross_platform_build) {
       deps += [
         "$ace_root/frameworks/bridge:framework_bridge_ng_$platform",
         "$ace_root/frameworks/core:ace_core_ng_$platform",
@@ -76,7 +76,7 @@ template("libace_static") {
     # build-in ark js engine for preview
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine && defined(config.ark_engine)) {
-      if (platform == "ohos_ng") {
+      if (platform == "ohos_ng" || is_cross_platform_build) {
         deps += [ "$ace_root/frameworks/bridge/declarative_frontend:declarative_js_engine_ng_ark_$platform" ]
       } else {
         deps += [
