@@ -34,12 +34,12 @@ public:
         return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
     }
 
-protected:
-    void OnAttachToFrameNode() override;
-    void OnBoundsSizeChanged(const Rosen::Vector4f& bounds);
 private:
+    void OnAttachToFrameNode() override;
+    void OnBoundsChanged(const Rosen::Vector4f& bounds);
+
     sptr<Rosen::Session> session_;
-    std::function<void(const Rosen::Vector4f&)> sizeChangedCallback_;
+    std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SystemWindowScene);
 };
