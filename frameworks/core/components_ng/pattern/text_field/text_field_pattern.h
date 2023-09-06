@@ -1034,6 +1034,16 @@ public:
         return isCustomFont_;
     }
 
+    void SetTextRectWillChange()
+    {
+        textRectWillChange_ = true;
+    }
+
+    bool GetTextRectWillChange() const
+    {
+        return textRectWillChange_;
+    }
+
     bool IsFocus()
     {
         return HasFocus();
@@ -1328,6 +1338,7 @@ private:
     std::function<void()> customKeyboardBulder_;
     bool isTouchAtLeftOffset_ = true;
     bool isCustomFont_ = false;
+    bool textRectWillChange_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -408,12 +408,13 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // if handler is moving, no need to adjust text rect in pattern
     auto isUsingMouse = pattern->GetMouseStatus() == MouseStatus::MOVE ||
                         pattern->GetMouseStatus() == MouseStatus::RELEASED || pattern->GetIsMousePressed();
-    auto needForceCheck = ((pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
-                               pattern->GetCaretUpdateType() == CaretUpdateType::DEL) &&
-                              (paragraphWidth_ <= contentSize.Width())) ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::VISIBLE_PASSWORD_ICON ||
-                          layoutProperty->GetTextAlignChangedValue(false);
+    auto needForceCheck =
+        ((pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
+             pattern->GetCaretUpdateType() == CaretUpdateType::DEL || pattern->GetTextRectWillChange()) &&
+            (paragraphWidth_ <= contentSize.Width())) ||
+        pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED ||
+        pattern->GetCaretUpdateType() == CaretUpdateType::VISIBLE_PASSWORD_ICON ||
+        layoutProperty->GetTextAlignChangedValue(false);
     auto needToKeepTextRect = isUsingMouse || !needForceCheck;
     if (needToKeepTextRect) {
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());

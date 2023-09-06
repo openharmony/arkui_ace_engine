@@ -320,9 +320,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
         updateSelectionAfterObscure_ = false;
     }
-    if (hostLayoutProperty && hostLayoutProperty->GetFontSizeChangedValue(false)) {
+    if (textRectWillChange_) {
         GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
-        hostLayoutProperty->ResetFontSizeChanged();
+        textRectWillChange_ = false;
     }
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
@@ -432,7 +432,7 @@ bool TextFieldPattern::UpdateCaretRect()
 
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
 
-    if (caretUpdateType_ == CaretUpdateType::NONE) {
+    if (caretUpdateType_ == CaretUpdateType::NONE && !textRectWillChange_) {
         return true;
     }
     return false;
