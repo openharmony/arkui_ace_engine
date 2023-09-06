@@ -906,7 +906,8 @@ ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
-        .textOverflow = textStyle.GetTextOverflow()
+        .textOverflow = textStyle.GetTextOverflow(),
+        .fontSize = textStyle.GetFontSize().ConvertToPx()
     };
 }
 } // namespace OHOS::Ace::NG

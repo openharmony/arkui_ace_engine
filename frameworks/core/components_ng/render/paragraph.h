@@ -49,6 +49,7 @@ struct ParagraphStyle {
     WordBreak wordBreak = WordBreak::NORMAL;
     TextOverflow textOverflow = TextOverflow::CLIP;
     std::optional<LeadingMargin> leadingMargin;
+    double fontSize = 0.0;
 };
 
 // Paragraph is interface for drawing text and text paragraph.
