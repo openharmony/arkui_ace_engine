@@ -2452,4 +2452,132 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0059, TestSize.Level1)
     res = focusHub->GetNearestNodeByProjectArea(allNodes, FocusStep::RIGHT);
     ASSERT_NE(res, nullptr);
 }
+
+/**
+ * @tc.name: FocusHubTestNg060
+ * @tc.desc: Test the function HandleFocusByTabIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0060, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode1->GetOrCreateFocusHub();
+    auto focusHub1 = frameNode1->GetFocusHub();
+
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode2->GetOrCreateFocusHub();
+    auto focusHub2 = frameNode2->GetFocusHub();
+
+    auto frameNode3 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode3->GetOrCreateFocusHub();
+    auto focusHub3 = frameNode3->GetFocusHub();
+
+    focusHub1->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub2->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub3->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+
+    focusHub1->focusCallbackEvents_->tabIndex_ = 1;
+    focusHub2->focusCallbackEvents_->tabIndex_ = 2;
+    focusHub3->focusCallbackEvents_->tabIndex_ = 3;
+    ASSERT_NE(focusHub1->focusCallbackEvents_, nullptr);
+
+    focusHub2->focusable_ = true;
+    focusHub2->parentFocusable_ = true;
+    focusHub2->currentFocus_ = true;
+
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
+    focusHub->isFirstFocusInPage_ = false;
+    focusHub->focusType_ = FocusType::SCOPE;
+    frameNode->children_.push_back(frameNode1);
+    frameNode->children_.push_back(frameNode2);
+    frameNode->children_.push_back(frameNode3);
+
+    KeyEvent event(KeyCode::KEY_TAB, KeyAction::DOWN);
+
+    auto res = focusHub->HandleFocusByTabIndex(event, focusHub);
+    ASSERT_TRUE(res);
+    event.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB };
+    res = focusHub->HandleFocusByTabIndex(event, focusHub);
+    ASSERT_TRUE(res);
+
+    focusHub->isFirstFocusInPage_ = true;
+    focusHub->HandleFocusByTabIndex(event, focusHub);
+    ASSERT_FALSE(focusHub->isFirstFocusInPage_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg061
+ * @tc.desc: Test the function RequestFocusImmediatelyById && GetFocusingTabNodeIdx.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0061, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto frameNode1 = FrameNode::CreateFrameNode("123", 123, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode1->GetOrCreateFocusHub();
+    auto focusHub1 = frameNode1->GetFocusHub();
+    frameNode1->propInspectorId_ = "123";
+
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode2->GetOrCreateFocusHub();
+    auto focusHub2 = frameNode2->GetFocusHub();
+
+    frameNode->children_.push_back(frameNode2);
+    frameNode->children_.push_back(frameNode1);
+    focusHub->focusType_ = FocusType::SCOPE;
+    focusHub1->parentFocusable_ = false;
+
+    focusHub->isFirstFocusInPage_ = false;
+
+    TabIndexNodeList list;
+    list.push_back({1, AceType::WeakClaim<FocusHub>(nullptr)});
+    auto res = focusHub->GetFocusingTabNodeIdx(list);
+    ASSERT_EQ(res, -1);
+
+    auto res2 = focusHub->RequestFocusImmediatelyById("123");
+    ASSERT_FALSE(res2);
+}
+
+/**
+ * @tc.name: FocusHubTestNg062
+ * @tc.desc: Test the function HandleParentScroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0062, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto frameNode1 = FrameNode::CreateFrameNode("123", 123, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode1->GetOrCreateFocusHub();
+    auto focusHub1 = frameNode1->GetFocusHub();
+
+    frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(frameNode1));
+    focusHub1->focusType_ = FocusType::SCOPE;
+    focusHub1->isFocusUnit_ = true;
+
+    focusHub->HandleParentScroll();
+    ASSERT_TRUE(focusHub1->isFocusUnit_);
+}
 } // namespace OHOS::Ace::NG
