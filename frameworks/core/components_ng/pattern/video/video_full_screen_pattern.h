@@ -69,9 +69,7 @@ public:
             return MakeRefPtr<VideoLayoutProperty>();
         }
         auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>()->Clone();
-        auto src_ = DynamicCast<VideoLayoutProperty>(layoutProperty)->GetVideoSourceValue("");
-        layoutProperty->Reset();
-        DynamicCast<VideoLayoutProperty>(layoutProperty)->UpdateVideoSource(src_);
+        DynamicCast<VideoLayoutProperty>(layoutProperty)->fullScreenReset();
         return layoutProperty;
     }
 
