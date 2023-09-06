@@ -1209,7 +1209,6 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
     if (!rsNode) {
         return;
     }
-#ifdef OHOS_PLATFORM
     auto rosenImage = std::make_shared<Rosen::RSImage>();
 #ifndef USE_ROSEN_DRAWING
     rosenImage->SetImage(skImage->GetImage());
@@ -1222,7 +1221,6 @@ void RosenRenderImage::PaintBgImage(const std::shared_ptr<RSNode>& rsNode)
     rsNode->SetBgImagePositionX(imageRenderPosition_.GetX());
     rsNode->SetBgImagePositionY(imageRenderPosition_.GetY());
     rsNode->SetBgImage(rosenImage);
-#endif
 }
 
 bool RosenRenderImage::NeedUploadImageObjToGpu()
