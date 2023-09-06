@@ -69,16 +69,20 @@ public:
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
 
     static void JsScale(const JSCallbackInfo& info);
+    static void SetDefaultScale();
     static void JsScaleX(const JSCallbackInfo& info);
     static void JsScaleY(const JSCallbackInfo& info);
     static void JsOpacity(const JSCallbackInfo& info);
     static void JsTranslate(const JSCallbackInfo& info);
+    static void SetDefaultTranslate();
     static void JsTranslateX(const JSCallbackInfo& info);
     static void JsTranslateY(const JSCallbackInfo& info);
     static void JsRotate(const JSCallbackInfo& info);
+    static void SetDefaultRotate();
     static void JsRotateX(const JSCallbackInfo& info);
     static void JsRotateY(const JSCallbackInfo& info);
     static void JsTransform(const JSCallbackInfo& info);
+    static void SetDefaultTransform();
     static void JsTransition(const JSCallbackInfo& info);
     static NG::TransitionOptions ParseTransition(std::unique_ptr<JsonValue>& transitionArgs);
     static void JsWidth(const JSCallbackInfo& info);
