@@ -66,6 +66,13 @@ public:
 
     void MarkDirty(PropertyChangeFlag flag);
 
+    RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
+
+    const WeakPtr<FrameNode>& GetSelectOverlayItem() const
+    {
+        return selectOverlayItem_;
+    }
+
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);
 
