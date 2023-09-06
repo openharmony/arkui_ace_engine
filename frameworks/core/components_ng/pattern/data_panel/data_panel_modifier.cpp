@@ -269,17 +269,17 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
     } else {
         proportions = maxValue == 0 ? 1.0 : DEFAULT_MAX_VALUE / maxValue;
     }
-    totalValue = totalValue * proportions;
     if (isEffect_->Get() && NonNegative(totalValue)) {
-        arcData.progress = totalValue * date;
+        arcData.progress = totalValue * proportions * date;
     } else {
-        arcData.progress = totalValue;
+        arcData.progress = totalValue * proportions;
     }
 
     if ((isShadowVisible_ && (isHasShadowValue_ || isEffect_->Get()))) {
         PaintRainbowFilterMask(canvas, factor * date, arcData, shadowColorsLastLength_, totalValue);
     }
 
+    totalValue = totalValue * proportions;
     for (int32_t i = static_cast<int32_t>(tempSize) - 1; i >= 0; i--) {
         arcData.progressColors = SortGradientColorsOffset(valueColors_[i]->Get().GetGradient());
         float totalValuePre = totalValue * 1.0f;
