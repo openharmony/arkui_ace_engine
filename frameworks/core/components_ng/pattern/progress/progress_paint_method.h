@@ -54,10 +54,16 @@ public:
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_VOID(progressModifier_);
-        GetThemeDate();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipeline);
+        CHECK_NULL_VOID_NOLOG(progressModifier_);
+        if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+            GetThemeDataForApiNine();
+        } else {
+            GetThemeData();
+        }
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
-        CHECK_NULL_VOID(paintProperty);
+        CHECK_NULL_VOID_NOLOG(paintProperty);
         color_ = paintProperty->GetColor().value_or(color_);
         bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
         borderColor_ = paintProperty->GetBorderColor().value_or(borderColor_);
@@ -100,7 +106,8 @@ public:
         progressModifier_->SetStrokeRadius(strokeRadius);
     }
 
-    void GetThemeDate();
+    void GetThemeData();
+    void GetThemeDataForApiNine();
     void CalculateStrokeWidth(const SizeF& contentSize);
 
 private:

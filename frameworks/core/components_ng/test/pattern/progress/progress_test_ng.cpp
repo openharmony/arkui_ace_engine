@@ -145,8 +145,8 @@ RefPtr<MockThemeManager> themeManager;
 class ProgressTestNg : public testing::Test {
 public:
     void CheckValue(const RefPtr<FrameNode>& frameNode, const TestProperty& testProperty);
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     void SetUp() override {}
     void TearDown() override {}
 
@@ -154,9 +154,11 @@ protected:
     RefPtr<FrameNode> CreateProgressParagraph(const TestProperty& testProperty);
 };
 
-void ProgressTestNg::SetUpTestCase()
+void ProgressTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     creatProperty.maxValue = std::make_optional(MAX_VALUE_OF_PROGRESS);
     creatProperty.value = std::make_optional(VALUE_OF_PROGRESS);
     themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -172,7 +174,7 @@ void ProgressTestNg::SetUpTestCase()
     progressTheme->scaleWidth_ = TEST_PROGRESS_SCALE_WIDTH;
 }
 
-void ProgressTestNg::TearDownTestCase()
+void ProgressTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
     progressTheme = nullptr;
