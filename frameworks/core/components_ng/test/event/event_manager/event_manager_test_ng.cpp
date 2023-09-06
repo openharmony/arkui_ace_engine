@@ -1421,4 +1421,93 @@ HWTEST_F(EventManagerTestNg, EventManagerTest029, TestSize.Level1)
     eventManager->DispatchMouseHoverAnimationNG(event);
     EXPECT_NE(eventManager->currHoverNode_.Upgrade(), nullptr);
 }
+
+/**
+ * @tc.name: EventManagerTest030
+ * @tc.desc: Test FlushTouchEventsBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto resultId = ElementRegister::GetInstance()->MakeUniqueId();
+    TouchTestResult touchTestResults;
+    touchTestResults.push_back(AceType::MakeRefPtr<MockTouchEventTarget>());
+    eventManager->touchTestResults_.emplace(resultId, touchTestResults);
+
+    TouchEvent event { .id = resultId };
+    std::list<TouchEvent> touchEvents { event };
+    eventManager->FlushTouchEventsBegin(touchEvents);
+    EXPECT_NE(eventManager->touchTestResults_.find(event.id), eventManager->touchTestResults_.end());
+}
+
+/**
+ * @tc.name: EventManagerTest031
+ * @tc.desc: Test FlushTouchEventsBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto resultId = ElementRegister::GetInstance()->MakeUniqueId();
+    TouchTestResult touchTestResults;
+    touchTestResults.push_back(AceType::MakeRefPtr<MockTouchEventTarget>());
+    eventManager->touchTestResults_.emplace(resultId, touchTestResults);
+
+    TouchEvent event { .id = resultId };
+    std::list<TouchEvent> touchEvents { event };
+    eventManager->FlushTouchEventsEnd(touchEvents);
+    EXPECT_NE(eventManager->touchTestResults_.find(event.id), eventManager->touchTestResults_.end());
+}
+
+/**
+ * @tc.name: EventManagerTest032
+ * @tc.desc: Test FlushTouchEventsBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    AxisEvent axisEvent { .x = 1, .y = 2, .sourceType = SourceType::TOUCH };
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    eventManager->AxisTest(axisEvent, frameNode);
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: EventManagerTest033
+ * @tc.desc: Test DispatchMouseHoverAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    eventManager->mouseHoverNode_ = RenderAbilityComponent::Create();
+    eventManager->mouseHoverNodePre_ = RenderAbilityComponent::Create();
+}
 } // namespace OHOS::Ace::NG
