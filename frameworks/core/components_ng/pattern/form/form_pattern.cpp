@@ -280,6 +280,10 @@ RefPtr<FrameNode> FormPattern::GetOrCreateImageNode()
         auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_RETURN(imageNode, nullptr);
         host->AddChild(imageNode);
+        auto eventHub = imageNode->GetOrCreateGestureEventHub();
+        if (eventHub != nullptr) {
+            eventHub->RemoveDragEvent();
+        }
         return imageNode;
     }
 
