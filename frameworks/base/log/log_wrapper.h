@@ -20,6 +20,8 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <unordered_map>
+
 #include "base/utils/macros.h"
 #include "base/utils/system_properties.h"
 
@@ -31,30 +33,37 @@
 #define ACE_LOG_ID
 #endif
 
-#define PRINT_LOG(level, fmt, ...)                                                                              \
+#define PRINT_LOG(level, tag, fmt, ...)                                                                         \
     do {                                                                                                        \
         if (OHOS::Ace::LogWrapper::JudgeLevel(OHOS::Ace::LogLevel::level)) {                                    \
-            OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::FRAMEWORK, OHOS::Ace::LogLevel::level,        \
+            OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::FRAMEWORK, OHOS::Ace::LogLevel::level, tag,   \
                 ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__), __FUNCTION__ ACE_LOG_ID, \
                 ##__VA_ARGS__);                                                                                 \
         }                                                                                                       \
     } while (0)
 
+#define LOGD(fmt, ...) TAG_LOGD(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
+#define LOGI(fmt, ...) TAG_LOGI(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
+#define LOGW(fmt, ...) TAG_LOGW(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
+#define LOGE(fmt, ...) TAG_LOGE(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
+#define LOGF(fmt, ...) TAG_LOGF(OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
+
 #ifdef ACE_DEBUG_LOG
-#define LOGD(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
+#define TAG_LOGD(tag, fmt, ...) PRINT_LOG(DEBUG, tag, fmt, ##__VA_ARGS__)
 #else
-#define LOGD(fmt, ...) ((void)0)
+#define TAG_LOGD(tag, fmt, ...) ((void)0)
 #endif
-#define LOGI(fmt, ...) PRINT_LOG(INFO, fmt, ##__VA_ARGS__)
-#define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
-#define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
-#define LOGF(fmt, ...) PRINT_LOG(FATAL, fmt, ##__VA_ARGS__)
+#define TAG_LOGI(tag, fmt, ...) PRINT_LOG(INFO, tag, fmt, ##__VA_ARGS__)
+#define TAG_LOGW(tag, fmt, ...) PRINT_LOG(WARN, tag, fmt, ##__VA_ARGS__)
+#define TAG_LOGE(tag, fmt, ...) PRINT_LOG(ERROR, tag, fmt, ##__VA_ARGS__)
+#define TAG_LOGF(tag, fmt, ...) PRINT_LOG(FATAL, tag, fmt, ##__VA_ARGS__)
 
 #define LOG_DESTROY() LOGI("destroyed")
 #define LOG_FUNCTION() LOGD("function track: %{public}s", __FUNCTION__)
 
 #define PRINT_APP_LOG(level, fmt, ...) \
-    OHOS::Ace::LogWrapper::PrintLog(OHOS::Ace::LogDomain::JS_APP, OHOS::Ace::LogLevel::level, fmt, ##__VA_ARGS__)
+    OHOS::Ace::LogWrapper::PrintLog(   \
+        OHOS::Ace::LogDomain::JS_APP, OHOS::Ace::LogLevel::level, OHOS::Ace::AceLogTag::DEFAULT, fmt, ##__VA_ARGS__)
 
 #define APP_LOGD(fmt, ...) PRINT_APP_LOG(DEBUG, fmt, ##__VA_ARGS__)
 #define APP_LOGI(fmt, ...) PRINT_APP_LOG(INFO, fmt, ##__VA_ARGS__)
@@ -63,6 +72,14 @@
 #define APP_LOGF(fmt, ...) PRINT_APP_LOG(FATAL, fmt, ##__VA_ARGS__)
 
 namespace OHOS::Ace {
+
+enum class AceLogTag : uint32_t {
+    DEFAULT = 0,
+};
+
+const std::unordered_map<AceLogTag, std::string> LOG_TAG_MAP = {
+    { AceLogTag::DEFAULT, "Ace" },
+};
 
 enum class LogDomain : uint32_t {
     FRAMEWORK = 0,
@@ -118,18 +135,23 @@ public:
         }
     }
 
-    static void PrintLog(LogDomain domain, LogLevel level, const char* fmt, ...)
-        __attribute__((__format__(os_log, 3, 4)))
+    static void PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, ...)
+        __attribute__((__format__(os_log, 4, 5)))
     {
         va_list args;
         va_start(args, fmt);
-        PrintLog(domain, level, fmt, args);
+        PrintLog(domain, level, tag, fmt, args);
         va_end(args);
+    }
+
+    static const char* GetTagContent(AceLogTag tag)
+    {
+        return LOG_TAG_MAP.at(tag).c_str();
     }
 
     // MUST implement these interface on each platform.
     static char GetSeparatorCharacter();
-    static void PrintLog(LogDomain domain, LogLevel level, const char* fmt, va_list args);
+    static void PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args);
     static int32_t GetId();
 
 private:
