@@ -48,6 +48,11 @@ RectModel* RectModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr uint32_t HAS_RADIUS_WIDTH = 1;
+constexpr uint32_t HAS_RADIUS_HEIGHT = 1 << 1;
+constexpr uint32_t HAS_RADIUS = 1 << 2;
+} // namespace
 
 void JSRect::Create(const JSCallbackInfo& info)
 {
@@ -56,6 +61,10 @@ void JSRect::Create(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         auto propertyNames = obj->GetPropertyNames();
+        if (!propertyNames->IsArray()) {
+            return;
+        }
+        auto propertyFlag = 0U;
         for (size_t i = 0; i < propertyNames->Length(); i++) {
             JSRef<JSVal> value = propertyNames->GetValueAt(i);
             if (!value->IsString()) {
@@ -63,19 +72,27 @@ void JSRect::Create(const JSCallbackInfo& info)
             }
             auto propertyName = value->ToString();
             if (propertyName == "radiusWidth") {
-                JSRef<JSVal> radiusWidth = obj->GetProperty("radiusWidth");
-                SetRadiusWidth(radiusWidth);
+                propertyFlag = propertyFlag | HAS_RADIUS_WIDTH;
             } else if (propertyName == "radiusHeight") {
-                JSRef<JSVal> radiusHeight = obj->GetProperty("radiusHeight");
-                SetRadiusHeight(radiusHeight);
+                propertyFlag = propertyFlag | HAS_RADIUS_HEIGHT;
             } else if (propertyName == "radius") {
-                JSRef<JSVal> radius = obj->GetProperty("radius");
-                if (radius->IsNumber() || radius->IsString()) {
-                    SetRadiusWithJsVal(nullptr, radius);
-                }
-                if (radius->IsArray()) {
-                    SetRadiusWithArrayValue(nullptr, radius);
-                }
+                propertyFlag = propertyFlag | HAS_RADIUS;
+            }
+        }
+        if ((propertyFlag & HAS_RADIUS_WIDTH) == HAS_RADIUS_WIDTH) {
+            JSRef<JSVal> radiusWidth = obj->GetProperty("radiusWidth");
+            SetRadiusWidth(radiusWidth);
+        }
+        if ((propertyFlag & HAS_RADIUS_HEIGHT) == HAS_RADIUS_HEIGHT) {
+            JSRef<JSVal> radiusHeight = obj->GetProperty("radiusHeight");
+            SetRadiusHeight(radiusHeight);
+        }
+        if ((propertyFlag & HAS_RADIUS) == HAS_RADIUS) {
+            JSRef<JSVal> radius = obj->GetProperty("radius");
+            if (radius->IsNumber() || radius->IsString()) {
+                SetRadiusWithJsVal(nullptr, radius);
+            } else if (radius->IsArray()) {
+                SetRadiusWithArrayValue(nullptr, radius);
             }
         }
         info.SetReturnValue(info.This());
