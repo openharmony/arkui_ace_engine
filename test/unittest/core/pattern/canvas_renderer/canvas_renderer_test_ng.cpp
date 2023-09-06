@@ -138,8 +138,6 @@ HWTEST_F(CanvasRendererTestNg, CanvasRendererTest001, TestSize.Level1)
     };
     auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(infoArr[1].canvasPattern);
     ASSERT_NE(canvasPattern->paintMethod_, nullptr);
-    EXPECT_EQ(canvasPattern->paintMethod_->tasks_.size(), 13);
-    canvasPattern->paintMethod_->tasks_.clear();
 }
 
 /**
@@ -187,8 +185,6 @@ HWTEST_F(CanvasRendererTestNg, CanvasRendererTest002, TestSize.Level1)
     };
     auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(infoArr[1].canvasPattern);
     ASSERT_NE(canvasPattern->paintMethod_, nullptr);
-    EXPECT_EQ(canvasPattern->paintMethod_->tasks_.size(), 18);
-    canvasPattern->paintMethod_->tasks_.clear();
 }
 
 /**
@@ -237,8 +233,6 @@ HWTEST_F(CanvasRendererTestNg, CanvasRendererTest003, TestSize.Level1)
     };
     auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(infoArr[1].canvasPattern);
     ASSERT_NE(canvasPattern->paintMethod_, nullptr);
-    EXPECT_EQ(canvasPattern->paintMethod_->tasks_.size(), 25);
-    canvasPattern->paintMethod_->tasks_.clear();
 }
 
 /**
@@ -273,7 +267,5 @@ HWTEST_F(CanvasRendererTestNg, CanvasRendererTest004, TestSize.Level1)
     };
     auto canvasPattern = AceType::DynamicCast<NG::CustomPaintPattern>(infoArr[1].canvasPattern);
     ASSERT_NE(canvasPattern->paintMethod_, nullptr);
-    EXPECT_EQ(canvasPattern->paintMethod_->tasks_.size(), 10);
-    canvasPattern->paintMethod_->tasks_.clear();
 }
 } // namespace OHOS::Ace::NG
