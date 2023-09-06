@@ -247,12 +247,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest, TestSize.Level1)
             for (auto hitTestModeofChild : hitTestModeofChilds) {
                 childNode->SetExclusiveEventForChild(isStack);
                 childEventHub->SetHitTestMode(hitTestModeofChild);
-                auto result = childNode->TouchTest(globalPoint, parentLocalPointOne, touchRestrict, touchTestResult, 0);
+                auto result = childNode->TouchTest(globalPoint, parentLocalPointOne,
+                    parentLocalPointOne, touchRestrict, touchTestResult, 0);
                 auto expectedResult =
                     (hitTestModeofGrandChild == HitTestMode::HTMBLOCK || hitTestModeofChild == HitTestMode::HTMBLOCK)
                         ? HitTestResult::STOP_BUBBLING
                         : HitTestResult::BUBBLING;
-                result = node->TouchTest(globalPoint, parentLocalPointOne, touchRestrict, touchTestResult, 0);
+                result = node->TouchTest(globalPoint, parentLocalPointOne,
+                    parentLocalPointOne, touchRestrict, touchTestResult, 0);
                 EXPECT_EQ(result, expectedResult);
             }
         }
@@ -938,10 +940,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
     TouchRestrict touchRestrict;
     TouchTestResult result;
     SystemProperties::debugEnabled_ = true;
-    FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, 1);
+    FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
 
     SystemProperties::debugEnabled_ = false;
-    FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, 1);
+    FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
 
     /**
      * @tc.steps: step2. set isActive_ and IsEnabled is false.
@@ -949,7 +951,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
      */
     FRAME_NODE2->isActive_ = false;
     FRAME_NODE2->eventHub_->SetEnabled(false);
-    auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, 1);
+    auto test = FRAME_NODE2->TouchTest(globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1);
     EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 

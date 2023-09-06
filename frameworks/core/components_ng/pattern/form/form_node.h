@@ -32,7 +32,8 @@ public:
     ~FormNode() override = default;
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override;
+        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict,
+        TouchTestResult& result, int32_t touchId) override;
 
     static RefPtr<FormNode> GetOrCreateFormNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);

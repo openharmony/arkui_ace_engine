@@ -68,7 +68,8 @@ public:
     explicit TestNode(int32_t nodeId) : UINode("TestNode", nodeId) {}
 
     HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
-        const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId) override
+        const PointF& parentRevertPoint, const TouchRestrict& touchRestrict,
+        TouchTestResult& result, int32_t touchId) override
     {
         return hitTestResult_;
     }
@@ -789,13 +790,14 @@ HWTEST_F(UINodeTestNg, UINodeTestNg023, TestSize.Level1)
     const PointF LOCAL_POINT { 15.0f, 15.0f };
     auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
     ZERO->AddChild(testNode, 1, false);
-    HitTestResult retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
+    HitTestResult retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT,
+        std::move(restrict), result, 1);
     EXPECT_EQ(retResult, HitTestResult::OUT_OF_REGION);
     testNode->hitTestResult_ = HitTestResult::STOP_BUBBLING;
-    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
+    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
     EXPECT_EQ(retResult, HitTestResult::STOP_BUBBLING);
     testNode->hitTestResult_ = HitTestResult::BUBBLING;
-    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
+    retResult = ZERO->UINode::TouchTest(GLOBAL_POINT, LOCAL_POINT, LOCAL_POINT, std::move(restrict), result, 1);
     EXPECT_EQ(retResult, HitTestResult::BUBBLING);
     ZERO->Clean();
 }
