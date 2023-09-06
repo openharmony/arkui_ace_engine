@@ -32,6 +32,10 @@ common_napi_libs = [
   "animator",
 ]
 
+if (!is_cross_platform_build) {
+  common_napi_libs += [ "performancemonitor" ]
+}
+
 template("ace_napi_lib") {
   forward_variables_from(invoker, "*")
 
