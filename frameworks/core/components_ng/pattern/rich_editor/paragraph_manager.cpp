@@ -92,6 +92,12 @@ OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHe
         y += it->paragraph->GetHeight();
         ++it;
     }
+
+    if (index == paragraphs_.back().end) {
+        --it;
+        y -= it->paragraph->GetHeight();
+    }
+
     CHECK_NULL_RETURN_NOLOG(it != paragraphs_.end(), {});
 
     int32_t relativeIndex = index - it->start;
