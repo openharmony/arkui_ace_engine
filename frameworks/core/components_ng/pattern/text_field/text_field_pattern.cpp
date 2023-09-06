@@ -2454,6 +2454,7 @@ void TextFieldPattern::OnModifyDone()
         SaveInlineStates();
     }
     if (HasFocus() && IsNormalInlineState()) {
+        selectionMode_ = SelectionMode::NONE;
         preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
     if (layoutProperty->GetShowUnderlineValue(false) &&
