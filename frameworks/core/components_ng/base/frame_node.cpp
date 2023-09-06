@@ -2030,11 +2030,9 @@ bool FrameNode::OnRemoveFromParent(bool allowTransition)
 RefPtr<FrameNode> FrameNode::FindChildByPosition(float x, float y)
 {
     std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
-    for (const auto& iter : frameChildren_) {
-        const auto& child = iter.Upgrade();
-        if (!child) {
-            continue;
-        }
+    std::list<RefPtr<FrameNode>> children;
+    GenerateOneDepthAllFrame(children);
+    for (const auto& child : children) {
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             continue;
