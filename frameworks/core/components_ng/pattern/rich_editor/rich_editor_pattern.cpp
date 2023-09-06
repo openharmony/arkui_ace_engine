@@ -1524,6 +1524,10 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
     auto windowRect = pipeline->GetCurrentWindowRect();
     float caretHeight = 0.0f;
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+    if (NearZero(caretHeight)) {
+        auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+        caretHeight = overlayModifier ? overlayModifier->GetCaretHeight() : DEFAULT_CARET_HEIGHT;
+    }
     MiscServices::CursorInfo cursorInfo { .left = caretOffset.GetX() + windowRect.Left() + parentGlobalOffset_.GetX(),
         .top = caretOffset.GetY() + windowRect.Top() + parentGlobalOffset_.GetY(),
         .width = CARET_WIDTH,
@@ -1577,14 +1581,13 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 void RichEditorPattern::UpdateCaretInfoToController()
 {
     CHECK_NULL_VOID_NOLOG(HasFocus());
-    auto caretPosition = GetCaretPosition();
-    auto selectionResult = GetSpansInfo(caretPosition, caretPosition, GetSpansMethod::GETSPANS);
+    auto selectionResult = GetSpansInfo(0, GetTextContentLength(), GetSpansMethod::ONSELECT);
     auto resultObjects = selectionResult.GetSelection().resultObjects;
     std::string text = "";
     if (!resultObjects.empty()) {
         for (const auto& resultObj : resultObjects) {
             if (resultObj.type == RichEditorSpanType::TYPESPAN) {
-                text.append(resultObj.valueString);
+                text += resultObj.valueString;
             }
         }
     }
