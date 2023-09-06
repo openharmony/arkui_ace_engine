@@ -49,6 +49,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
+constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
 } // namespace
 
 void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -84,8 +85,8 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameSize.SetWidth(layoutConstraint->minSize.Width());
             }
         }
-        if (pattern->IsNormalInlineState() && pattern->GetTextInputFlag()) {
-            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
+        if (pattern->IsNormalInlineState()) {
+            frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum() + PARAGRAPH_SAVE_BOUNDARY);
         }
         if (!frameSize.Height().has_value()) {
             // Like width
@@ -240,15 +241,28 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (isInlineStyle) {
         // for InlineStyle, max width is content width with safe boundary.
         float inlineBoxWidth = 0.0f;
-        auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
         if (pattern->IsFocus()) {
-            inlineBoxWidth = pattern->GetPreviewWidth() < layoutConstraint->maxSize.Width()
-                                 ? (pattern->GetPreviewWidth() + safeBoundary)
-                                 : (layoutConstraint->maxSize.Width() - safeBoundary);
+            auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
+            paragraph_->Layout(pattern->GetPreviewWidth() == 0 ? idealWidth : pattern->GetPreviewWidth());
+            if (pattern->GetPreviewWidth() != 0 && pattern->GetPreviewWidth() > layoutConstraint->maxSize.Width()) {
+                paragraph_->Layout(layoutConstraint->maxSize.Width() - safeBoundary - PARAGRAPH_SAVE_BOUNDARY);
+            }
+#ifndef USE_GRAPHIC_TEXT_GINE
+            inlineBoxWidth = paragraph_->GetLongestLine() + PARAGRAPH_SAVE_BOUNDARY;
+#else
+            inlineBoxWidth = paragraph_->GetActualWidth() + PARAGRAPH_SAVE_BOUNDARY;
+#endif
+            if (inlineBoxWidth > layoutConstraint->maxSize.Width()) {
+                inlineBoxWidth = layoutConstraint->maxSize.Width() - safeBoundary;
+            }
+            paragraph_->Layout(pattern->GetPreviewWidth() == 0 ? idealWidth : inlineBoxWidth);
         } else {
             inlineBoxWidth = idealWidth;
+            paragraph_->Layout(inlineBoxWidth);
         }
-        paragraph_->Layout(pattern->GetPreviewWidth() == 0 ? idealWidth : inlineBoxWidth);
+        if (pattern->IsTextArea()) {
+            paragraph_->Layout(pattern->GetPreviewWidth() == 0 ? idealWidth : inlineBoxWidth);
+        }
     } else if (showPlaceHolder) {
         // for placeholder.
         if (isPasswordType) {
@@ -428,7 +442,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             textRectOffsetX = pattern->GetPaddingLeft();
         }
         auto isEmptyTextEditValue = pattern->GetTextEditingValue().text.empty();
-        if (!isEmptyTextEditValue) {
+        auto isInlineStyle = pattern->IsNormalInlineState();
+        if (!isEmptyTextEditValue && !isInlineStyle) {
             switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
                 case TextAlign::START:
                     break;
