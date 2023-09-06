@@ -4829,7 +4829,6 @@ class ViewPU extends NativeViewPartialUpdate {
             const result = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
                 ? new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName)
                 : new SynchedPropertyObjectTwoWayPU(source, this, consumeVarName);
-            stateMgmtConsole.error(`${this.debugInfo()}: The @Consume is instance of ${result.constructor.name}`);
             return result;
         };
         return providedVarStore.createSync(factory);
@@ -4947,6 +4946,10 @@ class ViewPU extends NativeViewPartialUpdate {
     // executed on first render only
     // kept for backward compatibility with old ace-ets2bundle
     observeComponentCreation(compilerAssignedUpdateFunc) {
+        if (this.isDeleting_) {
+            stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destrucion, will not execute observeComponentCreation `);
+            return;
+        }
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         
         compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
@@ -4961,6 +4964,10 @@ class ViewPU extends NativeViewPartialUpdate {
     // - prototype : Object is present for every ES6 class
     // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
     observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
+        if (this.isDeleting_) {
+            stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destrucion, will not execute observeComponentCreation2 `);
+            return;
+        }
         const _componentName = (classObject && ("name" in classObject)) ? Reflect.get(classObject, "name") : "unspecified UINode";
         const _popFunc = (classObject && "pop" in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
@@ -5084,12 +5091,8 @@ class ViewPU extends NativeViewPartialUpdate {
         let removedChildElmtIds = new Array();
         If.branchId(branchId, removedChildElmtIds);
         // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
-
-        this.purgeDeletedElmtIds(removedChildElmtIds);
-        // option 2 below:
-        // this solution also works if the C++ side adds the UINodes to ElementRegister right away
-        // I understand (to be conformed) adding can have a delay if there is an animation
-        // then above solution will still work (should get a test case)
+        
+        this.purgeDeletedElmtIds();
         branchfunc();
     }
     /**
