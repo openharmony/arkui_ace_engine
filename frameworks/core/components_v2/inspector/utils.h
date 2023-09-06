@@ -343,12 +343,12 @@ inline FlexAlign ConvertStringToItemAlign(const std::string& str)
     inline std::string ConvertWrapTextAlignToString(TextAlign textAlign)
     {
         static const LinearEnumMapNode<TextAlign, std::string> textAlignTable[] = {
+            { TextAlign::START, "TextAlign.Start" },
+            { TextAlign::CENTER, "TextAlign.Center" },
+            { TextAlign::END, "TextAlign.End" },
+            { TextAlign::JUSTIFY, "TextAlign.Justify" },
             { TextAlign::LEFT, "TextAlign.Left" },
             { TextAlign::RIGHT, "TextAlign.Right" },
-            { TextAlign::CENTER, "TextAlign.Center" },
-            { TextAlign::JUSTIFY, "TextAlign.Justify" },
-            { TextAlign::START, "TextAlign.Start" },
-            { TextAlign::END, "TextAlign.End" },
         };
 
         auto index = BinarySearchFindIndex(textAlignTable, ArraySize(textAlignTable), textAlign);
