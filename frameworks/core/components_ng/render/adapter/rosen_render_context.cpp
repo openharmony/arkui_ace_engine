@@ -1628,7 +1628,9 @@ void RosenRenderContext::PaintAccessibilityFocus()
     Dimension paintWidth(ACCESSIBILITY_FOCUS_WIDTH, DimensionUnit::PX);
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
-    frameRect.SetRect(RectF(0.0, 0.0, bounds.z_, bounds.w_));
+    frameRect.SetRect(RectF(ACCESSIBILITY_FOCUS_WIDTH, ACCESSIBILITY_FOCUS_WIDTH,
+        bounds.z_ - (2 * ACCESSIBILITY_FOCUS_WIDTH),
+        bounds.w_ - (2 * ACCESSIBILITY_FOCUS_WIDTH)));
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
