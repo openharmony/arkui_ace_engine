@@ -206,6 +206,10 @@ void ButtonPattern::OnTouchUp()
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
+    auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
+    if (toggleButtonPattern) {
+        toggleButtonPattern->OnClick();
+    }
     if (buttonEventHub->GetStateEffect() && buttonEventHub->IsEnabled()) {
         auto renderContext = host->GetRenderContext();
         if (isSetClickedColor_) {
@@ -277,14 +281,6 @@ void ButtonPattern::HandleEnabled()
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
     int32_t duration, const RefPtr<Curve>& curve)
 {
-    if (startOpacity > endOpacity) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
-        if (toggleButtonPattern) {
-            toggleButtonPattern->OnClick();
-        }
-    }
     Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
     Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
     renderContext->BlendBgColor(touchColorFrom);
