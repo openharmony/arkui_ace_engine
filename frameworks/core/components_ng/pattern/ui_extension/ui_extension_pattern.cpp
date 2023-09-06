@@ -217,6 +217,10 @@ void UIExtensionPattern::OnExtensionDied()
     CHECK_NULL_VOID_NOLOG(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID_NOLOG(taskExecutor);
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
+    host->RemoveChild(contentNode_);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     state_ = AbilityState::DESTRUCTION;
     taskExecutor->PostTask(
         [weak = WeakClaim(this)]() {
