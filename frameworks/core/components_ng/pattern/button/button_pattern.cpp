@@ -102,7 +102,6 @@ void ButtonPattern::InitButtonLabel()
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->GetLabel().has_value()) {
-        LOGI("No label, no need to initialize label.");
         focusHub->SetFocusType(FocusType::SCOPE);
         return;
     }
@@ -270,12 +269,8 @@ void ButtonPattern::HandleEnabled()
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
     auto alpha = theme->GetBgDisabledAlpha();
-    auto backgroundColor = renderContext->GetBackgroundColor().value_or(theme->GetBgColor());
-    if (!enabled) {
-        renderContext->OnBackgroundColorUpdate(backgroundColor.BlendOpacity(alpha));
-    } else {
-        renderContext->OnBackgroundColorUpdate(backgroundColor);
-    }
+    auto originalOpacity = renderContext->GetOpacityValue(1.0);
+    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
