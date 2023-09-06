@@ -102,7 +102,6 @@ void ButtonPattern::InitButtonLabel()
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->GetLabel().has_value()) {
-        LOGI("No label, no need to initialize label.");
         focusHub->SetFocusType(FocusType::SCOPE);
         return;
     }
@@ -206,6 +205,10 @@ void ButtonPattern::OnTouchUp()
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
+    auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
+    if (toggleButtonPattern) {
+        toggleButtonPattern->OnClick();
+    }
     if (buttonEventHub->GetStateEffect() && buttonEventHub->IsEnabled()) {
         auto renderContext = host->GetRenderContext();
         if (isSetClickedColor_) {
@@ -266,25 +269,13 @@ void ButtonPattern::HandleEnabled()
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
     auto alpha = theme->GetBgDisabledAlpha();
-    auto backgroundColor = renderContext->GetBackgroundColor().value_or(theme->GetBgColor());
-    if (!enabled) {
-        renderContext->OnBackgroundColorUpdate(backgroundColor.BlendOpacity(alpha));
-    } else {
-        renderContext->OnBackgroundColorUpdate(backgroundColor);
-    }
+    auto originalOpacity = renderContext->GetOpacityValue(1.0);
+    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
     int32_t duration, const RefPtr<Curve>& curve)
 {
-    if (startOpacity > endOpacity) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
-        if (toggleButtonPattern) {
-            toggleButtonPattern->OnClick();
-        }
-    }
     Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
     Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
     renderContext->BlendBgColor(touchColorFrom);

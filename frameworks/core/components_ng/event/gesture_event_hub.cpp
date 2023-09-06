@@ -728,6 +728,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         LOGE("InteractionManager: drag start error");
         return;
     }
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->DoMouseActionRelease();
+    eventManager->SetIsDragging(true);
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("Drag window start for not in previewState, set DragWindowVisible true.");
@@ -773,12 +777,14 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
     }
     gestureInfoForWeb_ = info;
     CHECK_NULL_VOID(dragDropProxy_);
+#ifndef ENABLE_DRAG_FRAMEWORK
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     if (dragDropManager->IsDragged()) {
         dragDropProxy_->OnDragMove(info);
     }
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
@@ -822,7 +828,9 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
 void GestureEventHub::HandleOnDragCancel()
 {
     CHECK_NULL_VOID(dragDropProxy_);
+#ifndef ENABLE_DRAG_FRAMEWORK
     dragDropProxy_->onDragCancel();
+#endif // ENABLE_DRAG_FRAMEWORK
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
 }

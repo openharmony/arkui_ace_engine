@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <cstddef>
 #include <cstdint>
 
 #include "gtest/gtest.h"
@@ -21,20 +22,21 @@
 #define protected public
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
-#include "core/components/theme/app_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2387,5 +2389,67 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0058, TestSize.Level1)
     focusHub->isFirstFocusInPage_ = false;
     focusHub->currentFocus_ = true;
     EXPECT_FALSE(focusHub->HandleFocusByTabIndex(keyEvent, focusHub));
+}
+
+/**
+ * @tc.name: FocusHubTestNg059
+ * @tc.desc: Test the function HandleFocusByTabIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0059, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    frameNode->geometryNode_->SetFrameSize(SizeF(20, 20));
+    frameNode->geometryNode_->SetFrameOffset(OffsetF(20, 20));
+    ASSERT_NE(focusHub, nullptr);
+    std::list<RefPtr<FocusHub>> allNodes;
+
+    auto focus1 = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim<EventHub>(nullptr), FocusType::NODE, true);
+
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 102, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode2->GetOrCreateFocusHub();
+    auto focusHub2 = frameNode2->GetFocusHub();
+    frameNode2->geometryNode_->SetFrameOffset(OffsetF(15, 15));
+    frameNode2->geometryNode_->SetFrameSize(SizeF(30, 30));
+
+    auto frameNode3 = FrameNode::CreateFrameNode("frameNode3", 103, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode3->GetOrCreateFocusHub();
+    auto focusHub3 = frameNode3->GetFocusHub();
+    frameNode3->geometryNode_->SetFrameOffset(OffsetF(20, 20));
+    frameNode3->geometryNode_->SetFrameSize(SizeF(30, 30));
+
+    auto frameNode4 = FrameNode::CreateFrameNode("frameNode4", 104, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode4->GetOrCreateFocusHub();
+    auto focusHub4 = frameNode4->GetFocusHub();
+    frameNode4->geometryNode_->SetFrameOffset(OffsetF(10, 20));
+    frameNode4->geometryNode_->SetFrameSize(SizeF(20, 20));
+
+    auto frameNode5 = FrameNode::CreateFrameNode("frameNode5", 105, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode5->GetOrCreateFocusHub();
+    auto focusHub5 = frameNode5->GetFocusHub();
+    frameNode5->geometryNode_->SetFrameOffset(OffsetF(20, 20));
+    frameNode5->geometryNode_->SetFrameSize(SizeF(30, 30));
+
+    allNodes.push_back(nullptr);
+    allNodes.push_back(focus1);
+    allNodes.push_back(focusHub);
+    allNodes.push_back(focusHub2);
+    allNodes.push_back(focusHub3);
+    allNodes.push_back(focusHub4);
+    allNodes.push_back(focusHub5);
+
+    auto res = focusHub->GetNearestNodeByProjectArea(allNodes, FocusStep::UP);
+    ASSERT_NE(res, nullptr);
+    res = focusHub->GetNearestNodeByProjectArea(allNodes, FocusStep::DOWN);
+    ASSERT_NE(res, nullptr);
+    res = focusHub->GetNearestNodeByProjectArea(allNodes, FocusStep::LEFT);
+    ASSERT_NE(res, nullptr);
+    res = focusHub->GetNearestNodeByProjectArea(allNodes, FocusStep::RIGHT);
+    ASSERT_NE(res, nullptr);
 }
 } // namespace OHOS::Ace::NG

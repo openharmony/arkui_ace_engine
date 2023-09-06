@@ -39,10 +39,7 @@ const ::LogLevel LOG_LEVELS[] = {
     LOG_FATAL,
 };
 
-const char* LOG_TAGS[] = {
-    "Ace",
-    "JSApp",
-};
+const char* APP_TAG = "JSApp";
 
 constexpr uint32_t LOG_DOMAINS[] = {
     0xD003900,
@@ -64,16 +61,18 @@ char LogWrapper::GetSeparatorCharacter()
     return '/';
 }
 
-void LogWrapper::PrintLog(LogDomain domain, LogLevel level, const char* fmt, va_list args)
+void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args)
 {
+    uint32_t hilogDomain = LOG_DOMAINS[static_cast<uint32_t>(domain)] + static_cast<uint32_t>(tag);
+    const char* tagContent = domain == LogDomain::FRAMEWORK ? GetTagContent(tag) : APP_TAG;
 #ifdef ACE_PRIVATE_LOG
     std::string newFmt(fmt);
     ReplaceFormatString("{private}", "{public}", newFmt);
     HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
-        LOG_DOMAINS[static_cast<uint32_t>(domain)], LOG_TAGS[static_cast<uint32_t>(domain)], newFmt.c_str(), args);
+        hilogDomain, tagContent, newFmt.c_str(), args);
 #else
     HiLogPrintArgs(LOG_TYPES[static_cast<uint32_t>(domain)], LOG_LEVELS[static_cast<uint32_t>(level)],
-        LOG_DOMAINS[static_cast<uint32_t>(domain)], LOG_TAGS[static_cast<uint32_t>(domain)], fmt, args);
+        hilogDomain, tagContent, fmt, args);
 #endif
 }
 

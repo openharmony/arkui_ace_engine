@@ -14,6 +14,8 @@
  */
 
 #include <optional>
+#define private public
+#define protected public
 
 #include "gtest/gtest.h"
 #include "test/mock/base/mock_task_executor.h"
@@ -22,10 +24,13 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
@@ -38,6 +43,7 @@ constexpr int32_t NODE_ID = 143;
 constexpr int32_t NODE_ID_2 = 601;
 constexpr int32_t NODE_ID_3 = 707;
 const OffsetF RIGHT_CLICK_OFFSET = OffsetF(10.0f, 10.0f);
+const OffsetF ROOT_OFFSET = OffsetF(10.0f, 10.0f);
 const bool IS_USING_MOUSE = true;
 } // namespace
 
@@ -45,6 +51,10 @@ class SelectOverlayManagerTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    RefPtr<SelectOverlayManager> selectOverlayManager_;
+    RefPtr<SelectOverlayProxy> proxy_;
+    RefPtr<FrameNode> root_;
+    void Init();
 };
 
 void SelectOverlayManagerTestNg::SetUpTestSuite()
@@ -61,6 +71,16 @@ void SelectOverlayManagerTestNg::TearDownTestSuite()
     MockContainer::TearDown();
 }
 
+void SelectOverlayManagerTestNg::Init()
+{
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    root_ = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    selectOverlayManager_ = AceType::MakeRefPtr<SelectOverlayManager>(root_);
+    ASSERT_NE(selectOverlayManager_, nullptr);
+    proxy_ = selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    ASSERT_NE(proxy_, nullptr);
+}
 /**
  * @tc.name: SelectOverlayManagerTest001
  * @tc.desc: test first CreateAndShowSelectOverlay
@@ -69,25 +89,17 @@ void SelectOverlayManagerTestNg::TearDownTestSuite()
 HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. construct a SelectOverlayManager
-     */
-    SelectOverlayInfo selectOverlayInfo;
-    selectOverlayInfo.singleLineHeight = NODE_ID;
-    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-
-    /**
-     * @tc.steps: step2. call CreateAndShowSelectOverlay
+     * @tc.steps: step1. call CreateAndShowSelectOverlay
      * @tc.expected: return the proxy which has the right SelectOverlayId
      */
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
-    auto id = proxy->GetSelectOverlayId();
+    Init();
+    auto id = proxy_->GetSelectOverlayId();
     EXPECT_EQ(id, NODE_ID);
 
     /**
      * @tc.expected: root's children_list contains the selectOverlayNode we created
      */
-    auto selectOverlayNode = root->GetChildren().back();
+    auto selectOverlayNode = root_->GetChildren().back();
     ASSERT_TRUE(selectOverlayNode);
     auto node_id = selectOverlayNode->GetId();
     EXPECT_EQ(node_id, NODE_ID);
@@ -355,6 +367,17 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest008, TestSize.Level
     selectOverlayManager->DestroySelectOverlay();
     auto children = root->GetChildren();
     EXPECT_TRUE(children.empty());
+    /**
+     * @tc.steps: step3. call DestroySelectOverlay again when current node is invalid
+     * @tc.expected: function exits normally
+     */
+    PropertyChangeFlag flag = PROPERTY_UPDATE_NORMAL;
+    selectOverlayManager->MarkDirty(flag);
+    TouchEvent touchPoint;
+    selectOverlayManager->HandleGlobalEvent(touchPoint, ROOT_OFFSET);
+    selectOverlayManager->NotifyOverlayClosed();
+    selectOverlayManager->DestroySelectOverlay(NODE_ID);
+    EXPECT_TRUE(children.empty());
 }
 
 /**
@@ -385,8 +408,37 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest009, TestSize.Level
      * @tc.steps: step2. call IsInSelectedOrSelectOverlayArea
      * @tc.expected: return true
      */
+    PropertyChangeFlag flag = PROPERTY_UPDATE_NORMAL;
+    selectOverlayManager->MarkDirty(flag);
     const NG::PointF point { 0.0f, 0.0f };
     auto result = selectOverlayManager->IsInSelectedOrSelectOverlayArea(point);
     EXPECT_TRUE(result);
+}
+/**
+ * @tc.name: SelectOverlayManagerTest010
+ * @tc.desc: test IsTouchInCallerArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call IsTouchInCallerArea when touchTestResults_ is empty
+     * @tc.expected: return false
+     */
+    Init();
+    auto result1 = selectOverlayManager_->IsTouchInCallerArea();
+    EXPECT_FALSE(result1);
+    /**
+     * @tc.steps: step2. call HandleGlobalEvent
+     */
+    TouchEvent touchPoint;
+    selectOverlayManager_->HandleGlobalEvent(touchPoint, ROOT_OFFSET);
+    /**
+     * @tc.steps: step3. call DestroySelectOverlay with animation
+     * @tc.expected: root's children_list has removed the selectOverlayNode we created
+     */
+    selectOverlayManager_->DestroySelectOverlay(true);
+    auto children = root_->GetChildren();
+    EXPECT_FALSE(children.empty());
 }
 } // namespace OHOS::Ace::NG

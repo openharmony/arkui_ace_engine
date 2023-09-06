@@ -809,4 +809,105 @@ HWTEST_F(StepperPatternTestNg, GetFocusNode001, TestSize.Level1)
     focusNode = stepperPattern->GetFocusNode(FocusStep::DOWN, rightFocusHub);
     ASSERT_NE(focusNode.Upgrade(), leftFocusHub);
 }
+
+/**
+ * @tc.name: StepperPatternInitSwiperChangeEvent001
+ * @tc.desc: test Stepper pattern CreateRightButtonNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperPatternTestNg, StepperPatternCreateRightButtonNode001, TestSize.Level1)
+{
+    auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto stepperPattern = frameNode->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern, nullptr);
+    stepperPattern->CreateLeftButtonNode();
+    auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
+    ASSERT_NE(hostNode, nullptr);
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, hostNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    hostNode->AddChild(swiperNode);
+    auto frameNode1 = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    swiperNode->AddChild(frameNode1);
+    ASSERT_NE(frameNode1, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContext());
+    auto swiperAnimationController = swiperPattern->GetController();
+    ASSERT_NE(swiperAnimationController, nullptr);
+    stepperPattern->HandlingLeftButtonClickEvent();
+    auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
+    ASSERT_NE(swiperController, nullptr);
+    swiperAnimationController->status_ = Animator::Status::STOPPED;
+    stepperPattern->HandlingLeftButtonClickEvent();
+    swiperAnimationController->status_ = Animator::Status::RUNNING;
+    StepperItemModelNG().Create();
+    auto stepperItemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(stepperItemNode, nullptr);
+    swiperNode->AddChild(stepperItemNode);
+    stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->UpdateLabelStatus("normal");
+    stepperPattern->CreateRightButtonNode(1);
+    stepperPattern->maxIndex_ = 1;
+    stepperPattern->CreateRightButtonNode(1);
+    EXPECT_EQ(stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus(), "normal");
+    stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->UpdateLabelStatus("disabled");
+    stepperPattern->CreateRightButtonNode(1);
+    stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->UpdateLabelStatus("waiting");
+    stepperPattern->CreateRightButtonNode(1);
+    EXPECT_EQ(stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus(), "waiting");
+    stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->UpdateLabelStatus("skip");
+    stepperPattern->CreateRightButtonNode(1);
+    stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->UpdateLabelStatus("status");
+    stepperPattern->CreateRightButtonNode(1);
+    EXPECT_EQ(stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus(), "status");
+}
+
+/**
+ * @tc.name: StepperPatternHandleClickEvent011
+ * @tc.desc: test Stepper pattern handle button click event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperPatternTestNg, StepperPatternHandleClickEvent011, TestSize.Level1)
+{
+    auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto stepperPattern = frameNode->GetPattern<StepperPattern>();
+    ASSERT_NE(stepperPattern, nullptr);
+    stepperPattern->CreateLeftButtonNode();
+    auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
+    ASSERT_NE(hostNode, nullptr);
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(
+        SWIPER_NODE_TAG, hostNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    hostNode->AddChild(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    swiperPattern->controller_ = CREATE_ANIMATOR(hostNode->GetContext());
+    auto swiperAnimationController = swiperPattern->GetController();
+    ASSERT_NE(swiperAnimationController, nullptr);
+    stepperPattern->HandlingLeftButtonClickEvent();
+    auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
+    ASSERT_NE(swiperController, nullptr);
+    swiperAnimationController->status_ = Animator::Status::STOPPED;
+    stepperPattern->HandlingLeftButtonClickEvent();
+    swiperAnimationController->status_ = Animator::Status::RUNNING;
+    StepperItemModelNG().Create();
+    auto stepperItemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(stepperItemNode, nullptr);
+    swiperNode->AddChild(stepperItemNode);
+    stepperPattern->HandlingRightButtonClickEvent();
+    swiperAnimationController->status_ = Animator::Status::STOPPED;
+    stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->UpdateLabelStatus("skip");
+    stepperPattern->HandlingRightButtonClickEvent();
+    EXPECT_EQ(stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus(), "skip");
+    stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->UpdateLabelStatus("normal");
+    stepperPattern->HandlingRightButtonClickEvent();
+    EXPECT_EQ(stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus(), "normal");
+    EXPECT_EQ(stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus(), "normal");
+    stepperPattern->maxIndex_ = 5;
+    stepperPattern->HandlingRightButtonClickEvent();
+    stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->UpdateLabelStatus("waiting");
+    stepperPattern->HandlingRightButtonClickEvent();
+    EXPECT_EQ(stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus(), "waiting");
+}
 } // namespace OHOS::Ace::NG

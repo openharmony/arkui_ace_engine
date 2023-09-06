@@ -39,11 +39,11 @@ export class CommonOptions {
 }
 
 export class InlineStyleOptions extends CommonOptions {
-    value?: number;
-    min?: number;
-    max?: number;
-    textWidth?: number;
-    onChange?: (value: number) => void;
+  value?: number;
+  min?: number;
+  max?: number;
+  textWidth?: number;
+  onChange?: (value: number) => void;
 }
 
 export class NumberStyleOptions extends InlineStyleOptions {
@@ -62,10 +62,10 @@ export class DateData{
   }
 
   toString(): string {
-    let date = this.year.toString() + "-";
-    let month = this.month < 10 ? "0" + this.month.toString() : this.month.toString();
-    date += month + "-";
-    let day = this.day < 10 ? "0" + this.day.toString() : this.day.toString();
+    let date = this.year.toString() + '-';
+    let month = this.month < 10 ? '0' + this.month.toString() : this.month.toString();
+    date += month + '-';
+    let day = this.day < 10 ? '0' + this.day.toString() : this.day.toString();
     date += day;
     return date;
   }
@@ -102,82 +102,101 @@ export class CounterOptions<Type extends keyof CounterStyleMap> {
 
 class CounterResource {
   // counter color
-  static readonly BUTTON_BACKGROUD_COLOR = $r('sys.color.ohos_id_color_button_normal')
-  static readonly BUTTON_ICON_COLOR = $r('sys.color.ohos_id_color_primary')
-  static readonly BUTTON_BORDER_FOCUSED_COLOR = $r('sys.color.ohos_id_color_focused_outline')
-  static readonly COUNTER_TEXT_COLOR = $r('sys.color.ohos_id_color_text_primary')
-  static readonly COUNTER_BORDER_COLOR = $r('sys.color.ohos_id_color_component_normal')
+  static readonly BUTTON_BACKGROUD_COLOR = $r('sys.color.ohos_id_color_button_normal');
+  static readonly BUTTON_ICON_COLOR = $r('sys.color.ohos_id_color_primary');
+  static readonly BUTTON_BORDER_FOCUSED_COLOR = $r('sys.color.ohos_id_color_focused_outline');
+  static readonly COUNTER_TEXT_COLOR = $r('sys.color.ohos_id_color_text_primary');
+  static readonly COUNTER_BORDER_COLOR = $r('sys.color.ohos_id_color_component_normal');
   // button icon
-  static readonly BUTTON_ADD_ICON = $r("app.media.ohos_ic_public_add")
-  static readonly BUTTON_SUB_ICON = $r("app.media.ohos_ic_public_minus")
-  static readonly BUTTON_ARROW_UP = $r('app.media.ohos_ic_public_arrow_up')
-  static readonly BUTTON_ARROW_DOWN = $r('app.media.ohos_ic_public_arrow_down')
+  static readonly BUTTON_ADD_ICON = $r("sys.media.ohos_ic_public_add");
+  static readonly BUTTON_SUB_ICON = $r("sys.media.ohos_ic_public_minus");
+  static readonly BUTTON_ARROW_UP = $r('sys.media.ohos_ic_public_arrow_up');
+  static readonly BUTTON_ARROW_DOWN = $r('sys.media.ohos_ic_public_arrow_down');
 
   // counter size
-  static readonly BUTTON_BORDER_FOCUSED_WIDTH = '2vp'
-  static readonly BUTTON_BORDER_BLUR_WIDTH = '0vp'
-  static readonly COUNTER_BORDER_WIDTH = '1vp'
-  static readonly COUNTER_LIST_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body1')
-  static readonly COUNTER_LIST_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1')
-  static readonly COUNTER_COMPACT_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body2')
-  static readonly COUNTER_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1')
-  static readonly COUNTER_LIST_LEFT_PADDING = $r('sys.float.ohos_id_default_padding_start')
-  static readonly COUNTER_LIST_RIGHT_PADDING = $r('sys.float.ohos_id_default_padding_end')
-  static readonly COUNTER_LIST_HEIGHT = '48vp'
-  static readonly COUNTER_LIST_BUTTON_ICON_SIZE = '20vp'
-  static readonly COUNTER_LIST_BUTTON_SIZE = '32vp'
-  static readonly COUNTER_LIST_BUTTON_RADIUS = '16vp'
-  static readonly COUNTER_LIST_BUTTON_TEXT_DISTANCE = '8vp'
-  static readonly COUNTER_LIST_FOCUS_BORDER_SIZE = '30vp'
-  static readonly COUNTER_LIST_FOCUS_BORDER_RADIUS = '15vp'
-  static readonly COUNTER_LIST_BUTTON_HOT_SPOT_X = '-8vp'
-  static readonly COUNTER_LIST_BUTTON_HOT_SPOT_Y = '-8vp'
+  static readonly BUTTON_BORDER_FOCUSED_WIDTH = '2vp';
+  static readonly BUTTON_BORDER_BLUR_WIDTH = '0vp';
+  static readonly COUNTER_BORDER_WIDTH = '1vp';
+  static readonly COUNTER_LIST_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body1');
+  static readonly COUNTER_LIST_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
+  static readonly COUNTER_COMPACT_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body2');
+  static readonly COUNTER_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
+  static readonly COUNTER_LIST_LEFT_PADDING = $r('sys.float.ohos_id_default_padding_start');
+  static readonly COUNTER_LIST_RIGHT_PADDING = $r('sys.float.ohos_id_default_padding_end');
+  static readonly COUNTER_LIST_HEIGHT = '48vp';
+  static readonly COUNTER_LIST_BUTTON_ICON_SIZE = '20vp';
+  static readonly COUNTER_LIST_BUTTON_SIZE = '32vp';
+  static readonly COUNTER_LIST_BUTTON_RADIUS = '16vp';
+  static readonly COUNTER_LIST_BUTTON_TEXT_DISTANCE = '8vp';
+  static readonly COUNTER_LIST_FOCUS_BORDER_SIZE = '30vp';
+  static readonly COUNTER_LIST_FOCUS_BORDER_RADIUS = '15vp';
+  static readonly COUNTER_LIST_BUTTON_HOT_SPOT_X = '-8vp';
+  static readonly COUNTER_LIST_BUTTON_HOT_SPOT_Y = '-8vp';
 
-  static readonly COUNTER_COMPACT_BUTTON_ICON_SIZE = '16vp'
-  static readonly COUNTER_COMPACT_BUTTON_SIZE = '24vp'
-  static readonly COUNTER_COMPACT_BUTTON_RADIUS = '12vp'
-  static readonly COUNTER_COMPACT_BUTTON_TEXT_DISTANCE = '10vp'
-  static readonly COUNTER_COMPACT_CONTAINER_HEIGHT = '28vp'
-  static readonly COUNTER_COMPACT_CONTAINER_RADIUS = '14vp'
-  static readonly COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE = '8vp'
-  static readonly COUNTER_COMPACT_FOCUS_BORDER_SIZE = '22vp'
-  static readonly COUNTER_COMPACT_FOCUS_BORDER_RADIUS = '11vp'
+  static readonly COUNTER_COMPACT_BUTTON_ICON_SIZE = '16vp';
+  static readonly COUNTER_COMPACT_BUTTON_SIZE = '24vp';
+  static readonly COUNTER_COMPACT_BUTTON_RADIUS = '12vp';
+  static readonly COUNTER_COMPACT_BUTTON_TEXT_DISTANCE = '10vp';
+  static readonly COUNTER_COMPACT_CONTAINER_HEIGHT = '28vp';
+  static readonly COUNTER_COMPACT_CONTAINER_RADIUS = '14vp';
+  static readonly COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE = '8vp';
+  static readonly COUNTER_COMPACT_FOCUS_BORDER_SIZE = '22vp';
+  static readonly COUNTER_COMPACT_FOCUS_BORDER_RADIUS = '11vp';
 
-  static readonly COUNTER_INLINE_BUTTON_ICON_WIDTH = '24vp'
-  static readonly COUNTER_INLINE_BUTTON_ICON_HEIGHT = '12vp'
-  static readonly COUNTER_INLINE_BUTTON_TEXT_DISTANCE = '12vp'
-  static readonly COUNTER_INLINE_CONTAINER_HEIGHT = '32vp'
-  static readonly COUNTER_INLINE_BUTTON_WIDTH = '32vp'
-  static readonly COUNTER_INLINE_BUTTON_HEIGHT = '16vp'
-  static readonly COUNTER_INLINE_RADIUS = '8vp'
-  static readonly COUNTER_INLINE_FOCUS_BORDER_WIDTH = '28vp'
-  static readonly COUNTER_INLINE_FOCUS_BORDER_HEIGHT = '13.5vp'
-  static readonly COUNTER_INLINE_DATE_TEXT_MARGIN = '12vp'
-  static readonly COUNTER_BUTTON_INITIAL_OPACITY = 1
-  static readonly COUNTER_BUTTON_DISABLE_OPACITY = 0.4
+  static readonly COUNTER_INLINE_BUTTON_ICON_WIDTH = '24vp';
+  static readonly COUNTER_INLINE_BUTTON_ICON_HEIGHT = '12vp';
+  static readonly COUNTER_INLINE_BUTTON_TEXT_DISTANCE = '12vp';
+  static readonly COUNTER_INLINE_CONTAINER_HEIGHT = '32vp';
+  static readonly COUNTER_INLINE_BUTTON_WIDTH = '32vp';
+  static readonly COUNTER_INLINE_BUTTON_HEIGHT = '16vp';
+  static readonly COUNTER_INLINE_RADIUS = '8vp';
+  static readonly COUNTER_INLINE_FOCUS_BORDER_WIDTH = '28vp';
+  static readonly COUNTER_INLINE_FOCUS_BORDER_HEIGHT = '13.5vp';
+  static readonly COUNTER_INLINE_DATE_TEXT_MARGIN = '12vp';
+  static readonly COUNTER_BUTTON_INITIAL_OPACITY = 1;
+  static readonly COUNTER_BUTTON_DISABLE_OPACITY = 0.4;
 }
 
 class CounterConstant {
-  static readonly COUNTER_MAX_YEAR = 5000
-  static readonly COUNTER_MIN_YEAR = 1
-  static readonly COUNTER_INITIAL_MONTH = 1
-  static readonly COUNTER_INITIAL_DAY = 1
-  static readonly COUNTER_INITIAL_STEP = 1
+  static readonly COUNTER_MAX_YEAR = 5000;
+  static readonly COUNTER_MIN_YEAR = 1;
+  static readonly COUNTER_INITIAL_MONTH = 1;
+  static readonly COUNTER_INITIAL_DAY = 1;
+  static readonly COUNTER_INITIAL_STEP = 1;
 
-  static readonly COUNTER_TEN_NUMBER = 10
-  static readonly COUNTER_MIN_MONTH = 1
-  static readonly COUNTER_MAX_MONTH = 12
-  static readonly COUNTER_MIN_DAY = 1
-  static readonly KEYCODE_DPAD_UP = 2012
-  static readonly KEYCODE_DPAD_DOWN = 2013
-  static readonly KEYCODE_DPAD_LEFT = 2014
-  static readonly KEYCODE_DPAD_RIGHT = 2015
-  static readonly KEYCODE_MOVE_HOME = 2081
-  static readonly KEYCODE_MOVE_END = 2082
-  static readonly KEYCODE_TAB = 2049
-  static readonly KEYCODE_ESC = 2070
-  static readonly COUNTER_MIN_VALUE = 0
-  static readonly COUNTER_MAX_VALUE = 999
+  static readonly COUNTER_TEN_NUMBER = 10;
+  static readonly COUNTER_MIN_MONTH = 1;
+  static readonly COUNTER_MAX_MONTH = 12;
+  static readonly COUNTER_MIN_DAY = 1;
+  static readonly KEYCODE_DPAD_UP = 2012;
+  static readonly KEYCODE_DPAD_DOWN = 2013;
+  static readonly KEYCODE_DPAD_LEFT = 2014;
+  static readonly KEYCODE_DPAD_RIGHT = 2015;
+  static readonly KEYCODE_MOVE_HOME = 2081;
+  static readonly KEYCODE_MOVE_END = 2082;
+  static readonly KEYCODE_TAB = 2049;
+  static readonly KEYCODE_ESC = 2070;
+  static readonly COUNTER_MIN_VALUE = 0;
+  static readonly COUNTER_MAX_VALUE = 999;
+  static readonly JANUARY = 1;
+  static readonly FEBRUARY = 2;
+  static readonly MARCH = 3;
+  static readonly APRIL = 4;
+  static readonly MAY = 5;
+  static readonly JUNE = 6;
+  static readonly JULY = 7;
+  static readonly AUGUST = 8;
+  static readonly SEPTEMBER = 9;
+  static readonly OCTOBER = 10;
+  static readonly NOVEMBER = 11;
+  static readonly DECEMBER = 12;
+  static readonly BIG_MONTH_DAYS = 31;
+  static readonly SMALL_MONTH_DAYS = 30;
+  static readonly FEBRUARY_DAYS = 28;
+  static readonly AUSPICIOUS_FEBRUARY_DAYS = 29;
+  static readonly AUSPICIOUS_FOUR = 4;
+  static readonly AUSPICIOUS_HUNDRED = 100;
+  static readonly AUSPICIOUS_FOUR_HUNDRED = 400;
 }
 
 @Component
@@ -222,8 +241,7 @@ export struct CounterComponent {
 
   private maxYear: number = CounterConstant.COUNTER_MAX_YEAR;
   private minYear: number = CounterConstant.COUNTER_MIN_YEAR;
-  private numberStrList: Array<string> = [ "00", "01", "02", "03", "04", "05", "06", "07", "08", "09"];
-
+  private numberStrList: Array<string> = [ '00', '01', '02', '03', '04', '05', '06', '07', '08', '09'];
   private onHoverIncrease?: (isHover?: boolean) => void;
   private onHoverDecrease?: (isHover?: boolean) => void;
   private onFocusIncrease?: () => void;
@@ -232,21 +250,17 @@ export struct CounterComponent {
   private onBlurDecrease?: () => void;
   private onChange?: (value: number) => void;
   private onDateChange?: (date: DateData) => void;
-
   private timeoutID1: number = -1;
   private timeoutID2: number = -1;
   private timeoutID3: number = -1;
-
   private numberStyleOptions: NumberStyleOptions;
   private dateStyleOptions: DateStyleOptions;
   private inlineStyleOptions: InlineStyleOptions;
   private timeStamp: number = 0;
   private hasTextWidth: boolean = false;
-
-
-  private controller1: TextInputController = new TextInputController()
-  private controller2: TextInputController = new TextInputController()
-  private controller3: TextInputController = new TextInputController()
+  private controller1: TextInputController = new TextInputController();
+  private controller2: TextInputController = new TextInputController();
+  private controller3: TextInputController = new TextInputController();
 
   convertNumberToString(value: number) {
     if (value >= 0 && value < CounterConstant.COUNTER_TEN_NUMBER) {
@@ -258,30 +272,30 @@ export struct CounterComponent {
   aboutToAppear(): void {
     let dateTime = new Date();
     this.timeStamp = dateTime.getTime();
-    if (this.options != undefined && this.options != null) {
+    if (this.options !== undefined && this.options !== null) {
       this.onOptionsChange();
     }
   }
 
   private updateNumberStyleOptions() {
-    if (this.numberStyleOptions.label == undefined) {
-      this.numberStyleOptions.label = "";
+    if (this.numberStyleOptions.label === undefined) {
+      this.numberStyleOptions.label = '';
     }
-    if (this.numberStyleOptions.value != undefined ) {
+    if (this.numberStyleOptions.value !== undefined ) {
       this.value = this.numberStyleOptions.value;
       this.inputValue = this.value.toString();
     }
-    if (this.numberStyleOptions.min != undefined &&
+    if (this.numberStyleOptions.min !== undefined &&
         this.numberStyleOptions.min < this.max &&
         this.numberStyleOptions.min >= this.min) {
       this.min = this.numberStyleOptions.min;
     }
-    if (this.numberStyleOptions.max != undefined &&
+    if (this.numberStyleOptions.max !== undefined &&
         this.numberStyleOptions.max > this.min &&
         this.numberStyleOptions.max <= this.max) {
       this.max = this.numberStyleOptions.max;
     }
-    if (this.numberStyleOptions.textWidth != undefined) {
+    if (this.numberStyleOptions.textWidth !== undefined) {
       this.textWidth = this.numberStyleOptions.textWidth;
       if (this.textWidth  < 0) {
         this.textWidth = 0;
@@ -289,68 +303,68 @@ export struct CounterComponent {
       this.hasTextWidth = true;
     }
     if (this.value <= this.min) {
-      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.subBtnStateEffect = false
-      this.subBtnEnabled = false
-      this.value = this.min
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
+      this.value = this.min;
       this.inputValue = this.value.toString();
     }
     if (this.value >= this.max) {
-      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.addBtnStateEffect = false
-      this.addBtnEnabled = false
-      this.value = this.max
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
+      this.value = this.max;
       this.inputValue = this.value.toString();
     }
-    if (this.numberStyleOptions.step != undefined) {
+    if (this.numberStyleOptions.step !== undefined) {
       this.step = this.numberStyleOptions.step;
     }
     this.updateNumberStyleOptionsEvent();
   }
 
   private updateNumberStyleOptionsEvent() {
-    if (this.numberStyleOptions.onHoverIncrease != undefined) {
+    if (this.numberStyleOptions.onHoverIncrease !== undefined) {
       this.onHoverIncrease = this.numberStyleOptions.onHoverIncrease;
     }
-    if (this.numberStyleOptions.onHoverDecrease != undefined) {
+    if (this.numberStyleOptions.onHoverDecrease !== undefined) {
       this.onHoverDecrease = this.numberStyleOptions.onHoverDecrease;
     }
-    if (this.numberStyleOptions.onFocusIncrease != undefined) {
+    if (this.numberStyleOptions.onFocusIncrease !== undefined) {
       this.onFocusIncrease = this.numberStyleOptions.onFocusIncrease;
     }
-    if (this.numberStyleOptions.onFocusDecrease != undefined) {
+    if (this.numberStyleOptions.onFocusDecrease !== undefined) {
       this.onFocusDecrease = this.numberStyleOptions.onFocusDecrease;
     }
-    if (this.numberStyleOptions.onBlurIncrease != undefined) {
+    if (this.numberStyleOptions.onBlurIncrease !== undefined) {
       this.onBlurIncrease = this.numberStyleOptions.onBlurIncrease;
     }
-    if (this.numberStyleOptions.onBlurDecrease != undefined) {
+    if (this.numberStyleOptions.onBlurDecrease !== undefined) {
       this.onBlurDecrease = this.numberStyleOptions.onBlurDecrease;
     }
-    if (this.numberStyleOptions.onChange != undefined) {
+    if (this.numberStyleOptions.onChange !== undefined) {
       this.onChange = this.numberStyleOptions.onChange;
     }
-    if (this.numberStyleOptions.focusable != undefined) {
+    if (this.numberStyleOptions.focusable !== undefined) {
       this.focusEnable = this.numberStyleOptions.focusable;
     }
   }
 
   private updateInlineStyleOptions() {
-    if (this.inlineStyleOptions.value != undefined) {
+    if (this.inlineStyleOptions.value !== undefined) {
         this.value = this.inlineStyleOptions.value;
         this.inputValue = this.value.toString();
     }
-    if (this.inlineStyleOptions.min != undefined) {
+    if (this.inlineStyleOptions.min !== undefined) {
       this.min = this.inlineStyleOptions.min;
     }
-    if (this.inlineStyleOptions.max != undefined) {
+    if (this.inlineStyleOptions.max !== undefined) {
       this.max = this.inlineStyleOptions.max;
     }
     if (this.min > this.max) {
       this.min = this.max;
     }
 
-    if (this.inlineStyleOptions.textWidth != undefined) {
+    if (this.inlineStyleOptions.textWidth !== undefined) {
       this.textWidth = this.inlineStyleOptions.textWidth;
       if (this.textWidth  < 0) {
         this.textWidth = 0;
@@ -358,93 +372,93 @@ export struct CounterComponent {
       this.hasTextWidth = true;
     }
     if (this.value <= this.min) {
-      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.subBtnStateEffect = false
-      this.subBtnEnabled = false
-      this.value = this.min
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
+      this.value = this.min;
       this.inputValue = this.value.toString();
     }
     if (this.value >= this.max) {
-      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.addBtnStateEffect = false
-      this.addBtnEnabled = false
-      this.value = this.max
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
+      this.value = this.max;
       this.inputValue = this.value.toString();
     }
-    if (this.inlineStyleOptions.step != undefined) {
+    if (this.inlineStyleOptions.step !== undefined) {
       this.step = this.inlineStyleOptions.step;
     }
     this.updateInlineStyleOptionsEvent();
   }
 
   private updateInlineStyleOptionsEvent() {
-    if (this.inlineStyleOptions.onHoverIncrease != undefined) {
+    if (this.inlineStyleOptions.onHoverIncrease !== undefined) {
       this.onHoverIncrease = this.inlineStyleOptions.onHoverIncrease;
     }
-    if (this.inlineStyleOptions.onHoverDecrease != undefined) {
+    if (this.inlineStyleOptions.onHoverDecrease !== undefined) {
       this.onHoverDecrease = this.inlineStyleOptions.onHoverDecrease;
     }
-    if (this.inlineStyleOptions.onFocusIncrease != undefined) {
+    if (this.inlineStyleOptions.onFocusIncrease !== undefined) {
       this.onFocusIncrease = this.inlineStyleOptions.onFocusIncrease;
     }
-    if (this.inlineStyleOptions.onFocusDecrease != undefined) {
+    if (this.inlineStyleOptions.onFocusDecrease !== undefined) {
       this.onFocusDecrease = this.inlineStyleOptions.onFocusDecrease;
     }
-    if (this.inlineStyleOptions.onBlurIncrease != undefined) {
+    if (this.inlineStyleOptions.onBlurIncrease !== undefined) {
       this.onBlurIncrease = this.inlineStyleOptions.onBlurIncrease;
     }
-    if (this.inlineStyleOptions.onBlurDecrease != undefined) {
+    if (this.inlineStyleOptions.onBlurDecrease !== undefined) {
       this.onBlurDecrease = this.inlineStyleOptions.onBlurDecrease;
     }
-    if (this.inlineStyleOptions.onChange != undefined) {
+    if (this.inlineStyleOptions.onChange !== undefined) {
       this.onChange = this.inlineStyleOptions.onChange;
     }
-    if (this.inlineStyleOptions.focusable != undefined) {
+    if (this.inlineStyleOptions.focusable !== undefined) {
       this.focusEnable = this.inlineStyleOptions.focusable;
     }
   }
 
   private updateDateStyleOptions() {
-    if (this.dateStyleOptions.step != undefined) {
+    if (this.dateStyleOptions.step !== undefined) {
       this.step = this.dateStyleOptions.step;
     }
-    if (this.dateStyleOptions.onHoverIncrease != undefined) {
+    if (this.dateStyleOptions.onHoverIncrease !== undefined) {
       this.onHoverIncrease = this.dateStyleOptions.onHoverIncrease;
     }
-    if (this.dateStyleOptions.onHoverDecrease != undefined) {
+    if (this.dateStyleOptions.onHoverDecrease !== undefined) {
       this.onHoverDecrease = this.dateStyleOptions.onHoverDecrease;
     }
-    if (this.dateStyleOptions.onFocusIncrease != undefined) {
+    if (this.dateStyleOptions.onFocusIncrease !== undefined) {
       this.onFocusIncrease = this.dateStyleOptions.onFocusIncrease;
     }
-    if (this.dateStyleOptions.onFocusDecrease != undefined) {
+    if (this.dateStyleOptions.onFocusDecrease !== undefined) {
       this.onFocusDecrease = this.dateStyleOptions.onFocusDecrease;
     }
-    if (this.dateStyleOptions.onBlurIncrease != undefined) {
+    if (this.dateStyleOptions.onBlurIncrease !== undefined) {
       this.onBlurIncrease = this.dateStyleOptions.onBlurIncrease;
     }
-    if (this.dateStyleOptions.onBlurDecrease != undefined) {
+    if (this.dateStyleOptions.onBlurDecrease !== undefined) {
       this.onBlurDecrease = this.dateStyleOptions.onBlurDecrease;
     }
-    if (this.dateStyleOptions.year != undefined &&
-    this.dateStyleOptions.year >= this.minYear &&
-    this.dateStyleOptions.year <= this.maxYear) {
+    if (this.dateStyleOptions.year !== undefined &&
+        this.dateStyleOptions.year >= this.minYear &&
+        this.dateStyleOptions.year <= this.maxYear) {
       this.year = this.dateStyleOptions.year;
     }
-    if (this.dateStyleOptions.month != undefined &&
-    this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
-    this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
+    if (this.dateStyleOptions.month !== undefined &&
+        this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
+        this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
       this.month = this.dateStyleOptions.month;
     }
-    if (this.dateStyleOptions.day != undefined &&
-    this.dateStyleOptions.day <= this.getDayNumber() &&
-    this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
+    if (this.dateStyleOptions.day !== undefined &&
+        this.dateStyleOptions.day <= this.getDayNumber() &&
+        this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
       this.day = this.dateStyleOptions.day;
     }
-    if (this.dateStyleOptions.onDateChange != undefined) {
+    if (this.dateStyleOptions.onDateChange !== undefined) {
       this.onDateChange = this.dateStyleOptions.onDateChange;
     }
-    if (this.dateStyleOptions.focusable != undefined) {
+    if (this.dateStyleOptions.focusable !== undefined) {
       this.focusEnable = this.dateStyleOptions.focusable;
     }
     this.updateDay();
@@ -452,14 +466,14 @@ export struct CounterComponent {
 
   private onOptionsChange() {
     this.type = this.options.type;
-    if (this.type == CounterType.LIST ||
-        this.type == CounterType.COMPACT) {
+    if (this.type === CounterType.LIST ||
+        this.type === CounterType.COMPACT) {
       this.numberStyleOptions = this.options.counterOptions;
       this.updateNumberStyleOptions();
-    } else if (this.type == CounterType.INLINE) {
+    } else if (this.type === CounterType.INLINE) {
       this.inlineStyleOptions = this.options.counterOptions;
       this.updateInlineStyleOptions();
-    } else if (this.type == CounterType.INLINE_DATE) {
+    } else if (this.type === CounterType.INLINE_DATE) {
       this.dateStyleOptions = this.options.counterOptions;
       this.updateDateStyleOptions();
     } else {
@@ -474,40 +488,40 @@ export struct CounterComponent {
     if (!this.addBtnStateEffect) {
       this.addBtnStateEffect = true;
       this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
-      this.addBtnEnabled = true
+      this.addBtnEnabled = true;
     }
     if (this.value <= this.min) {
-      this.value = this.min
-      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.subBtnStateEffect = false
-      this.subBtnEnabled = false
+      this.value = this.min;
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
     } else {
-      if (this.subOpacity == CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
-        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY
+      if (this.subOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
       }
       if (!this.subBtnStateEffect) {
-        this.subBtnStateEffect = true
+        this.subBtnStateEffect = true;
       }
       if (!this.subBtnEnabled) {
-        this.subBtnEnabled = true
+        this.subBtnEnabled = true;
       }
     }
     this.focusText1();
   }
 
   private focusText1() {
-    if (this.type == CounterType.INLINE) {
-      if (this.focusText == FocusText.NONE) {
-        this.focusText = FocusText.TEXT1
-        this.hasFocusText1 = true
-        this.focusWithTarget("InlineTextInput" + this.timeStamp.toString())
+    if (this.type === CounterType.INLINE) {
+      if (this.focusText === FocusText.NONE) {
+        this.focusText = FocusText.TEXT1;
+        this.hasFocusText1 = true;
+        this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
       }
     }
   }
 
   private addValue(): void {
     if (this.addBtnStateEffect) {
-      this.value += this.step
+      this.value += this.step;
     }
 
     if (!this.subBtnStateEffect) {
@@ -517,18 +531,18 @@ export struct CounterComponent {
     }
     if (this.value >= this.max) {
       this.value = this.max;
-      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.addBtnStateEffect = false
-      this.addBtnEnabled = false
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
     } else {
-      if (this.addOpacity == CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
-        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY
+      if (this.addOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
       }
       if (!this.addBtnStateEffect) {
-        this.addBtnStateEffect = true
+        this.addBtnStateEffect = true;
       }
       if (!this.addBtnEnabled) {
-        this.addBtnEnabled = true
+        this.addBtnEnabled = true;
       }
     }
 
@@ -537,39 +551,39 @@ export struct CounterComponent {
 
   private getDayNumber(): number {
     switch(this.month) {
-      case 1:
-      case 3:
-      case 5:
-      case 7:
-      case 8:
-      case 10:
-      case 12:
-        return 31;
+      case CounterConstant.JANUARY:
+      case CounterConstant.MARCH:
+      case CounterConstant.MAY:
+      case CounterConstant.JULY:
+      case CounterConstant.AUGUST:
+      case CounterConstant.OCTOBER:
+      case CounterConstant.DECEMBER:
+        return CounterConstant.BIG_MONTH_DAYS;
         break;
-      case 4:
-      case 6:
-      case 9:
-      case 11:
-        return 30;
+      case CounterConstant.APRIL:
+      case CounterConstant.JUNE:
+      case CounterConstant.SEPTEMBER:
+      case CounterConstant.NOVEMBER:
+        return CounterConstant.SMALL_MONTH_DAYS;
         break;
-      case 2:
-        if ((this.year % 4 == 0 &&
-            this.year % 100 != 0) ||
-            this.year % 400 == 0) {
-          return 29
+      case CounterConstant.FEBRUARY:
+        if ((this.year % CounterConstant.AUSPICIOUS_FOUR === 0 &&
+            this.year % CounterConstant.AUSPICIOUS_HUNDRED !== 0) ||
+            this.year % CounterConstant.AUSPICIOUS_FOUR_HUNDRED === 0) {
+          return CounterConstant.AUSPICIOUS_FEBRUARY_DAYS;
         } else {
-          return 28;
+          return CounterConstant.FEBRUARY_DAYS;
         }
-        break
+        break;
       default:
-        break
+        break;
     }
   }
 
   private subDate(): void {
-    if (this.focusText == FocusText.TEXT1) {
+    if (this.focusText === FocusText.TEXT1) {
       if (this.subBtnStateEffect) {
-        this.inputYear = this.year
+        this.inputYear = this.year;
         this.year -= this.step;
         if (!this.hasFocusText1) {
           this.hasFocusText1 = true;
@@ -578,35 +592,35 @@ export struct CounterComponent {
       if (!this.addBtnStateEffect) {
         this.addBtnStateEffect = true;
         this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
-        this.addBtnEnabled = true
+        this.addBtnEnabled = true;
       }
       if (this.year <= this.minYear) {
-        this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-        this.subBtnStateEffect = false
-        this.subBtnEnabled = false
+        this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+        this.subBtnStateEffect = false;
+        this.subBtnEnabled = false;
       } else {
-        if (this.subOpacity == CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
-          this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY
+        if (this.subOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+          this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
         }
         if (!this.subBtnStateEffect) {
-          this.subBtnStateEffect = true
+          this.subBtnStateEffect = true;
         }
         if (!this.subBtnEnabled) {
-          this.subBtnEnabled = true
+          this.subBtnEnabled = true;
         }
       }
-    } else if (this.focusText == FocusText.TEXT2) {
-      this.month -= this.step % CounterConstant.COUNTER_MAX_MONTH
+    } else if (this.focusText === FocusText.TEXT2) {
+      this.month -= this.step % CounterConstant.COUNTER_MAX_MONTH;
       if (this.month < CounterConstant.COUNTER_MIN_MONTH) {
-        this.month += CounterConstant.COUNTER_MAX_MONTH
+        this.month += CounterConstant.COUNTER_MAX_MONTH;
       }
       if (!this.hasFocusText2) {
         this.hasFocusText2 = true;
       }
-    } else if (this.focusText == FocusText.TEXT3) {
-      this.day -= this.step % this.getDayNumber()
+    } else if (this.focusText === FocusText.TEXT3) {
+      this.day -= this.step % this.getDayNumber();
       if (this.day < CounterConstant.COUNTER_MIN_DAY) {
-        this.day += this.getDayNumber()
+        this.day += this.getDayNumber();
       }
       if (!this.hasFocusText3) {
         this.hasFocusText3 = true;
@@ -617,20 +631,20 @@ export struct CounterComponent {
   }
 
   private focusDayWitdhSub() {
-    this.focusText = FocusText.TEXT3
-    this.hasFocusText3 = true
-    this.day -= this.step % this.getDayNumber()
+    this.focusText = FocusText.TEXT3;
+    this.hasFocusText3 = true;
+    this.day -= this.step % this.getDayNumber();
     if (this.day < CounterConstant.COUNTER_MIN_DAY) {
-      this.day += this.getDayNumber()
+      this.day += this.getDayNumber();
     }
-    this.focusWithTarget("DateTextInput3" + this.timeStamp.toString())
+    this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
   }
 
   private addDate(): void {
-    if (this.focusText == FocusText.TEXT1) {
+    if (this.focusText === FocusText.TEXT1) {
       if (this.addBtnStateEffect) {
-        this.inputYear = this.year
-        this.year += this.step
+        this.inputYear = this.year;
+        this.year += this.step;
         if (!this.hasFocusText1) {
           this.hasFocusText1 = true;
         }
@@ -638,35 +652,35 @@ export struct CounterComponent {
       if (!this.subBtnStateEffect) {
         this.subBtnStateEffect = true;
         this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
-        this.subBtnEnabled = true
+        this.subBtnEnabled = true;
       }
       if (this.year >= this.maxYear) {
-        this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-        this.addBtnStateEffect = false
-        this.addBtnEnabled = false
+        this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+        this.addBtnStateEffect = false;
+        this.addBtnEnabled = false;
       } else {
-        if (this.addOpacity == CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+        if (this.addOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
           this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
         }
         if (!this.addBtnStateEffect) {
-          this.addBtnStateEffect = true
+          this.addBtnStateEffect = true;
         }
         if (!this.addBtnEnabled) {
-          this.addBtnEnabled = true
+          this.addBtnEnabled = true;
         }
       }
-    } else if (this.focusText == FocusText.TEXT2) {
-      this.month += this.step % CounterConstant.COUNTER_MAX_MONTH
+    } else if (this.focusText === FocusText.TEXT2) {
+      this.month += this.step % CounterConstant.COUNTER_MAX_MONTH;
       if (this.month > CounterConstant.COUNTER_MAX_MONTH) {
-        this.month -= CounterConstant.COUNTER_MAX_MONTH
+        this.month -= CounterConstant.COUNTER_MAX_MONTH;
       }
       if (!this.hasFocusText2) {
         this.hasFocusText2 = true;
       }
-    } else if (this.focusText == FocusText.TEXT3) {
-      this.day += this.step % this.getDayNumber()
+    } else if (this.focusText === FocusText.TEXT3) {
+      this.day += this.step % this.getDayNumber();
       if (this.day > this.getDayNumber()) {
-        this.day -= this.getDayNumber()
+        this.day -= this.getDayNumber();
       }
       if (!this.hasFocusText3) {
         this.hasFocusText3 = true;
@@ -677,65 +691,65 @@ export struct CounterComponent {
   }
 
   private focusDayWithAdd() {
-    this.focusText = FocusText.TEXT3
-    this.hasFocusText3 = true
-    this.day += this.step % this.getDayNumber()
+    this.focusText = FocusText.TEXT3;
+    this.hasFocusText3 = true;
+    this.day += this.step % this.getDayNumber();
     if (this.day > this.getDayNumber()) {
-      this.day -= this.getDayNumber()
+      this.day -= this.getDayNumber();
     }
-    this.focusWithTarget("DateTextInput3" + this.timeStamp.toString())
+    this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
   }
 
   private updateInlineEnableSate() {
     if (this.value >= this.max) {
-      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.addBtnStateEffect = false
-      this.addBtnEnabled = false
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
     } else {
-      this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY
-      this.addBtnStateEffect = true
-      this.addBtnEnabled = true
+      this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      this.addBtnStateEffect = true;
+      this.addBtnEnabled = true;
     }
     if (this.value <= this.min) {
-      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.subBtnStateEffect = false
-      this.subBtnEnabled = false
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
     } else {
-      this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY
-      this.subBtnStateEffect = true
-      this.subBtnEnabled = true
+      this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+      this.subBtnStateEffect = true;
+      this.subBtnEnabled = true;
     }
   }
 
   private updateDateEnableSate() {
-    if (this.year == this.maxYear && this.focusText == FocusText.TEXT1) {
-      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.addBtnStateEffect = false
-      this.addBtnEnabled = false
+    if (this.year === this.maxYear && this.focusText === FocusText.TEXT1) {
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
     } else {
-      if (this.addOpacity == CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
-        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY
+      if (this.addOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
       }
       if (!this.addBtnStateEffect) {
-        this.addBtnStateEffect = true
+        this.addBtnStateEffect = true;
       }
       if (!this.addBtnEnabled) {
-        this.addBtnEnabled = true
+        this.addBtnEnabled = true;
       }
     }
-    if (this.year == this.minYear && this.focusText == FocusText.TEXT1) {
-      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.subBtnStateEffect = false
-      this.subBtnEnabled = false
+    if (this.year === this.minYear && this.focusText === FocusText.TEXT1) {
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
     } else {
-      if (this.subOpacity == CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
-        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY
+      if (this.subOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
       }
       if (!this.subBtnStateEffect) {
-        this.subBtnStateEffect = true
+        this.subBtnStateEffect = true;
       }
       if (!this.subBtnEnabled) {
-        this.subBtnEnabled = true
+        this.subBtnEnabled = true;
       }
     }
   }
@@ -747,29 +761,29 @@ export struct CounterComponent {
   }
 
   private resetFocusText() {
-    this.focusText = FocusText.NONE
-    this.hasFocusText1 = false
-    this.hasFocusText2 = false
-    this.hasFocusText3 = false
+    this.focusText = FocusText.NONE;
+    this.hasFocusText1 = false;
+    this.hasFocusText2 = false;
+    this.hasFocusText3 = false;
   }
 
   private resetFocusButton() {
-    if (this.addBtnFocusWidh == CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
-      this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-      this.onBlurIncrease && this.onBlurIncrease()
+    if (this.addBtnFocusWidh === CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
+      this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+      this.onBlurIncrease && this.onBlurIncrease();
     }
-    if (this.subBtnFocusWidh == CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
-      this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-      this.onBlurDecrease && this.onBlurDecrease()
+    if (this.subBtnFocusWidh === CounterResource.BUTTON_BORDER_FOCUSED_WIDTH) {
+      this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+      this.onBlurDecrease && this.onBlurDecrease();
     }
   }
 
   private homeFocusText() {
-    this.focusWithTarget("DateTextInput1" + this.timeStamp.toString())
+    this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
   }
 
   private endFocusText() {
-    this.focusWithTarget("DateTextInput3" + this.timeStamp.toString())
+    this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
   }
 
   private homeFirstValue() {
@@ -777,7 +791,7 @@ export struct CounterComponent {
     if (!this.addBtnStateEffect) {
       this.addBtnStateEffect = true;
       this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
-      this.addBtnEnabled = true
+      this.addBtnEnabled = true;
     }
   }
 
@@ -795,11 +809,11 @@ export struct CounterComponent {
       if (!this.addBtnStateEffect) {
         this.addBtnStateEffect = true;
         this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
-        this.addBtnEnabled = true
+        this.addBtnEnabled = true;
       }
-      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.subBtnStateEffect = false
-      this.subBtnEnabled = false
+      this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.subBtnStateEffect = false;
+      this.subBtnEnabled = false;
     }
     if (this.value >= this.max) {
       if (!this.subBtnStateEffect) {
@@ -807,28 +821,28 @@ export struct CounterComponent {
         this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
         this.subBtnEnabled = true;
       }
-      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY
-      this.addBtnStateEffect = false
-      this.addBtnEnabled = false
+      this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+      this.addBtnStateEffect = false;
+      this.addBtnEnabled = false;
     }
   }
 
   private getValue() {
-    return this.hasInputText1? this.inputValue : this.value.toString()
+    return this.hasInputText1? this.inputValue : this.value.toString();
   }
 
   private getValueLength() {
-    return this.getValue().length > 0 ? this.getValue().length : 1
+    return this.getValue().length > 0 ? this.getValue().length : 1;
   }
 
   private getYear() {
-    let year: string = this.year.toString()
-    if (year.length == 1) {
-      year = "000" + year;
-    } else if (year.length == 2) {
-      year = "00" + year;
-    } else if (year.length == 3) {
-      year = "0" + year;
+    let year: string = this.year.toString();
+    if (year.length === 1) {
+      year = '000' + year;
+    } else if (year.length === 2) {
+      year = '00' + year;
+    } else if (year.length === 3) {
+      year = '0' + year;
     } else {
       year = year;
     }
@@ -837,33 +851,33 @@ export struct CounterComponent {
 
   private focusWithTarget(key: string) {
     setTimeout(()=>{
-      var res = focusControl.requestFocus(key)
+      var res = focusControl.requestFocus(key);
       if (res) {
-        console.log('Request success')
+        console.log('Request success');
       } else {
-        console.log('Request failed')
+        console.log('Request failed');
       }
     });
   }
 
   private focusCurrentText(text: FocusText) {
-    if (text == FocusText.TEXT1) {
-      if (this.focusText == FocusText.NONE) {
-        this.focusText = FocusText.TEXT1
+    if (text === FocusText.TEXT1) {
+      if (this.focusText === FocusText.NONE) {
+        this.focusText = FocusText.TEXT1;
       }
       if (!this.hasFocusText1) {
         this.hasFocusText1 = true;
       }
-    } else if (text == FocusText.TEXT2) {
-      if (this.focusText == FocusText.NONE) {
-        this.focusText = FocusText.TEXT2
+    } else if (text === FocusText.TEXT2) {
+      if (this.focusText === FocusText.NONE) {
+        this.focusText = FocusText.TEXT2;
       }
       if (!this.hasFocusText2) {
         this.hasFocusText2 = true;
       }
-    } else if (text == FocusText.TEXT3) {
-      if (this.focusText == FocusText.NONE) {
-        this.focusText = FocusText.TEXT3
+    } else if (text === FocusText.TEXT3) {
+      if (this.focusText === FocusText.NONE) {
+        this.focusText = FocusText.TEXT3;
       }
       if (!this.hasFocusText3) {
         this.hasFocusText3 = true;
@@ -882,26 +896,19 @@ export struct CounterComponent {
   }
 
   build() {
-    if (this.type == CounterType.LIST) {
+    if (this.type === CounterType.LIST) {
       RelativeContainer() {
         Text(this.numberStyleOptions.label)
           .fontSize(CounterResource.COUNTER_LIST_LABEL_SIZE)
           .fontColor(CounterResource.COUNTER_TEXT_COLOR)
           .margin({ left: CounterResource.COUNTER_LIST_LEFT_PADDING})
           .alignRules({
-            center: {anchor: "__container__", align: VerticalAlign.Center},
-            left: {anchor: "__container__", align: HorizontalAlign.Start}
+            center: {anchor: '__container__', align: VerticalAlign.Center},
+            left: {anchor: '__container__', align: HorizontalAlign.Start}
           })
-          .id("Text")
+          .id('Text')
         Row() {
           Stack() {
-            Rect()
-              .width(CounterResource.COUNTER_LIST_FOCUS_BORDER_SIZE)
-              .height(CounterResource.COUNTER_LIST_FOCUS_BORDER_SIZE)
-              .radius(CounterResource.COUNTER_LIST_FOCUS_BORDER_RADIUS)
-              .strokeWidth(this.subBtnFocusWidh)
-              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
-              .fillOpacity(0)
             Image(CounterResource.BUTTON_SUB_ICON)
               .width(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE)
               .height(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE)
@@ -920,66 +927,68 @@ export struct CounterComponent {
               .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
               .opacity(this.subOpacity)
               .enabled(this.subBtnEnabled)
-              .key("ListSubButton" + this.timeStamp.toString())
+              .key('ListSubButton' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-                if (event.keyCode == CounterConstant.KEYCODE_ESC) {
+                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                   this.resetFocusButton();
                   event.stopPropagation();
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_MOVE_HOME) {
-                  event.stopPropagation()
-                  this.homeFirstValue()
-                  this.focusWithTarget("ListAddButton" + this.timeStamp.toString())
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                  event.stopPropagation();
+                  this.homeFirstValue();
+                  this.focusWithTarget('ListAddButton' + this.timeStamp.toString());
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_MOVE_END) {
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
                   event.stopPropagation();
                   if (this.addBtnStateEffect) {
                     this.addBtnStateEffect = false;
                     this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-                    this.addBtnEnabled = false
+                    this.addBtnEnabled = false;
                   }
-                  this.endLastValue()
-                  this.focusWithTarget("ListAddButton" + this.timeStamp.toString())
+                  this.endLastValue();
+                  this.focusWithTarget('ListAddButton' + this.timeStamp.toString());
                 }
               })
               .onClick((event: ClickEvent) => {
-                this.subValue()
-                this.onChange && this.onChange(this.value)
-                if (event.source == SourceType.Mouse ||
-                    event.source == SourceType.TouchScreen) {
-                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                this.subValue();
+                this.onChange && this.onChange(this.value);
+                if (event.source === SourceType.Mouse ||
+                    event.source === SourceType.TouchScreen) {
+                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
               })
               .gesture(
                 LongPressGesture({ repeat: true })
                   .onAction((event: GestureEvent) => {
                     if (event.repeat) {
-                      this.subValue()
-                      this.onChange && this.onChange(this.value)
+                      this.subValue();
+                      this.onChange && this.onChange(this.value);
                     }
-                    this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                    this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
               )
               .hoverEffect(this.choverEffect)
               .onHover((isHover: boolean) => {
-                this.onHoverDecrease && this.onHoverDecrease(isHover)
+                this.onHoverDecrease && this.onHoverDecrease(isHover);
               })
               .focusable(this.focusEnable)
               .onFocus(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-                this.onFocusDecrease && this.onFocusDecrease()
+                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusDecrease && this.onFocusDecrease();
                 this.updateButtonStatus();
               })
               .onBlur(() => {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-                this.onBlurDecrease && this.onBlurDecrease()
+                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurDecrease && this.onBlurDecrease();
               })
           }.width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
           .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
           .borderRadius(CounterResource.COUNTER_LIST_BUTTON_RADIUS)
+          .borderWidth(this.subBtnFocusWidh)
+          .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
           .clip(true)
 
           if (this.hasTextWidth) {
@@ -1004,13 +1013,6 @@ export struct CounterComponent {
           }
 
           Stack() {
-            Rect()
-              .width(CounterResource.COUNTER_LIST_FOCUS_BORDER_SIZE)
-              .height(CounterResource.COUNTER_LIST_FOCUS_BORDER_SIZE)
-              .radius(CounterResource.COUNTER_LIST_FOCUS_BORDER_RADIUS)
-              .strokeWidth(this.addBtnFocusWidh)
-              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
-              .fillOpacity(0)
             Image(CounterResource.BUTTON_ADD_ICON)
               .width(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE)
               .height(CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE)
@@ -1028,91 +1030,85 @@ export struct CounterComponent {
               .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
               .opacity(this.addOpacity)
               .enabled(this.addBtnEnabled)
-              .key("ListAddButton" + this.timeStamp.toString())
+              .key('ListAddButton' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
                 this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-                if (event.keyCode == CounterConstant.KEYCODE_ESC) {
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                   this.resetFocusButton();
                   event.stopPropagation();
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_MOVE_HOME) {
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
                   event.stopPropagation();
-                  this.homeFirstValue()
+                  this.homeFirstValue();
                   if (this.subBtnStateEffect) {
                     this.subBtnStateEffect = false;
                     this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-                    this.subBtnEnabled = false
+                    this.subBtnEnabled = false;
                   }
-                  this.focusWithTarget("ListAddButton" + this.timeStamp.toString())
+                  this.focusWithTarget('ListAddButton' + this.timeStamp.toString());
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_MOVE_END) {
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
                   event.stopPropagation();
-                  this.endLastValue()
-                  this.focusWithTarget("ListSubButton" + this.timeStamp.toString())
+                  this.endLastValue();
+                  this.focusWithTarget('ListSubButton' + this.timeStamp.toString());
                 }
               })
               .onClick((event: ClickEvent) => {
-                this.addValue()
-                this.onChange && this.onChange(this.value)
-                if (event.source == SourceType.Mouse ||
-                    event.source == SourceType.TouchScreen) {
-                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                this.addValue();
+                this.onChange && this.onChange(this.value);
+                if (event.source === SourceType.Mouse ||
+                    event.source === SourceType.TouchScreen) {
+                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
               })
               .gesture(
                 LongPressGesture({ repeat: true })
                   .onAction((event: GestureEvent) => {
                     if (event.repeat) {
-                      this.addValue()
-                      this.onChange && this.onChange(
-                        this.value)
+                      this.addValue();
+                      this.onChange && this.onChange(this.value);
                     }
-                    this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                    this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   })
               )
               .hoverEffect(this.choverEffect)
               .onHover((isHover: boolean) => {
-                this.onHoverIncrease && this.onHoverIncrease(isHover)
+                this.onHoverIncrease && this.onHoverIncrease(isHover);
               })
               .focusable(this.focusEnable)
               .onFocus(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-                this.onFocusIncrease && this.onFocusIncrease()
+                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+                this.onFocusIncrease && this.onFocusIncrease();
                 this.updateButtonStatus();
               })
               .onBlur(() => {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-                this.onBlurIncrease && this.onBlurIncrease()
+                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                this.onBlurIncrease && this.onBlurIncrease();
               })
           }.width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
           .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
           .borderRadius(CounterResource.COUNTER_LIST_BUTTON_RADIUS)
+          .borderWidth(this.addBtnFocusWidh)
+          .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
           .clip(true)
         }
         .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
         .margin({ right: CounterResource.COUNTER_LIST_RIGHT_PADDING })
         .alignRules({
-          center: { anchor: "__container__", align: VerticalAlign.Center },
-          right: { anchor: "__container__", align: HorizontalAlign.End }
+          center: { anchor: '__container__', align: VerticalAlign.Center },
+          right: { anchor: '__container__', align: HorizontalAlign.End }
         })
         .tabIndex(0)
-        .id("Row1")
+        .id('Row1')
       }
       .width('100%')
       .height(CounterResource.COUNTER_LIST_HEIGHT)
-    } else if (this.type == CounterType.COMPACT) {
+    } else if (this.type === CounterType.COMPACT) {
       Column() {
         Row() {
           Stack() {
-            Rect()
-              .width(CounterResource.COUNTER_COMPACT_FOCUS_BORDER_SIZE)
-              .height(CounterResource.COUNTER_COMPACT_FOCUS_BORDER_SIZE)
-              .radius(CounterResource.COUNTER_COMPACT_FOCUS_BORDER_RADIUS)
-              .strokeWidth(this.subBtnFocusWidh)
-              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
-              .fillOpacity(0)
             Image(CounterResource.BUTTON_SUB_ICON)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE)
               .height(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE)
@@ -1124,71 +1120,72 @@ export struct CounterComponent {
             .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
             .opacity(this.subOpacity)
             .enabled(this.subBtnEnabled)
-            .key("CompactSubButton" + this.timeStamp.toString())
+            .key('CompactSubButton' + this.timeStamp.toString())
             .onKeyEvent((event: KeyEvent) => {
               this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-              if (event.keyCode == CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusButton();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_HOME) {
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
                 event.stopPropagation();
-                this.homeFirstValue()
-                this.focusWithTarget("CompactAddButton" + this.timeStamp.toString())
+                this.homeFirstValue();
+                this.focusWithTarget('CompactAddButton' + this.timeStamp.toString());
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_END) {
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
                 event.stopPropagation();
-                this.endLastValue()
+                this.endLastValue();
                 if (this.addBtnStateEffect) {
                   this.addBtnStateEffect = false;
                   this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-                  this.addBtnEnabled = false
+                  this.addBtnEnabled = false;
                 }
-                this.focusWithTarget("CompactSubButton" + this.timeStamp.toString())
+                this.focusWithTarget('CompactSubButton' + this.timeStamp.toString());
               }
             })
             .onClick((event: ClickEvent) => {
-              this.subValue()
-              this.onChange && this.onChange(this.value)
-              if (event.source == SourceType.Mouse ||
-                  event.source == SourceType.TouchScreen) {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+              this.subValue();
+              this.onChange && this.onChange(this.value);
+              if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             })
             .gesture(
               LongPressGesture({ repeat: true })
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
-                    this.subValue()
-                    this.onChange && this.onChange(
-                      this.value)
+                    this.subValue();
+                    this.onChange && this.onChange(this.value);
                   }
-                  if (event.source == SourceType.Mouse ||
-                      event.source == SourceType.TouchScreen) {
-                    this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                  if (event.source === SourceType.Mouse ||
+                      event.source === SourceType.TouchScreen) {
+                    this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   }
                 })
             )
             .hoverEffect(this.choverEffect)
             .onHover((isHover: boolean) => {
-              this.onHoverDecrease && this.onHoverDecrease(isHover)
+              this.onHoverDecrease && this.onHoverDecrease(isHover);
             })
             .focusable(this.focusEnable)
             .groupDefaultFocus(true)
             .onFocus(()=>{
-              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-              this.onFocusDecrease && this.onFocusDecrease()
+              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+              this.onFocusDecrease && this.onFocusDecrease();
               this.updateButtonStatus();
             })
             .onBlur(()=>{
-              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-              this.onBlurDecrease && this.onBlurDecrease()
+              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+              this.onBlurDecrease && this.onBlurDecrease();
             })
           }.width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
           .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
           .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
+          .borderWidth(this.subBtnFocusWidh)
+          .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
           .margin({left: '1vp'})
           .clip(true)
 
@@ -1214,13 +1211,6 @@ export struct CounterComponent {
           }
 
           Stack() {
-            Rect()
-              .width(CounterResource.COUNTER_COMPACT_FOCUS_BORDER_SIZE)
-              .height(CounterResource.COUNTER_COMPACT_FOCUS_BORDER_SIZE)
-              .radius(CounterResource.COUNTER_COMPACT_FOCUS_BORDER_RADIUS)
-              .strokeWidth(this.addBtnFocusWidh)
-              .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
-              .fillOpacity(0)
             Image(CounterResource.BUTTON_ADD_ICON)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE)
               .height(CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE)
@@ -1232,70 +1222,72 @@ export struct CounterComponent {
             .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
             .opacity(this.addOpacity)
             .enabled(this.addBtnEnabled)
-            .key("CompactAddButton" + this.timeStamp.toString())
+            .key('CompactAddButton' + this.timeStamp.toString())
             .onKeyEvent((event: KeyEvent) => {
               this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-              if (event.keyCode == CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusButton();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_HOME) {
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
                 event.stopPropagation();
-                this.homeFirstValue()
+                this.homeFirstValue();
                 if (this.subBtnStateEffect) {
                   this.subBtnStateEffect = false;
                   this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
-                  this.subBtnEnabled = false
+                  this.subBtnEnabled = false;
                 }
-                this.focusWithTarget("CompactAddButton" + this.timeStamp.toString())
+                this.focusWithTarget('CompactAddButton' + this.timeStamp.toString());
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_END) {
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
                 event.stopPropagation();
-                this.endLastValue()
-                this.focusWithTarget("CompactSubButton" + this.timeStamp.toString())
+                this.endLastValue();
+                this.focusWithTarget('CompactSubButton' + this.timeStamp.toString());
               }
             })
             .onClick((event: ClickEvent) => {
-              this.addValue()
-              this.onChange && this.onChange(this.value)
-              if (event.source == SourceType.Mouse ||
-                  event.source == SourceType.TouchScreen) {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+              this.addValue();
+              this.onChange && this.onChange(this.value);
+              if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             })
             .gesture(
               LongPressGesture({ repeat: true })
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
-                    this.addValue()
-                    this.onChange && this.onChange(this.value)
+                    this.addValue();
+                    this.onChange && this.onChange(this.value);
                   }
-                  if (event.source == SourceType.Mouse ||
-                      event.source == SourceType.TouchScreen) {
-                    this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                  if (event.source === SourceType.Mouse ||
+                      event.source === SourceType.TouchScreen) {
+                    this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                   }
                 })
             )
             .hoverEffect(this.choverEffect)
             .onHover((isHover: boolean) => {
-              this.onHoverIncrease && this.onHoverIncrease(isHover)
+              this.onHoverIncrease && this.onHoverIncrease(isHover);
             })
             .focusable(this.focusEnable)
             .onFocus(()=>{
-              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-              this.onFocusIncrease && this.onFocusIncrease()
+              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+              this.onFocusIncrease && this.onFocusIncrease();
               this.updateButtonStatus();
             })
             .onBlur(()=>{
-              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-              this.onBlurIncrease && this.onBlurIncrease()
+              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+              this.onBlurIncrease && this.onBlurIncrease();
             })
           }
           .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
           .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
           .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
+          .borderWidth(this.addBtnFocusWidh)
+          .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
           .margin({right: '1vp'})
           .clip(true)
         }
@@ -1311,7 +1303,7 @@ export struct CounterComponent {
           .fontColor(CounterResource.COUNTER_TEXT_COLOR)
           .align(Alignment.Top)
       }
-    } else if (this.type == CounterType.INLINE) {
+    } else if (this.type === CounterType.INLINE) {
       Row() {
         if (this.hasTextWidth) {
           RelativeContainer() {
@@ -1320,8 +1312,8 @@ export struct CounterComponent {
                 controller: this.controller1
               })
               .alignRules({
-                center: {anchor: "__container__", align: VerticalAlign.Center},
-                middle: {anchor: "__container__", align: HorizontalAlign.Center}
+                center: {anchor: '__container__', align: VerticalAlign.Center},
+                middle: {anchor: '__container__', align: HorizontalAlign.Center}
               })
               .width(this.getValueLength() * 9.6)
               .height('20vp')
@@ -1332,75 +1324,76 @@ export struct CounterComponent {
               .caretColor(Color.Transparent)
               .copyOption(CopyOptions.None)
               .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+              .fontWeight(FontWeight.Medium)
               .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
               .maxLength(this.getMaxLength())
               .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
-              .key("InlineTextInput" + this.timeStamp.toString())
+              .key('InlineTextInput' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
                 this.focusCurrentText(FocusText.TEXT1)
-                if (event.keyCode == CounterConstant.KEYCODE_ESC) {
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                   this.resetFocusText();
                   event.stopPropagation();
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_DPAD_UP) {
-                  this.addValue()
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                  this.addValue();
                   event.stopPropagation();
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_MOVE_HOME) {
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
                   event.stopPropagation();
-                  this.focusWithTarget("InlineTextInput" + this.timeStamp.toString())
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_MOVE_END) {
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
                   event.stopPropagation();
-                  this.focusWithTarget("InlineTextInput" + this.timeStamp.toString())
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_DPAD_DOWN) {
-                  this.subValue()
-                  event.stopPropagation();
-                }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_DPAD_LEFT) {
-                  this.focusWithTarget("InlineTextInput" + this.timeStamp.toString())
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                  this.subValue();
                   event.stopPropagation();
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_DPAD_RIGHT) {
-                  this.focusWithTarget("InlineTextInput" + this.timeStamp.toString())
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                  event.stopPropagation();
+                }
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
                   event.stopPropagation();
                 }
               })
               .onChange((value: string) => {
-                this.inputValue = value
+                this.inputValue = value;
                 for(let i= 0; i < value.length; i++) {
-                  let c = value[i]
-                  if (c == '+' || c == '*' || c == '#') {
+                  let c = value[i];
+                  if (c === '+' || c === '*' || c === '#') {
                     this.value -= 1;
                     this.value += 1;
                     this.inputValue = this.value.toString();
                     return;
                   }
-                  if (c == '-' && i != 0) {
-                    this.inputValue = c
+                  if (c === '-' && i !== 0) {
+                    this.inputValue = c;
                     break;
                   }
                 }
 
                 this.hasInputText1 = true;
-                let c = value[value.length -1]
-                if (value.length == this.getMaxLength()) {
-                  this.inputValue = c
+                let c = value[value.length -1];
+                if (value.length === this.getMaxLength()) {
+                  this.inputValue = c;
                 }
-                if (this.timeoutID1 != -1) {
+                if (this.timeoutID1 !== -1) {
                   clearTimeout(this.timeoutID1);
                   this.timeoutID1 = -1;
                 }
-                if (this.inputValue != '' && Number(this.inputValue) <= this.max &&
+                if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
                     Number(this.inputValue) >= this.min) {
-                  this.value = Number(this.inputValue)
+                  this.value = Number(this.inputValue);
                   this.hasInputText1 = false;
                 } else {
                   if (Number(this.inputValue) > this.max ||
@@ -1410,11 +1403,11 @@ export struct CounterComponent {
                   }
                   if (value.length < this.getMaxLength()) {
                     this.timeoutID1 = setTimeout(() => {
-                      if (this.inputValue != '' && Number(this.inputValue) <= this.max &&
+                      if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
                           Number(this.inputValue) >= this.min) {
-                        this.value = Number(this.inputValue)
+                        this.value = Number(this.inputValue);
                       }
-                      this.inputValue = this.value.toString()
+                      this.inputValue = this.value.toString();
                       this.hasInputText1 = false;
                       this.updateInlineEnableSate();
                     }, 1500);
@@ -1428,31 +1421,31 @@ export struct CounterComponent {
                   this.timeoutID1 = -1;
                 }
                 this.hasInputText1 = false;
-                this.value -= 1
+                this.value -= 1;
                 if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
-                  this.value = Number(this.inputValue)
-                  this.updateInlineEnableSate()
+                  this.value = Number(this.inputValue);
+                  this.updateInlineEnableSate();
                 } else {
-                  this.value += 1
-                  this.inputValue = this.value.toString()
+                  this.value += 1;
+                  this.inputValue = this.value.toString();
                 }
               })
               .focusable(this.focusEnable)
               .focusOnTouch(true)
               .onFocus(() => {
-                this.focusText = FocusText.TEXT1
+                this.focusText = FocusText.TEXT1;
                 this.hasFocusText1 = true;
                 this.controller1.caretPosition(this.value.toString().length);
               })
               .onBlur(() => {
-                this.focusText = FocusText.NONE
-                this.hasFocusText1 = false
+                this.focusText = FocusText.NONE;
+                this.hasFocusText1 = false;
               })
               .onClick((event: ClickEvent)=>{
-                this.focusText = FocusText.TEXT1
+                this.focusText = FocusText.TEXT1;
                 this.hasFocusText1 = true;
-                this.focusWithTarget("InlineTextInput" + this.timeStamp.toString())
-                this.controller1.caretPosition(this.value.toString().length)
+                this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                this.controller1.caretPosition(this.value.toString().length);
               })
           }
           .margin({
@@ -1476,65 +1469,66 @@ export struct CounterComponent {
               .caretColor(Color.Transparent)
               .copyOption(CopyOptions.None)
               .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+              .fontWeight(FontWeight.Medium)
               .fontColor(this.hasFocusText1 ? Color.White : CounterResource.COUNTER_TEXT_COLOR)
               .maxLength(this.getMaxLength())
               .backgroundColor(this.hasFocusText1 ? CounterResource.BUTTON_BORDER_FOCUSED_COLOR : Color.Transparent)
-              .key("InlineTextInput" + this.timeStamp.toString())
+              .key('InlineTextInput' + this.timeStamp.toString())
               .onKeyEvent((event: KeyEvent) => {
                 this.focusCurrentText(FocusText.TEXT1)
-                if (event.keyCode == CounterConstant.KEYCODE_ESC) {
+                if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                   this.resetFocusText();
                   event.stopPropagation();
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_DPAD_UP) {
-                  this.addValue()
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                  this.addValue();
                   event.stopPropagation();
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_DPAD_DOWN) {
-                  this.subValue()
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                  this.subValue();
                   event.stopPropagation();
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_DPAD_LEFT) {
-                  this.focusWithTarget("InlineTextInput" + this.timeStamp.toString())
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
                   event.stopPropagation();
                 }
-                if (event.type == KeyType.Down &&
-                    event.keyCode == CounterConstant.KEYCODE_DPAD_RIGHT) {
-                  this.focusWithTarget("InlineTextInput" + this.timeStamp.toString())
+                if (event.type === KeyType.Down &&
+                    event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                  this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
                   event.stopPropagation();
                 }
               })
               .onChange((value: string) => {
-                this.inputValue = value
+                this.inputValue = value;
                 for(let i= 0; i < value.length; i++) {
-                  let c = value[i]
-                  if (c == '+' || c == '*' || c == '#') {
+                  let c = value[i];
+                  if (c === '+' || c === '*' || c === '#') {
                     this.value -= 1;
                     this.value += 1;
                     this.inputValue = this.value.toString();
                     return;
                   }
-                  if (c == '-' && i != 0) {
-                    this.inputValue = c
+                  if (c === '-' && i !== 0) {
+                    this.inputValue = c;
                     break;
                   }
                 }
 
                 this.hasInputText1 = true;
-                let c = value[value.length -1]
-                if (value.length == this.getMaxLength()) {
-                  this.inputValue = c
+                let c = value[value.length -1];
+                if (value.length === this.getMaxLength()) {
+                  this.inputValue = c;
                 }
-                if (this.timeoutID1 != -1) {
+                if (this.timeoutID1 !== -1) {
                   clearTimeout(this.timeoutID1);
                   this.timeoutID1 = -1;
                 }
-                if (this.inputValue != '' && Number(this.inputValue) <= this.max &&
+                if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
                     Number(this.inputValue) >= this.min) {
-                  this.value = Number(this.inputValue)
+                  this.value = Number(this.inputValue);
                   this.hasInputText1 = false;
                 } else {
                   if (Number(this.inputValue) > this.max ||
@@ -1544,9 +1538,9 @@ export struct CounterComponent {
                   }
                   if (value.length < this.getMaxLength()) {
                     this.timeoutID1 = setTimeout(() => {
-                      if (this.inputValue != '' && Number(this.inputValue) <= this.max &&
+                      if (this.inputValue !== '' && Number(this.inputValue) <= this.max &&
                           Number(this.inputValue) >= this.min) {
-                        this.value = Number(this.inputValue)
+                        this.value = Number(this.inputValue);
                       }
                       this.inputValue = this.value.toString()
                       this.hasInputText1 = false;
@@ -1557,36 +1551,36 @@ export struct CounterComponent {
                 this.updateInlineEnableSate();
               })
               .onSubmit((enterKey: EnterKeyType) => {
-                if (this.timeoutID1 != -1) {
+                if (this.timeoutID1 !== -1) {
                   clearTimeout(this.timeoutID1);
                   this.timeoutID1 = -1;
                 }
                 this.hasInputText1 = false;
-                this.value -= 1
+                this.value -= 1;
                 if (Number(this.inputValue) >= this.min && Number(this.inputValue) <= this.max) {
-                  this.value = Number(this.inputValue)
-                  this.updateInlineEnableSate()
+                  this.value = Number(this.inputValue);
+                  this.updateInlineEnableSate();
                 } else {
-                  this.value += 1
-                  this.inputValue = this.value.toString()
+                  this.value += 1;
+                  this.inputValue = this.value.toString();
                 }
               })
               .focusable(this.focusEnable)
               .focusOnTouch(true)
               .onFocus(() => {
-                this.focusText = FocusText.TEXT1
+                this.focusText = FocusText.TEXT1;
                 this.hasFocusText1 = true;
-                this.controller1.caretPosition(this.value.toString().length)
+                this.controller1.caretPosition(this.value.toString().length);
               })
               .onBlur(() => {
-                this.focusText = FocusText.NONE
-                this.hasFocusText1 = false
+                this.focusText = FocusText.NONE;
+                this.hasFocusText1 = false;
               })
               .onClick((event: ClickEvent)=>{
-                this.focusText = FocusText.TEXT1
+                this.focusText = FocusText.TEXT1;
                 this.hasFocusText1 = true;
-                this.focusWithTarget("InlineTextInput" + this.timeStamp.toString())
-                this.controller1.caretPosition(this.value.toString().length)
+                this.focusWithTarget('InlineTextInput' + this.timeStamp.toString());
+                this.controller1.caretPosition(this.value.toString().length);
               })
           }
           .margin({
@@ -1617,39 +1611,39 @@ export struct CounterComponent {
             Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect })
             .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
             .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
-            .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+            .backgroundColor(Color.Transparent)
             .opacity(this.addOpacity)
             .enabled(this.addBtnEnabled)
             .onClick((event: ClickEvent) => {
-              this.addValue()
-              this.onChange && this.onChange(this.value)
-              if (event.source == SourceType.Mouse ||
-                  event.source == SourceType.TouchScreen) {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+              this.addValue();
+              this.onChange && this.onChange(this.value);
+              if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             })
             .gesture(
               LongPressGesture({ repeat: true })
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
-                    this.addValue()
-                    this.onChange && this.onChange(this.value)
+                    this.addValue();
+                    this.onChange && this.onChange(this.value);
                   }
-                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 })
             )
             .hoverEffect(this.choverEffect)
             .onHover((isHover: boolean) => {
-              this.onHoverIncrease && this.onHoverIncrease(isHover)
+              this.onHoverIncrease && this.onHoverIncrease(isHover);
             })
             .focusable(false)
             .onFocus(()=>{
-              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-              this.onFocusIncrease&& this.onFocusIncrease()
+              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+              this.onFocusIncrease&& this.onFocusIncrease();
             })
             .onBlur(()=>{
-              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-              this.onBlurIncrease && this.onBlurIncrease()
+              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+              this.onBlurIncrease && this.onBlurIncrease();
             })
           }
           .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
@@ -1679,39 +1673,39 @@ export struct CounterComponent {
             Button({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect })
             .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
             .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
-            .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+            .backgroundColor(Color.Transparent)
             .opacity(this.subOpacity)
             .enabled(this.subBtnEnabled)
             .onClick((event: ClickEvent) => {
-              this.subValue()
-              this.onChange && this.onChange(this.value)
-              if (event.source == SourceType.Mouse ||
-                  event.source == SourceType.TouchScreen) {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+              this.subValue();
+              this.onChange && this.onChange(this.value);
+              if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             })
             .gesture(
               LongPressGesture({ repeat: true })
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
-                    this.subValue()
-                    this.onChange && this.onChange(this.value)
+                    this.subValue();
+                    this.onChange && this.onChange(this.value);
                   }
-                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 })
             )
             .hoverEffect(this.choverEffect)
             .onHover((isHover: boolean) => {
-              this.onHoverDecrease && this.onHoverDecrease(isHover)
+              this.onHoverDecrease && this.onHoverDecrease(isHover);
             })
             .focusable(false)
             .onFocus(()=>{
-              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-              this.onFocusDecrease && this.onFocusDecrease()
+              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+              this.onFocusDecrease && this.onFocusDecrease();
             })
             .onBlur(()=>{
-              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-              this.onBlurDecrease && this.onBlurDecrease()
+              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+              this.onBlurDecrease && this.onBlurDecrease();
             })
           }
           .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
@@ -1728,7 +1722,7 @@ export struct CounterComponent {
       .borderColor(CounterResource.COUNTER_BORDER_COLOR)
       .borderRadius(CounterResource.COUNTER_INLINE_RADIUS)
       .clip(true)
-    } else if (this.type == CounterType.INLINE_DATE) {
+    } else if (this.type === CounterType.INLINE_DATE) {
       Row() {
         Row() {
           TextInput({
@@ -1739,6 +1733,7 @@ export struct CounterComponent {
             .caretColor(Color.Transparent)
             .copyOption(CopyOptions.None)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .fontWeight(FontWeight.Medium)
             .fontColor(this.hasFocusText1? Color.White : CounterResource.COUNTER_TEXT_COLOR)
             .maxLength(5)
             .padding(0)
@@ -1747,105 +1742,105 @@ export struct CounterComponent {
             .height('20vp')
             .borderRadius(0)
             .borderWidth(0)
-            .key("DateTextInput1" + this.timeStamp.toString())
+            .key('DateTextInput1' + this.timeStamp.toString())
             .onKeyEvent((event: KeyEvent) => {
-              this.focusCurrentText(FocusText.TEXT1)
-              if (event.keyCode == CounterConstant.KEYCODE_ESC) {
+              this.focusCurrentText(FocusText.TEXT1);
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusText();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_DPAD_UP) {
-                this.addDate()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                this.addDate();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_DPAD_DOWN) {
-                this.subDate()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                this.subDate();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_HOME) {
-                this.homeFocusText()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                this.homeFocusText();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_END) {
-                this.endFocusText()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                this.endFocusText();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_DPAD_LEFT) {
-                this.focusWithTarget("DateTextInput1" + this.timeStamp.toString())
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                 event.keyCode == CounterConstant.KEYCODE_DPAD_RIGHT) {
-                this.focusWithTarget("DateTextInput2" + this.timeStamp.toString())
+              if (event.type === KeyType.Down &&
+                 event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                this.focusWithTarget('DateTextInput2' + this.timeStamp.toString());
               }
             })
             .onChange((value: string) => {
-              if (value.length !=4) {
+              if (value.length !== 4) {
                 this.hasInputText1 = true;
               }
               this.inputYear = Number(value)
-              if(value.length == 5) {
+              if(value.length === 5) {
                 this.inputYear = this.inputYear % 10;
               }
 
-              if (this.timeoutID1 != -1) {
+              if (this.timeoutID1 !== -1) {
                 clearTimeout(this.timeoutID1);
                 this.timeoutID1 = -1;
               }
 
               this.timeoutID1 = setTimeout(()=>{
                 this.hasInputText1 = false;
-                this.inputYear = this.year
+                this.inputYear = this.year;
                 this.updateDateEnableSate();
                 this.updateDay();
               }, 1500);
 
               if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
-                this.year = this.inputYear
+                this.year = this.inputYear;
                 this.updateDateEnableSate();
                 this.updateDay();
               }
             })
             .onSubmit((enterKey: EnterKeyType) =>{
-              if (this.timeoutID1 != -1) {
+              if (this.timeoutID1 !== -1) {
                 clearTimeout(this.timeoutID1);
                 this.timeoutID1 = -1;
               }
               this.hasInputText1 = false;
-              this.year -= 1
+              this.year -= 1;
               if (this.inputYear >= this.minYear && this.inputYear <= this.maxYear) {
-                this.year = this.inputYear
+                this.year = this.inputYear;
               } else {
-                this.year += 1
-                this.inputYear = this.year
+                this.year += 1;
+                this.inputYear = this.year;
               }
-              this.updateDateEnableSate()
+              this.updateDateEnableSate();
               this.updateDay();
             })
             .tabIndex(0)
             .focusOnTouch(true)
             .focusable(true)
             .onFocus(() => {
-              this.focusText = FocusText.TEXT1
-              this.hasFocusText1 = true
-              this.updateDateEnableSate()
-              this.controller1.caretPosition(this.getYear().length)
+              this.focusText = FocusText.TEXT1;
+              this.hasFocusText1 = true;
+              this.updateDateEnableSate();
+              this.controller1.caretPosition(this.getYear().length);
             })
             .onBlur(()=>{
-              this.focusText = FocusText.NONE
-              this.hasFocusText1 = false
-              this.updateDateEnableSate()
+              this.focusText = FocusText.NONE;
+              this.hasFocusText1 = false;
+              this.updateDateEnableSate();
             })
             .onClick((event: ClickEvent)=>{
-              this.focusText = FocusText.TEXT1
-              this.hasFocusText1 = true
-              this.updateDateEnableSate()
-              this.controller1.caretPosition(this.getYear().length)
+              this.focusText = FocusText.TEXT1;
+              this.hasFocusText1 = true;
+              this.updateDateEnableSate();
+              this.controller1.caretPosition(this.getYear().length);
             })
           Text('/')
             .textAlign(TextAlign.Center)
@@ -1860,6 +1855,7 @@ export struct CounterComponent {
             .caretColor(Color.Transparent)
             .copyOption(CopyOptions.None)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .fontWeight(FontWeight.Medium)
             .fontColor(this.hasFocusText2? Color.White : CounterResource.COUNTER_TEXT_COLOR)
             .maxLength(3)
             .padding(0)
@@ -1867,117 +1863,117 @@ export struct CounterComponent {
             .width('19vp')
             .height('20vp')
             .borderRadius(0)
-            .key("DateTextInput2" + this.timeStamp.toString())
+            .key('DateTextInput2' + this.timeStamp.toString())
             .onKeyEvent((event: KeyEvent) => {
               this.focusCurrentText(FocusText.TEXT2)
-              if (event.keyCode == CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusText();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_DPAD_DOWN) {
-                this.subDate()
-                this.updateDay()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                this.subDate();
+                this.updateDay();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_DPAD_UP) {
-                this.addDate()
-                this.updateDay()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                this.addDate();
+                this.updateDay();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_HOME) {
-                this.homeFocusText()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                this.homeFocusText();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_END) {
-                this.endFocusText()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                this.endFocusText();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_DPAD_LEFT) {
-                this.focusWithTarget("DateTextInput1" + this.timeStamp.toString())
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
               }
-              if (event.type == KeyType.Down &&
-                 event.keyCode == CounterConstant.KEYCODE_DPAD_RIGHT) {
-                this.focusWithTarget("DateTextInput3" + this.timeStamp.toString())
+              if (event.type === KeyType.Down &&
+                 event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
               }
 
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_TAB) {
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_TAB) {
                 event.stopPropagation();
-                this.focusWithTarget("DateTextInput1" + this.timeStamp.toString())
+                this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
               }
             })
             .onChange((value: string) => {
-              this.inputMoon = Number(value)
-              if (value.length != 2) {
+              this.inputMoon = Number(value);
+              if (value.length !== 2) {
                 this.hasInputText2 = true;
               }
-              if (value.length == 3) {
-                this.inputMoon = this.inputMoon %10
+              if (value.length === 3) {
+                this.inputMoon = this.inputMoon % 10;
               }
-              if (this.timeoutID2 != -1) {
+              if (this.timeoutID2 !== -1) {
                 clearTimeout(this.timeoutID2);
-                this.timeoutID2 = -1
+                this.timeoutID2 = -1;
               }
 
               this.timeoutID2 = setTimeout(()=>{
                 this.hasInputText2 = false;
-                this.month -= 1
+                this.month -= 1;
                 if (this.inputMoon >= 1 && this.inputMoon <= 12) {
-                  this.month = this.inputMoon
+                  this.month = this.inputMoon;
                 } else {
-                  this.month += 1
-                  this.inputMoon = this.month
+                  this.month += 1;
+                  this.inputMoon = this.month;
                 }
                 this.updateDay();
               }, 1000);
 
-              if (value.length == 2) {
+              if (value.length === 2) {
                 this.hasInputText2 = false;
-                this.month -= 1
+                this.month -= 1;
                 if (this.inputMoon >= 1 && this.inputMoon <= 12) {
-                  this.month = this.inputMoon
+                  this.month = this.inputMoon;
                 } else {
-                  this.month += 1
-                  this.inputMoon = this.month
+                  this.month += 1;
+                  this.inputMoon = this.month;
                 }
                 this.updateDay();
               }
             })
             .onSubmit((enterKey: EnterKeyType) =>{
-              if (this.timeoutID2 != -1) {
+              if (this.timeoutID2 !== -1) {
                 clearTimeout(this.timeoutID2);
                 this.timeoutID2 = -1;
               }
               this.hasInputText2 = false;
-              this.month -= 1
+              this.month -= 1;
               if (this.inputMoon >= 1 && this.inputMoon <= 12) {
-                this.month = this.inputMoon
+                this.month = this.inputMoon;
                 this.updateDay();
               } else {
-                this.month += 1
+                this.month += 1;
               }
             })
             .focusOnTouch(true)
             .tabIndex(-1)
             .focusable(true)
             .onFocus(() => {
-              this.focusText = FocusText.TEXT2
-              this.hasFocusText2 = true
-              this.controller2.caretPosition(this.convertNumberToString(this.month).length)
+              this.focusText = FocusText.TEXT2;
+              this.hasFocusText2 = true;
+              this.controller2.caretPosition(this.convertNumberToString(this.month).length);
             })
             .onBlur(()=>{
               this.focusText = FocusText.NONE
               this.hasFocusText2 = false
             })
             .onClick((event: ClickEvent)=>{
-              this.focusText = FocusText.TEXT2
-              this.hasFocusText2 = true
-              this.controller2.caretPosition(this.convertNumberToString(this.month).length)
+              this.focusText = FocusText.TEXT2;
+              this.hasFocusText2 = true;
+              this.controller2.caretPosition(this.convertNumberToString(this.month).length);
             })
           Text('/')
             .textAlign(TextAlign.Center)
@@ -1992,6 +1988,7 @@ export struct CounterComponent {
             .caretColor(Color.Transparent)
             .copyOption(CopyOptions.None)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
+            .fontWeight(FontWeight.Medium)
             .fontColor(this.hasFocusText3? Color.White : CounterResource.COUNTER_TEXT_COLOR)
             .maxLength(3)
             .padding(0)
@@ -1999,114 +1996,114 @@ export struct CounterComponent {
             .width('19vp')
             .height('20vp')
             .borderRadius(0)
-            .key("DateTextInput3" + this.timeStamp.toString())
+            .key('DateTextInput3' + this.timeStamp.toString())
             .onKeyEvent((event: KeyEvent) => {
               this.focusCurrentText(FocusText.TEXT3)
-              if (event.keyCode == CounterConstant.KEYCODE_ESC) {
+              if (event.keyCode === CounterConstant.KEYCODE_ESC) {
                 this.resetFocusText();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_DPAD_DOWN) {
-                this.subDate()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_DOWN) {
+                this.subDate();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_DPAD_UP) {
-                this.addDate()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_UP) {
+                this.addDate();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_HOME) {
-                this.homeFocusText()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_HOME) {
+                this.homeFocusText();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_MOVE_END) {
-                this.endFocusText()
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_MOVE_END) {
+                this.endFocusText();
                 event.stopPropagation();
               }
-              if (event.type == KeyType.Down &&
-                event.keyCode == CounterConstant.KEYCODE_DPAD_LEFT) {
-                this.focusWithTarget("DateTextInput2" + this.timeStamp.toString())
-              }
-
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_DPAD_RIGHT) {
-                this.focusWithTarget("DateTextInput3" + this.timeStamp.toString())
-                event.stopPropagation();
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_LEFT) {
+                this.focusWithTarget('DateTextInput2' + this.timeStamp.toString());
               }
 
-              if (event.type == KeyType.Down &&
-                  event.keyCode == CounterConstant.KEYCODE_TAB) {
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_DPAD_RIGHT) {
+                this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
                 event.stopPropagation();
-                this.focusWithTarget("DateTextInput1" + this.timeStamp.toString())
+              }
+
+              if (event.type === KeyType.Down &&
+                  event.keyCode === CounterConstant.KEYCODE_TAB) {
+                event.stopPropagation();
+                this.focusWithTarget('DateTextInput1' + this.timeStamp.toString());
               }
             })
             .onChange((value: string) => {
               this.inputDay = Number(value)
-              if (value.length != 2) {
+              if (value.length !== 2) {
                 this.hasInputText3 = true;
               }
-              if (value.length == 3) {
-                this.inputDay = this.inputDay % 10
+              if (value.length === 3) {
+                this.inputDay = this.inputDay % 10;
               }
-              if (this.timeoutID3 != -1) {
+              if (this.timeoutID3 !== -1) {
                 clearTimeout(this.timeoutID3);
                 this.timeoutID3 = -1;
               }
 
               this.timeoutID3 = setTimeout(()=>{
                 this.hasInputText3 = false;
-                this.day -= 1
+                this.day -= 1;
                 if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
-                  this.day = this.inputDay
+                  this.day = this.inputDay;
                 } else {
-                  this.day += 1
-                  this.inputDay = this.day
+                  this.day += 1;
+                  this.inputDay = this.day;
                 }
               }, 1000);
 
-              if (value.length == 2) {
+              if (value.length === 2) {
                 this.hasInputText3 = false;
-                this.day -= 1
+                this.day -= 1;
                 if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
-                  this.day = this.inputDay
+                  this.day = this.inputDay;
                 } else {
-                  this.day += 1
-                  this.inputDay = this.day
+                  this.day += 1;
+                  this.inputDay = this.day;
                 }
               }
             })
             .onSubmit((enterKey: EnterKeyType) =>{
-              if (this.timeoutID3 != -1) {
+              if (this.timeoutID3 !== -1) {
                 clearTimeout(this.timeoutID3);
                 this.timeoutID3 = -1;
               }
-              this.hasInputText3 = false
-              this.day -= 1
+              this.hasInputText3 = false;
+              this.day -= 1;
               if (this.inputDay >= 1 && this.inputDay <= this.getDayNumber()) {
-                this.day = this.inputDay
+                this.day = this.inputDay;
               } else {
-                this.day += 1
+                this.day += 1;
               }
             })
             .tabIndex(-2)
             .focusOnTouch(true)
             .focusable(true)
             .onFocus(() => {
-              this.focusText = FocusText.TEXT3
-              this.hasFocusText3 = true
-              this.controller3.caretPosition(this.convertNumberToString(this.day).length)
+              this.focusText = FocusText.TEXT3;
+              this.hasFocusText3 = true;
+              this.controller3.caretPosition(this.convertNumberToString(this.day).length);
             })
             .onBlur(()=>{
-              this.focusText = FocusText.NONE
-              this.hasFocusText3 = false
+              this.focusText = FocusText.NONE;
+              this.hasFocusText3 = false;
             })
             .onClick((event: ClickEvent)=>{
-              this.focusText = FocusText.TEXT3
-              this.hasFocusText3 = true
-              this.controller3.caretPosition(this.convertNumberToString(this.day).length)
+              this.focusText = FocusText.TEXT3;
+              this.hasFocusText3 = true;
+              this.controller3.caretPosition(this.convertNumberToString(this.day).length);
             })
         }.width('92vp')
         .height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT)
@@ -2128,49 +2125,49 @@ export struct CounterComponent {
               .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({right: '1vp'})
               .fillOpacity(0)
-            Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect }) {
-              Image(CounterResource.BUTTON_ARROW_UP)
-                .width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH)
-                .height(CounterResource.COUNTER_INLINE_BUTTON_ICON_HEIGHT)
-                .fillColor(CounterResource.BUTTON_ICON_COLOR)
-            }
+            Image(CounterResource.BUTTON_ARROW_UP)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_ICON_HEIGHT)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.addOpacity)
+            Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect })
             .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
             .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
-            .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+            .backgroundColor(Color.Transparent)
             .opacity(this.addOpacity)
             .enabled(this.addBtnEnabled)
             .onClick((event: ClickEvent) => {
-              this.addDate()
+              this.addDate();
               let date = new DateData(this.year, this.month, this.day);
-              this.onDateChange && this.onDateChange(date)
-              if (event.source == SourceType.Mouse ||
-                  event.source == SourceType.TouchScreen) {
-                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+              this.onDateChange && this.onDateChange(date);
+              if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             })
             .gesture(
               LongPressGesture({ repeat: true })
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
-                    this.addDate()
+                    this.addDate();
                     let date = new DateData(this.year, this.month, this.day);
                     this.onDateChange && this.onDateChange(date);
                   }
-                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                  this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 })
             )
             .hoverEffect(this.choverEffect)
             .onHover((isHover: boolean) => {
-              this.onHoverIncrease && this.onHoverIncrease(isHover)
+              this.onHoverIncrease && this.onHoverIncrease(isHover);
             })
             .focusable(false)
             .onFocus(()=>{
-              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-              this.onFocusIncrease && this.onFocusIncrease()
+              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+              this.onFocusIncrease && this.onFocusIncrease();
             })
             .onBlur(()=>{
-              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-              this.onBlurIncrease && this.onBlurIncrease()
+              this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+              this.onBlurIncrease && this.onBlurIncrease();
             })
           }.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
           .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
@@ -2191,49 +2188,49 @@ export struct CounterComponent {
               .stroke(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
               .margin({top: '1vp', right: '1vp', bottom: '2vp'})
               .fillOpacity(0)
-            Button({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect }) {
-              Image(CounterResource.BUTTON_ARROW_DOWN)
-                .width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH)
-                .height(CounterResource.COUNTER_INLINE_BUTTON_ICON_HEIGHT)
-                .fillColor(CounterResource.BUTTON_ICON_COLOR)
-            }
+            Image(CounterResource.BUTTON_ARROW_DOWN)
+              .width(CounterResource.COUNTER_INLINE_BUTTON_ICON_WIDTH)
+              .height(CounterResource.COUNTER_INLINE_BUTTON_ICON_HEIGHT)
+              .fillColor(CounterResource.BUTTON_ICON_COLOR)
+              .opacity(this.subOpacity)
+            Button({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect })
             .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
             .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
-            .backgroundColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+            .backgroundColor(Color.Transparent)
             .opacity(this.subOpacity)
             .enabled(this.subBtnEnabled)
             .onClick((event: ClickEvent) => {
-              this.subDate()
+              this.subDate();
               let date = new DateData(this.year, this.month, this.day);
-              this.onDateChange && this.onDateChange(date)
-              if (event.source == SourceType.Mouse ||
-                  event.source == SourceType.TouchScreen) {
-                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+              this.onDateChange && this.onDateChange(date);
+              if (event.source === SourceType.Mouse ||
+                  event.source === SourceType.TouchScreen) {
+                this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
               }
             })
             .gesture(
               LongPressGesture({ repeat: true })
                 .onAction((event: GestureEvent) => {
                   if (event.repeat) {
-                    this.subDate()
+                    this.subDate();
                     let date = new DateData(this.year, this.month, this.day);
-                    this.onDateChange && this.onDateChange(date)
+                    this.onDateChange && this.onDateChange(date);
                   }
-                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
+                  this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 })
             )
             .hoverEffect(this.choverEffect)
             .onHover((isHover: boolean) => {
-              this.onHoverDecrease && this.onHoverDecrease(isHover)
+              this.onHoverDecrease && this.onHoverDecrease(isHover);
             })
             .focusable(false)
             .onFocus(()=>{
-              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH
-              this.onFocusDecrease && this.onFocusDecrease()
+              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_FOCUSED_WIDTH;
+              this.onFocusDecrease && this.onFocusDecrease();
             })
             .onBlur(()=>{
-              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH
-              this.onBlurDecrease && this.onBlurDecrease()
+              this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+              this.onBlurDecrease && this.onBlurDecrease();
             })
           }.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
           .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
@@ -2243,7 +2240,6 @@ export struct CounterComponent {
         .borderWidth({left: CounterResource.COUNTER_BORDER_WIDTH})
         .borderColor(CounterResource.COUNTER_BORDER_COLOR)
       }
-      .width('148vp')
       .height(CounterResource.COUNTER_INLINE_CONTAINER_HEIGHT)
       .borderWidth(CounterResource.COUNTER_BORDER_WIDTH)
       .borderColor(CounterResource.COUNTER_BORDER_COLOR)

@@ -29,19 +29,25 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+#include "base/resource/internal_resource.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/video/video_theme.h"
+#include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_styles.h"
 #include "core/components_ng/test/mock/render/mock_media_player.h"
@@ -771,6 +777,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     EXPECT_EQ(finishCheck, VIDEO_FINISH_EVENT);
     pattern->OnPlayerStatus(PlaybackStatus::ERROR);
     pattern->OnPlayerStatus(PlaybackStatus::IDLE);
+    pattern->OnPlayerStatus(PlaybackStatus::PREPARED);
     pattern->OnPlayerStatus(PlaybackStatus::PAUSED);
     pattern->OnPlayerStatus(PlaybackStatus::STOPPED);
     pattern->OnPlayerStatus(PlaybackStatus::NONE);
@@ -825,11 +832,17 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     pattern->isStop_ = true;
     pattern->autoPlay_ = true;
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(3)
+        .Times(10)
         .WillRepeatedly(Return(true));
     pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
+    pattern->isStop_ = false;
+    pattern->dragEndAutoPlay_ = true;
+    pattern->OnPrepared(VIDEO_WIDTH, VIDEO_HEIGHT, DURATION, 0, false);
+    EXPECT_EQ(pattern->duration_, DURATION);
+    EXPECT_TRUE(preparedCheck.empty());
+    EXPECT_FALSE(pattern->dragEndAutoPlay_);
 }
 
 /**
@@ -2025,5 +2038,255 @@ HWTEST_F(VideoTestNg, VideoPatternTest023, TestSize.Level1)
     videoPattern->currentPos_ = 0;
     videoPattern->isStop_ = false;
     videoPattern->OnCurrentTimeChange(1);
+}
+
+/**
+ * @tc.name: VideoPatternTest024
+ * @tc.desc: Test VideoPattern HiddenChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and get videoPattern.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnCurrentTimeChange in different status.
+     * @tc.expected: pastPlayingStatus_ is set.
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), Pause()).Times(1);
+    videoPattern->isPlaying_ = false;
+    videoPattern->pastPlayingStatus_ = false;
+    videoPattern->HiddenChange(true);
+    videoPattern->pastPlayingStatus_ = true;
+    videoPattern->HiddenChange(true);
+    videoPattern->pastPlayingStatus_ = false;
+    videoPattern->HiddenChange(false);
+    videoPattern->pastPlayingStatus_ = true;
+    videoPattern->HiddenChange(false);
+    EXPECT_FALSE(videoPattern->pastPlayingStatus_);
+
+    videoPattern->isPlaying_ = true;
+    videoPattern->HiddenChange(false);
+    videoPattern->HiddenChange(true);
+    EXPECT_TRUE(videoPattern->pastPlayingStatus_);
+    videoPattern->mediaPlayer_ = nullptr;
+    videoPattern->HiddenChange(false);
+    videoPattern->HiddenChange(true);
+    videoPattern->isPlaying_ = false;
+    videoPattern->HiddenChange(false);
+    videoPattern->HiddenChange(true);
+}
+
+/**
+ * @tc.name: VideoPatternTest025
+ * @tc.desc: Test VideoPattern PrepareSurface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and get videoPattern.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call PrepareSurface in different status.
+     * @tc.expected: SetSurface function is called.
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetSurface())
+        .WillOnce(Return(-1));
+    videoPattern->PrepareSurface();
+    SystemProperties::SetExtSurfaceEnabled(false);
+    videoPattern->PrepareSurface();
+}
+
+/**
+ * @tc.name: VideoPatternTest026
+ * @tc.desc: Test VideoPattern OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and get videoPattern.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call hiddenChangeEvent while video not in full screen mode.
+     * @tc.expected: pastPlayingStatus_ is set.
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), Pause()).Times(1);
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .WillRepeatedly(Return(false));
+    videoPattern->OnModifyDone();
+    auto hiddenChangeEvent = videoPattern->hiddenChangeEvent_;
+    ASSERT_NE(hiddenChangeEvent, nullptr);
+    videoPattern->isPlaying_ = true;
+    hiddenChangeEvent(true);
+    EXPECT_TRUE(videoPattern->pastPlayingStatus_);
+
+    /**
+     * @tc.steps: step2. Call hiddenChangeEvent while video in full screen mode.
+     * @tc.expected: pastPlayingStatus_ is set.
+     */
+    videoPattern->FullScreen();
+    videoPattern->isPlaying_ = true;
+    hiddenChangeEvent(true);
+    EXPECT_TRUE(videoPattern->pastPlayingStatus_);
+    videoPattern->OnModifyDone();
+}
+
+/**
+ * @tc.name: VideoPatternTest027
+ * @tc.desc: Test VideoPattern UpdateControllerBar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and get videoPattern.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<VideoNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+    auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Update Video controllerBar while controllerBar is show or not.
+     * @tc.expected: Visibility value is changed.
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .WillOnce(Return(false));
+    layoutProperty->UpdateControls(false);
+    auto controller = AceType::DynamicCast<FrameNode>(videoNode->GetControllerRow());
+    ASSERT_NE(controller, nullptr);
+    auto controllerLayoutProperty = controller->GetLayoutProperty<LinearLayoutProperty>();
+    ASSERT_NE(controllerLayoutProperty, nullptr);
+    videoPattern->UpdateControllerBar();
+    EXPECT_EQ(controllerLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
+    layoutProperty->UpdateControls(true);
+    videoNode->children_.clear();
+    videoPattern->UpdateControllerBar();
+}
+
+/**
+ * @tc.name: VideoPatternTest028
+ * @tc.desc: Test VideoPattern UpdateVideoProperty and OnRebuildFrame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and get videoPattern.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<VideoNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Update Video property while isInitialState_ and autoPlay_ changes.
+     * @tc.expected: PrepareAsync function is called only once.
+     */
+    videoPattern->isStop_ = true;
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), PrepareAsync())
+        .Times(1)
+        .WillOnce(Return(-1));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+    videoPattern->isInitialState_ = false;
+    videoPattern->autoPlay_ = false;
+    videoPattern->UpdateVideoProperty();
+    videoPattern->autoPlay_ = true;
+    videoPattern->UpdateVideoProperty();
+    videoPattern->isInitialState_ = true;
+    videoPattern->autoPlay_ = false;
+    videoPattern->UpdateVideoProperty();
+    videoPattern->autoPlay_ = true;
+    videoPattern->UpdateVideoProperty();
+
+    /**
+     * @tc.steps: step2. Call OnRebuildFrame while renderSurface_ in different status.
+     * @tc.expected: IsSurfaceValid function is called only once.
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(videoNode->renderContext_)), AddChild(_, _)).Times(1);
+    videoPattern->OnRebuildFrame();
+    videoPattern->renderSurface_ = nullptr;
+    videoPattern->OnRebuildFrame();
+}
+
+/**
+ * @tc.name: VideoPatternTest029
+ * @tc.desc: Test VideoPattern OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, VideoPatternTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and get videoPattern.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<VideoNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnColorConfigurationUpdate with different childNode in controlBar_.
+     * @tc.expected: BackgroundColor of renderContext is set.
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+    ASSERT_NE(videoPattern->controlBar_, nullptr);
+    auto renderContext = videoPattern->controlBar_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto videoTheme = PipelineBase::GetCurrentContext()->GetTheme<VideoTheme>();
+    ASSERT_NE(videoTheme, nullptr);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    textNode->layoutProperty_ = nullptr;
+    videoPattern->controlBar_->children_.emplace_back(textNode);
+    videoPattern->OnColorConfigurationUpdate();
+    EXPECT_FALSE(videoNode->needCallChildrenUpdate_);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), videoTheme->GetBkgColor());
 }
 } // namespace OHOS::Ace::NG

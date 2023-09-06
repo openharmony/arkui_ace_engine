@@ -39,7 +39,7 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
-#ifndef PREVIEW
+#ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #endif
 
@@ -228,7 +228,7 @@ public:
         return sharedTransitionManager_;
     }
 
-#ifndef PREVIEW
+#ifdef WINDOW_SCENE_SUPPORTED
     const RefPtr<UIExtensionManager>& GetUIExtensionManager()
     {
         return uiExtensionManager_;
@@ -493,7 +493,7 @@ private:
     RefPtr<DragDropManager> dragDropManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
-#ifndef PREVIEW
+#ifdef WINDOW_SCENE_SUPPORTED
     RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
     WeakPtr<FrameNode> dirtyFocusNode_;
