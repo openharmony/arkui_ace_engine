@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 
 #define private public
+//#define ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -1321,6 +1322,208 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerFindTargetInChildNodesTest001, Te
 }
 
 /**
+ * @tc.name: DragDropManagerFindTargetInChildNodesTest002
+ * @tc.desc: Test FindTargetInChildNodes
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerFindTargetInChildNodesTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. draggedFrameNode_ &  preTargetFrameNode_ are assigned to the frameNode created previously
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    customNode->SetActive(false);
+    std::vector<RefPtr<FrameNode>> hitFrameNodes;
+    hitFrameNodes.push_back(frameNode);
+    auto draggedNode = dragDropManager->draggedFrameNode_;
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, true);
+    ASSERT_TRUE(draggedNode);
+    ASSERT_TRUE(preTargetNode);
+}
+
+/**
+ * @tc.name: DragDropManagerFindTargetInChildNodesTest003
+ * @tc.desc: Test FindTargetInChildNodes
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerFindTargetInChildNodesTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. draggedFrameNode_ &  preTargetFrameNode_ are assigned to the frameNode created previously
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    customNode->SetActive(true);
+    std::vector<RefPtr<FrameNode>> hitFrameNodes;
+    hitFrameNodes.push_back(frameNode);
+    auto draggedNode = dragDropManager->draggedFrameNode_;
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, true);
+    ASSERT_TRUE(draggedNode);
+    ASSERT_TRUE(preTargetNode);
+}
+
+/**
+ * @tc.name: DragDropManagerFindTargetInChildNodesTest005
+ * @tc.desc: Test FindTargetInChildNodes
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerFindTargetInChildNodesTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    RefPtr<UINode> customNode1 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<UINode> customNode2 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<UINode> customNode3 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    std::list<RefPtr<UINode>> child = {customNode1, customNode2, customNode2, nullptr};
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. draggedFrameNode_ &  preTargetFrameNode_ are assigned to the frameNode created previously
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    customNode->SetActive(true);
+    customNode->children_ = child;
+    std::vector<RefPtr<FrameNode>> hitFrameNodes = {frameNode, frameNode2};
+    auto draggedNode = dragDropManager->draggedFrameNode_;
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, true);
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, false);
+    ASSERT_TRUE(draggedNode);
+    ASSERT_TRUE(preTargetNode);
+}
+
+/**
+ * @tc.name: DragDropManagerFindTargetInChildNodesTest006
+ * @tc.desc: Test FindTargetInChildNodes
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerFindTargetInChildNodesTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    RefPtr<UINode> customNode1 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<UINode> customNode2 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<UINode> customNode3 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    std::list<RefPtr<UINode>> child = {customNode1, customNode2, customNode2, nullptr};
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. draggedFrameNode_ &  preTargetFrameNode_ are assigned to the frameNode created previously
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    customNode->SetActive(true);
+    customNode->children_ = child;
+
+    auto frameNode4 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode4->GetEventHub<EventHub>();
+    std::string onDropInfo;
+    auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
+        onDropInfo = EXTRA_INFO;
+    };
+    eventHub->SetOnDrop(std::move(onDrop));
+	
+    auto frameNode5 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<GridPattern>());
+    auto gridEvent = frameNode5->GetEventHub<GridEventHub>();
+    std::string onItemDropInfo;
+    ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
+                                  int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
+    gridEvent->SetOnItemDrop(std::move(onItemDrop));
+
+    std::vector<RefPtr<FrameNode>> hitFrameNodes = {frameNode, frameNode2, frameNode4, frameNode5};
+    auto draggedNode = dragDropManager->draggedFrameNode_;
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, true);
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, false);
+    ASSERT_TRUE(draggedNode);
+    ASSERT_TRUE(preTargetNode);
+}
+
+/**
+ * @tc.name: DragDropManagerFindTargetInChildNodesTest008
+ * @tc.desc: Test FindTargetInChildNodes
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerFindTargetInChildNodesTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    RefPtr<UINode> customNode1 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<UINode> customNode2 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<UINode> customNode3 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    std::list<RefPtr<UINode>> child = {customNode1, customNode2, customNode2, nullptr};
+
+    /**
+     * @tc.steps: step2. call OnDragStart
+     * @tc.expected: step2. draggedFrameNode_ &  preTargetFrameNode_ are assigned to the frameNode created previously
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    customNode->SetActive(true);
+    customNode->children_ = child;
+
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(customNode);
+
+    std::vector<RefPtr<FrameNode>> hitFrameNodes = {parentFrameNode};
+    auto draggedNode = dragDropManager->draggedFrameNode_;
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, true);
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, false);
+    ASSERT_TRUE(draggedNode);
+    ASSERT_TRUE(preTargetNode);
+
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, true);
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, false);
+    ASSERT_TRUE(draggedNode);
+
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, true);
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, false);
+    ASSERT_TRUE(draggedNode);
+
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, true);
+    dragDropManager->FindTargetInChildNodes(customNode, hitFrameNodes, false);
+    ASSERT_TRUE(draggedNode);
+    ASSERT_TRUE(preTargetNode);
+}
+
+/**
  * @tc.name: DragDropManagerOnDragMoveTest001
  * @tc.desc: Test OnDragMove
  * @tc.type: FUNC
@@ -1725,4 +1928,158 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerGetItemIndexTest001, TestSize.Lev
     dragDropManager->GetItemIndex(frameNode, DragType::GRID, 0.0, 0.0);
     ASSERT_TRUE(draggedNode);
 }
+/**
+ * @tc.name: DragDropManagerGetItemIndexTest002
+ * @tc.desc: Test GetItemIndex
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerGetItemIndexTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager and create a DragWindow
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    GestureEvent gestureEvent;
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
+
+    /**
+     * @tc.steps: step2. call FindDragFrameNodeByPosition with frameNodes contains nullptr
+     * @tc.expected: step2.
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
+    frameNodeNull.Reset();
+    auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeGeoNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId,
+        AceType::MakeRefPtr<Pattern>());
+    frameNodeGeoNull->SetGeometryNode(nullptr);
+    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
+
+    /**
+     * @tc.steps: step3. call FireOnDragEvent with type=DragEventType::DROP
+     * @tc.expected: step3. FireOnDrop will be called
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    std::string onDropInfo;
+    auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
+        onDropInfo = EXTRA_INFO;
+    };
+    eventHub->SetOnDrop(std::move(onDrop));
+    Point point;
+    TouchEvent event;
+    event.x = 1.0f;
+    event.y = 2.0f;
+    dragDropManager->velocityTracker_.UpdateTouchPoint(event, false);
+    dragDropManager->FireOnDragEvent(frameNode, point, DragEventType::DROP, EXTRA_INFO);
+
+    /**
+     * @tc.steps: step4. call FireOnItemDropEvent with type=DragEventType::DROP
+     * @tc.expected: step4. FireOnItemDrop will be called
+     */
+    ItemDragInfo itemDragInfo;
+    auto gridNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<GridPattern>());
+    auto gridEvent = gridNode->GetEventHub<GridEventHub>();
+    std::string onItemDropInfo;
+    ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
+                                  int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
+    gridEvent->SetOnItemDrop(std::move(onItemDrop));
+    dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0.0, 0.0);
+    EXPECT_EQ(onItemDropInfo, "");
+
+    auto listNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
+    auto listEvent = listNode->GetEventHub<ListEventHub>();
+    std::string onItemDropInfoList;
+    ItemDropFunc onItemDropList = [&onItemDropInfoList](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
+                                      int32_t /* insertIndex */,
+                                      bool /* isSuccess */) { onItemDropInfoList = EXTRA_INFO; };
+    listEvent->SetOnItemDrop(std::move(onItemDropList));
+    dragDropManager->GetItemIndex(listNode, DragType::GRID, 0.0, 0.0);
+    dragDropManager->GetItemIndex(listNode, DragType::COMMON, 0.0, 0.0);
+    dragDropManager->GetItemIndex(listNode, DragType::TEXT, 0.0, 0.0);
+    dragDropManager->GetItemIndex(listNode, DragType::LIST, 0.0, 0.0);
+    EXPECT_EQ(onItemDropInfoList, "");
+}
+
+/**
+ * @tc.name: DragDropManagerGetItemIndexTest003
+ * @tc.desc: Test GetItemIndex
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerGetItemIndexTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager and create a DragWindow
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    GestureEvent gestureEvent;
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
+    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
+
+    /**
+     * @tc.steps: step2. call FindDragFrameNodeByPosition with frameNodes contains nullptr
+     * @tc.expected: step2.
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
+    frameNodeNull.Reset();
+    auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNodeGeoNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId,
+        AceType::MakeRefPtr<Pattern>());
+    frameNodeGeoNull->SetGeometryNode(nullptr);
+    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
+    auto targetFrameNode = dragDropManager->FindDragFrameNodeByPosition(GLOBAL_X, GLOBAL_Y, DragType::COMMON, false);
+
+    /**
+     * @tc.steps: step3. call FireOnDragEvent with type=DragEventType::DROP
+     * @tc.expected: step3. FireOnDrop will be called
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    std::string onDropInfo;
+    auto onDrop = [&onDropInfo](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* info */) {
+        onDropInfo = EXTRA_INFO;
+    };
+    eventHub->SetOnDrop(std::move(onDrop));
+    Point point;
+    TouchEvent event;
+    event.x = 1.0f;
+    event.y = 2.0f;
+    dragDropManager->velocityTracker_.UpdateTouchPoint(event, false);
+    dragDropManager->FireOnDragEvent(frameNode, point, DragEventType::DROP, EXTRA_INFO);
+
+    /**
+     * @tc.steps: step4. call FireOnItemDropEvent with type=DragEventType::DROP
+     * @tc.expected: step4. FireOnItemDrop will be called
+     */
+    ItemDragInfo itemDragInfo;
+    auto gridNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<GridPattern>());
+    auto gridEvent = gridNode->GetEventHub<GridEventHub>();
+    std::string onItemDropInfo;
+    ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
+                                  int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
+    gridEvent->SetOnItemDrop(std::move(onItemDrop));
+    dragDropManager->draggedGridFrameNode_ = gridNode;
+    dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0.0, 0.0);
+    auto listNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<ListPattern>());
+    auto listEvent = listNode->GetEventHub<ListEventHub>();
+    std::string onItemDropInfoList;
+    ItemDropFunc onItemDropList = [&onItemDropInfoList](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
+                                      int32_t /* insertIndex */,
+                                      bool /* isSuccess */) { onItemDropInfoList = EXTRA_INFO; };
+    listEvent->SetOnItemDrop(std::move(onItemDropList));
+    dragDropManager->draggedGridFrameNode_ = gridNode;
+    dragDropManager->GetItemIndex(listNode, DragType::GRID, 0.0, 0.0);
+    dragDropManager->GetItemIndex(listNode, DragType::GRID, 1.0f, 2.0f);
+    EXPECT_EQ(onItemDropInfoList, "");
+}
+
 } // namespace OHOS::Ace::NG
