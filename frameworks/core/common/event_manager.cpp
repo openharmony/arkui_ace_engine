@@ -1123,7 +1123,11 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
         std::vector<std::vector<KeyCode>> keyCodes;
         std::vector<uint8_t> permutation;
         AddKeyboardShortcutKeys(keyboardShortcut.keys, keyCodes, permutation);
-        if (event.ConvertInputCodeToString().find(keyboardShortcut.value) == std::string::npos) {
+        // FunctionKey
+        if ((event.IsFunctionKey() || event.IsEscapeKey()) &&
+            event.ConvertInputCodeToString() != keyboardShortcut.value) {
+            continue;
+        } else if (event.ConvertInputCodeToString().find(keyboardShortcut.value) == std::string::npos) {
             continue;
         }
         // Handle left and right the keys problem.
