@@ -47,6 +47,21 @@ public:
         ResetVideoStyle();
     }
 
+    void fullScreenReset()
+    {
+        auto src_ = GetVideoSourceValue("");
+        auto objectFit_ = GetObjectFitValue(ImageFit::COVER);
+        auto ImageSourceInfo_ = GetPosterImageInfoValue(ImageSourceInfo());
+        auto control_ = GetControlsValue(true);
+        auto videoSize_ = GetVideoSizeValue(SizeF());
+        Reset();
+        UpdateVideoSource(src_);
+        UpdateObjectFit(objectFit_);
+        UpdateControls(control_);
+        UpdatePosterImageInfo(ImageSourceInfo_);
+        UpdateVideoSize(videoSize_);
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(VideoStyle, VideoStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(VideoStyle, ObjectFit, ImageFit, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(VideoStyle, VideoSource, std::string, PROPERTY_UPDATE_MEASURE);
