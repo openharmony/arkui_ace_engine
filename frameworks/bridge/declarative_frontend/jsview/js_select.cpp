@@ -297,6 +297,12 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
         CalcDimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
+        } else if (size->IsUndefined()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            SelectModel::GetInstance()->SetSelectedOptionFontSize(theme->GetFontSize());
         }
     }
     std::string weight;
@@ -370,6 +376,13 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
         CalcDimension fontSize;
         if (ParseJsDimensionFp(size, fontSize)) {
             SelectModel::GetInstance()->SetOptionFontSize(fontSize);
+        }
+        if (size->IsUndefined()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            SelectModel::GetInstance()->SetOptionFontSize(theme->GetFontSize());
         }
     }
     std::string weight;
