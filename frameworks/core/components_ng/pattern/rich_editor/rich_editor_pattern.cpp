@@ -133,7 +133,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     parentGlobalOffset_ = richEditorLayoutAlgorithm->GetParentGlobalOffset();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
-    if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+    if (textSelector_.baseOffset != -1 && textSelector_.destinationOffset != -1) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
@@ -759,6 +759,8 @@ void RichEditorPattern::SetTypingStyle(struct UpdateSpanStyle typingStyle, TextS
 void RichEditorPattern::UpdateTextStyle(
     RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID_NOLOG(host);
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
@@ -787,6 +789,8 @@ void RichEditorPattern::UpdateTextStyle(
         spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
 }
 
 bool RichEditorPattern::HasSameTypingStyle(const RefPtr<SpanNode>& spanNode)
