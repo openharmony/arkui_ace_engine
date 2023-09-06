@@ -38,10 +38,10 @@ const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 {
     session_ = session;
-    sizeChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
+    boundsChangedCallback_ = [weakThis = WeakClaim(this)](const Rosen::Vector4f& bounds) {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        self->OnBoundsSizeChanged(bounds);
+        self->OnBoundsChanged(bounds);
     };
     CHECK_NULL_VOID_NOLOG(IsMainWindow());
     RegisterLifecycleListener();
@@ -78,7 +78,7 @@ void WindowScene::OnAttachToFrameNode()
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
-        surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
+        surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
         return;
     }
 
@@ -88,7 +88,7 @@ void WindowScene::OnAttachToFrameNode()
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
-    surfaceNode->SetBoundsSizeChangedCallback(sizeChangedCallback_);
+    surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
     WindowPattern::OnAttachToFrameNode();
 }
@@ -110,7 +110,7 @@ void WindowScene::UpdateSession(const sptr<Rosen::Session>& session)
     context->SetRSNode(surfaceNode);
 }
 
-void WindowScene::OnBoundsSizeChanged(const Rosen::Vector4f& bounds)
+void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 {
     Rosen::WSRect windowRect {
         .posX_ = std::round(bounds.x_),

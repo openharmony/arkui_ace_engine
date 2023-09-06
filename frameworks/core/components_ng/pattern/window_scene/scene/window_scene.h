@@ -49,7 +49,7 @@ protected:
 
 private:
     void BufferAvailableCallback();
-    void OnBoundsSizeChanged(const Rosen::Vector4f& bounds);
+    void OnBoundsChanged(const Rosen::Vector4f& bounds);
 
     bool destroyed_ = false;
 
