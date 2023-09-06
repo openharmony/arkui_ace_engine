@@ -222,7 +222,7 @@ public:
     {
         onClick_ = std::move(onClick);
     }
-    void OnColorConfigurationUpdate() override;
+    virtual void OnColorConfigurationUpdate() override;
 
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
