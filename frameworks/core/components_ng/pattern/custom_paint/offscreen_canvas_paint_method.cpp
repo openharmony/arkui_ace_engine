@@ -770,16 +770,14 @@ bool OffscreenCanvasPaintMethod::UpdateOffParagraph(const std::string& text, boo
         txtShadow.color = shadow_.GetColor().GetValue();
         txtShadow.offset.fX = shadow_.GetOffset().GetX();
         txtShadow.offset.fY = shadow_.GetOffset().GetY();
+        txtShadow.blur_sigma = shadow_.GetBlurRadius();
+        txtStyle.text_shadows.emplace_back(txtShadow);
 #else
         Rosen::TextShadow txtShadow;
         txtShadow.color = shadow_.GetColor().GetValue();
         txtShadow.offset.SetX(shadow_.GetOffset().GetX());
         txtShadow.offset.SetY(shadow_.GetOffset().GetY());
-#endif
         txtShadow.blurRadius = shadow_.GetBlurRadius();
-#ifndef USE_GRAPHIC_TEXT_GINE
-        txtStyle.text_shadows.emplace_back(txtShadow);
-#else
         txtStyle.shadows.emplace_back(txtShadow);
 #endif
     }
