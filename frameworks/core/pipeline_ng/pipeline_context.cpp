@@ -902,7 +902,7 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
-#ifndef PREVIEW
+#ifdef WINDOW_SCENE_SUPPORTED
     if (uiExtensionManager_->OnBackPressed()) {
         return true;
     }
