@@ -962,13 +962,12 @@ void TextPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& layoutProperty = host->GetLayoutProperty();
-    auto flag = layoutProperty ? layoutProperty->GetPropertyChangeFlag() : PROPERTY_UPDATE_NORMAL;
-    // When updating the scenario, needs to determine whether the SpanNode node is refreshed.
-    if (paragraph_ && (flag & PROPERTY_UPDATE_BY_CHILD_REQUEST) != PROPERTY_UPDATE_BY_CHILD_REQUEST) {
-        LOGD("no need to refresh span node");
-        return;
+
+    // mark content dirty
+    if (contentMod_) {
+        contentMod_->ContentChange();
     }
+
     imageCount_ = 0;
     // When dirty areas are marked because of child node changes, the text rendering node tree is reset.
     const auto& children = host->GetChildren();
@@ -977,6 +976,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
     }
 
     if (paragraph_) {
+        // because ParagraphStyle can't be set directly yet, paragraph always needs to be rebuilt
         LOGD("reset before create layoutwrapper");
         paragraph_.Reset();
     }
@@ -1004,11 +1004,6 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (isSpanHasClick) {
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
         InitClickEvent(gestureEventHub);
-    }
-
-    // mark content dirty
-    if (contentMod_) {
-        contentMod_->ContentChange();
     }
 }
 
