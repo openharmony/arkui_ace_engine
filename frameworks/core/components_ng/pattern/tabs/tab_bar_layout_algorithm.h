@@ -123,6 +123,7 @@ private:
     void UpdateHorizontalPadding(LayoutWrapper* layoutWrapper, float horizontalPadding) const;
     void AdjustFixedItem(const RefPtr<LayoutWrapper>& childWrapper, const OptionalSizeF& frameSize, Axis axis) const;
     void MeasureMask(LayoutWrapper* layoutWrapper, int32_t childCount) const;
+    void CheckMarqueeForScrollable(LayoutWrapper* layoutWrapper, int32_t childCount) const;
 
     std::vector<OffsetF> tabItemOffset_;
     float currentOffset_ = 0.0f;
