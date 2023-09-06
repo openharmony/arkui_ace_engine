@@ -354,7 +354,7 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
                 eventHub->FireNavBarStateChangeEvent(true);
             }
         } else {
-            if (navigationStack_->Empty()) {
+            if (navigationStack_->Empty() && !layoutProperty->GetHideNavBarValue(false)) {
                 eventHub->FireNavBarStateChangeEvent(true);
             } else {
                 eventHub->FireNavBarStateChangeEvent(false);
@@ -364,7 +364,7 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
         return;
     }
 
-    if (GetNavBarVisibilityChange() && (currentNavigationMode == NavigationMode::SPLIT)) {
+    if (GetNavBarVisibilityChange()) {
         if (!layoutProperty->GetHideNavBarValue(false)) {
             eventHub->FireNavBarStateChangeEvent(true);
         } else {
@@ -396,7 +396,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(hostNode, false);
     auto oldMode = navigationMode_;
     navigationMode_ = navigationLayoutAlgorithm->GetNavigationMode();
-    OnNavBarStateChange(oldMode == navigationMode_);
+    OnNavBarStateChange(oldMode != navigationMode_);
     auto curTopNavPath = navigationStack_->GetTopNavPath();
     if (curTopNavPath.has_value()) {
         auto context = PipelineContext::GetCurrentContext();
@@ -406,8 +406,11 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     auto pattern = weak.Upgrade();
                     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
                         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
+                    auto navigationLayoutProperty =
+                        AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
                     if (pattern->navigationStack_->Size() == 1 &&
-                        pattern->GetNavigationMode() == NavigationMode::SPLIT) {
+                        (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
+                            navigationLayoutProperty->GetHideNavBar().value_or(false))) {
                         // set backButton gone for the first level page in SPLIT mode
                         hostNode->SetBackButtonVisible(curTopNavDestination, false);
                     } else {
@@ -440,7 +443,7 @@ void NavigationPattern::UpdateContextRect(
     curDestination->GetRenderContext()->ClipWithRRect(
         RectF(0.0f, 0.0f, size.Width(), size.Height()), RadiusF(EdgeF(0.0f, 0.0f)));
     curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
-    
+
     if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
         curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);

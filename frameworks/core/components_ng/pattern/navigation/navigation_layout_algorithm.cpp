@@ -27,6 +27,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
@@ -136,6 +138,10 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         AceType::DynamicCast<NavigationLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     auto contentChildSize = contentNode->GetChildren().size();
 
+    // cases that content layouts from start
+    // 1. displaying content pages in STACK mode
+    // 2. placing navBar at the end
+    // 3. hiding navBar in SPLIT mode
     if ((contentChildSize != 0 && navigationLayoutAlgorithm->GetNavigationMode() == NavigationMode::STACK) ||
         position == NavBarPosition::END ||
         (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
@@ -170,8 +176,8 @@ bool NavigationLayoutAlgorithm::IsAutoHeight(const RefPtr<LayoutProperty>& layou
     if (!calcLayoutConstraint || !calcLayoutConstraint->selfIdealSize.has_value() ||
         !calcLayoutConstraint->selfIdealSize->Height().has_value() ||
         (calcLayoutConstraint->selfIdealSize->Height().value().ToString().find("auto") == std::string::npos)) {
-            return false;
-        }
+        return false;
+    }
     return true;
 }
 
@@ -376,11 +382,10 @@ void NavigationLayoutAlgorithm::SizeCalculationStack(const RefPtr<NavigationGrou
     CHECK_NULL_VOID(contentNode);
     realDividerWidth_ = 0.0f;
     float frameWidth = frameSize.Width();
-    realContentWidth_ = frameWidth;
     navBarSize_.SetWidth(frameWidth);
     dividerSize_.SetWidth(realDividerWidth_);
-    contentSize_.SetWidth(realContentWidth_);
-
+    contentSize_.SetWidth(frameWidth);
+    realContentWidth_ = frameWidth;
 }
 
 void NavigationLayoutAlgorithm::MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
@@ -457,6 +462,15 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         SetNavigationHeight(layoutWrapper, size);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
+        navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    } else {
+        navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    }
 }
 
 void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -475,7 +489,6 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void NavigationLayoutAlgorithm::SetNavigationHeight(LayoutWrapper* layoutWrapper, SizeF& size)
 {
-
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());

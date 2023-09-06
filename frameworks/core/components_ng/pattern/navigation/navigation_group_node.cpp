@@ -306,13 +306,16 @@ RefPtr<FrameNode> NavigationGroupNode::GetNavDestinationNodeToHandleBack()
     if (children.empty()) {
         return nullptr;
     }
-    auto mode = pattern->GetNavigationMode();
-    if (mode == NavigationMode::SPLIT) {
-        if (children.size() == 1) {
+    if (children.size() == 1) {
+        auto mode = pattern->GetNavigationMode();
+        auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, nullptr);
+        if (mode == NavigationMode::SPLIT ||
+            (mode == NavigationMode::STACK && layoutProperty->GetHideNavBar().value_or(false))) {
             return nullptr;
         }
-        return AceType::DynamicCast<NavDestinationGroupNode>(children.back());
     }
+
     return AceType::DynamicCast<NavDestinationGroupNode>(children.back());
 }
 
