@@ -64,11 +64,13 @@ public:
 
     RefPtr<AcePage> GetPage(int32_t pageId) const override
     {
+        CHECK_NULL_RETURN(delegate_, nullptr);
         return delegate_->GetPage(pageId);
     }
 
     WeakPtr<AcePage> GetCurrentReadyPage() const
     {
+        CHECK_NULL_RETURN(delegate_, nullptr);
         return delegate_->GetCurrentReadyPage();
     }
 
