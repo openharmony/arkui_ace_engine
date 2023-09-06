@@ -253,7 +253,7 @@ public:
     bool CanOverScroll(int32_t source)
     {
         return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
+            source != SCROLL_FROM_NONE && IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
