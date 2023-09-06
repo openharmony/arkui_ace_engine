@@ -504,17 +504,28 @@ void JSRichEditor::ParseMenuParam(
     }
 }
 
+JSRef<JSVal> JSRichEditor::CreateJSTextCommonEvent(NG::TextCommonEvent& event)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> object = objectTemplate->NewInstance();
+    object->SetPropertyObject("preventDefault", JSRef<JSFunc>::New<FunctionCallback>(JsPreventDefault));
+    object->Wrap<NG::TextCommonEvent>(&event);
+    return JSRef<JSVal>::Cast(object);
+}
+
 void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(info[0]->IsFunction());
-    auto onPasteCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(onPasteCallback)]() -> bool {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        ACE_SCORING_EVENT("RichEditor.onPaste");
-        return (func->ExecuteJS())->ToBoolean();
+    auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
+
+    auto onPaste = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc)](NG::TextCommonEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onPaste");
+        func->Execute(info);
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
-    info.ReturnSelf();
 }
 
 void JSRichEditor::JSBind(BindingTarget globalObj)

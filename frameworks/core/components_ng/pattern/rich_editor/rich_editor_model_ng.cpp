@@ -132,7 +132,7 @@ void RichEditorModelNG::BindSelectionMenu(
     }
 }
 
-void RichEditorModelNG::SetOnPaste(std::function<bool()>&& func)
+void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);

@@ -28,6 +28,8 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
@@ -2812,8 +2814,9 @@ void RichEditorPattern::HandleOnPaste()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto overridePaste = eventHub->FireOnPaste();
-    if (overridePaste) {
+    TextCommonEvent event;
+    eventHub->FireOnPaste(event);
+    if (event.IsPreventDefault()) {
         return;
     }
 

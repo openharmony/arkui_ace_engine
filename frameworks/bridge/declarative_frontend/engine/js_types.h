@@ -45,6 +45,7 @@ inline auto ToJSValue(T&& val)
 };
 
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info);
+Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info);
 Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info);
 
 #endif
