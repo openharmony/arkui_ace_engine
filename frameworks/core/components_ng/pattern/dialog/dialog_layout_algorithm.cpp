@@ -309,7 +309,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 }
 
 OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
-    const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& selfSize) const
+    const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& selfSize)
 {
     OffsetF topLeftPoint;
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -335,8 +335,7 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     return AdjustChildPosition(topLeftPoint, dialogOffset, childSize, needAvoidKeyboard);
 }
 
-bool DialogLayoutAlgorithm::SetAlignmentSwitch(
-    const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint) const
+bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint)
 {
     if (alignment_ != DialogAlignment::DEFAULT) {
         switch (alignment_) {
@@ -403,7 +402,7 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
     CHECK_NULL_RETURN(pipelineContext, 0);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, 0);
-    auto bottom = dialogTheme->GetDefaultPaddingBottomFixed();
+    auto bottom = dialogTheme->GetDefaultDialogMarginBottom();
     return pipelineContext->NormalizeToPx(bottom);
 }
 
@@ -421,8 +420,9 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
     auto childBottom = childOffset.GetY() + childSize.Height();
-    if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > keyboardInsert.start) {
-        childOffset.SetY(childOffset.GetY() - (childBottom - keyboardInsert.start));
+    auto paddingBottom = static_cast<float>(GetPaddingBottom());
+    if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
+        childOffset.SetY(childOffset.GetY() - (childBottom - (keyboardInsert.start - paddingBottom)));
     }
     return childOffset;
 }
