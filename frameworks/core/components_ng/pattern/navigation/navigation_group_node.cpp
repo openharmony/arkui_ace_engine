@@ -124,6 +124,9 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             // for the navDestination at the top, FireChangeEvent
             eventHub->FireChangeEvent(true);
             hasChanged = CheckNeedMeasure(navDestination->GetLayoutProperty()->GetPropertyChangeFlag());
+            if (!hasChanged && NavigationLayoutAlgorithm::IsAutoHeight(GetLayoutProperty<NavigationLayoutProperty>())) {
+                hasChanged = true;
+            }
         } else {
             eventHub->FireChangeEvent(false);
         }
