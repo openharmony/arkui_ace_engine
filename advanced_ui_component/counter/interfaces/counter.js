@@ -2051,8 +2051,9 @@ export class CounterComponent extends ViewPU {
                     Stack.create();
                     Stack.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
                     Stack.height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT);
-                    Stack.borderColor(CounterResource.BUTTON_BACKGROUD_COLOR);
+                    Stack.padding({ top: "1vp" });
                     Stack.borderWidth({ bottom: "1vp" });
+                    Stack.borderColor(CounterResource.COUNTER_BORDER_COLOR);
                     Stack.clip(!0);
                     e || Stack.pop();
                     ViewStackProcessor.StopGetAccessRecording()
@@ -2601,8 +2602,9 @@ export class CounterComponent extends ViewPU {
                     Stack.create();
                     Stack.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH);
                     Stack.height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT);
+                    Stack.padding({ top: "1vp" });
                     Stack.borderWidth({ bottom: "1vp" });
-                    Stack.borderColor(CounterResource.BUTTON_BACKGROUD_COLOR);
+                    Stack.borderColor(CounterResource.COUNTER_BORDER_COLOR);
                     Stack.clip(!0);
                     e || Stack.pop();
                     ViewStackProcessor.StopGetAccessRecording()
