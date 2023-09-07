@@ -19,7 +19,6 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/paint_property.h"
-#include "core/components_ng/pattern/gauge/gauge_theme.h"
 
 namespace OHOS::Ace::NG {
 using ColorStopArray = std::vector<std::pair<Color, Dimension>>;
@@ -45,7 +44,6 @@ public:
         paintProperty->propStartAngle_ = CloneStartAngle();
         paintProperty->propEndAngle_ = CloneEndAngle();
         paintProperty->propColors_ = CloneColors();
-        paintProperty->propGradientColors_ = CloneGradientColors();
         paintProperty->propValues_ = CloneValues();
         paintProperty->propStrokeWidth_ = CloneStrokeWidth();
         paintProperty->propGaugeType_ = CloneGaugeType();
@@ -61,7 +59,6 @@ public:
         ResetStartAngle();
         ResetEndAngle();
         ResetColors();
-        ResetGradientColors();
         ResetValues();
         ResetStrokeWidth();
         ResetGaugeType();
@@ -81,23 +78,12 @@ public:
             json->Put("strokeWidth", "");
         }
         auto jsonColors = JsonUtil::CreateArray(true);
-        if (propColors_.has_value() && propColors_.has_value()) {
-            for (size_t i = 0; i < propValues_.value().size(); i++) {
-                auto jsonObject = JsonUtil::CreateArray(true);
-                jsonObject->Put("0", propColors_.value()[i].ColorToString().c_str());
-                jsonObject->Put("1", propValues_.value()[i]);
-                auto index = std::to_string(i);
-                jsonColors->Put(index.c_str(), jsonObject);
-            }
-        }
-        json->Put("colors", jsonColors->ToString().c_str());
-        auto jsongradientColors = JsonUtil::CreateArray(true);
-        if (propGradientColors_.has_value() && propValues_.has_value() &&
-            (propGradientColors_.value().size() == propValues_.value().size())) {
+        if (propColors_.has_value() && propValues_.has_value() &&
+            (propColors_.value().size() == propValues_.value().size())) {
             for (size_t i = 0; i < propValues_.value().size(); i++) {
                 auto jsonObject = JsonUtil::CreateArray(true);
                 auto jsonColor = JsonUtil::CreateArray(true);
-                auto colorStopArray = propGradientColors_.value()[i];
+                auto colorStopArray = propColors_.value()[i];
                 for (size_t j = 0; j < colorStopArray.size(); j++) {
                     auto jsonColorObject = JsonUtil::CreateArray(true);
                     jsonColorObject->Put("0", colorStopArray[j].first.ColorToString().c_str());
@@ -108,10 +94,10 @@ public:
                 jsonObject->Put("0", jsonColor);
                 jsonObject->Put("1", propValues_.value()[i]);
                 auto index = std::to_string(i);
-                jsongradientColors->Put(index.c_str(), jsonObject);
+                jsonColors->Put(index.c_str(), jsonObject);
             }
         }
-        json->Put("gradientColors", jsongradientColors->ToString().c_str());
+        json->Put("colors", jsonColors->ToString().c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, float, PROPERTY_UPDATE_RENDER);
@@ -120,8 +106,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartAngle, float, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndAngle, float, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GaugeType, GaugeType, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Colors, std::vector<Color>, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(GradientColors, std::vector<ColorStopArray>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Colors, std::vector<ColorStopArray>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Values, std::vector<float>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(GaugePaintProperty);
