@@ -1539,6 +1539,9 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event, const RefPtr<FocusHu
     TabIndexNodeList tabIndexNodes;
     tabIndexNodes.clear();
     mainFocusHub->CollectTabIndexNodes(tabIndexNodes);
+    if (tabIndexNodes.empty()) {
+        return false;
+    }
     tabIndexNodes.sort([](std::pair<int32_t, WeakPtr<FocusHub>>& a, std::pair<int32_t, WeakPtr<FocusHub>>& b) {
         return a.first < b.first;
     });
