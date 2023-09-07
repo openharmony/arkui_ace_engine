@@ -192,6 +192,47 @@ HWTEST_F(DragDropProxyTestNg, DragDropProxyTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DragDropProxyOnDragEndTest001
+ * @tc.desc: Test OnDragEnd
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropProxyTestNg, DragDropProxyOnDragEndTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropProxy with unfitted proxyId
+     * @tc.expected: step1. id_ = PROXY_ID_NOT_FIT
+     */
+    auto proxyUnFitted = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID_NOT_FIT);
+    EXPECT_EQ(proxyUnFitted->id_, PROXY_ID_NOT_FIT);
+
+    /**
+     * @tc.steps: step2. call OnDragEnd
+     * @tc.expected: step2. no fatal errors happended
+     *                      DragDropManager->OnDragEnd() & GetExtraInfoFromClipboard() &
+     *                      RestoreClipboardData() will not be called
+     */
+    GestureEvent info;
+    proxyUnFitted->OnDragEnd(info, true);
+
+    /**
+     * @tc.steps: step3. construct a DragDropProxy with fitted proxyId
+     * @tc.expected: step3. id_ = PROXY_ID
+     */
+    auto proxy = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID);
+    EXPECT_EQ(proxy->id_, PROXY_ID);
+
+    /**
+     * @tc.steps: step4. call OnDragEnd
+     * @tc.expected: step4. DragDropManager->OnDragEnd() & GetExtraInfoFromClipboard() &
+     *                      RestoreClipboardData() will be called
+     *                      some logs will be print they are defined in "mock_drag_drop_manager.cpp"
+     */
+    proxy->OnDragEnd(info, true);
+    EXPECT_EQ(proxy->id_, PROXY_ID);
+}
+
+/**
  * @tc.name: DragDropProxyTest004
  * @tc.desc: Test onDragCancel
  * @tc.type: FUNC
