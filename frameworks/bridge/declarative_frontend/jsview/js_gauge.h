@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,10 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GAUGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GAUGE_H
 
-#include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
+
 class JSGauge : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
@@ -31,13 +31,7 @@ public:
     static void SetColors(const JSCallbackInfo& info);
     static void SetStrokeWidth(const JSCallbackInfo& info);
     static void SetLabelConfig(const JSCallbackInfo& info);
-
-private:
-    static void SetGradientColors(const JSCallbackInfo& info);
-    static void ConvertGradientColor(const JsiRef<JsiValue>& itemParam,
-        std::vector<OHOS::Ace::NG::ColorStopArray>& colors, OHOS::Ace::NG::GaugeType& type);
-    static void ConvertResourceColor(
-        const JsiRef<JsiValue>& itemParam, std::vector<OHOS::Ace::NG::ColorStopArray>& colors);
 };
+
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GAUGE_H
