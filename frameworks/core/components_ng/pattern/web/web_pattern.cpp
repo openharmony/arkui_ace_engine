@@ -359,6 +359,10 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
     CHECK_NULL_VOID(delegate_);
+    if (info.GetAction() == MouseAction::PRESS) {
+        delegate_->OnContextMenuHide("");
+    }
+
     if (info.GetAction() == MouseAction::RELEASE) {
         WebRequestFocus();
     }
