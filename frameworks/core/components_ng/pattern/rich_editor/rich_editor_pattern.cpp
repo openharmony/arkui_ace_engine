@@ -238,7 +238,10 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     // The length of the imageSpan defaults to the length of a character to calculate the position
     spanItem->content = " ";
     AddSpanItem(spanItem, offset);
-    if (textSelector_.IsValid()) {
+    if (options.offset.has_value() && options.offset.value() >= GetCaretPosition()) {
+        SetCaretPosition(GetCaretPosition() + 1);
+    }
+    if (!isPaste && textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
     }
