@@ -203,11 +203,7 @@ void ImagePattern::OnImageDataReady()
         geometryNode->GetContentOffset().GetX(), geometryNode->GetContentOffset().GetY());
     imageEventHub->FireCompleteEvent(event);
 
-    if (!geometryNode->GetContent() || (geometryNode->GetContent() && altLoadingCtx_)) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        return;
-    }
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
