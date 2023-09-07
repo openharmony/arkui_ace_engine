@@ -25,6 +25,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
+constexpr uint8_t DOUBLE = 2;
+constexpr float PICKER_DIALOG_DIVIDER_MARGIN = 24.0f;
 } // namespace
 
 CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
@@ -43,18 +45,22 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
                enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(picker);
-        DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
         auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern.Upgrade());
         CHECK_NULL_VOID_NOLOG(textPickerPattern);
+        auto dividerLength = frameRect.Width();
+        if (textPickerPattern->GetIsShowInDialog()) {
+            dividerLength = frameRect.Width() - PICKER_DIALOG_DIVIDER_MARGIN * DOUBLE;
+        }
+        DividerPainter dividerPainter(dividerLineWidth, dividerLength, false, dividerColor, LineCap::SQUARE);
         auto height = picker->defaultPickerItemHeight_;
         if (textPickerPattern->GetResizeFlag()) {
             height = textPickerPattern->GetResizePickerItemHeight();
         }
         double upperLine = (frameRect.Height() - height) / 2.0;
         double downLine = (frameRect.Height() + height) / 2.0;
-        OffsetF offset = OffsetF(0.0f, upperLine);
+        OffsetF offset = OffsetF(PICKER_DIALOG_DIVIDER_MARGIN, upperLine);
         dividerPainter.DrawLine(canvas, offset);
-        OffsetF offsetY = OffsetF(0.0f, downLine);
+        OffsetF offsetY = OffsetF(PICKER_DIALOG_DIVIDER_MARGIN, downLine);
         dividerPainter.DrawLine(canvas, offsetY);
         if (enabled) {
             picker->PaintGradient(canvas, frameRect);
