@@ -4871,6 +4871,12 @@ HWTEST_F(MenuTestNg, MenuItemGroupLayoutAlgorithmTestNg001, TestSize.Level1)
     // create menu item group
     auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
     auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->OnModifyDone();
     auto algorithm = AceType::MakeRefPtr<MenuItemGroupLayoutAlgorithm>(-1, -1, 0);
     ASSERT_TRUE(algorithm);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -4907,6 +4913,117 @@ HWTEST_F(MenuTestNg, MenuItemGroupLayoutAlgorithmTestNg001, TestSize.Level1)
         EXPECT_EQ(child->GetGeometryNode()->GetMarginFrameOffset(), offset);
         offset.AddY(MENU_SIZE_HEIGHT / 3);
     }
+    parentLayoutConstraint.selfIdealSize.SetWidth(10);
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    algorithm->headerIndex_ = 0;
+    algorithm->footerIndex_ = 0;
+    algorithm->Measure(layoutWrapper);
+    algorithm->Layout(layoutWrapper);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Height(), MENU_ITEM_SIZE_HEIGHT * 5);
+    algorithm->needHeaderPadding_ = true;
+    algorithm->LayoutHeader(layoutWrapper);
+    algorithm->NeedHeaderPadding(menuItemGroup);
+    algorithm->UpdateHeaderAndFooterMargin(layoutWrapper);
+}
+
+/**
+ * @tc.name: MenuItemGroupLayoutAlgorithmTestNg002
+ * @tc.desc: Test MenuItemGroup measure UpdateHeaderAndFooterMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemGroupLayoutAlgorithmTestNg002, TestSize.Level1)
+{
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    menuItemGroupPattern->hasSelectIcon_ = true;
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->OnModifyDone();
+    auto algorithm = AceType::MakeRefPtr<MenuItemGroupLayoutAlgorithm>(-1, -1, 0);
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto* layoutWrapper = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+    algorithm->UpdateHeaderAndFooterMargin(layoutWrapper);
+    menuItemGroupPattern->hasStartIcon_ = true;
+    menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    layoutWrapper = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    algorithm->UpdateHeaderAndFooterMargin(layoutWrapper);
+    algorithm->headerIndex_ = 0;
+    algorithm->UpdateHeaderAndFooterMargin(layoutWrapper);
+    algorithm->footerIndex_ = 0;
+    algorithm->UpdateHeaderAndFooterMargin(layoutWrapper);
+    menuItemGroupPattern->hasSelectIcon_ = false;
+    menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    layoutWrapper = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    algorithm->UpdateHeaderAndFooterMargin(layoutWrapper);
+    algorithm->Measure(layoutWrapper);
+    auto expectedSize = SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT * 3);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), expectedSize);
+}
+
+/**
+ * @tc.name: MenuItemGroupPaintMethod001
+ * @tc.desc: Test MenuItemGroup GetOverlayDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemGroupPaintMethod001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare paint method object.
+     */
+    RefPtr<MenuItemGroupPaintProperty> paintProp = AceType::MakeRefPtr<MenuItemGroupPaintProperty>();
+    RefPtr<MenuItemGroupPaintMethod> paintMethod = AceType::MakeRefPtr<MenuItemGroupPaintMethod>();
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    /**
+     * @tc.steps: step2. update paint property and excute GetOverlayDrawFunction.
+     * @tc.expected:  return value are as expected.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+    paintProp->UpdateNeedHeaderPadding(true);
+    paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
+    paintProp->UpdateNeedFooterPadding(true);
+    paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
+    result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    EXPECT_NE(result, nullptr);
+    result(canvas);
+    delete paintWrapper;
+    paintWrapper = nullptr;
 }
 
 /**
