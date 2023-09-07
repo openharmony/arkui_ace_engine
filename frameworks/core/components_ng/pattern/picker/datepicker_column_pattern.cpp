@@ -495,6 +495,9 @@ void DatePickerColumnPattern::AddAnimationTextProperties(
         auto size = MeasureUtil::MeasureTextSize(measureContext);
         if (!optionProperties_.empty()) {
             optionProperties_[currentIndex].fontheight = size.Height();
+            if (optionProperties_[currentIndex].fontheight > optionProperties_[currentIndex].height) {
+                optionProperties_[currentIndex].fontheight = optionProperties_[currentIndex].height;
+            }
         }
         SetOptionShiftDistance();
         properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
