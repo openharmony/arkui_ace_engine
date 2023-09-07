@@ -186,6 +186,8 @@ private:
     PointF hoverPoint_;
     PointF dragStartPoint_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
+    bool isClicked_ = false;
+    bool isRepeatClicked_ = false;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
