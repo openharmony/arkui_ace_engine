@@ -1020,6 +1020,16 @@ public:
         return isCustomFont_;
     }
 
+    void SetISCounterIdealHeight(bool IsIdealHeight)
+    {
+        isCounterIdealheight_ = IsIdealHeight;
+    }
+
+    bool GetIsCounterIdealHeight() const
+    {
+        return isCounterIdealheight_;
+    }
+
 private:
     bool HasFocus() const;
     void HandleTouchEvent(const TouchEventInfo& info);
@@ -1254,6 +1264,7 @@ private:
     Dimension underlineWidth_ = UNDERLINE_WIDTH;
     Color underlineColor_;
     bool scrollBarVisible_ = false;
+    bool isCounterIdealheight_ = false;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
