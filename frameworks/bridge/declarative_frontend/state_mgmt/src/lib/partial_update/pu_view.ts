@@ -520,7 +520,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
       const result : ObservedPropertyAbstractPU<T> = ((source instanceof ObservedPropertySimple) || (source instanceof ObservedPropertySimplePU))
           ? new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName) 
           : new SynchedPropertyObjectTwoWayPU<T>(source, this, consumeVarName);
-      stateMgmtConsole.error(`The @Consume is instance of ${result.constructor.name}`);
       return result;
     };
     return providedVarStore.createSync(factory) as  ObservedPropertyAbstractPU<T>;
@@ -602,6 +601,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // executed on first render only
   // kept for backward compatibility with old ace-ets2bundle
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
+    if (this.isDeleting_) {
+        stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destrucion, will not execute observeComponentCreation `);
+        return;
+    }
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} start ....`);
     compilerAssignedUpdateFunc(elmtId, /* is first render */ true);
@@ -616,6 +619,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // - prototype : Object is present for every ES6 class
   // - pop : () => void, static function present for JSXXX classes such as Column, TapGesture, etc.
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype : Object, pop?: () => void }): void {
+    if (this.isDeleting_) {
+        stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destrucion, will not execute observeComponentCreation2 `);
+        return;
+    }
     const _componentName : string =  (classObject && "name" in classObject) ? classObject.name as string : "unspecified UINode";
     const _popFunc : () => void = (classObject && "pop" in classObject) ? classObject.pop! : () => {};
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
