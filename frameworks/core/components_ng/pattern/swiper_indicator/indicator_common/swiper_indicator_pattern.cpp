@@ -320,12 +320,7 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float itemHeightValue = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     float selectedItemWidthValue =
         static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx() * 2);
-    auto selectedItemHeightValue =
-        static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
-    auto swiperThemeSelectedItemHeightSize = swiperTheme->GetSize().ConvertToPx();
-    auto swiperThemeSelectedItemWidthSize = swiperTheme->GetSize().ConvertToPx() * 2.0f;
-    if (!NearEqual(selectedItemWidthValue, swiperThemeSelectedItemWidthSize) ||
-        !NearEqual(selectedItemHeightValue, swiperThemeSelectedItemHeightSize)) {
+    if (paintProperty->GetIsCustomSizeValue(false)) {
         selectedItemWidthValue *= 0.5f;
     }
     // diameter calculation
