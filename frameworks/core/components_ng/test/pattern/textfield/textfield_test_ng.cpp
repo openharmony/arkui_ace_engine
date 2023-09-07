@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/test/mock/pattern/text_field/mock_text_input_connection.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -7371,6 +7372,203 @@ HWTEST_F(TextFieldPatternTestNg, CursorMove003, TestSize.Level1)
     layoutProperty_->UpdateMaxLines(1);
     EXPECT_TRUE(pattern_->CursorMoveLeftWord());
     EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 3);
+}
+
+/**
+ * @tc.name: TextFilter
+ * @tc.desc: test method of line position
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFilter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call FilterWithEmail and FilterWithAscii.
+     * @tc.expected: Check result.
+     */
+    std::string result = "wyz@@xx.com";
+    EXPECT_TRUE(pattern_->FilterWithEmail(result));
+    result = "wyz@xx.com";
+    EXPECT_FALSE(pattern_->FilterWithEmail(result));
+
+    std::string valueToUpdate = "wyz测试";
+    result = "";
+    EXPECT_TRUE(pattern_->FilterWithAscii(valueToUpdate, result));
+    EXPECT_STREQ(result.c_str(), "wyz");
+}
+
+/**
+ * @tc.name: ProcessPasswordIcon
+ * @tc.desc: test method of ProcessPasswordIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ProcessPasswordIcon, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call ProcessPasswordIcon.
+     * @tc.expected: Check result.
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutProperty_->UpdateShowPasswordIcon(false);
+    pattern_->ProcessPasswordIcon();
+
+    layoutProperty_->UpdateShowPasswordIcon(true);
+    ImageSourceInfo imageSourceInfo;
+    layoutProperty_->UpdateHidePasswordSourceInfo(imageSourceInfo);
+    pattern_->textObscured_ = true;
+    pattern_->hideUserDefinedIcon_ = true;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        }
+        return AceType::MakeRefPtr<TextFieldTheme>();
+    });
+
+    pattern_->ProcessPasswordIcon();
+    ASSERT_NE(pattern_->hidePasswordImageLoadingCtx_, nullptr);
+    auto loadSuccessTask = pattern_->CreateLoadSuccessCallback(pattern_->textObscured_);
+    loadSuccessTask(imageSourceInfo);
+    EXPECT_NE(pattern_->hidePasswordCanvasImage_, nullptr);
+    auto loadFailTask = pattern_->CreateLoadFailCallback(pattern_->textObscured_);
+    loadFailTask(imageSourceInfo, "tdd error");
+    auto dataReadyTask = pattern_->CreateDataReadyCallback(pattern_->textObscured_);
+    dataReadyTask(imageSourceInfo);
+
+    pattern_->hideUserDefinedIcon_ = false;
+    imageSourceInfo.SetSrc("/pages/media/test.jpg");
+    pattern_->ProcessPasswordIcon();
+    loadFailTask(imageSourceInfo, "tdd error");
+
+    pattern_->textObscured_ = false;
+    pattern_->showUserDefinedIcon_ = true;
+    layoutProperty_->UpdateShowPasswordSourceInfo(imageSourceInfo);
+    pattern_->ProcessPasswordIcon();
+    ASSERT_NE(pattern_->showPasswordImageLoadingCtx_, nullptr);
+    loadSuccessTask = pattern_->CreateLoadSuccessCallback(pattern_->textObscured_);
+    loadSuccessTask(imageSourceInfo);
+    loadFailTask = pattern_->CreateLoadFailCallback(pattern_->textObscured_);
+    loadFailTask(imageSourceInfo, "tdd error");
+
+    pattern_->showUserDefinedIcon_ = false;
+    pattern_->ProcessPasswordIcon();
+    loadFailTask(imageSourceInfo, "tdd error");
+    EXPECT_NE(pattern_->showPasswordCanvasImage_, nullptr);
+}
+
+/**
+ * @tc.name: OnCursorTwinkling
+ * @tc.desc: test method of OnCursorTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnCursorTwinkling, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call OnCursorTwinkling.
+     * @tc.expected: Check result.
+     */
+    pattern_->cursorVisible_ = true;
+    pattern_->obscureTickCountDown_ = 5;
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern_->textObscured_ = true;
+    pattern_->OnCursorTwinkling();
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 4);
+    EXPECT_FALSE(pattern_->cursorVisible_);
+
+    pattern_->obscureTickCountDown_ = 0;
+    pattern_->OnCursorTwinkling();
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 0);
+    EXPECT_TRUE(pattern_->cursorVisible_);
+
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->textObscured_ = false;
+    pattern_->OnCursorTwinkling();
+    EXPECT_FALSE(pattern_->cursorVisible_);
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 1);
+
+    layoutProperty_->UpdateTextInputType(TextInputType::TEXT);
+    pattern_->OnCursorTwinkling();
+    EXPECT_TRUE(pattern_->cursorVisible_);
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 1);
+
+    layoutProperty_->UpdateMaxLines(1);
+    pattern_->textObscured_ = true;
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern_->obscureTickCountDown_ = 1;
+    pattern_->OnCursorTwinkling();
+    EXPECT_FALSE(pattern_->cursorVisible_);
+    EXPECT_EQ(pattern_->obscureTickCountDown_, 0);
+}
+
+/**
+ * @tc.name: HandleClickEvent
+ * @tc.desc: test method of HandleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, HandleClickEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call HandleClickEvent.
+     * @tc.expected: Check result.
+     */
+    auto renderContext = host_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    EXPECT_CALL(*mockRenderContext, GetPaintRectWithTransform()).WillRepeatedly(Return(RectF()));
+
+    auto focusHub = host_->GetOrCreateFocusHub();
+    focusHub->eventHub_.Upgrade()->SetEnabled(true);
+    focusHub->focusType_ = FocusType::NODE;
+    layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
+    GestureEvent info;
+    pattern_->HandleClickEvent(info);
+
+    focusHub->currentFocus_ = true;
+    pattern_->HandleClickEvent(info);
+
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->isFocusOnTouch_ = false;
+    pattern_->HandleClickEvent(info);
+
+    pattern_->isMousePressed_ = true;
+    pattern_->HandleClickEvent(info);
+    EXPECT_FALSE(pattern_->isMousePressed_);
+
+    info.SetLocalLocation(Offset(90, 90));
+    pattern_->imageRect_.SetWidth(20);
+    pattern_->frameRect_.SetWidth(100);
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    layoutProperty_->UpdateShowPasswordIcon(true);
+    pattern_->HandleClickEvent(info);
+    EXPECT_EQ(pattern_->caretUpdateType_, CaretUpdateType::ICON_PRESSED);
+
+    layoutProperty_->UpdateShowPasswordIcon(false);
+    pattern_->HandleClickEvent(info);
+
+    info.SetLocalLocation(Offset(10, 90));
+    pattern_->HandleClickEvent(info);
 }
 
 } // namespace OHOS::Ace::NG
