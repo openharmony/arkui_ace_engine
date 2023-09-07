@@ -181,9 +181,7 @@ void JankFrameReport::ResetFrameJankClock()
 
 void JankFrameReport::StartRecord(const std::string& pageUrl)
 {
-    if (startTime_ == 0) {
-        ResetFrameJankClock();
-    }
+    ResetFrameJankClock();
     pageUrl_ = pageUrl;
 }
 
@@ -194,6 +192,5 @@ void JankFrameReport::FlushRecord()
         EventReport::JankFrameReport(startTime_, SteadyTimeRecorder::End(), frameJankRecord_, pageUrl_);
     }
     ClearFrameJankRecord();
-    ResetFrameJankClock();
 }
 } // namespace OHOS::Ace
