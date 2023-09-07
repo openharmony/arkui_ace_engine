@@ -944,11 +944,12 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         }
         style.textAlign = align;
     }
-    auto leadingMarginObj = styleObject->GetProperty("leadingMargin");
-    JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(leadingMarginObj);
-    if (!leadingMarginObject->IsUndefined()) {
+    auto lm = styleObject->GetProperty("leadingMargin");
+    if (lm->IsObject()) {
+        // [LeadingMarginPlaceholder]
+        JSRef<JSObject> leadingMarginObject = JSRef<JSObject>::Cast(lm);
         style.leadingMargin = std::make_optional<NG::LeadingMargin>();
-        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("placeholder");
+        JSRef<JSVal> placeholder = leadingMarginObject->GetProperty("pixelMap");
         if (IsPixelMap(placeholder)) {
 #if defined(PIXEL_MAP_SUPPORTED)
             auto pixelMap = CreatePixelMapFromNapiValue(placeholder);
@@ -966,9 +967,14 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
             CalcDimension height;
             JSContainerBase::ParseJsDimensionVp(widthVal, width);
             JSContainerBase::ParseJsDimensionVp(heightVal, height);
-            auto size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
-            style.leadingMargin->size = size;
+            style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), height.ConvertToPx());
         }
+    } else if (!lm->IsNull()) {
+        // [Dimension]
+        style.leadingMargin = std::make_optional<NG::LeadingMargin>();
+        CalcDimension width;
+        JSContainerBase::ParseJsDimensionVp(lm, width);
+        style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), 0.0);
     }
     return true;
 }
