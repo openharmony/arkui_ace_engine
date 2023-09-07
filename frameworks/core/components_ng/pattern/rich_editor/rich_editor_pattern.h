@@ -226,6 +226,7 @@ public:
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
+    void OnColorConfigurationUpdate() override {}
     bool IsDisabled() const;
     float GetLineHeight() const override;
 #ifndef USE_GRAPHIC_TEXT_GINE
