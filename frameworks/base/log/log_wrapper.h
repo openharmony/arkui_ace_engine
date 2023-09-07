@@ -20,7 +20,6 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
-#include <unordered_map>
 
 #include "base/utils/macros.h"
 #include "base/utils/system_properties.h"
@@ -75,10 +74,6 @@ namespace OHOS::Ace {
 
 enum class AceLogTag : uint32_t {
     DEFAULT = 0,
-};
-
-const std::unordered_map<AceLogTag, std::string> LOG_TAG_MAP = {
-    { AceLogTag::DEFAULT, "Ace" },
 };
 
 enum class LogDomain : uint32_t {
@@ -142,11 +137,6 @@ public:
         va_start(args, fmt);
         PrintLog(domain, level, tag, fmt, args);
         va_end(args);
-    }
-
-    static const char* GetTagContent(AceLogTag tag)
-    {
-        return LOG_TAG_MAP.at(tag).c_str();
     }
 
     // MUST implement these interface on each platform.
