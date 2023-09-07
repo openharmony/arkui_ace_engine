@@ -764,6 +764,7 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     GetSelectPosition(parameters, centerWidth, contentOffset);
     GetBackgroundPosition(parameters, centerWidth, contentOffset);
     GetCirclePosition(parameters, centerWidth, contentOffset);
+    UpdateCircleCenterOffset();
     return parameters;
 }
 

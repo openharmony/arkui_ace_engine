@@ -301,7 +301,8 @@ bool SliderTipModifier::CreateParagraph(const TextStyle& textStyle, std::string 
 OffsetF SliderTipModifier::GetBubbleVertex()
 {
     CHECK_NULL_RETURN(getBubbleVertexFunc_, bubbleVertex_->Get());
-    return getBubbleVertexFunc_();
+    auto bubbleVertexInBlock = getBubbleVertexFunc_();
+    return bubbleVertexInBlock + contentOffset_->Get();
 }
 
 void SliderTipModifier::UpdateBubbleSize()
