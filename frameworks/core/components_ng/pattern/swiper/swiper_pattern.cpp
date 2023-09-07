@@ -278,7 +278,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
             currentIndex_ = userSetCurrentIndex;
         }
     }
-    if (GetLoopIndex(oldIndex_) != GetLoopIndex(currentIndex_) || (itemPosition_.empty() && !isVoluntarilyClear_)) {
+    if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)) {
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
