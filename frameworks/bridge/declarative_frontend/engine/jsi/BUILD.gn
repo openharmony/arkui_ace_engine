@@ -149,7 +149,12 @@ template("declarative_js_engine_ark") {
     }
 
     include_dirs += [ "${ace_root}/interfaces/inner_api/ace" ]
-    deps = [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]
+
+    deps = []
+    if (!is_cross_platform_build) {
+      deps +=
+          [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]
+    }
 
     if (platform == "ohos_ng" || is_cross_platform_build) {
       sources += [
