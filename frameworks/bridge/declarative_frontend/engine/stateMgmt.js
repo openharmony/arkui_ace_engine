@@ -4472,6 +4472,8 @@ class ViewPU extends NativeViewPartialUpdate {
     updateId(elmtId) {
         this.id_ = elmtId;
     }
+    aboutToReuse(params) { }
+    aboutToRecycle() { }
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
@@ -4869,12 +4871,6 @@ class ViewPU extends NativeViewPartialUpdate {
         
         this.dumpStateVars();
     }
-    updateRecycleDirtyElements() {
-        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-            this.UpdateElement(elmtId);
-        });
-        this.dirtDescendantElementIds_.clear();
-    }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
     purgeDeletedElmtIds() {
         
@@ -5039,12 +5035,10 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     aboutToReuseInternal() {
         this.runReuse_ = true;
-        if (this.aboutToReuse && typeof this.aboutToReuse === "function") {
-            stateMgmtTrace.scopedTrace(() => {
-                this.aboutToReuse(this === null || this === void 0 ? void 0 : this.paramsGenerator_());
-            }, "aboutToReuse", this.constructor.name);
-        }
-        this.updateRecycleDirtyElements();
+        stateMgmtTrace.scopedTrace(() => {
+            this.aboutToReuse(this === null || this === void 0 ? void 0 : this.paramsGenerator_());
+        }, "aboutToReuse", this.constructor.name);
+        this.updateDirtyElements();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
@@ -5055,11 +5049,9 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     aboutToRecycleInternal() {
         this.runReuse_ = true;
-        if (this.aboutToRecycle && typeof this.aboutToRecycle === "function") {
-            stateMgmtTrace.scopedTrace(() => {
-                this.aboutToRecycle();
-            }, "aboutToRecycle", this.constructor.name);
-        }
+        stateMgmtTrace.scopedTrace(() => {
+            this.aboutToRecycle();
+        }, "aboutToRecycle", this.constructor.name);
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
@@ -5273,15 +5265,6 @@ class RecycleManager {
         });
         this.cachedRecycleNodes.clear();
     }
-}
-function createWeakRef(o) {
-    if (typeof o !== "object") {
-        return o;
-    }
-    if (o instanceof ObservedPropertyAbstract) {
-        return new WeakRef(o.getUnmonitored());
-    }
-    return new WeakRef(o);
 }
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.

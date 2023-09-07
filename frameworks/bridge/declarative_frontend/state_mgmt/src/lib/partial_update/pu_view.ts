@@ -64,7 +64,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   private runReuse_: boolean = false;
 
-  private paramsGenerator_: () => { [key: string]: unknown };
+  private paramsGenerator_: () => Object;
 
   // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
   private isDeleting_: boolean = false;
@@ -172,9 +172,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // are about to be deleted
   abstract aboutToBeDeleted(): void;
 
-  abstract aboutToReuse(params: { [key: string]: unknown }): void;
+  aboutToReuse(params: Object): void {}
 
-  abstract aboutToRecycle(): void;
+  aboutToRecycle(): void {}
 
   // super class will call this function from
   // its aboutToBeDeleted implementation
@@ -633,13 +633,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.dumpStateVars();
   }
 
-  public updateRecycleDirtyElements() {
-    Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-        this.UpdateElement(elmtId);
-    });
-    this.dirtDescendantElementIds_.clear();
-  }
-
   //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
   protected purgeDeletedElmtIds(): void {
     stateMgmtConsole.debug(`purgeDeletedElmtIds @Component '${this.constructor.name}' (id: ${this.id__()}) `)
@@ -826,36 +819,32 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   aboutToReuseInternal() {
-      this.runReuse_ = true;
-      if (this.aboutToReuse && typeof this.aboutToReuse === "function") {
-          stateMgmtTrace.scopedTrace(() => {
-              this.aboutToReuse(this?.paramsGenerator_());
-          }, "aboutToReuse", this.constructor.name);
+    this.runReuse_ = true;
+    stateMgmtTrace.scopedTrace(() => {
+      this.aboutToReuse(this?.paramsGenerator_());
+    }, "aboutToReuse", this.constructor.name);
+    this.updateDirtyElements();
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (child) {
+        child.aboutToReuseInternal();
       }
-      this.updateRecycleDirtyElements()
-      this.childrenWeakrefMap_.forEach((weakRefChild) => {
-          const child = weakRefChild.deref();
-          if (child) {
-              child.aboutToReuseInternal();
-          }
-      });
-      this.runReuse_ = false;
+    });
+    this.runReuse_ = false;
   }
 
   aboutToRecycleInternal() {
-      this.runReuse_ = true;
-      if (this.aboutToRecycle && typeof this.aboutToRecycle === "function") {
-          stateMgmtTrace.scopedTrace(() => {
-              this.aboutToRecycle();
-          }, "aboutToRecycle", this.constructor.name);
+    this.runReuse_ = true;
+    stateMgmtTrace.scopedTrace(() => {
+      this.aboutToRecycle();
+    }, "aboutToRecycle", this.constructor.name);
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (child) {
+        child.aboutToRecycleInternal();
       }
-      this.childrenWeakrefMap_.forEach((weakRefChild) => {
-          const child = weakRefChild.deref();
-          if (child) {
-              child.aboutToRecycleInternal();
-          }
-      });
-      this.runReuse_ = false;
+    });
+    this.runReuse_ = false;
   }
 
   // add current JS object to it's parent recycle manager
