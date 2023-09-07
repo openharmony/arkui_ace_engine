@@ -148,14 +148,23 @@ void TextFieldModelNG::RequestKeyboardOnFocus(bool needToRequest)
     pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
 }
 
+void TextFieldModelNG::SetTextRectWillChange()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->SetTextRectWillChange();
+}
+
 void TextFieldModelNG::SetType(TextInputType value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
     }
+    SetTextRectWillChange();
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value);
 }
 
@@ -245,11 +254,7 @@ void TextFieldModelNG::SetMaxLines(uint32_t value)
 }
 void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
-    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    if (layoutProperty->GetFontSizeValue(value) != value) {
-        layoutProperty->UpdateFontSizeChanged(true);
-    }
+    SetTextRectWillChange();
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
