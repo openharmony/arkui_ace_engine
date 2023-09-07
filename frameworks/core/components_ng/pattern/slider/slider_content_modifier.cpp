@@ -150,43 +150,35 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
     auto& canvas = context.canvas;
     auto stepSize = stepSize_->Get();
     auto stepColor = stepColor_->Get();
-    auto direction = static_cast<Axis>(directionAxis_->Get());
     auto backStart = backStart_->Get();
     auto backEnd = backEnd_->Get();
     auto stepRatio = stepRatio_->Get();
     if (NearEqual(stepRatio, .0f)) {
         return;
     }
+    float startX = backStart.GetX();
+    float endX = backEnd.GetX();
+    float startY = backStart.GetY();
+    float endY = backEnd.GetY();
+    auto stepsLengthX = (endX - startX) * stepRatio;
+    auto stepsLengthY = (endY - startY) * stepRatio;
 
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(stepColor));
-
     canvas.AttachBrush(brush);
-    // Distance between slide track and Content boundary
-    auto centerWidth = direction == Axis::HORIZONTAL ? context.height : context.width;
-    centerWidth *= HALF;
-    if (direction == Axis::HORIZONTAL) {
-        auto stepsLength = (backEnd.GetX() - backStart.GetX()) * stepRatio;
-        float dyOffset = backEnd.GetY();
-        float start = backStart.GetX();
-        float end = backEnd.GetX();
-        float current = start;
-        while (LessOrEqual(current, end)) {
-            float dxOffset = std::clamp(current, start, end);
-            canvas.DrawCircle(RSPoint(dxOffset, dyOffset), stepSize * HALF);
-            current += stepsLength;
+
+    if (reverse_) {
+        while (GreatOrEqual(endX, startX) && GreatOrEqual(endY, startY)) {
+            canvas.DrawCircle(RSPoint(endX, endY), stepSize * HALF);
+            endX -= stepsLengthX;
+            endY -= stepsLengthY;
         }
     } else {
-        auto stepsLength = (backEnd.GetY() - backStart.GetY()) * stepRatio;
-        float dxOffset = backEnd.GetX();
-        float start = backStart.GetY();
-        float end = backEnd.GetY();
-        float current = start;
-        while (LessOrEqual(current, end)) {
-            float dyOffset = std::clamp(current, start, end);
-            canvas.DrawCircle(RSPoint(dxOffset, dyOffset), stepSize * HALF);
-            current += stepsLength;
+        while (LessOrEqual(startX, endX) && LessOrEqual(startY, endY)) {
+            canvas.DrawCircle(RSPoint(startX, startY), stepSize * HALF);
+            startX += stepsLengthX;
+            startY += stepsLengthY;
         }
     }
 
