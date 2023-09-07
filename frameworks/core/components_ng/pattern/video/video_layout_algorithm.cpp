@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/video/video_theme.h"
@@ -45,13 +46,17 @@ VideoLayoutAlgorithm::VideoLayoutAlgorithm() = default;
 void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
+    auto contentOffset = layoutWrapper->GetGeometryNode()->GetContentOffset();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
-            child->GetGeometryNode()->SetMarginFrameOffset(OffsetF { 0.0f, 0.0f });
+            child->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
             auto controlBarHeight = CalControlBarHeight();
             auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
-            child->GetGeometryNode()->SetMarginFrameOffset(OffsetF { 0.0f, contentSize.Height() - controlBarHeight });
+            child->GetGeometryNode()->SetMarginFrameOffset(
+                { contentOffset.GetX(), contentOffset.GetY() + contentSize.Height() - controlBarHeight });
+        } else if (child->GetHostTag() == V2::COLUMN_ETS_TAG) {
+            child->GetGeometryNode()->SetMarginFrameOffset(OffsetF { contentOffset.GetX(), contentOffset.GetY() });
         }
         child->Layout();
     }
@@ -77,6 +82,12 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraintForControlBar.UpdateMaxSizeWithCheck(controlBarSize);
             layoutConstraintForControlBar.UpdateMinSizeWithCheck(controlBarSize);
             child->Measure(layoutConstraintForControlBar);
+        } else if (child->GetHostTag() == V2::COLUMN_ETS_TAG) {
+            auto layoutConstraintForImage = layoutConstraint;
+            layoutConstraintForImage.UpdateSelfMarginSizeWithCheck(OptionalSizeF(contentSize));
+            layoutConstraintForImage.UpdateMaxSizeWithCheck(contentSize);
+            layoutConstraintForImage.UpdateMinSizeWithCheck(contentSize);
+            child->Measure(layoutConstraintForImage);
         }
     }
 
