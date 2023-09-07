@@ -81,6 +81,8 @@ const SizeF DRAGBAR_SIZE(DRAG_ICON_WIDTH, DRAG_ICON_HEIGHT);
 const SizeF PANEL_SIZE(FULL_SCREEN_WIDTH, PANEL_HEIGHT);
 const SizeF COLUMN_SIZE(FULL_SCREEN_WIDTH, COLUMN_HEIGHT);
 const SizeF ROW_SIZE(ROW_WIDTH, ROW_HEIGHT);
+const SizeF ROW_MAX_SIZE(FULL_SCREEN_HEIGHT, FULL_SCREEN_WIDTH);
+const SizeF ROW_MIN_SIZE(-1, FULL_SCREEN_WIDTH);
 const OffsetF ORIGIN_POINT(ZERO, ZERO);
 const OffsetF COLUMN_OFFSET(ZERO, ZERO);
 const OffsetF ROW_OFFSET(ZERO, COLUMN_HEIGHT);
@@ -2997,7 +2999,7 @@ HWTEST_F(PanelTestNg, PanelTestNg0056, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelTestNg0056
+ * @tc.name: PanelTestNg0057
  * @tc.desc: Test panel pattern InitPanEvent.
  * @tc.type: FUNC
  */
@@ -3037,5 +3039,54 @@ HWTEST_F(PanelTestNg, PanelTestNg0057, TestSize.Level1)
     layoutProperty->UpdatePanelType(PanelType::TEMP_DISPLAY);
     panelPattern->InitPanEvent(gestureHub);
     panelPattern->panEvent_->actionEnd_(gestureEvent);
+}
+
+/**
+ * @tc.name: PanelTestNg0058
+ * @tc.desc: Test panel pattern GetOrCreateSlidingPanelNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0058, TestSize.Level1)
+{
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    /**
+     * step1. GetLinearLayoutProperty
+     */
+    auto patternCreator = []() -> RefPtr<Pattern> { return AceType::MakeRefPtr<SlidingPanelPattern>(); };
+    ElementRegister::GetInstance()->itemMap_.clear();
+    auto temp = AceType::MakeRefPtr<SlidingPanelNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ElementRegister::GetInstance()->itemMap_.emplace(std::make_pair(5, AceType::WeakClaim(AceType::RawPtr(temp))));
+    auto columnLayoutProperty = slidingPanelModelNG.GetOrCreateSlidingPanelNode(V2::PANEL_ETS_TAG, 5, patternCreator);
+    EXPECT_NE(columnLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: PanelTestNg0059
+ * @tc.desc: Test panel pattern GetMaxWidthByScreenSizeType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto panelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(panelPattern, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<SlidingPanelLayoutAlgorithm>(panelPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    panelPattern->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    EXPECT_TRUE(layoutAlgorithm->GetMaxWidthByScreenSizeType(DRAGBAR_SIZE, DRAGBAR_SIZE));
+    EXPECT_TRUE(layoutAlgorithm->GetMaxWidthByScreenSizeType(ROW_MAX_SIZE, DRAGBAR_SIZE));
+    EXPECT_TRUE(layoutAlgorithm->GetMaxWidthByScreenSizeType(DRAGBAR_SIZE, ROW_MAX_SIZE));
 }
 } // namespace OHOS::Ace::NG
