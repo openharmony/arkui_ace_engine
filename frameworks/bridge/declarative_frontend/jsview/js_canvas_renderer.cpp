@@ -2159,8 +2159,10 @@ void JSCanvasRenderer::JsSetLineDash(const JSCallbackInfo& info)
     if (lineDash.size() % 2 != 0) {
         lineDash.insert(lineDash.end(), lineDash.begin(), lineDash.end());
     }
-    for (auto i = 0U; i < lineDash.size(); i++) {
-        lineDash[i] = SystemProperties::Vp2Px(lineDash[i]);
+    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        for (auto i = 0U; i < lineDash.size(); i++) {
+            lineDash[i] = SystemProperties::Vp2Px(lineDash[i]);
+        }
     }
 
     BaseInfo baseInfo;
