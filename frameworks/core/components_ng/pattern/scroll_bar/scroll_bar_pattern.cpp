@@ -344,6 +344,9 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
             scrollBar->ProcessFrictionMotion(value);
         });
     }
+    CHECK_NULL_VOID(!scrollBarProxy_ || !scrollBarProxy_->NotifySnapScroll(-(frictionMotion_->GetFinalPosition()),
+        velocity, GetScrollableDistance()));
+    
     if (!frictionController_) {
         frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
         frictionController_->AddStopListener([weakBar = AceType::WeakClaim(this)]() {
