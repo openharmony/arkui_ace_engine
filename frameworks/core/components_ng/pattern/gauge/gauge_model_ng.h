@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,6 @@ public:
     void SetStartAngle(float startAngle) override;
     void SetEndAngle(float endAngle) override;
     void SetColors(const std::vector<Color>& colors, const std::vector<float>& values) override;
-    void SetGradientColors(
-        const std::vector<ColorStopArray>& colors, const std::vector<float>& values, const GaugeType& type) override;
     void SetStrokeWidth(const Dimension& strokeWidth) override;
     void SetLabelMarkedText(std::string labelTextString) override;
     void SetMarkedTextColor(const Color color) override;

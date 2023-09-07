@@ -179,11 +179,6 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
     gauge.Create(VALUE, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = MAX_SIZE;
-    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
 
     /**
      * @tc.steps: step2. get layoutWrapper and setLayoutAlgorithm.
@@ -280,8 +275,6 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
      */
     LayoutConstraintF layoutConstraintSmallWidth;
     layoutConstraintSmallWidth.maxSize = SizeF(SMALL_WIDTH, MAX_HEIGHT);
-    layoutConstraint.maxSize = SizeF(SMALL_WIDTH, MAX_HEIGHT);
-    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     gaugeTheme->trackWidth_ = 500.0_vp;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(gaugeTheme));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintSmallWidth, &layoutWrapper).value();
@@ -295,8 +288,6 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
      */
     LayoutConstraintF layoutConstraintSmallHeight;
     layoutConstraintSmallWidth.maxSize = SizeF(MAX_WIDTH, SMALL_HEIGHT);
-    layoutConstraint.maxSize = SizeF(MAX_WIDTH, SMALL_HEIGHT);
-    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(gaugeTheme));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintSmallWidth, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(SMALL_HEIGHT, SMALL_HEIGHT));
@@ -304,9 +295,6 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest003, TestSize.Level1)
     LayoutConstraintF layoutConstraintInfinite;
     layoutConstraintInfinite.maxSize = MAX_SIZE;
     layoutConstraintInfinite.maxSize.SetWidth(INFINITE);
-    layoutConstraint.maxSize = MAX_SIZE;
-    layoutConstraint.maxSize.SetWidth(INFINITE);
-    layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(gaugeTheme));
     gaugeSize = gaugeLayoutAlgorithm->MeasureContent(layoutConstraintInfinite, &layoutWrapper).value();
     EXPECT_EQ(gaugeSize, SizeF(MAX_HEIGHT, MAX_HEIGHT));
