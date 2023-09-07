@@ -1002,13 +1002,7 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsScale", info, checkList)) {
-        auto scaleX = 1.0f;
-        auto scaleY = 1.0f;
-        auto scaleZ = 1.0f;
-        CalcDimension centerX = 0.5_pct;
-        CalcDimension centerY = 0.5_pct;
-        ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
-        ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY, 0.0_vp);
+        SetDefaultScale();
         return;
     }
 
@@ -1029,12 +1023,20 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
             ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
             ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY, 0.0_vp);
             return;
+        } else {
+            SetDefaultScale();
         }
     }
     double scale = 0.0;
     if (ParseJsDouble(info[0], scale)) {
         ViewAbstractModel::GetInstance()->SetScale(scale, scale, 1.0f);
     }
+}
+
+void JSViewAbstract::SetDefaultScale()
+{
+    ViewAbstractModel::GetInstance()->SetScale(1.0f, 1.0f, 1.0f);
+    ViewAbstractModel::GetInstance()->SetPivot(0.5_pct, 0.5_pct, 0.0_vp);
 }
 
 void JSViewAbstract::JsScaleX(const JSCallbackInfo& info)
@@ -1100,10 +1102,7 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsTranslate", info, checkList)) {
-        auto translateX = CalcDimension(0.0);
-        auto translateY = CalcDimension(0.0);
-        auto translateZ = CalcDimension(0.0);
-        ViewAbstractModel::GetInstance()->SetTranslate(translateX, translateY, translateZ);
+        SetDefaultTranslate();
         return;
     }
 
@@ -1123,11 +1122,18 @@ void JSViewAbstract::JsTranslate(const JSCallbackInfo& info)
             ParseJsTranslate(argsPtrItem, translateX, translateY, translateZ);
             ViewAbstractModel::GetInstance()->SetTranslate(translateX, translateY, translateZ);
             return;
+        } else {
+            SetDefaultTranslate();
         }
     }
     if (ParseJsDimensionVp(info[0], value)) {
         ViewAbstractModel::GetInstance()->SetTranslate(value, value, value);
     }
+}
+
+void JSViewAbstract::SetDefaultTranslate()
+{
+    ViewAbstractModel::GetInstance()->SetTranslate(CalcDimension(0.0), CalcDimension(0.0), CalcDimension(0.0));
 }
 
 void JSViewAbstract::JsTranslateX(const JSCallbackInfo& info)
@@ -1163,17 +1169,14 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
     LOGD("JsRotate");
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsRotate", info, checkList)) {
-        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
-        ViewAbstractModel::GetInstance()->SetRotate(
-            rotate.xDirection, rotate.yDirection, rotate.zDirection, 0.0f, rotate.perspective);
-        ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
+        SetDefaultRotate();
         return;
     }
 
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {
-            LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+            SetDefaultRotate();
             return;
         }
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
@@ -1184,7 +1187,7 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
                 rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value(), rotate.perspective);
             ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
         } else {
-            LOGE("Js JsRotate failed, not specify angle");
+            SetDefaultRotate();
         }
         return;
     }
@@ -1192,6 +1195,14 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
     if (ParseJsDouble(info[0], rotateZ)) {
         ViewAbstractModel::GetInstance()->SetRotate(0.0f, 0.0f, 1.0f, rotateZ);
     }
+}
+
+void JSViewAbstract::SetDefaultRotate()
+{
+    NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+    ViewAbstractModel::GetInstance()->SetRotate(
+        rotate.xDirection, rotate.yDirection, rotate.zDirection, 0.0f, rotate.perspective);
+    ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
 }
 
 void JSViewAbstract::JsRotateX(const JSCallbackInfo& info)
@@ -1229,14 +1240,7 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
     LOGD("JsTransform");
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
     if (!CheckJSCallbackInfo("JsTransform", info, checkList)) {
-        const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
-        std::vector<float> matrix(matrix4Len);
-        const int32_t initPosition = 5;
-        for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
-            double value = 1.0;
-            matrix[i] = static_cast<float>(value);
-        }
-        ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
+        SetDefaultTransform();
         return;
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -1254,6 +1258,18 @@ void JSViewAbstract::JsTransform(const JSCallbackInfo& info)
     for (int32_t i = 0; i < matrix4Len; i++) {
         double value = 0.0;
         ParseJsonDouble(array->GetArrayItem(i), value);
+        matrix[i] = static_cast<float>(value);
+    }
+    ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
+}
+
+void JSViewAbstract::SetDefaultTransform()
+{
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        double value = 1.0;
         matrix[i] = static_cast<float>(value);
     }
     ViewAbstractModel::GetInstance()->SetTransformMatrix(matrix);
@@ -3143,6 +3159,11 @@ void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
         return;
     }
     Color colorBlend;
+    if (info[0]->IsUndefined()) {
+        colorBlend = Color::TRANSPARENT;
+        SetColorBlend(colorBlend);
+        return;
+    }
     if (!ParseJsColor(info[0], colorBlend)) {
         return;
     }
@@ -4566,7 +4587,7 @@ void JSViewAbstract::JsRadialGradient(const JSCallbackInfo& info)
     if (!CheckJSCallbackInfo("JsRadialGradient", info, checkList)) {
         NG::Gradient newGradient;
         newGradient.CreateGradientWithType(NG::GradientType::RADIAL);
-        ViewAbstractModel::GetInstance()->SetSweepGradient(newGradient);
+        ViewAbstractModel::GetInstance()->SetRadialGradient(newGradient);
         return;
     }
 
@@ -4715,6 +4736,9 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsShadow", info, checkList)) {
+        Shadow shadow;
+        std::vector<Shadow> shadows { shadow };
+        ViewAbstractModel::GetInstance()->SetBackShadow(shadows);
         return;
     }
 
@@ -4766,6 +4790,8 @@ void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(0.0);
+        ViewAbstractModel::GetInstance()->SetGrayScale(value);
         return;
     }
 
@@ -4789,6 +4815,8 @@ void JSViewAbstract::JsBrightness(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(1.0);
+        ViewAbstractModel::GetInstance()->SetBrightness(value);
         return;
     }
 
@@ -4804,6 +4832,8 @@ void JSViewAbstract::JsContrast(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(1.0);
+        ViewAbstractModel::GetInstance()->SetContrast(value);
         return;
     }
 
@@ -4822,6 +4852,8 @@ void JSViewAbstract::JsSaturate(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(1.0);
+        ViewAbstractModel::GetInstance()->SetSaturate(value);
         return;
     }
 
@@ -4841,6 +4873,8 @@ void JSViewAbstract::JsSepia(const JSCallbackInfo& info)
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(0.0);
+        ViewAbstractModel::GetInstance()->SetSepia(value);
         return;
     }
 
@@ -4859,6 +4893,8 @@ void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
     }
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
+        value.SetValue(0.0);
+        ViewAbstractModel::GetInstance()->SetInvert(value);
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -4881,6 +4917,8 @@ void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
         degree = static_cast<float>(info[0]->ToNumber<int32_t>());
     } else {
         LOGE("Invalid value type");
+        ViewAbstractModel::GetInstance()->SetHueRotate(0.0);
+        return;
     }
     float deg = 0.0f;
     if (degree) {
@@ -4925,9 +4963,6 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
         auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
         progressMask->SetColor(Color::TRANSPARENT);
         ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
-        auto shape = AceType::MakeRefPtr<BasicShape>();
-        shape->SetColor(Color::TRANSPARENT);
-        ViewAbstractModel::GetInstance()->SetMask(shape);
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
