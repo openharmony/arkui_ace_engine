@@ -24,7 +24,6 @@ namespace OHOS::Ace::Framework {
 class ACE_EXPORT SideBarContainerModelImpl : public SideBarContainerModel {
 public:
     void Create() override {}
-    void Pop() override;
     void SetSideBarContainerType(SideBarContainerType type) override;
     void SetShowSideBar(bool isShow) override;
     void SetShowControlButton(bool showControlButton) override;
@@ -53,8 +52,6 @@ public:
     void SetMinContentWidth(const Dimension& minContentWidth) override;
 
 private:
-    void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode) override;
-    void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode) override;
     void MarkNeedInitRealSideBarWidth() override;
 };
 } // namespace OHOS::Ace::Framework

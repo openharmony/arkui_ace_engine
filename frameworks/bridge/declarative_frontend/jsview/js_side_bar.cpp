@@ -146,7 +146,6 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::Declare("SideBarContainer");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSSideBar>::StaticMethod("create", &JSSideBar::Create, opt);
-    JSClass<JSSideBar>::StaticMethod("pop", &JSSideBar::Pop);
     JSClass<JSSideBar>::StaticMethod("showSideBar", &JSSideBar::JsShowSideBar);
     JSClass<JSSideBar>::StaticMethod("controlButton", &JSSideBar::JsControlButton);
     JSClass<JSSideBar>::StaticMethod("showControlButton", &JSSideBar::SetShowControlButton);
@@ -364,12 +363,6 @@ void JSSideBar::JsAutoHide(bool autoHide)
 {
     SideBarContainerModel::GetInstance()->SetAutoHide(autoHide);
 }
-
-void JSSideBar::Pop()
-{
-    SideBarContainerModel::GetInstance()->Pop();
-}
-
 
 void JSSideBar::ParseControlButtonOG(JSRef<JSObject> value)
 {
