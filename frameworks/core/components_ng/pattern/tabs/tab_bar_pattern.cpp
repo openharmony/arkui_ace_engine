@@ -1951,7 +1951,7 @@ void TabBarPattern::InitTurnPageRateEvent()
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAnimationEndEvent([weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
             pattern->isTouchingSwiper_ = false;
         }
     });
