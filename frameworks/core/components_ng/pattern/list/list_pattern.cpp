@@ -837,7 +837,8 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
             return list->contentMainSize_ / 2.0f + endItemHeight / 2.0f - (endPos - startPos);
         }
-        return list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
+        float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
+        return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
     });
     scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
@@ -859,7 +860,8 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
             return list->contentMainSize_ / 2.0f + endItemHeight / 2.0f - (endPos - startPos);
         }
-        return list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
+        float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
+        return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
     });
     scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
