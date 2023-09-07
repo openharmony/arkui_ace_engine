@@ -146,6 +146,16 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 layoutConstraint->minSize.Width());
         frameSize.SetWidth(width);
     }
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >=
+                                                 static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
+            layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+            layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        frameSize.SetWidth(finalSize.Width());
+        frameSize.SetHeight(finalSize.Height());
+    } else {
+        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    }
     if (layoutConstraint->maxSize.Height() < layoutConstraint->minSize.Height()) {
         frameSize.SetHeight(layoutConstraint->minSize.Height());
     }
@@ -189,7 +199,15 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
     auto idealSize = SizeF { idealWidth, idealHeight };
-    idealSize.UpdateSizeWhenSmaller(contentConstraint.maxSize);
+    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >=
+                                                 static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(static_cast<OptionalSize<float>>(idealSize),
+            layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+            layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        idealSize.UpdateSizeWhenSmaller(finalSize.ConvertToSizeT());
+    } else {
+        idealSize.UpdateSizeWhenSmaller(contentConstraint.maxSize);
+    }
     idealWidth = idealSize.Width();
     idealHeight = idealSize.Height();
     auto isInlineStyle = pattern->IsNormalInlineState();

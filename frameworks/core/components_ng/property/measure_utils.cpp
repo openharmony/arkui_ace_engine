@@ -316,6 +316,44 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
     return idealSize;
 }
 
+OptionalSizeF UpdateOptionSizeByCalcLayoutConstraint(const OptionalSize<float>& frameSize,
+    const std::unique_ptr<MeasureProperty>& calcLayoutConstraint, const SizeT<float> percentReference)
+{
+    OptionalSizeF finalSize(frameSize.Width(), frameSize.Height());
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+
+    if (!calcLayoutConstraint) {
+        return finalSize;
+    } else {
+        if (calcLayoutConstraint->maxSize.has_value()) {
+            if (calcLayoutConstraint->maxSize->Width().has_value()) {
+                auto maxWidthPx =
+                    ConvertToPx(calcLayoutConstraint->maxSize->Width(), scaleProperty, percentReference.Width());
+                finalSize.SetWidth(std::min(maxWidthPx.value(), finalSize.Width().value_or(maxWidthPx.value())));
+            }
+            if (calcLayoutConstraint->maxSize->Height().has_value()) {
+                auto maxHeightPx =
+                    ConvertToPx(calcLayoutConstraint->maxSize->Height(), scaleProperty, percentReference.Height());
+                finalSize.SetHeight(std::min(maxHeightPx.value(), finalSize.Height().value_or(maxHeightPx.value())));
+            }
+        }
+        if (calcLayoutConstraint->minSize.has_value()) {
+            if (calcLayoutConstraint->minSize->Width().has_value()) {
+                auto minWidthPx =
+                    ConvertToPx(calcLayoutConstraint->minSize->Width(), scaleProperty, percentReference.Width());
+                finalSize.SetWidth(std::max(minWidthPx.value(), finalSize.Width().value_or(minWidthPx.value())));
+            }
+
+            if (calcLayoutConstraint->minSize->Height().has_value()) {
+                auto minHeightPx =
+                    ConvertToPx(calcLayoutConstraint->minSize->Height(), scaleProperty, percentReference.Height());
+                finalSize.SetHeight(std::max(minHeightPx.value(), finalSize.Height().value_or(minHeightPx.value())));
+            }
+        }
+    }
+    return finalSize;
+}
+
 OptionalSizeF CreateIdealSizeByPercentRef(
     const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain)
 {
