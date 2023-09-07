@@ -105,7 +105,7 @@ public:
             }
         }
         json->Put("colors", jsonColors->ToString().c_str());
-        auto jsongradientColors = JsonUtil::CreateArray(true);
+        auto jsonGradientColors = JsonUtil::CreateArray(true);
         if (propGradientColors_.has_value() && propValues_.has_value() &&
             (propGradientColors_.value().size() == propValues_.value().size())) {
             for (size_t i = 0; i < propValues_.value().size(); i++) {
@@ -122,10 +122,10 @@ public:
                 jsonObject->Put("0", jsonColor);
                 jsonObject->Put("1", propValues_.value()[i]);
                 auto index = std::to_string(i);
-                jsongradientColors->Put(index.c_str(), jsonObject);
+                jsonGradientColors->Put(index.c_str(), jsonObject);
             }
         }
-        json->Put("gradientColors", jsongradientColors->ToString().c_str());
+        json->Put("gradientColors", jsonGradientColors->ToString().c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, float, PROPERTY_UPDATE_RENDER);

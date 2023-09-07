@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/gauge/gauge_model.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT GaugeModelNG : public OHOS::Ace::GaugeModel {
 public:
     void Create(float values, float min, float max) override;
@@ -32,6 +31,9 @@ public:
     void SetStrokeWidth(const Dimension& strokeWidth) override;
     void SetLabelMarkedText(std::string labelTextString) override;
     void SetMarkedTextColor(const Color color) override;
+    void SetDescription(const RefPtr<AceType>& customNode) override;
+    void SetIsShowLimitValue(const bool isShowLimitValue) override;
+    void SetIsShowDescription(const bool isShowDescription) override;
     void SetShadowOptions(const GaugeShadowOptions& shadowOptions) override;
 };
 } // namespace OHOS::Ace::NG

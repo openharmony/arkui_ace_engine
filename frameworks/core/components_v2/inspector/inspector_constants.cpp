@@ -383,6 +383,7 @@ const char RADIO_ETS_TAG[] = "Radio";
 // gauge
 const char GAUGE_COMPONENT_TAG[] = "Gauge";
 const char GAUGE_ETS_TAG[] = "Gauge";
+const char GAUGE_DESCRIPTION_TAG[] = "GaugeDescription";
 
 // gridContainer
 const char GRIDCONTAINER_COMPONENT_TAG[] = "GridContainer";
