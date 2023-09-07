@@ -1653,7 +1653,7 @@ bool RichEditorPattern::CloseCustomKeyboard()
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
-    overlayManager->DestroyKeyboard();
+    overlayManager->CloseKeyboard(frameNode->GetId());
     isCustomKeyboardAttached_ = false;
     return true;
 }
