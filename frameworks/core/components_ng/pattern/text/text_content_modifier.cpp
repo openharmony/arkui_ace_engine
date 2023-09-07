@@ -56,7 +56,7 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle)
 {
-    contentChange_ = MakeRefPtr<PropertyBool>(false);
+    contentChange_ = MakeRefPtr<PropertyInt>(0);
     AttachProperty(contentChange_);
     contentOffset_ = MakeRefPtr<PropertyOffsetF>(OffsetF());
     contentSize_ = MakeRefPtr<PropertySizeF>(SizeF());
@@ -581,7 +581,7 @@ float TextContentModifier::GetTextRacePercent()
 void TextContentModifier::ContentChange()
 {
     CHECK_NULL_VOID(contentChange_);
-    contentChange_->Set(!contentChange_->Get());
+    contentChange_->Set(contentChange_->Get()+ 1);
 }
 
 void TextContentModifier::AddDefaultShadow()

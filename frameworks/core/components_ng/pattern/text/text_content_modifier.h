@@ -154,7 +154,7 @@ private:
 
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
-    RefPtr<PropertyBool> contentChange_;
+    RefPtr<PropertyInt> contentChange_;
     RefPtr<PropertyBool> clip_;
     RefPtr<PropertyString> fontFamilyString_;
     RefPtr<PropertyBool> fontReady_;

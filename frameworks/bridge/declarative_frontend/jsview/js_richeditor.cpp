@@ -126,10 +126,10 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     auto size = JSRef<JSArray>::New();
     size->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(info.leadingMarginSize[0])));
     size->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(info.leadingMarginSize[1])));
-    lmObj->SetProperty("size", size);
+    lmObj->SetPropertyObject("size", size);
 #ifdef PIXEL_MAP_SUPPORTED
     if (info.leadingMarginPixmap) {
-        lmObj->SetProperty("placeholder", ConvertPixmap(info.leadingMarginPixmap));
+        lmObj->SetPropertyObject("placeholder", ConvertPixmap(info.leadingMarginPixmap));
     }
 #endif
     obj->SetPropertyObject("leadingMargin", lmObj);
@@ -1073,12 +1073,12 @@ JSRef<JSVal> JSRichEditorController::CreateJSParagraphsInfo(const std::vector<Pa
     auto array = JSRef<JSArray>::New();
     for (size_t i = 0; i < info.size(); ++i) {
         auto obj = JSRef<JSObject>::New();
-        obj->SetProperty("style", JSRichEditor::CreateParagraphStyleResult(info[i]));
+        obj->SetPropertyObject("style", JSRichEditor::CreateParagraphStyleResult(info[i]));
 
         auto range = JSRef<JSArray>::New();
         range->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(info[i].range.first)));
         range->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(info[i].range.second)));
-        obj->SetProperty("range", range);
+        obj->SetPropertyObject("range", range);
         array->SetValueAt(i, obj);
     }
     return JSRef<JSVal>::Cast(array);
