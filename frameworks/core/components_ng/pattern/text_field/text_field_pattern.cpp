@@ -6083,7 +6083,34 @@ void TextFieldPattern::DumpInfo()
 
 bool TextFieldPattern::IsTouchAtLeftOffset(float currentOffsetX)
 {
-    return LessNotEqual(currentOffsetX, contentRect_.GetX() + contentRect_.Width() * 0.5) ? true : false;
+    return LessNotEqual(currentOffsetX, contentRect_.GetX() + contentRect_.Width() * 0.5);
+}
+
+OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
+{
+    if (textBoxes_.empty()) {
+        return { 0.0f, 0.0f };
+    }
+    auto startY = textBoxes_.front().rect_.GetTop();
+    auto startX = textBoxes_.front().rect_.GetLeft();
+    auto endY = textBoxes_.back().rect_.GetTop();
+
+    OffsetF startOffset;
+    if (NearEqual(startY, endY)) {
+        startOffset = { (IsTextArea() ? contentRect_.GetX() : textRect_.GetX()) + startX,
+            startY + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) };
+    } else {
+        startOffset = { contentRect_.GetX(),
+            startY + (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) };
+    }
+
+    if (startOffset.GetY() < contentRect_.GetY()) {
+        startOffset.SetY(contentRect_.GetY());
+    }
+    if (startOffset.GetX() < contentRect_.GetX()) {
+        startOffset.SetX(contentRect_.GetX());
+    }
+    return startOffset + parentGlobalOffset_;
 }
 
 void TextFieldPattern::OnColorConfigurationUpdate()
