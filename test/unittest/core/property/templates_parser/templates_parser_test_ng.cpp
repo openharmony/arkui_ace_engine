@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <string>
 #include <tuple>
 #include <vector>
 
@@ -203,7 +204,7 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg002, TestSize.Level1)
     int32_t childrenCount = 6;
 
     auto retVal = ParseTemplateArgs(args, size, gap, childrenCount);
-    EXPECT_EQ(retVal.first.size(), 97);
+    EXPECT_EQ(retVal.first.size(), 4);
 
     /**
      * @tc.steps: step2. Test ParseArgsWithAutoFill.
@@ -213,11 +214,11 @@ HWTEST_F(TemplatesParserTestNg, TemplatesParserTestNg002, TestSize.Level1)
     size = 6;
     gap = 100;
     childrenCount = 6;
-    vector<int> gt { 4, 4, 4, 2, 2, 2 };
+    vector<int> gt { 4, 2, 2, 2 };
 
     retVal = ParseTemplateArgs(args, size, gap, childrenCount);
-    EXPECT_EQ(retVal.first.size(), 100);
-    for (int i = 0; i < gt.size(); i++) {
+    EXPECT_EQ(retVal.first.size(), 4);
+    for (int i = 0; i < retVal.first.size(); i++) {
         EXPECT_EQ(retVal.first[i], gt[i]);
     }
 

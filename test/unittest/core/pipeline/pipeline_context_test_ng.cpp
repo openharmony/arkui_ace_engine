@@ -2651,4 +2651,24 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg056, TestSize.Level1)
     context_->SetWindowSceneConsumed(true);
     EXPECT_TRUE(context_->IsWindowSceneConsumed());
 }
+
+/**
+ * @tc.name: PipelineContextTestNg057
+ * @tc.desc: Test the function AddFontNodeNG and RemoveFontNodeNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg057, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    auto needRenderNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto needRenderNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, needRenderNodeId, nullptr);
+    context_->SetNeedRenderNode(needRenderNode);
+    context_->InspectDrew();
+    EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 1);
+}
 } // namespace OHOS::Ace::NG
