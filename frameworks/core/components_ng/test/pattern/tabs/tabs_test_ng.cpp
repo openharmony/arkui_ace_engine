@@ -1464,6 +1464,22 @@ HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
     EXPECT_EQ(tabBarPattern->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
     tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
+    /**
+     * @tc.steps: step2. creat different conditions and invoke OnDirtyLayoutWrapperSwap.
+     * @tc.expected: step2. expect The function is run ok.
+     */
+    config.skipMeasure = true;
+    tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(config.skipMeasure, true);
+    EXPECT_EQ(config.skipLayout, false);
+    config.skipLayout = true;
+    tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(config.skipMeasure, true);
+    EXPECT_EQ(config.skipLayout, true);
+    config.skipMeasure = false;
+    tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(config.skipMeasure, false);
+    EXPECT_EQ(config.skipLayout, true);
 }
 
 /**
@@ -6806,6 +6822,13 @@ HWTEST_F(TabsTestNg, TabBarPatternGetIndicatorStyle001, TestSize.Level1)
     tabBarPattern->GetIndicatorStyle(indicator3);
     tabBarPattern->SetIndicatorStyle(indicator3, 0);
     EXPECT_EQ(tabBarPattern->indicatorStyles_[0], indicator3);
+    tabBarPattern->indicator_ = -1;
+    tabBarPattern->GetIndicatorStyle(indicator2);
+    tabBarPattern->SetIndicatorStyle(indicator1, 1);
+    EXPECT_EQ(tabBarPattern->indicatorStyles_[1], indicator1);
+    tabBarPattern->GetIndicatorStyle(indicator3);
+    tabBarPattern->SetIndicatorStyle(indicator3, 0);
+    EXPECT_EQ(tabBarPattern->indicatorStyles_[0], indicator3);
 }
 
 /**
@@ -7721,7 +7744,22 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible001, TestSize.
     tabBarLayoutAlgorithm->itemWidths_.emplace_back(2000.0f);
     tabBarLayoutAlgorithm->itemWidths_.emplace_back(3000.0f);
     tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
+    EXPECT_NE(tabBarLayoutAlgorithm->itemWidths_.size(), 1);
+    tabBarLayoutAlgorithm->itemWidths_.clear();
+    tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
+    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_.size(), 1);
     childCount = 3;
+    tabBarLayoutAlgorithm->itemWidths_.clear();
+    tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
+    tabBarLayoutAlgorithm->itemWidths_.emplace_back(2000.0f);
+    tabBarLayoutAlgorithm->itemWidths_.emplace_back(3000.0f);
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
+    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_.size(), 3);
+    tabBarLayoutAlgorithm->itemWidths_.clear();
+    tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
+    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_.size(), 1);
     tabBarLayoutAlgorithm->itemWidths_.clear();
     tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
     tabBarLayoutAlgorithm->itemWidths_.emplace_back(2000.0f);
@@ -8874,7 +8912,7 @@ HWTEST_F(TabsTestNg, AddChildToGroup001, TestSize.Level1)
     /**
      * @tc.steps: step2. Invoke OnAttachToMainTree.
      */
-    
+
     tabsNode->AddChildToGroup(tabContentFrameNode, 1);
     EXPECT_NE(tabsNode, nullptr);
 }
@@ -8932,5 +8970,119 @@ HWTEST_F(TabsTestNg, SetOnChangeEvent001, TestSize.Level1)
     pattern->onChangeEvent_ = std::make_shared<ChangeEvent>();
     pattern->SetOnChangeEvent([](const BaseEventInfo* info) {});
     ASSERT_NE(tabsFrameNode, nullptr);
+    ASSERT_NE(pattern, nullptr);
+    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetTabs());
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    swiperPattern->FireChangeEvent();
+    ASSERT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: TabPatternOnModifyDone001.
+ * @tc.desc: test OnModifyDone in TabsPattern class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabPatternOnModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    Color color = Color::RED;
+    TabsItemDivider divider;
+    divider.color = color;
+    instance.SetDivider(divider);
+
+    /**
+     * @tc.steps: step2. Get tabspattern.
+     * @tc.expected: step2. creat tabspattern.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto tabspattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabspattern, nullptr);
+
+    /**
+     * @tc.steps: step3. invoke OnModifyDone and onChangeEvent_.
+     * @tc.expected: step3. related function is called.
+     */
+
+    tabspattern->OnModifyDone();
+    ASSERT_NE(tabspattern, nullptr);
+    tabspattern->onChangeEvent_ = std::make_shared<ChangeEvent>();
+    tabspattern->OnModifyDone();
+    ASSERT_NE(tabspattern, nullptr);
+}
+
+/**
+ * @tc.name: SetOnIndexChangeEvent001.
+ * @tc.desc: test SetOnIndexChangeEvent in TabsPattern class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetOnIndexChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    MockPipelineContextGetTheme();
+
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    Color color = Color::RED;
+    TabsItemDivider divider;
+    divider.color = color;
+    instance.SetDivider(divider);
+
+    /**
+     * @tc.steps: step2. Get tabspattern.
+     * @tc.expected: step2. creat tabspattern.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto tabspattern = tabsFrameNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabspattern, nullptr);
+
+    /**
+     * @tc.steps: step3. invoke OnModifyDone and onChangeEvent_.
+     * @tc.expected: step3. related function is called.
+     */
+    tabspattern->onIndexChangeEvent_ = std::make_shared<ChangeEvent>();
+    tabspattern->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
+    ASSERT_NE(tabspattern, nullptr);
+    tabspattern->onIndexChangeEvent_ = nullptr;
+    tabspattern->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
+    ASSERT_NE(tabspattern, nullptr);
+    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetTabs());
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    swiperPattern->FireChangeEvent();
+    ASSERT_NE(tabspattern, nullptr);
+}
+
+/**
+ * @tc.name: TabsModelSetAnimationDuration002
+ * @tc.desc: test SetAnimationDuration
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelSetAnimationDuration002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    float duration = 1;
+
+    /**
+     * @tc.steps: step2. Test function SetAnimationDuration.
+     * @tc.expected: Related function runs ok.
+     */
+    tabsModel.SetAnimationDuration(duration);
+    EXPECT_FLOAT_EQ(duration, 1);
+    duration = -1;
+    tabsModel.SetAnimationDuration(duration);
+    EXPECT_FLOAT_EQ(duration, -1);
 }
 } // namespace OHOS::Ace::NG
