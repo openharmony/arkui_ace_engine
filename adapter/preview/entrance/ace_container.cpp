@@ -883,7 +883,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
         if (front) {
             front->UpdateState(Frontend::State::ON_CREATE);
             front->SetJsMessageDispatcher(AceType::Claim(this));
-            auto weak = AceType::WeakClaim(AceType::RawPtr(front->GetJsEngine()));
+            auto weak = WeakPtr(front->GetJsEngine());
             taskExecutor_->PostTask(
                 [weak, containerSdkPath = containerSdkPath_]() {
                     auto jsEngine = weak.Upgrade();
