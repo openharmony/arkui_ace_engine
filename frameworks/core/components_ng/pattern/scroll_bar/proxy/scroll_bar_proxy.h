@@ -20,6 +20,7 @@
 #include <list>
 
 #include "core/components/scroll_bar/scroll_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,6 +30,8 @@ struct ScrollableNodeInfo {
     std::function<bool(double, int32_t source)> onPositionChanged;
     std::function<bool(double, int32_t source)> scrollStartCallback;
     std::function<void()> scrollEndCallback;
+    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback;
+    StartScrollSnapMotionCallback startScrollSnapMotionCallback;
 
     bool operator==(const ScrollableNodeInfo& info) const
     {
@@ -82,6 +85,13 @@ public:
      * Stop animation of ScrollBar, and show ScrollBar if needed, when scrollable node is scrolling.
      */
     void StopScrollBarAnimator() const;
+
+    /*
+     * Notify scrollable node to snap scroll, called by scroll bar.
+     */
+    bool NotifySnapScroll(float delta, float velocity, float controlDistance) const;
+
+    float CalcPatternOffset(float scrollableDistance, float controlDistance, float delta) const;
 
 private:
     std::list<ScrollableNodeInfo> scrollableNodes_;  // Scrollable nodes, like list, grid, scroll, etc.
