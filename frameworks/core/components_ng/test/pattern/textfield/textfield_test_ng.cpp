@@ -7137,4 +7137,240 @@ HWTEST_F(TextFieldPatternTestNg, HandleSelection004, TestSize.Level1)
     EXPECT_EQ(pattern_->selectionMode_, SelectionMode::NONE);
 }
 
+/**
+ * @tc.name: GetTextOfCursor
+ * @tc.desc: test GetRightTextOfCursor and GetLeftTextOfCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetTextOfCursor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call GetRightTextOfCursor.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    pattern_->textSelector_.baseOffset = 0;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_EQ(pattern_->GetRightTextOfCursor(1), u"D");
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    EXPECT_EQ(pattern_->GetRightTextOfCursor(1), u"B");
+
+    /**
+     * @tc.steps: step3. call GetLeftTextOfCursor.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 1);
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_EQ(pattern_->GetLeftTextOfCursor(1), u"A");
+
+    pattern_->UpdateEditingValue("ABCD", 1);
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    EXPECT_EQ(pattern_->GetLeftTextOfCursor(1), u"A");
+}
+
+/**
+ * @tc.name: CursorMove001
+ * @tc.desc: test method of cursor movement
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call CursorMoveEnd.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    EXPECT_TRUE(pattern_->CursorMoveEnd());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    EXPECT_TRUE(pattern_->CursorMoveEnd());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    /**
+     * @tc.steps: step3. call CursorMoveToParagraphEnd.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    EXPECT_TRUE(pattern_->CursorMoveToParagraphEnd());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    EXPECT_TRUE(pattern_->CursorMoveToParagraphEnd());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    /**
+     * @tc.steps: step4. call CursorMoveLineEnd.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    EXPECT_TRUE(pattern_->CursorMoveLineEnd());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT_ALL;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_TRUE(pattern_->CursorMoveLineEnd());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    layoutProperty_->UpdateMaxLines(2);
+    pattern_->CursorMoveLineEnd();
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    layoutProperty_->UpdateMaxLines(1);
+    pattern_->CursorMoveLineEnd();
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = -1;
+    EXPECT_FALSE(pattern_->CursorMoveLineEnd());
+
+    pattern_->textEditingValue_.caretPosition = 5;
+    EXPECT_FALSE(pattern_->CursorMoveLineEnd());
+}
+
+/**
+ * @tc.name: CursorMove002
+ * @tc.desc: test method of cursor movement
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorMove002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call CursorMoveRightWord.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 4);
+    EXPECT_TRUE(pattern_->CursorMoveRightWord());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT_ALL;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_TRUE(pattern_->CursorMoveRightWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    EXPECT_TRUE(pattern_->CursorMoveRightWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    EXPECT_TRUE(pattern_->CursorMoveRightWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 4);
+
+    pattern_->textEditingValue_.caretPosition = 5;
+    EXPECT_FALSE(pattern_->CursorMoveRightWord());
+
+    /**
+     * @tc.steps: step3. call CursorMoveHome.
+     * @tc.expected: Check result.
+     */
+    pattern_->textEditingValue_.caretPosition = 0;
+    EXPECT_TRUE(pattern_->CursorMoveHome());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    EXPECT_TRUE(pattern_->CursorMoveHome());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    /**
+     * @tc.steps: step4. call CursorMoveToParagraphBegin.
+     * @tc.expected: Check result.
+     */
+    pattern_->textEditingValue_.caretPosition = 0;
+    EXPECT_TRUE(pattern_->CursorMoveToParagraphBegin());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    EXPECT_TRUE(pattern_->CursorMoveToParagraphBegin());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+}
+
+/**
+ * @tc.name: CursorMove003
+ * @tc.desc: test method of cursor movement
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorMove003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. RunSetUp to Create TextFieldPattern.
+     * @tc.expected: Check it is not nullptr.
+     */
+    RunSetUp();
+    /**
+     * @tc.steps: step2. call CursorMoveLineBegin.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("ABCD", 0);
+    EXPECT_TRUE(pattern_->CursorMoveLineBegin());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT_ALL;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_TRUE(pattern_->CursorMoveLineBegin());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    layoutProperty_->UpdateMaxLines(2);
+    EXPECT_TRUE(pattern_->CursorMoveLineBegin());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    layoutProperty_->UpdateMaxLines(1);
+    EXPECT_TRUE(pattern_->CursorMoveLineBegin());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    /**
+     * @tc.steps: step3. call CursorMoveLeftWord.
+     * @tc.expected: Check result.
+     */
+    pattern_->UpdateEditingValue("AB CD", 0);
+    EXPECT_TRUE(pattern_->CursorMoveLeftWord());
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->selectionMode_ = SelectionMode::SELECT_ALL;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    EXPECT_TRUE(pattern_->CursorMoveLeftWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 0);
+
+    pattern_->textEditingValue_.caretPosition = 1;
+    pattern_->textSelector_.baseOffset = 1;
+    pattern_->textSelector_.destinationOffset = 3;
+    pattern_->selectionMode_ = SelectionMode::SELECT;
+    EXPECT_FALSE(pattern_->CursorMoveLeftWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 1);
+
+    pattern_->textEditingValue_.caretPosition = 4;
+    pattern_->selectionMode_ = SelectionMode::NONE;
+    layoutProperty_->UpdateMaxLines(1);
+    EXPECT_TRUE(pattern_->CursorMoveLeftWord());
+    EXPECT_EQ(pattern_->textEditingValue_.caretPosition, 3);
+}
+
 } // namespace OHOS::Ace::NG
