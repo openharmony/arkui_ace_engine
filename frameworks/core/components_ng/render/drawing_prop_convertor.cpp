@@ -79,7 +79,31 @@ RSTextDirection ToRSTextDirection(const TextDirection& txtDir)
 RSTextAlign ToRSTextAlign(const TextAlign& align)
 {
     // should keep enum same with rosen.
-    return static_cast<RSTextAlign>(align);
+    RSTextAlign textAlign = RSTextAlign::START;
+    switch (align) {
+        case TextAlign::LEFT:
+            textAlign = RSTextAlign::LEFT;
+            break;
+        case TextAlign::RIGHT:
+            textAlign = RSTextAlign::RIGHT;
+            break;
+        case TextAlign::CENTER:
+            textAlign = RSTextAlign::CENTER;
+            break;
+        case TextAlign::JUSTIFY:
+            textAlign = RSTextAlign::JUSTIFY;
+            break;
+        case TextAlign::START:
+            textAlign = RSTextAlign::START;
+            break;
+        case TextAlign::END:
+            textAlign = RSTextAlign::END;
+            break;
+        default:
+            textAlign = RSTextAlign::START;
+            break;
+    }
+    return textAlign;
 }
 
 RSFontWeight ToRSFontWeight(FontWeight fontWeight)
