@@ -1602,6 +1602,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
     };
     usePropertyAnimation_ = true;
     propertyAnimationIndex_ = nextIndex;
+    ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost(), option);
     AnimationUtils::Animate(option, propertyUpdateCallback, finishCallback);
     AnimationCallbackInfo info;
     info.velocity = Dimension(velocity, DimensionUnit::PX).ConvertToVp();

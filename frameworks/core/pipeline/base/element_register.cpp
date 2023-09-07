@@ -224,11 +224,11 @@ void ElementRegister::DumpGeometryTransition()
     }
 }
 
-void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger)
+void ElementRegister::ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger, const AnimationOption& option)
 {
     for (const auto& [itemId, item] : geometryTransitionMap_) {
         if (item) {
-            item->OnReSync(trigger);
+            item->OnReSync(trigger, option);
         }
     }
 }

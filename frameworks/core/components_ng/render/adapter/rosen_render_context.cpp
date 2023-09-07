@@ -1540,11 +1540,8 @@ void RosenRenderContext::ScaleAnimation(const AnimationOption& option, double be
         option.GetOnFinishEvent());
 }
 
-void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
+void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
 {
-    if (!isSynced_) {
-        return;
-    }
     CHECK_NULL_VOID(rsNode_);
     auto paintRect = AdjustPaintRect();
     if (isDisappearing_ && !paintRect.IsValid()) {
@@ -1561,6 +1558,12 @@ void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
         static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPxWithSize(radiusX)));
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
+}
+
+void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
+{
+    CHECK_NULL_VOID_NOLOG(isSynced_);
+    SetBorderRadius(value);
 }
 
 void RosenRenderContext::OnBorderColorUpdate(const BorderColorProperty& value)
