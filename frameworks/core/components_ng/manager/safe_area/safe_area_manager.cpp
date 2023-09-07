@@ -20,11 +20,8 @@
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
 {
-    if (cutoutSafeArea_ == safeArea) {
-        return false;
-    }
-    cutoutSafeArea_ = safeArea;
-    return true;
+    // cutout regions currently not adjacent to edges, so ignore it.
+    return false;
 }
 
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
