@@ -86,6 +86,10 @@ void SlidingPanelPattern::OnModifyDone()
     }
 
     auto isShow = layoutProperty->GetIsShowValue(false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto backgroundMask = layoutProperty->GetBackgroundMaskValue(Color::TRANSPARENT);
+    renderContext->UpdateBackgroundColor(isShow ? backgroundMask : Color::TRANSPARENT);
     if (isShow_.has_value() && isShow != isShow_.value_or(false)) {
         isShowQueue_.push(isShow);
         if (isShowQueue_.size() == 1 && isShowQueue_.front()) {

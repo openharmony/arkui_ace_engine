@@ -157,16 +157,7 @@ void SlidingPanelModelNG::SetShowCloseIcon(bool showCloseIcon)
 
 void SlidingPanelModelNG::SetBackgroundMask(const Color& backgroundMask)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProp = frameNode->GetLayoutProperty<SlidingPanelLayoutProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    auto isShow = layoutProp->GetIsShow().value();
-    if (isShow) {
-        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, backgroundMask);
-    } else {
-        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, Color::TRANSPARENT);
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundMask, backgroundMask);
 }
 
 // Set the color of the panel content area
