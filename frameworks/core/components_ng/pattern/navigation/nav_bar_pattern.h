@@ -106,19 +106,19 @@ public:
     void OnCoordScrollStart();
     void OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
-    void OnScrollStart();
-    void OnScrollUpdate(float offset);
-    void OnScrollEnd();
     bool GetDraggedDown();
     bool GetFullStatus();
     bool GetIsMinTitle() const;
-    void NavBarMotion(double velocity, double friction);
     void StopNavBarMotion();
 
     bool GetToolbarHideStatus()
     {
         return isHideToolbar_;
     }
+
+    void ResetAssociatedScroll();
+    void UpdateAssociatedScrollOffset(float offset);
+    bool IsTitleModeFree();
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -143,7 +143,6 @@ private:
     std::optional<int32_t> landscapeMenuNodeId_;
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
-    float motionOffset_ = 0.0f;
     bool isTitleMenuNodeShowing_ = false;
 };
 

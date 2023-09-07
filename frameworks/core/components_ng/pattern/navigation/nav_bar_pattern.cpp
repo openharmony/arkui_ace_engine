@@ -646,45 +646,6 @@ void NavBarPattern::OnCoordScrollEnd()
     offset_ = 0.0f;
 }
 
-void NavBarPattern::OnScrollStart()
-{
-    offset_ = 0.0f;
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->SetCanOverDrag(false);
-    titlePattern->ProcessTittleDragStart(offset_);
-}
-
-void NavBarPattern::OnScrollUpdate(float offset)
-{
-    offset_ += offset;
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTittleDragUpdate(offset_);
-    if (GetFullStatus()) {
-        StopNavBarMotion();
-    }
-}
-
-void NavBarPattern::OnScrollEnd()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    titlePattern->ProcessTittleDragEnd();
-    offset_ = 0.0f;
-}
-
 bool NavBarPattern::GetFullStatus()
 {
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -807,36 +768,41 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     isOritationListenerRegisted_ = false;
 }
 
-void NavBarPattern::NavBarMotion(double velocity, double friction)
-{
-    float mainPosition = 0.0f;
-    if (!motion_) {
-        motion_ = AceType::MakeRefPtr<FrictionMotion>(friction, mainPosition, velocity);
-    } else {
-        motion_->Reset(friction, mainPosition, velocity);
-    }
-    motionOffset_ = 0.0f;
-    motion_->AddListener([weak = AceType::WeakClaim(this)](double value) {
-        auto navBar = weak.Upgrade();
-        if (navBar) {
-            navBar->OnScrollUpdate(value - navBar->motionOffset_);
-            navBar->motionOffset_ = value;
-        }
-    });
-    controller_->ClearStopListeners();
-    controller_->AddStopListener([weak = AceType::WeakClaim(this)]() {
-        auto navBar = weak.Upgrade();
-        if (navBar) {
-            navBar->OnScrollEnd();
-        }
-    });
-    OnScrollStart();
-    controller_->PlayMotion(motion_);
-}
 void NavBarPattern::StopNavBarMotion()
 {
     if (controller_->IsRunning()) {
         controller_->Stop();
     }
+}
+
+void NavBarPattern::ResetAssociatedScroll()
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->ResetAssociatedScroll();
+}
+
+void NavBarPattern::UpdateAssociatedScrollOffset(float offset)
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    titlePattern->UpdateAssociatedScrollOffset(offset);
+}
+
+bool NavBarPattern::IsTitleModeFree()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_RETURN(navBarLayoutProperty, false);
+    return navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE;
 }
 } // namespace OHOS::Ace::NG

@@ -163,6 +163,9 @@ public:
         CanOverDrag_ = CanOverDrag;
     }
 
+    void ResetAssociatedScroll();
+    void UpdateAssociatedScrollOffset(float offset);
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -233,6 +236,12 @@ private:
     bool CanOverDrag_ = true;
 
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
+
+    bool enableAssociatedScroll_ = false;
+    float associatedScrollOffset_ = 0.0f;
+    bool dragScrolling_ = false;
+    bool associatedScrollOverSize_ = false;
+    float associatedScrollOffsetMax_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG
