@@ -15,15 +15,14 @@
 
 #include <functional>
 #include <optional>
-
 #include "gtest/gtest.h"
-
-#include "core/components_ng/pattern/text_field/text_selector.h"
 
 #define private public
 #define protected public
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -33,6 +32,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
@@ -40,10 +40,12 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/rosen/testing_typography_properties.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_ng/test/pattern/text/mock/mock_txt_paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -638,7 +640,23 @@ HWTEST_F(TextTestNg, OnHandleMoveDone001, TestSize.Level1)
      * @tc.expected: the OnHandleMoveDone function exits normally
      */
     bool isFirstHandle[2] = { true, false };
+    bool isShowCopyAll[2] = { true, false };
     for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2; ++j) {
+            pattern->selectMenuInfo_.showCopyAll = isShowCopyAll[j];
+            pattern->textForDisplay_ = "abcdefghij";
+            pattern->OnHandleMoveDone(handleRect, isFirstHandle[i]);
+            if (pattern->IsSelectAll() && pattern->selectMenuInfo_.showCopyAll) {
+                EXPECT_FALSE(pattern->selectMenuInfo_.showCopyAll);
+            }
+
+            pattern->selectMenuInfo_.showCopyAll = isShowCopyAll[j];
+            pattern->textForDisplay_ = TEXT_CONTENT;
+            pattern->OnHandleMoveDone(handleRect, isFirstHandle[i]);
+            if (!pattern->IsSelectAll() && !pattern->selectMenuInfo_.showCopyAll) {
+                EXPECT_TRUE(pattern->selectMenuInfo_.showCopyAll);
+            }
+        }
         pattern->OnHandleMoveDone(handleRect, isFirstHandle[i]);
         EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
         EXPECT_EQ(pattern->textSelector_.GetTextEnd(), TEXT_SIZE_INT);
@@ -802,6 +820,15 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(ret);
     EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    pattern->selectOverlayProxy_ = proxy;
+    ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -3357,6 +3384,98 @@ HWTEST_F(TextTestNg, HandleMouseEvent002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseEvent003
+ * @tc.desc: test test_pattern.h HandleMouseEvent function when copyOption is not none
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleMouseEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textForDisplay_ = "test";
+    pattern->textSelector_.Update(0, 3);
+    pattern->copyOption_ = CopyOptions::InApp;
+
+    /**
+     * @tc.steps: step2. create paragraph
+     */
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    ASSERT_NE(paragraph, nullptr);
+    pattern->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step3. create MouseInfo and call HandleMouseEvent function
+     * @tc.expected: selectOverlay is not closed
+     */
+    MouseInfo info;
+    // none none
+    pattern->textSelector_.Update(0, 3);
+    info.button_ = MouseButton::NONE_BUTTON;
+    info.action_ = MouseAction::NONE;
+    pattern->HandleMouseEvent(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+
+    // left none
+    pattern->textSelector_.Update(0, 3);
+    info.localLocation_ = Offset(2, 2);
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::NONE;
+    pattern->HandleMouseEvent(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+
+    // right none
+    pattern->textSelector_.Update(0, 3);
+    info.button_ = MouseButton::RIGHT_BUTTON;
+    info.action_ = MouseAction::NONE;
+    pattern->HandleMouseEvent(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+
+    // left press
+    pattern->textSelector_.Update(0, 3);
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::PRESS;
+    pattern->HandleMouseEvent(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
+
+    // left move
+    pattern->textSelector_.Update(0, 3);
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::MOVE;
+    pattern->blockPress_ = true;
+    pattern->HandleMouseEvent(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
+
+    pattern->textSelector_.Update(0, 3);
+    pattern->blockPress_ = false;
+    pattern->HandleMouseEvent(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
+
+    // left RELEASE
+    pattern->textSelector_.Update(0, 3);
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::RELEASE;
+    pattern->blockPress_ = true;
+    pattern->HandleMouseEvent(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
+
+    pattern->textSelector_.Update(0, 3);
+    pattern->blockPress_ = false;
+    pattern->HandleMouseEvent(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
+}
+
+/**
  * @tc.name: HandleOnCopy001
  * @tc.desc: test test_pattern.h HandleOnCopy function
  * @tc.type: FUNC
@@ -3551,12 +3670,26 @@ HWTEST_F(TextTestNg, HandlePanUpdateAndEnd001, TestSize.Level1)
     ASSERT_NE(pipelineContext, nullptr);
     auto rect = pipelineContext->GetCurrentWindowRect();
     auto contentRect_ = CONTENT_RECT;
+    pattern->HandlePanUpdate(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+    pattern->HandlePanEnd(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
     // create textdrag window
     auto dragWindow = DragWindow::CreateTextDragWindow("APP_DRAG_WINDOW",
         static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
         static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()),
         static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()), contentRect_.Height() + contentRect_.GetY());
+    pattern->dragWindow_ = dragWindow;
+    pattern->HandlePanEnd(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
 
+    dragWindow = DragWindow::CreateTextDragWindow("APP_DRAG_WINDOW",
+        static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
+        static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()),
+        static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()), contentRect_.Height() + contentRect_.GetY());
     pattern->dragWindow_ = dragWindow;
 
     /**
@@ -4421,5 +4554,71 @@ HWTEST_F(TextTestNg, GetLineCount001, TestSize.Level1)
      * @tc.expected: linecount will be 1.
      */
     EXPECT_EQ(rowLayoutAlgorithm->GetLineCount(), 1);
+}
+
+/**
+ * @tc.name: GetDragUpperLeftCoordinates001
+ * @tc.desc: test text_layout_algorithm.cpp GetDragUpperLeftCoordinates function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetDragUpperLeftCoordinates001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [frameNode, pattern] = Init();
+    auto pipeline = frameNode->GetContext();
+    
+    /**
+     * @tc.steps: step3. run GetDragUpperLeftCoordinates func.
+     */
+    auto ret = pattern->GetDragUpperLeftCoordinates();
+    EXPECT_EQ(ret, OffsetF(0, 0));
+    
+    pattern->dragBoxes_.push_back({
+        {}, Testing::TextDirection::LTR
+    });
+    ret = pattern->GetDragUpperLeftCoordinates();
+    EXPECT_EQ(ret, OffsetF(0, 0));
+
+    pattern->dragBoxes_.push_back({
+        {1, 2, 3, 4}, Testing::TextDirection::LTR
+    });
+    ret = pattern->GetDragUpperLeftCoordinates();
+    EXPECT_EQ(ret, OffsetF(0, 0));
+}
+
+/**
+ * @tc.name: GetCopyOptionString001
+ * @tc.desc: Test if GetCopyOptionString is successful
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetCopyOptionString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textModelNG and FrameNode
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto [frameNode, pattern] = Init();
+    auto pipeline = frameNode->GetContext();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. run GetCopyOptionString Func.
+     */
+    textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
+    EXPECT_EQ(textLayoutProperty->GetCopyOptionString(), "CopyOptions.InApp");
+    textLayoutProperty->UpdateCopyOption(CopyOptions::Local);
+    EXPECT_EQ(textLayoutProperty->GetCopyOptionString(), "CopyOptions.Local");
+    textLayoutProperty->UpdateCopyOption(CopyOptions::None);
+    EXPECT_EQ(textLayoutProperty->GetCopyOptionString(), "CopyOptions.None");
+    textLayoutProperty->UpdateCopyOption(CopyOptions::Distributed);
+    EXPECT_EQ(textLayoutProperty->GetCopyOptionString(), "CopyOptions.Distributed");
+    textLayoutProperty->UpdateCopyOption(CopyOptions(10));
+    EXPECT_EQ(textLayoutProperty->GetCopyOptionString(), "CopyOptions.None");
 }
 } // namespace OHOS::Ace::NG
