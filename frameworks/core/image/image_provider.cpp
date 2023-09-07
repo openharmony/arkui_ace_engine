@@ -35,6 +35,7 @@
 #include "core/common/container_scope.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
 #include "core/event/ace_event_helper.h"
 #include "core/image/image_object.h"
@@ -269,7 +270,7 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
             return *skData;
 #else
             LOGD("drawing data from memory cache.");
-            return AceType::DynamicCast<NG::RsImageData>(cacheData)->GetRsData();
+            return AceType::DynamicCast<NG::DrawingImageData>(cacheData)->GetRsData();
 #endif
         }
     }
@@ -286,7 +287,7 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawData(
         imageCache->CacheImageData(imageInfo.GetSrc(), NG::ImageData::MakeFromDataWrapper(&data));
 #else
         // cache drawing data.
-        imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<NG::RsImageData>(data));
+        imageCache->CacheImageData(imageInfo.GetSrc(), AceType::MakeRefPtr<NG::DrawingImageData>(data));
 #endif
     }
     return data;
@@ -311,7 +312,7 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawDataFromFileCache(
             const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(data->GetDataWrapper());
             return *skData;
 #else
-            return AceType::DynamicCast<NG::RsImageData>(data)->GetRsData();
+            return AceType::DynamicCast<NG::DrawingImageData>(data)->GetRsData();
 #endif
         }
     }
