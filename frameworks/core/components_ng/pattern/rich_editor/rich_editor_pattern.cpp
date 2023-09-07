@@ -23,6 +23,8 @@
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -183,6 +185,12 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     auto imageNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+
+    // Disable the image itself event
+    imageNode->SetDraggable(false);
+    auto gesture = imageNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gesture, -1);
+    gesture->SetHitTestMode(HitTestMode::HTMNONE);
 
     int32_t spanIndex = 0;
     int32_t offset = -1;
