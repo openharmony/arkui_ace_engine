@@ -86,7 +86,7 @@ const double TIME_PLUS = 1 * 100.0;
 const double TIME_PLUS_LARGE = 10 * 1000.0;
 constexpr double DISTANCE = 20.0;
 const OffsetF CHILD_OFFSET(0.0f, 10.0f);
-const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 0.0f };
+const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 5.0f };
 } // namespace
 
 class TextPickerTestNg : public testing::Test {
@@ -4287,6 +4287,88 @@ HWTEST_F(TextPickerTestNg, TextPickerKeyEvent001, TestSize.Level1)
     operationOn = textPickerPattern->operationOn_;
     EXPECT_EQ(operationOn, true);
     EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: TextPickerKeyEvent002
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerKeyEvent002, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    textPickerPattern->InitOnKeyEvent(focusHub);
+    KeyEvent event;
+
+    /**
+     * @tc.cases: case. cover branch KeyAction is not DOWN.
+     */
+    event.action = KeyAction::UP;
+    event.code = KeyCode::KEY_TAB;
+    bool result = textPickerPattern->OnKeyEvent(event);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.cases: case. cover branch event code is KEY_ENTER and operationOn_ is false.
+     */
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_ENTER;
+    textPickerPattern->operationOn_ = false;
+    result = textPickerPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.cases: case. cover branch operationOn_ is not true.
+     */
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    textPickerPattern->operationOn_ = true;
+    result = textPickerPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewOnKeyEvent
+ * @tc.desc: Test TextPickerDialogView OnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerDialogViewOnKeyEvent, TestSize.Level1)
+{
+    KeyEvent event;
+
+    /**
+     * @tc.cases: case. cover KeyAction is not DOWN.
+     */
+    event.action = KeyAction::UP;
+    event.code = KeyCode::KEY_TAB;
+    bool result = TextPickerDialogView::OnKeyEvent(event);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.cases: case. cover KeyCode is KEY_ESCAPE.
+     */
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_ESCAPE;
+    result = TextPickerDialogView::OnKeyEvent(event);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.cases: case. cover KeyCode is not KEY_ESCAPE.
+     */
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_FORWARD_DEL;
+    result = TextPickerDialogView::OnKeyEvent(event);
+    EXPECT_FALSE(result);
 }
 
 /**
