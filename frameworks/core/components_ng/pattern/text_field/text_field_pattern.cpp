@@ -213,7 +213,6 @@ TextFieldPattern::~TextFieldPattern()
     if (HasConnection()) {
 #if defined(ENABLE_STANDARD_INPUT)
         LOGI("Destruction of text field, close input method.");
-        MiscServices::InputMethodController::GetInstance()->HideTextInput();
         MiscServices::InputMethodController::GetInstance()->Close();
 #else
         connection_->Close(GetInstanceId());
@@ -3421,7 +3420,6 @@ bool TextFieldPattern::CloseKeyboard(bool forceClose)
             LOGE("Request close soft keyboard failed because input method is null.");
             return false;
         }
-        inputMethod->HideTextInput();
         inputMethod->Close();
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         imeAttached_ = false;
