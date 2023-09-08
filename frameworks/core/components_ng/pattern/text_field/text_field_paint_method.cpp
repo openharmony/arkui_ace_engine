@@ -109,7 +109,8 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
     textFieldContentModifier_->SetShowCounter(
         layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
-    textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false));
+    textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false) &&
+        paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE);
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
     textFieldContentModifier_->SetShowPasswordIcon(textFieldPattern->GetShowResultImageSrc());
