@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -46,6 +47,14 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    if (spans_.empty()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, std::nullopt);
+        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+        auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
+        return SizeF(contentConstraint.selfIdealSize.Width().value(), defaultCaretHeight);
+    }
+
     SizeF res;
     for (auto&& group : spans_) {
         // layout each paragraph
