@@ -405,6 +405,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 
     if (status == PlaybackStatus::PREPARED) {
         auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
         if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
             return;
         }
@@ -716,7 +717,7 @@ void VideoPattern::OnAttachToFrameNode()
     }
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
-    renderContext->SetClipToFrame(true);
+    renderContext->SetClipToBounds(true);
 }
 
 void VideoPattern::OnModifyDone()
@@ -873,8 +874,11 @@ void VideoPattern::OnRebuildFrame()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    auto video = AceType::DynamicCast<VideoNode>(host);
+    CHECK_NULL_VOID(video);
+    auto column = AceType::DynamicCast<FrameNode>(video->GetMediaColumn());
+    CHECK_NULL_VOID(column);
+    auto renderContext = column->GetRenderContext();
     renderContext->AddChild(renderContextForMediaPlayer_, 0);
 }
 
@@ -905,14 +909,12 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    auto videoNodeFrameSize = geometryNode->GetFrameSize();
-    auto videoNodeFrameOffset = geometryNode->GetFrameOffset();
-    RectF rect(videoNodeFrameOffset.GetX(), videoNodeFrameOffset.GetY(), videoNodeFrameSize.Width(),
-        videoNodeFrameSize.Height());
-    renderContext->SetContentRectToFrame(rect);
     host->MarkNeedSyncRenderTree();
+    auto video = AceType::DynamicCast<VideoNode>(host);
+    CHECK_NULL_RETURN(video, false);
+    auto column = AceType::DynamicCast<FrameNode>(video->GetMediaColumn());
+    CHECK_NULL_RETURN(column, false);
+    column->GetRenderContext()->SetClipToBounds(true);
     return false;
 }
 

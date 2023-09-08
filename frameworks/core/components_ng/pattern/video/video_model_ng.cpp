@@ -39,7 +39,16 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
     stack->Push(videoNode);
     bool hasPreviewImageNode = videoNode->HasPreviewImageNode();
     bool hasControllerRowNode = videoNode->HasControllerRowNode();
-    LOGI("Preview image is %{public}d, controller is %{public}d.", hasPreviewImageNode, hasControllerRowNode);
+    bool hasMediaColumnNode = videoNode->HasMediaColumnNode();
+    LOGD("Preview mediaColumn is %{public}d,image is %{public}d, controller is %{public}d.", hasMediaColumnNode,
+        hasPreviewImageNode, hasControllerRowNode);
+    if (!hasMediaColumnNode) {
+        auto mediaColumnId = videoNode->GetMediaColumnId();
+        auto mediaColumNode = FrameNode::GetOrCreateFrameNode(
+            V2::COLUMN_ETS_TAG, mediaColumnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        CHECK_NULL_VOID(mediaColumNode);
+        videoNode->AddChild(mediaColumNode);
+    }
     if (!hasPreviewImageNode) {
         auto previewImageId = videoNode->GetPreviewImageId();
         auto previewImageNode = FrameNode::GetOrCreateFrameNode(
