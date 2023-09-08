@@ -55,6 +55,10 @@ template("ace_core_apng_source_set") {
         "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
         "$ace_flutter_engine_root/skia:ace_skia_$platform",
       ]
+      if (enable_graphic_text_gine) {
+        deps -=
+            [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform" ]
+      }
     }
 
     cflags_cc = []
