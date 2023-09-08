@@ -9206,4 +9206,194 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick003, TestSize.Level1)
     tabBarPattern->HandleClick(info);
     EXPECT_EQ(tabBarPattern->indicator_, 1);
 }
+
+/**
+ * @tc.name: SetSpecificSupportAction
+ * @tc.desc: Test the SetSpecificSupportAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarAPSetSpecificSupportAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat accessibilityProperty in class.
+     * @tc.expected: Successfully created.
+     */
+    TabContentModelNG tabContentModel1;
+    tabContentModel1.Create();
+    auto tabContentFrameNode1 =
+        AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+
+    TabContentModelNG tabContentModel2;
+    tabContentModel2.Create();
+    auto tabContentFrameNode2 =
+        AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(tabContentFrameNode2, nullptr);
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    auto accessibilityProperty = tabBarNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    /**
+     * @tc.steps: step2. invoke SetSpecificSupportAction.
+     * @tc.expected: Related function is called.
+     */
+    accessibilityProperty->SetSpecificSupportAction();
+    EXPECT_FALSE(accessibilityProperty->IsScrollable());
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    ASSERT_NE(swiperNode, nullptr);
+    tabContentFrameNode1->MountToParent(swiperNode);
+    tabContentFrameNode2->MountToParent(swiperNode);
+    auto frameNode = accessibilityProperty->host_.Upgrade();
+    ASSERT_NE(frameNode, nullptr);
+    auto tabBarPattern = frameNode->GetPattern<TabBarPattern>();
+    tabBarPattern->currentOffset_ = 1.0f;
+    tabBarPattern->tabItemOffsets_ = { { 10.0f, 10.0f } };
+    accessibilityProperty->SetSpecificSupportAction();
+    EXPECT_TRUE(accessibilityProperty->IsScrollable());
+}
+
+/**
+ * @tc.name: TabBarPatternGetInnerFocusPaintRect001
+ * @tc.desc: test GetInnerFocusPaintRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternGetInnerFocusPaintRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto focusHub = tabBarNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function InitOnKeyEvent.
+     * @tc.expected: Related function runs ok.
+     */
+    tabBarPattern->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
+    tabBarPattern->isFirstFocus_ = true;
+    auto event = KeyEvent();
+    auto paintRect = RoundRect();
+    tabBarPattern->GetInnerFocusPaintRect(paintRect);
+    EXPECT_EQ(tabBarPattern->isFirstFocus_, true);
+}
+
+/**
+ * @tc.name: TabBarPatternInitScrollable005
+ * @tc.desc: test InitScrollable
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternInitScrollable005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    tabBarPattern->axis_ = Axis::HORIZONTAL;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureHub, nullptr);
+    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateAxis(Axis::VERTICAL);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+
+    /**
+     * @tc.steps: step2. Test function InitScrollable.
+     * @tc.expected: Related function runs ok.
+     */
+
+    tabBarPattern->InitScrollable(gestureHub);
+    ASSERT_NE(tabBarPattern->scrollableEvent_, nullptr);
+    auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
+    scrollable->callback_(0.1, SCROLL_FROM_NONE);
+    tabBarPattern->controller_ = AceType::MakeRefPtr<Animator>();
+    scrollable->callback_(0.1, SCROLL_FROM_NONE);
+    ASSERT_NE(tabBarPattern->scrollableEvent_, nullptr);
+    tabBarPattern->controller_->status_ = Animator::Status::RUNNING;
+    scrollable->callback_(0.1, SCROLL_FROM_NONE);
+    EXPECT_EQ(tabBarPattern->controller_->IsRunning(), true);
+    tabBarPattern->scrollableEvent_ = nullptr;
+    scrollable->callback_(0.1, SCROLL_FROM_NONE);
+    EXPECT_EQ(tabBarPattern->scrollableEvent_, nullptr);
+}
+
+/**
+ * @tc.name: TabBarPatternHandleClick005
+ * @tc.desc: test HandleClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternHandleClick005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateAxis(Axis::HORIZONTAL);
+    auto layoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    GestureEvent info;
+    Offset offset(1, 1);
+    info.SetLocalLocation(offset);
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->SetAxis(Axis::HORIZONTAL);
+    scrollable->springController_ = nullptr;
+    scrollable->controller_ = nullptr;
+    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
+    scrollableEvent->SetAxis(Axis::VERTICAL);
+    scrollableEvent->SetScrollable(scrollable);
+    tabBarPattern->scrollableEvent_ = scrollableEvent;
+
+    layoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
+    layoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    /**
+     * @tc.steps: step2. Test function HandleClick.
+     * @tc.expected: Related functions run ok.
+     */
+    info.deviceType_ = SourceType::KEYBOARD;
+    tabBarPattern->HandleClick(info);
+    EXPECT_EQ(info.deviceType_, SourceType::KEYBOARD);
+}
 } // namespace OHOS::Ace::NG
