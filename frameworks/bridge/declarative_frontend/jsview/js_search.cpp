@@ -55,7 +55,6 @@ SearchModel* SearchModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-const static int32_t PLATFORM_VERSION_TEN = 10;
 namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END };
 } // namespace
@@ -395,8 +394,7 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
         font.fontSize = themeFontSize;
     } else {
-        auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
-                                  PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
+        auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
         CalcDimension size;
         if (versionTenOrLarger ? ParseJsDimensionVpNG(fontSize, size) : ParseJsDimensionVp(fontSize, size) &&
             size.Unit() != DimensionUnit::PERCENT) {
@@ -587,8 +585,7 @@ void JSSearch::SetHeight(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsHeight(info);
     CalcDimension value;
-    auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
-                              PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
+    auto versionTenOrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (versionTenOrLarger ? !ParseJsDimensionVpNG(info[0], value) : !ParseJsDimensionVp(info[0], value)) {
         LOGE("The arg is wrong, it is supposed to be a number arguments");
         return;

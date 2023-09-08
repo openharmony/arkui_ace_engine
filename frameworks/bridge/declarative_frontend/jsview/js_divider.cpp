@@ -95,10 +95,7 @@ void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)
     auto theme = GetTheme<DividerTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension strokeWidth = theme->GetStokeWidth();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         strokeWidth = 1.0_px;
     }
     ParseJsDimensionVp(info[0], strokeWidth);

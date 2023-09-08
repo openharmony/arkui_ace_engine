@@ -48,9 +48,7 @@ StepperItemModel* StepperItemModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-namespace {
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
-} // namespace
+namespace {} // namespace
 
 void JSStepperItem::Create(const JSCallbackInfo& info)
 {
@@ -82,9 +80,8 @@ void JSStepperItem::SetPrevLabel(const JSCallbackInfo& info)
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsUndefined() || info[0]->IsNull())) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
+        (info[0]->IsUndefined() || info[0]->IsNull())) {
         StepperItemModel::GetInstance()->ResetPrevLabel();
         return;
     }
@@ -103,9 +100,8 @@ void JSStepperItem::SetNextLabel(const JSCallbackInfo& info)
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsUndefined() || info[0]->IsNull())) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
+        (info[0]->IsUndefined() || info[0]->IsNull())) {
         StepperItemModel::GetInstance()->ResetNextLabel();
         return;
     }
