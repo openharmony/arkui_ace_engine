@@ -58,6 +58,7 @@ void TxtParagraph::CreateBuilder()
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
+    style.fontSize = paraStyle_.fontSize;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
 #ifndef USE_GRAPHIC_TEXT_GINE
