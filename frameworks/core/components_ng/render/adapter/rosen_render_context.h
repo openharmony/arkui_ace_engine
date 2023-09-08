@@ -240,6 +240,7 @@ public:
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
 
     void OnBackgroundColorUpdate(const Color& value) override;
+    void OnOpacityUpdate(double opacity) override;
 
     void MarkContentChanged(bool isChanged) override;
     void MarkDrivenRender(bool flag) override;
@@ -282,7 +283,6 @@ private:
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
-    void OnOpacityUpdate(double opacity) override;
 
     void OnTransformScaleUpdate(const VectorF& value) override;
     void OnTransformCenterUpdate(const DimensionOffset& value) override;

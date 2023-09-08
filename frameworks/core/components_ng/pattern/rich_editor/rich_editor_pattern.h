@@ -203,6 +203,7 @@ public:
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
+    bool IsDisabled() const;
 
 private:
     void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
@@ -222,6 +223,7 @@ private:
     void HandleBlurEvent();
     void HandleFocusEvent();
     void HandleClickEvent(GestureEvent& info);
+    void HandleEnabled();
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
     void OnCaretTwinkling();
