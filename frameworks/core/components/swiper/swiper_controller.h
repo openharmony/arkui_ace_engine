@@ -166,6 +166,16 @@ public:
         return turnPageRateCallback_;
     }
 
+    void SetUpdateCubicCurveCallback(const CommonFunc& updateCubicCurveCallback)
+    {
+        updateCubicCurveCallback_ = updateCubicCurveCallback;
+    }
+
+    const CommonFunc& GetUpdateCubicCurveCallback() const
+    {
+        return updateCubicCurveCallback_;
+    }
+
 private:
     SwipeToImpl swipeToImpl_;
     SwipeToWithoutAnimationImpl swipeToWithoutAnimationImpl_;
@@ -179,6 +189,7 @@ private:
     CommonFunc removeSwiperEventCallback_;
     CommonFunc addSwiperEventCallback_;
     TurnPageRateFunc turnPageRateCallback_;
+    CommonFunc updateCubicCurveCallback_;
 };
 
 } // namespace OHOS::Ace
