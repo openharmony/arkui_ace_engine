@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,39 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/shape_painter.h"
+#include "core/components_ng/render/adapter/rosen/drawing_painter.h"
 
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/shape/path_paint_property.h"
 
 namespace OHOS::Ace::NG {
-bool ShapePainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProperty)
+void DrawingPainter::DrawPath(
+    RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty)
+{
+    RSPen pen;
+    RSBrush brush;
+    RSRecordingPath path;
+    bool ret = path.BuildFromSVGString(commands);
+    if (!ret) {
+        return;
+    }
+    // do brush first then do pen
+    SetBrush(brush, shapePaintProperty);
+    canvas.AttachBrush(brush);
+    canvas.DrawPath(path);
+    canvas.DetachBrush();
+    if (SetPen(pen, shapePaintProperty)) {
+        canvas.AttachPen(pen);
+        canvas.DrawPath(path);
+        canvas.DetachPen();
+    }
+}
+
+bool DrawingPainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProperty)
 {
     if (shapePaintProperty.HasStrokeWidth()) {
-        // Return false will not call 'AttachPen'.
-        // The shape will be stroked once 'AttachPen' has been called even if the strokeWidth is zero.
+        // Return false will not call 'drawPath'.
+        // The path will be stroked once 'drawPath' has been called even if the strokeWidth is zero.
         if (NearZero(shapePaintProperty.GetStrokeWidth()->Value())) {
             return false;
         }
@@ -33,7 +53,6 @@ bool ShapePainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProper
     } else {
         pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.STROKE_WIDTH_DEFAULT.ConvertToPx()));
     }
-
     if (shapePaintProperty.HasAntiAlias()) {
         pen.SetAntiAlias(shapePaintProperty.GetAntiAliasValue());
     } else {
@@ -42,12 +61,12 @@ bool ShapePainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProper
 
     if (shapePaintProperty.HasStrokeLineCap()) {
         int lineCap = shapePaintProperty.GetStrokeLineCapValue();
-        if (static_cast<int>(RSPen::CapStyle::FLAT_CAP) == lineCap) {
-            pen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
-        } else if (static_cast<int>(shapePaintProperty.SQUARE_CAP) == lineCap) {
+        if (static_cast<int>(LineCapStyle::ROUND) == lineCap) {
+            pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+        } else if (static_cast<int>(LineCapStyle::SQUARE) == lineCap) {
             pen.SetCapStyle(RSPen::CapStyle::SQUARE_CAP);
         } else {
-            pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+            pen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
         }
     } else {
         pen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
@@ -55,34 +74,30 @@ bool ShapePainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProper
 
     if (shapePaintProperty.HasStrokeLineJoin()) {
         int lineJoin = shapePaintProperty.GetStrokeLineJoinValue();
-        if (static_cast<int>(RSPen::JoinStyle::BEVEL_JOIN) == lineJoin) {
-            pen.SetJoinStyle(RSPen::JoinStyle::BEVEL_JOIN);
-        } else if (static_cast<int>(RSPen::JoinStyle::MITER_JOIN) == lineJoin) {
-            pen.SetJoinStyle(RSPen::JoinStyle::MITER_JOIN);
-        } else {
+        if (static_cast<int>(LineJoinStyle::ROUND) == lineJoin) {
             pen.SetJoinStyle(RSPen::JoinStyle::ROUND_JOIN);
+        } else if (static_cast<int>(LineJoinStyle::BEVEL) == lineJoin) {
+            pen.SetJoinStyle(RSPen::JoinStyle::BEVEL_JOIN);
+        } else {
+            pen.SetJoinStyle(RSPen::JoinStyle::MITER_JOIN);
         }
     } else {
         pen.SetJoinStyle(RSPen::JoinStyle::MITER_JOIN);
     }
 
-    Color strokeColor = Color::TRANSPARENT;
+    Color strokeColor = Color::BLACK;
     if (shapePaintProperty.HasStroke()) {
         strokeColor = shapePaintProperty.GetStrokeValue();
     }
-    RSColor rSColor(strokeColor.GetRed(), strokeColor.GetGreen(), strokeColor.GetBlue(), strokeColor.GetAlpha());
+    double curOpacity = shapePaintProperty.STROKE_OPACITY_DEFAULT;
     if (shapePaintProperty.HasStrokeOpacity()) {
-        rSColor.SetAlphaF(static_cast<RSScalar>(shapePaintProperty.GetStrokeOpacityValue()));
+        curOpacity = shapePaintProperty.GetStrokeOpacityValue();
     }
-    pen.SetColor(rSColor);
+    pen.SetColor(strokeColor.BlendOpacity(curOpacity).GetValue());
 
     if (shapePaintProperty.HasStrokeDashArray()) {
         auto lineDashState = shapePaintProperty.GetStrokeDashArrayValue();
-#ifndef USE_ROSEN_DRAWING
-        RSScalar intervals[lineDashState.size()];
-#else
         std::vector<RSScalar> intervals(lineDashState.size());
-#endif
         for (size_t i = 0; i < lineDashState.size(); ++i) {
             intervals[i] = static_cast<RSScalar>(lineDashState[i].ConvertToPx());
         }
@@ -90,11 +105,7 @@ bool ShapePainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProper
         if (shapePaintProperty.HasStrokeDashOffset()) {
             phase = static_cast<RSScalar>(shapePaintProperty.GetStrokeDashOffsetValue().ConvertToPx());
         }
-#ifndef USE_ROSEN_DRAWING
-        pen.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
-#else
         pen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, phase));
-#endif
     }
 
     if (shapePaintProperty.HasStrokeMiterLimit()) {
@@ -103,21 +114,33 @@ bool ShapePainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProper
     return true;
 }
 
-void ShapePainter::SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty)
+void DrawingPainter::SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty)
 {
     Color fillColor = Color::BLACK;
     if (shapePaintProperty.HasFill()) {
         fillColor = shapePaintProperty.GetFillValue();
     }
-    RSColor rSColor(fillColor.GetRed(), fillColor.GetGreen(), fillColor.GetBlue(), fillColor.GetAlpha());
+    double curOpacity = shapePaintProperty.FILL_OPACITY_DEFAULT;
     if (shapePaintProperty.HasFillOpacity()) {
-        rSColor.SetAlphaF(static_cast<RSScalar>(shapePaintProperty.GetFillOpacityValue()));
+        curOpacity = shapePaintProperty.GetFillOpacityValue();
     }
+    brush.SetColor(fillColor.BlendOpacity(curOpacity).GetValue());
     if (shapePaintProperty.HasAntiAlias()) {
         brush.SetAntiAlias(shapePaintProperty.GetAntiAliasValue());
     } else {
         brush.SetAntiAlias(shapePaintProperty.ANTIALIAS_DEFAULT);
     }
-    brush.SetColor(rSColor);
+}
+
+void DrawingPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset)
+{
+    RSRecordingPath path;
+    if (!path.BuildFromSVGString(commands)) {
+        LOGE("Invalid path value.");
+        return;
+    }
+
+    path.Offset(offset.GetX(), offset.GetY());
+    canvas.DrawPath(path);
 }
 } // namespace OHOS::Ace::NG

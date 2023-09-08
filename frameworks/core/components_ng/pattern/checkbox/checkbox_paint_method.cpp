@@ -176,7 +176,11 @@ void CheckBoxModifier::DrawCheck(
     if (strokeSize_->Get() == CHECKBOX_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_LENGTH_ZERO) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     RSPath path;
+#else
+    RSRecordingPath path;
+#endif
     float originX = origin.GetX();
     float originY = origin.GetY();
     float strokeSize = strokeSize_->Get();

@@ -151,15 +151,15 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas, const SizeF& frameS
     PointF centerPt = PointF(frameSize.Width() / INT32_TWO, frameSize.Height() / INT32_TWO);
     RSBrush brush;
     double angle = (value_->Get() / maxValue_->Get()) * totalDegree;
+#ifndef USE_ROSEN_DRAWING
     RSPath path;
+#else
+    RSRecordingPath path;
+#endif
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor((maskColor_->Get())));
     canvas.AttachBrush(brush);
-#ifndef USE_ROSEN_DRAWING
     path.SetFillStyle(RSPathFillType::EVENTODD);
-#else
-    path.SetFillStyle(RSPathFillType::EVENTODD);
-#endif
     path.AddCircle(centerPt.GetX(), centerPt.GetY(), bigRadius_, RSPathDirection::CW_DIRECTION);
     if (NearZero(std::abs(ratio_->Get() - INITIAL_RATIO), EPSLION)) {
         path.AddArc(
@@ -188,5 +188,8 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas, const SizeF& frameS
             RSPathDirection::CW_DIRECTION);
         canvas.DrawPath(path);
     }
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachBrush();
+#endif
 }
 } // namespace OHOS::Ace::NG
