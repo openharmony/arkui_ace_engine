@@ -202,7 +202,7 @@ void MenuPattern::RegisterOnTouch()
 
 void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    if (GetInnerMenuCount() > 0 || IsMultiMenu() || IsSelectOverlayCustomMenu()) {
+    if (GetInnerMenuCount() > 0 || IsMultiMenu() || IsDesktopMenu()|| IsSelectOverlayCustomMenu()) {
         // not click hide menu for multi menu or select overlay custom menu
         return;
     }
@@ -235,7 +235,7 @@ void MenuPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
 {
-    if (event.action != KeyAction::DOWN || IsMultiMenu()) {
+    if (event.action != KeyAction::DOWN || IsMultiMenu() || IsDesktopMenu()) {
         return false;
     }
     if ((event.code == KeyCode::KEY_DPAD_LEFT || event.code == KeyCode::KEY_ESCAPE) &&
@@ -494,7 +494,7 @@ RefPtr<FrameNode> MenuPattern::GetMenuColumn() const
 
 void MenuPattern::DisableTabInMenu()
 {
-    if (IsMultiMenu()) {
+    if (IsMultiMenu() || IsDesktopMenu()) {
         // multi menu not has scroll and column
         return;
     }
