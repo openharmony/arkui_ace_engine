@@ -161,6 +161,10 @@ WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallb
 WebPattern::~WebPattern()
 {
     LOGI("WebPattern::~WebPattern");
+    if (delegate_) {
+        delegate_->SetAudioMuted(true);
+    }
+
     if (observer_) {
         LOGI("WebPattern::~WebPattern NotifyDestory");
         observer_->NotifyDestory();
