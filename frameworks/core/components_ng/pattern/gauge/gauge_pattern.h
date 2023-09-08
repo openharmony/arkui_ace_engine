@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_GAUGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_GAUGE_PATTERN_H
 
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/gauge/gauge_accessibility_property.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_property.h"
@@ -38,7 +39,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<GaugePaintMethod>();
+        return MakeRefPtr<GaugePaintMethod>(WeakClaim(this));
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -53,7 +54,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<GaugeLayoutAlgorithm>();
+        return MakeRefPtr<GaugeLayoutAlgorithm>(indicatorIconLoadingCtx_);
     }
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
@@ -122,12 +123,26 @@ public:
     {
         descriptionNode_ = descriptionNode;
     }
+
+    const RefPtr<CanvasImage>& GetIndicatorIconCanvasImage() const
+    {
+        return indicatorIconCanvasImage_;
+    }
+
     void OnModifyDone() override;
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void InitDescriptionNode();
     void InitLimitValueText(const int32_t valueTextId, const bool isMin);
+    void InitIndicatorImage();
+
+    LoadSuccessNotifyTask CreateLoadSuccessCallback();
+    DataReadyNotifyTask CreateDataReadyCallback();
+    LoadFailNotifyTask CreateLoadFailCallback();
+    void OnImageDataReady();
+    void OnImageLoadSuccess();
+    void OnImageLoadFail();
 
     Color GetMaxValueColor(const RefPtr<GaugePaintProperty>& gaugePaintProperty) const;
     std::optional<int32_t> descriptionNodeId_;
@@ -135,6 +150,10 @@ private:
     std::optional<int32_t> maxValueTextId_;
     std::optional<int32_t> titleChildId_;
     RefPtr<UINode> descriptionNode_;
+
+    RefPtr<ImageLoadingContext> indicatorIconLoadingCtx_;
+    RefPtr<CanvasImage> indicatorIconCanvasImage_;
+
     ACE_DISALLOW_COPY_AND_MOVE(GaugePattern);
 };
 

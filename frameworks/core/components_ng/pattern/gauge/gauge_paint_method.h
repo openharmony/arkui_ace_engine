@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_METHOD_H
 
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 namespace OHOS::Ace::NG {
@@ -45,6 +46,8 @@ public:
     GaugePaintMethod() = default;
     ~GaugePaintMethod() override = default;
 
+    explicit GaugePaintMethod(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern) : pattern_(pattern) {}
+
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
@@ -54,7 +57,10 @@ private:
     bool ShouldHighLight(float start, float interval, float percent) const;
     // API11
     void NewPaint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    void NewDrawIndicator(RSCanvas& canvas, const RenderRingInfo& data) const;
+    void NewDrawIndicator(
+        RSCanvas& canvas, const RefPtr<GaugePaintProperty>& paintProperty, const RenderRingInfo& data) const;
+    void NewDrawImageIndicator(
+        RSCanvas& canvas, const RefPtr<GaugePaintProperty>& paintProperty, const RenderRingInfo& data) const;
     void PaintMonochromeCircular(
         RSCanvas& canvas, RenderRingInfo data, const RefPtr<GaugePaintProperty>& paintProperty) const;
     void PaintMonochromeCircularShadow(RSCanvas& canvas, const RenderRingInfo& data, const Color& color,
@@ -69,12 +75,15 @@ private:
     void PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas, const RenderRingInfo& data,
         const RefPtr<GaugePaintProperty>& paintProperty, const std::vector<ColorStopArray>& colors,
         const std::vector<float>& weights) const;
-    void DrawSingleSegmentGradient(
-        RSCanvas& canvas, const RenderRingInfo& data, const SingleSegmentGradientInfo& info, const size_t index) const;
+    void DrawSingleSegmentGradient(RSCanvas& canvas, const RenderRingInfo& data,
+        const RefPtr<GaugePaintProperty>& paintProperty, const SingleSegmentGradientInfo& info,
+        const size_t index) const;
     void DrawHighLight(RSCanvas& canvas, const RenderRingInfo& data, const float drawStartDegree) const;
     void CalculateStartAndSweepDegree(const RefPtr<GaugePaintProperty>& paintProperty, RenderRingInfo& data) const;
     float GetOffsetDegree(const RenderRingInfo& data, const float oppositeSide) const;
     float GetValueRatio(const RefPtr<GaugePaintProperty>& paintProperty) const;
+    void CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
+    WeakPtr<Pattern> pattern_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -66,6 +66,7 @@ void JSGauge::JSBind(BindingTarget globalObj)
     JSClass<JSGauge>::StaticMethod("strokeWidth", &JSGauge::SetStrokeWidth);
     JSClass<JSGauge>::StaticMethod("labelConfig", &JSGauge::SetLabelConfig);
     JSClass<JSGauge>::StaticMethod("trackShadow", &JSGauge::SetShadowOptions);
+    JSClass<JSGauge>::StaticMethod("indicator", &JSGauge::SetIndicator);
     JSClass<JSGauge>::StaticMethod("description", &JSGauge::SetDescription);
     JSClass<JSGauge>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSGauge>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -332,6 +333,37 @@ void JSGauge::SetDescription(const JSCallbackInfo& info)
     } else {
         GaugeModel::GetInstance()->SetIsShowLimitValue(true);
         GaugeModel::GetInstance()->SetIsShowDescription(false);
+    }
+}
+
+void JSGauge::SetIndicator(const JSCallbackInfo& info)
+{
+    if (info[0]->IsNull()) {
+        GaugeModel::GetInstance()->SetIsShowIndicator(false);
+        return;
+    }
+
+    if (info[0]->IsUndefined()) {
+        GaugeModel::GetInstance()->SetIsShowIndicator(true);
+        return;
+    }
+
+    GaugeModel::GetInstance()->SetIsShowIndicator(true);
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsIcon = paramObject->GetProperty("icon");
+    JSRef<JSVal> jsSpace = paramObject->GetProperty("space");
+
+    std::string iconPath;
+    if (ParseJsMedia(jsIcon, iconPath)) {
+        std::string bundleName;
+        std::string moduleName;
+        GetJsMediaBundleInfo(jsIcon, bundleName, moduleName);
+        GaugeModel::GetInstance()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+    }
+
+    CalcDimension space;
+    if (ParseJsDimensionVpNG(jsSpace, space, false)) {
+        GaugeModel::GetInstance()->SetIndicatorSpace(space);
     }
 }
 } // namespace OHOS::Ace::Framework

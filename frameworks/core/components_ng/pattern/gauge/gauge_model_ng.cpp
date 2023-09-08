@@ -80,22 +80,39 @@ void GaugeModelNG::SetDescription(const RefPtr<AceType>& customNode)
     gaugePattern->SetDescriptionNode(customDescriptionNode);
 }
 
-void GaugeModelNG::SetIsShowLimitValue(const bool isShowLimitValue)
+void GaugeModelNG::SetIsShowLimitValue(bool isShowLimitValue)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowLimitValue, isShowLimitValue);
 }
 
-void GaugeModelNG::SetIsShowDescription(const bool isShowDescription)
+void GaugeModelNG::SetIsShowDescription(bool isShowDescription)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, isShowDescription);
 }
 
-void GaugeModelNG::SetLabelMarkedText(std::string labelTextString) {}
+void GaugeModelNG::SetLabelMarkedText(const std::string labelTextString) {}
 
-void GaugeModelNG::SetMarkedTextColor(const Color color) {}
+void GaugeModelNG::SetMarkedTextColor(const Color& color) {}
 
 void GaugeModelNG::SetShadowOptions(const GaugeShadowOptions& shadowOptions)
 {
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, ShadowOptions, shadowOptions);
+}
+
+void GaugeModelNG::SetIsShowIndicator(bool isShowIndicator)
+{
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, IsShowIndicator, isShowIndicator);
+}
+
+void GaugeModelNG::SetIndicatorIconPath(
+    const std::string& iconPath, const std::string& bundleName, const std::string& moduleName)
+{
+    ACE_UPDATE_PAINT_PROPERTY(
+        GaugePaintProperty, IndicatorIconSourceInfo, ImageSourceInfo(iconPath, bundleName, moduleName));
+}
+
+void GaugeModelNG::SetIndicatorSpace(const Dimension& space)
+{
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, IndicatorSpace, space);
 }
 } // namespace OHOS::Ace::NG
