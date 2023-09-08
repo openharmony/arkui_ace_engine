@@ -47,7 +47,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
-#include "nweb_helper.h"
+#include "nweb_system_properties.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "transaction/rs_interfaces.h"
@@ -2520,7 +2520,7 @@ void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
     }
     surfaceOcclusion_ = occlusion;
 
-    if (!NWebHelper::GetWebOptimizationValue()) {
+    if (!NWebSystemProperties::GetWebOptimizationValue()) {
         LOGD("web optimization switch is closed.");
         return;
     }
