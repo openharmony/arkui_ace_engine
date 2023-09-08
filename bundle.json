@@ -58,6 +58,7 @@
                 "resource_management",
                 "i18n",
                 "hicollie",
+                "netmanager_base",
                 "init",
                 "image_framework",
                 "player_framework",

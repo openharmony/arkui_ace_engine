@@ -99,6 +99,7 @@ template("ace_osal_ohos_source_set") {
         "image_framework:image",
         "input:libmmi-client",
         "napi:ace_napi",
+        "netmanager_base:net_conn_manager_if",
         "resource_management:global_resmgr",
       ]
       if (defined(config.accessibility_support) &&
@@ -124,6 +125,7 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [
+      "download_manager_ohos.cpp",
       "file_uri_helper_ohos.cpp",
       "image_source_ohos.cpp",
       "mouse_style_ohos.cpp",
