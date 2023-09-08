@@ -68,6 +68,10 @@ public:
     void SetStrokeRadius(float strokeRaidus);
 
 private:
+    void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintCapsuleForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintVerticalCapsuleForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+
     void ContentDrawWithFunction(DrawingContext& context);
     void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintLinearSweeping(RSCanvas& canvas, const OffsetF& offset, const RSPath& path, bool isHorizontal) const;
