@@ -2466,11 +2466,11 @@ void TextFieldPattern::OnModifyDone()
         isTextInput_ = true;
     }
     auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
-    if ((!HasFocus() && IsNormalInlineState()) || ((inputStyle == InputStyle::DEFAULT) &&
-            (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
-            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT) &&
-            preInputStyle_ != InputStyle::INLINE)) {
+    if (!inlineState_.saveInlineState) {
         inlineState_.saveInlineState = false;
+        SaveInlineStates();
+    }
+    if (!HasFocus() && inlineState_.saveInlineState) {
         SaveInlineStates();
     }
     if (HasFocus() && IsNormalInlineState()) {
@@ -2485,6 +2485,11 @@ void TextFieldPattern::OnModifyDone()
     if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT &&
         (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
         layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT)) {
+        if (IsTextArea() && isTextInput_) {
+            layoutProperty->UpdateMaxLines(1);
+        }
+        inlineSelectAllFlag_ = false;
+        inlineFocusState_ = false;
         RestorePreInlineStates();
     }
     preInputStyle_ = inputStyle;
@@ -5801,6 +5806,9 @@ void TextFieldPattern::SaveInlineStates()
         inlineState_.margin.bottom = CalcLength(0.0_vp);
         inlineState_.margin.right = CalcLength(0.0_vp);
     }
+    if (inlineState_.saveInlineState) {
+        inlineState_.frameRect = frameRect_;
+    }
 }
 
 void TextFieldPattern::TextIsEmptyRect(RectF& rect)
@@ -5993,6 +6001,7 @@ void TextFieldPattern::RestorePreInlineStates()
     if (inlineState_.hasBorderColor) {
         renderContext->UpdateBorderColor(inlineState_.borderColor);
     }
+    selectionMode_ = SelectionMode::NONE;
 }
 
 bool TextFieldPattern::IsNormalInlineState() const
