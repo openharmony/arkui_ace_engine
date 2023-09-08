@@ -13,11 +13,16 @@
  * limitations under the License.
  */
 
+#include <memory>
+
 #include "gtest/gtest.h"
+
+#include "base/json/json_util.h"
 
 #define protected public
 #define private public
 
+#include "base/json/node_object.h"
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -26,7 +31,11 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {} // namespace
+namespace {
+const char DISTRIBUTE_UI_ID[] = "$ID";
+const char DISTRIBUTE_UI_DEPTH[] = "$depth";
+const char DISTRIBUTE_UI_ATTRS[] = "$attrs";
+} // namespace
 class DistributedUiTestNg : public testing::Test {
 public:
     static void SetUpTestSuite()
@@ -326,5 +335,102 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg006, TestSize.Level1)
     EXPECT_TRUE(distributedUI.IsInCurrentPage(parentNode, 0));
     EXPECT_TRUE(distributedUI.IsInCurrentPage(childNode, 0));
     EXPECT_FALSE(distributedUI.IsInCurrentPage(childNode, 5));
+}
+
+/**
+ * @tc.name: DistributedUiTestNg007
+ * @tc.desc: DistributedUi of tests
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg007, TestSize.Level1)
+{
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::JS_SYNTAX_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto childNode = FrameNode::CreateFrameNode(
+        "child", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    parentNode->AddChild(childNode);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+
+    auto nodeObject = std::make_unique<OHOS::Ace::NodeObject>();
+    /**
+     * @tc.steps: step1. creat distributedUI and creat parentNode add childNode
+     * @tc.expected: step1. call AttachToTree() return SerializeableObjectArray
+     */
+    DistributedUI distributedUI;
+    distributedUI.AttachToTree(parentNode, childNode, nodeObject);
+    EXPECT_TRUE(distributedUI.IsInCurrentPage(parentNode, 0));
+
+    nodeObject->Put(DISTRIBUTE_UI_DEPTH, 1);
+    distributedUI.AttachToTree(parentNode, childNode, nodeObject);
+    EXPECT_TRUE(distributedUI.IsInCurrentPage(parentNode, 0));
+}
+
+/**
+ * @tc.name: DistributedUiTestNg008
+ * @tc.desc: DistributedUi of tests
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg008, TestSize.Level1)
+{
+    auto parentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parentNode =
+        FrameNode::CreateFrameNode(V2::JS_SYNTAX_ITEM_ETS_TAG, parentNodeId, AceType::MakeRefPtr<Pattern>());
+    auto childNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode = FrameNode::CreateFrameNode("child", childNodeId, AceType::MakeRefPtr<Pattern>());
+    parentNode->AddChild(childNode);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+
+    auto nodeObject = std::make_unique<OHOS::Ace::NodeObject>();
+    nodeObject->Put(DISTRIBUTE_UI_ID, childNodeId);
+    /**
+     * @tc.steps: step1. creat distributedUI and creat parentNode add childNode
+     * @tc.expected: step1. call AttachToTree() return SerializeableObjectArray
+     */
+    DistributedUI distributedUI;
+    distributedUI.DelNode(nodeObject);
+    EXPECT_FALSE(parentNode->GetChildren().empty());
+
+    distributedUI.SetIdMapping(childNodeId, childNodeId);
+    distributedUI.DelNode(nodeObject);
+    EXPECT_TRUE(parentNode->GetChildren().empty());
+
+    distributedUI.DelNode(nodeObject);
+    EXPECT_EQ(childNode->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: DistributedUiTestNg009
+ * @tc.desc: DistributedUi of tests
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg009, TestSize.Level1)
+{
+    auto parentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parentNode =
+        FrameNode::CreateFrameNode(V2::JS_SYNTAX_ITEM_ETS_TAG, parentNodeId, AceType::MakeRefPtr<Pattern>());
+    auto childNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode = FrameNode::CreateFrameNode("child", childNodeId, AceType::MakeRefPtr<Pattern>());
+    parentNode->AddChild(childNode);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(parentNode);
+    MockPipelineBase::GetCurrent()->stageManager_ = stageManager;
+
+    auto nodeObject = std::make_unique<OHOS::Ace::NodeObject>();
+    nodeObject->Put(DISTRIBUTE_UI_ID, childNodeId);
+
+    auto attrValue = "{padding: 1px}";
+    nodeObject->Put(DISTRIBUTE_UI_ATTRS, OHOS::Ace::JsonUtil::ParseJsonString(attrValue));
+    /**
+     * @tc.steps: step1. creat distributedUI and creat parentNode add childNode
+     * @tc.expected: step1. call AttachToTree() return SerializeableObjectArray
+     */
+    DistributedUI distributedUI;
+    distributedUI.ModNode(nodeObject);
+    EXPECT_NE(childNode, nullptr);
+
+    distributedUI.SetIdMapping(childNodeId, childNodeId);
+    distributedUI.ModNode(nodeObject);
+    EXPECT_NE(childNode->GetLayoutProperty()->GetPaddingProperty()->left->calcValue_, "0.0");
 }
 } // namespace OHOS::Ace::NG
