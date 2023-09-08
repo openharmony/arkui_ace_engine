@@ -26,7 +26,7 @@ void OverlayManager::ShowToast(
 
 void OverlayManager::PopToast(int32_t toastId) {}
 
-void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo) {}
+void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo) {}
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo) {}
 

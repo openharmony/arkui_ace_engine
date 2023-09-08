@@ -262,7 +262,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     ShowWindow(false);
     ResizeWindow();
     ContainerScope scope(childContainerId_);
-    overlayManager->ShowPopup(targetId, popupInfo);
+    overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
 void SubwindowOhos::HidePopupNG(int32_t targetId)
@@ -279,6 +279,12 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     ContainerScope scope(childContainerId_);
     overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);
     context->FlushPipelineImmediately();
+    HideWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HideEventColumn();
+    HidePixelMap();
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
