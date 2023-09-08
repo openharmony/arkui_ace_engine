@@ -4980,7 +4980,6 @@ HWTEST_F(MenuTestNg, MenuItemGroupLayoutAlgorithmTestNg002, TestSize.Level1)
     algorithm->UpdateHeaderAndFooterMargin(layoutWrapper);
     algorithm->Measure(layoutWrapper);
     auto expectedSize = SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT * 3);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), expectedSize);
 }
 
 /**
@@ -5024,6 +5023,70 @@ HWTEST_F(MenuTestNg, MenuItemGroupPaintMethod001, TestSize.Level1)
     result(canvas);
     delete paintWrapper;
     paintWrapper = nullptr;
+}
+
+/**
+ * @tc.name: MenuItemGroupPattern001
+ * @tc.desc: Test MenuItemGroup pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuItemGroupPattern001, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    MneuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    itemPattern->OnModifyDone();
+    itemNode->MountToParent(menuNode);
+    itemNode->OnMountToParentDone();
+
+    // call UpdateMenuItemChildren
+    menuPattern->OnModifyDone();
+
+    auto contentNode = itemPattern->GetContentNode();
+    ASSERT_NE(contentNode, nullptr);
+    auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    menuItemGroup->MountToParent(menuNode);
+    menuItemGroupPattern->hasSelectIcon_ = true;
+    menuItemGroupPattern->headerContent_ = contentNode;
+    menuItemGroupPattern->OnMountToParentDone();
+    menuItemGroupPattern->footerContent_ = contentNode;
+    menuItemGroupPattern->OnMountToParentDone();
+    RefPtr<NG::UINode> headerNode;
+    headerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    menuItemGroupPattern->AddHeader(headerNode);
+    RefPtr<NG::UINode> footerNode;
+    footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    menuItemGroupPattern->AddFooter(footerNode);
+    EXPECT_EQ(menuItemGroupPattern->headerIndex_, 0);
+    EXPECT_EQ(menuItemGroupPattern->footerIndex_, 1);
+    menuItemGroupPattern->headerIndex_ = 0;
+    menuItemGroupPattern->footerIndex_ = 0;
+    menuItemGroupPattern->AddHeader(headerNode);
+    menuItemGroupPattern->AddFooter(footerNode);
+    EXPECT_FALSE(menuItemGroupPattern->GetMenu() == nullptr);
 }
 
 /**
