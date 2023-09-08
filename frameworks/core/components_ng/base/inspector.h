@@ -31,6 +31,11 @@ public:
     static void GetRectangleById(const std::string& key, Rectangle& rectangle);
     static std::string GetInspector(bool isLayoutInspector = false);
     static void HideAllMenus();
+    static void AddOffscreenNode(RefPtr<FrameNode> node);
+    static void RemoveOffscreenNode(RefPtr<FrameNode> node);
+
+private:
+    static std::set<RefPtr<FrameNode>> offscreenNodes;
 };
 } // namespace OHOS::Ace::NG
 

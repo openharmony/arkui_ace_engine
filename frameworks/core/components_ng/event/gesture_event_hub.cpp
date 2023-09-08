@@ -617,8 +617,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.customNode) {
         g_getPixelMapSucc = false;
-        auto callback = [pipeline, info, gestureEventHubPtr = AceType::Claim(this), frameNode, dragDropInfo,
-                            event](std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg) {
+        auto callback = [pipeline, info, gestureEventHubPtr = AceType::Claim(this), frameNode, dragDropInfo, event](
+                            std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
             if (pixelMap == nullptr) {
                 LOGW("%{public}s: failed to get pixelmap, return nullptr", __func__);
                 g_getPixelMapSucc = false;
@@ -637,7 +637,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 TaskExecutor::TaskType::UI);
         };
         auto customNode = AceType::DynamicCast<FrameNode>(dragDropInfo.customNode);
-        NG::ComponentSnapshot::Create(customNode, std::move(callback), CREATE_PIXELMAP_TIME);
+        NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
         return;
     }
 #endif

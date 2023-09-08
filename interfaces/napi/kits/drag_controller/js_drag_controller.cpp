@@ -538,7 +538,7 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
             napi_close_escapable_handle_scope(env, scope);
             return nullptr;
         }
-        auto callback = [asyncCtx](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode) {
+        auto callback = [asyncCtx](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode, std::function<void()>) {
             if (!asyncCtx) {
                 LOGE("DragControllerAsyncContext is null");
                 return;
@@ -550,7 +550,7 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
         auto builder = [build = asyncCtx->customBuilder, env] {
             napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
         };
-        delegate->CreateSnapshot(builder, callback);
+        delegate->CreateSnapshot(builder, callback, false);
     }
 
     napi_escape_handle(env, scope, result, &result);

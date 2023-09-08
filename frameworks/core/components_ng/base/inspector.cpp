@@ -287,8 +287,18 @@ RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
 }
 } // namespace
 
+std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
+
 RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key)
 {
+    if (!offscreenNodes.empty()) {
+        for (auto node : offscreenNodes) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key));
+            if (frameNode) {
+                return frameNode;
+            }
+        }
+    }
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
     auto rootNode = context->GetRootElement();
@@ -488,6 +498,20 @@ void Inspector::HideAllMenus()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideAllMenus();
+}
+
+void Inspector::AddOffscreenNode(RefPtr<FrameNode> node)
+{
+    CHECK_NULL_VOID(node);
+    LOGI("add offscreen node:%{public}d", node->GetId());
+    offscreenNodes.insert(node);
+}
+
+void Inspector::RemoveOffscreenNode(RefPtr<FrameNode> node)
+{
+    CHECK_NULL_VOID(node);
+    LOGI("remove offscreen node:%{public}d", node->GetId());
+    offscreenNodes.erase(node);
 }
 
 } // namespace OHOS::Ace::NG

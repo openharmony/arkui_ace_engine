@@ -1782,9 +1782,9 @@ void RosenRenderContext::OnBackgroundPixelMapUpdate(const RefPtr<PixelMap>& pixe
 
 void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)
 {
-    NG::ComponentSnapshot::JsCallback callback = [weak = WeakPtr(GetHost()),
-                                                     containerId = Container::CurrentId()](
-                                                     std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode) {
+    NG::ComponentSnapshot::JsCallback callback = [weak = WeakPtr(GetHost()), containerId = Container::CurrentId()](
+                                                     std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode,
+                                                     std::function<void()> finishCallback) {
         CHECK_NULL_VOID(pixmap);
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
@@ -1802,7 +1802,7 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     };
-    NG::ComponentSnapshot::Create(customNode, std::move(callback));
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), false);
 }
 
 void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& /*borderImage*/)
