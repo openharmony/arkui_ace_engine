@@ -128,6 +128,11 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             }
         } else {
             eventHub->FireChangeEvent(false);
+            // split mode and node is not animation node in stack mode need to hide
+            if (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
+                navDestination->GetPattern<NavDestinationPattern>()->GetNavDestinationNode() != remainChild) {
+                navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+            }
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
@@ -363,6 +368,7 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
                         // has another transition, just return
                         return;
                     }
+                    node->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
                     auto title = weakTitle.Upgrade();
                     if (title) {
                         title->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
