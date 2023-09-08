@@ -25,10 +25,10 @@ public:
     FormUtils() = default;
     virtual ~FormUtils() = default;
 
-    virtual int32_t RouterEvent(const int64_t formId, const std::string& action, const int32_t contianerId,
+    virtual int32_t RouterEvent(const int64_t formId, const std::string& action, const int32_t containerId,
         const std::string& defualtbundleName);
 
-    virtual int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t contianerId,
+    virtual int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t containerId,
         const std::string& defualtbundleName);
 };
 } // namespace OHOS::Ace
