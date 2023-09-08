@@ -348,4 +348,97 @@ HWTEST_F(DragBarPatternTestNg, DragBarPatternTest005, TestSize.Level1)
     dragBarPattern->HandleTouchUp();
     EXPECT_TRUE(paintProperty->GetDragOffset() == OffsetF(0.1f, 0.2f));
 }
+
+/**
+ * @tc.name: DragBarPatternTest006
+ * @tc.desc: Test dragBar DoStyleAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragBarPatternTestNg, DragBarPatternTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get dragBar frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHasDragBar(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(columnNode, nullptr);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MarkModifyDone();
+    auto dragBarPattern = dragBarNode->GetPattern<DragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+    auto leftPoint = OffsetT<Dimension>(Dimension(1), Dimension(2));
+    auto centerPoint = OffsetT<Dimension>(Dimension(1), Dimension(2));
+    auto rightPoint = OffsetT<Dimension>(Dimension(1), Dimension(2));
+    dragBarPattern->DoStyleAnimation(leftPoint, centerPoint, rightPoint);
+    std::list<RefPtr<Interpolator>> test = dragBarPattern->barStyleAnimator_->interpolators_;
+    for (std::list<RefPtr<Interpolator>>::iterator iter = test.begin(); iter != test.end(); iter++) {
+        auto animation = static_cast<CurveAnimation<OffsetT<Dimension>>*>(AceType::RawPtr(*iter));
+        animation->callbacks_.begin()->second(OffsetT<Dimension>(Dimension(1), Dimension(2)));
+    }
+}
+
+/**
+ * @tc.name: DragBarPatternTest007
+ * @tc.desc: Test dragBar DoStyleAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragBarPatternTestNg, DragBarPatternTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get dragBar frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHasDragBar(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(columnNode, nullptr);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MarkModifyDone();
+    auto dragBarPattern = dragBarNode->GetPattern<DragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+    dragBarNode->paintProperty_ = AceType::MakeRefPtr<DragBarPaintProperty>();
+    auto paintProperty = dragBarPattern->GetPaintProperty<DragBarPaintProperty>();
+    paintProperty->UpdateDragOffset(OffsetF(0.1f, 0.1f));
+    dragBarPattern->HandleTouchUp();
+    std::list<RefPtr<Interpolator>> test = dragBarPattern->barRangeAnimator_->interpolators_;
+    auto dragAnimation = static_cast<CurveAnimation<OffsetF>*>(AceType::RawPtr(test.front()));
+    dragAnimation->callbacks_.begin()->second(OffsetF(0.1f, 0.2f));
+}
+
+/**
+ * @tc.name: DragBarPatternTest008
+ * @tc.desc: Test dragBar InitProps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragBarPatternTestNg, DragBarPatternTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get dragBar frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHasDragBar(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(columnNode, nullptr);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MarkModifyDone();
+    auto dragBarPattern = dragBarNode->GetPattern<DragBarPattern>();
+    ASSERT_NE(dragBarPattern, nullptr);
+    dragBarPattern->barTouchAnimator_ = nullptr;
+    dragBarPattern->InitProps();
+    std::list<RefPtr<Interpolator>> test = dragBarPattern->barTouchAnimator_->interpolators_;
+    auto dragAnimation = static_cast<CurveAnimation<float>*>(AceType::RawPtr(test.front()));
+    dragAnimation->callbacks_.begin()->second(0.1f);
+}
 } // namespace OHOS::Ace::NG
