@@ -151,7 +151,12 @@ template("build_component_ng") {
           external_deps += [ "graphic_2d:rosen_text" ]
         }
       } else {
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
+        if (!is_cross_platform_build && defined(use_rosen_drawing) &&
+            use_rosen_drawing) {
+          external_deps += [ "graphic_2d:2d_graphics" ]
+        } else {
+          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics_source_$platform" ]
+        }
       }
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {

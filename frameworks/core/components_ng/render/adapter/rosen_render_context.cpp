@@ -2760,7 +2760,11 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
     if (gradientProperty->HasSweepGradient()) {
         gradient = gradientProperty->GetSweepGradientValue();
     }
+#ifndef USE_ROSEN_DRAWING
     auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
+#else
+    auto shader = DrawingDecorationPainter::CreateGradientShader(gradient, frameSize);
+#endif
     rsNode_->SetBackgroundShader(RSShader::CreateRSShader(shader));
 }
 
