@@ -2995,4 +2995,47 @@ HWTEST_F(PanelTestNg, PanelTestNg0056, TestSize.Level1)
     panelPattern->AnimateTo(TARGET_LOCATION, PANEL_MODE_VALUE);
     panelPattern->animator_->NotifyStopListener();
 }
+
+/**
+ * @tc.name: PanelTestNg0056
+ * @tc.desc: Test panel pattern InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelTestNg, PanelTestNg0057, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slidingPanel and get frameNode.
+     */
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto panelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    EXPECT_FALSE(panelPattern == nullptr);
+    auto layoutProperty = panelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<SlidingPanelLayoutAlgorithm>(panelPattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(layoutAlgorithm == nullptr);
+    auto hub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutProperty->UpdatePanelType(PanelType::CUSTOM);
+    panelPattern->InitPanEvent(gestureHub);
+    layoutProperty->UpdatePanelType(PanelType::FOLDABLE_BAR);
+    GestureEvent gestureEvent;
+    panelPattern->InitPanEvent(gestureHub);
+    panelPattern->panEvent_->actionStart_(gestureEvent);
+    layoutProperty->UpdatePanelType(PanelType::MINI_BAR);
+    panelPattern->InitPanEvent(gestureHub);
+    panelPattern->panEvent_->actionUpdate_(gestureEvent);
+    layoutProperty->UpdatePanelType(PanelType::TEMP_DISPLAY);
+    panelPattern->InitPanEvent(gestureHub);
+    panelPattern->panEvent_->actionEnd_(gestureEvent);
+}
 } // namespace OHOS::Ace::NG
