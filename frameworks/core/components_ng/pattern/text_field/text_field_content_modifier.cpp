@@ -92,7 +92,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     } else {
         errorMargin = 0;
     }
-    if (errorParagraph) {
+    if (errorParagraph && showErrorState_->Get()) {
         errorViewHeight = textFrameRect.Bottom() - textFrameRect.Top() + errorMargin;
     }
     if (showCounter_->Get() && counterParagraph && !textFieldPattern->GetIsCounterIdealHeight()) {
