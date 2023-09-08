@@ -63,6 +63,10 @@ RefPtr<TabController> JSTabsController::CreateController()
 void JSTabsController::ChangeIndex(int32_t index)
 {
     if (swiperController_) {
+        const auto& updateCubicCurveCallback = swiperController_->GetUpdateCubicCurveCallback();
+        if (updateCubicCurveCallback != nullptr) {
+            updateCubicCurveCallback();
+        }
         swiperController_->SwipeTo(index);
     }
 
