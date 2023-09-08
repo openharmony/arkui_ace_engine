@@ -99,6 +99,7 @@ public:
     void DeleteMenu(int32_t targetId);
     void ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenuInSubWindow(const RefPtr<FrameNode>& menu, int32_t targetId);
+    RefPtr<FrameNode> GetMenuNode(int32_t targetId);
     void HideMenuInSubWindow();
     void CleanMenuInSubWindow();
     void HideAllMenus();

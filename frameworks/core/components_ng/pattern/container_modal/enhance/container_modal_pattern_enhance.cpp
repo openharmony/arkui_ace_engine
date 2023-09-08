@@ -14,12 +14,16 @@
  */
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+#include "base/memory/referenced.h"
+#include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/common/container.h"
 namespace OHOS::Ace::NG {
 namespace {
     constexpr int32_t TITLE_LABEL_INDEX = 1;
@@ -157,5 +161,25 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
         floatingMinimizeBtn->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         floatingMinimizeBtn->MarkDirtyNode();
     }
+}
+
+bool ContainerModalPatternEnhance::CanHideFloatingTitle()
+{
+    auto containerNode = GetHost();
+    CHECK_NULL_RETURN(containerNode, true);
+    auto floatingTitleNode = AceType::DynamicCast<FrameNode>(containerNode->GetChildren().back());
+    auto maximizeBtn = GetTitleItemByIndex(floatingTitleNode, MAX_RECOVER_BUTTON_INDEX);
+    auto subwindowManager = SubwindowManager::GetInstance();
+    CHECK_NULL_RETURN(subwindowManager, true);
+    auto subwindow = subwindowManager->GetSubwindow(Container::CurrentId());
+    CHECK_NULL_RETURN(subwindow, true);
+    auto overlayManager = subwindow->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, true);
+    auto menu = overlayManager->GetMenuNode(maximizeBtn->GetId());
+    // current MaximizeBtnMenu is null!
+    if (menu == nullptr) {
+        return true;
+    }
+    return !subwindow->GetShown();
 }
 } // namespace OHOS::Ace::NG

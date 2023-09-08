@@ -33,8 +33,7 @@ protected:
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
     static void BondingMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
     static void BondingMaxBtnInputEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
-    static RefPtr<FrameNode> ShowMaxMenu(const RefPtr<FrameNode>& containerNode, const RefPtr<FrameNode>& targetNode,
-        OffsetF menuPosition);
+    static RefPtr<FrameNode> ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition);
     static void BondingMenuItemEvent(RefPtr<FrameNode> item);
     static RefPtr<FrameNode> BuildMenuItem(std::string title, InternalResource::ResourceId resourceId,
         RefPtr<ClickEvent> event, bool chooseCurrent);
@@ -50,6 +49,9 @@ protected:
     static bool sIsHovering;
     static bool enableSplit_;
     static CancelableCallback<void()> sContextTimer_;
+
+private:
+    static OffsetF RecalculateMenuOffset(OffsetF menuPosition);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_VIEW_ENHANCE_H
