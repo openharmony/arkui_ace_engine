@@ -92,6 +92,7 @@ ohos_unittest("event_manager_test_ng") {
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
     "$ace_root/frameworks/core/event/key_event.cpp",
+    "$ace_root/frameworks/core/event/mouse_event.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
     "$ace_root/frameworks/core/pipeline/base/element_register.cpp",
     "$ace_root/frameworks/core/pipeline/base/render_node.cpp",

@@ -150,7 +150,9 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::SELECTED, Accessibility::EventType::TYPE_VIEW_SELECTED_EVENT },
         { AccessibilityEventType::FOCUS, Accessibility::EventType::TYPE_VIEW_FOCUSED_EVENT },
         { AccessibilityEventType::TEXT_CHANGE, Accessibility::EventType::TYPE_VIEW_TEXT_UPDATE_EVENT },
+        { AccessibilityEventType::HOVER_ENTER_EVENT, Accessibility::EventType::TYPE_VIEW_HOVER_ENTER_EVENT },
         { AccessibilityEventType::PAGE_CHANGE, Accessibility::EventType::TYPE_PAGE_STATE_UPDATE },
+        { AccessibilityEventType::HOVER_EXIT_EVENT, Accessibility::EventType::TYPE_VIEW_HOVER_EXIT_EVENT },
         { AccessibilityEventType::CHANGE, Accessibility::EventType::TYPE_PAGE_CONTENT_UPDATE },
         { AccessibilityEventType::SCROLL_END, Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT },
         { AccessibilityEventType::TEXT_SELECTION_UPDATE,
@@ -1403,7 +1405,7 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
         return false;
     }
 
-    LOGD("type:%{public}s nodeId:%{public}d", accessibilityEvent.eventType.c_str(), accessibilityEvent.nodeId);
+    LOGD("type:%{public}zu nodeId:%{public}d", accessibilityEvent.type, accessibilityEvent.nodeId);
 
     Accessibility::EventType type = Accessibility::EventType::TYPE_VIEW_INVALID;
     if (accessibilityEvent.type != AccessibilityEventType::UNKNOWN) {
