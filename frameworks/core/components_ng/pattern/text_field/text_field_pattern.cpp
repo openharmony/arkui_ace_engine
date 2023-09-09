@@ -291,7 +291,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto hostLayoutProperty =
         dirty->GetHostNode() ? dirty->GetHostNode()->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
     if (paragraph) {
-        if (inlineFocusState_ && needApplyInlineSize_) {
+        if (inlineFocusState_ && needApplyInlineSize_ && IsNormalInlineState()) {
             CalcSize idealSize;
 #ifndef USE_GRAPHIC_TEXT_GINE
             auto paragraphWidth = paragraph_->GetLongestLine();
