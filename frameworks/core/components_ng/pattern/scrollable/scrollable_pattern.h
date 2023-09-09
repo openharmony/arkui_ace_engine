@@ -104,6 +104,7 @@ public:
     void SetScrollBar(const std::unique_ptr<ScrollBarProperty>& property);
     void SetScrollBar(DisplayMode displayMode);
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
+    void CreateScrollBarOverlayModifier();
 
     float GetScrollableDistance() const
     {
@@ -273,8 +274,8 @@ public:
     void SetScrollSource(int32_t scrollSource)
     {
         if (scrollSource == SCROLL_FROM_JUMP) {
-            if (scrollBar_ && overlayModifier_) {
-                overlayModifier_->SetOpacity(UINT8_MAX);
+            if (scrollBar_ && scrollBarOverlayModifier_) {
+                scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
                 scrollBar_->ScheduleDisapplearDelayTask();
             }
             StopScrollBarAnimatorByProxy();
@@ -332,12 +333,12 @@ protected:
 
     RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
     {
-        return overlayModifier_;
+        return scrollBarOverlayModifier_;
     }
 
     void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier)
     {
-        overlayModifier_ = scrollBarOverlayModifier;
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
     }
 
 private:
@@ -376,7 +377,7 @@ private:
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
-    RefPtr<ScrollBarOverlayModifier> overlayModifier_;
+    RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;

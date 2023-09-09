@@ -73,7 +73,8 @@ void WaterFlowPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     }
     OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
     OffsetF bgOffset(scrollBar->GetBarRect().Left(), scrollBar->GetBarRect().Top());
-    scrollBarOverlayModifier->SetRect(SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
+    scrollBarOverlayModifier->StartHoverAnimation(
+        SizeF(scrollBar->GetActiveRect().Width(), scrollBar->GetActiveRect().Height()),
         SizeF(scrollBar->GetBarRect().Width(), scrollBar->GetBarRect().Height()), fgOffset, bgOffset,
         scrollBar->GetHoverAnimationType());
     scrollBarOverlayModifier->SetOffset(fgOffset, bgOffset);
