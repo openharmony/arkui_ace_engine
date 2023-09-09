@@ -322,12 +322,14 @@ void TitleBarPattern::ProcessTittleDragStart(float offset)
     SetDefaultTitleFontSize();
     auto mappedOffset = GetMappedOffset(offset);
     auto tempFontSize = GetFontSize(mappedOffset);
-    UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::VP));
+    UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::PX));
 
     // subTitle Opacity
     SetDefaultSubtitleOpacity();
     auto tempOpacity = GetSubtitleOpacity();
     UpdateSubTitleOpacity(tempOpacity);
+
+    dragScrolling_ = true;
 }
 
 void TitleBarPattern::ProcessTittleDragUpdate(float offset)
@@ -366,7 +368,7 @@ void TitleBarPattern::SetTitleStyleByOffset(float offset)
     // title font size
     auto mappedOffset = GetMappedOffset(offset);
     auto tempFontSize = GetFontSize(mappedOffset);
-    UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::VP));
+    UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::PX));
 
     // subTitle Opacity
     auto tempOpacity = GetSubtitleOpacity();
@@ -383,8 +385,11 @@ void TitleBarPattern::ProcessTittleDragEnd()
         return;
     }
 
+    dragScrolling_ = false;
+
     if (Positive(overDragOffset_)) {
         SpringAnimation(overDragOffset_, 0);
+        enableAssociatedScroll_ = false;
         return;
     }
 
@@ -392,8 +397,12 @@ void TitleBarPattern::ProcessTittleDragEnd()
         (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
     if (LessNotEqual(tempTitleBarHeight_, titleMiddleValue) || NearEqual(tempTitleBarHeight_, titleMiddleValue)) {
         AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
+        enableAssociatedScroll_ = false;
+        return;
     } else if (GreatNotEqual(tempTitleBarHeight_, titleMiddleValue)) {
         AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
+        enableAssociatedScroll_ = false;
+        return;
     }
 }
 
@@ -409,18 +418,18 @@ float TitleBarPattern::GetSubtitleOpacity()
 float TitleBarPattern::GetFontSize(float offset)
 {
     auto titleBarHeight = defaultTitleBarHeight_ + offset;
-    if (LessNotEqual(titleBarHeight, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()))) {
-        titleBarHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
-    }
-    if (GreatNotEqual(titleBarHeight, maxTitleBarHeight_)) {
-        titleBarHeight = maxTitleBarHeight_;
-    }
     auto titleFontSizeDiff = MAX_TITLE_FONT_SIZE - MIN_TITLE_FONT_SIZE;
     auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
-    fontSizeRatio_ = titleFontSizeDiff.Value() / titleBarHeightDiff;
+    fontSizeRatio_ = titleFontSizeDiff.ConvertToPx() / titleBarHeightDiff;
     auto tempFontSize = static_cast<float>(
         (titleBarHeight - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) * fontSizeRatio_ +
-        MIN_TITLE_FONT_SIZE.Value());
+        MIN_TITLE_FONT_SIZE.ConvertToPx());
+    if (GreatNotEqual(tempFontSize, MAX_TITLE_FONT_SIZE.ConvertToPx())) {
+        tempFontSize = MAX_TITLE_FONT_SIZE.ConvertToPx();
+    }
+    if (LessNotEqual(tempFontSize, MIN_TITLE_FONT_SIZE.ConvertToPx())) {
+        tempFontSize = MIN_TITLE_FONT_SIZE.ConvertToPx();
+    }
     return tempFontSize;
 }
 
@@ -734,4 +743,70 @@ void TitleBarPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+void TitleBarPattern::ResetAssociatedScroll()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    defaultTitleBarHeight_ = titleBarNode->GetGeometryNode()->GetFrameSize().Height();
+    associatedScrollOffset_ = 0.0f;
+    associatedScrollOverSize_ = false;
+    defaultTitleOffsetY_ = GetTitleOffsetY();
+    associatedScrollOffsetMax_ = 0.0f;
+    enableAssociatedScroll_ =
+        (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) &&
+        !IsTitleFullStatus();
+    SetMaxTitleBarHeight();
+}
+
+void TitleBarPattern::UpdateAssociatedScrollOffset(float offset)
+{
+    if (!enableAssociatedScroll_) {
+        return;
+    }
+
+    associatedScrollOffset_ += offset;
+    if (Negative(associatedScrollOffset_)) {
+        associatedScrollOffset_ = 0.0f;
+    }
+
+    if (GreatNotEqual(associatedScrollOffset_, associatedScrollOffsetMax_)) {
+        associatedScrollOffsetMax_ = associatedScrollOffset_;
+    }
+
+    if (dragScrolling_) {
+        return;
+    }
+
+    auto titleMiddleValue =
+        (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
+    auto tempTitleBarHeight = defaultTitleBarHeight_ + associatedScrollOffset_;
+
+    if (Positive(offset) && GreatNotEqual(tempTitleBarHeight, maxTitleBarHeight_)) {
+        associatedScrollOverSize_ = true;
+        CanOverDrag_ = true;
+    }
+
+    float titleBarOffset = associatedScrollOffset_;
+    if (Negative(offset)) {
+        if (associatedScrollOverSize_) {
+            SpringAnimation(associatedScrollOffsetMax_ + defaultTitleBarHeight_ - maxTitleBarHeight_, 0);
+            enableAssociatedScroll_ = false;
+            return;
+        } else {
+            if (GreatNotEqual(associatedScrollOffsetMax_ + defaultTitleBarHeight_, titleMiddleValue)) {
+                AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
+                enableAssociatedScroll_ = false;
+                return;
+            } else {
+                AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
+                enableAssociatedScroll_ = false;
+                return;
+            }
+        }
+    }
+
+    ProcessTittleDragUpdate(titleBarOffset);
+}
 } // namespace OHOS::Ace::NG

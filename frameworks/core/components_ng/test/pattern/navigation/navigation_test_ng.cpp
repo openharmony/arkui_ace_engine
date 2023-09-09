@@ -2896,45 +2896,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0023, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavigationModelNG0024
- * @tc.desc: Test NavBarPattern::NavBarMotion
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, NavigationModelNG0024, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    NavigationModelNG model;
-    model.Create();
-    model.SetNavigationStack();
-    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ASSERT_NE(navigation, nullptr);
-    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto contentNode = FrameNode::CreateFrameNode("content", 454, AceType::MakeRefPtr<ButtonPattern>());
-
-    auto navBar =
-        NavBarNode::GetOrCreateNavBarNode("navBar", 300, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    ASSERT_NE(navBar, nullptr);
-    auto navBarPattern = navBar->GetPattern<NavBarPattern>();
-    ASSERT_NE(navBarPattern, nullptr);
-    auto animator = AceType::MakeRefPtr<Animator>();
-    navBarPattern->controller_ = animator;
-
-    navBarPattern->NavBarMotion(5, 5);
-    navBarPattern->motion_->NotifyListener(2);
-    navBarPattern->controller_->NotifyStopListener();
-    navBarPattern->NavBarMotion(5, 5);
-
-    navBarPattern->StopNavBarMotion();
-    ASSERT_EQ(animator->status_, Animator::Status::IDLE);
-    animator->status_ = Animator::Status::RUNNING;
-    navBarPattern->StopNavBarMotion();
-    ASSERT_EQ(animator->status_, Animator::Status::STOPPED);
-}
-
-/**
  * @tc.name: NavigationModelNG0025
  * @tc.desc: Test NavBarPattern::OnWindowSizeChanged
  * @tc.type: FUNC

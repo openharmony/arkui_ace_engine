@@ -115,10 +115,9 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
     auto isAtTop = (IsAtTop() && Positive(offset));
     auto isDraggedDown = navBarPattern_ ? navBarPattern_->GetDraggedDown() : false;
-    auto isFullStatus = navBarPattern_ ? navBarPattern_->GetFullStatus() : false;
-    if (isAtTop && (source == SCROLL_FROM_ANIMATION_SPRING) && !isFullStatus) {
-        SetNavBarVelocity();
-    }
+
+    ProcessAssociatedScroll(offset, source);
+
     if ((isAtTop || isDraggedDown) && (source == SCROLL_FROM_UPDATE) && !isReactInParentMovement_ &&
         (axis_ == Axis::VERTICAL)) {
         isReactInParentMovement_ = true;
@@ -141,7 +140,7 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
         ProcessNavBarReactOnEnd();
     }
     if (isReactInParentMovement_) {
-        ProcessNavBarReactOnUpdate(isDraggedDown, offset);
+        auto needMove = ProcessNavBarReactOnUpdate(isDraggedDown, offset);
         if (coordinationEvent_) {
             auto onScroll = coordinationEvent_->GetOnScroll();
             CHECK_NULL_RETURN(onScroll, false);
@@ -150,6 +149,9 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
                 return true;
             }
             return scrollEffect_ && scrollEffect_->IsSpringEffect();
+        }
+        if (navBarPattern_ && navBarPattern_->IsTitleModeFree()) {
+            return needMove;
         }
     }
     if (source == SCROLL_FROM_START) {
@@ -567,18 +569,6 @@ void ScrollablePattern::GetParentNavigition()
     }
     navBarPattern_ = nullptr;
     return;
-}
-
-void ScrollablePattern::SetNavBarVelocity()
-{
-    CHECK_NULL_VOID(scrollableEvent_);
-    auto scrollable = scrollableEvent_->GetScrollable();
-    CHECK_NULL_VOID(scrollable);
-    auto currVelocity = scrollable->GetCurrentVelocity();
-    if (Positive(currVelocity)) {
-        CHECK_NULL_VOID(navBarPattern_);
-        navBarPattern_->NavBarMotion(currVelocity, FRICTION);
-    }
 }
 
 void ScrollablePattern::SetParentScrollable()
@@ -1005,5 +995,19 @@ float ScrollablePattern::GetOutOfScrollableOffset() const
         offset = mainTop - mouseMainOffset;
     }
     return offset;
+}
+
+void ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)
+{
+    if (navBarPattern_) {
+        if (source == SCROLL_FROM_START) {
+            navBarPattern_->ResetAssociatedScroll();
+        } else if ((source == SCROLL_FROM_UPDATE) || (source == SCROLL_FROM_ANIMATION) ||
+                   (source == SCROLL_FROM_ANIMATION_SPRING)) {
+            if (IsAtTop()) {
+                navBarPattern_->UpdateAssociatedScrollOffset(offset);
+            }
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -366,7 +366,7 @@ private:
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
-    void SetNavBarVelocity();
+    void ProcessAssociatedScroll(double offset, int32_t source);
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
