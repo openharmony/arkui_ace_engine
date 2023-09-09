@@ -47,20 +47,6 @@ struct CacheNode {
     T cacheObj;
 };
 
-struct FileInfo {
-    FileInfo(std::string path, size_t size, time_t time) : filePath(std::move(path)), fileSize(size), accessTime(time)
-    {}
-
-    // file information will be sort by access time.
-    bool operator<(const FileInfo& otherFile) const
-    {
-        return accessTime < otherFile.accessTime;
-    }
-    std::string filePath;
-    size_t fileSize;
-    time_t accessTime;
-};
-
 class ACE_EXPORT ImageCache : public AceType {
     DECLARE_ACE_TYPE(ImageCache, AceType);
 
@@ -81,9 +67,6 @@ public:
     void CacheImgObj(const std::string& key, const RefPtr<ImageObject>& imgObj);
     RefPtr<ImageObject> GetCacheImgObj(const std::string& key);
 
-    static void SetCacheFileInfo();
-    static void WriteCacheFile(
-        const std::string& url, const void* data, size_t size, const std::string& suffix = std::string());
 
     void SetCapacity(size_t capacity)
     {
@@ -108,66 +91,13 @@ public:
         return cacheList_.size();
     }
 
-    static void SetImageCacheFilePath(const std::string& cacheFilePath)
-    {
-        std::unique_lock<std::shared_mutex> lock(cacheFilePathMutex_);
-        if (cacheFilePath_.empty()) {
-            cacheFilePath_ = cacheFilePath;
-        }
-    }
-
-    static std::string GetImageCacheFilePath()
-    {
-        std::shared_lock<std::shared_mutex> lock(cacheFilePathMutex_);
-        return cacheFilePath_;
-    }
-
-    static std::string GetImageCacheFilePath(const std::string& url)
-    {
-        std::shared_lock<std::shared_mutex> lock(cacheFilePathMutex_);
-#if !defined(PREVIEW)
-        return cacheFilePath_ + "/" + std::to_string(std::hash<std::string> {}(url));
-#elif defined(MAC_PLATFORM) || defined(LINUX_PLATFORM)
-        return "/tmp/" + std::to_string(std::hash<std::string> {}(url));
-#elif defined(WINDOWS_PLATFORM)
-        char* pathvar;
-        pathvar = getenv("TEMP");
-        if (!pathvar) {
-            return std::string("C:\\Windows\\Temp") + "\\" + std::to_string(std::hash<std::string> {}(url));
-        }
-        return std::string(pathvar) + "\\" + std::to_string(std::hash<std::string> {}(url));
-#endif
-    }
-
-    static void SetCacheFileLimit(size_t cacheFileLimit)
-    {
-        LOGI("Set file cache limit size : %{public}d", static_cast<int32_t>(cacheFileLimit));
-        fileLimit_ = cacheFileLimit;
-    }
-
-    static void SetClearCacheFileRatio(float clearRatio)
-    {
-        // clearRatio must in (0, 1].
-        if (clearRatio < 0) {
-            clearRatio = 0.1f;
-        } else if (clearRatio > 1) {
-            clearRatio = 1.0f;
-        }
-        clearCacheFileRatio_ = clearRatio;
-    }
-
-    static bool GetFromCacheFile(const std::string& filePath);
-
-    virtual RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& filePath) = 0;
-
     void Clear();
     static void Purge();
 
     void ClearCacheImage(const std::string& key);
 
-protected:
-    static void ClearCacheFile(const std::vector<std::string>& removeFiles);
-
+private:
+    bool ProcessImageDataCacheInner(size_t dataSize);
     template<typename T>
     static void CacheWithCountLimitLRU(const std::string& key, const T& cacheObj, std::list<CacheNode<T>>& cacheList,
         std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache,
@@ -177,13 +107,6 @@ protected:
     static T GetCacheObjWithCountLimitLRU(const std::string& key, std::list<CacheNode<T>>& cacheList,
         std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache);
 
-    static bool GetFromCacheFileInner(const std::string& filePath);
-
-    bool ProcessImageDataCacheInner(size_t dataSize);
-
-    static std::mutex cacheFileInfoMutex_;
-
-private:
     std::atomic<size_t> capacity_ = 0; // by default memory cache can store 0 images.
     mutable std::mutex imageCacheMutex_;
     std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
@@ -203,19 +126,6 @@ private:
     std::unordered_map<std::string, std::list<CacheNode<RefPtr<NG::ImageObject>>>::iterator> imgObjCacheNG_;
     std::list<CacheNode<RefPtr<ImageObject>>> cacheImgObjList_;
     std::unordered_map<std::string, std::list<CacheNode<RefPtr<ImageObject>>>::iterator> imgObjCache_;
-
-    static std::shared_mutex cacheFilePathMutex_;
-    static std::string cacheFilePath_;
-
-    static std::atomic<size_t> fileLimit_;
-
-    static std::atomic<float> clearCacheFileRatio_;
-
-    static std::mutex cacheFileSizeMutex_;
-    static int64_t cacheFileSize_;
-
-    static std::list<FileInfo> cacheFileInfo_;
-    static bool hasSetCacheFileInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageCache);
 };

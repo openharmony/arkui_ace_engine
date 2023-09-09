@@ -42,8 +42,8 @@
 #include "core/common/thread_checker.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
-#include "core/image/flutter_image_cache.h" // TODO: add adapter layer and use FlutterImageCache there
 #include "core/image/image_cache.h"
+#include "core/image/image_file_cache.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -145,12 +145,12 @@ sk_sp<SkData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
 std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& uri)
 #endif
 {
-    std::string cacheFilePath = ImageCache::GetImageCacheFilePath(uri);
+    std::string cacheFilePath = ImageFileCache::GetInstance().GetImageCacheFilePath(uri);
     if (cacheFilePath.length() > PATH_MAX) {
         LOGE("cache file path is too long, cacheFilePath: %{private}s", cacheFilePath.c_str());
         return nullptr;
     }
-    bool cacheFileFound = ImageCache::GetFromCacheFile(cacheFilePath);
+    bool cacheFileFound = ImageFileCache::GetInstance().GetFromCacheFile(cacheFilePath);
     if (!cacheFileFound) {
         return nullptr;
     }
@@ -209,12 +209,9 @@ void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageD
 RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string& key, const std::string& suffix)
 {
     ACE_FUNCTION_TRACE();
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineCtx, nullptr);
-    auto imageCache = pipelineCtx->GetImageCache();
-    CHECK_NULL_RETURN(imageCache, nullptr);
-    std::string filePath = ImageCache::GetImageCacheFilePath(key) + suffix;
-    auto data = imageCache->GetDataFromCacheFile(filePath);
+    auto* fileCache = &ImageFileCache::GetInstance();
+    std::string filePath = fileCache->GetImageCacheFilePath(key) + suffix;
+    auto data = fileCache->GetDataFromCacheFile(filePath);
     return data;
 }
 
@@ -470,7 +467,9 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
 #endif
     // 3. write it into file cache.
     BackgroundTaskExecutor::GetInstance().PostTask(
-        [uri, imgData = std::move(imageData)]() { ImageCache::WriteCacheFile(uri, imgData.data(), imgData.size()); },
+        [uri, imgData = std::move(imageData)]() {
+            ImageFileCache::GetInstance().WriteCacheFile(uri, imgData.data(), imgData.size());
+        },
         BgTaskPriority::LOW);
     return data;
 }

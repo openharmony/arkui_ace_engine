@@ -35,15 +35,6 @@ struct CachedImage {
     uint32_t uniqueId = 0;
 };
 
-class FlutterImageCache : public ImageCache {
-    DECLARE_ACE_TYPE(FlutterImageCache, ImageCache);
-
-public:
-    FlutterImageCache() = default;
-    ~FlutterImageCache() override = default;
-    RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& filePath) override;
-};
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_FLUTTER_IMAGE_CACHE_H

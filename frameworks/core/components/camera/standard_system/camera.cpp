@@ -30,7 +30,7 @@
 #include "base/log/log.h"
 #include "display_type.h"
 
-#include "core/image/image_cache.h"
+#include "core/image/image_file_cache.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/video/rosen_render_texture.h"
@@ -295,7 +295,7 @@ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> c
         return intResult;
     }
 
-    std::string cacheFilePath = ImageCache::GetImageCacheFilePath();
+    std::string cacheFilePath = ImageFileCache::GetInstance().GetImageCacheFilePath();
     if (cacheFilePath.empty()) {
         cacheFilePath = DEFAULT_CATCH_PATH;
     }

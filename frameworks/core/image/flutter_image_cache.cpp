@@ -13,41 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/image/flutter_image_cache.h"
+#include "core/image/image_cache.h"
 
 #include "include/core/SkGraphics.h"
 
-#include "core/components_ng/image_provider/adapter/skia_image_data.h"
-#ifdef USE_ROSEN_DRAWING
-#include "drawing/engine_adapter/skia_adapter/skia_data.h"
-#include "core/commonents_ng/image_provider/adapter/rosen/drawing_image_data.h"
-#include "core/components_ng/render/drawing.h"
-#endif
-#include "core/components_ng/image_provider/image_object.h"
-
 namespace OHOS::Ace {
-
-RefPtr<ImageCache> ImageCache::Create()
-{
-    return MakeRefPtr<FlutterImageCache>();
-}
-
-RefPtr<NG::ImageData> FlutterImageCache::GetDataFromCacheFile(const std::string& filePath)
-{
-    std::lock_guard<std::mutex> lock(cacheFileInfoMutex_);
-    if (!GetFromCacheFileInner(filePath)) {
-        LOGD("file not cached, return nullptr");
-        return nullptr;
-    }
-    auto cacheFileLoader = AceType::MakeRefPtr<FileImageLoader>();
-#ifndef USE_ROSEN_DRAWING
-    auto data = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
-    return data ? AceType::MakeRefPtr<NG::SkiaImageData>(data) : nullptr;
-#else
-    auto rsData = cacheFileLoader->LoadImageData(ImageSourceInfo(std::string("file:/").append(filePath)));
-    return rsData ? AceType::MakeRefPtr<NG::DrawingImageData>(rsData) : nullptr;
-#endif
-}
 
 void ImageCache::Purge()
 {
