@@ -36,9 +36,9 @@ public:
     ~RectPaintMethod() override = default;
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
+        CHECK_NULL_RETURN(paintWrapper, nullptr);
         auto rectPaintProperty = DynamicCast<RectPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        CHECK_NULL_RETURN_NOLOG(rectPaintProperty, nullptr);
+        CHECK_NULL_RETURN(rectPaintProperty, nullptr);
 
         if (propertiesFromAncestor_) {
             if (!rectPaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {

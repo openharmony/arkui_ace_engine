@@ -31,9 +31,9 @@ CanvasDrawFunction MenuItemGroupPaintMethod::GetOverlayDrawFunction(PaintWrapper
     return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto group = weak.Upgrade();
         if (group) {
-            CHECK_NULL_VOID_NOLOG(paintWrapper);
+            CHECK_NULL_VOID(paintWrapper);
             auto props = DynamicCast<MenuItemGroupPaintProperty>(paintWrapper->GetPaintProperty());
-            CHECK_NULL_VOID_NOLOG(props);
+            CHECK_NULL_VOID(props);
             bool needHeaderPadding = props->GetNeedHeaderPadding().value_or(false);
             if (needHeaderPadding) {
                 group->PaintDivider(canvas, paintWrapper, true);

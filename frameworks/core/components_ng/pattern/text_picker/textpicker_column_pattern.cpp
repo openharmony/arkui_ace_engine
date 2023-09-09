@@ -73,7 +73,7 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
 bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -203,7 +203,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
     if (touchEventInit_) {
         return;
     }
-    
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -215,7 +215,7 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
         param->instance = childNode;
         param->itemIndex = i;
         param->itemTotalCounts = childSize;
-        
+
         auto eventHub = childNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
 
@@ -760,22 +760,22 @@ Dimension TextPickerColumnPattern::LinearFontSize(
 
 void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!panEvent_);
+    CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(event);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS) {
             return;
         }
@@ -784,7 +784,7 @@ void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
     PanDirection panDirection;
@@ -807,8 +807,8 @@ RefPtr<TextPickerLayoutProperty> TextPickerColumnPattern::GetParentLayout() cons
 
 void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-    CHECK_NULL_VOID_NOLOG(GetHost());
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(GetHost());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     yOffset_ = event.GetGlobalPoint().GetY();
     toss->SetStart(yOffset_);
@@ -824,13 +824,13 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     if (event.GetInputEventType() == InputEventType::AXIS) {
         int32_t step = LessNotEqual(event.GetDelta().GetY(), 0.0) ? 1 : -1;
         InnerHandleScroll(step);
-        
+
         return;
     }
 
-    CHECK_NULL_VOID_NOLOG(pressed_);
-    CHECK_NULL_VOID_NOLOG(GetHost());
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(pressed_);
+    CHECK_NULL_VOID(GetHost());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     double offsetY = event.GetGlobalPoint().GetY();
     if (NearEqual(offsetY, yLast_, 1.0)) { // if changing less than 1.0, no need to handle
@@ -844,8 +844,8 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
 void TextPickerColumnPattern::HandleDragEnd()
 {
     pressed_ = false;
-    CHECK_NULL_VOID_NOLOG(GetHost());
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(GetHost());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -877,7 +877,7 @@ void TextPickerColumnPattern::HandleDragEnd()
 
 void TextPickerColumnPattern::CreateAnimation()
 {
-    CHECK_NULL_VOID_NOLOG(!animationCreated_);
+    CHECK_NULL_VOID(!animationCreated_);
     toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
@@ -910,7 +910,7 @@ RefPtr<CurveAnimation<double>> TextPickerColumnPattern::CreateAnimation(double f
 
 void TextPickerColumnPattern::HandleCurveStopped()
 {
-    CHECK_NULL_VOID_NOLOG(animationCreated_);
+    CHECK_NULL_VOID(animationCreated_);
     if (NearZero(scrollDelta_)) {
         return;
     }

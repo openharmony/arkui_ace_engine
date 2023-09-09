@@ -100,7 +100,7 @@ const char PNG_TAG[] = "png";
 void LayoutInspector::SupportInspector()
 {
     auto container = Container::Current();
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     if (!layoutInspectorStatus_) {
         return;
     }
@@ -132,7 +132,7 @@ void LayoutInspector::SetCallback(int32_t instanceId)
 {
     LOGI("SetCallback start");
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
         OHOS::AbilityRuntime::ConnectServerManager::Get().SetLayoutInspectorCallback(
             [](int32_t containerId) { return CreateLayoutInfo(containerId); },
@@ -149,7 +149,7 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
     LOGI("CreateLayoutInfo start");
     ContainerScope sope(containerId);
     auto container = AceEngine::Get().GetContainer(containerId);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     std::string treeJsonStr;
     GetInspectorTreeJsonStr(treeJsonStr, containerId);
     auto message = JsonUtil::Create(true);
@@ -169,7 +169,7 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
 {
     auto container = AceEngine::Get().GetContainer(containerId);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
 #ifdef NG_BUILD
     treeJsonStr = NG::Inspector::GetInspector(true);
 #else
@@ -187,10 +187,10 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
 {
     LOGI("GetSnapshotJson start");
     auto container = AceEngine::Get().GetContainer(containerId);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
 
     OHOS::sptr<OHOS::Rosen::Window> window = OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
-    CHECK_NULL_VOID_NOLOG(window);
+    CHECK_NULL_VOID(window);
     auto pixelMap = window->Snapshot();
     CHECK_NULL_VOID(pixelMap);
     auto acePixelMap = AceType::MakeRefPtr<PixelMapOhos>(pixelMap);

@@ -69,7 +69,7 @@ void SliderPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitMouseEvent(inputEventHub);
     auto focusHub = hub->GetFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub);
+    CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitializeBubble();
     SetAccessibilityAction();
@@ -163,7 +163,7 @@ void SliderPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleTouchEvent(info);
     };
     gestureHub->RemoveTouchEvent(touchEvent_);
@@ -265,7 +265,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SliderPattern::InitializeBubble()
 {
-    CHECK_NULL_VOID_NOLOG(showTips_);
+    CHECK_NULL_VOID(showTips_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -360,8 +360,8 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
 
 void SliderPattern::UpdateTipsValue()
 {
-    CHECK_NULL_VOID_NOLOG(valueChangeFlag_);
-    CHECK_NULL_VOID_NOLOG(showTips_);
+    CHECK_NULL_VOID(valueChangeFlag_);
+    CHECK_NULL_VOID(showTips_);
     CHECK_NULL_VOID(bubbleFlag_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -391,7 +391,7 @@ void SliderPattern::UpdateCircleCenterOffset()
 
 void SliderPattern::UpdateBubble()
 {
-    CHECK_NULL_VOID_NOLOG(bubbleFlag_);
+    CHECK_NULL_VOID(bubbleFlag_);
     // update the tip value according to the slider value, update the tip position according to current block position
     UpdateTipsValue();
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -405,26 +405,26 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     direction_ = GetDirection();
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandlingGestureStart(info);
         pattern->OpenTranslateAnimation();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandlingGestureEvent(info);
         pattern->FireChangeEvent(SliderChangeMode::Moving);
         pattern->OpenTranslateAnimation();
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandledGestureEvent();
         pattern->CloseTranslateAnimation();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandledGestureEvent();
         pattern->FireChangeEvent(SliderChangeMode::End);
         pattern->axisFlag_ = false;
@@ -445,21 +445,21 @@ void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->GetInnerFocusPaintRect(paintRect);
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
 
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 
     auto onBlur = [wp = WeakClaim(this)]() {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->bubbleFlag_ = false;
         pattern->focusFlag_ = false;
         pattern->UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -649,7 +649,7 @@ void SliderPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub)
 {
     auto hoverEvent = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleHoverEvent(isHover);
     };
     if (hoverEvent_) {
@@ -660,7 +660,7 @@ void SliderPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub)
 
     auto mouseEvent = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleMouseEvent(info);
     };
     if (mouseEvent_) {

@@ -55,7 +55,7 @@ void ListItemGroupModelNG::SetHeader(std::function<void()>&& header)
         header();
         headerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    CHECK_NULL_VOID_NOLOG(headerNode);
+    CHECK_NULL_VOID(headerNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
@@ -71,7 +71,7 @@ void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
         footer();
         footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    CHECK_NULL_VOID_NOLOG(footerNode);
+    CHECK_NULL_VOID(footerNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();

@@ -42,7 +42,7 @@ RSRecordingPath SvgEllipse::AsPath(const Size& viewPort) const
     RSRecordingPath path;
 #endif
     auto declaration = AceType::DynamicCast<SvgEllipseDeclaration>(declaration_);
-    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    CHECK_NULL_RETURN(declaration, path);
     double rx = 0.0;
     if (GreatOrEqual(declaration->GetRx().Value(), 0.0)) {
         rx = ConvertDimensionToPx(declaration->GetRx(), viewPort, SvgLengthType::HORIZONTAL);

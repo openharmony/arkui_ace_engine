@@ -37,7 +37,7 @@ void DateTimeAnimationController::PlayTitleInAnimation()
     renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0, 0));
     AnimationUtils::Animate(animationOption,
         [renderContext]() {
-            CHECK_NULL_VOID_NOLOG(renderContext);
+            CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0 - SEMI_CIRCLE_ANGEL, 0));
         });
 }
@@ -53,7 +53,7 @@ void DateTimeAnimationController::PlayTitleOutAnimation()
     renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0 - SEMI_CIRCLE_ANGEL, 0));
     AnimationUtils::Animate(animationOption,
         [renderContext]() {
-            CHECK_NULL_VOID_NOLOG(renderContext);
+            CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformRotate(Vector5F(0, 0, 1, 0, 0));
         });
 }
@@ -77,9 +77,9 @@ void DateTimeAnimationController::PlayMovingInAnimation()
         [yearRenderContext, monthRenderContext, dayRenderContext, weak = AceType::WeakClaim(this)]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
-            CHECK_NULL_VOID_NOLOG(yearRenderContext);
-            CHECK_NULL_VOID_NOLOG(monthRenderContext);
-            CHECK_NULL_VOID_NOLOG(dayRenderContext);
+            CHECK_NULL_VOID(yearRenderContext);
+            CHECK_NULL_VOID(monthRenderContext);
+            CHECK_NULL_VOID(dayRenderContext);
             yearRenderContext->UpdateTransformTranslate({ ref->yearEnd_, 0.0f, 0.0f });
             monthRenderContext->UpdateTransformTranslate({ ref->monthEnd_, 0.0f, 0.0f });
             dayRenderContext->UpdateTransformTranslate({ ref->dayEnd_, 0.0f, 0.0f });
@@ -105,9 +105,9 @@ void DateTimeAnimationController::PlayMovingOutAnimation()
         [yearRenderContext, monthRenderContext, dayRenderContext, weak = AceType::WeakClaim(this)]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
-            CHECK_NULL_VOID_NOLOG(yearRenderContext);
-            CHECK_NULL_VOID_NOLOG(monthRenderContext);
-            CHECK_NULL_VOID_NOLOG(dayRenderContext);
+            CHECK_NULL_VOID(yearRenderContext);
+            CHECK_NULL_VOID(monthRenderContext);
+            CHECK_NULL_VOID(dayRenderContext);
             yearRenderContext->UpdateTransformTranslate({ ref->yearStart_, 0.0f, 0.0f });
             monthRenderContext->UpdateTransformTranslate({ ref->monthStart_, 0.0f, 0.0f });
             dayRenderContext->UpdateTransformTranslate({ ref->dayStart_, 0.0f, 0.0f });
@@ -155,8 +155,8 @@ void DateTimeAnimationController::PlayOldColumnOpacityInAnimation()
     timePickerRender->UpdateOpacity(1);
     oldColumnOpacityInAnimation_ = AnimationUtils::StartAnimation(animationOption,
         [monthDaysRender, timePickerRender]() {
-            CHECK_NULL_VOID_NOLOG(monthDaysRender);
-            CHECK_NULL_VOID_NOLOG(timePickerRender);
+            CHECK_NULL_VOID(monthDaysRender);
+            CHECK_NULL_VOID(timePickerRender);
             monthDaysRender->UpdateOpacity(0);
             timePickerRender->UpdateOpacity(0);
         }, animationOption.GetOnFinishEvent());
@@ -179,8 +179,8 @@ void DateTimeAnimationController::PlayNewColumnOpacityInAnimation()
     dayRender->UpdateOpacity(0);
     AnimationUtils::Animate(animationOption,
         [monthRender, dayRender]() {
-            CHECK_NULL_VOID_NOLOG(monthRender);
-            CHECK_NULL_VOID_NOLOG(dayRender);
+            CHECK_NULL_VOID(monthRender);
+            CHECK_NULL_VOID(dayRender);
             monthRender->UpdateOpacity(1);
             dayRender->UpdateOpacity(1);
         });
@@ -262,8 +262,8 @@ void DateTimeAnimationController::PlayOldColumnOpacityOutAnimation()
     timePickerRender->UpdateOpacity(0);
     oldColumnOpacityOutAnimation_ = AnimationUtils::StartAnimation(animationOption,
         [monthDaysRender, timePickerRender]() {
-            CHECK_NULL_VOID_NOLOG(monthDaysRender);
-            CHECK_NULL_VOID_NOLOG(timePickerRender);
+            CHECK_NULL_VOID(monthDaysRender);
+            CHECK_NULL_VOID(timePickerRender);
             monthDaysRender->UpdateOpacity(1);
             timePickerRender->UpdateOpacity(1);
         }, animationOption.GetOnFinishEvent());
@@ -287,8 +287,8 @@ void DateTimeAnimationController::PlayNewColumnOpacityOutAnimation()
     dayRender->UpdateOpacity(1);
     AnimationUtils::Animate(animationOption,
         [monthRender, dayRender]() {
-            CHECK_NULL_VOID_NOLOG(monthRender);
-            CHECK_NULL_VOID_NOLOG(dayRender);
+            CHECK_NULL_VOID(monthRender);
+            CHECK_NULL_VOID(dayRender);
             monthRender->UpdateOpacity(0);
             dayRender->UpdateOpacity(0);
         });

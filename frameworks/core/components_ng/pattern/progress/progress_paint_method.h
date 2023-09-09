@@ -55,15 +55,15 @@ public:
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipeline);
-        CHECK_NULL_VOID_NOLOG(progressModifier_);
+        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID(progressModifier_);
         if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
             GetThemeDataForApiNine();
         } else {
             GetThemeData();
         }
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
-        CHECK_NULL_VOID_NOLOG(paintProperty);
+        CHECK_NULL_VOID(paintProperty);
         color_ = paintProperty->GetColor().value_or(color_);
         bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
         borderColor_ = paintProperty->GetBorderColor().value_or(borderColor_);

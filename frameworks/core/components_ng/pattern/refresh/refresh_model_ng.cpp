@@ -117,7 +117,7 @@ void RefreshModelNG::Pop()
         CHECK_NULL_VOID(paintProperty);
         paintProperty->UpdateColor(theme->GetProgressColor());
         auto progressContext = loadingProgressChild->GetRenderContext();
-        CHECK_NULL_VOID_NOLOG(progressContext);
+        CHECK_NULL_VOID(progressContext);
         progressContext->UpdateOpacity(0.0);
         refreshNode->AddChild(loadingProgressChild);
         loadingProgressChild->MarkDirtyNode();

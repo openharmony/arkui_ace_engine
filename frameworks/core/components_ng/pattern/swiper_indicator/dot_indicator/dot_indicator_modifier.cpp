@@ -70,7 +70,7 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
 
 void DotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
 {
-    CHECK_NULL_VOID_NOLOG(contentProperty.backgroundColor.GetAlpha());
+    CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
     auto itemWidth = contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] * 2;
     auto itemHeight = contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
     auto selectedItemWidth = contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
@@ -417,7 +417,7 @@ void DotIndicatorModifier::UpdateHoverAndPressConversionPaintProperty()
     AnimationUtils::Animate(option, [weak = WeakClaim(this), backgroundColor]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->UpdateBackgroundColor(backgroundColor); 
+        modifier->UpdateBackgroundColor(backgroundColor);
     });
 }
 

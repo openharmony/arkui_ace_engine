@@ -368,13 +368,13 @@ void PatternLockPattern::InitFocusEvent()
 
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);
@@ -386,7 +386,7 @@ void PatternLockPattern::InitFocusEvent()
     focusHub->SetOnKeyEventInternal(keyTask);
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->GetInnerFocusPaintRect(paintRect);
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
@@ -571,7 +571,7 @@ void PatternLockPattern::InitMouseEvent()
     CHECK_NULL_VOID(inputEventHub);
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleHoverEvent(isHover);
     };
     auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -580,7 +580,7 @@ void PatternLockPattern::InitMouseEvent()
 
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleMouseEvent(info);
     };
     auto mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));

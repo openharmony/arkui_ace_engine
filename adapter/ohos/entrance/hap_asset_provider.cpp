@@ -35,7 +35,7 @@ bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<
         AbilityBase::ExtractorUtil::DeleteExtractor(loadPath_);
     }
     runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(loadPath_, newCreate);
-    CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, false);
+    CHECK_NULL_RETURN(runtimeExtractor_, false);
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
     LOGD("hapPath_:%{public}s", hapPath_.c_str());
@@ -87,7 +87,7 @@ std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& 
     LOGD("assert name is: %{public}s :: %{public}s", hapPath_.c_str(), assetName.c_str());
     std::lock_guard<std::mutex> lock(mutex_);
 
-    CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, nullptr);
+    CHECK_NULL_RETURN(runtimeExtractor_, nullptr);
     for (const auto& basePath : assetBasePaths_) {
         std::string fileName = basePath + assetName;
         bool hasFile = runtimeExtractor_->HasEntry(fileName);
@@ -111,7 +111,7 @@ std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& 
 std::string HapAssetProvider::GetAssetPath(const std::string& assetName, bool isAddHapPath)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, "");
+    CHECK_NULL_RETURN(runtimeExtractor_, "");
     for (const auto& basePath : assetBasePaths_) {
         std::string fileName = basePath + assetName;
         bool hasFile = runtimeExtractor_->HasEntry(fileName);
@@ -151,7 +151,7 @@ void HapAssetProvider::GetAssetList(const std::string& path, std::vector<std::st
 bool HapAssetProvider::GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, false);
+    CHECK_NULL_RETURN(runtimeExtractor_, false);
     OHOS::AbilityBase::FileInfo fileInfoAbility;
     auto state = runtimeExtractor_->GetFileInfo(fileName, fileInfoAbility);
     if (!state) {

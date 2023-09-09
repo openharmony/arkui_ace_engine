@@ -35,7 +35,7 @@ void ColumnModelNG::Create(const std::optional<Dimension>& space, AlignDeclarati
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, FlexDirection, FlexDirection::COLUMN);
 
-    CHECK_NULL_VOID_NOLOG(space);
+    CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
     } else {

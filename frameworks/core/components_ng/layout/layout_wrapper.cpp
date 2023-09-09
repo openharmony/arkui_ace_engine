@@ -47,7 +47,7 @@ void LayoutWrapper::ApplySafeArea(const SafeAreaInsets& insets, LayoutConstraint
 void LayoutWrapper::OffsetNodeToSafeArea()
 {
     auto&& insets = GetLayoutProperty()->GetSafeAreaInsets();
-    CHECK_NULL_VOID_NOLOG(insets);
+    CHECK_NULL_VOID(insets);
     auto geometryNode = GetGeometryNode();
     auto offset = geometryNode->GetMarginFrameOffset();
     if (offset.GetX() < insets->left_.end) {
@@ -111,7 +111,7 @@ void LayoutWrapper::SaveGeoState()
 void LayoutWrapper::ExpandSafeArea()
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    CHECK_NULL_VOID_NOLOG(opts && opts->Expansive());
+    CHECK_NULL_VOID(opts && opts->Expansive());
 
     // children of Scrollable nodes don't support expandSafeArea
     auto host = GetHostNode();

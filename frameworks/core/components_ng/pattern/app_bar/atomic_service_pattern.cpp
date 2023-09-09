@@ -48,19 +48,19 @@ void AtomicServicePattern::OnAttachToFrameNode()
 void AtomicServicePattern::OnLanguageConfigurationUpdate()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto rowChild = host->GetFirstChild();
-    CHECK_NULL_VOID_NOLOG(rowChild);
+    CHECK_NULL_VOID(rowChild);
     auto labelChild = DynamicCast<FrameNode>(rowChild->GetChildAtIndex(1));
-    CHECK_NULL_VOID_NOLOG(labelChild);
+    CHECK_NULL_VOID(labelChild);
     auto textLayoutProperty = labelChild->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(textLayoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_VOID_NOLOG(themeManager);
+    CHECK_NULL_VOID(themeManager);
     auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_VOID_NOLOG(themeConstants);
+    CHECK_NULL_VOID(themeConstants);
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipelineContext->GetAppLabelId()));
 }
 

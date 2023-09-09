@@ -29,9 +29,9 @@ ScrollableActuator::ScrollableActuator(const WeakPtr<GestureEventHub>& gestureEv
 
 void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& effect)
 {
-    CHECK_NULL_VOID_NOLOG(effect);
+    CHECK_NULL_VOID(effect);
     auto scrollable = scrollableEvents_[axis];
-    CHECK_NULL_VOID_NOLOG(scrollable);
+    CHECK_NULL_VOID(scrollable);
     effect->SetScrollable(scrollable->GetScrollable());
     effect->InitialEdgeEffect();
     scrollEffects_[axis] = effect;
@@ -39,7 +39,7 @@ void ScrollableActuator::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdge
 
 bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect)
 {
-    CHECK_NULL_RETURN_NOLOG(effect, false);
+    CHECK_NULL_RETURN(effect, false);
     for (auto iter = scrollEffects_.begin(); iter != scrollEffects_.end(); ++iter) {
         if (effect == iter->second) {
             scrollEffects_.erase(iter);

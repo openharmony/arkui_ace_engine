@@ -46,7 +46,7 @@ RefPtr<Container> Container::GetActive()
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 {
     auto curContainer = Current();
-    CHECK_NULL_RETURN_NOLOG(curContainer, nullptr);
+    CHECK_NULL_RETURN(curContainer, nullptr);
     return curContainer->GetTaskExecutor();
 }
 

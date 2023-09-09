@@ -561,9 +561,9 @@ void SelectOverlayNode::MoreAnimation()
                                   id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
         auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipeline);
+        CHECK_NULL_VOID(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
                 ContainerScope scope(id);
@@ -643,9 +643,9 @@ void SelectOverlayNode::BackAnimation()
                                   id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
         auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipeline);
+        CHECK_NULL_VOID(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [selectMenuInnerProperty, extensionProperty, backButtonProperty, id, weak]() {
                 ContainerScope scope(id);

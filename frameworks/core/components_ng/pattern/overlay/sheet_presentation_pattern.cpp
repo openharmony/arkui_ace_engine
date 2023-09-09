@@ -234,9 +234,9 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn)
         [weak = AceType::WeakClaim(this), marginValue, id = Container::CurrentId(), isTransitionIn]() {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(context);
+            CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask([weak, marginValue, id, isTransitionIn]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);

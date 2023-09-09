@@ -83,9 +83,9 @@ void MarqueePattern::OnModifyDone()
     auto src = layoutProperty->GetSrc().value_or(" ");
     textLayoutProperty->UpdateContent(src);
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     auto fontSize = layoutProperty->GetFontSize().value_or(theme->GetTextStyle().GetFontSize());
     textLayoutProperty->UpdateFontSize(fontSize);
     textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL));

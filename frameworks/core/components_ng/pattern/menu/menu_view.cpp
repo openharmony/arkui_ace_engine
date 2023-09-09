@@ -233,18 +233,18 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& menuN
 void SetFilter(const RefPtr<FrameNode>& targetNode)
 {
     auto parent = targetNode->GetParent();
-    CHECK_NULL_VOID_NOLOG(parent);
+    CHECK_NULL_VOID(parent);
     while (parent->GetDepth() != 1) {
         parent = parent->GetParent();
-        CHECK_NULL_VOID_NOLOG(parent);
+        CHECK_NULL_VOID(parent);
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID_NOLOG(manager);
+    CHECK_NULL_VOID(manager);
     if (!manager->GetHasFilter() && !manager->GetIsOnAnimation()) {
         bool isBindOverlayValue = targetNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-        CHECK_NULL_VOID_NOLOG(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+        CHECK_NULL_VOID(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -296,10 +296,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         menuPattern->AddOptionNode(optionNode);
         auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
         auto eventHub = optionNode->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN_NOLOG(eventHub, nullptr);
+        CHECK_NULL_RETURN(eventHub, nullptr);
         eventHub->SetEnabled(params[i].enabled);
         auto focusHub = optionNode->GetFocusHub();
-        CHECK_NULL_RETURN_NOLOG(focusHub, nullptr);
+        CHECK_NULL_RETURN(focusHub, nullptr);
         focusHub->SetEnabled(params[i].enabled);
 
         OptionKeepMenu(optionNode, menuWeak);

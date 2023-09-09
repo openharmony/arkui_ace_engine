@@ -104,9 +104,9 @@ RefPtr<FrameNode> GetLastPage()
 void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
 {
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     // animation finish event should be posted to UI thread.
     taskExecutor->PostTask(
         [weak = WeakClaim(this), nodeWk, id = Container::CurrentId()]() {
@@ -114,7 +114,7 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
             LOGD("Execute dialog OnDialogCloseEvent");
             auto overlayManager = weak.Upgrade();
             auto node = nodeWk.Upgrade();
-            CHECK_NULL_VOID_NOLOG(overlayManager && node);
+            CHECK_NULL_VOID(overlayManager && node);
             SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_NONE };
             node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
             overlayManager->OnDialogCloseEvent(node);
@@ -156,7 +156,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     }
 
     auto container = Container::Current();
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     if (container->IsDialogContainer() || isShowInSubWindow) {
         SubwindowManager::GetInstance()->HideSubWindowNG();
     }
@@ -193,9 +193,9 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
         [weak = WeakClaim(this), nodeWK = WeakPtr<FrameNode>(node), id = Container::CurrentId(), onFinish] {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(context);
+            CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask(
                 [id, weak, nodeWK, onFinish]() {
                     ContainerScope scope(id);
@@ -253,7 +253,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     option.SetOnFinishEvent([weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(overlayManager);
+        CHECK_NULL_VOID(overlayManager);
         overlayManager->PostDialogFinishEvent(nodeWk);
     });
     auto ctx = node->GetRenderContext();
@@ -291,14 +291,14 @@ void OverlayManager::SetShowMenuAnimation(const RefPtr<FrameNode>& menu, bool is
         [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(), isInSubWindow] {
             ContainerScope scope(id);
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto taskExecutor = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask(
                 [weak, menuWK, id, isInSubWindow]() {
                     auto menu = menuWK.Upgrade();
                     auto overlayManager = weak.Upgrade();
-                    CHECK_NULL_VOID_NOLOG(menu && overlayManager);
+                    CHECK_NULL_VOID(menu && overlayManager);
                     ContainerScope scope(id);
                     if (isInSubWindow) {
                         SubwindowManager::GetInstance()->RequestFocusSubwindow(id);
@@ -327,15 +327,15 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
                                 weak = WeakClaim(this)] {
         ContainerScope scope(id);
         auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipeline);
+        CHECK_NULL_VOID(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [rootWeak, menuWK, id, weak]() {
                 auto menu = menuWK.Upgrade();
                 auto root = rootWeak.Upgrade();
                 auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(menu && overlayManager);
+                CHECK_NULL_VOID(menu && overlayManager);
                 ContainerScope scope(id);
                 auto container = Container::Current();
                 if (container && container->IsScenceBoardWindow()) {
@@ -418,7 +418,7 @@ void OverlayManager::ShowToast(
     option.SetOnFinishEvent([continuousTask = continuousTask_, duration, id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
+        CHECK_NULL_VOID(context);
         context->GetTaskExecutor()->PostDelayedTask(continuousTask, TaskExecutor::TaskType::UI, duration);
     });
     auto ctx = toastNode->GetRenderContext();
@@ -450,30 +450,30 @@ void OverlayManager::PopToast(int32_t toastId)
     option.SetOnFinishEvent([weak = WeakClaim(this), toastId, id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
+        CHECK_NULL_VOID(context);
         context->GetTaskExecutor()->PostTask(
             [weak, toastId, id]() {
                 ContainerScope scope(id);
                 auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(overlayManager);
+                CHECK_NULL_VOID(overlayManager);
                 auto toastIter = overlayManager->toastMap_.find(toastId);
                 if (toastIter == overlayManager->toastMap_.end()) {
                     LOGI("No toast under pop");
                     return;
                 }
                 auto toastUnderPop = toastIter->second.Upgrade();
-                CHECK_NULL_VOID_NOLOG(toastUnderPop);
+                CHECK_NULL_VOID(toastUnderPop);
                 LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
                 auto context = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID_NOLOG(context);
+                CHECK_NULL_VOID(context);
                 auto rootNode = context->GetRootElement();
-                CHECK_NULL_VOID_NOLOG(rootNode);
+                CHECK_NULL_VOID(rootNode);
                 rootNode->RemoveChild(toastUnderPop);
                 overlayManager->toastMap_.erase(toastId);
                 rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
                 auto container = Container::Current();
-                CHECK_NULL_VOID_NOLOG(container);
+                CHECK_NULL_VOID(container);
                 if (container->IsDialogContainer() ||
                     (container->IsSubContainer() && rootNode->GetChildren().empty())) {
                     // hide window when toast show in subwindow.
@@ -488,7 +488,7 @@ void OverlayManager::PopToast(int32_t toastId)
         return;
     }
     auto toastUnderPop = toastIter->second.Upgrade();
-    CHECK_NULL_VOID_NOLOG(toastUnderPop);
+    CHECK_NULL_VOID(toastUnderPop);
     auto ctx = toastUnderPop->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     ctx->UpdateOpacity(1.0);
@@ -521,15 +521,15 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         rootNode = FindWindowScene(popupInfo.target.Upgrade());
     }
     CHECK_NULL_VOID(rootNode);
-    CHECK_NULL_VOID_NOLOG(popupInfo.markNeedUpdate);
-    CHECK_NULL_VOID_NOLOG(popupInfo.popupNode);
+    CHECK_NULL_VOID(popupInfo.markNeedUpdate);
+    CHECK_NULL_VOID(popupInfo.popupNode);
 
     popupMap_[targetId].markNeedUpdate = false;
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
     if (iter != rootChildren.end()) {
         // Pop popup
-        CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
+        CHECK_NULL_VOID(popupInfo.isCurrentOnShow);
         LOGI("OverlayManager: Popup begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
@@ -546,7 +546,7 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
 #endif // ENABLE_DRAG_FRAMEWORK
     } else {
         // Push popup
-        CHECK_NULL_VOID_NOLOG(!popupInfo.isCurrentOnShow);
+        CHECK_NULL_VOID(!popupInfo.isCurrentOnShow);
         LOGI("OverlayManager: Popup begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         auto hub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
@@ -609,11 +609,11 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 {
     LOGI("OverlayManager:: Hide Popup");
     popupMap_[targetId] = popupInfo;
-    CHECK_NULL_VOID_NOLOG(popupInfo.markNeedUpdate);
+    CHECK_NULL_VOID(popupInfo.markNeedUpdate);
     popupMap_[targetId].markNeedUpdate = false;
-    CHECK_NULL_VOID_NOLOG(popupInfo.popupNode);
+    CHECK_NULL_VOID(popupInfo.popupNode);
     popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-    CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
+    CHECK_NULL_VOID(popupInfo.isCurrentOnShow);
     popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
     auto pattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
@@ -1555,15 +1555,15 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
             [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
                 auto context = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID_NOLOG(context);
+                CHECK_NULL_VOID(context);
                 auto taskExecutor = context->GetTaskExecutor();
-                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                CHECK_NULL_VOID(taskExecutor);
                 // animation finish event should be posted to UI thread.
                 taskExecutor->PostTask(
                     [rootWeak, modalWK, id]() {
                         auto modal = modalWK.Upgrade();
                         auto root = rootWeak.Upgrade();
-                        CHECK_NULL_VOID_NOLOG(modal && root);
+                        CHECK_NULL_VOID(modal && root);
                         ContainerScope scope(id);
                         root->RemoveChild(modal);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1610,15 +1610,15 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
             [rootWeak = rootNodeWeak_, modalWK = WeakClaim(RawPtr(modalNode)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
                 auto context = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID_NOLOG(context);
+                CHECK_NULL_VOID(context);
                 auto taskExecutor = context->GetTaskExecutor();
-                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                CHECK_NULL_VOID(taskExecutor);
                 // animation finish event should be posted to UI thread.
                 taskExecutor->PostTask(
                     [rootWeak, modalWK, id]() {
                         auto modal = modalWK.Upgrade();
                         auto root = rootWeak.Upgrade();
-                        CHECK_NULL_VOID_NOLOG(modal && root);
+                        CHECK_NULL_VOID(modal && root);
                         ContainerScope scope(id);
                         root->RemoveChild(modal);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1759,15 +1759,15 @@ void OverlayManager::PlaySheetTransition(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
                 auto context = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID_NOLOG(context);
+                CHECK_NULL_VOID(context);
                 auto taskExecutor = context->GetTaskExecutor();
-                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                CHECK_NULL_VOID(taskExecutor);
                 // animation finish event should be posted to UI thread.
                 taskExecutor->PostTask(
                     [rootWeak, sheetWK, id]() {
                         auto sheet = sheetWK.Upgrade();
                         auto root = rootWeak.Upgrade();
-                        CHECK_NULL_VOID_NOLOG(sheet && root);
+                        CHECK_NULL_VOID(sheet && root);
                         ContainerScope scope(id);
                         OverlayManager::DestroySheetMask(sheet);
                         root->RemoveChild(sheet);
@@ -1925,7 +1925,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
         option.SetOnFinishEvent([id = Container::CurrentId(), customKeyboard] {
             ContainerScope scope(id);
             auto taskExecutor = Container::CurrentTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             // animation finish event should be posted to UI thread.
             taskExecutor->PostTask(
                 [customKeyboard]() {
@@ -2242,9 +2242,9 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
 void OverlayManager::MarkDirty(PropertyChangeFlag flag)
 {
     auto root = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(root);
+    CHECK_NULL_VOID(root);
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     for (auto&& child : root->GetChildren()) {
         // first child is Stage node in main window, subwindow not has Stage node.
         if (child != root->GetFirstChild() || pipeline->IsSubPipeline()) {

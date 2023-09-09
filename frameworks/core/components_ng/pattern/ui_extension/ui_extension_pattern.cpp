@@ -81,7 +81,7 @@ private:
 UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto callerToken = container->GetToken();
     auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
     if (want.GetElement().GetBundleName() == "AbilityComp") {
@@ -107,7 +107,7 @@ UIExtensionPattern::UIExtensionPattern(const RefPtr<OHOS::Ace::WantWrap>& wantWr
 UIExtensionPattern::UIExtensionPattern(const AAFwk::Want& want)
 {
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto callerToken = container->GetToken();
     Rosen::SessionInfo extensionSessionInfo = {
         .bundleName_ = want.GetElement().GetBundleName(),
@@ -142,13 +142,13 @@ void UIExtensionPattern::OnConnect()
     LOGI("UIExtension OnConnect called");
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [weak = WeakClaim(this)]() {
             auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(extensionPattern);
+            CHECK_NULL_VOID(extensionPattern);
             extensionPattern->OnConnectInner();
         },
         TaskExecutor::TaskType::UI);
@@ -156,18 +156,18 @@ void UIExtensionPattern::OnConnect()
 
 void UIExtensionPattern::OnConnectInner()
 {
-    CHECK_NULL_VOID_NOLOG(session_);
+    CHECK_NULL_VOID(session_);
     ContainerScope scope(instanceId_);
     contentNode_ = FrameNode::CreateFrameNode(
         V2::UI_EXTENSION_SURFACE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentNode_->SetHitTestMode(HitTestMode::HTMNONE);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
     auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID_NOLOG(surfaceNode);
+    CHECK_NULL_VOID(surfaceNode);
     context->SetRSNode(surfaceNode);
     host->AddChild(contentNode_, 0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -194,14 +194,14 @@ void UIExtensionPattern::OnDisconnect()
     LOGI("UIExtension OnDisconnect called");
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     state_ = AbilityState::DESTRUCTION;
     taskExecutor->PostTask(
         [weak = WeakClaim(this)]() {
             auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(extensionPattern);
+            CHECK_NULL_VOID(extensionPattern);
             if (extensionPattern->onReleaseCallback_) {
                 extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
             }
@@ -214,18 +214,18 @@ void UIExtensionPattern::OnExtensionDied()
     LOGI("UIExtension OnExtensionDied called");
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     host->RemoveChild(contentNode_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     state_ = AbilityState::DESTRUCTION;
     taskExecutor->PostTask(
         [weak = WeakClaim(this)]() {
             auto extensionPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(extensionPattern);
+            CHECK_NULL_VOID(extensionPattern);
             if (extensionPattern->onReleaseCallback_) {
                 extensionPattern->onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
             }
@@ -289,7 +289,7 @@ void UIExtensionPattern::RequestExtensionSessionActivation()
 {
     LOGI("UIExtension request UIExtensionAbility foreground, AbilityState=%{public}d", static_cast<int>(state_));
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
     LOGI("UIExtension request host windowId %{public}u", hostWindowId);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
@@ -359,7 +359,7 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
@@ -428,7 +428,7 @@ void UIExtensionPattern::HandleBlurEvent()
     DisPatchFocusActiveEvent(false);
     TransferFocusState(false);
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField();
@@ -498,14 +498,14 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID_NOLOG(pointerEvent);
+    CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub);
+    CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
@@ -524,9 +524,9 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID_NOLOG(pointerEvent);
+    CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
@@ -548,17 +548,17 @@ void UIExtensionPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID_NOLOG(hub);
+    CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID_NOLOG(gestureHub);
+    CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
     auto inputHub = hub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID_NOLOG(inputHub);
+    CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub);
+    CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
 }
 
@@ -572,9 +572,9 @@ void UIExtensionPattern::SetOnRemoteReadyCallback(const std::function<void(const
     onRemoteReadyCallback_ = std::move(callback);
 
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->notifyRemoteReadyFunc_ =
@@ -596,9 +596,9 @@ void UIExtensionPattern::SetModalOnRemoteReadyCallback(
     onModalRemoteReadyCallback_ = std::move(callback);
 
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->notifyRemoteReadyFunc_ =
@@ -641,15 +641,15 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
     onResultCallback_ = std::move(callback);
 
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferAbilityResultFunc_ =
         [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor](int32_t code, const AAFwk::Want& want) {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             pattern->state_ = AbilityState::DESTRUCTION;
             taskExecutor->PostTask([pattern, instanceId, code, want]() {
                 ContainerScope scope(instanceId);
@@ -666,9 +666,9 @@ void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAF
     onReceiveCallback_ = std::move(callback);
 
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
     auto extSessionEventCallback = extensionSession->GetExtensionSessionEventCallback();
     extSessionEventCallback->transferExtensionDataFunc_ =
@@ -696,14 +696,14 @@ void UIExtensionPattern::OnVisibleChange(bool visible)
 void UIExtensionPattern::RegisterVisibleAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(uiExtension);
+        CHECK_NULL_VOID(uiExtension);
         uiExtension->OnVisibleChange(visible);
     };
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 }
 
@@ -724,9 +724,9 @@ void UIExtensionPattern::UpdateTextFieldManager(const Offset& offset, float heig
 bool UIExtensionPattern::IsCurrentFocus() const
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, false);
+    CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_RETURN_NOLOG(focusHub, false);
+    CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsCurrentFocus();
 }
 

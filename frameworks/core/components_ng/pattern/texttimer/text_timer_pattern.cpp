@@ -171,7 +171,7 @@ void TextTimerPattern::UpdateTextLayoutProperty(
 void TextTimerPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto textTimerProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
     CHECK_NULL_VOID(textTimerProperty);
     textTimerProperty->UpdateAlignment(Alignment::CENTER_LEFT);

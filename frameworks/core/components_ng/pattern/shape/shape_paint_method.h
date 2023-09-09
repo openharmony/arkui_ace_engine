@@ -36,10 +36,10 @@ public:
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
-        CHECK_NULL_RETURN_NOLOG(shapeOverlayModifier_, nullptr);
+        CHECK_NULL_RETURN(paintWrapper, nullptr);
+        CHECK_NULL_RETURN(shapeOverlayModifier_, nullptr);
         auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        CHECK_NULL_RETURN_NOLOG(shapePaintProperty, nullptr);
+        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
 
         auto offset = paintWrapper->GetContentOffset();
         float width = paintWrapper->GetContentSize().Width();

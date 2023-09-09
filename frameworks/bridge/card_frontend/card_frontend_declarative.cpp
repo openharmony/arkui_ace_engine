@@ -68,8 +68,8 @@ void CardFrontendDeclarative::Destroy()
 void CardFrontendDeclarative::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     auto pipelineContext = DynamicCast<NG::PipelineContext>(context);
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(pipelineContext);
     eventHandler_ = AceType::MakeRefPtr<CardEventHandlerDeclarative>(delegate_);
 
     holder_.Attach(context);
@@ -126,7 +126,7 @@ void CardFrontendDeclarative::OnPageLoaded(const RefPtr<Framework::JsAcePage>& p
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, jsCommands] {
             auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(frontend);
+            CHECK_NULL_VOID(frontend);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);

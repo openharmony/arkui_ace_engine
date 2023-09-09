@@ -201,7 +201,7 @@ void AceContainer::Destroy()
 void AceContainer::DestroyView()
 {
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID_NOLOG(aceView_);
+    CHECK_NULL_VOID(aceView_);
     auto aceView = static_cast<AceViewOhos*>(aceView_);
     if (aceView) {
         aceView->DecRefCount();
@@ -298,7 +298,7 @@ void AceContainer::InitializeFrontend()
 RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<AceContainer>(container);
     return aceContainer;
 }
@@ -306,25 +306,25 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
 bool AceContainer::OnBackPressed(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN_NOLOG(container, false);
+    CHECK_NULL_RETURN(container, false);
     // When the container is for overlay, it need close the overlay first.
     if (container->IsSubContainer()) {
 #ifdef NG_BUILD
         LOGI("back press for remove overlay node");
         ContainerScope scope(instanceId);
         auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-        CHECK_NULL_RETURN_NOLOG(subPipelineContext, false);
+        CHECK_NULL_RETURN(subPipelineContext, false);
         auto overlayManager = subPipelineContext->GetOverlayManager();
-        CHECK_NULL_RETURN_NOLOG(overlayManager, false);
+        CHECK_NULL_RETURN(overlayManager, false);
         return overlayManager->RemoveOverlayInSubwindow();
 #else
         if (container->IsUseNewPipeline()) {
             LOGI("back press for remove overlay node");
             ContainerScope scope(instanceId);
             auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-            CHECK_NULL_RETURN_NOLOG(subPipelineContext, false);
+            CHECK_NULL_RETURN(subPipelineContext, false);
             auto overlayManager = subPipelineContext->GetOverlayManager();
-            CHECK_NULL_RETURN_NOLOG(overlayManager, false);
+            CHECK_NULL_RETURN(overlayManager, false);
             return overlayManager->RemoveOverlayInSubwindow();
         }
         SubwindowManager::GetInstance()->CloseMenu();
@@ -333,7 +333,7 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
     }
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
-    CHECK_NULL_RETURN_NOLOG(context, false);
+    CHECK_NULL_RETURN(context, false);
     if (context->PopPageStackOverlay()) {
         return true;
     }
@@ -581,10 +581,10 @@ void AceContainer::OnConfigurationUpdated(int32_t instanceId, const std::string&
 void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_VOID_NOLOG(front);
+    CHECK_NULL_VOID(front);
     front->OnNewRequest(data);
 }
 
@@ -599,7 +599,7 @@ void AceContainer::InitializeCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess]() {
                 context->OnTouchEvent(event);
-                CHECK_NULL_VOID_NOLOG(markProcess);
+                CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
             TaskExecutor::TaskType::UI);
@@ -612,7 +612,7 @@ void AceContainer::InitializeCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess]() {
                 context->OnMouseEvent(event);
-                CHECK_NULL_VOID_NOLOG(markProcess);
+                CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
             TaskExecutor::TaskType::UI);
@@ -625,7 +625,7 @@ void AceContainer::InitializeCallback()
         context->GetTaskExecutor()->PostTask(
             [context, event, markProcess]() {
                 context->OnAxisEvent(event);
-                CHECK_NULL_VOID_NOLOG(markProcess);
+                CHECK_NULL_VOID(markProcess);
                 markProcess();
             },
             TaskExecutor::TaskType::UI);
@@ -659,7 +659,7 @@ void AceContainer::InitializeCallback()
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
                 auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(id);
-                CHECK_NULL_VOID_NOLOG(subwindow);
+                CHECK_NULL_VOID(subwindow);
                 subwindow->ResizeWindow();
             }
         };
@@ -744,7 +744,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const 
     }
 
     auto jsFront = AceType::DynamicCast<JsFrontend>(front);
-    CHECK_NULL_VOID_NOLOG(jsFront);
+    CHECK_NULL_VOID(jsFront);
     jsFront->SetInstanceName(instanceName);
 }
 
@@ -768,7 +768,7 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
         EngineHelper::RemoveEngine(instanceId);
         AceEngine::Get().RemoveContainer(instanceId);
         ConnectServerManager::Get().RemoveInstance(instanceId);
-        CHECK_NULL_VOID_NOLOG(destroyCallback);
+        CHECK_NULL_VOID(destroyCallback);
         destroyCallback();
     };
     if (container->GetSettings().usePlatformAsUIThread) {
@@ -820,33 +820,33 @@ void AceContainer::SetViewNew(
 
 void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow)
 {
-    CHECK_NULL_VOID_NOLOG(uiWindow);
+    CHECK_NULL_VOID(uiWindow);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     container->SetUIWindowInner(uiWindow);
 }
 
 sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    CHECK_NULL_RETURN(container, nullptr);
     return container->GetUIWindowInner();
 }
 
 OHOS::AppExecFwk::Ability* AceContainer::GetAbility(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    CHECK_NULL_RETURN(container, nullptr);
     return container->GetAbilityInner().lock().get();
 }
 
 bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN_NOLOG(container, false);
+    CHECK_NULL_RETURN(container, false);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN_NOLOG(front, false);
+    CHECK_NULL_RETURN(front, false);
     LOGD("RunPage content=[%{private}s]", content.c_str());
     front->RunPage(pageId, content, params);
     return true;
@@ -855,10 +855,10 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN_NOLOG(container, false);
+    CHECK_NULL_RETURN(container, false);
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN_NOLOG(front, false);
+    CHECK_NULL_RETURN(front, false);
     front->PushPage(content, params);
     return true;
 }
@@ -866,10 +866,10 @@ bool AceContainer::PushPage(int32_t instanceId, const std::string& content, cons
 bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN_NOLOG(container, false);
+    CHECK_NULL_RETURN(container, false);
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
-    CHECK_NULL_RETURN_NOLOG(context, false);
+    CHECK_NULL_RETURN(context, false);
     return context->CallRouterBackToPopPage();
 }
 
@@ -945,7 +945,7 @@ bool AceContainer::DumpInfo(const std::vector<std::string>& params)
     if (OnDumpInfo(params)) {
         return true;
     }
-    CHECK_NULL_RETURN_NOLOG(pipelineContext_, false);
+    CHECK_NULL_RETURN(pipelineContext_, false);
     return pipelineContext_->Dump(params);
 }
 
@@ -1014,7 +1014,7 @@ void AceContainer::DumpHeapSnapshot(bool isPrivate)
     taskExecutor_->PostTask(
         [isPrivate, frontend = WeakPtr<Frontend>(frontend_)] {
             auto sp = frontend.Upgrade();
-            CHECK_NULL_VOID_NOLOG(sp);
+            CHECK_NULL_VOID(sp);
             sp->DumpHeapSnapshot(isPrivate);
         },
         TaskExecutor::TaskType::JS);
@@ -1026,7 +1026,7 @@ void AceContainer::SetLocalStorage(NativeReference* storage, NativeReference* co
     taskExecutor_->PostTask(
         [frontend = WeakPtr<Frontend>(frontend_), storage, context, id = instanceId_] {
             auto sp = frontend.Upgrade();
-            CHECK_NULL_VOID_NOLOG(sp);
+            CHECK_NULL_VOID(sp);
 #ifdef NG_BUILD
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(sp);
 #else
@@ -1049,7 +1049,7 @@ void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePa
     const std::vector<std::string>& paths)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     RefPtr<FlutterAssetManager> flutterAssetManager;
     if (container->assetManager_) {
         flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
@@ -1060,7 +1060,7 @@ void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePa
             container->frontend_->SetAssetManager(flutterAssetManager);
         }
     }
-    CHECK_NULL_VOID_NOLOG(flutterAssetManager);
+    CHECK_NULL_VOID(flutterAssetManager);
     if (!hapPath.empty()) {
         auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
         if (assetProvider->Initialize(hapPath, paths)) {
@@ -1080,7 +1080,7 @@ void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePa
 void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     RefPtr<FlutterAssetManager> flutterAssetManager;
     if (container->assetManager_) {
         flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
@@ -1091,7 +1091,7 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
             container->frontend_->SetAssetManager(flutterAssetManager);
         }
     }
-    CHECK_NULL_VOID_NOLOG(flutterAssetManager);
+    CHECK_NULL_VOID(flutterAssetManager);
     flutterAssetManager->SetLibPath("default", libPath);
 }
 
@@ -1326,7 +1326,7 @@ bool AceContainer::IsLauncherContainer()
 void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -1336,7 +1336,7 @@ void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
 void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     container->SetWindowModal(windowModal);
     container->SetColorScheme(colorScheme);
@@ -1345,7 +1345,7 @@ void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, C
 void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto front = container->GetFrontend();
     if (front && front->GetType() == FrontendType::JS) {
         front->SetDialogCallback(callback);
@@ -1355,28 +1355,28 @@ void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback 
 std::string AceContainer::RestoreRouterStack(int32_t instanceId, const std::string& contentInfo)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN_NOLOG(container, "");
+    CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN_NOLOG(front, "");
+    CHECK_NULL_RETURN(front, "");
     return front->RestoreRouterStack(contentInfo);
 }
 
 std::string AceContainer::GetContentInfo(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN_NOLOG(container, "");
+    CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN_NOLOG(front, "");
+    CHECK_NULL_RETURN(front, "");
     return front->GetContentInfo();
 }
 
 void AceContainer::SetWindowPos(int32_t left, int32_t top)
 {
-    CHECK_NULL_VOID_NOLOG(frontend_);
+    CHECK_NULL_VOID(frontend_);
     auto accessibilityManager = frontend_->GetAccessibilityManager();
-    CHECK_NULL_VOID_NOLOG(accessibilityManager);
+    CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->SetWindowPos(left, top, windowId_);
 }
 
@@ -1429,7 +1429,7 @@ void AceContainer::InitWindowCallback()
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
-        CHECK_NULL_RETURN_NOLOG(window, rect);
+        CHECK_NULL_RETURN(window, rect);
         auto windowRect = window->GetRect();
         rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
         return rect;
@@ -1438,7 +1438,7 @@ void AceContainer::InitWindowCallback()
 
 NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type)
 {
-    CHECK_NULL_RETURN_NOLOG(uiWindow_, {});
+    CHECK_NULL_RETURN(uiWindow_, {});
     Rosen::AvoidArea avoidArea;
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
@@ -1594,7 +1594,7 @@ sptr<IRemoteObject> AceContainer::GetToken()
 std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t instanceId)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    CHECK_NULL_RETURN(container, nullptr);
     auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(context, nullptr);
     auto window = static_cast<FormRenderWindow*>(context->GetWindow());

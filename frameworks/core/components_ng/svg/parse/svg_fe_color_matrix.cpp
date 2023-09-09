@@ -42,7 +42,7 @@ SvgFeColorMatrix::SvgFeColorMatrix() : SvgFe()
 void SvgFeColorMatrix::OnInitStyle()
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
-    CHECK_NULL_VOID_NOLOG(declaration);
+    CHECK_NULL_VOID(declaration);
     auto value = declaration->GetValues();
     if (memset_s(matrix_, sizeof(matrix_), 0, sizeof(matrix_)) != EOK) {
         return;
@@ -72,7 +72,7 @@ void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilt
 #endif
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
-    CHECK_NULL_VOID_NOLOG(declaration);
+    CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
 
 #ifndef USE_ROSEN_DRAWING
@@ -91,7 +91,7 @@ void SvgFeColorMatrix::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilt
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix_);
     auto colorFilter = RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix);
-    CHECK_NULL_VOID_NOLOG(colorFilter);
+    CHECK_NULL_VOID(colorFilter);
 
     imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*colorFilter, imageFilter);
 #endif

@@ -768,7 +768,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 {
-    CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
         AnimateOnSafeAreaUpdate();
     }
@@ -776,7 +776,7 @@ void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
 
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
 {
-    CHECK_NULL_VOID_NOLOG(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
+    CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
         AnimateOnSafeAreaUpdate();
     }
@@ -803,9 +803,9 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
 
 void PipelineContext::SyncSafeArea(bool onKeyboard)
 {
-    CHECK_NULL_VOID_NOLOG(rootNode_);
+    CHECK_NULL_VOID(rootNode_);
     rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    CHECK_NULL_VOID_NOLOG(stageManager_);
+    CHECK_NULL_VOID(stageManager_);
     auto page = stageManager_->GetLastPage();
     if (page) {
         page->MarkDirtyNode(onKeyboard ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE);
@@ -877,7 +877,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
         // layout immediately
         FlushUITasks();
 
-        CHECK_NULL_VOID_NOLOG(manager);
+        CHECK_NULL_VOID(manager);
         manager->ScrollTextFieldToSafeArea();
         FlushUITasks();
     };
@@ -932,9 +932,9 @@ bool PipelineContext::OnBackPressed()
             weakSelectOverlay = AceType::WeakClaim(AceType::RawPtr(selectOverlayManager_)), &hasOverlay]() {
             // Destroy behaviour of Select Overlay shouble be adjusted.
             auto overlay = weakOverlay.Upgrade();
-            CHECK_NULL_VOID_NOLOG(overlay);
+            CHECK_NULL_VOID(overlay);
             auto selectOverlay = weakSelectOverlay.Upgrade();
-            CHECK_NULL_VOID_NOLOG(selectOverlay);
+            CHECK_NULL_VOID(selectOverlay);
             selectOverlay->DestroySelectOverlay();
             hasOverlay = overlay->RemoveOverlay(true);
         },
@@ -1028,9 +1028,9 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive)
         return false;
     }
     isFocusActive_ = isFocusActive;
-    CHECK_NULL_RETURN_NOLOG(rootNode_, false);
+    CHECK_NULL_RETURN(rootNode_, false);
     auto rootFocusHub = rootNode_->GetFocusHub();
-    CHECK_NULL_RETURN_NOLOG(rootFocusHub, false);
+    CHECK_NULL_RETURN(rootFocusHub, false);
     if (isFocusActive_) {
         return rootFocusHub->PaintAllFocusState();
     }
@@ -2047,7 +2047,7 @@ void PipelineContext::AnimateOnSafeAreaUpdate()
     option.SetCurve(safeAreaManager_->GetSafeAreaCurve());
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
         auto self = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(self);
+        CHECK_NULL_VOID(self);
         self->SyncSafeArea();
         self->FlushUITasks();
     });

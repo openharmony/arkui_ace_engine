@@ -141,7 +141,7 @@ void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, cons
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize, float maxWidth)
 {
     auto subtitleNode = titleBarNode->GetSubtitle();
-    CHECK_NULL_VOID_NOLOG(subtitleNode);
+    CHECK_NULL_VOID(subtitleNode);
     auto index = titleBarNode->GetChildIndexById(subtitleNode->GetId());
     auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(subtitleWrapper);
@@ -172,7 +172,7 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
             constraint.parentIdealSize.SetWidth(maxWidth);
             constraint.maxSize.SetWidth(maxWidth);
             // custom title must be single line title
-            
+
             auto navDestinationProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
             auto titleHeight = navDestinationProperty->GetTitleBarHeightValue(SINGLE_LINE_TITLEBAR_HEIGHT);
             constraint.parentIdealSize.SetHeight(titleHeight.ConvertToPx());
@@ -261,7 +261,7 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
 {
     auto menuNode = titleBarNode->GetMenu();
-    CHECK_NULL_VOID_NOLOG(menuNode);
+    CHECK_NULL_VOID(menuNode);
     auto index = titleBarNode->GetChildIndexById(menuNode->GetId());
     auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(menuWrapper);
@@ -525,7 +525,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight)
 {
     auto subtitleNode = titleBarNode->GetSubtitle();
-    CHECK_NULL_VOID_NOLOG(subtitleNode);
+    CHECK_NULL_VOID(subtitleNode);
     auto index = titleBarNode->GetChildIndexById(subtitleNode->GetId());
     auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(subtitleWrapper);
@@ -739,7 +739,7 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 bool TitleBarLayoutAlgorithm::GetNavigationBackButtonState(const RefPtr<TitleBarNode>& titleBarNode)
 {
     auto backButton = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-    CHECK_NULL_RETURN_NOLOG(backButton, false);
+    CHECK_NULL_RETURN(backButton, false);
     auto layoutProperty = backButton->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, false);
     return layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE;

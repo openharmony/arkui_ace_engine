@@ -147,7 +147,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     auto property = host->GetLayoutProperty();
-    CHECK_NULL_RETURN_NOLOG(host, false);
+    CHECK_NULL_RETURN(host, false);
     return property->GetPaddingProperty() != nullptr;
 }
 
@@ -214,21 +214,21 @@ void WaterFlowPattern::SetAccessibilityAction()
     accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID_NOLOG(pattern->IsScrollable());
+        CHECK_NULL_VOID(pattern->IsScrollable());
         pattern->ScrollPage(false);
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID_NOLOG(pattern->IsScrollable());
+        CHECK_NULL_VOID(pattern->IsScrollable());
         pattern->ScrollPage(true);
     });
 }
 
 void WaterFlowPattern::ScrollPage(bool reverse)
 {
-    CHECK_NULL_VOID_NOLOG(IsScrollable());
+    CHECK_NULL_VOID(IsScrollable());
 
     auto layoutProperty = GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);

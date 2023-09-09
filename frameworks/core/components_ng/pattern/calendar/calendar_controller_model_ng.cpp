@@ -23,18 +23,18 @@ RefPtr<AceType> CalendarControllerModelNG::GetController()
 
 void CalendarControllerModelNG::BackToToday(RefPtr<AceType>& controller)
 {
-    CHECK_NULL_VOID_NOLOG(controller);
+    CHECK_NULL_VOID(controller);
     auto controllerNG = AceType::DynamicCast<NG::CalendarControllerNg>(controller);
-    CHECK_NULL_VOID_NOLOG(controllerNG);
+    CHECK_NULL_VOID(controllerNG);
     controllerNG->BackToToday();
 }
 
 void CalendarControllerModelNG::GoTo(const int32_t& year, const int32_t& month, const int32_t& day,
     RefPtr<AceType>& controller)
 {
-    CHECK_NULL_VOID_NOLOG(controller);
+    CHECK_NULL_VOID(controller);
     auto controllerNG = AceType::DynamicCast<NG::CalendarControllerNg>(controller);
-    CHECK_NULL_VOID_NOLOG(controllerNG);
+    CHECK_NULL_VOID(controllerNG);
     controllerNG->GoTo(year, month, day);
 }
 } // namespace OHOS::Ace::NG

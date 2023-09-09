@@ -41,7 +41,7 @@ public:
     void OnFinish() const override
     {
         LOGI("FormPlatformEventCallback OnFinish");
-        CHECK_NULL_VOID_NOLOG(onFinish_);
+        CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
@@ -78,7 +78,7 @@ void AceFormAbility::LoadFormEnv(const OHOS::AAFwk::Want& want)
     // get asset
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    CHECK_NULL_VOID_NOLOG(moduleInfo);
+    CHECK_NULL_VOID(moduleInfo);
     packagePathStr += "/" + moduleInfo->package + "/";
     std::shared_ptr<AbilityInfo> abilityInfo = GetAbilityInfo();
 

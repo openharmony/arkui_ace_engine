@@ -75,7 +75,7 @@ void SequencedRecognizer::OnPending()
     std::advance(iter, currentIndex_);
     if (iter != recognizers_.end()) {
         auto activeRecognizer = *iter;
-        CHECK_NULL_VOID_NOLOG(activeRecognizer);
+        CHECK_NULL_VOID(activeRecognizer);
         if (activeRecognizer->GetGestureDisposal() == GestureDisposal::ACCEPT) {
             activeRecognizer->OnAccepted();
             UpdateCurrentIndex();

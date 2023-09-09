@@ -28,7 +28,7 @@ CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 {
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto scroll = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(scroll);
+        CHECK_NULL_VOID(scroll);
         scroll->PaintScrollEffect(canvas, paintWrapper);
     };
 
@@ -38,7 +38,7 @@ CanvasDrawFunction ScrollPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBar);
+    CHECK_NULL_VOID(scrollBar);
     if (!scrollBar->NeedPaint()) {
         LOGD("no need paint scroll bar.");
         return;
@@ -50,16 +50,16 @@ void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrap
 void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     auto scrollEdgeEffect = edgeEffect_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollEdgeEffect);
+    CHECK_NULL_VOID(scrollEdgeEffect);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     scrollEdgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
 }
 
 void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_VOID_NOLOG(paintWrapper);
+    CHECK_NULL_VOID(paintWrapper);
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBarOverlayModifier);
+    CHECK_NULL_VOID(scrollBarOverlayModifier);
     auto scrollBar = scrollBar_.Upgrade();
     if (!scrollBar || !scrollBar->NeedPaint()) {
         LOGD("no need paint scroll bar.");

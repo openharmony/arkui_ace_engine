@@ -186,7 +186,7 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(imageCache, nullptr);
     auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetKey());
-    CHECK_NULL_RETURN_NOLOG(cacheData, nullptr);
+    CHECK_NULL_RETURN(cacheData, nullptr);
 #ifndef USE_ROSEN_DRAWING
     const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(cacheData->GetDataWrapper());
     return *skData;

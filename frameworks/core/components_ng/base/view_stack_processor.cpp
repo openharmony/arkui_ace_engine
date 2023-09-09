@@ -89,7 +89,7 @@ void ViewStackProcessor::FlushImplicitAnimation()
 void ViewStackProcessor::FlushRerenderTask()
 {
     auto node = Finish();
-    CHECK_NULL_VOID_NOLOG(node);
+    CHECK_NULL_VOID(node);
     if (predictNode_) {
         predictNode_->AddAttachToMainTreeTask([node]() {
             node->FlushUpdateAndMarkDirty();

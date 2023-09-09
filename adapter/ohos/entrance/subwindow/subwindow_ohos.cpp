@@ -85,7 +85,7 @@ void SubwindowOhos::InitContainer()
         auto parentWindowId = parentContainer->GetWindowId();
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
-        CHECK_NULL_VOID_NOLOG(parentWindow);
+        CHECK_NULL_VOID(parentWindow);
         parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
         LOGI("Find parent window success, name: %{public}s, windowId: %{public}u, type: %{public}u",
@@ -240,10 +240,10 @@ bool SubwindowOhos::CancelPopup(const std::string& id)
 {
 #ifndef NG_BUILD
     auto stack = GetStack();
-    CHECK_NULL_RETURN_NOLOG(stack, false);
+    CHECK_NULL_RETURN(stack, false);
     stack->PopPopup(id);
     auto context = stack->GetContext().Upgrade();
-    CHECK_NULL_RETURN_NOLOG(context, false);
+    CHECK_NULL_RETURN(context, false);
     context->FlushPipelineImmediately();
     HideWindow();
 #endif
@@ -748,9 +748,9 @@ bool SubwindowOhos::CreateEventRunner()
 {
     if (!eventLoop_) {
         eventLoop_ = AppExecFwk::EventRunner::Create("Subwindow_Toast_Dialog");
-        CHECK_NULL_RETURN_NOLOG(eventLoop_, false);
+        CHECK_NULL_RETURN(eventLoop_, false);
         handler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-        CHECK_NULL_RETURN_NOLOG(handler_, false);
+        CHECK_NULL_RETURN(handler_, false);
     }
     return true;
 }

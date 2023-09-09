@@ -105,7 +105,7 @@ void RectModelNG::SetBottomRightRadius(const Radius& bottomRightRadius)
 void RectModelNG::SetShapeRectRadius(
     const RefPtr<ShapeRect>& rect, const Dimension& radiusX, const Dimension& radiusY, int32_t index)
 {
-    CHECK_NULL_VOID_NOLOG(rect);
+    CHECK_NULL_VOID(rect);
     auto newRadius = Ace::Radius(Dimension(radiusX), Dimension(radiusY));
     switch (index) {
         case TOP_LEFT_RADIUS:

@@ -326,7 +326,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
         caretStyle.caretWidth = theme->GetCursorWidth();
     } else {
@@ -371,7 +371,7 @@ void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         selectedColor = theme->GetSelectedColor();
     }
     TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
@@ -430,7 +430,7 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         auto theme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         textColor = theme->GetTextColor();
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);

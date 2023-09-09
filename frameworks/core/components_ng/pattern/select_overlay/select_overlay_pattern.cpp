@@ -540,7 +540,7 @@ void SelectOverlayPattern::StartHiddenHandleTask()
     auto weak = WeakClaim(this);
     hiddenHandleTask_.Reset([weak] {
         auto client = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         client->HiddenHandle();
     });
     taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS);

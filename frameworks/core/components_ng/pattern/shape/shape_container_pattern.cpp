@@ -41,7 +41,7 @@ void ShapeContainerPattern::ViewPortTransform()
     auto curFrameNode = GetHost();
     auto renderContext = curFrameNode->GetRenderContext();
     auto geoNode = curFrameNode->GetGeometryNode();
-    CHECK_NULL_VOID_NOLOG(geoNode);
+    CHECK_NULL_VOID(geoNode);
     auto contentSize = geoNode->GetContentSize();
     auto paintProperty = curFrameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     if (paintProperty->HasShapeViewBox() && paintProperty->GetShapeViewBoxValue().IsValid()) {

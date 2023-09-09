@@ -46,14 +46,14 @@ RefPtr<GeometryNode> FocusHub::GetGeometryNode() const
 std::optional<std::string> FocusHub::GetInspectorKey() const
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN_NOLOG(frameNode, std::nullopt);
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
     return frameNode->GetInspectorId();
 }
 
 RefPtr<FocusHub> FocusHub::GetParentFocusHub() const
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN_NOLOG(frameNode, nullptr);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto parentNode = frameNode->GetFocusParent();
     return parentNode ? parentNode->GetFocusHub() : nullptr;
 }
@@ -454,7 +454,7 @@ void FocusHub::SetIsDefaultFocus(bool isDefaultFocus)
     CHECK_NULL_VOID(mainFocusHub);
 
     auto defaultFocusNode = mainFocusHub->GetChildFocusNodeByType();
-    CHECK_NULL_VOID_NOLOG(defaultFocusNode);
+    CHECK_NULL_VOID(defaultFocusNode);
     mainFocusHub->SetDefaultFocusNode(AceType::WeakClaim(AceType::RawPtr(defaultFocusNode)));
 }
 void FocusHub::SetIsDefaultGroupFocus(bool isDefaultGroupFocus)
@@ -725,7 +725,7 @@ bool FocusHub::OnClick(const KeyEvent& event)
         auto info = GestureEvent();
         info.SetTimeStamp(event.timeStamp);
         auto geometryNode = GetGeometryNode();
-        CHECK_NULL_RETURN_NOLOG(geometryNode, false);
+        CHECK_NULL_RETURN(geometryNode, false);
         auto rect = geometryNode->GetFrameRect();
         info.SetGlobalLocation(Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2));
         info.SetLocalLocation(Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2));
@@ -940,7 +940,7 @@ void FocusHub::OnFocusNode()
     HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
     PaintFocusState();
     auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID_NOLOG(frameNode);
+    CHECK_NULL_VOID(frameNode);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::FOCUS);
 }
 
@@ -1337,7 +1337,7 @@ bool FocusHub::IsFocusableByTab()
 bool FocusHub::IsFocusableNodeByTab()
 {
     auto parent = GetParentFocusHub();
-    CHECK_NULL_RETURN_NOLOG(parent, GetTabIndex() == 0);
+    CHECK_NULL_RETURN(parent, GetTabIndex() == 0);
     return (GetTabIndex() == 0) && (parent->GetTabIndex() == 0);
 }
 

@@ -128,7 +128,7 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
 CanvasDrawFunction ImagePaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
 {
     // draw selected mask effect
-    CHECK_NULL_RETURN_NOLOG(selected_, {});
+    CHECK_NULL_RETURN(selected_, {});
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, {});

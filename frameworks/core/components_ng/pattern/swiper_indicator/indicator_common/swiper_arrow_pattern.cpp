@@ -48,7 +48,7 @@ void SwiperArrowPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swi
 {
     ChangeEvent changeEvent = [weak = WeakClaim(this)](int32_t index) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->UpdateButtonNode(index);
     };
     if (swiperChangeEvent_) {
@@ -83,7 +83,7 @@ void SwiperArrowPattern::InitButtonEvent()
 
     auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->ButtonTouchEvent(buttonNode, info.GetTouches().front().GetTouchType());
     };
     buttonTouchListenr_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -92,7 +92,7 @@ void SwiperArrowPattern::InitButtonEvent()
 
     auto hoverCallback = [weak = WeakClaim(this), buttonNode](bool isHovered) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->ButtonOnHover(buttonNode, isHovered);
     };
     buttonOnHoverListenr_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
@@ -101,7 +101,7 @@ void SwiperArrowPattern::InitButtonEvent()
 
     auto clickCallback = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->ButtonClickEvent();
     };
     if (buttonClickListenr_) {
@@ -171,11 +171,11 @@ void SwiperArrowPattern::ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchTyp
     auto swiperArrowLayoutProperty = GetSwiperArrowLayoutProperty();
     CHECK_NULL_VOID(swiperArrowLayoutProperty);
     const auto& renderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_VOID_NOLOG(renderContext);
+    CHECK_NULL_VOID(renderContext);
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
     Color backgroundColor;
     if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         isTouch_ = false;
@@ -208,11 +208,11 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     hoverOnClickFlag_ = isHovered;
     isHover_ = isHovered;
     const auto& renderContext = buttonNode->GetRenderContext();
-    CHECK_NULL_VOID_NOLOG(renderContext);
+    CHECK_NULL_VOID(renderContext);
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
     Color backgroundColor;
 
     auto swiperNode = GetSwiperNode();
@@ -321,9 +321,9 @@ void SwiperArrowPattern::UpdateArrowContent()
     imageSourceInfo.SetFillColor(swiperArrowLayoutProperty->GetArrowColorValue());
     if (!swiperArrowLayoutProperty->GetEnabledValue(true)) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        CHECK_NULL_VOID(pipelineContext);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-        CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+        CHECK_NULL_VOID(swiperIndicatorTheme);
         buttonNode->GetRenderContext()->UpdateBackgroundColor(
             backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
         imageSourceInfo.SetFillColor(swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(

@@ -43,7 +43,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         CHECK_NULL_VOID(self);
         self->OnBoundsChanged(bounds);
     };
-    CHECK_NULL_VOID_NOLOG(IsMainWindow());
+    CHECK_NULL_VOID(IsMainWindow());
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         LOGI("RSSurfaceNode buffer available callback");
@@ -59,8 +59,8 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
 
 WindowScene::~WindowScene()
 {
-    CHECK_NULL_VOID_NOLOG(IsMainWindow());
-    CHECK_NULL_VOID_NOLOG(session_);
+    CHECK_NULL_VOID(IsMainWindow());
+    CHECK_NULL_VOID(session_);
     session_->SetShowRecent(false);
     UnregisterLifecycleListener();
 }

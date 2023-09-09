@@ -138,7 +138,7 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
     auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(columnGesture);
     columnGesture->AddTouchEvent(touchListener);
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto childSize = static_cast<int32_t>(host->GetChildren().size());
     RefPtr<FrameNode> middleChild = nullptr;
@@ -296,7 +296,7 @@ void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
 bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     return true;
 }
@@ -690,23 +690,23 @@ bool DatePickerColumnPattern::InnerHandleScroll(
 
 void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!panEvent_);
+    CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(event);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->SetMainVelocity(event.GetMainVelocity());
         pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             return;
         }
@@ -716,7 +716,7 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
     PanDirection panDirection;
@@ -728,8 +728,8 @@ void DatePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 
 void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-    CHECK_NULL_VOID_NOLOG(GetHost());
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(GetHost());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto offsetY = event.GetGlobalPoint().GetY();
     toss->SetStart(offsetY);
@@ -747,9 +747,9 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
     }
-    CHECK_NULL_VOID_NOLOG(pressed_);
-    CHECK_NULL_VOID_NOLOG(GetHost());
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(pressed_);
+    CHECK_NULL_VOID(GetHost());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto offsetY =
         event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
@@ -763,8 +763,8 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 void DatePickerColumnPattern::HandleDragEnd()
 {
     pressed_ = false;
-    CHECK_NULL_VOID_NOLOG(GetHost());
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(GetHost());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -797,7 +797,7 @@ void DatePickerColumnPattern::HandleDragEnd()
 
 void DatePickerColumnPattern::CreateAnimation()
 {
-    CHECK_NULL_VOID_NOLOG(!animationCreated_);
+    CHECK_NULL_VOID(!animationCreated_);
     toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER); // 200ms for animation that from zero to outer.
     auto weak = AceType::WeakClaim(this);
@@ -843,7 +843,7 @@ RefPtr<CurveAnimation<double>> DatePickerColumnPattern::CreateClickAnimation(dou
 
 void DatePickerColumnPattern::HandleCurveStopped()
 {
-    CHECK_NULL_VOID_NOLOG(animationCreated_);
+    CHECK_NULL_VOID(animationCreated_);
     if (NearZero(scrollDelta_)) {
         return;
     }
@@ -1128,7 +1128,7 @@ void DatePickerColumnPattern::ShiftOptionProp(RefPtr<FrameNode> curNode, RefPtr<
 
 bool DatePickerColumnPattern::CanMove(bool isDown) const
 {
-    CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
+    CHECK_NULL_RETURN(NotLoopOptions(), true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto options = GetOptions();

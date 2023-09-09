@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 
 std::unique_ptr<PlatformWindow> PlatformWindow::Create(AceView* view)
 {
-    CHECK_NULL_RETURN_NOLOG(view, nullptr);
+    CHECK_NULL_RETURN(view, nullptr);
     return std::make_unique<Platform::FlutterWindow>(view->GetInstanceId());
 }
 
@@ -50,7 +50,7 @@ void FlutterWindow::Destroy()
 void FlutterWindow::RequestFrame()
 {
     auto window = flutter::WindowManager::GetWindow(instanceId_);
-    CHECK_NULL_VOID_NOLOG(window);
+    CHECK_NULL_VOID(window);
     window->ScheduleFrame();
     if (!window->HasBeginFrameCallback()) {
         window->SetBeginFrameCallback(std::bind(&FlutterWindow::OnVsyncCallback, this, std::placeholders::_1));

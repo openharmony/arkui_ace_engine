@@ -31,7 +31,7 @@ FlutterWindow::FlutterWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id) : ta
 
 void FlutterWindow::RequestFrame()
 {
-    CHECK_NULL_VOID_NOLOG(onShow_);
+    CHECK_NULL_VOID(onShow_);
 
     CHECK_RUN_ON(UI);
     auto window = flutter::ace::WindowManager::GetWindow(id_);

@@ -83,7 +83,7 @@ void ListPattern::OnModifyDone()
         UninitMouseEvent();
     }
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub);
+    CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
 }
@@ -768,9 +768,9 @@ void ListPattern::FireOnScrollStart()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ListEventHub>();
-    CHECK_NULL_VOID_NOLOG(hub);
+    CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
-    CHECK_NULL_VOID_NOLOG(onScrollStart);
+    CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
 }
 
@@ -825,7 +825,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
 {
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(list, 0.0);
+        CHECK_NULL_RETURN(list, 0.0);
         return list->startMainPos_ + list->GetChainDelta(list->startIndex_) - list->currentDelta_;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
@@ -842,7 +842,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     });
     scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(list, 0.0);
+        CHECK_NULL_RETURN(list, 0.0);
         if (list->IsScrollSnapAlignCenter() && !list->itemPosition_.empty()) {
             float startItemHeight =
                 list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
@@ -865,7 +865,7 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     });
     scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(list, 0.0);
+        CHECK_NULL_RETURN(list, 0.0);
         if (list->IsScrollSnapAlignCenter() && !list->itemPosition_.empty()) {
             float startItemHeight =
                 list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
@@ -896,7 +896,7 @@ void ListPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
@@ -1096,9 +1096,9 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
 
 bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 {
-    CHECK_NULL_RETURN_NOLOG(focusFrameNode, false);
+    CHECK_NULL_RETURN(focusFrameNode, false);
     auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
-    CHECK_NULL_RETURN_NOLOG(focusPattern, false);
+    CHECK_NULL_RETURN(focusPattern, false);
     auto curIndex = focusPattern->GetIndexInList();
     ScrollToIndex(curIndex, smooth_, ScrollAlign::AUTO);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1114,7 +1114,7 @@ WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t
     auto isScrollIndex = ScrollListForFocus(nextIndex, curIndex, nextIndexInGroup);
     auto groupIndexInGroup = ScrollListItemGroupForFocus(nextIndex, nextIndexInGroup,
         curIndexInGroup, moveStep, step, isScrollIndex);
-    
+
     return groupIndexInGroup ? GetChildFocusNodeByIndex(nextIndex, nextIndexInGroup) : nullptr;
 }
 
@@ -1303,9 +1303,9 @@ void ListPattern::UpdateScrollBarOffset()
 
     // calculate padding offset of list
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto layoutPriority = host->GetLayoutProperty();
-    CHECK_NULL_VOID_NOLOG(layoutPriority);
+    CHECK_NULL_VOID(layoutPriority);
     auto paddingOffset = layoutPriority->CreatePaddingAndBorder().Offset();
     Offset viewOffset = { paddingOffset.GetX(), paddingOffset.GetY() };
     UpdateScrollBarRegion(currentOffset, estimatedHeight, size, viewOffset);
@@ -1409,7 +1409,7 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
 
 void ListPattern::ProcessDragStart(float startPosition)
 {
-    CHECK_NULL_VOID_NOLOG(chainAnimation_);
+    CHECK_NULL_VOID(chainAnimation_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto globalOffset = host->GetTransformRelativeOffset();
@@ -1430,7 +1430,7 @@ void ListPattern::ProcessDragStart(float startPosition)
 
 void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 {
-    CHECK_NULL_VOID_NOLOG(chainAnimation_);
+    CHECK_NULL_VOID(chainAnimation_);
     if (NearZero(dragOffset)) {
         return;
     }
@@ -1457,7 +1457,7 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 
 float ListPattern::GetChainDelta(int32_t index) const
 {
-    CHECK_NULL_RETURN_NOLOG(chainAnimation_, 0.0f);
+    CHECK_NULL_RETURN(chainAnimation_, 0.0f);
     return chainAnimation_->GetValue(index);
 }
 
@@ -1567,7 +1567,7 @@ bool ListPattern::IsItemSelected(const MouseInfo& info)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-    CHECK_NULL_RETURN_NOLOG(node, false);
+    CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<ListItemPattern>();
     if (itemPattern) {
         return itemPattern->IsSelected();
@@ -1575,9 +1575,9 @@ bool ListPattern::IsItemSelected(const MouseInfo& info)
     auto itemGroupPattern = node->GetPattern<ListItemGroupPattern>();
     if (itemGroupPattern) {
         auto itemNode = node->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-        CHECK_NULL_RETURN_NOLOG(itemNode, false);
+        CHECK_NULL_RETURN(itemNode, false);
         itemPattern = itemNode->GetPattern<ListItemPattern>();
-        CHECK_NULL_RETURN_NOLOG(itemPattern, false);
+        CHECK_NULL_RETURN(itemPattern, false);
         return itemPattern->IsSelected();
     }
     return false;

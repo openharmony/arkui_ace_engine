@@ -29,7 +29,7 @@ namespace OHOS::Ace::Framework {
 void JSSecButtonBase::SetIconSize(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
@@ -42,7 +42,7 @@ void JSSecButtonBase::SetIconSize(const JSCallbackInfo& info)
 void JSSecButtonBase::SetIconColor(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
@@ -54,7 +54,7 @@ void JSSecButtonBase::SetIconColor(const JSCallbackInfo& info)
 void JSSecButtonBase::SetFontSize(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     CalcDimension value;
     if (!ParseJsDimensionFp(info[0], value)) {
@@ -101,7 +101,7 @@ void JSSecButtonBase::SetFontFamily(const JSCallbackInfo& info)
 void JSSecButtonBase::SetFontColor(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
@@ -131,7 +131,7 @@ void JSSecButtonBase::SetLayoutDirection(const JSCallbackInfo& info)
 void JSSecButtonBase::SetBackgroundColor(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
@@ -158,7 +158,7 @@ void JSSecButtonBase::SetBackgroundBorderStyle(const JSCallbackInfo& info)
 void JSSecButtonBase::SetBackgroundBorderWidth(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
@@ -171,7 +171,7 @@ void JSSecButtonBase::SetBackgroundBorderWidth(const JSCallbackInfo& info)
 void JSSecButtonBase::SetBackgroundBorderColor(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     Color borderColor;
     if (!ParseJsColor(info[0], borderColor)) {
@@ -183,7 +183,7 @@ void JSSecButtonBase::SetBackgroundBorderColor(const JSCallbackInfo& info)
 void JSSecButtonBase::SetBackgroundBorderRadius(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
@@ -235,7 +235,7 @@ void JSSecButtonBase::SetBackgroundPadding(const JSCallbackInfo& info)
 void JSSecButtonBase::SetTextIconSpace(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     CalcDimension length;
     if (!ParseJsDimensionVp(info[0], length)) {

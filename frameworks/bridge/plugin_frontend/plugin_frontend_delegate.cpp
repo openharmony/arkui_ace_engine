@@ -386,7 +386,7 @@ bool PluginFrontendDelegate::OnPageBackPress()
     taskExecutor_->PostSyncTask(
         [weak = AceType::WeakClaim(this), &result] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             auto pageId = delegate->GetRunningPageId();
             auto page = delegate->GetPage(pageId);
             if (page) {
@@ -403,7 +403,7 @@ void PluginFrontendDelegate::NotifyAppStorage(const WeakPtr<Framework::JsEngine>
     taskExecutor_->PostTask(
         [jsEngineWeak, key, value] {
             auto jsEngine = jsEngineWeak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsEngine);
+            CHECK_NULL_VOID(jsEngine);
             jsEngine->NotifyAppStorage(key, value);
         },
         TaskExecutor::TaskType::JS);
@@ -419,7 +419,7 @@ void PluginFrontendDelegate::OnBackGround()
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             delegate->OnPageHide();
         },
         TaskExecutor::TaskType::JS);
@@ -430,7 +430,7 @@ void PluginFrontendDelegate::OnForeground()
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             delegate->OnPageShow();
         },
         TaskExecutor::TaskType::JS);
@@ -730,7 +730,7 @@ void PluginFrontendDelegate::PostponePageTransition()
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
           auto delegate = weak.Upgrade();
-          CHECK_NULL_VOID_NOLOG(delegate);
+          CHECK_NULL_VOID(delegate);
           auto pipelineContext = delegate->pipelineContextHolder_.Get();
           pipelineContext->PostponePageTransition();
         },
@@ -742,7 +742,7 @@ void PluginFrontendDelegate::LaunchPageTransition()
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
           auto delegate = weak.Upgrade();
-          CHECK_NULL_VOID_NOLOG(delegate);
+          CHECK_NULL_VOID(delegate);
           auto pipelineContext = delegate->pipelineContextHolder_.Get();
           pipelineContext->LaunchPageTransition();
         },
@@ -833,7 +833,7 @@ std::string PluginFrontendDelegate::GetParams()
 void PluginFrontendDelegate::TriggerPageUpdate(int32_t pageId, bool directExecute)
 {
     auto page = GetPage(pageId);
-    CHECK_NULL_VOID_NOLOG(page);
+    CHECK_NULL_VOID(page);
 
     auto jsPage = AceType::DynamicCast<Framework::JsAcePage>(page);
     ACE_DCHECK(jsPage);
@@ -1115,7 +1115,7 @@ void PluginFrontendDelegate::LoadJS(
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, url, isMainPage] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             delegate->loadJs_(url, page, isMainPage);
             page->FlushCommands();
             // just make sure the pipelineContext is created.
@@ -1157,7 +1157,7 @@ void PluginFrontendDelegate::OnMediaQueryUpdate(bool isSynchronous)
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             const auto& info = delegate->mediaQueryInfo_->GetMediaQueryInfo();
             // request css mediaquery
             std::string param("\"viewsizechanged\",");
@@ -1184,7 +1184,7 @@ void PluginFrontendDelegate::OnPageReady(
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, url, jsCommands, isMainPage] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
             CHECK_NULL_VOID(pipelineContext);
             // Flush all JS commands.
@@ -1232,7 +1232,7 @@ void PluginFrontendDelegate::OnPrePageChange(const RefPtr<JsAcePage>& page)
 void PluginFrontendDelegate::FlushPageCommand(
     const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
 {
-    CHECK_NULL_VOID_NOLOG(page);
+    CHECK_NULL_VOID(page);
     if (page->FragmentCount() == 1) {
         OnPageReady(page, url, isMainPage);
     } else {
@@ -1300,7 +1300,7 @@ void PluginFrontendDelegate::PopToPage(const std::string& url)
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), url] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             auto pageId = delegate->GetPageIdByUrl(url);
             if (pageId == INVALID_PAGE_ID) {
                 return;
@@ -1357,7 +1357,7 @@ void PluginFrontendDelegate::PopPage()
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
             CHECK_NULL_VOID(pipelineContext);
             if (delegate->GetStackSize() == 1) {
@@ -1426,7 +1426,7 @@ void PluginFrontendDelegate::ClearInvisiblePages()
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
             CHECK_NULL_VOID(pipelineContext);
             if (pipelineContext->ClearInvisiblePages()) {
@@ -1440,7 +1440,7 @@ void PluginFrontendDelegate::ClearInvisiblePages()
 void PluginFrontendDelegate::OnReplacePageSuccess(
     const RefPtr<JsAcePage>& page, const std::string& url)
 {
-    CHECK_NULL_VOID_NOLOG(page);
+    CHECK_NULL_VOID(page);
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
     if (!pageRouteStack_.empty()) {
@@ -1463,7 +1463,7 @@ void PluginFrontendDelegate::ReplacePage(
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, url, jsCommands] {
             auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(delegate);
+            CHECK_NULL_VOID(delegate);
             auto pipelineContext = AceType::DynamicCast<PipelineContext>(delegate->pipelineContextHolder_.Get());
             CHECK_NULL_VOID(pipelineContext);
             // Flush all JS commands.
@@ -1718,7 +1718,7 @@ SingleTaskExecutor PluginFrontendDelegate::GetUiTask()
 
 void PluginFrontendDelegate::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
     context->SetOnPageShow([weak = AceType::WeakClaim(this)] {
         auto delegate = weak.Upgrade();
         if (delegate) {

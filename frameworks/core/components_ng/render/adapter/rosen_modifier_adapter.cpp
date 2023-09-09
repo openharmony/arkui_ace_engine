@@ -65,10 +65,10 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
 #else
-    CHECK_NULL_VOID_NOLOG(context.canvas);
+    CHECK_NULL_VOID(context.canvas);
 #endif
     auto modifier = modifier_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(modifier);
+    CHECK_NULL_VOID(modifier);
 #ifndef USE_ROSEN_DRAWING
     DrawingContext context_ = { canvas, context.width, context.height };
 #else
@@ -157,10 +157,10 @@ void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
     RSCanvas canvas(&skCanvas);
 #else
-    CHECK_NULL_VOID_NOLOG(context.canvas);
+    CHECK_NULL_VOID(context.canvas);
 #endif
     auto modifier = modifier_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(modifier);
+    CHECK_NULL_VOID(modifier);
 #ifndef USE_ROSEN_DRAWING
     DrawingContext context_ = { canvas, context.width, context.height };
 #else

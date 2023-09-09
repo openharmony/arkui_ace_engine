@@ -62,7 +62,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(window);
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), 0);
             auto pipeline = container->GetPipelineContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
             JankFrameReport::JankFrameRecord(timeStampNanos);
         };
@@ -81,7 +81,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     rsUIDirector_->Init();
     rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
         ContainerScope scope(id);
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     });
 }
@@ -97,9 +97,9 @@ void RosenWindow::Init()
 
 void RosenWindow::RequestFrame()
 {
-    CHECK_NULL_VOID_NOLOG(onShow_);
+    CHECK_NULL_VOID(onShow_);
     CHECK_RUN_ON(UI);
-    CHECK_NULL_VOID_NOLOG(!isRequestVsync_);
+    CHECK_NULL_VOID(!isRequestVsync_);
     LOGD("request next vsync");
     if (rsWindow_) {
         isRequestVsync_ = true;
@@ -114,7 +114,7 @@ void RosenWindow::RequestFrame()
                 auto container = Container::Current();
                 CHECK_NULL_VOID(container);
                 auto pipeline = container->GetPipelineContext();
-                CHECK_NULL_VOID_NOLOG(pipeline);
+                CHECK_NULL_VOID(pipeline);
                 pipeline->OnIdle(0);
             },
             TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND);

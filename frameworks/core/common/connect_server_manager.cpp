@@ -159,7 +159,7 @@ void ConnectServerManager::InitConnectServer()
 void ConnectServerManager::CloseConnectServerSo()
 {
 #if !defined(IOS_PLATFORM)
-    CHECK_NULL_VOID_NOLOG(handlerConnectServerSo_);
+    CHECK_NULL_VOID(handlerConnectServerSo_);
     dlclose(handlerConnectServerSo_);
     handlerConnectServerSo_ = nullptr;
 #endif
@@ -171,7 +171,7 @@ void ConnectServerManager::SetDebugMode()
     if (!CheckDebugVersion()) {
         return;
     }
-    
+
     if (!g_waitForConnection()) { // waitForDebugger : waitForDebugger means the connection state of the connect server
         AceApplicationInfo::GetInstance().SetNeedDebugBreakPoint(true);
     }

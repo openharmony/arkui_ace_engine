@@ -118,7 +118,7 @@ void RefreshPattern::InitOnKeyEvent()
     CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     isKeyEventRegisted_ = true;
@@ -408,7 +408,7 @@ void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
         default:;
     }
     auto progressContext = progressChild_->GetRenderContext();
-    CHECK_NULL_VOID_NOLOG(progressContext);
+    CHECK_NULL_VOID(progressContext);
     progressContext->UpdateOpacity(scale);
 }
 

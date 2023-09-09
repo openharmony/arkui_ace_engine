@@ -76,9 +76,9 @@ bool ParseJsDimensionArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& 
 
 bool CheckSnapPaginations(std::vector<Dimension> snapPaginations)
 {
-    CHECK_NULL_RETURN_NOLOG(!snapPaginations.empty(), false);
+    CHECK_NULL_RETURN(!snapPaginations.empty(), false);
     float preValue = (*snapPaginations.begin()).Value();
-    CHECK_NULL_RETURN_NOLOG(!Negative(preValue), false);
+    CHECK_NULL_RETURN(!Negative(preValue), false);
     auto unit = (*snapPaginations.begin()).Unit();
     for (auto iter = snapPaginations.begin() + 1; iter < snapPaginations.end(); ++iter) {
         if (Negative((*iter).Value()) || (*iter).Unit() != unit || LessOrEqual((*iter).Value(), preValue)) {
@@ -310,9 +310,9 @@ void JSScroll::SetScrollBar(const JSCallbackInfo& args)
 void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     CalcDimension scrollBarWidth;
     if (args.Length() < 1) {
         LOGE("args is invalid");
@@ -332,9 +332,9 @@ void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     Color color(theme->GetForegroundColor());
     Color::ParseColorString(scrollBarColor, color);
     ScrollModel::GetInstance()->SetScrollBarColor(color);

@@ -74,9 +74,9 @@ void GaugeModelNG::SetDescription(const RefPtr<AceType>& customNode)
 {
     auto customDescriptionNode = AceType::DynamicCast<NG::UINode>(customNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID_NOLOG(frameNode);
+    CHECK_NULL_VOID(frameNode);
     auto gaugePattern = frameNode->GetPattern<GaugePattern>();
-    CHECK_NULL_VOID_NOLOG(gaugePattern);
+    CHECK_NULL_VOID(gaugePattern);
     gaugePattern->SetDescriptionNode(customDescriptionNode);
 }
 

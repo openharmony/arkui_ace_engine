@@ -566,9 +566,9 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
     calendarPattern->SetSelectedDay(selectedDay);
     calendarNode->MarkModifyDone();
 
-    CHECK_NULL_VOID_NOLOG(settingData.entryNode);
+    CHECK_NULL_VOID(settingData.entryNode);
     auto eventHub = settingData.entryNode->GetEventHub<CalendarPickerEventHub>();
-    CHECK_NULL_VOID_NOLOG(eventHub);
+    CHECK_NULL_VOID(eventHub);
     eventHub->UpdateOnChangeEvent(callbackInfo);
 }
 } // namespace OHOS::Ace::NG

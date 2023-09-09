@@ -127,7 +127,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
                 overScroll = mainSize + pattern->GetLeftPadding() - pattern->tabItemOffsets_.back().GetX() -
                              pattern->scrollMargin_;
             }
-          
+
             if (source == SCROLL_FROM_UPDATE) {
                 // adjust offset.
                 if (mainSize != 0.0f) {
@@ -1584,7 +1584,7 @@ void TabBarPattern::SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID(springEffect);
         springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_RETURN_NOLOG(pattern, false);
+            CHECK_NULL_RETURN(pattern, false);
             return pattern->IsAtTop() || pattern->IsAtBottom();
         });
         // add callback to springEdgeEffect
@@ -1598,7 +1598,7 @@ void TabBarPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 {
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto tabBar = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(tabBar, 0.0);
+        CHECK_NULL_RETURN(tabBar, 0.0);
         return tabBar->tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE ? tabBar->currentOffset_ : 0.0;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {

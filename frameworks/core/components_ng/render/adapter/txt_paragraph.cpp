@@ -133,7 +133,7 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 
 void TxtParagraph::Build()
 {
-    CHECK_NULL_VOID_NOLOG(builder_);
+    CHECK_NULL_VOID(builder_);
 #ifndef USE_GRAPHIC_TEXT_GINE
     paragraph_ = builder_->Build();
 #else

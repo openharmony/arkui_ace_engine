@@ -39,7 +39,7 @@ void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
         footer();
         footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
-    CHECK_NULL_VOID_NOLOG(footerNode);
+    CHECK_NULL_VOID(footerNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();

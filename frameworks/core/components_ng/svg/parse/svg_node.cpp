@@ -105,7 +105,7 @@ std::string ParseIdFromUrl(const std::string& url)
 
 void SvgNode::SetAttr(const std::string& name, const std::string& value)
 {
-    CHECK_NULL_VOID_NOLOG(declaration_);
+    CHECK_NULL_VOID(declaration_);
     if (!declaration_->SetSpecializedAttr(std::make_pair(name, value))) {
         declaration_->SetAttr({ std::make_pair(name, value) });
     }
@@ -118,7 +118,7 @@ RSPath SvgNode::AsRSPath(const Size& viewPort) const
 
 void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
 {
-    CHECK_NULL_VOID_NOLOG(declaration_);
+    CHECK_NULL_VOID(declaration_);
     Inherit(parent);
     if (hrefFill_) {
         auto href = declaration_->GetFillState().GetHref();
@@ -203,7 +203,7 @@ bool SvgNode::OnCanvas(RSCanvas& canvas)
 #ifndef USE_ROSEN_DRAWING
     // drawing.h api 不完善，直接取用SkCanvas，后续要重写
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    CHECK_NULL_RETURN_NOLOG(rsCanvas, false);
+    CHECK_NULL_RETURN(rsCanvas, false);
     skCanvas_ = rsCanvas->ExportSkCanvas();
     return skCanvas_ != nullptr;
 #else

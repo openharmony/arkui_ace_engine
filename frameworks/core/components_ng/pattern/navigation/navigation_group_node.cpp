@@ -66,7 +66,7 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavigationGroupNode>(frameNode));
+    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<NavigationGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navigationGroupNode = AceType::MakeRefPtr<NavigationGroupNode>(tag, nodeId, pattern);
     navigationGroupNode->InitializePatternAndContext();
@@ -350,9 +350,9 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
             weakNavigation = WeakClaim(this), id = Container::CurrentId(), nodeWidth, nodeHeight] {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(context);
+            CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             // animation finish event should be posted to UI thread
             taskExecutor->PostTask(
                 [weakNode, weakTitle, weakNavigation, nodeWidth, nodeHeight]() {
@@ -451,9 +451,9 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
                                 weakNavigation = WeakClaim(this), isNavBar, id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
+        CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        CHECK_NULL_VOID(taskExecutor);
         // animation finish event should be posted to UI thread
         taskExecutor->PostTask(
             [weakNode, weakTitle, weakNavigation, isNavBar]() {
@@ -660,14 +660,14 @@ void NavigationGroupNode::BackButtonAnimation(const RefPtr<FrameNode>& backButto
             [backButtonNodeContextWK = WeakClaim(RawPtr(backButtonNodeContext)), id = Container::CurrentId()] {
                 ContainerScope scope(id);
                 auto context = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID_NOLOG(context);
+                CHECK_NULL_VOID(context);
                 auto taskExecutor = context->GetTaskExecutor();
-                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                CHECK_NULL_VOID(taskExecutor);
                 // animation finish event should be posted to UI thread.
                 taskExecutor->PostTask(
                     [backButtonNodeContextWK, id]() {
                         auto backButtonNodeContext = backButtonNodeContextWK.Upgrade();
-                        CHECK_NULL_VOID_NOLOG(backButtonNodeContext);
+                        CHECK_NULL_VOID(backButtonNodeContext);
                         ContainerScope scope(id);
                         backButtonNodeContext->UpdateOpacity(1.0);
                     },
@@ -687,9 +687,9 @@ void NavigationGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionO
         [transitionOutNodeContextWK = WeakPtr<RenderContext>(transitionOutNodeContext), id = Container::CurrentId()] {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(context);
+            CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask(
                 [transitionOutNodeContextWK]() {
                     auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
@@ -723,7 +723,7 @@ void NavigationGroupNode::TitleOpacityAnimationOut(const RefPtr<RenderContext>& 
             taskExecutor->PostTask(
                 [transitionOutNodeContextWK, id]() {
                     auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
-                    CHECK_NULL_VOID_NOLOG(transitionOutNodeContext);
+                    CHECK_NULL_VOID(transitionOutNodeContext);
                     transitionOutNodeContext->UpdateOpacity(1.0);
                 },
                 TaskExecutor::TaskType::UI);

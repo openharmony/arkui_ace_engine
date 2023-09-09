@@ -62,7 +62,7 @@ public:
         auto task = [weak = node_, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(node);
+            CHECK_NULL_VOID(node);
             auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(node);
             if (ability) {
                 ability->FireConnect();
@@ -83,7 +83,7 @@ public:
         auto task = [weak = node_, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(node);
+            CHECK_NULL_VOID(node);
             auto ability = AceType::DynamicCast<V2::RenderAbilityComponent>(node);
             if (ability) {
                 ability->FireDisconnect();

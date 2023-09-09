@@ -167,7 +167,7 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
 bool AnimatedImage::GetCachedFrame(uint32_t idx)
 {
     auto image = GetCachedFrameImpl(cacheKey_ + std::to_string(idx));
-    CHECK_NULL_RETURN_NOLOG(image, false);
+    CHECK_NULL_RETURN(image, false);
 
     if (!decodeMtx_.try_lock()) {
         // last frame still decoding, skip this frame to avoid blocking UI thread

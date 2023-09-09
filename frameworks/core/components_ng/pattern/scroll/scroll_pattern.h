@@ -259,9 +259,9 @@ public:
     ScrollSnapAlign GetScrollSnapAlign() const
     {
         auto host = GetHost();
-        CHECK_NULL_RETURN_NOLOG(host, ScrollSnapAlign::NONE);
+        CHECK_NULL_RETURN(host, ScrollSnapAlign::NONE);
         auto scrollLayoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-        CHECK_NULL_RETURN_NOLOG(scrollLayoutProperty, ScrollSnapAlign::NONE);
+        CHECK_NULL_RETURN(scrollLayoutProperty, ScrollSnapAlign::NONE);
         return scrollLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     }
 

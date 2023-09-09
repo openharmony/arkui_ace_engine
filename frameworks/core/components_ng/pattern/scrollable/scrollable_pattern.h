@@ -73,7 +73,7 @@ public:
     }
     void SetScrollEnable(bool enable)
     {
-        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        CHECK_NULL_VOID(scrollableEvent_);
         scrollableEvent_->SetEnabled(enable);
         if (!enable) {
             scrollableEvent_->SetAxis(Axis::NONE);
@@ -137,39 +137,39 @@ public:
 
     bool IsScrollableStopped() const
     {
-        CHECK_NULL_RETURN_NOLOG(scrollableEvent_, true);
+        CHECK_NULL_RETURN(scrollableEvent_, true);
         auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_RETURN_NOLOG(scrollable, true);
+        CHECK_NULL_RETURN(scrollable, true);
         return scrollable->IsStopped();
     }
 
     void StopScrollable()
     {
-        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        CHECK_NULL_VOID(scrollableEvent_);
         auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID_NOLOG(scrollable);
+        CHECK_NULL_VOID(scrollable);
         scrollable->StopScrollable();
     }
 
     void StartScrollSnapMotion(float scrollSnapDelta, float scrollSnapVelocity)
     {
-        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        CHECK_NULL_VOID(scrollableEvent_);
         auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID_NOLOG(scrollable);
+        CHECK_NULL_VOID(scrollable);
         scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
     }
 
     void SetScrollFrameBeginCallback(const ScrollFrameBeginCallback& scrollFrameBeginCallback)
     {
-        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        CHECK_NULL_VOID(scrollableEvent_);
         auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID_NOLOG(scrollable);
+        CHECK_NULL_VOID(scrollable);
         scrollable->SetOnScrollFrameBegin(scrollFrameBeginCallback);
     }
 
     bool IsScrollableSpringEffect() const
     {
-        CHECK_NULL_RETURN_NOLOG(scrollEffect_, false);
+        CHECK_NULL_RETURN(scrollEffect_, false);
         return scrollEffect_->IsSpringEffect();
     }
 
@@ -177,11 +177,11 @@ public:
     {
         isCoordEventNeedSpring_ = IsCoordEventNeedSpring;
     }
-    
+
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     RefPtr<ScrollablePattern> GetParentScrollable();
     void GetParentNavigition();
-	
+
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
         return { 0, 0 };
@@ -280,7 +280,7 @@ public:
             StopScrollBarAnimatorByProxy();
             StartScrollBarAnimatorByProxy();
         }
-        
+
         scrollSource_ = scrollSource;
     }
 

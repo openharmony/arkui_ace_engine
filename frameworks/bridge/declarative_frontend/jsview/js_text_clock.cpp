@@ -146,7 +146,7 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         textColor = theme->GetTextStyle().GetTextColor();
     }
@@ -161,9 +161,9 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     CalcDimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
@@ -172,9 +172,9 @@ void JSTextClock::SetFontSize(const JSCallbackInfo& info)
 
     if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
     }
 

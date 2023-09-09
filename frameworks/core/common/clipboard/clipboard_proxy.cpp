@@ -40,7 +40,7 @@ void ClipboardProxy::SetDelegate(std::unique_ptr<ClipboardInterface>&& delegate)
 
 RefPtr<Clipboard> ClipboardProxy::GetClipboard(const RefPtr<TaskExecutor>& taskExecutor) const
 {
-    CHECK_NULL_RETURN_NOLOG(delegate_, nullptr);
+    CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetClipboard(taskExecutor);
 }
 

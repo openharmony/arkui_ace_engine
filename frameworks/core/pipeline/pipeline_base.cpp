@@ -553,7 +553,7 @@ void PipelineBase::OpenImplicitAnimation(
             [finishCallback, weak]() {
                 auto context = weak.Upgrade();
                 CHECK_NULL_VOID(context);
-                CHECK_NULL_VOID_NOLOG(finishCallback);
+                CHECK_NULL_VOID(finishCallback);
                 if (context->IsFormRender()) {
                     context->SetEnableImplicitAnimation(false);
                     finishCallback();
@@ -662,7 +662,7 @@ Rect PipelineBase::GetCurrentWindowRect() const
 
 bool PipelineBase::HasFloatTitle() const
 {
-    CHECK_NULL_RETURN_NOLOG(windowManager_, false);
+    CHECK_NULL_RETURN(windowManager_, false);
     return GetWindowModal() == WindowModal::CONTAINER_MODAL &&
            windowManager_->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
 }

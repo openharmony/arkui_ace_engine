@@ -356,7 +356,7 @@ void CalendarPickerPattern::InitOnKeyEvent()
 
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(std::move(blurTask));

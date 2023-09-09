@@ -243,7 +243,7 @@ public:
 
     void SetScrollable(bool isScrollable)
     {
-        CHECK_NULL_VOID_NOLOG(isScrollable_ != isScrollable);
+        CHECK_NULL_VOID(isScrollable_ != isScrollable);
         isScrollable_ = isScrollable;
     }
 
@@ -273,7 +273,7 @@ public:
 
     void SetDisplayMode(DisplayMode displayMode)
     {
-        CHECK_NULL_VOID_NOLOG(displayMode_ != displayMode);
+        CHECK_NULL_VOID(displayMode_ != displayMode);
         displayMode_ = displayMode;
     }
 
@@ -354,7 +354,7 @@ public:
     {
         hoverAnimationType_ = hoverAnimationType;
     }
-    
+
 
     void PlayScrollBarGrowAnimation()
     {
@@ -439,7 +439,7 @@ public:
     {
         return hostBorderRadius_;
     }
-    
+
     void SetScrollPositionCallback(ScrollPositionCallback&& callback)
     {
         scrollPositionCallback_ = std::move(callback);

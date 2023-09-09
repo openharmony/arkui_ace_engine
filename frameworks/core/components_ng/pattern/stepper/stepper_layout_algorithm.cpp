@@ -81,7 +81,7 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
 {
     auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
-    CHECK_NULL_VOID_NOLOG(hostNode->HasLeftButtonNode());
+    CHECK_NULL_VOID(hostNode->HasLeftButtonNode());
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -106,7 +106,7 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
 {
     auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
-    CHECK_NULL_VOID_NOLOG(hostNode->HasRightButtonNode());
+    CHECK_NULL_VOID(hostNode->HasRightButtonNode());
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -131,9 +131,9 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
 void StepperLayoutAlgorithm::MeasureText(
     const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& buttonLayoutConstraint, bool isLeft)
 {
-    CHECK_NULL_VOID_NOLOG(layoutWrapper->GetHostTag() == std::string(V2::BUTTON_ETS_TAG));
+    CHECK_NULL_VOID(layoutWrapper->GetHostTag() == std::string(V2::BUTTON_ETS_TAG));
     auto rowWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID_NOLOG(rowWrapper->GetHostTag() == std::string(V2::ROW_ETS_TAG));
+    CHECK_NULL_VOID(rowWrapper->GetHostTag() == std::string(V2::ROW_ETS_TAG));
     auto textWrapper = rowWrapper->GetOrCreateChildByIndex(isLeft ? 1 : 0);
     CHECK_NULL_VOID(textWrapper->GetHostTag() == std::string(V2::TEXT_ETS_TAG));
 
@@ -192,7 +192,7 @@ void StepperLayoutAlgorithm::LayoutLeftButton(LayoutWrapper* layoutWrapper)
 {
     auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
-    CHECK_NULL_VOID_NOLOG(hostNode->HasLeftButtonNode());
+    CHECK_NULL_VOID(hostNode->HasLeftButtonNode());
     auto index = hostNode->GetChildIndexById(hostNode->GetLeftButtonId());
     auto leftButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -220,7 +220,7 @@ void StepperLayoutAlgorithm::LayoutRightButton(LayoutWrapper* layoutWrapper)
 {
     auto hostNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
-    CHECK_NULL_VOID_NOLOG(hostNode->HasRightButtonNode());
+    CHECK_NULL_VOID(hostNode->HasRightButtonNode());
     auto index = hostNode->GetChildIndexById(hostNode->GetRightButtonId());
     auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     auto pipeline = PipelineBase::GetCurrentContext();

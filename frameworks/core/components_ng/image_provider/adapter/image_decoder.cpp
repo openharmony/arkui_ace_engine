@@ -153,7 +153,7 @@ sk_sp<SkImage> ImageDecoder::ResizeSkImage()
     auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
     auto encodedImage = SkImage::MakeFromEncoded(skData);
 #endif
-    CHECK_NULL_RETURN_NOLOG(desiredSize_.IsPositive(), encodedImage);
+    CHECK_NULL_RETURN(desiredSize_.IsPositive(), encodedImage);
 
     auto width = std::lround(desiredSize_.Width());
     auto height = std::lround(desiredSize_.Height());
@@ -195,7 +195,7 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
 {
     auto key = ImageUtils::GenerateImageKey(obj_->GetSourceInfo(), desiredSize_);
     auto cachedData = ImageLoader::LoadImageDataFromFileCache(key, ".astc");
-    CHECK_NULL_RETURN_NOLOG(cachedData, {});
+    CHECK_NULL_RETURN(cachedData, {});
 
 #ifndef USE_ROSEN_DRAWING
     auto skiaImageData = AceType::DynamicCast<SkiaImageData>(cachedData);

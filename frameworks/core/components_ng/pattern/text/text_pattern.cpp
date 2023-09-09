@@ -50,16 +50,16 @@ constexpr float BOX_EPSILON = 0.5f;
 void TextPattern::OnAttachToFrameNode()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     if (pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE) {
         host->GetRenderContext()->UpdateClipEdge(true);
     }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     host->SetDraggable(theme->GetDraggable());
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
@@ -250,7 +250,7 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
-    CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
+    CHECK_NULL_VOID(selectOverlayProxy_);
     auto start = textSelector_.GetTextStart();
     auto end = textSelector_.GetTextEnd();
     selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
@@ -408,7 +408,7 @@ void TextPattern::CheckHandles(SelectHandleInfo& handleInfo)
 
 void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!longPressEvent_);
+    CHECK_NULL_VOID(!longPressEvent_);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -477,7 +477,7 @@ void TextPattern::HandleClickEvent(GestureEvent& info)
 
 void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!clickEventInitialized_);
+    CHECK_NULL_VOID(!clickEventInitialized_);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -491,7 +491,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void TextPattern::InitMouseEvent()
 {
-    CHECK_NULL_VOID_NOLOG(!mouseEventInitialized_);
+    CHECK_NULL_VOID(!mouseEventInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
@@ -501,7 +501,7 @@ void TextPattern::InitMouseEvent()
 
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleMouseEvent(info);
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -576,7 +576,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
 
 void TextPattern::InitTouchEvent()
 {
-    CHECK_NULL_VOID_NOLOG(!touchEventInitialized_);
+    CHECK_NULL_VOID(!touchEventInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
@@ -584,7 +584,7 @@ void TextPattern::InitTouchEvent()
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleTouchEvent(info);
     };
     auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -599,20 +599,20 @@ void TextPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void TextPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!panEventInitialized_);
+    CHECK_NULL_VOID(!panEventInitialized_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandlePanStart(info);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandlePanUpdate(info);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandlePanEnd(info);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {};
@@ -922,7 +922,7 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
         selectInfo.callerFrameNode = GetHost();
         selectOverlayProxy_ =
             pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo, WeakClaim(this), animation);
-        CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
+        CHECK_NULL_VOID(selectOverlayProxy_);
         auto start = textSelector_.GetTextStart();
         auto end = textSelector_.GetTextEnd();
         selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
@@ -1283,7 +1283,7 @@ OffsetF TextPattern::GetDragUpperLeftCoordinates()
     } else {
         offset = { contentRect_.GetX(), startY + contentRect_.GetY() };
     }
-    
+
     return GetParentGlobalOffset() + offset;
 }
 

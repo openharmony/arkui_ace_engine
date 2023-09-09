@@ -44,7 +44,7 @@ public:
     void OnFinish() const override
     {
         LOGI("ServicePlatformEventCallback OnFinish");
-        CHECK_NULL_VOID_NOLOG(onFinish_);
+        CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
@@ -77,7 +77,7 @@ void AceServiceAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::Sessi
     // get asset
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    CHECK_NULL_VOID_NOLOG(moduleInfo);
+    CHECK_NULL_VOID(moduleInfo);
     packagePathStr += "/" + moduleInfo->package + "/";
     auto abilityInfo = GetAbilityInfo();
 

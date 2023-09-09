@@ -39,7 +39,7 @@ void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
     std::shared_lock<std::shared_mutex> readLock(scopeLock_);
-    CHECK_NULL_VOID_NOLOG(updateScopeNotify_);
+    CHECK_NULL_VOID(updateScopeNotify_);
     updateScopeNotify_(id);
 }
 

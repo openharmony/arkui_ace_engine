@@ -73,7 +73,7 @@ WantWrapOhos::WantWrapOhos(const std::string& bundleName, const std::string& abi
 void WantWrapOhos::SetWantParamsFromWantWrap(void* want)
 {
     auto destWant = reinterpret_cast<AAFwk::Want*>(want);
-    CHECK_NULL_VOID_NOLOG(destWant);
+    CHECK_NULL_VOID(destWant);
     auto params = want_.GetParams();
     destWant->SetParams(params);
 }

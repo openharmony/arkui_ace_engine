@@ -157,7 +157,7 @@ RefPtr<CanvasImage> SkiaImage::QueryFromCache(const std::string& key)
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
     auto cacheImage = cache->GetCacheImage(key);
-    CHECK_NULL_RETURN_NOLOG(cacheImage, nullptr);
+    CHECK_NULL_RETURN(cacheImage, nullptr);
     LOGD("skImage found in cache: %{public}s", key.c_str());
 
     auto skiaImage = MakeRefPtr<SkiaImage>(cacheImage->imagePtr);

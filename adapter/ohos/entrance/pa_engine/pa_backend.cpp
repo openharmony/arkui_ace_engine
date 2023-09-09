@@ -45,7 +45,7 @@ bool PaBackend::Initialize(BackendType type, SrcLanguage language)
     type_ = type;
     language_ = language;
 
-    CHECK_NULL_RETURN_NOLOG(jsBackendEngine_, false);
+    CHECK_NULL_RETURN(jsBackendEngine_, false);
     jsBackendEngine_->Initialize(type, language);
 
     LOGI("PaBackend initialize end.");
@@ -69,7 +69,7 @@ void PaBackend::UpdateState(Backend::State state)
                 jsBackendEngine_->PostSyncTask(
                     [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_)] {
                         auto jsBackendEngine = weakEngine.Upgrade();
-                        CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+                        CHECK_NULL_VOID(jsBackendEngine);
                         jsBackendEngine->DestroyApplication("pa");
                     });
             }
@@ -85,7 +85,7 @@ void PaBackend::OnCommand(const OHOS::AAFwk::Want& want, int startId)
     jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), want, startId] {
             auto jsBackendEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+            CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnCommand(want, startId);
         });
 }
@@ -339,14 +339,14 @@ void PaBackend::LoadPa(const std::string& url, const OHOS::AAFwk::Want& want)
         jsBackendEngine_->PostSyncTask(
             [weak = WeakPtr<JsBackendEngine>(jsBackendEngine_), url, want] {
                 auto jsBackendEngine = weak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+                CHECK_NULL_VOID(jsBackendEngine);
                 jsBackendEngine->LoadJs(url, want);
             });
     } else {
         jsBackendEngine_->PostTask(
             [weak = WeakPtr<JsBackendEngine>(jsBackendEngine_), url, want] {
                 auto jsBackendEngine = weak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+                CHECK_NULL_VOID(jsBackendEngine);
                 jsBackendEngine->LoadJs(url, want);
             });
     }
@@ -367,7 +367,7 @@ void PaBackend::OnCreate(const OHOS::AAFwk::Want& want)
     jsBackendEngine_->PostSyncTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), want] {
             auto jsBackendEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+            CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnCreate(want);
         });
 }
@@ -378,7 +378,7 @@ void PaBackend::OnDelete(const int64_t formId)
     jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formId] {
             auto jsBackendEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+            CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnDelete(formId);
         });
 }
@@ -389,7 +389,7 @@ void PaBackend::OnTriggerEvent(const int64_t formId, const std::string& message)
     jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formId, message] {
             auto jsBackendEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+            CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnTriggerEvent(formId, message);
         });
 }
@@ -400,7 +400,7 @@ void PaBackend::OnUpdate(const int64_t formId)
     jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formId] {
             auto jsBackendEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+            CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnUpdate(formId);
         });
 }
@@ -411,7 +411,7 @@ void PaBackend::OnCastTemptoNormal(const int64_t formId)
     jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formId] {
             auto jsBackendEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+            CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnCastTemptoNormal(formId);
         });
 }
@@ -422,7 +422,7 @@ void PaBackend::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEvents
     jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), formEventsMap] {
             auto jsBackendEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+            CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnVisibilityChanged(formEventsMap);
         });
 }
@@ -461,7 +461,7 @@ void PaBackend::OnDisConnect(const OHOS::AAFwk::Want& want)
     jsBackendEngine_->PostTask(
         [weakEngine = WeakPtr<JsBackendEngine>(jsBackendEngine_), want] {
             auto jsBackendEngine = weakEngine.Upgrade();
-            CHECK_NULL_VOID_NOLOG(jsBackendEngine);
+            CHECK_NULL_VOID(jsBackendEngine);
             jsBackendEngine->OnDisconnectService(want);
         });
 }

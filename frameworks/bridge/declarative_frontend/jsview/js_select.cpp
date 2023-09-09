@@ -247,9 +247,9 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], textColor)) {
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
+            CHECK_NULL_VOID(theme);
             textColor = theme->GetFontColor();
         } else {
             return;
@@ -269,9 +269,9 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], bgColor)) {
         if (info[0]->IsUndefined() || info[0]->IsNull()) {
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
+            CHECK_NULL_VOID(theme);
             bgColor = theme->GetSelectedColor();
         } else {
             return;
@@ -299,9 +299,9 @@ void JSSelect::SelectedOptionFont(const JSCallbackInfo& info)
             SelectModel::GetInstance()->SetSelectedOptionFontSize(fontSize);
         } else if (size->IsUndefined()) {
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
+            CHECK_NULL_VOID(theme);
             SelectModel::GetInstance()->SetSelectedOptionFontSize(theme->GetFontSize());
         }
     }
@@ -339,9 +339,9 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], textColor)) {
         if (info[0]->IsNull() || info[0]->IsUndefined()) {
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
+            CHECK_NULL_VOID(theme);
             textColor = theme->GetSelectedColorText();
         } else {
             return;
@@ -379,9 +379,9 @@ void JSSelect::OptionFont(const JSCallbackInfo& info)
         }
         if (size->IsUndefined()) {
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto theme = pipeline->GetTheme<SelectTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
+            CHECK_NULL_VOID(theme);
             SelectModel::GetInstance()->SetOptionFontSize(theme->GetFontSize());
         }
     }

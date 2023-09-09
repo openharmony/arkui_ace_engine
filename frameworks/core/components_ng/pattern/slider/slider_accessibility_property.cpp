@@ -23,9 +23,9 @@ namespace OHOS::Ace::NG {
 std::string SliderAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(frameNode, "");
+    CHECK_NULL_RETURN(frameNode, "");
     auto sliderProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_RETURN_NOLOG(sliderProperty, "");
+    CHECK_NULL_RETURN(sliderProperty, "");
     return std::to_string(sliderProperty->GetValue().value_or(0));
 }
 
@@ -33,9 +33,9 @@ AccessibilityValue SliderAccessibilityProperty::GetAccessibilityValue() const
 {
     AccessibilityValue result;
     auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(frameNode, result);
+    CHECK_NULL_RETURN(frameNode, result);
     auto sliderProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_RETURN_NOLOG(sliderProperty, result);
+    CHECK_NULL_RETURN(sliderProperty, result);
     result.min = sliderProperty->GetMin().value_or(0);
     result.max = sliderProperty->GetMax().value_or(100.0f);
     result.current = sliderProperty->GetValue().value_or(0);

@@ -358,25 +358,25 @@ void GestureEventHub::InitDragDropEvent()
 {
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto gestureEventHub = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        CHECK_NULL_VOID(gestureEventHub);
         gestureEventHub->HandleOnDragStart(info);
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto gestureEventHub = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        CHECK_NULL_VOID(gestureEventHub);
         gestureEventHub->HandleOnDragUpdate(info);
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto gestureEventHub = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        CHECK_NULL_VOID(gestureEventHub);
         gestureEventHub->HandleOnDragEnd(info);
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto gestureEventHub = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(gestureEventHub);
+        CHECK_NULL_VOID(gestureEventHub);
         gestureEventHub->HandleOnDragCancel();
     };
 
@@ -420,9 +420,9 @@ void GestureEventHub::StartLongPressActionForWeb()
     taskScheduler->PostTask(
         [weak = WeakClaim(this)]() {
             auto gestureHub = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(gestureHub);
+            CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
-            CHECK_NULL_VOID_NOLOG(dragEventActuator);
+            CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartLongPressActionForWeb();
         },
         TaskExecutor::TaskType::UI);
@@ -439,9 +439,9 @@ void GestureEventHub::CancelDragForWeb()
         [weak = WeakClaim(this)]() {
             LOGI("web long press action start");
             auto gestureHub = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(gestureHub);
+            CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
-            CHECK_NULL_VOID_NOLOG(dragEventActuator);
+            CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->CancelDragForWeb();
         },
         TaskExecutor::TaskType::UI);
@@ -450,7 +450,7 @@ void GestureEventHub::CancelDragForWeb()
 void GestureEventHub::ResetDragActionForWeb()
 {
     isReceivedDragGestureInfo_ = false;
-    CHECK_NULL_VOID_NOLOG(dragEventActuator_);
+    CHECK_NULL_VOID(dragEventActuator_);
     dragEventActuator_->ResetDragActionForWeb();
 }
 
@@ -471,9 +471,9 @@ void GestureEventHub::StartDragTaskForWeb()
         [weak = WeakClaim(this)]() {
             LOGI("web drag task start");
             auto gestureHub = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(gestureHub);
+            CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
-            CHECK_NULL_VOID_NOLOG(dragEventActuator);
+            CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
         },
         TaskExecutor::TaskType::UI);
@@ -630,7 +630,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
             CHECK_NULL_VOID(taskScheduler);
             taskScheduler->PostTask(
                 [pipeline, info, gestureEventHubPtr, frameNode, dragDropInfo, event]() {
-                    CHECK_NULL_VOID_NOLOG(gestureEventHubPtr);
+                    CHECK_NULL_VOID(gestureEventHubPtr);
                     CHECK_NULL_VOID(frameNode);
                     gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
                 },
@@ -840,7 +840,7 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     auto focusHub = eventHub->GetFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub);
+    CHECK_NULL_VOID(focusHub);
     focusHub->SetOnClickCallback(std::move(clickEvent));
 }
 
@@ -883,9 +883,9 @@ OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
 {
     auto callback = [weak = WeakClaim(this)](AccessibilityEventType eventType) {
         auto gestureHub = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(gestureHub);
+        CHECK_NULL_VOID(gestureHub);
         auto node = gestureHub->GetFrameNode();
-        CHECK_NULL_VOID_NOLOG(node);
+        CHECK_NULL_VOID(node);
         node->OnAccessibilityEvent(eventType);
     };
     return callback;
@@ -916,7 +916,7 @@ bool GestureEventHub::ActClick()
     info.SetGlobalLocation(globalOffset);
     if (clickEventActuator_) {
         click = clickEventActuator_->GetClickEvent();
-        CHECK_NULL_RETURN_NOLOG(click, true);
+        CHECK_NULL_RETURN(click, true);
         click(info);
         return true;
     }
@@ -958,7 +958,7 @@ bool GestureEventHub::ActLongClick()
     info.SetGlobalLocation(globalOffset);
     if (longPressEventActuator_) {
         click = longPressEventActuator_->GetGestureEventFunc();
-        CHECK_NULL_RETURN_NOLOG(click, true);
+        CHECK_NULL_RETURN(click, true);
         click(info);
         return true;
     }

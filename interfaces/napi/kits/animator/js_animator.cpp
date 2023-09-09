@@ -638,8 +638,8 @@ extern "C" __attribute__((constructor)) void AnimatorRegister()
 
 void AnimatorResult::ApplyOption()
 {
-    CHECK_NULL_VOID_NOLOG(animator_);
-    CHECK_NULL_VOID_NOLOG(option_);
+    CHECK_NULL_VOID(animator_);
+    CHECK_NULL_VOID(option_);
     animator_->SetDuration(option_->duration);
     animator_->SetIteration(option_->iterations);
     animator_->SetStartDelay(option_->delay);

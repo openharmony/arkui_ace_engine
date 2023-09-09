@@ -88,14 +88,14 @@ public:
     void OnFinish() const override
     {
         LOGI("UIContent OnFinish");
-        CHECK_NULL_VOID_NOLOG(onFinish_);
+        CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
         LOGI("UIContent OnStartAbility");
-        CHECK_NULL_VOID_NOLOG(onStartAbility_);
+        CHECK_NULL_VOID(onStartAbility_);
         onStartAbility_(address);
     }
 
@@ -206,11 +206,11 @@ UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability) : instanceId_(A
 void UIContentImpl::DestroyUIDirector()
 {
     auto container = AceContainer::GetContainerInstance(instanceId_);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto rsUIDirector = pipelineContext->GetRSUIDirector();
-    CHECK_NULL_VOID_NOLOG(rsUIDirector);
+    CHECK_NULL_VOID(rsUIDirector);
     rsUIDirector->Destroy();
 }
 

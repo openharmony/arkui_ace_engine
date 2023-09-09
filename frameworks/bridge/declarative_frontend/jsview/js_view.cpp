@@ -600,8 +600,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
 
     auto pageTransitionFunction = [weak = AceType::WeakClaim(this)]() {
         auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsView);
-        CHECK_NULL_VOID_NOLOG(jsView->jsViewFunction_);
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         {
             ACE_SCORING_EVENT("Component[" + jsView->viewId_ + "].Transition");
@@ -620,7 +620,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
 
     auto updateViewNodeFunction = [weak = AceType::WeakClaim(this)](const RefPtr<AceType>& node) {
         auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(jsView);
+        CHECK_NULL_VOID(jsView);
         jsView->viewNode_ = node;
     };
 

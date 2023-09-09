@@ -46,7 +46,7 @@ bool GeometryTransition::IsInAndOutValid() const
 
 bool GeometryTransition::IsRunning(const WeakPtr<FrameNode>& frameNode) const
 {
-    CHECK_NULL_RETURN_NOLOG(IsInAndOutValid(), false);
+    CHECK_NULL_RETURN(IsInAndOutValid(), false);
     return (hasInAnim_ && frameNode.Upgrade() == inNode_) || (hasOutAnim_ && frameNode.Upgrade() == outNode_);
 }
 
@@ -81,9 +81,9 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> GeometryTransition::GetMatchedPa
 
 RectF GeometryTransition::GetNodeAbsFrameRect(const RefPtr<FrameNode>& node, std::optional<OffsetF> parentPos) const
 {
-    CHECK_NULL_RETURN_NOLOG(node, RectF());
+    CHECK_NULL_RETURN(node, RectF());
     auto renderContext = node->GetRenderContext();
-    CHECK_NULL_RETURN_NOLOG(renderContext, RectF());
+    CHECK_NULL_RETURN(renderContext, RectF());
     auto parentGlobalOffset = parentPos.value_or(node->GetPaintRectGlobalOffsetWithTranslate(true));
     auto paintRect = renderContext->GetPaintRectWithTransform();
     return RectF(parentGlobalOffset + paintRect.GetOffset(), paintRect.GetSize());
@@ -92,7 +92,7 @@ RectF GeometryTransition::GetNodeAbsFrameRect(const RefPtr<FrameNode>& node, std
 void GeometryTransition::RecordOutNodeFrame()
 {
     auto outNode = outNode_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(outNode);
+    CHECK_NULL_VOID(outNode);
     outNodeParentPos_ = outNode->GetPaintRectGlobalOffsetWithTranslate(true);
     auto outNodeAbsRect = GetNodeAbsFrameRect(outNode_.Upgrade(), outNodeParentPos_);
     outNodePos_ = outNodeAbsRect.GetOffset();
@@ -139,7 +139,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
 
     auto inNode = inNode_.Upgrade();
     auto outNode = outNode_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(IsInAndOutValid() && (inNode != outNode));
+    CHECK_NULL_VOID(IsInAndOutValid() && (inNode != outNode));
 
     bool follow = false;
     if (hasOutAnim_) {
@@ -343,9 +343,9 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         [id = Container::CurrentId(), nodeWeak = WeakClaim(RawPtr(self))]() {
             ContainerScope scope(id);
             auto node = nodeWeak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(node);
+            CHECK_NULL_VOID(node);
             auto renderContext = node->GetRenderContext();
-            CHECK_NULL_VOID_NOLOG(renderContext);
+            CHECK_NULL_VOID(renderContext);
             renderContext->SetSandBox(std::nullopt);
             LOGD("GeometryTransition: node %{public}d animation completed", node->GetId());
         },
@@ -359,7 +359,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
 
 RefPtr<FrameNode> CreateHolderNode(const RefPtr<FrameNode>& node)
 {
-    CHECK_NULL_RETURN_NOLOG(node, nullptr);
+    CHECK_NULL_RETURN(node, nullptr);
     auto newNode = FrameNode::CreateFrameNode(
         node->GetTag(), ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     newNode->SetGeometryNode(node->GetGeometryNode()->Clone());
@@ -373,7 +373,7 @@ RefPtr<FrameNode> CreateHolderNode(const RefPtr<FrameNode>& node)
 // transition (parameter is its transition direction).
 bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction)
 {
-    CHECK_NULL_RETURN_NOLOG(followWithoutTransition_, false);
+    CHECK_NULL_RETURN(followWithoutTransition_, false);
     if (!direction.has_value()) {
         auto inNode = inNode_.Upgrade();
         auto outNode = outNode_.Upgrade();
@@ -425,7 +425,7 @@ bool GeometryTransition::OnFollowWithoutTransition(std::optional<bool> direction
 
 bool GeometryTransition::IsParent(const WeakPtr<FrameNode>& parent, const WeakPtr<FrameNode>& child) const
 {
-    CHECK_NULL_RETURN_NOLOG(parent.Upgrade() && child.Upgrade(), false);
+    CHECK_NULL_RETURN(parent.Upgrade() && child.Upgrade(), false);
     RefPtr<UINode> node = child.Upgrade();
     while (node != nullptr) {
         if (AceType::DynamicCast<FrameNode>(node) == parent) {
@@ -460,7 +460,7 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
 {
     auto inNode = inNode_.Upgrade();
     auto outNode = outNode_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(!staticNodeAbsRect_ &&
+    CHECK_NULL_VOID(!staticNodeAbsRect_ &&
         inNode && outNode && outNode->IsRemoving() && outNodeTargetAbsRect_ && outNodeTargetAbsRect_->IsValid());
     if (trigger.Upgrade()) {
         RecordAnimationOption(trigger, option);
@@ -468,11 +468,11 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
     }
     auto inRenderContext = inNode->GetRenderContext();
     auto outRenderContext = outNode->GetRenderContext();
-    CHECK_NULL_VOID_NOLOG(inRenderContext && outRenderContext && inRenderContext->IsSynced());
+    CHECK_NULL_VOID(inRenderContext && outRenderContext && inRenderContext->IsSynced());
     auto inNodeParentPos = inNode->GetPaintRectGlobalOffsetWithTranslate(true);
     auto inNodeAbsRect = GetNodeAbsFrameRect(inNode, inNodeParentPos);
     auto inNodeAbsRectOld = outNodeTargetAbsRect_.value();
-    CHECK_NULL_VOID_NOLOG(inNodeAbsRect != inNodeAbsRectOld);
+    CHECK_NULL_VOID(inNodeAbsRect != inNodeAbsRectOld);
     static constexpr int32_t defaultDuration = 100;
     auto animOption = animationOption_.IsValid() ? animationOption_ : AnimationOption(Curves::LINEAR, defaultDuration);
     AnimationUtils::Animate(animOption,
@@ -493,9 +493,9 @@ void GeometryTransition::OnReSync(const WeakPtr<FrameNode>& trigger, const Anima
             ContainerScope scope(id);
             auto geometryTransition = geometryTransitionWeak.Upgrade();
             auto inNode = inNodeWeak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(geometryTransition && inNode);
+            CHECK_NULL_VOID(geometryTransition && inNode);
             auto inContext = inNode->GetRenderContext();
-            CHECK_NULL_VOID_NOLOG(inContext);
+            CHECK_NULL_VOID(inContext);
             inContext->SetSandBox(std::nullopt, geometryTransition->inNode_ == inNode && !outNodeWeak.Upgrade());
         });
     LOGD("GeometryTransition: outNode: %{public}d %{public}s resyncs to inNode: %{public}d %{public}s, "

@@ -177,7 +177,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper)
 
 void MenuItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& offset)
 {
-    CHECK_NULL_VOID_NOLOG(wrapper);
+    CHECK_NULL_VOID(wrapper);
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
     wrapper->Layout();
 }
@@ -186,7 +186,7 @@ void MenuItemGroupLayoutAlgorithm::LayoutIndex(const RefPtr<LayoutWrapper>& wrap
 bool MenuItemGroupLayoutAlgorithm::NeedHeaderPadding(const RefPtr<FrameNode>& host)
 {
     auto brotherNode = GetBrotherNode(host);
-    CHECK_NULL_RETURN_NOLOG(brotherNode, false);
+    CHECK_NULL_RETURN(brotherNode, false);
     return brotherNode->GetTag() != V2::MENU_ITEM_GROUP_ETS_TAG;
 }
 

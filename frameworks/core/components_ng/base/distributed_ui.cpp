@@ -76,10 +76,10 @@ SerializeableObjectArray DistributedUI::DumpUITree()
     ResetDirtyNodes();
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(context, SerializeableObjectArray());
+    CHECK_NULL_RETURN(context, SerializeableObjectArray());
     auto pageRootNode = currentPageId_ ? context->GetStageManager()->GetPageById(currentPageId_)
                                        : context->GetStageManager()->GetLastPage();
-    CHECK_NULL_RETURN_NOLOG(pageRootNode, SerializeableObjectArray());
+    CHECK_NULL_RETURN(pageRootNode, SerializeableObjectArray());
     LOGD("UITree Dump page: %{public}d", pageRootNode->GetPageId());
 
     SerializeableObjectArray objectArray;
@@ -118,7 +118,7 @@ void DistributedUI::ProcessSerializeableInputEvent(const SerializeableObjectArra
 #endif
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
 
     TouchEvent event;
     std::unique_ptr<JsonValue>& json = (std::unique_ptr<JsonValue>&)array.front();
@@ -161,7 +161,7 @@ void DistributedUI::UpdateUITree(const SerializeableObjectArray& array)
     pendingUpdates_.emplace_back(std::move((SerializeableObjectArray&)array));
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
     context->RequestFrame();
 }
 
@@ -749,9 +749,9 @@ void DistributedUI::UpdateUITreeInner(SerializeableObjectArray& nodeArray)
 #endif
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
     auto pageRootNode = context->GetStageManager()->GetLastPage();
-    CHECK_NULL_VOID_NOLOG(pageRootNode);
+    CHECK_NULL_VOID(pageRootNode);
 
     LOGD("UITree Update %{public}zu nodes", nodeArray.size());
     for (const auto& nodeObject : nodeArray) {
@@ -781,9 +781,9 @@ void DistributedUI::RestoreUITreeInner(const SerializeableObjectArray& nodeArray
     }
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
     auto pageRootNode = context->GetStageManager()->GetLastPage();
-    CHECK_NULL_VOID_NOLOG(pageRootNode);
+    CHECK_NULL_VOID(pageRootNode);
     RestorePageNode(pageRootNode);
     sinkPageChildren_ = pageRootNode->GetChildren();
     for (const auto& child : sinkPageChildren_) {

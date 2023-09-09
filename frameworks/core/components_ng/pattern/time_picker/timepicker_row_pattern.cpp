@@ -49,7 +49,7 @@ void TimePickerRowPattern::OnAttachToFrameNode()
 
 bool TimePickerRowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
     return true;
@@ -98,12 +98,12 @@ void TimePickerRowPattern::OnModifyDone()
     InitDisabled();
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(refPtr);
+        CHECK_NULL_VOID(refPtr);
         refPtr->HandleColumnChange(tag, add, index, notify);
     });
     SetEventCallback([weak = WeakClaim(this)](bool refresh) {
         auto refPtr = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(refPtr);
+        CHECK_NULL_VOID(refPtr);
         refPtr->FireChangeEvent(refresh);
     });
     auto focusHub = host->GetFocusHub();
@@ -498,7 +498,7 @@ void TimePickerRowPattern::OnColumnsBuilding()
     }
     secondColumnPattern->SetOptions(GetOptionsCount());
     secondColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
-    
+
 }
 
 void TimePickerRowPattern::HandleHourColumnBuilding()

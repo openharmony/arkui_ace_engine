@@ -327,7 +327,7 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
         }
         if (event.code == KeyCode::KEY_MENU || event.keyIntention == KeyIntention::INTENTION_MENU) {
             auto targetNode = wp.Upgrade();
-            CHECK_NULL_RETURN_NOLOG(targetNode, false);
+            CHECK_NULL_RETURN(targetNode, false);
             if (!param.placement.has_value()) {
                 param.placement = Placement::BOTTOM_LEFT;
             }

@@ -103,16 +103,16 @@ void SwiperIndicatorPattern::OnModifyDone()
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(config.frameSizeChange, false);
     return true;
 }
 
 void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!clickEvent_);
+    CHECK_NULL_VOID(!clickEvent_);
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleClick(info);
     };
     clickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));
@@ -135,7 +135,7 @@ void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /* info */)
         return;
     }
     GetMouseClickIndex();
-    CHECK_NULL_VOID_NOLOG(mouseClickIndex_);
+    CHECK_NULL_VOID(mouseClickIndex_);
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
@@ -554,7 +554,7 @@ bool SwiperIndicatorPattern::CheckIsTouchBottom(const TouchLocationInfo& info)
 
 void SwiperIndicatorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!longPressEvent_);
+    CHECK_NULL_VOID(!longPressEvent_);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -628,13 +628,13 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
 float SwiperIndicatorPattern::HandleTouchClickMargin()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, 0.0f);
+    CHECK_NULL_RETURN(host, 0.0f);
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
-    CHECK_NULL_RETURN_NOLOG(paintProperty, 0.0f);
+    CHECK_NULL_RETURN(paintProperty, 0.0f);
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(pipeline, 0.0f);
+    CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_RETURN_NOLOG(theme, 0.0f);
+    CHECK_NULL_RETURN(theme, 0.0f);
     auto itemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
     auto selectedItemWidth = paintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx();
     if (Negative(itemWidth) || Negative(selectedItemWidth)) {
@@ -642,7 +642,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
         selectedItemWidth = theme->GetSize().ConvertToPx();
     }
     auto swiperNode = GetSwiperNode();
-    CHECK_NULL_RETURN_NOLOG(swiperNode, 0.0f);
+    CHECK_NULL_RETURN(swiperNode, 0.0f);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     int32_t itemCount = swiperPattern->TotalCount();
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount - 1) + selectedItemWidth;
@@ -650,7 +650,7 @@ float SwiperIndicatorPattern::HandleTouchClickMargin()
     auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
     auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0f);
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
     auto frameSize = geometryNode->GetFrameSize();
     auto axis = swiperPattern->GetDirection();
     return ((axis == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5f;

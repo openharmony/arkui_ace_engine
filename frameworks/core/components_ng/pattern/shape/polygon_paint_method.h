@@ -41,9 +41,9 @@ public:
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
     {
-        CHECK_NULL_RETURN_NOLOG(paintWrapper, nullptr);
+        CHECK_NULL_RETURN(paintWrapper, nullptr);
         auto shapePaintProperty = DynamicCast<PolygonPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        CHECK_NULL_RETURN_NOLOG(shapePaintProperty, nullptr);
+        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
 
         if (propertiesFromAncestor_) {
             if (!shapePaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {

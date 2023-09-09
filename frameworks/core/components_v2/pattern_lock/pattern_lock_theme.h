@@ -57,7 +57,7 @@ public:
                 return theme;
             }
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_RETURN_NOLOG(pipeline, theme);
+            CHECK_NULL_RETURN(pipeline, theme);
             theme->wrongColor_ = Color::RED;
             theme->correctColor_ = Color::BLUE;
             theme->hoverColor_ = Color::BLACK;

@@ -66,7 +66,7 @@ void UpdateTitleFontSize(const RefPtr<NavBarNode>& hostNode, const Dimension& fo
     auto titleNode = AceType::DynamicCast<FrameNode>(hostNode->GetTitle());
     CHECK_NULL_VOID(titleNode);
     auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(titleLayoutProperty);
+    CHECK_NULL_VOID(titleLayoutProperty);
     titleLayoutProperty->UpdateFontSize(fontSize);
     titleNode->MarkModifyDone();
 }
@@ -378,7 +378,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
 
 void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    CHECK_NULL_VOID_NOLOG(navBarNode->GetTitle());
+    CHECK_NULL_VOID(navBarNode->GetTitle());
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto theme = NavigationGetTheme();
@@ -402,7 +402,7 @@ void BuildTitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>
 
 void BuildSubtitle(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    CHECK_NULL_VOID_NOLOG(navBarNode->GetSubtitle());
+    CHECK_NULL_VOID(navBarNode->GetSubtitle());
     if (navBarNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }
@@ -505,7 +505,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
 
 void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 {
-    CHECK_NULL_VOID_NOLOG(hostNode->GetToolBarNode());
+    CHECK_NULL_VOID(hostNode->GetToolBarNode());
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto toolBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolBarNode());
@@ -528,29 +528,29 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 
 void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!panEvent_);
+    CHECK_NULL_VOID(!panEvent_);
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragStart(info.GetOffsetY());
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this), this](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragUpdate(info.GetOffsetY());
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragEnd();
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragEnd();
     };
 

@@ -228,7 +228,7 @@ LayoutConstraintF WaterFlowLayoutAlgorithm::CreateChildConstraint(int32_t crossI
     itemConstraint.maxSize = itemIdealSize;
     itemConstraint.percentReference = itemIdealSize;
 
-    CHECK_NULL_RETURN_NOLOG(layoutProperty->HasItemLayoutConstraint(), itemConstraint);
+    CHECK_NULL_RETURN(layoutProperty->HasItemLayoutConstraint(), itemConstraint);
 
     OptionalSizeF childMinSize;
     OptionalSizeF childMaxSize;
@@ -250,9 +250,9 @@ LayoutConstraintF WaterFlowLayoutAlgorithm::CreateChildConstraint(int32_t crossI
         itemConstraint.minSize.UpdateSizeWhenLarger(childMinSize.ConvertToSizeT());
     }
 
-    CHECK_NULL_RETURN_NOLOG(childLayoutWrapper, itemConstraint);
+    CHECK_NULL_RETURN(childLayoutWrapper, itemConstraint);
     auto childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
-    CHECK_NULL_RETURN_NOLOG(childLayoutProperty, itemConstraint);
+    CHECK_NULL_RETURN(childLayoutProperty, itemConstraint);
     auto&& childCalcLayoutConstraint = childLayoutProperty->GetCalcLayoutConstraint();
     if (childCalcLayoutConstraint) {
         if (childCalcLayoutConstraint->maxSize.has_value()) {

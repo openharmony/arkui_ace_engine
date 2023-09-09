@@ -28,7 +28,7 @@ void SearchNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 
     searchChildren_.emplace(child->GetId());
     auto searchNode = GetChildren().back();
-    CHECK_NULL_VOID_NOLOG(searchNode);
+    CHECK_NULL_VOID(searchNode);
     child->MountToParent(searchNode);
 }
 
