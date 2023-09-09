@@ -88,6 +88,9 @@ void SetCrossAxisSize(float value, Axis axis, OptionalSizeF& size);
 
 void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
 
+void UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
+    const std::optional<CalcSize>& calcLayoutConstraintMaxMinSize, const SizeT<float> percentReference, bool IsMaxSize);
+
 /**
  * @brief Create node IdealSize.
  *

@@ -320,38 +320,41 @@ OptionalSizeF UpdateOptionSizeByCalcLayoutConstraint(const OptionalSize<float>& 
     const std::unique_ptr<MeasureProperty>& calcLayoutConstraint, const SizeT<float> percentReference)
 {
     OptionalSizeF finalSize(frameSize.Width(), frameSize.Height());
-    auto scaleProperty = ScaleProperty::CreateScaleProperty();
-
     if (!calcLayoutConstraint) {
         return finalSize;
     } else {
-        if (calcLayoutConstraint->maxSize.has_value()) {
-            if (calcLayoutConstraint->maxSize->Width().has_value()) {
-                auto maxWidthPx =
-                    ConvertToPx(calcLayoutConstraint->maxSize->Width(), scaleProperty, percentReference.Width());
-                finalSize.SetWidth(std::min(maxWidthPx.value(), finalSize.Width().value_or(maxWidthPx.value())));
-            }
-            if (calcLayoutConstraint->maxSize->Height().has_value()) {
-                auto maxHeightPx =
-                    ConvertToPx(calcLayoutConstraint->maxSize->Height(), scaleProperty, percentReference.Height());
-                finalSize.SetHeight(std::min(maxHeightPx.value(), finalSize.Height().value_or(maxHeightPx.value())));
-            }
-        }
-        if (calcLayoutConstraint->minSize.has_value()) {
-            if (calcLayoutConstraint->minSize->Width().has_value()) {
-                auto minWidthPx =
-                    ConvertToPx(calcLayoutConstraint->minSize->Width(), scaleProperty, percentReference.Width());
-                finalSize.SetWidth(std::max(minWidthPx.value(), finalSize.Width().value_or(minWidthPx.value())));
-            }
-
-            if (calcLayoutConstraint->minSize->Height().has_value()) {
-                auto minHeightPx =
-                    ConvertToPx(calcLayoutConstraint->minSize->Height(), scaleProperty, percentReference.Height());
-                finalSize.SetHeight(std::max(minHeightPx.value(), finalSize.Height().value_or(minHeightPx.value())));
-            }
-        }
+        UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(
+            finalSize, calcLayoutConstraint->maxSize, percentReference, true);
+        UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(
+            finalSize, calcLayoutConstraint->minSize, percentReference, false);
     }
     return finalSize;
+}
+
+void UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
+    const std::optional<CalcSize>& calcLayoutConstraintMaxMinSize, const SizeT<float> percentReference, bool IsMaxSize)
+{
+    auto scaleProperty = ScaleProperty::CreateScaleProperty();
+    if (!calcLayoutConstraintMaxMinSize.has_value()) {
+        return;
+    }
+    if (calcLayoutConstraintMaxMinSize->Width().has_value()) {
+        auto maxWidthPx = ConvertToPx(calcLayoutConstraintMaxMinSize->Width(), scaleProperty, percentReference.Width());
+        if (IsMaxSize) {
+            frameSize.SetWidth(std::min(maxWidthPx.value(), frameSize.Width().value_or(maxWidthPx.value())));
+        } else {
+            frameSize.SetWidth(std::max(maxWidthPx.value(), frameSize.Width().value_or(maxWidthPx.value())));
+        }
+    }
+    if (calcLayoutConstraintMaxMinSize->Height().has_value()) {
+        auto maxHeightPx =
+            ConvertToPx(calcLayoutConstraintMaxMinSize->Height(), scaleProperty, percentReference.Height());
+        if (IsMaxSize) {
+            frameSize.SetHeight(std::min(maxHeightPx.value(), frameSize.Height().value_or(maxHeightPx.value())));
+        } else {
+            frameSize.SetHeight(std::max(maxHeightPx.value(), frameSize.Height().value_or(maxHeightPx.value())));
+        }
+    }
 }
 
 OptionalSizeF CreateIdealSizeByPercentRef(

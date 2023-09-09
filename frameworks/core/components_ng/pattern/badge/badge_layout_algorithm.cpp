@@ -66,6 +66,7 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         hasFontSize_ = false;
         auto badgeThemeFontSize = badgeTheme->GetBadgeFontSize();
+        layoutProperty->UpdateBadgeFontSize(badgeThemeFontSize);
         textLayoutProperty->UpdateFontSize(badgeThemeFontSize);
     }
     if (textWrapper) {

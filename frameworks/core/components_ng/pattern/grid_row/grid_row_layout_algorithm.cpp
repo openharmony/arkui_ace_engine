@@ -21,6 +21,7 @@
 #include "grid_row_event_hub.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/grid_col/grid_col_layout_property.h"
 #include "core/components_ng/pattern/grid_row/grid_row_layout_property.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
@@ -92,15 +93,14 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
 
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
     idealSize.SetHeight(childHeight + padding.Height());
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >=
-                                                 static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    } else {
         auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(idealSize,
             layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
             layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
         idealSize.SetWidth(finalSize.Width());
         idealSize.SetHeight(finalSize.Height());
-    } else {
-        idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 }
