@@ -91,6 +91,7 @@ namespace {
 RefPtr<PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
+constexpr std::chrono::duration<int, std::milli> PIXELMAP_TIMEOUT_DURATION(1000);
 constexpr float ANIMATION_CURVE_VELOCITY_LIGHT_OR_MIDDLE = 10.0f;
 constexpr float ANIMATION_CURVE_VELOCITY_HEAVY = 0.0f;
 constexpr float ANIMATION_CURVE_MASS = 1.0f;
@@ -745,7 +746,10 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
         return nullptr;
     }
     std::unique_lock<std::mutex> lock(g_mutex);
-    thumbnailGet.wait(lock);
+    if (thumbnailGet.wait_for(lock, PIXELMAP_TIMEOUT_DURATION) == std::cv_status::timeout) {
+        LOGW("Create GetThumbnailPixelMap false, wait lock timeout");
+        return nullptr;
+    }
     return g_pixelMap;
 }
 
