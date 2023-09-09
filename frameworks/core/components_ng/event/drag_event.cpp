@@ -53,7 +53,6 @@ constexpr int32_t LONG_PRESS_DURATION = 500;
 constexpr int32_t PREVIEW_LONG_PRESS_RECONGNIZER = 800;
 #ifdef ENABLE_DRAG_FRAMEWORK
 constexpr Dimension FILTER_VALUE(0.0f);
-constexpr Dimension FILTER_RADIUS(100.0f);
 constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
 constexpr int32_t PIXELMAP_ANIMATION_TIME = 800;
 constexpr float SCALE_NUMBER = 0.95f;
@@ -496,11 +495,14 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
             parent->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
         AnimationOption option;
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(BlurStyle::BACKGROUND_THIN);
+        styleOption.colorMode = static_cast<ThemeColorMode>(static_cast<int32_t>(ThemeColorMode::SYSTEM));
         option.SetDuration(FILTER_TIMES);
         option.SetCurve(Curves::SHARP);
         columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_VALUE);
         AnimationUtils::Animate(
-            option, [columnNode]() { columnNode->GetRenderContext()->UpdateBackBlurRadius(FILTER_RADIUS); },
+            option, [columnNode, styleOption]() { columnNode->GetRenderContext()->UpdateBackBlurStyle(styleOption); },
             option.GetOnFinishEvent());
     }
     if (SystemProperties::GetDebugEnabled()) {
