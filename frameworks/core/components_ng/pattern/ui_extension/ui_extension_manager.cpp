@@ -26,7 +26,7 @@ void UIExtensionManager::RegisterUIExtensionInFocus(const WeakPtr<UIExtensionPat
 bool UIExtensionManager::OnBackPressed()
 {
     auto uiExtensionFocused = uiExtensionFocused_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(uiExtensionFocused, false);
+    CHECK_NULL_RETURN(uiExtensionFocused, false);
     return uiExtensionFocused->OnBackPressed();
 }
 } // namespace OHOS::Ace::NG

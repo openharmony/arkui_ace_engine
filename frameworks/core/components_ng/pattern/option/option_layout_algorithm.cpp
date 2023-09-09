@@ -95,7 +95,7 @@ std::optional<float> OptionLayoutAlgorithm::GetIdealWidth(LayoutWrapper* layoutW
 void OptionLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint)
 {
     auto children = row->GetAllChildrenWithBuild();
-    CHECK_NULL_VOID_NOLOG(!children.empty());
+    CHECK_NULL_VOID(!children.empty());
 
     float spaceWidth = constraint.maxSize.Width();
     float rowWidth = 0.0f;

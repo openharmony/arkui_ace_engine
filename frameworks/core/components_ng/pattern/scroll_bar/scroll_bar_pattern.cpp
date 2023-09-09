@@ -96,14 +96,14 @@ void ScrollBarPattern::OnModifyDone()
     scrollableEvent_->SetInBarRegionCallback([weak = AceType::WeakClaim(this)]
         (const PointF& point, SourceType source) {
             auto scrollBar = weak.Upgrade();
-            CHECK_NULL_RETURN_NOLOG(scrollBar, false);
+            CHECK_NULL_RETURN(scrollBar, false);
             return scrollBar->childRect_.IsInRegion(point);
         }
     );
     scrollableEvent_->SetBarCollectTouchTargetCallback([weak = AceType::WeakClaim(this)]
         (const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) {
             auto scrollBar = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(scrollBar);
+            CHECK_NULL_VOID(scrollBar);
             scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
         }
     );
@@ -127,9 +127,9 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
     if (displayMode_ != DisplayMode::OFF) {
         auto host = GetHost();
-        CHECK_NULL_RETURN_NOLOG(host, false);
+        CHECK_NULL_RETURN(host, false);
         auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN_NOLOG(renderContext, false);
+        CHECK_NULL_RETURN(renderContext, false);
         if (Positive(controlDistance_) && opacity_ == 0) {
             SetOpacity(UINT8_MAX);
             if (displayMode_ == DisplayMode::AUTO) {
@@ -343,7 +343,7 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
         frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity);
         frictionMotion_->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
             auto scrollBar = weakBar.Upgrade();
-            CHECK_NULL_VOID_NOLOG(scrollBar);
+            CHECK_NULL_VOID(scrollBar);
             scrollBar->ProcessFrictionMotion(value);
         });
     }
@@ -351,7 +351,7 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
         frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
         frictionController_->AddStopListener([weakBar = AceType::WeakClaim(this)]() {
             auto scrollBar = weakBar.Upgrade();
-            CHECK_NULL_VOID_NOLOG(scrollBar);
+            CHECK_NULL_VOID(scrollBar);
             scrollBar->ProcessFrictionMotionStop();
         });
     }

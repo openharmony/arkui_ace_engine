@@ -329,7 +329,7 @@ void ScrollBar::SetGestureEvent()
     if (!touchEvent_) {
         touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto scrollBar = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(scrollBar && scrollBar->IsScrollable());
+            CHECK_NULL_VOID(scrollBar && scrollBar->IsScrollable());
             if (info.GetTouches().empty()) {
                 return;
             }
@@ -369,7 +369,7 @@ void ScrollBar::SetMouseEvent()
     }
     mouseEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](MouseInfo& info) {
         auto scrollBar = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(scrollBar && scrollBar->IsScrollable());
+        CHECK_NULL_VOID(scrollBar && scrollBar->IsScrollable());
         Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
         bool inRegion = scrollBar->InBarHoverRegion(point);
         if (inRegion && !scrollBar->IsHover()) {
@@ -390,10 +390,10 @@ void ScrollBar::SetMouseEvent()
 
 void ScrollBar::SetHoverEvent()
 {
-    CHECK_NULL_VOID_NOLOG(!hoverEvent_);
+    CHECK_NULL_VOID(!hoverEvent_);
     hoverEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](bool isHover) {
         auto scrollBar = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(scrollBar && scrollBar->IsScrollable());
+        CHECK_NULL_VOID(scrollBar && scrollBar->IsScrollable());
         if (scrollBar->IsHover() && !isHover) {
             scrollBar->SetHover(false);
             if (!scrollBar->IsPressed()) {
@@ -453,11 +453,11 @@ void ScrollBar::PlayAdaptAnimation(
 void ScrollBar::CalcReservedHeight()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     const static int32_t PLATFORM_VERSION_TEN = 10;
     if (pipelineContext->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
         auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         startReservedHeight_ = Dimension(0.0, DimensionUnit::PX);
         endReservedHeight_ = theme->GetReservedHeight();
         LOGD("scrollBar set reservedHeight by theme");
@@ -576,7 +576,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         frictionMotion_ = AceType::MakeRefPtr<FrictionMotion>(friction_, 0, velocity);
         frictionMotion_->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
             auto scrollBar = weakBar.Upgrade();
-            CHECK_NULL_VOID_NOLOG(scrollBar);
+            CHECK_NULL_VOID(scrollBar);
             scrollBar->ProcessFrictionMotion(value);
         });
     }
@@ -584,7 +584,7 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
         frictionController_->AddStopListener([weakBar = AceType::WeakClaim(this)]() {
             auto scrollBar = weakBar.Upgrade();
-            CHECK_NULL_VOID_NOLOG(scrollBar);
+            CHECK_NULL_VOID(scrollBar);
             scrollBar->ProcessFrictionMotionStop();
         });
     }
@@ -627,12 +627,12 @@ void ScrollBar::ScheduleDisapplearDelayTask()
     if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
         disapplearDelayTask_.Cancel();
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
+        CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        CHECK_NULL_VOID(taskExecutor);
         disapplearDelayTask_.Reset([weak = WeakClaim(this)] {
             auto scrollBar = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(scrollBar);
+            CHECK_NULL_VOID(scrollBar);
             scrollBar->PlayScrollBarEndAnimation();
         });
         taskExecutor->PostDelayedTask(disapplearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION);

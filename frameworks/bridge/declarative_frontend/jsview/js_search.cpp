@@ -182,7 +182,7 @@ void JSSearch::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SearchTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     std::string buttonValue;
     if (!ParseJsString(info[0], buttonValue)) {
         return;
@@ -220,7 +220,7 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
         auto theme = GetTheme<SearchTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
 
         // set icon size
         CalcDimension size;
@@ -270,7 +270,7 @@ void JSSearch::SetCancelButton(const JSCallbackInfo& info)
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     // set style
     std::string styleStr;
@@ -337,7 +337,7 @@ void JSSearch::SetIconStyle(const JSCallbackInfo& info)
 void JSSearch::SetTextColor(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SearchTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
 
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
@@ -352,7 +352,7 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
         auto textFieldTheme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(textFieldTheme);
+        CHECK_NULL_VOID(textFieldTheme);
 
         // set caret width
         CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
@@ -388,7 +388,7 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");
@@ -439,7 +439,7 @@ void JSSearch::SetTextFont(const JSCallbackInfo& info)
     }
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     auto themeFontSize = theme->GetFontSize();
     Font font;
     auto fontSize = param->GetProperty("size");

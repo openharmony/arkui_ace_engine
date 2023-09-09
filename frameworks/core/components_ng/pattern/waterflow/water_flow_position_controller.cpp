@@ -40,7 +40,7 @@ void WaterFlowPositionController::ScrollPage(bool reverse, bool /* smooth */)
 bool WaterFlowPositionController::IsAtEnd() const
 {
     auto waterFlowPattern = AceType::DynamicCast<WaterFlowPattern>(scroll_.Upgrade());
-    CHECK_NULL_RETURN_NOLOG(waterFlowPattern, false);
+    CHECK_NULL_RETURN(waterFlowPattern, false);
     return waterFlowPattern->IsAtBottom();
 }
 } // namespace OHOS::Ace::NG

@@ -44,9 +44,9 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     return [weak = WeakClaim(this), dividerLineWidth, frameRect, dividerColor, dividerSpacing, pressColor,
                enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(picker);
+        CHECK_NULL_VOID(picker);
         auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern.Upgrade());
-        CHECK_NULL_VOID_NOLOG(textPickerPattern);
+        CHECK_NULL_VOID(textPickerPattern);
         auto dividerLength = frameRect.Width();
         if (textPickerPattern->GetIsShowInDialog()) {
             dividerLength = frameRect.Width() - PICKER_DIALOG_DIVIDER_MARGIN * DOUBLE;

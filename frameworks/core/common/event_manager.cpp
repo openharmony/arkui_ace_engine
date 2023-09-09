@@ -141,11 +141,11 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     auto coordinateOffset = textOverlayManager->GetCoordinateOffset();
     const Point point { touchPoint.x - coordinateOffset.GetX(), touchPoint.y - coordinateOffset.GetY(),
         touchPoint.sourceType };
-    CHECK_NULL_VOID_NOLOG(textOverlayManager);
+    CHECK_NULL_VOID(textOverlayManager);
     auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
-    CHECK_NULL_VOID_NOLOG(textOverlayBase);
+    CHECK_NULL_VOID(textOverlayBase);
     auto targetNode = textOverlayManager->GetTargetNode();
-    CHECK_NULL_VOID_NOLOG(targetNode);
+    CHECK_NULL_VOID(targetNode);
     for (auto& rect : textOverlayManager->GetTextOverlayRect()) {
         if (rect.IsInRegion(point)) {
             inSelectedRect_ = true;
@@ -168,7 +168,7 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
 void EventManager::HandleGlobalEventNG(const TouchEvent& touchPoint,
     const RefPtr<NG::SelectOverlayManager>& selectOverlayManager, const NG::OffsetF& rootOffset)
 {
-    CHECK_NULL_VOID_NOLOG(selectOverlayManager);
+    CHECK_NULL_VOID(selectOverlayManager);
     if (touchPoint.type == TouchType::DOWN &&
         touchTestResults_.find(touchPoint.id) != touchTestResults_.end()) {
         std::vector<std::string> touchTestIds;

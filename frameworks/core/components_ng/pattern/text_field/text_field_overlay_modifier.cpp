@@ -198,7 +198,7 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
 void TextFieldOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas)
 {
     auto edgeEffect = edgeEffect_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(edgeEffect);
+    CHECK_NULL_VOID(edgeEffect);
     edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
 }
 

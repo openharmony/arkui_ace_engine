@@ -169,7 +169,7 @@ void ProgressPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->GetInnerFocusPaintRect(paintRect);
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
@@ -210,7 +210,7 @@ void ProgressPattern::OnModifyDone()
         HandleEnabled();
         InitTouchEvent();
         auto focusHub = hub->GetFocusHub();
-        CHECK_NULL_VOID_NOLOG(focusHub);
+        CHECK_NULL_VOID(focusHub);
         InitOnKeyEvent(focusHub);
     } else {
         RemoveTouchEvent();

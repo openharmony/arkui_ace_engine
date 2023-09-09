@@ -46,7 +46,7 @@ void SvgFeComposite::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter
 #endif
 {
     auto declaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(declaration_);
-    CHECK_NULL_VOID_NOLOG(declaration);
+    CHECK_NULL_VOID(declaration);
     if (declaration->GetOperatorType() != FeOperatorType::FE_ARITHMETIC) {
         // this version skia not support SkBlendImageFilters
         return;

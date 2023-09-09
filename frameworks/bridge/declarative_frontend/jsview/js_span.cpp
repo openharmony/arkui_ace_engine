@@ -109,9 +109,9 @@ void JSSpan::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         textColor = theme->GetTextStyle().GetTextColor();
     }
     SpanModel::GetInstance()->SetTextColor(textColor);

@@ -186,7 +186,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
-        CHECK_NULL_VOID_NOLOG(paragraph_);
+        CHECK_NULL_VOID(paragraph_);
         auto canvas = drawingContext.canvas;
         canvas.Save();
         if (!textRacing_) {

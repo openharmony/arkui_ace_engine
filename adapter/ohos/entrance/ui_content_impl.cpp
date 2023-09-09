@@ -104,14 +104,14 @@ public:
     void OnFinish() const override
     {
         LOGI("UIContent OnFinish");
-        CHECK_NULL_VOID_NOLOG(onFinish_);
+        CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
         LOGI("UIContent OnStartAbility");
-        CHECK_NULL_VOID_NOLOG(onStartAbility_);
+        CHECK_NULL_VOID(onStartAbility_);
         onStartAbility_(address);
     }
 
@@ -164,7 +164,7 @@ public:
             taskExecutor->PostTask(
                 [container, keyboardRect, rsTransaction] {
                     auto context = container->GetPipelineContext();
-                    CHECK_NULL_VOID_NOLOG(context);
+                    CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
                 },
                 TaskExecutor::TaskType::UI);
@@ -187,11 +187,11 @@ public:
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
             (int32_t)avoidArea.topRect_.height_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
-        CHECK_NULL_VOID_NOLOG(container);
+        CHECK_NULL_VOID(container);
         auto pipeline = container->GetPipelineContext();
-        CHECK_NULL_VOID_NOLOG(pipeline);
+        CHECK_NULL_VOID(pipeline);
         auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        CHECK_NULL_VOID(taskExecutor);
         auto safeArea = ConvertAvoidArea(avoidArea);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
@@ -217,7 +217,7 @@ public:
     {
         LOGI("DragWindowListener::OnDrag called.");
         auto container = Platform::AceContainer::GetContainer(instanceId_);
-        CHECK_NULL_VOID_NOLOG(container);
+        CHECK_NULL_VOID(container);
         int32_t instanceId = instanceId_;
         if (container->IsSubContainer()) {
             instanceId = container->GetParentId();
@@ -311,12 +311,12 @@ void UIContentImpl::DestroyUIDirector()
 {
 #ifndef NG_BUILD
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsUIDirector = pipelineContext->GetRSUIDirector();
-    CHECK_NULL_VOID_NOLOG(rsUIDirector);
+    CHECK_NULL_VOID(rsUIDirector);
     LOGI("Destroying old rsUIDirectory");
     rsUIDirector->Destroy();
 #endif
@@ -328,9 +328,9 @@ void UIContentImpl::DestroyUIDirector()
 void UIContentImpl::DestroyCallback() const
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
 
@@ -650,15 +650,15 @@ void UIContentImpl::CommonInitializeForm(
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
                 [window = window_] {
-                    CHECK_NULL_VOID_NOLOG(window);
+                    CHECK_NULL_VOID(window);
                     window->PerformBack();
                 },
                 [context = context_](const std::string& address) {
                     auto sharedContext = context.lock();
-                    CHECK_NULL_VOID_NOLOG(sharedContext);
+                    CHECK_NULL_VOID(sharedContext);
                     auto abilityContext =
                         OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                    CHECK_NULL_VOID_NOLOG(abilityContext);
+                    CHECK_NULL_VOID(abilityContext);
                     LOGI("start ability with url = %{private}s", address.c_str());
                     AAFwk::Want want;
                     want.AddEntity(Want::ENTITY_BROWSER);
@@ -1101,15 +1101,15 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, context_, info,
             std::make_unique<ContentEventCallback>(
                 [window = window_] {
-                    CHECK_NULL_VOID_NOLOG(window);
+                    CHECK_NULL_VOID(window);
                     window->PerformBack();
                 },
                 [context = context_](const std::string& address) {
                     auto sharedContext = context.lock();
-                    CHECK_NULL_VOID_NOLOG(sharedContext);
+                    CHECK_NULL_VOID(sharedContext);
                     auto abilityContext =
                         OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                    CHECK_NULL_VOID_NOLOG(abilityContext);
+                    CHECK_NULL_VOID(abilityContext);
                     LOGI("start ability with url = %{private}s", address.c_str());
                     AAFwk::Want want;
                     want.AddEntity(Want::ENTITY_BROWSER);
@@ -1161,10 +1161,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         container->SetSharePanelCallback(
             [context = context_](const std::string& bundleName, const std::string& abilityName) {
                 auto sharedContext = context.lock();
-                CHECK_NULL_VOID_NOLOG(sharedContext);
+                CHECK_NULL_VOID(sharedContext);
                 auto abilityContext =
                     OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                CHECK_NULL_VOID_NOLOG(abilityContext);
+                CHECK_NULL_VOID(abilityContext);
                 auto abilityInfo = abilityContext->GetAbilityInfo();
                 AAFwk::Want want;
                 want.SetParam("abilityName", abilityInfo->name);
@@ -1317,7 +1317,7 @@ void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
     auto container = AceEngine::Get().GetContainer(instanceId_);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     // stop performance check and output json file
     AcePerformanceCheck::Stop();
     if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
@@ -1376,9 +1376,9 @@ bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("UIContentImpl: ProcessBackPressed: Platform::AceContainer::OnBackPressed called");
     auto container = AceEngine::Get().GetContainer(instanceId_);
-    CHECK_NULL_RETURN_NOLOG(container, false);
+    CHECK_NULL_RETURN(container, false);
     auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_RETURN_NOLOG(taskExecutor, false);
+    CHECK_NULL_RETURN(taskExecutor, false);
     bool ret = false;
     taskExecutor->PostSyncTask(
         [container, this, &ret]() {
@@ -1446,7 +1446,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     taskExecutor->PostTask(
         [weakContainer = WeakPtr<Platform::AceContainer>(container), config]() {
             auto container = weakContainer.Upgrade();
-            CHECK_NULL_VOID_NOLOG(container);
+            CHECK_NULL_VOID(container);
             Platform::ParsedConfig parsedConfig;
             parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             parsedConfig.deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
@@ -1506,7 +1506,7 @@ void UIContentImpl::SetIgnoreViewSafeArea(bool ignoreViewSafeArea)
     ContainerScope scope(instanceId_);
     auto pipeline = container->GetPipelineContext();
     const static int32_t PLATFORM_VERSION_TEN = 10;
-    CHECK_NULL_VOID_NOLOG(
+    CHECK_NULL_VOID(
         pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -1803,17 +1803,17 @@ int32_t UIContentImpl::CreateModalUIExtension(
 {
     LOGI("UIExtension create modal page start");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_RETURN_NOLOG(container, 0);
+    CHECK_NULL_RETURN(container, 0);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_RETURN_NOLOG(taskExecutor, 0);
+    CHECK_NULL_RETURN(taskExecutor, 0);
     int32_t sessionId = 0;
     taskExecutor->PostSyncTask(
         [container, &sessionId, want, callbacks = callbacks, config = config]() {
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto overlay = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID_NOLOG(overlay);
+            CHECK_NULL_VOID(overlay);
             sessionId = overlay->CreateModalUIExtension(want, callbacks, config.isProhibitBack);
         },
         TaskExecutor::TaskType::UI);
@@ -1829,16 +1829,16 @@ void UIContentImpl::CloseModalUIExtension(int32_t sessionId)
         return;
     }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, sessionId]() {
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto overlay = pipeline->GetOverlayManager();
-            CHECK_NULL_VOID_NOLOG(overlay);
+            CHECK_NULL_VOID(overlay);
             overlay->CloseModalUIExtension(sessionId);
         },
         TaskExecutor::TaskType::UI);

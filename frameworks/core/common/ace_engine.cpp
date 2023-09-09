@@ -114,25 +114,25 @@ RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 
 void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread)
 {
-    CHECK_NULL_VOID_NOLOG(watchDog_);
+    CHECK_NULL_VOID(watchDog_);
     watchDog_->Register(instanceId, taskExecutor, useUIAsJSThread);
 }
 
 void AceEngine::UnRegisterFromWatchDog(int32_t instanceId)
 {
-    CHECK_NULL_VOID_NOLOG(watchDog_);
+    CHECK_NULL_VOID(watchDog_);
     watchDog_->Unregister(instanceId);
 }
 
 void AceEngine::BuriedBomb(int32_t instanceId, uint64_t bombId)
 {
-    CHECK_NULL_VOID_NOLOG(watchDog_);
+    CHECK_NULL_VOID(watchDog_);
     watchDog_->BuriedBomb(instanceId, bombId);
 }
 
 void AceEngine::DefusingBomb(int32_t instanceId)
 {
-    CHECK_NULL_VOID_NOLOG(watchDog_);
+    CHECK_NULL_VOID(watchDog_);
     watchDog_->DefusingBomb(instanceId);
 }
 
@@ -166,7 +166,7 @@ void AceEngine::TriggerGarbageCollection()
 
 void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback)
 {
-    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID(callback);
     std::shared_lock<std::shared_mutex> lock(mutex_);
     for (const auto& [first, second] : containerMap_) {
         // first = container ID

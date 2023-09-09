@@ -38,7 +38,7 @@ SkPath SvgCircle::AsPath(const Size& viewPort) const
 {
     SkPath path;
     auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
-    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    CHECK_NULL_RETURN(declaration, path);
     path.addCircle(ConvertDimensionToPx(declaration->GetCx(), viewPort, SvgLengthType::HORIZONTAL),
         ConvertDimensionToPx(declaration->GetCy(), viewPort, SvgLengthType::VERTICAL),
         ConvertDimensionToPx(declaration->GetR(), viewPort, SvgLengthType::OTHER));
@@ -49,7 +49,7 @@ RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
     auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
-    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    CHECK_NULL_RETURN(declaration, path);
     path.AddCircle(ConvertDimensionToPx(declaration->GetCx(), viewPort, SvgLengthType::HORIZONTAL),
         ConvertDimensionToPx(declaration->GetCy(), viewPort, SvgLengthType::VERTICAL),
         ConvertDimensionToPx(declaration->GetR(), viewPort, SvgLengthType::OTHER));
@@ -60,7 +60,7 @@ RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
 void SvgCircle::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
 {
     auto declaration = AceType::DynamicCast<SvgCircleDeclaration>(declaration_);
-    CHECK_NULL_VOID_NOLOG(declaration);
+    CHECK_NULL_VOID(declaration);
     auto attr = animate->GetAttributeName();
     if (attr == DOM_SVG_CX) {
         AnimateOnAttribute(animate, declaration->GetCx());

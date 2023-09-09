@@ -104,7 +104,7 @@ void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
 
 void ImagePattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 {
-    CHECK_NULL_VOID_NOLOG(image);
+    CHECK_NULL_VOID(image);
     // set animation flush function for svg / gif
     image->SetRedrawCallback([weak = WeakPtr(GetHost())] {
         auto imageNode = weak.Upgrade();
@@ -262,7 +262,7 @@ void ImagePattern::CreateObscuredImage()
     auto props = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
-    CHECK_NULL_VOID_NOLOG(layoutConstraint);
+    CHECK_NULL_VOID(layoutConstraint);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto sourceInfo = props->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -486,7 +486,7 @@ void ImagePattern::OnAttachToFrameNode()
     pipeline->AddWindowStateChangedCallback(host->GetId());
     // set draggable for framenode
     auto theme = pipeline->GetTheme<ImageTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     auto draggable = theme->GetDraggable();
     if (draggable && !host->IsDraggable()) {
         auto gestureHub = host->GetOrCreateGestureEventHub();
@@ -502,7 +502,7 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
     auto id = frameNode->GetId();
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
 }
@@ -566,7 +566,7 @@ void ImagePattern::InitCopy()
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::PRESS) {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             pattern->OpenSelectOverlay();
         }
     };
@@ -731,7 +731,7 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 
 void ImagePattern::OnLanguageConfigurationUpdate()
 {
-    CHECK_NULL_VOID_NOLOG(loadingCtx_);
+    CHECK_NULL_VOID(loadingCtx_);
     auto&& src = loadingCtx_->GetSourceInfo();
     // Resource image needs to reload when Language changes
     if (src.GetSrcType() == SrcType::RESOURCE) {

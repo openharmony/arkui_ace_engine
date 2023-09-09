@@ -701,9 +701,9 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
     }
 
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
     if (LessNotEqual(indicatorHeight, swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx())) {
         indicatorHeight = swiperIndicatorTheme->GetIndicatorDigitHeight().ConvertToPx();
     }
@@ -773,9 +773,9 @@ void SwiperLayoutAlgorithm::MeasureArrow(
     CHECK_NULL_VOID(arrowGeometryNode);
 
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID_NOLOG(swiperIndicatorTheme);
+    CHECK_NULL_VOID(swiperIndicatorTheme);
 
     arrowGeometryNode->SetFrameSize(
         SizeF { static_cast<float>(

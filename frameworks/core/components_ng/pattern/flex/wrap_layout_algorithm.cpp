@@ -585,7 +585,7 @@ void WrapLayoutAlgorithm::CalcFlexGrowLayout(
     auto layoutProperty = itemWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto& flexItemProperty = layoutProperty->GetFlexItemProperty();
-    CHECK_NULL_VOID_NOLOG(flexItemProperty);
+    CHECK_NULL_VOID(flexItemProperty);
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     if (!layoutConstraint.has_value()) {
         return;

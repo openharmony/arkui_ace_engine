@@ -136,7 +136,7 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
 
 void CalendarDialogPattern::InitHoverEvent()
 {
-    CHECK_NULL_VOID_NOLOG(!hoverListener_);
+    CHECK_NULL_VOID(!hoverListener_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto inputHub = host->GetOrCreateInputEventHub();
@@ -145,7 +145,7 @@ void CalendarDialogPattern::InitHoverEvent()
     auto mouseCallback = [weak = WeakClaim(this)](const MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID_NOLOG(pattern->GetHoverState());
+        CHECK_NULL_VOID(pattern->GetHoverState());
         pattern->HandleEntryNodeHoverEvent(
             pattern->IsInEntryRegion(info.GetGlobalLocation()), info.GetGlobalLocation());
     };
@@ -166,14 +166,14 @@ void CalendarDialogPattern::InitHoverEvent()
 
 bool CalendarDialogPattern::IsInEntryRegion(const Offset& globalLocation)
 {
-    CHECK_NULL_RETURN_NOLOG(entryNode_, false);
+    CHECK_NULL_RETURN(entryNode_, false);
     return entryNode_->GetTransformRectRelativeToWindow().IsInRegion(
         PointF(globalLocation.GetX(), globalLocation.GetY()));
 }
 
 void CalendarDialogPattern::HandleEntryNodeHoverEvent(bool state, const Offset& globalLocation)
 {
-    CHECK_NULL_VOID_NOLOG(entryNode_);
+    CHECK_NULL_VOID(entryNode_);
     auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->HandleHoverEvent(state, globalLocation);
@@ -181,7 +181,7 @@ void CalendarDialogPattern::HandleEntryNodeHoverEvent(bool state, const Offset& 
 
 void CalendarDialogPattern::HandleEntryNodeTouchEvent(bool isPressed, const Offset& globalLocation)
 {
-    CHECK_NULL_VOID_NOLOG(entryNode_);
+    CHECK_NULL_VOID(entryNode_);
     if (IsInEntryRegion(globalLocation)) {
         auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
         CHECK_NULL_VOID(pattern);
@@ -206,7 +206,7 @@ void CalendarDialogPattern::InitClickEvent()
 
 void CalendarDialogPattern::HandleClickEvent(const GestureEvent& info)
 {
-    CHECK_NULL_VOID_NOLOG(entryNode_);
+    CHECK_NULL_VOID(entryNode_);
     if (IsInEntryRegion(info.GetGlobalLocation())) {
         auto pattern = entryNode_->GetPattern<CalendarPickerPattern>();
         CHECK_NULL_VOID(pattern);
@@ -253,7 +253,7 @@ void CalendarDialogPattern::InitOnKeyEvent()
 
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         if (event.IsNumberKey() && event.action == KeyAction::DOWN) {
             CHECK_NULL_RETURN(pattern->entryNode_, false);
             auto entryPattern = pattern->entryNode_->GetPattern<CalendarPickerPattern>();
@@ -275,7 +275,7 @@ void CalendarDialogPattern::InitOnKeyEvent()
 
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->isFocused_ = false;
         pattern->isCalendarFirstFocused_ = false;
         pattern->ClearCalendarFocusedState();
@@ -284,7 +284,7 @@ void CalendarDialogPattern::InitOnKeyEvent()
 
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->GetInnerFocusPaintRect(paintRect);
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
@@ -292,7 +292,7 @@ void CalendarDialogPattern::InitOnKeyEvent()
 
 void CalendarDialogPattern::InitEntryChangeEvent()
 {
-    CHECK_NULL_VOID_NOLOG(entryNode_);
+    CHECK_NULL_VOID(entryNode_);
     auto eventHub = entryNode_->GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto callback = [weak = WeakClaim(this)](const std::string& info) {
@@ -738,7 +738,7 @@ void CalendarDialogPattern::ClearCalendarFocusedState()
 
 void CalendarDialogPattern::ChangeEntryState()
 {
-    CHECK_NULL_VOID_NOLOG(entryNode_);
+    CHECK_NULL_VOID(entryNode_);
     auto enrtyPattern = entryNode_->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(enrtyPattern);
     if (focusAreaID_ == TITLE_NODE_INDEX) {
@@ -850,7 +850,7 @@ void CalendarDialogPattern::GetCalendarMonthData(int32_t year, int32_t month, Ob
     }
 
     auto calendarPattern = GetCalendarPattern();
-    CHECK_NULL_VOID_NOLOG(calendarPattern);
+    CHECK_NULL_VOID(calendarPattern);
     PickerDate selectedDay = calendarPattern->GetSelectedDay();
     for (size_t i = 0; i < calendarMonthData.days.size(); i++) {
         calendarMonthData.days[i].isKeyFocused = isFocused_
@@ -870,7 +870,7 @@ void CalendarDialogPattern::GetCalendarMonthData(int32_t year, int32_t month, Ob
 
 void CalendarDialogPattern::AddHotZoneRect()
 {
-    CHECK_NULL_VOID_NOLOG(entryNode_);
+    CHECK_NULL_VOID(entryNode_);
     auto rect = entryNode_->GetPaintRectWithTransform();
     rect.SetOffset(entryNode_->GetPaintRectOffsetToPage());
     DimensionRect hotZoneRegion;
@@ -947,7 +947,7 @@ int32_t CalendarDialogPattern::GetIndexByFocusedDay()
 
 void CalendarDialogPattern::HandleEntryLayoutChange()
 {
-    CHECK_NULL_VOID_NOLOG(entryNode_);
+    CHECK_NULL_VOID(entryNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto wrapperNode = host->GetParent();
@@ -1000,7 +1000,7 @@ void CalendarDialogPattern::HandleEntryChange(const std::string& info)
 RefPtr<FrameNode> CalendarDialogPattern::GetCalendarFrameNode()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, nullptr);
+    CHECK_NULL_RETURN(host, nullptr);
     auto calendarNode = host->GetChildAtIndex(CALENDAR_NODE_INDEX);
     return AceType::DynamicCast<FrameNode>(calendarNode);
 }
@@ -1008,26 +1008,26 @@ RefPtr<FrameNode> CalendarDialogPattern::GetCalendarFrameNode()
 RefPtr<CalendarPattern> CalendarDialogPattern::GetCalendarPattern()
 {
     auto calendarFrameNode = GetCalendarFrameNode();
-    CHECK_NULL_RETURN_NOLOG(calendarFrameNode, nullptr);
+    CHECK_NULL_RETURN(calendarFrameNode, nullptr);
     return calendarFrameNode->GetPattern<CalendarPattern>();
 }
 
 RefPtr<FrameNode> CalendarDialogPattern::GetSwiperFrameNode()
 {
     auto calendarFrameNode = GetCalendarFrameNode();
-    CHECK_NULL_RETURN_NOLOG(calendarFrameNode, nullptr);
+    CHECK_NULL_RETURN(calendarFrameNode, nullptr);
     if (calendarFrameNode->GetChildren().empty()) {
         return nullptr;
     }
     auto swiperNode = calendarFrameNode->GetChildren().front();
-    CHECK_NULL_RETURN_NOLOG(swiperNode, nullptr);
+    CHECK_NULL_RETURN(swiperNode, nullptr);
     return AceType::DynamicCast<FrameNode>(swiperNode);
 }
 
 RefPtr<SwiperPattern> CalendarDialogPattern::GetSwiperPattern()
 {
     auto swiperFrameNode = GetSwiperFrameNode();
-    CHECK_NULL_RETURN_NOLOG(swiperFrameNode, nullptr);
+    CHECK_NULL_RETURN(swiperFrameNode, nullptr);
     return swiperFrameNode->GetPattern<SwiperPattern>();
 }
 } // namespace OHOS::Ace::NG

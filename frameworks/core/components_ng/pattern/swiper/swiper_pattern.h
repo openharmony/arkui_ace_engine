@@ -356,7 +356,7 @@ public:
 
     void RemoveIndicatorNode()
     {
-        CHECK_NULL_VOID_NOLOG(HasIndicatorNode());
+        CHECK_NULL_VOID(HasIndicatorNode());
         auto swiperNode = GetHost();
         CHECK_NULL_VOID(swiperNode);
         swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetIndicatorId()));
@@ -365,7 +365,7 @@ public:
 
     void RemoveLeftButtonNode()
     {
-        CHECK_NULL_VOID_NOLOG(HasLeftButtonNode());
+        CHECK_NULL_VOID(HasLeftButtonNode());
         auto swiperNode = GetHost();
         CHECK_NULL_VOID(swiperNode);
         swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetLeftButtonId()));
@@ -374,7 +374,7 @@ public:
 
     void RemoveRightButtonNode()
     {
-        CHECK_NULL_VOID_NOLOG(HasRightButtonNode());
+        CHECK_NULL_VOID(HasRightButtonNode());
         auto swiperNode = GetHost();
         CHECK_NULL_VOID(swiperNode);
         swiperNode->RemoveChildAtIndex(swiperNode->GetChildIndexById(GetRightButtonId()));

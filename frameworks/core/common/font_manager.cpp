@@ -50,7 +50,7 @@ void FontManager::RegisterFont(
 
     fontLoader->SetVariationChanged([weak = WeakClaim(this), familyName]() {
         auto fontManager = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(fontManager);
+        CHECK_NULL_VOID(fontManager);
         fontManager->VaryFontCollectionWithFontWeightScale();
     });
 }

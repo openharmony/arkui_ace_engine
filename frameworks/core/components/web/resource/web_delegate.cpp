@@ -5195,7 +5195,7 @@ Offset WebDelegate::GetWebRenderGlobalPos()
 Size WebDelegate::GetEnhanceSurfaceSize(const Size& drawSize)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(pipeline, Size());
+    CHECK_NULL_RETURN(pipeline, Size());
     double dipScale = pipeline->GetDipScale();
     if (NearZero(dipScale)) {
         return Size();

@@ -75,7 +75,7 @@ void TimePickerColumnPattern::OnModifyDone()
 {
     auto host = GetHost();
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub);
+    CHECK_NULL_VOID(focusHub);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
@@ -134,7 +134,7 @@ void TimePickerColumnPattern::InitMouseAndPressEvent()
     auto columnGesture = columnEventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(columnGesture);
     columnGesture->AddTouchEvent(touchListener);
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     CHECK_NULL_VOID(toss);
     RefPtr<FrameNode> middleChild = nullptr;
@@ -298,7 +298,7 @@ void TimePickerColumnPattern::PlayHoverAnimation(const Color& color)
 bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     return true;
 }
@@ -651,23 +651,23 @@ Dimension TimePickerColumnPattern::LinearFontSize(
 
 void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!panEvent_);
+    CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         LOGI("Pan event start");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(event);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->SetMainVelocity(event.GetMainVelocity());
         pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         LOGI("Pan event end mainVelocity: %{public}lf", info.GetMainVelocity());
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
             return;
         }
@@ -677,7 +677,7 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGI("Pan event cancel");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
     PanDirection panDirection;
@@ -689,8 +689,8 @@ void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 
 void TimePickerColumnPattern::HandleDragStart(const GestureEvent& event)
 {
-    CHECK_NULL_VOID_NOLOG(GetHost());
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(GetHost());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto offsetY = event.GetGlobalPoint().GetY();
     toss->SetStart(offsetY);
@@ -708,9 +708,9 @@ void TimePickerColumnPattern::HandleDragMove(const GestureEvent& event)
         InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0));
         return;
     }
-    CHECK_NULL_VOID_NOLOG(pressed_);
-    CHECK_NULL_VOID_NOLOG(GetHost());
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(pressed_);
+    CHECK_NULL_VOID(GetHost());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto offsetY =
         event.GetGlobalPoint().GetY() + (event.GetInputEventType() == InputEventType::AXIS ? event.GetOffsetY() : 0.0);
@@ -724,8 +724,8 @@ void TimePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 void TimePickerColumnPattern::HandleDragEnd()
 {
     pressed_ = false;
-    CHECK_NULL_VOID_NOLOG(GetHost());
-    CHECK_NULL_VOID_NOLOG(GetToss());
+    CHECK_NULL_VOID(GetHost());
+    CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -759,7 +759,7 @@ void TimePickerColumnPattern::HandleDragEnd()
 
 void TimePickerColumnPattern::CreateAnimation()
 {
-    CHECK_NULL_VOID_NOLOG(!animationCreated_);
+    CHECK_NULL_VOID(!animationCreated_);
     toController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
     toController_->SetDuration(ANIMATION_ZERO_TO_OUTER);
     auto weak = AceType::WeakClaim(this);
@@ -805,7 +805,7 @@ RefPtr<CurveAnimation<double>> TimePickerColumnPattern::CreateClickAnimation(dou
 
 void TimePickerColumnPattern::HandleCurveStopped()
 {
-    CHECK_NULL_VOID_NOLOG(animationCreated_);
+    CHECK_NULL_VOID(animationCreated_);
     if (NearZero(scrollDelta_)) {
         return;
     }
@@ -1143,7 +1143,7 @@ void TimePickerColumnPattern::ShiftOptionProp(RefPtr<FrameNode> curNode, RefPtr<
 bool TimePickerColumnPattern::CanMove(bool isDown) const
 {
     if (wheelModeEnabled_) {
-        CHECK_NULL_RETURN_NOLOG(NotLoopOptions(), true);
+        CHECK_NULL_RETURN(NotLoopOptions(), true);
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -1160,7 +1160,7 @@ void TimePickerColumnPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));

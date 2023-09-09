@@ -31,7 +31,7 @@ bool AceTraceEnabled()
 
 void AceTraceBegin(const char* name)
 {
-    CHECK_NULL_VOID_NOLOG(name);
+    CHECK_NULL_VOID(name);
     std::string nameStr(name);
     StartTrace(HITRACE_TAG_ACE, nameStr);
 }
@@ -43,21 +43,21 @@ void AceTraceEnd()
 
 void AceAsyncTraceBegin(int32_t taskId, const char* name)
 {
-    CHECK_NULL_VOID_NOLOG(name);
+    CHECK_NULL_VOID(name);
     std::string nameStr(name);
     StartAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
 }
 
 void AceAsyncTraceEnd(int32_t taskId, const char* name)
 {
-    CHECK_NULL_VOID_NOLOG(name);
+    CHECK_NULL_VOID(name);
     std::string nameStr(name);
     FinishAsyncTrace(HITRACE_TAG_ACE, nameStr, taskId);
 }
 
 void AceCountTrace(const char *key, int32_t count)
 {
-    CHECK_NULL_VOID_NOLOG(key);
+    CHECK_NULL_VOID(key);
     std::string keyStr(key);
     CountTrace(HITRACE_TAG_ACE, keyStr, count);
 }

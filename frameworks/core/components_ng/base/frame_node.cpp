@@ -320,7 +320,7 @@ RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
 RefPtr<FrameNode> FrameNode::GetFrameNode(const std::string& tag, int32_t nodeId)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
-    CHECK_NULL_RETURN_NOLOG(frameNode, nullptr);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetTag() != tag) {
         LOGE("the tag is changed");
         ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
@@ -981,7 +981,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         return std::nullopt;
     }
     auto wrapper = CreatePaintWrapper();
-    CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
+    CHECK_NULL_RETURN(wrapper, std::nullopt);
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
         ACE_SCOPED_TRACE("FrameNode::RenderTask");
         auto self = weak.Upgrade();
@@ -1066,8 +1066,8 @@ RefPtr<LayoutWrapperNode> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool
 RefPtr<LayoutWrapperNode> FrameNode::UpdateLayoutWrapper(
     RefPtr<LayoutWrapperNode> layoutWrapper, bool forceMeasure, bool forceLayout)
 {
-    CHECK_NULL_RETURN_NOLOG(layoutProperty_, nullptr);
-    CHECK_NULL_RETURN_NOLOG(pattern_, nullptr);
+    CHECK_NULL_RETURN(layoutProperty_, nullptr);
+    CHECK_NULL_RETURN(pattern_, nullptr);
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         if (!layoutWrapper) {
             layoutWrapper =
@@ -1775,7 +1775,7 @@ std::pair<float, float> FrameNode::ContextPositionConvertToPX(
     const RefPtr<RenderContext>& context, const SizeF& percentReference) const
 {
     std::pair<float, float> position;
-    CHECK_NULL_RETURN_NOLOG(context, position);
+    CHECK_NULL_RETURN(context, position);
     auto scaleProperty = ScaleProperty::CreateScaleProperty();
     position.first =
         ConvertToPx(context->GetPositionProperty()->GetPosition()->GetX(), scaleProperty, percentReference.Width())
@@ -1808,7 +1808,7 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
         if (parentRenderContext && parentRenderContext->GetPositionProperty()) {
             if (parentRenderContext->GetPositionProperty()->HasPosition()) {
                 auto parentLayoutProperty = parent->GetLayoutProperty();
-                CHECK_NULL_RETURN_NOLOG(parentLayoutProperty, offset);
+                CHECK_NULL_RETURN(parentLayoutProperty, offset);
                 auto parentRenderContextPosition = ContextPositionConvertToPX(
                     parentRenderContext, parentLayoutProperty->GetLayoutConstraint()->percentReference);
                 offset.AddX(static_cast<float>(parentRenderContextPosition.first));
@@ -2606,7 +2606,7 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
 void FrameNode::OnInspectorIdUpdate(const std::string& /*unused*/)
 {
     auto parent = GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID_NOLOG(parent);
+    CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }

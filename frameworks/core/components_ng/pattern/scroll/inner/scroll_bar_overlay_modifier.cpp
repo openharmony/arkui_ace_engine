@@ -52,13 +52,13 @@ ScrollBarOverlayModifier::ScrollBarOverlayModifier()
 
 void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
-    CHECK_NULL_VOID_NOLOG(opacity_);
-    CHECK_NULL_VOID_NOLOG(fgOffset_);
-    CHECK_NULL_VOID_NOLOG(fgSize_);
-    CHECK_NULL_VOID_NOLOG(bgOffset_);
-    CHECK_NULL_VOID_NOLOG(bgSize_);
-    CHECK_NULL_VOID_NOLOG(fgColor_);
-    CHECK_NULL_VOID_NOLOG(bgColor_);
+    CHECK_NULL_VOID(opacity_);
+    CHECK_NULL_VOID(fgOffset_);
+    CHECK_NULL_VOID(fgSize_);
+    CHECK_NULL_VOID(bgOffset_);
+    CHECK_NULL_VOID(bgSize_);
+    CHECK_NULL_VOID(fgColor_);
+    CHECK_NULL_VOID(bgColor_);
 
     auto fgSize = fgSize_->Get();
     auto bgSize = bgSize_->Get();
@@ -89,7 +89,7 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
 
 void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacityAnimationType)
 {
-    CHECK_NULL_VOID_NOLOG(opacity_);
+    CHECK_NULL_VOID(opacity_);
     if (opacityAnimationType == OpacityAnimationType::NONE) {
         return;
     }
@@ -117,7 +117,7 @@ void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacit
         },
         [weak = WeakClaim(this)]() {
             auto modifier = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(modifier);
+            CHECK_NULL_VOID(modifier);
             modifier->SetOpacityAnimatingType(OpacityAnimationType::NONE);
         });
 }
@@ -131,8 +131,8 @@ void ScrollBarOverlayModifier::StopBarOpacityAnimation()
 
 void ScrollBarOverlayModifier::SetOffset(OffsetF fgOffset, OffsetF bgOffset)
 {
-    CHECK_NULL_VOID_NOLOG(fgOffset_);
-    CHECK_NULL_VOID_NOLOG(bgOffset_);
+    CHECK_NULL_VOID(fgOffset_);
+    CHECK_NULL_VOID(bgOffset_);
     fgOffset_->Set(fgOffset);
     bgOffset_->Set(bgOffset);
 }
@@ -140,10 +140,10 @@ void ScrollBarOverlayModifier::SetOffset(OffsetF fgOffset, OffsetF bgOffset)
 void ScrollBarOverlayModifier::SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset,
     const OffsetF& bgOffset, HoverAnimationType hoverAnimationType)
 {
-    CHECK_NULL_VOID_NOLOG(fgSize_);
-    CHECK_NULL_VOID_NOLOG(bgSize_);
-    CHECK_NULL_VOID_NOLOG(fgOffset_);
-    CHECK_NULL_VOID_NOLOG(bgOffset_);
+    CHECK_NULL_VOID(fgSize_);
+    CHECK_NULL_VOID(bgSize_);
+    CHECK_NULL_VOID(fgOffset_);
+    CHECK_NULL_VOID(bgOffset_);
     if (hoverAnimationType == HoverAnimationType::NONE) {
         if (hoverAnimatingType_ == HoverAnimationType::NONE) {
             fgSize_->Set(fgSize);
@@ -175,7 +175,7 @@ void ScrollBarOverlayModifier::SetRect(const SizeF& fgSize, const SizeF& bgSize,
         },
         [weak = WeakClaim(this)]() {
             auto modifier = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(modifier);
+            CHECK_NULL_VOID(modifier);
             modifier->SetHoverAnimatingType(HoverAnimationType::NONE);
         });
 }
@@ -189,13 +189,13 @@ void ScrollBarOverlayModifier::StopBarHoverAnimation()
 
 void ScrollBarOverlayModifier::SetFgColor(Color fgColor)
 {
-    CHECK_NULL_VOID_NOLOG(fgColor_);
+    CHECK_NULL_VOID(fgColor_);
     fgColor_->Set(fgColor);
 }
 
 void ScrollBarOverlayModifier::SetBgColor(Color bgColor)
 {
-    CHECK_NULL_VOID_NOLOG(bgColor_);
+    CHECK_NULL_VOID(bgColor_);
     bgColor_->Set(bgColor);
 }
 } // namespace OHOS::Ace::NG

@@ -159,7 +159,7 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
 void FitScrollFullWindow(SizeF& frameSize)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     if (frameSize.Width() == Infinity<float>()) {
         frameSize.SetWidth(pipeline->GetRootWidth());
     }

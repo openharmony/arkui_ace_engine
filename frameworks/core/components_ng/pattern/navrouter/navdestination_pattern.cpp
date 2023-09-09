@@ -43,7 +43,7 @@ namespace OHOS::Ace::NG {
 namespace {
 void BuildTitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    CHECK_NULL_VOID_NOLOG(navDestinationNode->GetTitle());
+    CHECK_NULL_VOID(navDestinationNode->GetTitle());
     if (navDestinationNode->GetTitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }
@@ -63,7 +63,7 @@ void BuildSubtitle(const RefPtr<NavDestinationGroupNode>& navDestinationNode, co
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
-    CHECK_NULL_VOID_NOLOG(navDestinationNode->GetSubtitle());
+    CHECK_NULL_VOID(navDestinationNode->GetSubtitle());
     if (navDestinationNode->GetSubtitleNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
         return;
     }

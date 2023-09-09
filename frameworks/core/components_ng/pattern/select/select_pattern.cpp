@@ -104,7 +104,7 @@ void SelectPattern::RegisterOnClick()
 
     GestureEventFunc callback = [weak = WeakClaim(this)](GestureEvent& /* info */) mutable {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
 
         auto selected = pattern->GetSelected();
         if (selected > -1 && selected < pattern->GetOptions().size()) {
@@ -137,11 +137,11 @@ void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
 
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
-        CHECK_NULL_VOID_NOLOG(host);
+        CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID_NOLOG(renderContext);
+        CHECK_NULL_VOID(renderContext);
         renderContext->BlendBgColor(pattern->GetBgBlendColor());
     });
 }
@@ -254,7 +254,7 @@ void SelectPattern::RegisterOnKeyEvent()
     CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));

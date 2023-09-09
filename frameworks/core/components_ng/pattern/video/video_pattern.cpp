@@ -270,7 +270,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
     auto&& positionUpdatedEvent = [videoPattern, uiTaskExecutor](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([&videoPattern, currentPos] {
             auto video = videoPattern.Upgrade();
-            CHECK_NULL_VOID_NOLOG(video);
+            CHECK_NULL_VOID(video);
             video->OnCurrentTimeChange(currentPos);
         });
     };
@@ -278,7 +278,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
     auto&& stateChangedEvent = [videoPattern, uiTaskExecutor](PlaybackStatus status) {
         uiTaskExecutor.PostSyncTask([&videoPattern, status] {
             auto video = videoPattern.Upgrade();
-            CHECK_NULL_VOID_NOLOG(video);
+            CHECK_NULL_VOID(video);
             LOGI("OnPlayerStatus");
             video->OnPlayerStatus(status);
         });
@@ -287,7 +287,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
     auto&& errorEvent = [videoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
-            CHECK_NULL_VOID_NOLOG(video);
+            CHECK_NULL_VOID(video);
             LOGW("OnError");
             video->OnError("");
         });
@@ -296,7 +296,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
     auto&& resolutionChangeEvent = [videoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
-            CHECK_NULL_VOID_NOLOG(video);
+            CHECK_NULL_VOID(video);
             video->OnResolutionChange();
         });
     };
@@ -304,7 +304,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
     auto&& startRenderFrameEvent = [videoPattern, uiTaskExecutor]() {
         uiTaskExecutor.PostSyncTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
-            CHECK_NULL_VOID_NOLOG(video);
+            CHECK_NULL_VOID(video);
             video->OnStartRenderFrameCb();
         });
     };
@@ -691,7 +691,7 @@ void VideoPattern::OnAttachToFrameNode()
     if (SystemProperties::GetExtSurfaceEnabled() && !isFullScreen) {
         auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
             auto videoPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(videoPattern);
+            CHECK_NULL_VOID(videoPattern);
 
             auto host = videoPattern->GetHost();
             CHECK_NULL_VOID(host);
@@ -726,7 +726,7 @@ void VideoPattern::OnModifyDone()
     if (!hiddenChangeEvent_) {
         SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
             auto videoPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(videoPattern);
+            CHECK_NULL_VOID(videoPattern);
             auto fullScreenNode = videoPattern->GetFullScreenNode();
             if (fullScreenNode) {
                 auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
@@ -1193,7 +1193,7 @@ void VideoPattern::SetMethodCall()
             fullScreenPattern->ExitFullScreen();
         });
     });
-    CHECK_NULL_VOID_NOLOG(videoControllerV2_);
+    CHECK_NULL_VOID(videoControllerV2_);
     videoControllerV2_->AddVideoController(videoController);
 }
 

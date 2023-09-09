@@ -287,7 +287,7 @@ void ImageLoadingContext::SetSourceSize(const std::optional<SizeF>& sourceSize)
 
 std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 {
-    CHECK_NULL_RETURN_NOLOG(sourceSizePtr_, std::nullopt);
+    CHECK_NULL_RETURN(sourceSizePtr_, std::nullopt);
     if (sourceSizePtr_->Width() <= 0.0 || sourceSizePtr_->Height() <= 0.0) {
         LOGW("Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
         return std::nullopt;

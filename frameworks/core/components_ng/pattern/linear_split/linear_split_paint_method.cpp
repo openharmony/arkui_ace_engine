@@ -37,7 +37,7 @@ CanvasDrawFunction LinearSplitPaintMethod::GetContentDrawFunction(PaintWrapper* 
 {
     auto paintFunc = [weak = WeakClaim(this)](RSCanvas& canvas) {
         auto linearSplit_ = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(linearSplit_);
+        CHECK_NULL_VOID(linearSplit_);
         linearSplit_->PaintContent(canvas);
     };
 

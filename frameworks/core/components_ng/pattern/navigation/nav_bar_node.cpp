@@ -34,7 +34,7 @@ RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = GetFrameNode(tag, nodeId);
-    CHECK_NULL_RETURN_NOLOG(!frameNode, AceType::DynamicCast<NavBarNode>(frameNode));
+    CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<NavBarNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navBarNode = AceType::MakeRefPtr<NavBarNode>(tag, nodeId, pattern);
     navBarNode->InitializePatternAndContext();
@@ -87,7 +87,7 @@ std::string NavBarNode::GetBarItemsString(bool isMenu) const
 {
     auto jsonValue = JsonUtil::Create(true);
     auto parentNodeOfBarItems = isMenu ? DynamicCast<FrameNode>(GetMenu()) : DynamicCast<FrameNode>(GetToolBarNode());
-    CHECK_NULL_RETURN_NOLOG(parentNodeOfBarItems, "");
+    CHECK_NULL_RETURN(parentNodeOfBarItems, "");
     if (!parentNodeOfBarItems->GetChildren().empty()) {
         auto jsonOptions = JsonUtil::CreateArray(true);
         int32_t i = 0;

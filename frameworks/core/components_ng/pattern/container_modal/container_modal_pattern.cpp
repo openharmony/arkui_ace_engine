@@ -177,9 +177,9 @@ void ContainerModalPattern::InitContainerEvent()
             [floatingLayoutProperty, id = Container::CurrentId()]() {
                 ContainerScope scope(id);
                 auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID_NOLOG(pipeline);
+                CHECK_NULL_VOID(pipeline);
                 auto taskExecutor = pipeline->GetTaskExecutor();
-                CHECK_NULL_VOID_NOLOG(taskExecutor);
+                CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
                     [floatingLayoutProperty, id]() {
                         ContainerScope scope(id);
@@ -219,9 +219,9 @@ void ContainerModalPattern::InitContainerEvent()
                 [floatingLayoutProperty, id = Container::CurrentId()]() {
                     ContainerScope scope(id);
                     auto pipeline = PipelineBase::GetCurrentContext();
-                    CHECK_NULL_VOID_NOLOG(pipeline);
+                    CHECK_NULL_VOID(pipeline);
                     auto taskExecutor = pipeline->GetTaskExecutor();
-                    CHECK_NULL_VOID_NOLOG(taskExecutor);
+                    CHECK_NULL_VOID(taskExecutor);
                     taskExecutor->PostTask(
                         [floatingLayoutProperty, id]() {
                             ContainerScope scope(id);

@@ -47,7 +47,7 @@ SkPath SvgPolygon::AsPath(const Size& viewPort) const
 {
     SkPath path;
     auto declaration = AceType::DynamicCast<SvgPolygonDeclaration>(declaration_);
-    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    CHECK_NULL_RETURN(declaration, path);
     if (declaration->GetPoints().empty()) {
         return path;
     }
@@ -75,7 +75,7 @@ RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
     auto declaration = AceType::DynamicCast<SvgPolygonDeclaration>(declaration_);
-    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    CHECK_NULL_RETURN(declaration, path);
     if (declaration->GetPoints().empty()) {
         return path;
     }

@@ -114,7 +114,7 @@ void DragEventActuator::CancelDragForWeb()
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    CHECK_NULL_VOID_NOLOG(userCallback_);
+    CHECK_NULL_VOID(userCallback_);
     auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragEvent panRecognizer onActionStart.");
@@ -476,7 +476,7 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
 #endif
         } else {
             bool isBindOverlayValue = frameNode->GetLayoutProperty()->GetIsBindOverlayValue(false);
-            CHECK_NULL_VOID_NOLOG(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
+            CHECK_NULL_VOID(isBindOverlayValue && SystemProperties::GetDeviceType() == DeviceType::PHONE);
         }
         // insert columnNode to rootNode
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),

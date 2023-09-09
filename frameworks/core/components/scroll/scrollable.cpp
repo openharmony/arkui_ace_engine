@@ -208,11 +208,11 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     snapController_ = CREATE_ANIMATOR(context);
     snapController_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
         auto scroll = weakScroll.Upgrade();
-        CHECK_NULL_VOID_NOLOG(scroll);
+        CHECK_NULL_VOID(scroll);
         scroll->ProcessScrollMotionStop();
         // Send event to accessibility when scroll stop.
         auto context = scroll->GetContext().Upgrade();
-        CHECK_NULL_VOID_NOLOG(context && scroll->Idle());
+        CHECK_NULL_VOID(context && scroll->Idle());
         AccessibilityEvent scrollEvent;
         scrollEvent.nodeId = scroll->nodeId_;
         scrollEvent.eventType = "scrollend";
@@ -853,11 +853,11 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
         snapController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
         snapController_->AddStopListener([weakScroll = AceType::WeakClaim(this)]() {
             auto scroll = weakScroll.Upgrade();
-            CHECK_NULL_VOID_NOLOG(scroll);
+            CHECK_NULL_VOID(scroll);
             scroll->ProcessScrollMotionStop();
             // Send event to accessibility when scroll stop.
             auto context = scroll->GetContext().Upgrade();
-            CHECK_NULL_VOID_NOLOG(context && scroll->Idle());
+            CHECK_NULL_VOID(context && scroll->Idle());
             AccessibilityEvent scrollEvent;
             scrollEvent.nodeId = scroll->nodeId_;
             scrollEvent.eventType = "scrollend";

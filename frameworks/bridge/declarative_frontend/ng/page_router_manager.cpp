@@ -1171,7 +1171,7 @@ void PageRouterManager::CleanPageOverlay()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     auto sharedManager = context->GetSharedOverlayManager();
     if (sharedManager) {
         sharedManager->StopSharedTransition();

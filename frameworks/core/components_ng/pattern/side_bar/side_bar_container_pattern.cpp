@@ -324,29 +324,29 @@ void SideBarContainerPattern::OnModifyDone()
 
 void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!dragEvent_);
+    CHECK_NULL_VOID(!dragEvent_);
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart();
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragUpdate(static_cast<float>(info.GetOffsetX()));
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
 
@@ -396,11 +396,11 @@ void SideBarContainerPattern::CreateAnimation()
 
 void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!controlButtonClickEvent_);
+    CHECK_NULL_VOID(!controlButtonClickEvent_);
 
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->SetControlButtonClick(true);
         pattern->DoAnimation();
     };
@@ -530,7 +530,7 @@ void SideBarContainerPattern::DoSideBarAnimation()
         controller_->AddInterpolator(isSideBarStart ? leftToRightAnimation_ : rightToLeftAnimation_);
         controller_->AddStopListener([weak]() {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             pattern->SetSideBarStatus(SideBarStatus::SHOW);
             pattern->UpdateControlButtonIcon();
         });
@@ -538,7 +538,7 @@ void SideBarContainerPattern::DoSideBarAnimation()
         controller_->AddInterpolator(isSideBarStart ? rightToLeftAnimation_ : leftToRightAnimation_);
         controller_->AddStopListener([weak]() {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
             pattern->UpdateControlButtonIcon();
         });
@@ -776,7 +776,7 @@ void SideBarContainerPattern::HandleDragEnd()
 void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub)
 {
     CHECK_NULL_VOID(inputHub);
-    CHECK_NULL_VOID_NOLOG(!hoverEvent_);
+    CHECK_NULL_VOID(!hoverEvent_);
 
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();

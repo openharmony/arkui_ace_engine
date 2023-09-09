@@ -24,14 +24,14 @@ namespace OHOS::Ace::NG {
 
 Dimension GridProperty::GetWidth()
 {
-    CHECK_NULL_RETURN_NOLOG(gridInfo_, Dimension());
+    CHECK_NULL_RETURN(gridInfo_, Dimension());
     // gridInfo_ must exist, because layout algorithm invoke UpdateContainer first
     return Dimension(gridInfo_->GetWidth());
 }
 
 Dimension GridProperty::GetOffset()
 {
-    CHECK_NULL_RETURN_NOLOG(gridInfo_, Dimension());
+    CHECK_NULL_RETURN(gridInfo_, Dimension());
     // gridInfo_ must exist, because layout algorithm invoke UpdateContainer() first
     auto offset = gridInfo_->GetOffset();
     if (offset == UNDEFINED_DIMENSION) {

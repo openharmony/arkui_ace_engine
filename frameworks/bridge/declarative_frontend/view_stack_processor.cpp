@@ -412,7 +412,7 @@ void ViewStackProcessor::ClearPageTransitionComponent()
 
 void ViewStackProcessor::Push(const RefPtr<Component>& component, bool isCustomView)
 {
-    CHECK_NULL_VOID_NOLOG(component);
+    CHECK_NULL_VOID(component);
     std::unordered_map<std::string, RefPtr<Component>> wrappingComponentsMap;
     if (componentsStack_.size() > 1 && ShouldPopImmediately()) {
         Pop();

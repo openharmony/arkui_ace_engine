@@ -111,9 +111,9 @@ void GetSpanInspector(
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
-    CHECK_NULL_VOID_NOLOG(spanParentNode);
+    CHECK_NULL_VOID(spanParentNode);
     auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
-    CHECK_NULL_VOID_NOLOG(node);
+    CHECK_NULL_VOID(node);
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
@@ -218,9 +218,9 @@ void GetSpanInspector(
 {
     // span rect follows parent text size
     auto spanParentNode = parent->GetParent();
-    CHECK_NULL_VOID_NOLOG(spanParentNode);
+    CHECK_NULL_VOID(spanParentNode);
     auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
-    CHECK_NULL_VOID_NOLOG(node);
+    CHECK_NULL_VOID(node);
     auto jsonNode = JsonUtil::Create(true);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
@@ -389,7 +389,7 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(context, jsonRoot->ToString());
+    CHECK_NULL_RETURN(context, jsonRoot->ToString());
     auto scale = context->GetViewScale();
     auto rootHeight = context->GetRootHeight();
     auto rootWidth = context->GetRootWidth();
@@ -399,7 +399,7 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
 
     auto pageRootNode = context->GetStageManager()->GetLastPage();
-    CHECK_NULL_RETURN_NOLOG(pageRootNode, jsonRoot->ToString());
+    CHECK_NULL_RETURN(pageRootNode, jsonRoot->ToString());
     auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : pageRootNode->GetChildren()) {

@@ -82,7 +82,7 @@ RefPtr<LayoutWrapper> LayoutWrapperNode::GetOrCreateChildByIndex(uint32_t index,
 
 void LayoutWrapperNode::SetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint)
 {
-    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
+    CHECK_NULL_VOID(layoutWrapperBuilder_);
     layoutWrapperBuilder_->SetCacheCount(cacheCount, itemConstraint);
 }
 
@@ -130,7 +130,7 @@ void LayoutWrapperNode::RemoveAllChildInRenderTree()
     for (auto& child : childrenMap_) {
         child.second->SetActive(false);
     }
-    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
+    CHECK_NULL_VOID(layoutWrapperBuilder_);
     layoutWrapperBuilder_->RemoveAllChildInRenderTree();
 }
 
@@ -152,7 +152,7 @@ const std::string& LayoutWrapperNode::GetHostTag() const
 int32_t LayoutWrapperNode::GetHostDepth() const
 {
     auto host = GetHostNode();
-    CHECK_NULL_RETURN_NOLOG(host, -1);
+    CHECK_NULL_RETURN(host, -1);
     return host->GetDepth();
 }
 
@@ -362,7 +362,7 @@ void LayoutWrapperNode::SwapDirtyLayoutWrapperOnMainThread()
             child->GetHostNode()->AdjustGridOffset();
         }
     }
-    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
+    CHECK_NULL_VOID(layoutWrapperBuilder_);
     layoutWrapperBuilder_->AdjustGridOffset();
 }
 
@@ -388,7 +388,7 @@ std::pair<int32_t, int32_t> LayoutWrapperNode::GetLazyBuildRange()
 
 void LayoutWrapperNode::SetLongPredictTask()
 {
-    CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
+    CHECK_NULL_VOID(layoutWrapperBuilder_);
     layoutWrapperBuilder_->SetLongPredictTask();
 }
 

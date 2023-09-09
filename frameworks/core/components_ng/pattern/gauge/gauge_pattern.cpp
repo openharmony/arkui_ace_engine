@@ -49,12 +49,12 @@ void GaugePattern::OnModifyDone()
     if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (host->TotalChildCount() > 0) {
             auto firstChild = host->GetFirstChild();
-            CHECK_NULL_VOID_NOLOG(firstChild);
+            CHECK_NULL_VOID(firstChild);
             titleChildId_ = firstChild->GetId();
         }
 
         auto gaugeLayoutProperty = GetLayoutProperty<GaugeLayoutProperty>();
-        CHECK_NULL_VOID_NOLOG(gaugeLayoutProperty);
+        CHECK_NULL_VOID(gaugeLayoutProperty);
 
         if (gaugeLayoutProperty->GetIsShowLimitValueValue(false)) {
             InitLimitValueText(GetMinValueTextId(), true);
@@ -69,16 +69,16 @@ void GaugePattern::OnModifyDone()
 void GaugePattern::InitDescriptionNode()
 {
     auto frameNode = GetHost();
-    CHECK_NULL_VOID_NOLOG(frameNode);
+    CHECK_NULL_VOID(frameNode);
     auto linearNode = FrameNode::GetOrCreateFrameNode(V2::GAUGE_DESCRIPTION_TAG, GetDescriptionNodeId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     auto descriptionRenderContext = linearNode->GetRenderContext();
-    CHECK_NULL_VOID_NOLOG(descriptionRenderContext);
+    CHECK_NULL_VOID(descriptionRenderContext);
     descriptionRenderContext->UpdateClipEdge(true);
-    CHECK_NULL_VOID_NOLOG(descriptionNode_);
+    CHECK_NULL_VOID(descriptionNode_);
     descriptionNode_->MountToParent(linearNode);
     auto property = linearNode->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(property);
+    CHECK_NULL_VOID(property);
 
     linearNode->MountToParent(frameNode);
     linearNode->MarkModifyDone();
@@ -87,12 +87,12 @@ void GaugePattern::InitDescriptionNode()
 void GaugePattern::InitLimitValueText(const int32_t valueTextId, const bool isMin)
 {
     auto frameNode = GetHost();
-    CHECK_NULL_VOID_NOLOG(frameNode);
+    CHECK_NULL_VOID(frameNode);
     auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
-    CHECK_NULL_VOID_NOLOG(gaugePaintProperty);
+    CHECK_NULL_VOID(gaugePaintProperty);
     auto textNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
-    CHECK_NULL_VOID_NOLOG(textNode);
+    CHECK_NULL_VOID(textNode);
 
     auto limitValue =
         isMin ? gaugePaintProperty->GetMinValue(DEFAULT_MIN_VALUE) : gaugePaintProperty->GetMaxValue(DEFAULT_MAX_VALUE);
@@ -107,7 +107,7 @@ void GaugePattern::InitLimitValueText(const int32_t valueTextId, const bool isMi
     out << std::setiosflags(std::ios::fixed) << std::setprecision(0) << limitValue;
 
     auto limitValueTextProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(limitValueTextProperty);
+    CHECK_NULL_VOID(limitValueTextProperty);
     limitValueTextProperty->UpdateContent(out.str());
     limitValueTextProperty->UpdateTextColor(limitValueColor);
     limitValueTextProperty->UpdateMaxLines(1);
@@ -126,7 +126,7 @@ void GaugePattern::InitLimitValueText(const int32_t valueTextId, const bool isMi
 Color GaugePattern::GetMaxValueColor(const RefPtr<GaugePaintProperty>& gaugePaintProperty) const
 {
     Color color(Color::BLACK);
-    CHECK_NULL_RETURN_NOLOG(gaugePaintProperty, color);
+    CHECK_NULL_RETURN(gaugePaintProperty, color);
     switch (gaugePaintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT)) {
         case GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT: {
             color = gaugePaintProperty->GetGradientColorsValue().rbegin()->rbegin()->first;

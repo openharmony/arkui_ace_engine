@@ -287,9 +287,9 @@ void ProgressModifier::StartRingLoadingHeadAnimation()
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto taskExecutor = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask(
                 [weak, id]() {
                     ContainerScope scope(id);
@@ -320,9 +320,9 @@ void ProgressModifier::StartRingLoadingTailAnimation()
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipeline);
+            CHECK_NULL_VOID(pipeline);
             auto taskExecutor = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID_NOLOG(taskExecutor);
+            CHECK_NULL_VOID(taskExecutor);
             taskExecutor->PostTask(
                 [weak, id]() {
                     ContainerScope scope(id);
@@ -435,7 +435,7 @@ void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float
         [weak = WeakClaim(this), id = Container::CurrentId(), speed]() {
             ContainerScope scope(id);
             auto modifier = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(modifier);
+            CHECK_NULL_VOID(modifier);
             modifier->continuousSweepingCounter_--;
             if (!modifier->continuousSweepingCounter_) {
                 modifier->PostTask([modifier, id, speed]() {
@@ -628,7 +628,7 @@ void ProgressModifier::SetLinearSweepEffect(bool value)
 void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto contentSize = contentSize_->Get();
     auto& canvas = context.canvas;
     if (progressType_->Get() == static_cast<int32_t>(ProgressType::LINEAR)) {
@@ -1535,7 +1535,7 @@ void ProgressModifier::PaintVerticalCapsuleForApiNine(
                         frameSize.Width() - progressWidth + offsetY },
             ANGLE_180, ANGLE_180);
     } else if (GreatNotEqual(progressWidth, frameSize.Height() - radius)) {
-        path.AddRect({ 
+        path.AddRect({
             offsetX, offsetY + radius, frameSize.Width() + offsetX, frameSize.Height() - radius + offsetY });
         // startAngle:180  sweepAngle:-180
         path.AddArc({ offsetX, offsetY + (frameSize.Height() - radius) * 2.0 - progressWidth,

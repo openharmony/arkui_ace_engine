@@ -62,11 +62,11 @@ float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
 void ScrollPattern::OnModifyDone()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<ScrollPaintProperty>();
-    CHECK_NULL_VOID_NOLOG(paintProperty);
+    CHECK_NULL_VOID(paintProperty);
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis != GetAxis()) {
         SetAxis(axis);
@@ -98,9 +98,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         return false;
     }
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN_NOLOG(layoutAlgorithmWrapper, false);
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN_NOLOG(layoutAlgorithm, false);
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
     auto axis = GetAxis();
@@ -166,9 +166,9 @@ void ScrollPattern::FireOnScrollStart()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID_NOLOG(hub);
+    CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetScrollStartEvent();
-    CHECK_NULL_VOID_NOLOG(onScrollStart);
+    CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
 }
 
@@ -186,9 +186,9 @@ void ScrollPattern::FireOnScrollStop()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID_NOLOG(hub);
+    CHECK_NULL_VOID(hub);
     auto onScrollStop = hub->GetScrollStopEvent();
-    CHECK_NULL_VOID_NOLOG(onScrollStop);
+    CHECK_NULL_VOID(onScrollStop);
     onScrollStop();
 }
 
@@ -360,7 +360,7 @@ void ScrollPattern::HandleScrollPosition(float scroll, int32_t scrollState)
     auto eventHub = GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnScrollEvent();
-    CHECK_NULL_VOID_NOLOG(onScroll);
+    CHECK_NULL_VOID(onScroll);
     // not consider async call
     Dimension scrollX(0, DimensionUnit::VP);
     Dimension scrollY(0, DimensionUnit::VP);
@@ -396,7 +396,7 @@ void ScrollPattern::HandleCrashTop() const
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
-    CHECK_NULL_VOID_NOLOG(onScrollEdge);
+    CHECK_NULL_VOID(onScrollEdge);
     // not consider async call
     if (GetAxis() == Axis::HORIZONTAL) {
         onScrollEdge(ScrollEdge::LEFT);
@@ -412,7 +412,7 @@ void ScrollPattern::HandleCrashBottom() const
     auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     const auto& onScrollEdge = eventHub->GetScrollEdgeEvent();
-    CHECK_NULL_VOID_NOLOG(onScrollEdge);
+    CHECK_NULL_VOID(onScrollEdge);
     if (GetAxis() == Axis::HORIZONTAL) {
         onScrollEdge(ScrollEdge::RIGHT);
         return;
@@ -458,7 +458,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 void ScrollPattern::OnAnimateStop()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     scrollStop_ = true;
@@ -534,7 +534,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 {
     scrollEffect->SetCurrentPositionCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(scroll, 0.0);
+        CHECK_NULL_RETURN(scroll, 0.0);
         return scroll->GetCurrentPosition();
     });
     scrollEffect->SetLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
@@ -573,9 +573,9 @@ void ScrollPattern::UpdateScrollBarOffset()
         return;
     }
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty);
     auto padding = layoutProperty->CreatePaddingAndBorder();
     Size size(viewSize_.Width(), viewSize_.Height());
     auto viewPortExtent = viewPortExtent_;
@@ -677,8 +677,8 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta)
 {
     std::optional<float> predictSnapOffset;
-    CHECK_NULL_RETURN_NOLOG(!snapOffsets_.empty(), predictSnapOffset);
-    CHECK_NULL_RETURN_NOLOG(GetScrollSnapAlign() != ScrollSnapAlign::NONE, predictSnapOffset);
+    CHECK_NULL_RETURN(!snapOffsets_.empty(), predictSnapOffset);
+    CHECK_NULL_RETURN(GetScrollSnapAlign() != ScrollSnapAlign::NONE, predictSnapOffset);
     float finalPosition = currentOffset_ + delta;
     if (!IsSnapToInterval()) {
         if (!enableSnapToSide_.first) {
@@ -726,7 +726,7 @@ void ScrollPattern::CaleSnapOffsets()
 {
     auto scrollSnapAlign = GetScrollSnapAlign();
     std::vector<float>().swap(snapOffsets_);
-    CHECK_NULL_VOID_NOLOG(scrollSnapAlign != ScrollSnapAlign::NONE);
+    CHECK_NULL_VOID(scrollSnapAlign != ScrollSnapAlign::NONE);
     if (IsSnapToInterval()) {
         CaleSnapOffsetsByInterval(scrollSnapAlign);
     } else {
@@ -736,7 +736,7 @@ void ScrollPattern::CaleSnapOffsets()
 
 void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
 {
-    CHECK_NULL_VOID_NOLOG(Positive(intervalSize_.Value()));
+    CHECK_NULL_VOID(Positive(intervalSize_.Value()));
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
     auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
     auto start = 0.0f;
@@ -811,10 +811,10 @@ void ScrollPattern::CaleSnapOffsetsByPaginations()
 
 bool ScrollPattern::NeedScrollSnapToSide(float delta)
 {
-    CHECK_NULL_RETURN_NOLOG(GetScrollSnapAlign() != ScrollSnapAlign::NONE, false);
-    CHECK_NULL_RETURN_NOLOG(!IsSnapToInterval(), false);
+    CHECK_NULL_RETURN(GetScrollSnapAlign() != ScrollSnapAlign::NONE, false);
+    CHECK_NULL_RETURN(!IsSnapToInterval(), false);
     auto finalPosition = currentOffset_ + delta;
-    CHECK_NULL_RETURN_NOLOG(static_cast<int32_t>(snapOffsets_.size()) > 2, false);
+    CHECK_NULL_RETURN(static_cast<int32_t>(snapOffsets_.size()) > 2, false);
     if (!enableSnapToSide_.first) {
         if (GreatOrEqual(currentOffset_, *(snapOffsets_.begin() + 1)) &&
             LessOrEqual(finalPosition, *(snapOffsets_.begin() + 1))) {

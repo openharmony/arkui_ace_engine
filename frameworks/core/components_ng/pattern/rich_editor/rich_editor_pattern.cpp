@@ -765,7 +765,7 @@ void RichEditorPattern::UpdateTextStyle(
     RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
@@ -1061,7 +1061,7 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 
 void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!clickEventInitialized_);
+    CHECK_NULL_VOID(!clickEventInitialized_);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1074,7 +1074,7 @@ void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub
 
 void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    CHECK_NULL_VOID_NOLOG(!focusEventInitialized_);
+    CHECK_NULL_VOID(!focusEventInitialized_);
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1230,7 +1230,7 @@ void RichEditorPattern::HandleOnSelectAll()
 
 void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!longPressEvent_);
+    CHECK_NULL_VOID(!longPressEvent_);
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1414,7 +1414,7 @@ bool RichEditorPattern::SelectOverlayIsOn()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    CHECK_NULL_RETURN_NOLOG(selectOverlayProxy_, false);
+    CHECK_NULL_RETURN(selectOverlayProxy_, false);
     auto overlayId = selectOverlayProxy_->GetSelectOverlayId();
     return pipeline->GetSelectOverlayManager()->HasSelectOverlay(overlayId);
 }
@@ -1431,7 +1431,7 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
 
 void RichEditorPattern::InitMouseEvent()
 {
-    CHECK_NULL_VOID_NOLOG(!mouseEventInitialized_);
+    CHECK_NULL_VOID(!mouseEventInitialized_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
@@ -1441,7 +1441,7 @@ void RichEditorPattern::InitMouseEvent()
 
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleMouseEvent(info);
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -1585,7 +1585,7 @@ bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 
 void RichEditorPattern::UpdateCaretInfoToController()
 {
-    CHECK_NULL_VOID_NOLOG(HasFocus());
+    CHECK_NULL_VOID(HasFocus());
     auto selectionResult = GetSpansInfo(0, GetTextContentLength(), GetSpansMethod::ONSELECT);
     auto resultObjects = selectionResult.GetSelection().resultObjects;
     std::string text = "";
@@ -2292,7 +2292,7 @@ void RichEditorPattern::MoveCaretAfterTextChange()
 
 void RichEditorPattern::InitTouchEvent()
 {
-    CHECK_NULL_VOID_NOLOG(!touchListener_);
+    CHECK_NULL_VOID(!touchListener_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -2300,7 +2300,7 @@ void RichEditorPattern::InitTouchEvent()
     CHECK_NULL_VOID(gesture);
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleTouchEvent(info);
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -2719,7 +2719,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         };
 
         auto host = pattern->GetHost();
-        CHECK_NULL_VOID_NOLOG(host);
+        CHECK_NULL_VOID(host);
 
         pattern->UpdateSelectMenuInfo(hasData, selectInfo, isCopyAll);
 
@@ -2831,7 +2831,7 @@ void RichEditorPattern::HandleOnPaste()
             return;
         }
         auto richEditor = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(richEditor);
+        CHECK_NULL_VOID(richEditor);
         LOGI("HandleOnPaste InsertValue: %{public}s", data.c_str());
         richEditor->InsertValueByPaste(data);
         if (isLastRecord) {
@@ -2843,7 +2843,7 @@ void RichEditorPattern::HandleOnPaste()
     auto pixelMapCallback = [weak = WeakClaim(this), textSelector = textSelector_](
                                 const RefPtr<PixelMap>& pixelMap, bool isLastRecord) {
         auto richEditor = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(richEditor);
+        CHECK_NULL_VOID(richEditor);
         ImageSpanOptions imageOption;
         imageOption.imagePixelMap = pixelMap;
         ImageSpanAttribute imageAttribute;
@@ -2870,7 +2870,7 @@ void RichEditorPattern::HandleOnPaste()
     auto urlCallback = [weak = WeakClaim(this), textSelector = textSelector_](
                            const std::string& uri, bool isLastRecord) {
         auto richEditor = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(richEditor);
+        CHECK_NULL_VOID(richEditor);
         ImageSpanOptions imageOption;
         imageOption.image = uri;
         ImageSpanAttribute imageAttribute;
@@ -3074,7 +3074,7 @@ void RichEditorPattern::OnAreaChangedInner()
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-        CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
+        CHECK_NULL_VOID(SelectOverlayIsOn());
         textSelector_.selectionBaseOffset.SetX(
             CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight).GetX());
         textSelector_.selectionDestinationOffset.SetX(

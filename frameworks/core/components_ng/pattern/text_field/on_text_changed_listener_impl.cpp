@@ -72,7 +72,7 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
     LOGI("[OnTextChangedListenerImpl] SetKeyboardStatus status: %{public}d", status);
     auto task = [textField = pattern_, status] {
         auto client = textField.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         client->SetInputMethodStatus(status);
     };
@@ -85,7 +85,7 @@ std::u16string OnTextChangedListenerImpl::GetLeftTextOfCursor(int32_t number)
     std::u16string leftResult;
     auto task = [textField = pattern_, &leftResult, number] {
         auto client = textField.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         leftResult = client->GetLeftTextOfCursor(number);
     };
@@ -99,7 +99,7 @@ std::u16string OnTextChangedListenerImpl::GetRightTextOfCursor(int32_t number)
     std::u16string rightResult;
     auto task = [textField = pattern_, &rightResult, number] {
         auto client = textField.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         rightResult = client->GetRightTextOfCursor(number);
     };
@@ -113,7 +113,7 @@ int32_t OnTextChangedListenerImpl::GetTextIndexAtCursor()
     int32_t index = 0;
     auto task = [textField = pattern_, &index] {
         auto client = textField.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         index = client->GetTextIndexAtCursor();
     };
@@ -175,7 +175,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
     LOGI("[OnTextChangedListenerImpl] move cursor direction %{public}d", static_cast<int32_t>(direction));
     auto task = [textField = pattern_, direction] {
         auto client = textField.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         client->ResetTouchAtLeftOffsetFlag();
         switch (direction) {

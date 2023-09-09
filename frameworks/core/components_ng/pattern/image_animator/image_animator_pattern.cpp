@@ -99,7 +99,7 @@ void ImageAnimatorPattern::SetShowingIndex(int32_t index)
         return;
     }
     // update cache images
-    CHECK_NULL_VOID_NOLOG(cacheImages_.size());
+    CHECK_NULL_VOID(cacheImages_.size());
     int32_t nextIndex = GetNextIndex(index);
     for (auto& cacheImage : cacheImages_) {
         UpdateCacheImageInfo(cacheImage, nextIndex);

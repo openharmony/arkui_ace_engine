@@ -40,9 +40,9 @@ RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
 {
     auto declaration = AceType::DynamicCast<SvgRectDeclaration>(declaration_);
 #ifndef USE_ROSEN_DRAWING
-    CHECK_NULL_RETURN_NOLOG(declaration, SkPath());
+    CHECK_NULL_RETURN(declaration, SkPath());
 #else
-    CHECK_NULL_RETURN_NOLOG(declaration, RSRecordingPath());
+    CHECK_NULL_RETURN(declaration, RSRecordingPath());
 #endif
     double rx = 0.0;
     if (GreatOrEqual(declaration->GetRx().Value(), 0.0)) {

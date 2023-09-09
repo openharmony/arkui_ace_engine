@@ -58,8 +58,8 @@ void CardFrontend::Destroy()
 void CardFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     auto pipelineContext = DynamicCast<PipelineContext>(context);
-    CHECK_NULL_VOID_NOLOG(delegate_);
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(pipelineContext);
     eventHandler_ = AceType::MakeRefPtr<CardEventHandler>(delegate_);
     pipelineContext->RegisterEventHandler(eventHandler_);
     holder_.Attach(context);
@@ -131,7 +131,7 @@ std::string CardFrontend::GetFormSrcPath(const std::string& uri, const std::stri
 
 RefPtr<AcePage> CardFrontend::GetPage(int32_t pageId) const
 {
-    CHECK_NULL_RETURN_NOLOG(delegate_, nullptr);
+    CHECK_NULL_RETURN(delegate_, nullptr);
     return delegate_->GetPage();
 }
 
@@ -148,7 +148,7 @@ WindowConfig& CardFrontend::GetWindowConfig()
 void CardFrontend::LoadPage(const std::string& urlPath, const std::string& params)
 {
     CHECK_RUN_ON(JS);
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     auto page = delegate_->CreatePage(0, urlPath);
     page->SetPageParams(params);
     page->SetFlushCallback([weak = WeakClaim(this)](const RefPtr<Framework::JsAcePage>& page) {
@@ -202,7 +202,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), page, jsCommands] {
             auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(frontend);
+            CHECK_NULL_VOID(frontend);
             // Flush all JS commands.
             for (const auto& command : *jsCommands) {
                 command->Execute(page);
@@ -261,7 +261,7 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto frontend = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(frontend);
+            CHECK_NULL_VOID(frontend);
             frontend->FireFormVisiableCallback();
         },
         TaskExecutor::TaskType::UI);
@@ -317,11 +317,11 @@ void CardFrontend::RebuildAllPages()
     taskExecutor_->PostTask(
         [weakPage = WeakPtr<Framework::JsAcePage>(page)] {
             auto page = weakPage.Upgrade();
-            CHECK_NULL_VOID_NOLOG(page);
+            CHECK_NULL_VOID(page);
             auto domDoc = page->GetDomDocument();
-            CHECK_NULL_VOID_NOLOG(domDoc);
+            CHECK_NULL_VOID(domDoc);
             auto rootNode = domDoc->GetDOMNodeById(domDoc->GetRootNodeId());
-            CHECK_NULL_VOID_NOLOG(rootNode);
+            CHECK_NULL_VOID(rootNode);
             rootNode->UpdateStyleWithChildren();
         },
         TaskExecutor::TaskType::UI);

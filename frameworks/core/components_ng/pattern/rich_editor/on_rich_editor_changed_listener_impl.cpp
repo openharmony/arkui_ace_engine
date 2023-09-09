@@ -69,7 +69,7 @@ std::u16string OnRichEditorChangedListenerImpl::GetLeftTextOfCursor(int32_t numb
     std::u16string leftResult;
     auto task = [textField = pattern_, &leftResult, number] {
         auto client = textField.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         leftResult = client->GetLeftTextOfCursor(number);
     };
@@ -83,7 +83,7 @@ std::u16string OnRichEditorChangedListenerImpl::GetRightTextOfCursor(int32_t num
     std::u16string rightResult;
     auto task = [textField = pattern_, &rightResult, number] {
         auto client = textField.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         rightResult = client->GetRightTextOfCursor(number);
     };
@@ -97,7 +97,7 @@ int32_t OnRichEditorChangedListenerImpl::GetTextIndexAtCursor()
     int32_t index = 0;
     auto task = [textField = pattern_, &index] {
         auto client = textField.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         index = client->GetTextIndexAtCursor();
     };
@@ -129,7 +129,7 @@ void OnRichEditorChangedListenerImpl::SetKeyboardStatus(bool status)
 {
     auto task = [richEditorPattern = pattern_, status] {
         auto client = richEditorPattern.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         client->SetInputMethodStatus(status);
     };
@@ -163,7 +163,7 @@ void OnRichEditorChangedListenerImpl::MoveCursor(MiscServices::Direction directi
 {
     auto task = [richEditorPattern = pattern_, direction] {
         auto client = richEditorPattern.Upgrade();
-        CHECK_NULL_VOID_NOLOG(client);
+        CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         switch (direction) {
             case MiscServices::Direction::UP:

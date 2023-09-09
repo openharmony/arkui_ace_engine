@@ -353,7 +353,7 @@ public:
 
     bool HasPositionProp() const
     {
-        CHECK_NULL_RETURN_NOLOG(renderContext_, false);
+        CHECK_NULL_RETURN(renderContext_, false);
         return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
     }
 
@@ -518,7 +518,7 @@ public:
 
     void ForceSyncGeometryNode()
     {
-        CHECK_NULL_VOID_NOLOG(renderContext_);
+        CHECK_NULL_VOID(renderContext_);
         oldGeometryNode_.Reset();
         renderContext_->SyncGeometryProperties(RawPtr(geometryNode_));
     }

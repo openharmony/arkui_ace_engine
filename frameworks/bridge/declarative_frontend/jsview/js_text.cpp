@@ -112,9 +112,9 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     } else {
         if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
             auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipelineContext);
+            CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<TextTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
+            CHECK_NULL_VOID(theme);
             font.fontSize = theme->GetTextStyle().GetFontSize();
         } else {
             font.fontSize = size;
@@ -150,9 +150,9 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
         return;
     }
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     ParseJsDimensionFp(info[0], fontSize);
     if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
@@ -174,9 +174,9 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         textColor = theme->GetTextStyle().GetTextColor();
     }
     TextModel::GetInstance()->SetTextColor(textColor);
@@ -348,9 +348,9 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
         auto value = info[0]->ToString();
         if (!value.empty() && value.back() == '%') {
             auto pipelineContext = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID_NOLOG(pipelineContext);
+            CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<TextTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
+            CHECK_NULL_VOID(theme);
             CalcDimension defaultValue = theme->GetTextStyle().GetLetterSpacing();
             TextModel::GetInstance()->SetLetterSpacing(defaultValue);
             return;
@@ -398,9 +398,9 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         JSRef<JSVal> styleValue = obj->GetProperty("style");
 
         auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         TextDecoration textDecoration = theme->GetTextStyle().GetTextDecoration();
         if (typeValue->IsNumber()) {
             textDecoration = static_cast<TextDecoration>(typeValue->ToNumber<int32_t>());

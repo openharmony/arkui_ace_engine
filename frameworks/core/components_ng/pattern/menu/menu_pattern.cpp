@@ -186,14 +186,14 @@ void InnerMenuPattern::OnModifyDone()
 // close menu on touch up
 void MenuPattern::RegisterOnTouch()
 {
-    CHECK_NULL_VOID_NOLOG(!onTouch_);
+    CHECK_NULL_VOID(!onTouch_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->OnTouchEvent(info);
     };
     onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
@@ -227,7 +227,7 @@ void MenuPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));

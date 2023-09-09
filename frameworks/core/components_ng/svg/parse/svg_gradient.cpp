@@ -47,7 +47,7 @@ void SvgGradient::SetAttr(const std::string& name, const std::string& value)
 void SvgGradient::OnAppendChild(const RefPtr<SvgNode>& child)
 {
     auto svgStop = AceType::DynamicCast<SvgStop>(child);
-    CHECK_NULL_VOID_NOLOG(svgStop);
+    CHECK_NULL_VOID(svgStop);
     gradientDeclaration_->AddGradientColor(svgStop->GetGradientColor());
 }
 

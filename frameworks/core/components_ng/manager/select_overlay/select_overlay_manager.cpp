@@ -176,7 +176,7 @@ void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 {
     auto current = selectOverlayItem_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(current, false);
+    CHECK_NULL_RETURN(current, false);
     return current->GetId() == overlayId;
 }
 
@@ -187,7 +187,7 @@ bool SelectOverlayManager::IsInSelectedOrSelectOverlayArea(const PointF& point)
         return true;
     }
     auto current = selectOverlayItem_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(current, false);
+    CHECK_NULL_RETURN(current, false);
     auto selectOverlayNode = DynamicCast<SelectOverlayNode>(current);
     if (selectOverlayNode) {
         return selectOverlayNode->IsInSelectedOrSelectOverlayArea(point);
@@ -232,7 +232,7 @@ bool SelectOverlayManager::IsSameSelectOverlayInfo(const SelectOverlayInfo& info
 
 void SelectOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset)
 {
-    CHECK_NULL_VOID_NOLOG(!selectOverlayItem_.Invalid());
+    CHECK_NULL_VOID(!selectOverlayItem_.Invalid());
     NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
     // handle global touch event.
     if (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::TOUCH) {

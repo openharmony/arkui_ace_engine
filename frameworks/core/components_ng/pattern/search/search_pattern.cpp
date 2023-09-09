@@ -194,7 +194,7 @@ void SearchPattern::InitButtonAndImageClickEvent()
     CHECK_NULL_VOID(host);
     auto imageFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
     CHECK_NULL_VOID(imageFrameNode);
-    CHECK_NULL_VOID_NOLOG(!imageClickListener_);
+    CHECK_NULL_VOID(!imageClickListener_);
     auto imageGesture = imageFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGesture);
     auto imageClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
@@ -210,7 +210,7 @@ void SearchPattern::InitButtonAndImageClickEvent()
     }
     auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-    CHECK_NULL_VOID_NOLOG(!buttonClickListener_);
+    CHECK_NULL_VOID(!buttonClickListener_);
     auto buttonGesture = buttonFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(buttonGesture);
     auto buttonClickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
@@ -247,25 +247,25 @@ void SearchPattern::InitSearchController()
 {
     searchController_->SetCaretPosition([weak = WeakClaim(this)](int32_t caretPosition) {
         auto search = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(search);
+        CHECK_NULL_VOID(search);
         search->HandleCaretPosition(caretPosition);
     });
 
     searchController_->SetGetTextContentRect([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(search, Rect(0, 0, 0, 0));
+        CHECK_NULL_RETURN(search, Rect(0, 0, 0, 0));
         return search->HandleTextContentRect();
     });
 
     searchController_->SetGetTextContentLinesNum([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(search, 0);
+        CHECK_NULL_RETURN(search, 0);
         return search->HandleTextContentLines();
     });
 
     searchController_->SetStopEditing([weak = WeakClaim(this)]() {
         auto search = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(search);
+        CHECK_NULL_VOID(search);
         search->StopEditing();
     });
 }
@@ -695,7 +695,7 @@ void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(blurTask);

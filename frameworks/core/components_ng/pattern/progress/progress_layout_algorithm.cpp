@@ -42,13 +42,13 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(pipeline, std::nullopt);
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
     if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
         return MeasureContentForApiNine(contentConstraint, layoutWrapper);
     }
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN_NOLOG(progressLayoutProperty, std::nullopt);
+    CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth().
                         value_or(progressTheme ? progressTheme->GetTrackThickness() : Dimension(strokeWidth_)).
@@ -106,10 +106,10 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContentForApiNine(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(pipeline, std::nullopt);
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN_NOLOG(progressLayoutProperty, std::nullopt);
+    CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth().
                         value_or(progressTheme ? (type_ == ProgressType::SCALE ? progressTheme->GetScaleLength() :

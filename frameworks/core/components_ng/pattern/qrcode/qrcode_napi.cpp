@@ -44,9 +44,9 @@ template<typename T>
 RefPtr<T> GetTheme()
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(pipelineContext, nullptr);
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN_NOLOG(themeManager, nullptr);
+    CHECK_NULL_RETURN(themeManager, nullptr);
     return themeManager->GetTheme<T>();
 }
 
@@ -83,7 +83,7 @@ napi_value JsColor(napi_env env, napi_callback_info info)
     Color qrcodeColor;
     if (!CommonNapiUtils::ParseColor(env, argv[0], qrcodeColor)) {
         RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
-        CHECK_NULL_RETURN_NOLOG(qrcodeTheme, CommonNapiUtils::CreateNull(env));
+        CHECK_NULL_RETURN(qrcodeTheme, CommonNapiUtils::CreateNull(env));
         qrcodeColor = qrcodeTheme->GetQrcodeColor();
     }
     QRCodeModel::GetInstance()->SetQRCodeColor(qrcodeColor);
@@ -101,7 +101,7 @@ napi_value JsBackgroundColor(napi_env env, napi_callback_info info)
     Color backgroundColor;
     if (!CommonNapiUtils::ParseColor(env, argv[0], backgroundColor)) {
         RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
-        CHECK_NULL_RETURN_NOLOG(qrcodeTheme, CommonNapiUtils::CreateNull(env));
+        CHECK_NULL_RETURN(qrcodeTheme, CommonNapiUtils::CreateNull(env));
         backgroundColor = qrcodeTheme->GetBackgroundColor();
     }
     QRCodeModel::GetInstance()->SetQRBackgroundColor(backgroundColor);

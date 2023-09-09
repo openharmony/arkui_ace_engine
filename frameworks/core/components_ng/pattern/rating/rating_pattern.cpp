@@ -320,7 +320,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
     const double oldRatingScore = ratingRenderProperty->GetRatingScoreValue();
     const double oldDrawScore = fmin(Round(oldRatingScore / stepSize) * stepSize, static_cast<double>(starNum));
 
-    CHECK_NULL_VOID_NOLOG(!NearEqual(newDrawScore, oldDrawScore));
+    CHECK_NULL_VOID(!NearEqual(newDrawScore, oldDrawScore));
 
     // step4: Update the ratingScore saved in renderProperty and update render.
     UpdateRatingScore(newDrawScore);
@@ -340,7 +340,7 @@ bool RatingPattern::IsIndicator()
 
 void RatingPattern::HandleDragUpdate(const GestureEvent& info)
 {
-    CHECK_NULL_VOID_NOLOG(!IsIndicator());
+    CHECK_NULL_VOID(!IsIndicator());
     RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), true);
 }
 
@@ -357,13 +357,13 @@ void RatingPattern::FireChangeEvent() const
 
 void RatingPattern::HandleDragEnd()
 {
-    CHECK_NULL_VOID_NOLOG(!IsIndicator());
+    CHECK_NULL_VOID(!IsIndicator());
     FireChangeEvent();
 }
 
 void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!(IsIndicator() || panEvent_));
+    CHECK_NULL_VOID(!(IsIndicator() || panEvent_));
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) { LOGD("Pan event start"); };
 
@@ -392,7 +392,7 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!(IsIndicator() || touchEvent_));
+    CHECK_NULL_VOID(!(IsIndicator() || touchEvent_));
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
@@ -417,14 +417,14 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::HandleTouchUp()
 {
-    CHECK_NULL_VOID_NOLOG(!IsIndicator());
+    CHECK_NULL_VOID(!IsIndicator());
     state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
 {
-    CHECK_NULL_VOID_NOLOG(!IsIndicator());
+    CHECK_NULL_VOID(!IsIndicator());
 
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
@@ -442,7 +442,7 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
 
 void RatingPattern::HandleClick(const GestureEvent& info)
 {
-    CHECK_NULL_VOID_NOLOG(!IsIndicator());
+    CHECK_NULL_VOID(!IsIndicator());
     auto eventPointX = info.GetLocalLocation().GetX();
     if (Negative(eventPointX)) {
         LOGW("eventPointX cannot be less than zero when handling click event");
@@ -454,7 +454,7 @@ void RatingPattern::HandleClick(const GestureEvent& info)
 
 void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!(IsIndicator() || clickEvent_));
+    CHECK_NULL_VOID(!(IsIndicator() || clickEvent_));
 
     auto touchTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -467,7 +467,7 @@ void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void RatingPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo, int32_t imageFlag)
 {
-    CHECK_NULL_VOID_NOLOG(sourceInfo.IsInternalResource());
+    CHECK_NULL_VOID(sourceInfo.IsInternalResource());
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
@@ -599,7 +599,7 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
     auto onBlur = [wp = WeakClaim(this)]() {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->OnBlurEvent();
     };
     focusHub->SetOnBlurInternal(std::move(onBlur));
@@ -659,7 +659,7 @@ void RatingPattern::HandleHoverEvent(bool isHover)
 
 void RatingPattern::HandleMouseEvent(MouseInfo& info)
 {
-    CHECK_NULL_VOID_NOLOG(!IsIndicator() && isHover_);
+    CHECK_NULL_VOID(!IsIndicator() && isHover_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& content = host->GetGeometryNode()->GetContent();
@@ -844,7 +844,7 @@ void RatingPattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
 
 void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
 {
-    CHECK_NULL_VOID_NOLOG(image);
+    CHECK_NULL_VOID(image);
     // set animation flush function for svg / gif
     image->SetRedrawCallback([weak = WeakPtr(GetHost())] {
         auto ratingNode = weak.Upgrade();

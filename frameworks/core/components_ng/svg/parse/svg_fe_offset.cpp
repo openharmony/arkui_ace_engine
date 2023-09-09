@@ -47,7 +47,7 @@ void SvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, c
 #endif
 {
     auto declaration = AceType::DynamicCast<SvgFeOffsetDeclaration>(declaration_);
-    CHECK_NULL_VOID_NOLOG(declaration);
+    CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
 #ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA

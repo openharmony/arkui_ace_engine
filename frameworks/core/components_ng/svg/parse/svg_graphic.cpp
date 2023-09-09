@@ -26,7 +26,7 @@ void SvgGraphic::UpdateGradient(const Size& viewPort)
 {
     fillState_ = declaration_->GetFillState();
     auto& gradient = fillState_.GetGradient();
-    CHECK_NULL_VOID_NOLOG(gradient);
+    CHECK_NULL_VOID(gradient);
     auto bounds = AsBounds(viewPort);
     auto width = bounds.Width();
     auto height = bounds.Height();

@@ -197,7 +197,7 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
         return;
     }
     auto eventTime = GetCurrentTime();
-    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
+    CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9901");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());
@@ -233,7 +233,7 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout(int64_t time, const std::s
         return;
     }
     auto eventTime = GetCurrentTime();
-    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
+    CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());
@@ -250,7 +250,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
         return;
     }
     auto eventTime = GetCurrentTime();
-    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
+    CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9903");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());
@@ -285,7 +285,7 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(
         return;
     }
     auto eventTime = GetCurrentTime();
-    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
+    CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9904");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());
@@ -315,7 +315,7 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
         return;
     }
     auto eventTime = GetCurrentTime();
-    CHECK_NULL_VOID_NOLOG(AcePerformanceCheck::performanceInfo_);
+    CHECK_NULL_VOID(AcePerformanceCheck::performanceInfo_);
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9905");
     auto pageJson = JsonUtil::Create(false);
     pageJson->Put("eventTime", eventTime.c_str());

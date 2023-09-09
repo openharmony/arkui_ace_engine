@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 void ListPaintMethod::PaintScrollBar(RSCanvas& canvas)
 {
     auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBar);
+    CHECK_NULL_VOID(scrollBar);
     if (scrollBar->NeedPaint()) {
         ScrollBarPainter::PaintRectBar(canvas, scrollBar);
     }
@@ -32,7 +32,7 @@ void ListPaintMethod::PaintScrollBar(RSCanvas& canvas)
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
     auto edgeEffect = edgeEffect_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(edgeEffect);
+    CHECK_NULL_VOID(edgeEffect);
     CHECK_NULL_VOID(paintWrapper);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
@@ -93,9 +93,9 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
 void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_VOID_NOLOG(paintWrapper);
+    CHECK_NULL_VOID(paintWrapper);
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBarOverlayModifier);
+    CHECK_NULL_VOID(scrollBarOverlayModifier);
     auto scrollBar = scrollBar_.Upgrade();
     if (!scrollBar || !scrollBar->NeedPaint()) {
         LOGD("no need paint scroll bar.");

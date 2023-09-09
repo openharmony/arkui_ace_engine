@@ -32,7 +32,7 @@ void RowModelNG::Create(const std::optional<Dimension>& space, AlignDeclaration*
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, FlexDirection, FlexDirection::ROW);
 
-    CHECK_NULL_VOID_NOLOG(space);
+    CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
     } else {

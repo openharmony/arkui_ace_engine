@@ -77,14 +77,14 @@ public:
 
     void RemoveLeftButtonNode()
     {
-        CHECK_NULL_VOID_NOLOG(HasLeftButtonNode());
+        CHECK_NULL_VOID(HasLeftButtonNode());
         RemoveChildAtIndex(GetChildIndexById(GetLeftButtonId()));
         leftButtonId_ = std::nullopt;
     }
 
     void RemoveRightButtonNode()
     {
-        CHECK_NULL_VOID_NOLOG(HasRightButtonNode());
+        CHECK_NULL_VOID(HasRightButtonNode());
         RemoveChildAtIndex(GetChildIndexById(GetRightButtonId()));
         rightButtonId_ = std::nullopt;
     }

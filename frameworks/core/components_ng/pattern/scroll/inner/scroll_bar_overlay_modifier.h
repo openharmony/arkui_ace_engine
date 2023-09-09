@@ -97,13 +97,13 @@ public:
 
     void SetOpacity(uint8_t opacity)
     {
-        CHECK_NULL_VOID_NOLOG(opacity_);
+        CHECK_NULL_VOID(opacity_);
         opacity_->Set(opacity);
     }
 
     uint8_t GetOpacity() const
     {
-        CHECK_NULL_RETURN_NOLOG(opacity_, 0);
+        CHECK_NULL_RETURN(opacity_, 0);
         return opacity_->Get();
     }
 

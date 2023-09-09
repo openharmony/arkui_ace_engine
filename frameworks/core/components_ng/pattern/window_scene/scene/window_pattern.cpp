@@ -309,7 +309,7 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
         return;
     }
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     FilterInvalidPointerItem(pointerEvent);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
@@ -331,7 +331,7 @@ void WindowPattern::HandleTouchEvent(const TouchEventInfo& info)
 void WindowPattern::FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto ids = pointerEvent->GetPointerIds();
     if (ids.size() <= 1) {
         return;
@@ -368,7 +368,7 @@ void WindowPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale);

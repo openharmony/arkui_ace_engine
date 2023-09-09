@@ -296,8 +296,8 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
     nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto* callback = nativeXComponentImpl_->GetCallback();
-    CHECK_NULL_VOID_NOLOG(callback);
-    CHECK_NULL_VOID_NOLOG(callback->OnSurfaceChanged);
+    CHECK_NULL_VOID(callback);
+    CHECK_NULL_VOID(callback->OnSurfaceChanged);
     callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
 }
 
@@ -308,8 +308,8 @@ void XComponentPattern::NativeXComponentDestroy()
     CHECK_NULL_VOID(nativeXComponentImpl_);
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto* callback = nativeXComponentImpl_->GetCallback();
-    CHECK_NULL_VOID_NOLOG(callback);
-    CHECK_NULL_VOID_NOLOG(callback->OnSurfaceDestroyed);
+    CHECK_NULL_VOID(callback);
+    CHECK_NULL_VOID(callback->OnSurfaceDestroyed);
     callback->OnSurfaceDestroyed(nativeXComponent_.get(), surface);
 }
 
@@ -335,8 +335,8 @@ void XComponentPattern::NativeXComponentDispatchTouchEvent(
     nativeXComponentImpl_->SetTouchPoint(xComponentTouchPoints);
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto* callback = nativeXComponentImpl_->GetCallback();
-    CHECK_NULL_VOID_NOLOG(callback);
-    CHECK_NULL_VOID_NOLOG(callback->DispatchTouchEvent);
+    CHECK_NULL_VOID(callback);
+    CHECK_NULL_VOID(callback->DispatchTouchEvent);
     callback->DispatchTouchEvent(nativeXComponent_.get(), surface);
 }
 
@@ -400,21 +400,21 @@ void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onFocusEvent = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         return pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(std::move(onFocusEvent));
 
     auto onKeyEvent = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->HandleKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 
     auto onBlurEvent = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         return pattern->HandleBlurEvent();
     };
     focusHub->SetOnBlurInternal(std::move(onBlurEvent));
@@ -425,7 +425,7 @@ void XComponentPattern::HandleFocusEvent()
     CHECK_NULL_VOID(nativeXComponentImpl_);
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto focusEventCallback = nativeXComponentImpl_->GetFocusEventCallback();
-    CHECK_NULL_VOID_NOLOG(focusEventCallback);
+    CHECK_NULL_VOID(focusEventCallback);
     focusEventCallback(nativeXComponent_.get(), surface);
 }
 
@@ -439,7 +439,7 @@ bool XComponentPattern::HandleKeyEvent(const KeyEvent& event)
 
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto keyEventCallback = nativeXComponentImpl_->GetKeyEventCallback();
-    CHECK_NULL_RETURN_NOLOG(keyEventCallback, false);
+    CHECK_NULL_RETURN(keyEventCallback, false);
     keyEventCallback(nativeXComponent_.get(), surface);
     return false;
 }
@@ -450,13 +450,13 @@ void XComponentPattern::HandleBlurEvent()
     CHECK_NULL_VOID(nativeXComponentImpl_);
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto blurEventCallback = nativeXComponentImpl_->GetBlurEventCallback();
-    CHECK_NULL_VOID_NOLOG(blurEventCallback);
+    CHECK_NULL_VOID(blurEventCallback);
     blurEventCallback(nativeXComponent_.get(), surface);
 }
 
 void XComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID_NOLOG(!touchEvent_);
+    CHECK_NULL_VOID(!touchEvent_);
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
@@ -470,7 +470,7 @@ void XComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
 
 void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 {
-    CHECK_NULL_VOID_NOLOG(!mouseEvent_);
+    CHECK_NULL_VOID(!mouseEvent_);
 
     auto mouseTask = [weak = WeakClaim(this)](const MouseInfo& info) {
         auto pattern = weak.Upgrade();
@@ -484,7 +484,7 @@ void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
 void XComponentPattern::InitMouseHoverEvent(const RefPtr<InputEventHub>& inputHub)
 {
-    CHECK_NULL_VOID_NOLOG(!mouseHoverEvent_);
+    CHECK_NULL_VOID(!mouseHoverEvent_);
     auto mouseHoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -589,8 +589,8 @@ void XComponentPattern::HandleMouseHoverEvent(bool isHover)
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
     const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
-    CHECK_NULL_VOID_NOLOG(callback);
-    CHECK_NULL_VOID_NOLOG(callback->DispatchHoverEvent);
+    CHECK_NULL_VOID(callback);
+    CHECK_NULL_VOID(callback->DispatchHoverEvent);
     callback->DispatchHoverEvent(nativeXComponent_.get(), isHover);
 }
 
@@ -602,8 +602,8 @@ void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXCompo
     nativeXComponentImpl_->SetMouseEvent(mouseEvent);
     auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
     const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
-    CHECK_NULL_VOID_NOLOG(callback);
-    CHECK_NULL_VOID_NOLOG(callback->DispatchMouseEvent);
+    CHECK_NULL_VOID(callback);
+    CHECK_NULL_VOID(callback->DispatchMouseEvent);
     callback->DispatchMouseEvent(nativeXComponent_.get(), surface);
 }
 

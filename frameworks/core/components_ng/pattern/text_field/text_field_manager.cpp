@@ -67,12 +67,12 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bot
     CHECK_NULL_VOID(textFieldNode);
 
     auto scrollableNode = FindScrollableOfFocusedTextField(textFieldNode);
-    CHECK_NULL_VOID_NOLOG(scrollableNode);
+    CHECK_NULL_VOID(scrollableNode);
     auto scrollPattern = scrollableNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
 
     auto scrollableRect = scrollableNode->GetTransformRectRelativeToWindow();
-    CHECK_NULL_VOID_NOLOG(scrollableRect.Top() < bottomInset.start);
+    CHECK_NULL_VOID(scrollableRect.Top() < bottomInset.start);
 
     auto caretRect = textField->GetCaretRect() + textFieldNode->GetOffsetRelativeToWindow();
     // caret above scroll's content region
@@ -84,7 +84,7 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bot
 
     // caret below safeArea
     auto diffBot = bottomInset.start - (caretRect.Bottom() + caretRect.Height() * 2);
-    CHECK_NULL_VOID_NOLOG(diffBot < 0);
+    CHECK_NULL_VOID(diffBot < 0);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
 }
 
@@ -94,9 +94,9 @@ void TextFieldManagerNG::ScrollTextFieldToSafeArea()
     CHECK_NULL_VOID(pipeline);
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
     // only scroll when keyboard shows
-    CHECK_NULL_VOID_NOLOG(keyboardInset.IsValid());
+    CHECK_NULL_VOID(keyboardInset.IsValid());
     auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
-    CHECK_NULL_VOID_NOLOG(bottomInset.IsValid());
+    CHECK_NULL_VOID(bottomInset.IsValid());
     ScrollToSafeAreaHelper(bottomInset);
 }
 } // namespace OHOS::Ace::NG

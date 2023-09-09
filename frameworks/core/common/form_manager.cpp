@@ -51,14 +51,14 @@ RefPtr<SubContainer> FormManager::GetSubContainer(int64_t formId)
 void FormManager::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils)
 {
     std::lock_guard<std::mutex> lock(formUtilsMutex_);
-    CHECK_NULL_VOID_NOLOG(formUtils);
+    CHECK_NULL_VOID(formUtils);
     formUtils_ = formUtils;
 }
 
 std::shared_ptr<FormUtils> FormManager::GetFormUtils()
 {
     std::lock_guard<std::mutex> lock(formUtilsMutex_);
-    CHECK_NULL_RETURN_NOLOG(formUtils_, nullptr);
+    CHECK_NULL_RETURN(formUtils_, nullptr);
     return formUtils_;
 }
 

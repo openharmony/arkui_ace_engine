@@ -45,9 +45,9 @@ FlexDirection GetFlexDirection(const RefPtr<UINode>& node)
         return FlexDirection::ROW;
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(node);
-    CHECK_NULL_RETURN_NOLOG(frameNode, FlexDirection::ROW);
+    CHECK_NULL_RETURN(frameNode, FlexDirection::ROW);
     auto layoutProperty = frameNode->GetLayoutProperty<FlexLayoutProperty>();
-    CHECK_NULL_RETURN_NOLOG(layoutProperty, FlexDirection::ROW);
+    CHECK_NULL_RETURN(layoutProperty, FlexDirection::ROW);
     return layoutProperty->GetFlexDirection().value_or(FlexDirection::ROW);
 }
 } // namespace
@@ -76,11 +76,11 @@ void BlankPattern::DumpInfo()
 void BlankPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto parent = host->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID_NOLOG(parent);
+    CHECK_NULL_VOID(parent);
     auto layoutProp = host->GetLayoutProperty<BlankLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(layoutProp);
+    CHECK_NULL_VOID(layoutProp);
     if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
         return;
     }
@@ -105,7 +105,7 @@ void BlankPattern::BeforeCreateLayoutWrapper()
         layoutProp->UpdateFlexGrow(1.0f);
         layoutProp->UpdateFlexShrink(1.0f);
     }
-    CHECK_NULL_VOID_NOLOG(layoutProp->GetMinSize().has_value());
+    CHECK_NULL_VOID(layoutProp->GetMinSize().has_value());
     auto blankMin = layoutProp->GetMinSize().value_or(Dimension());
     if (isParentRow) {
         if (!(calcConstraint && calcConstraint->minSize.has_value() &&

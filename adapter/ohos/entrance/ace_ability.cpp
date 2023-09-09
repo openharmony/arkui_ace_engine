@@ -118,14 +118,14 @@ public:
     void OnFinish() const override
     {
         LOGI("AcePlatformEventCallback OnFinish");
-        CHECK_NULL_VOID_NOLOG(onFinish_);
+        CHECK_NULL_VOID(onFinish_);
         onFinish_();
     }
 
     void OnStartAbility(const std::string& address) override
     {
         LOGI("AcePlatformEventCallback OnStartAbility");
-        CHECK_NULL_VOID_NOLOG(onStartAbility_);
+        CHECK_NULL_VOID(onStartAbility_);
         onStartAbility_(address);
     }
 
@@ -302,7 +302,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 
     auto packagePathStr = GetBundleCodePath();
     auto moduleInfo = GetHapModuleInfo();
-    CHECK_NULL_VOID_NOLOG(moduleInfo);
+    CHECK_NULL_VOID(moduleInfo);
     packagePathStr += "/" + moduleInfo->package + "/";
     std::shared_ptr<AbilityInfo> info = GetAbilityInfo();
     std::string srcPath;
@@ -477,7 +477,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         context->SetActionEventHandler(actionEventHandler);
         context->SetGetWindowRectImpl([window]() -> Rect {
             Rect rect;
-            CHECK_NULL_RETURN_NOLOG(window, rect);
+            CHECK_NULL_RETURN(window, rect);
             auto windowRect = window->GetRect();
             rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
             return rect;
@@ -615,7 +615,7 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
     taskExecutor->PostTask(
         [weakContainer = WeakPtr<Platform::AceContainer>(container), configuration]() {
             auto container = weakContainer.Upgrade();
-            CHECK_NULL_VOID_NOLOG(container);
+            CHECK_NULL_VOID(container);
             Platform::ParsedConfig parsedConfig;
             parsedConfig.colorMode = configuration.GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
             parsedConfig.deviceAccess =
@@ -766,7 +766,7 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
         taskExecutor->PostTask(
             [container, keyboardRect, rsTransaction] {
                 auto context = container->GetPipelineContext();
-                CHECK_NULL_VOID_NOLOG(context);
+                CHECK_NULL_VOID(context);
                 context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
             },
             TaskExecutor::TaskType::UI);
@@ -894,16 +894,16 @@ uint32_t AceAbility::GetBackgroundColor()
 void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
     auto container = Platform::AceContainer::GetContainer((abilityId_));
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_VOID_NOLOG(
+    CHECK_NULL_VOID(
         pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && pipeline->GetIsAppWindow());
     LOGI("AceAbility::OnAvoidAreaChanged type:%{public}d, avoidArea:topRect:x:%{public}d, y:%{public}d, "
          "width:%{public}d, height%{public}d",
         type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
         (int32_t)avoidArea.topRect_.height_);
     auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID_NOLOG(taskExecutor);
+    CHECK_NULL_VOID(taskExecutor);
     auto safeArea = ConvertAvoidArea(avoidArea);
     ContainerScope scope(abilityId_);
     taskExecutor->PostTask(

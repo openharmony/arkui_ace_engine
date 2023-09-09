@@ -125,7 +125,7 @@ CanvasDrawFunction MenuPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWr
         auto menu = weak.Upgrade();
         if (menu) {
             auto props = DynamicCast<MenuPaintProperty>(paintWrapper->GetPaintProperty());
-            CHECK_NULL_VOID_NOLOG(props);
+            CHECK_NULL_VOID(props);
             if (props->GetEnableArrow().has_value()) {
                 if (!props->GetEnableArrow().value() || !props->GetArrowPosition().has_value() ||
                     !props->GetArrowPlacement().has_value()) {

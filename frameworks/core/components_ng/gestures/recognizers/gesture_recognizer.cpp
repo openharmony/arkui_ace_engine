@@ -32,7 +32,7 @@ RefPtr<GestureReferee> GetCurrentGestureReferee()
     CHECK_NULL_RETURN(context, nullptr);
 
     auto eventManager = context->GetEventManager();
-    CHECK_NULL_RETURN_NOLOG(eventManager, nullptr);
+    CHECK_NULL_RETURN(eventManager, nullptr);
     return eventManager->GetGestureRefereeNG();
 }
 

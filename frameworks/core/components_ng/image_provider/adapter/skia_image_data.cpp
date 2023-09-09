@@ -38,7 +38,7 @@ RefPtr<ImageData> ImageData::MakeFromDataWithCopy(const void* data, size_t lengt
 RefPtr<ImageData> ImageData::MakeFromDataWrapper(void* dataWrapper)
 {
     auto* skDataPtr = reinterpret_cast<sk_sp<SkData>*>(dataWrapper);
-    CHECK_NULL_RETURN_NOLOG(skDataPtr && *skDataPtr, nullptr);
+    CHECK_NULL_RETURN(skDataPtr && *skDataPtr, nullptr);
     return MakeRefPtr<SkiaImageData>(*skDataPtr);
 }
 
@@ -88,7 +88,7 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
 std::pair<SizeF, int32_t> SkiaImageData::Parse() const
 {
     auto codec = SkCodec::MakeFromData(GetSkData());
-    CHECK_NULL_RETURN_NOLOG(codec, {});
+    CHECK_NULL_RETURN(codec, {});
     SizeF imageSize;
     switch (codec->getOrigin()) {
         case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:

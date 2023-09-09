@@ -206,9 +206,9 @@ void SheetDragBarPattern::HandleTouchUp()
     option.SetOnFinishEvent([weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
         ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
+        CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID_NOLOG(taskExecutor);
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask([weak, id]() {
             ContainerScope scope(id);
             auto dragBarPattern = weak.Upgrade();

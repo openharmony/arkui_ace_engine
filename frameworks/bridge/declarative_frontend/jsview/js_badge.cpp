@@ -65,7 +65,7 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
     }
 
     auto badgeTheme = GetTheme<BadgeTheme>();
-    CHECK_NULL_RETURN_NOLOG(badgeTheme, BadgeParameters());
+    CHECK_NULL_RETURN(badgeTheme, BadgeParameters());
     auto obj = JSRef<JSObject>::Cast(info[0]);
     auto value = obj->GetProperty("value");
     if (!value->IsNull() && value->IsString()) {

@@ -217,7 +217,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
 void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout)
 {
-    CHECK_NULL_VOID_NOLOG(pageNode);
+    CHECK_NULL_VOID(pageNode);
     PerformanceCheckNodeMap nodeMap;
     pageNode->GetPerformanceCheckData(nodeMap);
     AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, vsyncTimeout);
@@ -403,7 +403,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
     pageFocusHub->LostFocus();
 
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
 }
 
@@ -424,7 +424,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     pagePattern->ProcessShowState();
 
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(context);
+    CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {

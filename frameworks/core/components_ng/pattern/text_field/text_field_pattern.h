@@ -610,7 +610,7 @@ public:
     bool NeedShowPasswordIcon()
     {
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_RETURN_NOLOG(layoutProperty, false);
+        CHECK_NULL_RETURN(layoutProperty, false);
         return layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD &&
                layoutProperty->GetShowPasswordIconValue(true);
     }

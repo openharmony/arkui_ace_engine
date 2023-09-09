@@ -187,7 +187,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
         panDirection.type = PanDirection::ALL;
         auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent&) {
             auto windowManager = wk.Upgrade();
-            CHECK_NULL_VOID_NOLOG(windowManager);
+            CHECK_NULL_VOID(windowManager);
             if (windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) {
                 LOGI("container window start move.");
                 windowManager->WindowStartMove();
@@ -217,7 +217,7 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& conta
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
         [wk = WeakClaim(RawPtr(windowManager))](GestureEvent& info) {
             auto windowManager = wk.Upgrade();
-            CHECK_NULL_VOID_NOLOG(windowManager);
+            CHECK_NULL_VOID(windowManager);
             auto mode = windowManager->GetWindowMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
                 LOGI("recover button clicked");

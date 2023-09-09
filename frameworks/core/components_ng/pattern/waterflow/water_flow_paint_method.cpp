@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 void WaterFlowPaintMethod::PaintScrollBar(RSCanvas& canvas)
 {
     auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBar);
+    CHECK_NULL_VOID(scrollBar);
     if (scrollBar->NeedPaint()) {
         ScrollBarPainter::PaintRectBar(canvas, scrollBar);
     }
@@ -31,7 +31,7 @@ void WaterFlowPaintMethod::PaintScrollBar(RSCanvas& canvas)
 void WaterFlowPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
     auto edgeEffect = edgeEffect_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(edgeEffect);
+    CHECK_NULL_VOID(edgeEffect);
     CHECK_NULL_VOID(paintWrapper);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
@@ -62,11 +62,11 @@ void WaterFlowPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
 void WaterFlowPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
-    CHECK_NULL_VOID_NOLOG(paintWrapper);
+    CHECK_NULL_VOID(paintWrapper);
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBarOverlayModifier);
+    CHECK_NULL_VOID(scrollBarOverlayModifier);
     auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBar);
+    CHECK_NULL_VOID(scrollBar);
     if (!scrollBar || !scrollBar->NeedPaint()) {
         LOGD("no need paint scroll bar.");
         return;

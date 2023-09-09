@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG {
 
 void ShapePaintProperty::UpdateShapeProperty(const RefPtr<ShapePaintProperty>& target)
 {
-    CHECK_NULL_VOID_NOLOG(target);
+    CHECK_NULL_VOID(target);
     if (!HasAntiAlias() && target->HasAntiAlias()) {
         UpdateAntiAlias(target->GetAntiAliasValue());
     }

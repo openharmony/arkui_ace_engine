@@ -88,7 +88,7 @@ void StepperPattern::InitSwiperChangeEvent(const RefPtr<SwiperEventHub>& swiperE
 {
     ChangeEvent changeEvent = [weak = WeakClaim(this)](int32_t index) {
         auto stepperPattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(stepperPattern->TotalCount() > -1);
+        CHECK_NULL_VOID(stepperPattern->TotalCount() > -1);
         stepperPattern->UpdateIndexWithoutMeasure(index);
         stepperPattern->UpdateOrCreateLeftButtonNode(index);
         stepperPattern->UpdateOrCreateRightButtonNode(index);
@@ -560,7 +560,7 @@ void StepperPattern::InitButtonClickEvent()
         if (leftGestureHub->IsClickEventsEmpty()) {
             auto leftClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
                 auto stepperPattern = weak.Upgrade();
-                CHECK_NULL_VOID_NOLOG(stepperPattern);
+                CHECK_NULL_VOID(stepperPattern);
                 stepperPattern->HandlingLeftButtonClickEvent();
             };
             leftGestureHub->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(leftClickEvent)));
@@ -575,7 +575,7 @@ void StepperPattern::InitButtonClickEvent()
     if (rightGestureHub->IsClickEventsEmpty()) {
         auto rightClickEvent = [weak = WeakClaim(this)](const GestureEvent& info) {
             auto stepperPattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(stepperPattern);
+            CHECK_NULL_VOID(stepperPattern);
             stepperPattern->HandlingRightButtonClickEvent();
         };
         rightGestureHub->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(rightClickEvent)));

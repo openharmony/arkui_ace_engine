@@ -460,11 +460,11 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
     Color backgroundColor;
     if (tmp) {
         auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(pipeline);
+        CHECK_NULL_VOID(pipeline);
         auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID_NOLOG(themeManager);
+        CHECK_NULL_VOID(themeManager);
         auto theme = themeManager->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
         return;
     }
@@ -480,7 +480,7 @@ void TextFieldModelNG::SetPadding(NG::PaddingProperty& newPadding, Edge oldPaddi
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID_NOLOG(theme);
+        CHECK_NULL_VOID(theme);
         auto textFieldPadding = theme->GetPadding();
         auto top = textFieldPadding.Top();
         auto bottom = textFieldPadding.Bottom();

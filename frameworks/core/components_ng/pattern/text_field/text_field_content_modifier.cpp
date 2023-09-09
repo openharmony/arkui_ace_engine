@@ -127,7 +127,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     if (!textFieldPattern->NeedShowPasswordIcon()) {
         return;
     }
-    CHECK_NULL_VOID_NOLOG(passwordIconCanvasImage);
+    CHECK_NULL_VOID(passwordIconCanvasImage);
     UpdatePaintConfig(passwordIconCanvasImage, context, iconRect);
     const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
     canvas.Save();

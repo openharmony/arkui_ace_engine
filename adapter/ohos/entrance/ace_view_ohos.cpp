@@ -81,19 +81,19 @@ void AceViewOhos::SurfaceChanged(AceViewOhos* view, int32_t width, int32_t heigh
 
 void AceViewOhos::SurfacePositionChanged(AceViewOhos* view, int32_t posX, int32_t posY)
 {
-    CHECK_NULL_VOID_NOLOG(view);
+    CHECK_NULL_VOID(view);
     view->NotifySurfacePositionChanged(posX, posY);
 }
 
 void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config)
 {
-    CHECK_NULL_VOID_NOLOG(view);
+    CHECK_NULL_VOID(view);
     view->NotifyDensityChanged(config.Density());
 }
 
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    CHECK_NULL_VOID_NOLOG(view);
+    CHECK_NULL_VOID(view);
     CHECK_NULL_VOID(pointerEvent);
     LogPointInfo(pointerEvent);
     DispatchEventToPerf(pointerEvent);
@@ -251,14 +251,14 @@ void AceViewOhos::Launch()
 
 void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    CHECK_NULL_VOID_NOLOG(pointerEvent);
+    CHECK_NULL_VOID(pointerEvent);
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
     if (SystemProperties::GetDebugEnabled()) {
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
     }
     auto markProcess = [pointerEvent]() {
-        CHECK_NULL_VOID_NOLOG(pointerEvent);
+        CHECK_NULL_VOID(pointerEvent);
         LOGD("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
@@ -309,7 +309,7 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
 void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {
     LOGD("ProcessDragEvent");
-    CHECK_NULL_VOID_NOLOG(dragEventCallback_);
+    CHECK_NULL_VOID(dragEventCallback_);
     dragEventCallback_(x, y, action);
 }
 
@@ -322,12 +322,12 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
         ConvertMouseEvent(pointerEvent, event, container->IsScenceBoardWindow());
     }
     auto markProcess = [pointerEvent]() {
-        CHECK_NULL_VOID_NOLOG(pointerEvent);
+        CHECK_NULL_VOID(pointerEvent);
         LOGD("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
 
-    CHECK_NULL_VOID_NOLOG(mouseEventCallback_);
+    CHECK_NULL_VOID(mouseEventCallback_);
     mouseEventCallback_(event, markProcess);
 }
 
@@ -338,18 +338,18 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         ConvertAxisEvent(pointerEvent, event);
     }
     auto markProcess = [pointerEvent]() {
-        CHECK_NULL_VOID_NOLOG(pointerEvent);
+        CHECK_NULL_VOID(pointerEvent);
         LOGD("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
 
-    CHECK_NULL_VOID_NOLOG(axisEventCallback_);
+    CHECK_NULL_VOID(axisEventCallback_);
     axisEventCallback_(event, markProcess);
 }
 
 bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
-    CHECK_NULL_RETURN_NOLOG(keyEventCallback_, false);
+    CHECK_NULL_RETURN(keyEventCallback_, false);
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
     return keyEventCallback_(event);
@@ -362,7 +362,7 @@ const void* AceViewOhos::GetNativeWindowById(uint64_t textureId)
 
 bool AceViewOhos::ProcessRotationEvent(float rotationValue)
 {
-    CHECK_NULL_RETURN_NOLOG(rotationEventCallBack_, false);
+    CHECK_NULL_RETURN(rotationEventCallBack_, false);
     RotationEvent event { .value = rotationValue * ROTATION_DIVISOR };
     return rotationEventCallBack_(event);
 }

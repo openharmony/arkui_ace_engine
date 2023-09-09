@@ -48,7 +48,7 @@ public:
             theme->qrcodeWidth_ = themeConstants->GetDimension(THEME_QRCODE_SIZE);
             theme->qrcodeHeight_ = themeConstants->GetDimension(THEME_QRCODE_SIZE);
             auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_RETURN_NOLOG(pipeline, theme);
+            CHECK_NULL_RETURN(pipeline, theme);
             if (pipeline->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
                 ParsePattern(themeConstants->GetThemeStyle(), theme);
             }

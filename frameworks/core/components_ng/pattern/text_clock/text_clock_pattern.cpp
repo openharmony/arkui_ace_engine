@@ -143,7 +143,7 @@ void TextClockPattern::OnModifyDone()
 
 void TextClockPattern::InitTextClockController()
 {
-    CHECK_NULL_VOID_NOLOG(textClockController_);
+    CHECK_NULL_VOID(textClockController_);
     if (textClockController_->HasInitialized()) {
         return;
     }
@@ -223,7 +223,7 @@ void TextClockPattern::RequestUpdateForNextSecond()
     context->GetTaskExecutor()->PostDelayedTask(
         [wp = WeakClaim(this)] {
             auto textClock = wp.Upgrade();
-            CHECK_NULL_VOID_NOLOG(textClock);
+            CHECK_NULL_VOID(textClock);
             if (!textClock->isStart_) {
                 return;
             }

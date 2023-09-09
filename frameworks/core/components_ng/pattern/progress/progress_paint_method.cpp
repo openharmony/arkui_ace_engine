@@ -31,9 +31,9 @@ namespace OHOS::Ace::NG {
 void ProgressPaintMethod::GetThemeData()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
-    CHECK_NULL_VOID_NOLOG(progressTheme);
+    CHECK_NULL_VOID(progressTheme);
     color_ = progressTheme->GetTrackSelectedColor();
     if (progressType_ == ProgressType::CAPSULE) {
         color_ = progressTheme->GetCapsuleSelectColor();
@@ -54,9 +54,9 @@ void ProgressPaintMethod::GetThemeData()
 void ProgressPaintMethod::GetThemeDataForApiNine()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipeline);
+    CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
-    CHECK_NULL_VOID_NOLOG(progressTheme);
+    CHECK_NULL_VOID(progressTheme);
     color_ = progressTheme->GetTrackSelectedColor();
     bgColor_ = progressTheme->GetTrackBgColor();
     scaleWidth_ = progressTheme->GetScaleWidth().ConvertToPx();

@@ -321,7 +321,7 @@ void LayoutProperty::CheckAspectRatio()
 
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
-    CHECK_NULL_VOID_NOLOG(gridProperty_);
+    CHECK_NULL_VOID(gridProperty_);
     auto parent = host->GetAncestorNodeOfFrame();
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
@@ -349,7 +349,7 @@ void LayoutProperty::UpdateGridProperty(std::optional<int32_t> span, std::option
 
 bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
 {
-    CHECK_NULL_RETURN_NOLOG(gridProperty_, false);
+    CHECK_NULL_RETURN(gridProperty_, false);
     auto optOffset = gridProperty_->GetOffset();
     if (optOffset == UNDEFINED_DIMENSION) {
         return false;
@@ -498,7 +498,7 @@ PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder()
 
 MarginPropertyF LayoutProperty::CreateMargin()
 {
-    CHECK_NULL_RETURN_NOLOG(margin_, MarginPropertyF());
+    CHECK_NULL_RETURN(margin_, MarginPropertyF());
     if (!marginResult_.has_value() && margin_) {
         if (layoutConstraint_.has_value()) {
             marginResult_ = ConvertToMarginPropertyF(
@@ -543,7 +543,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     }
 
     auto parent = host->GetAncestorNodeOfFrame();
-    CHECK_NULL_VOID_NOLOG(parent);
+    CHECK_NULL_VOID(parent);
     // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
     if (preVisible != VisibleType::GONE && visible != VisibleType::GONE) {
         parent->MarkNeedSyncRenderTree();
@@ -578,14 +578,14 @@ void LayoutProperty::UpdateSafeAreaInsets(const SafeAreaInsets& safeArea)
 
 bool LayoutProperty::HasFixedWidth() const
 {
-    CHECK_NULL_RETURN_NOLOG(calcLayoutConstraint_, false);
+    CHECK_NULL_RETURN(calcLayoutConstraint_, false);
     auto&& idealSize = calcLayoutConstraint_->selfIdealSize;
     return (idealSize && idealSize->WidthFixed());
 }
 
 bool LayoutProperty::HasFixedHeight() const
 {
-    CHECK_NULL_RETURN_NOLOG(calcLayoutConstraint_, false);
+    CHECK_NULL_RETURN(calcLayoutConstraint_, false);
     auto&& idealSize = calcLayoutConstraint_->selfIdealSize;
     return (idealSize && idealSize->HeightFixed());
 }
@@ -635,7 +635,7 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
     auto geometryTransitionOld = GetGeometryTransition();
     auto geometryTransitionNew =
         ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, host_, followWithoutTransition);
-    CHECK_NULL_VOID_NOLOG(geometryTransitionOld != geometryTransitionNew);
+    CHECK_NULL_VOID(geometryTransitionOld != geometryTransitionNew);
     if (geometryTransitionOld) {
         geometryTransitionOld->OnFollowWithoutTransition();
         // unregister node from old geometry transition

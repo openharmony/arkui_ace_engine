@@ -25,9 +25,9 @@ namespace OHOS::Ace::NG {
 std::string VideoAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(frameNode, "");
+    CHECK_NULL_RETURN(frameNode, "");
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
-    CHECK_NULL_RETURN_NOLOG(videoLayoutProperty, "");
+    CHECK_NULL_RETURN(videoLayoutProperty, "");
     return videoLayoutProperty->GetVideoSource().value_or("");
 }
 
@@ -35,9 +35,9 @@ AccessibilityValue VideoAccessibilityProperty::GetAccessibilityValue() const
 {
     AccessibilityValue result;
     auto frameNode = host_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(frameNode, result);
+    CHECK_NULL_RETURN(frameNode, result);
     auto pattern = frameNode->GetPattern<VideoPattern>();
-    CHECK_NULL_RETURN_NOLOG(pattern, result);
+    CHECK_NULL_RETURN(pattern, result);
     if (pattern->IsFullScreen()) {
         auto fullScreenNode = AceType::DynamicCast<VideoFullScreenNode>(pattern->GetFullScreenNode());
         CHECK_NULL_RETURN(fullScreenNode, result);

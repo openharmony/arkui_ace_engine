@@ -71,7 +71,7 @@ void GridPositionController::ScrollPage(bool reverse, bool /* smooth */)
 bool GridPositionController::IsAtEnd() const
 {
     auto gridPattern = AceType::DynamicCast<GridPattern>(scroll_.Upgrade());
-    CHECK_NULL_RETURN_NOLOG(gridPattern, false);
+    CHECK_NULL_RETURN(gridPattern, false);
     return gridPattern->IsAtBottom();
 }
 } // namespace OHOS::Ace::NG

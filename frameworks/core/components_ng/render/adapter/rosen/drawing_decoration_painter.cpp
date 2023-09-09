@@ -237,7 +237,7 @@ public:
     static std::unique_ptr<GradientShader> CreateLinearGradient(const NG::Gradient& gradient, const RSSize& size)
     {
         auto linearGradient = gradient.GetLinearGradient();
-        CHECK_NULL_RETURN_NOLOG(linearGradient, nullptr);
+        CHECK_NULL_RETURN(linearGradient, nullptr);
         RSPoint firstPoint { 0.0f, 0.0f };
         RSPoint secondPoint { 0.0f, 0.0f };
         if (linearGradient->angle) {
@@ -619,7 +619,7 @@ public:
     static std::unique_ptr<GradientShader> CreateSweepGradient(const NG::Gradient& gradient, const RSSize& size)
     {
         auto sweepGradient = gradient.GetSweepGradient();
-        CHECK_NULL_RETURN_NOLOG(sweepGradient, nullptr);
+        CHECK_NULL_RETURN(sweepGradient, nullptr);
         RSPoint center = GetCenter(sweepGradient, size);
         float rotationAngle = 0.0f;
         if (sweepGradient->rotation) {
@@ -935,7 +935,7 @@ void DrawingDecorationPainter::PaintBrightness(const RSRoundRect& rRect, RSCanva
 {
     // brightness range = (0, 2)
     // skip painting when brightness is normal
-    CHECK_NULL_VOID_NOLOG(!NearEqual(bright, 1.0));
+    CHECK_NULL_VOID(!NearEqual(bright, 1.0));
     if (canvas) {
         RSAutoCanvasRestore acr(*canvas, true);
         canvas->ClipRoundRect(rRect, RSClipOp::INTERSECT, true);
@@ -959,7 +959,7 @@ void DrawingDecorationPainter::PaintBrightness(const RSRoundRect& rRect, RSCanva
 void DrawingDecorationPainter::PaintContrast(const RSRoundRect& rRect, RSCanvas* canvas, float contrasts)
 {
     // skip painting if contrast is normal
-    CHECK_NULL_VOID_NOLOG(!NearEqual(contrasts, 1.0));
+    CHECK_NULL_VOID(!NearEqual(contrasts, 1.0));
     if (canvas) {
         RSAutoCanvasRestore acr(*canvas, true);
         canvas->ClipRoundRect(rRect, RSClipOp::INTERSECT, true);

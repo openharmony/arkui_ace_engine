@@ -236,9 +236,9 @@ bool GridPattern::IsItemSelected(const MouseInfo& info)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-    CHECK_NULL_RETURN_NOLOG(node, false);
+    CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<GridItemPattern>();
-    CHECK_NULL_RETURN_NOLOG(itemPattern, false);
+    CHECK_NULL_RETURN(itemPattern, false);
     return itemPattern->IsSelected();
 }
 
@@ -265,9 +265,9 @@ void GridPattern::FireOnScrollStart()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID_NOLOG(hub);
+    CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
-    CHECK_NULL_VOID_NOLOG(onScrollStart);
+    CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
 }
 
@@ -301,7 +301,7 @@ void GridPattern::CheckRestartSpring()
     if (AnimateRunning()) {
         return;
     }
-    
+
     FireOnScrollStart();
     edgeEffect->ProcessScrollOver(0);
 }
@@ -967,7 +967,7 @@ void GridPattern::ScrollToFocusNodeIndex(int32_t index)
 
 bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 {
-    CHECK_NULL_RETURN_NOLOG(focusFrameNode, false);
+    CHECK_NULL_RETURN(focusFrameNode, false);
     auto focusHub = focusFrameNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     auto scrollToIndex = GetFocusNodeIndex(focusHub);
@@ -987,7 +987,7 @@ void GridPattern::ScrollBy(float offset)
     StopAnimate();
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
@@ -1057,7 +1057,7 @@ void GridPattern::ScrollPage(bool reverse)
         UpdateCurrentOffset(GetMainContentSize(), SCROLL_FROM_JUMP);
     }
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
@@ -1111,16 +1111,16 @@ void GridPattern::ScrollTo(float position)
     StopAnimate();
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
 float GridPattern::EstimateHeight() const
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, 0.0);
+    CHECK_NULL_RETURN(host, 0.0);
     auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0);
+    CHECK_NULL_RETURN(geometryNode, 0.0);
     const auto& info = gridLayoutInfo_;
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
@@ -1156,9 +1156,9 @@ float GridPattern::EstimateHeight() const
 float GridPattern::GetAverageHeight() const
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, 0.0);
+    CHECK_NULL_RETURN(host, 0.0);
     auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0);
+    CHECK_NULL_RETURN(geometryNode, 0.0);
     const auto& info = gridLayoutInfo_;
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
@@ -1188,9 +1188,9 @@ float GridPattern::GetAverageHeight() const
 float GridPattern::GetTotalHeight() const
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, 0.0f);
+    CHECK_NULL_RETURN(host, 0.0f);
     auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN_NOLOG(geometryNode, 0.0f);
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     float heightSum = 0;
@@ -1370,18 +1370,18 @@ void GridPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
 {
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(grid, 0.0);
+        CHECK_NULL_RETURN(grid, 0.0);
         return grid->gridLayoutInfo_.currentOffset_;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(grid, 0.0);
+        CHECK_NULL_RETURN(grid, 0.0);
         return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto grid = weak.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(grid, 0.0);
+        CHECK_NULL_RETURN(grid, 0.0);
         return grid->GetMainContentSize() - grid->gridLayoutInfo_.GetTotalHeightOfItemsInView(grid->GetMainGap());
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
@@ -1454,7 +1454,7 @@ void GridPattern::DumpInfo()
     LOGI("reachStart:%{public}d,reachEnd:%{public}d,offsetEnd:%{public}d", gridLayoutInfo_.reachStart_,
         gridLayoutInfo_.reachEnd_, gridLayoutInfo_.offsetEnd_);
     auto property = GetLayoutProperty<GridLayoutProperty>();
-    CHECK_NULL_VOID_NOLOG(property);
+    CHECK_NULL_VOID(property);
     LOGI("startIndex:%{public}d,endIndex:%{public}d,startMainLine:%{public}d,endMainLine:%{public}d,cachedCount:%{"
          "public}d",
         gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.startMainLineIndex_,

@@ -204,7 +204,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
         }
     }
 
-    CHECK_NULL_RETURN_NOLOG(parentFrameNode, nullptr);
+    CHECK_NULL_RETURN(parentFrameNode, nullptr);
     for (auto iter : hitFrameNodes) {
         if (parentFrameNode == iter) {
             auto eventHub = parentFrameNode->GetEventHub<EventHub>();
@@ -459,7 +459,7 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         return;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
-    CHECK_NULL_VOID_NOLOG(dragFrameNode);
+    CHECK_NULL_VOID(dragFrameNode);
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
@@ -777,7 +777,7 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
         auto callback = [weakManager = WeakClaim(this)](const std::string& data) {
             auto dragDropManager = weakManager.Upgrade();
             auto addData = dragDropManager->newData_->ToString();
-            CHECK_NULL_VOID_NOLOG(dragDropManager);
+            CHECK_NULL_VOID(dragDropManager);
             auto clipboardAllData = JsonUtil::Create(true);
             clipboardAllData->Put("preData", data.c_str());
             clipboardAllData->Put("newData", addData.c_str());
@@ -805,7 +805,7 @@ void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
     if (!getDataCallback_) {
         auto callback = [weak = WeakClaim(this)](const std::string& data) {
             auto manager = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(manager);
+            CHECK_NULL_VOID(manager);
             auto json = JsonUtil::ParseJsonString(data);
             auto newData = JsonUtil::ParseJsonString(json->GetString("newData"));
             manager->extraInfo_ = newData->GetString("customDragInfo");
@@ -836,7 +836,7 @@ void DragDropManager::RestoreClipboardData()
     if (!deleteDataCallback_) {
         auto callback = [weakManager = WeakClaim(this)](const std::string& data) {
             auto dragDropManager = weakManager.Upgrade();
-            CHECK_NULL_VOID_NOLOG(dragDropManager);
+            CHECK_NULL_VOID(dragDropManager);
             auto json = JsonUtil::ParseJsonString(data);
             if (json->Contains("preData")) {
                 dragDropManager->clipboard_->SetData(json->GetString("preData"));

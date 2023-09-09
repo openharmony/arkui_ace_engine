@@ -78,8 +78,8 @@ TaskExecutor::Task WrapTaskWithContainer(
 
 bool PostTaskToTaskRunner(const fml::RefPtr<fml::TaskRunner>& taskRunner, TaskExecutor::Task&& task, uint32_t delayTime)
 {
-    CHECK_NULL_RETURN_NOLOG(taskRunner, false);
-    CHECK_NULL_RETURN_NOLOG(task, false);
+    CHECK_NULL_RETURN(taskRunner, false);
+    CHECK_NULL_RETURN(task, false);
 
     if (delayTime > 0) {
         taskRunner->PostDelayedTask(std::move(task), fml::TimeDelta::FromMilliseconds(delayTime));

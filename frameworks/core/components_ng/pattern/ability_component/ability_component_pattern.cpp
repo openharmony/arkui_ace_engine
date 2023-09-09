@@ -190,7 +190,7 @@ void AbilityComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     const auto pointerEvent = info.GetPointerEvent();
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
@@ -206,9 +206,9 @@ void AbilityComponentPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
-    CHECK_NULL_VOID_NOLOG(pointerEvent);
+    CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto selfGlobalOffset = host->GetTransformRelativeOffset();
     auto scale = host->GetTransformScale();
     Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
@@ -297,9 +297,9 @@ bool AbilityComponentPattern::OnKeyEvent(const KeyEvent& event)
 bool AbilityComponentPattern::IsCurrentFocus() const
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, false);
+    CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_RETURN_NOLOG(focusHub, false);
+    CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG

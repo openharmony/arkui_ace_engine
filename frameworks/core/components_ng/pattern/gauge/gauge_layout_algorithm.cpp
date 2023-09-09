@@ -30,11 +30,11 @@ void GaugeLayoutAlgorithm::OnReset() {}
 
 void GaugeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_VOID_NOLOG(layoutWrapper);
+    CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID_NOLOG(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID_NOLOG(geometryNode);
+    CHECK_NULL_VOID(geometryNode);
     auto constraint = layoutProperty->GetLayoutConstraint();
 
     const auto idealSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
@@ -95,17 +95,17 @@ void GaugeLayoutAlgorithm::MeasureLimitValueText(
     LayoutWrapper* layoutWrapper, const SizeF& parentSize, const bool isMin)
 {
     auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
-    CHECK_NULL_VOID_NOLOG(hostNode);
+    CHECK_NULL_VOID(hostNode);
     auto pattern = hostNode->GetPattern<GaugePattern>();
-    CHECK_NULL_VOID_NOLOG(pattern);
+    CHECK_NULL_VOID(pattern);
     auto hasLimitValueNode = isMin ? pattern->HasMinValueTextNode() : pattern->HasMaxValueTextNode();
-    CHECK_NULL_VOID_NOLOG(hasLimitValueNode);
+    CHECK_NULL_VOID(hasLimitValueNode);
     auto layoutProperty = AceType::DynamicCast<GaugeLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID_NOLOG(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(parentSize);
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID_NOLOG(layoutGeometryNode);
+    CHECK_NULL_VOID(layoutGeometryNode);
     auto paddingSize = layoutGeometryNode->GetPaddingSize();
     auto diameter = std::min(paddingSize.Width(), paddingSize.Height());
     auto width = diameter * LIMIT_VALUE_MIN_OR_MAX_WIDTH_RATIO;
@@ -119,21 +119,21 @@ void GaugeLayoutAlgorithm::MeasureLimitValueText(
     auto hasLimitValueNodeId = isMin ? pattern->GetMinValueTextId() : pattern->GetMaxValueTextId();
     auto index = hostNode->GetChildIndexById(hasLimitValueNodeId);
     auto limitValueTextWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID_NOLOG(limitValueTextWrapper);
+    CHECK_NULL_VOID(limitValueTextWrapper);
     limitValueTextWrapper->Measure(childLayoutConstraint);
 }
 
 void GaugeLayoutAlgorithm::MeasureDescription(LayoutWrapper* layoutWrapper, const SizeF& parentSize)
 {
     auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
-    CHECK_NULL_VOID_NOLOG(hostNode);
+    CHECK_NULL_VOID(hostNode);
     auto pattern = hostNode->GetPattern<GaugePattern>();
-    CHECK_NULL_VOID_NOLOG(pattern);
-    CHECK_NULL_VOID_NOLOG(pattern->HasDescriptionNode());
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->HasDescriptionNode());
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID_NOLOG(layoutGeometryNode);
+    CHECK_NULL_VOID(layoutGeometryNode);
     auto layoutProperty = AceType::DynamicCast<GaugeLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID_NOLOG(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(parentSize);
     auto paddingSize = layoutGeometryNode->GetPaddingSize();
@@ -143,7 +143,7 @@ void GaugeLayoutAlgorithm::MeasureDescription(LayoutWrapper* layoutWrapper, cons
 
     auto index = hostNode->GetChildIndexById(pattern->GetDescriptionNodeId());
     auto descriptionLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID_NOLOG(descriptionLayoutWrapper);
+    CHECK_NULL_VOID(descriptionLayoutWrapper);
 
     if (CheckDescriptionIsImageNode(descriptionLayoutWrapper)) {
         width = diameter * DESCRIPTION_IMAGE_NODE_WIDTH_RATIO;
@@ -160,14 +160,14 @@ void GaugeLayoutAlgorithm::MeasureDescription(LayoutWrapper* layoutWrapper, cons
 void GaugeLayoutAlgorithm::MeasureTitleChild(LayoutWrapper* layoutWrapper, const SizeF& parentSize)
 {
     auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
-    CHECK_NULL_VOID_NOLOG(hostNode);
+    CHECK_NULL_VOID(hostNode);
     auto pattern = hostNode->GetPattern<GaugePattern>();
-    CHECK_NULL_VOID_NOLOG(pattern);
-    CHECK_NULL_VOID_NOLOG(pattern->HasTitleChildNode());
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->HasTitleChildNode());
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID_NOLOG(layoutGeometryNode);
+    CHECK_NULL_VOID(layoutGeometryNode);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID_NOLOG(layoutProperty);
+    CHECK_NULL_VOID(layoutProperty);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.parentIdealSize = OptionalSizeF(parentSize);
     auto paddingSize = layoutGeometryNode->GetPaddingSize();
@@ -176,7 +176,7 @@ void GaugeLayoutAlgorithm::MeasureTitleChild(LayoutWrapper* layoutWrapper, const
     childLayoutConstraint.maxSize = { diameter, diameter };
     auto index = hostNode->GetChildIndexById(pattern->GetTitleChildId());
     auto titleChildLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID_NOLOG(titleChildLayoutWrapper);
+    CHECK_NULL_VOID(titleChildLayoutWrapper);
     titleChildLayoutWrapper->Measure(childLayoutConstraint);
 }
 
@@ -186,11 +186,11 @@ void GaugeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID_NOLOG(hostNode);
+    CHECK_NULL_VOID(hostNode);
     auto gaugePattern = hostNode->GetPattern<GaugePattern>();
-    CHECK_NULL_VOID_NOLOG(gaugePattern);
+    CHECK_NULL_VOID(gaugePattern);
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID_NOLOG(layoutGeometryNode);
+    CHECK_NULL_VOID(layoutGeometryNode);
     auto paddingSize = layoutGeometryNode->GetPaddingSize();
     auto left = layoutGeometryNode->GetPadding()->left.value_or(0.0f);
     auto top = layoutGeometryNode->GetPadding()->top.value_or(0.0f);
@@ -218,7 +218,7 @@ void GaugeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
 
         auto childGeometryNode = child->GetGeometryNode();
-        CHECK_NULL_VOID_NOLOG(childGeometryNode);
+        CHECK_NULL_VOID(childGeometryNode);
         childGeometryNode->SetMarginFrameOffset(childOffset);
         child->Layout();
     }

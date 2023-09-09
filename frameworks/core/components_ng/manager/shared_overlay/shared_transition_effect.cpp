@@ -35,7 +35,7 @@ SharedTransitionEffect::SharedTransitionEffect(
 RefPtr<SharedTransitionEffect> SharedTransitionEffect::GetSharedTransitionEffect(
     const ShareId& shareId, const std::shared_ptr<SharedTransitionOption>& option)
 {
-    CHECK_NULL_RETURN_NOLOG(option, nullptr);
+    CHECK_NULL_RETURN(option, nullptr);
     RefPtr<SharedTransitionEffect> effect;
     if (option->type == SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE) {
         effect = AceType::MakeRefPtr<SharedTransitionExchange>(shareId, option);

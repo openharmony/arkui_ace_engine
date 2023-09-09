@@ -73,7 +73,7 @@ public:
         auto task = [weak = originNode_, rsNode = rsOriginNode_, instanceId = instanceId_]() {
             ContainerScope scope(instanceId);
             auto node = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(node);
+            CHECK_NULL_VOID(node);
             UpdateFrameNodeTree(node, rsNode);
             auto pattern = AceType::DynamicCast<NG::AbilityComponentPattern>(node->GetPattern());
             if (pattern) {

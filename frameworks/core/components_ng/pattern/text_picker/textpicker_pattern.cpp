@@ -58,7 +58,7 @@ void TextPickerPattern::OnAttachToFrameNode()
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN_NOLOG(config.frameSizeChange, false);
+    CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
     return true;
@@ -118,19 +118,19 @@ void TextPickerPattern::OnModifyDone()
         SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag,
             bool add, uint32_t index, bool notify) {
             auto refPtr = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(refPtr);
+            CHECK_NULL_VOID(refPtr);
             refPtr->HandleColumnChange(tag, add, index, notify);
         });
     }
     SetEventCallback([weak = WeakClaim(this)](bool refresh) {
         auto refPtr = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(refPtr);
+        CHECK_NULL_VOID(refPtr);
         refPtr->FireChangeEvent(refresh);
     });
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID_NOLOG(focusHub);
+    CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitDisabled();
 }
@@ -361,7 +361,7 @@ void TextPickerPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
-        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        CHECK_NULL_RETURN(pattern, false);
         return pattern->OnKeyEvent(event);
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));

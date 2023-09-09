@@ -716,7 +716,7 @@ void FormPattern::CreateCardContainer()
             SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, weak] {
             auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(pattern);
+            CHECK_NULL_VOID(pattern);
             LOGI("card id:%{public}zu", id);
             pattern->FireOnAcquiredEvent(id);
         });
@@ -861,7 +861,7 @@ void FormPattern::OnLoadEvent()
 
 void FormPattern::OnActionEvent(const std::string& action)
 {
-    CHECK_NULL_VOID_NOLOG(formManagerBridge_);
+    CHECK_NULL_VOID(formManagerBridge_);
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         LOGE("get event action failed");

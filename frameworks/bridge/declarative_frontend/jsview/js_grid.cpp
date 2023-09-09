@@ -348,9 +348,9 @@ void JSGrid::SetScrollBarColor(const std::string& color)
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     Color defaultColor(theme->GetForegroundColor());
     GridModel::GetInstance()->SetScrollBarColor(defaultColor.ColorToString());
 }
@@ -358,9 +358,9 @@ void JSGrid::SetScrollBarColor(const std::string& color)
 void JSGrid::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID_NOLOG(theme);
+    CHECK_NULL_VOID(theme);
     CalcDimension scrollBarWidth;
     if (scrollWidth.Length() < 1) {
         LOGE("scrollWidth is invalid");

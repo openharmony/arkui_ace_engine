@@ -47,7 +47,7 @@ void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFil
 #endif
 {
     auto declaration = AceType::DynamicCast<SvgFeGaussianBlurDeclaration>(declaration_);
-    CHECK_NULL_VOID_NOLOG(declaration);
+    CHECK_NULL_VOID(declaration);
     imageFilter = MakeImageFilter(declaration->GetIn(), imageFilter);
 #ifndef USE_ROSEN_DRAWING
 #ifndef NEW_SKIA

@@ -38,7 +38,7 @@ SkPath SvgLine::AsPath(const Size& viewPort) const
 {
     SkPath path;
     auto declaration = AceType::DynamicCast<SvgLineDeclaration>(declaration_);
-    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    CHECK_NULL_RETURN(declaration, path);
     path.moveTo(ConvertDimensionToPx(declaration->GetX1(), viewPort, SvgLengthType::HORIZONTAL),
         ConvertDimensionToPx(declaration->GetY1(), viewPort, SvgLengthType::VERTICAL));
     path.lineTo(ConvertDimensionToPx(declaration->GetX2(), viewPort, SvgLengthType::HORIZONTAL),
@@ -50,7 +50,7 @@ RSRecordingPath SvgLine::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
     auto declaration = AceType::DynamicCast<SvgLineDeclaration>(declaration_);
-    CHECK_NULL_RETURN_NOLOG(declaration, path);
+    CHECK_NULL_RETURN(declaration, path);
     path.MoveTo(ConvertDimensionToPx(declaration->GetX1(), viewPort, SvgLengthType::HORIZONTAL),
         ConvertDimensionToPx(declaration->GetY1(), viewPort, SvgLengthType::VERTICAL));
     path.LineTo(ConvertDimensionToPx(declaration->GetX2(), viewPort, SvgLengthType::HORIZONTAL),

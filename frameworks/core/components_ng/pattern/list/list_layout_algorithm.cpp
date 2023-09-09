@@ -358,7 +358,7 @@ bool ListLayoutAlgorithm::NoNeedJump(LayoutWrapper* layoutWrapper, float startPo
     if ((jumpIndex == tempEndIndex) && LessOrEqual(endPos, contentMainSize_)) {
         return true;
     }
-    
+
     return false;
 }
 
@@ -971,10 +971,10 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    CHECK_NULL_VOID_NOLOG(textFieldManager);
+    CHECK_NULL_VOID(textFieldManager);
     // only when textField is onFocus
     auto textField = textFieldManager->GetOnFocusTextField().Upgrade();
-    CHECK_NULL_VOID_NOLOG(textField);
+    CHECK_NULL_VOID(textField);
     auto textFieldHost = textField->GetHost();
     CHECK_NULL_VOID(textFieldHost);
     auto position = textFieldHost->GetTransformRelativeOffset().GetY() + textField->GetHostFrameSize()->Height();
@@ -1005,7 +1005,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
             jumpIndexInGroup_ = LAST_ITEM;
         }
     }
-    
+
     if (groupNeedAllLayout) {
         itemGroup->SetNeedAllLayout();
     }
@@ -1022,14 +1022,14 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
 void ListLayoutAlgorithm::SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
 {
     auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID_NOLOG(host);
+    CHECK_NULL_VOID(host);
     auto listItem = host->GetPattern<ListItemPattern>();
     if (listItem) {
         listItem->SetIndexInList(index);
         return;
     }
     auto listItemGroup = host->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_VOID_NOLOG(listItemGroup);
+    CHECK_NULL_VOID(listItemGroup);
     listItemGroup->SetIndexInList(index);
 }
 

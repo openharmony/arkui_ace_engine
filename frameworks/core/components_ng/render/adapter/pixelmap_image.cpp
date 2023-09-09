@@ -64,7 +64,7 @@ void PixelMapImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& /* dstRect */, const BorderRadiusArray& radiusXY)
 {
     auto pixmap = GetPixelMap();
-    CHECK_NULL_VOID_NOLOG(pixmap);
+    CHECK_NULL_VOID(pixmap);
 
 #ifdef ENABLE_ROSEN_BACKEND
 #ifndef USE_ROSEN_DRAWING
@@ -109,7 +109,7 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas.ClipAdaptiveRoundRect(radius);
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
-    CHECK_NULL_VOID_NOLOG(pixmap->GetPixelMapSharedPtr());
+    CHECK_NULL_VOID(pixmap->GetPixelMapSharedPtr());
     RSPoint pointRadius[4] = {};
     for (int i = 0; i < 4; i++) {
         pointRadius[i] = radius[i];
@@ -168,7 +168,7 @@ RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);
     auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(key));
-    CHECK_NULL_RETURN_NOLOG(data, nullptr);
+    CHECK_NULL_RETURN(data, nullptr);
     LOGD("pixelMap cache found %{public}s", key.c_str());
     return MakeRefPtr<PixelMapImage>(data->GetPixmap());
 }

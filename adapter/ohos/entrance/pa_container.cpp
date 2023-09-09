@@ -91,7 +91,7 @@ void PaContainer::CreateContainer(int32_t instanceId, void* paAbility, const PaC
     AceEngine::Get().AddContainer(instanceId, aceContainer);
 
     auto back = aceContainer->GetBackend();
-    CHECK_NULL_VOID_NOLOG(back);
+    CHECK_NULL_VOID(back);
     back->UpdateState(Backend::State::ON_CREATE);
 }
 
@@ -243,7 +243,7 @@ void PaContainer::AddAssetPath(int32_t instanceId, const std::string& packagePat
     const std::vector<std::string>& paths)
 {
     auto container = AceType::DynamicCast<PaContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     RefPtr<FlutterAssetManager> flutterAssetManager;
     if (container->assetManager_) {
         flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
@@ -252,7 +252,7 @@ void PaContainer::AddAssetPath(int32_t instanceId, const std::string& packagePat
         container->assetManager_ = flutterAssetManager;
         AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(flutterAssetManager);
     }
-    CHECK_NULL_VOID_NOLOG(flutterAssetManager);
+    CHECK_NULL_VOID(flutterAssetManager);
     if (!hapPath.empty()) {
         auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
         if (assetProvider->Initialize(hapPath, paths)) {
@@ -272,7 +272,7 @@ void PaContainer::AddAssetPath(int32_t instanceId, const std::string& packagePat
 void PaContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath)
 {
     auto container = AceType::DynamicCast<PaContainer>(AceEngine::Get().GetContainer(instanceId));
-    CHECK_NULL_VOID_NOLOG(container);
+    CHECK_NULL_VOID(container);
     RefPtr<FlutterAssetManager> flutterAssetManager;
     if (container->assetManager_) {
         flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
@@ -281,7 +281,7 @@ void PaContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>&
         container->assetManager_ = flutterAssetManager;
         AceType::DynamicCast<PaBackend>(container->GetBackend())->SetAssetManager(flutterAssetManager);
     }
-    CHECK_NULL_VOID_NOLOG(flutterAssetManager);
+    CHECK_NULL_VOID(flutterAssetManager);
     flutterAssetManager->SetLibPath("default", libPath);
 }
 
@@ -293,7 +293,7 @@ int32_t PaContainer::Insert(int32_t instanceId, const Uri& uri, const OHOS::Nati
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->Insert(uri, value);
     return ret;
 }
@@ -307,7 +307,7 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> PaContainer::Query(int32_t 
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->Query(uri, columns, predicates);
     return ret;
 }
@@ -321,7 +321,7 @@ int32_t PaContainer::Update(int32_t instanceId, const Uri& uri, const OHOS::Nati
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->Update(uri, value, predicates);
     return ret;
 }
@@ -335,7 +335,7 @@ int32_t PaContainer::Delete(
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->Delete(uri, predicates);
     return ret;
 }
@@ -349,7 +349,7 @@ int32_t PaContainer::BatchInsert(
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->BatchInsert(uri, values);
     return ret;
 }
@@ -362,7 +362,7 @@ std::string PaContainer::GetType(int32_t instanceId, const Uri& uri)
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->GetType(uri);
     return ret;
 }
@@ -376,7 +376,7 @@ std::vector<std::string> PaContainer::GetFileTypes(
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->GetFileTypes(uri, mimeTypeFilter);
     return ret;
 }
@@ -389,7 +389,7 @@ int32_t PaContainer::OpenFile(int32_t instanceId, const Uri& uri, const std::str
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->OpenFile(uri, mode);
     return ret;
 }
@@ -402,7 +402,7 @@ int32_t PaContainer::OpenRawFile(int32_t instanceId, const Uri& uri, const std::
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->OpenRawFile(uri, mode);
     return ret;
 }
@@ -415,7 +415,7 @@ Uri PaContainer::NormalizeUri(int32_t instanceId, const Uri& uri)
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->NormalizeUri(uri);
     return ret;
 }
@@ -428,7 +428,7 @@ Uri PaContainer::DenormalizeUri(int32_t instanceId, const Uri& uri)
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->DenormalizeUri(uri);
     return ret;
 }
@@ -440,7 +440,7 @@ sptr<IRemoteObject> PaContainer::OnConnect(int32_t instanceId, const OHOS::AAFwk
     CHECK_NULL_RETURN(container, nullptr);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = aceContainer->GetBackend();
-    CHECK_NULL_RETURN_NOLOG(back, nullptr);
+    CHECK_NULL_RETURN(back, nullptr);
     auto paBackend = AceType::DynamicCast<PaBackend>(back);
     CHECK_NULL_RETURN(paBackend, nullptr);
     return paBackend->OnConnect(want);
@@ -454,7 +454,7 @@ void PaContainer::OnDisConnect(int32_t instanceId, const OHOS::AAFwk::Want& want
     CHECK_NULL_VOID(container);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = aceContainer->GetBackend();
-    CHECK_NULL_VOID_NOLOG(back);
+    CHECK_NULL_VOID(back);
     auto paBackend = AceType::DynamicCast<PaBackend>(back);
     CHECK_NULL_VOID(paBackend);
     paBackend->OnDisConnect(want);
@@ -467,7 +467,7 @@ void PaContainer::OnCommand(const OHOS::AAFwk::Want &want, int startId, int32_t 
     CHECK_NULL_VOID(container);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = aceContainer->GetBackend();
-    CHECK_NULL_VOID_NOLOG(back);
+    CHECK_NULL_VOID(back);
     auto paBackend = AceType::DynamicCast<PaBackend>(back);
     CHECK_NULL_VOID(paBackend);
     paBackend->OnCommand(want, startId);
@@ -495,7 +495,7 @@ std::shared_ptr<AppExecFwk::PacMap> PaContainer::Call(int32_t instanceId, const 
     CHECK_NULL_RETURN(container, ret);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     auto back = AceType::DynamicCast<PaBackend>(aceContainer->GetBackend());
-    CHECK_NULL_RETURN_NOLOG(back, ret);
+    CHECK_NULL_RETURN(back, ret);
     ret = back->Call(uri, method, arg, pacMap);
     return ret;
 }

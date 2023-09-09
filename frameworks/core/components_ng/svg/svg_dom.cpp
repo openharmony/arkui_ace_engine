@@ -111,15 +111,15 @@ RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const std::optional<Col
 bool SvgDom::ParseSvg(SkStream& svgStream)
 {
     SkDOM xmlDom;
-    CHECK_NULL_RETURN_NOLOG(svgContext_, false);
+    CHECK_NULL_RETURN(svgContext_, false);
     if (!xmlDom.build(svgStream)) {
         LOGE("Failed to parse xml file.");
         return false;
     }
     root_ = TranslateSvgNode(xmlDom, xmlDom.getRootNode(), nullptr);
-    CHECK_NULL_RETURN_NOLOG(root_, false);
+    CHECK_NULL_RETURN(root_, false);
     auto svg = AceType::DynamicCast<SvgSvg>(root_);
-    CHECK_NULL_RETURN_NOLOG(svg, false);
+    CHECK_NULL_RETURN(svg, false);
     svgSize_ = svg->GetSize();
     viewBox_ = svg->GetViewBox();
     svgContext_->SetRootViewBox(viewBox_);
@@ -131,7 +131,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
 {
     const char* element = dom.getName(xmlNode);
     if (dom.getType(xmlNode) == SkDOM::kText_Type) {
-        CHECK_NULL_RETURN_NOLOG(parent, nullptr);
+        CHECK_NULL_RETURN(parent, nullptr);
         if (AceType::InstanceOf<SvgStyle>(parent)) {
             SvgStyle::ParseCssStyle(element, attrCallback_);
         } else {
@@ -144,7 +144,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
         return nullptr;
     }
     RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value();
-    CHECK_NULL_RETURN_NOLOG(node, nullptr);
+    CHECK_NULL_RETURN(node, nullptr);
     node->SetContext(svgContext_);
     ParseAttrs(dom, xmlNode, node);
     for (auto* child = dom.getFirstChild(xmlNode, nullptr); child; child = dom.getNextSibling(child)) {
@@ -246,19 +246,19 @@ void SvgDom::SetAttrValue(const std::string& name, const std::string& value, con
 
 void SvgDom::SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx)
 {
-    CHECK_NULL_VOID_NOLOG(svgContext_);
+    CHECK_NULL_VOID(svgContext_);
     svgContext_->SetFuncNormalizeToPx(funcNormalizeToPx);
 }
 
 void SvgDom::SetAnimationCallback(FuncAnimateFlush&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr)
 {
-    CHECK_NULL_VOID_NOLOG(svgContext_);
+    CHECK_NULL_VOID(svgContext_);
     svgContext_->SetFuncAnimateFlush(std::move(funcAnimateFlush), imagePtr);
 }
 
 void SvgDom::ControlAnimation(bool play)
 {
-    CHECK_NULL_VOID_NOLOG(svgContext_);
+    CHECK_NULL_VOID(svgContext_);
     svgContext_->ControlAnimators(play);
 }
 
@@ -270,7 +270,7 @@ bool SvgDom::IsStatic()
 void SvgDom::DrawImage(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
-    CHECK_NULL_VOID_NOLOG(root_);
+    CHECK_NULL_VOID(root_);
     canvas.Save();
     // viewBox scale and imageFit scale
     FitImage(canvas, imageFit, layout);
