@@ -54,7 +54,8 @@ class ScrollBarOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(ScrollBarOverlayModifier, OverlayModifier)
 
 public:
-    ScrollBarOverlayModifier();
+    ScrollBarOverlayModifier(const OffsetF& fgOffset = OffsetF(), const OffsetF& bgOffset = OffsetF(),
+        const SizeF& fgSize = SizeF(), const SizeF& bgSize = SizeF());
 
     ~ScrollBarOverlayModifier() override = default;
 
@@ -62,10 +63,14 @@ public:
 
     void StartOpacityAnimation(OpacityAnimationType opacityAnimationType);
 
-    void SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset, const OffsetF& bgOffset,
+    void StartHoverAnimation(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset, const OffsetF& bgOffset,
         HoverAnimationType hoverAnimationType);
 
-    void SetOffset(OffsetF fgOffset, OffsetF bgOffset);
+    void SetOffset(const OffsetF& fgOffset, const OffsetF& bgOffset);
+
+    void SetSize(const SizeF& fgSize, const SizeF& bgSize);
+
+    void SetRect(const Rect& fgRect, const Rect& bgRect);
 
     void SetFgColor(Color fgColor);
 
