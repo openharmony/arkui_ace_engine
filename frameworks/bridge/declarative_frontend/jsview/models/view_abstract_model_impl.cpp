@@ -31,6 +31,7 @@
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
@@ -1532,7 +1533,8 @@ void ViewAbstractModelImpl::BindMenu(
     click->SetOnClick(tapGesture);
 }
 
-void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam&)
+void ViewAbstractModelImpl::BindContextMenu(ResponseType type, std::function<void()>& buildFunc,
+    const NG::MenuParam& menuParam, const NG::MenuType& menuType)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);

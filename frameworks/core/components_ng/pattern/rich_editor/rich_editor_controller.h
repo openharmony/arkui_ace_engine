@@ -33,6 +33,7 @@ public:
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) override;
     RichEditorSelection GetSpansInfo(int32_t start, int32_t end) override;
     void DeleteSpans(const RangeOptions& options) override;
+    void CloseSelectionMenu() override;
 
 private:
     WeakPtr<Pattern> pattern_;

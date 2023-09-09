@@ -115,4 +115,20 @@ void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func)
         pattern->SetCustomKeyboard(std::move(func));
     }
 }
+
+void RichEditorModelNG::SetCopyOption(CopyOptions& copyOptions)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOptions);
+}
+
+void RichEditorModelNG::BindSelectionMenu(
+    RichEditorType& editorType, ResponseType& type, std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    if (pattern) {
+        pattern->BindSelectionMenu(type, editorType, buildFunc, menuParam.onAppear, menuParam.onDisappear);
+    }
+}
 } // namespace OHOS::Ace::NG

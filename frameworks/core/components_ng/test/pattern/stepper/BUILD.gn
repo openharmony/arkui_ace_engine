@@ -55,6 +55,10 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
 
+    # menu
+    "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/menu/mock_menu_wrapper_pattern.cpp",
+
     # flex
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
 

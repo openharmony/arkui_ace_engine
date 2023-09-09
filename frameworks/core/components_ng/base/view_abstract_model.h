@@ -31,6 +31,7 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -254,8 +255,8 @@ public:
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
-    virtual void BindContextMenu(
-        ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam) = 0;
+    virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
+        const NG::MenuType& menuType = NG::MenuType::CONTEXT_MENU) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear) = 0;

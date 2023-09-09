@@ -31,6 +31,9 @@ public:
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;
     void SetOnDeleteComplete(std::function<void()>&& func) override;
     void SetCustomKeyboard(std::function<void()>&& func) override;
+    void SetCopyOption(CopyOptions& copyOptions) override;
+    void BindSelectionMenu(RichEditorType& editorType, ResponseType& responseType,
+        std::function<void()>& buildFunc, SelectMenuParam& menuParam) override;
 
 private:
     void SetDraggable(bool draggable);

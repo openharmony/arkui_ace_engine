@@ -312,7 +312,7 @@ protected:
     bool IsDraggable(const Offset& localOffset);
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
-    virtual void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool animation);
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -347,6 +347,7 @@ protected:
     bool isMeasureBoundary_ = false;
     bool isCustomFont_ = false;
     std::vector<RSTypographyProperties::TextBox> dragBoxes_;
+    bool ignoreEvent_ = false;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;

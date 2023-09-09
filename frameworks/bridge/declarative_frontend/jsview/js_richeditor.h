@@ -39,11 +39,15 @@ public:
     static JSRef<JSVal> CreateJsOnIMEInputComplete(const NG::RichEditorAbstractSpanResult& textSpanResult);
     static JSRef<JSVal> CreateJsAboutToDelet(const NG::RichEditorDeleteValue& deleteValue);
     static void JsFocusable(const JSCallbackInfo& info);
+    static void SetCopyOptions(const JSCallbackInfo& info);
+    static void BindSelectionMenu(const JSCallbackInfo& info);
 
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
+    static void ParseMenuParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, SelectMenuParam& menuParam);
 };
 
 class JSRichEditorController final : public Referenced {
@@ -82,6 +86,7 @@ public:
     void GetCaretOffset(const JSCallbackInfo& args);
     void UpdateSpanStyle(const JSCallbackInfo& info);
     void GetSpansInfo(const JSCallbackInfo& args);
+    void CloseSelectionMenu();
     JSRef<JSVal> CreateCreateJSSpansInfo(const RichEditorSelection& info);
 
 private:

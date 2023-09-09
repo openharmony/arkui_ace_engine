@@ -21,11 +21,13 @@
 #include "base/geometry/dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/components/menu/menu_component.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/property/property.h"
@@ -104,6 +106,64 @@ void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
     }
 }
 
+void SelectOverlayPattern::BeforeCreateLayoutWrapper()
+{
+    if (!IsCustomMenu()) {
+        return;
+    }
+    auto menu = DynamicCast<FrameNode>(GetHost()->GetFirstChild());
+    CHECK_NULL_VOID(menu);
+    auto layoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+
+    // Calculate the spacing with text and handle, menu is fixed up the handle and text.
+    double menuSpacing = theme->GetMenuSpacingWithText().ConvertToPx() + theme->GetHandleDiameter().ConvertToPx();
+    // Get bound rect of handles
+    RectF handleBound = info_->firstHandle.paintRect.CombineRectT(info_->secondHandle.paintRect);
+    // Bound rect plus top and bottom padding
+    RectF safeArea(handleBound.GetX(), handleBound.GetY() - menuSpacing, handleBound.Width(),
+        handleBound.Height() + menuSpacing * 2);
+
+    layoutProperty->UpdateTargetSize(safeArea.GetSize());
+    OffsetF offset(safeArea.GetX(), safeArea.Bottom());
+    layoutProperty->UpdateMenuOffset(offset);
+}
+
+void SelectOverlayPattern::AddMenuResponseRegion(std::vector<DimensionRect>& responseRegion)
+{
+    auto layoutProps = GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    float safeAreaInsetsLeft = 0.0f;
+    float safeAreaInsetsTop = 0.0f;
+    auto&& safeAreaInsets = layoutProps->GetSafeAreaInsets();
+    if (safeAreaInsets) {
+        safeAreaInsetsLeft = static_cast<float>(safeAreaInsets->left_.end);
+        safeAreaInsetsTop = static_cast<float>(safeAreaInsets->top_.end);
+    }
+    const auto& children = GetHost()->GetChildren();
+    for (const auto& it : children) {
+        auto child = DynamicCast<FrameNode>(it);
+        if (child == nullptr) {
+            continue;
+        }
+        auto frameRect = child->GetGeometryNode()->GetFrameRect();
+        // rect is relative to window
+        auto rect = Rect(frameRect.GetX() + safeAreaInsetsLeft, frameRect.GetY() + safeAreaInsetsTop, frameRect.Width(),
+            frameRect.Height());
+
+        DimensionRect region;
+        region.SetSize({ Dimension(rect.GetSize().Width()), Dimension(rect.GetSize().Height()) });
+        region.SetOffset(DimensionOffset(Offset(rect.GetOffset().GetX(), rect.GetOffset().GetY())));
+
+        responseRegion.emplace_back(region);
+    }
+}
+
 void SelectOverlayPattern::UpdateHandleHotZone()
 {
     auto host = GetHost();
@@ -170,6 +230,10 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     secondHandleRegion.SetOffset(
         DimensionOffset(Offset(secondHandleRegion_.GetOffset().GetX(), secondHandleRegion_.GetOffset().GetY())));
     responseRegion.emplace_back(secondHandleRegion);
+    if (IsCustomMenu()) {
+        AddMenuResponseRegion(responseRegion);
+    }
+
     host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
 }
 
@@ -204,17 +268,13 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
     } else if (info_->onTouchMove && changedPoint.GetTouchType() == TouchType::MOVE) {
         info_->onTouchMove(info);
     }
+    if (IsCustomMenu()) {
+        MenuWrapperPattern::OnTouchEvent(info);
+    }
 }
 
 void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
 {
-    auto host = DynamicCast<SelectOverlayNode>(GetHost());
-    CHECK_NULL_VOID(host);
-    orignMenuIsShow_ = info_->menuInfo.menuIsShow;
-    if (info_->menuInfo.menuIsShow) {
-        info_->menuInfo.menuIsShow = false;
-        host->UpdateToolBar(false);
-    }
     PointF point = { info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY() };
     if (firstHandleRegion_.IsInRegion(point)) {
         firstHandleDrag_ = true;
@@ -230,8 +290,16 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
         }
     } else {
         LOGW("the point is not in drag area");
+        return;
     }
 
+    auto host = DynamicCast<SelectOverlayNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    orignMenuIsShow_ = info_->menuInfo.menuIsShow;
+    if (info_->menuInfo.menuIsShow) {
+        info_->menuInfo.menuIsShow = false;
+        host->UpdateToolBar(false);
+    }
     if (info_->isSingleHandle && !info_->isHandleLineShow) {
         StopHiddenHandleTask();
     }
@@ -430,10 +498,10 @@ void SelectOverlayPattern::DisableMenu(bool isDisabled)
 
 bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    UpdateHandleHotZone();
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto selectOverlayLayoutAlgorithm =
@@ -443,6 +511,9 @@ bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     menuWidth_ = selectOverlayLayoutAlgorithm->GetMenuWidth();
     menuHeight_ = selectOverlayLayoutAlgorithm->GetMenuHeight();
     hasExtensionMenu_ = selectOverlayLayoutAlgorithm->GetHasExtensionMenu();
+    if (IsCustomMenu()) {
+        MenuWrapperPattern::CheckAndShowAnimation();
+    }
     return true;
 }
 
