@@ -187,7 +187,7 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
 {
     CHECK_NULL_RETURN(parentNode, nullptr);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
-    if (parentFrameNode && !parentFrameNode->IsActive()) {
+    if (parentFrameNode && (!parentFrameNode->IsActive() || !parentFrameNode->IsVisible())) {
         return nullptr;
     }
     auto children = parentNode->GetChildren();
