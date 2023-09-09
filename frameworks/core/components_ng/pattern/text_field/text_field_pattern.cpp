@@ -844,8 +844,8 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
     if (GreatOrEqual(dy, 0.0f)) {
         return FitCursorInSafeArea();
     }
-    caretRect_.SetTop(caretRect_.GetY() + dy);
-    textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
+    caretRect_.SetTop(caretRect_.GetY() + dy - BOX_EPSILON * 2);
+    textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy - BOX_EPSILON * 2));
     return dy;
 }
 
