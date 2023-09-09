@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
+#include <algorithm>
 #include <chrono>
 
 #include "base/geometry/ng/offset_t.h"
@@ -2338,7 +2339,9 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
             isFirstMouseSelect_ = false;
         } else {
             int32_t extend = paragraphs_.GetIndex(textOffset);
-            textSelector_.Update(textSelector_.baseOffset, extend);
+            auto start = std::min(textSelector_.baseOffset, extend);
+            auto end = std::max(textSelector_.baseOffset, extend);
+            textSelector_.Update(start, end);
             SetCaretPosition(std::max(textSelector_.baseOffset, extend));
         }
         isMouseSelect_ = true;

@@ -432,10 +432,7 @@ bool TextFieldPattern::UpdateCaretRect()
 
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
 
-    if (caretUpdateType_ == CaretUpdateType::NONE && !textRectWillChange_) {
-        return true;
-    }
-    return false;
+    return caretUpdateType_ == CaretUpdateType::NONE && !textRectWillChange_;
 }
 
 float TextFieldPattern::GetIconSize()
