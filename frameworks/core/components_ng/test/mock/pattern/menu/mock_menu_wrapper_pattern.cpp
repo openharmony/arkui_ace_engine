@@ -12,20 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "core/components_ng/pattern/menu/menu_view.h"
+#define private public
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
-// create menu with menuItems
-RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t targetId, const std::string& targetTag,
-    MenuType type, const MenuParam& menuParam)
+void MenuWrapperPattern::OnModifyDone() {}
+void MenuWrapperPattern::OnAttachToFrameNode() {}
+bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    return nullptr;
+    return true;
 }
-
-RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, const std::string& targetTag,
-    MenuType type, const MenuParam& menuParam, bool withWrapper)
-{
-    return nullptr;
-}
-} // namespace OHOS::Ace::NG
+void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info) {}
+void MenuWrapperPattern::CheckAndShowAnimation() {}
+}; // namespace OHOS::Ace::NG

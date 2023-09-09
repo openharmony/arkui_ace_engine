@@ -90,8 +90,6 @@ constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
 constexpr Placement BUBBLE_LAYOUT_PROPERTY_PLACEMENT = Placement::LEFT;
 constexpr Dimension BORDER_EDGE = 1.0_px;
 constexpr Dimension BORDER_EDGE_LARGE = 20.0_px;
-constexpr Dimension ARROW_ZERO_PERCENT_VALUE = Dimension(0.0, DimensionUnit::PERCENT);
-constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = Dimension(1.0, DimensionUnit::PERCENT);
 const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENTS = {
     Placement::LEFT,
     Placement::RIGHT,

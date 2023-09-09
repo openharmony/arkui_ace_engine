@@ -25,6 +25,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -32,6 +33,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_paint_method.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 #if not defined(ACE_UNITTEST)
@@ -51,6 +53,19 @@ enum class MoveDirection { FORWARD, BACKWARD };
 
 constexpr float CARET_WIDTH = 1.5f;
 constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
+struct SelectionMenuParams {
+    RichEditorType type;
+    std::function<void()> buildFunc;
+    std::function<void(int32_t, int32_t)> onAppear;
+    std::function<void()> onDisappear;
+    ResponseType responseType;
+
+    SelectionMenuParams(RichEditorType _type, std::function<void()> _buildFunc,
+        std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear, ResponseType _responseType)
+        : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
+          responseType(_responseType)
+    {}
+};
 
 class RichEditorPattern : public TextPattern, public TextInputClient {
     DECLARE_ACE_TYPE(RichEditorPattern, TextPattern, TextInputClient);
@@ -144,6 +159,7 @@ public:
     void DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info);
     void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
     void ClearContent(const RefPtr<UINode>& child);
+    void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition);
     void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -155,7 +171,7 @@ public:
     std::u16string GetLeftTextOfCursor(int32_t number);
     std::u16string GetRightTextOfCursor(int32_t number);
     int32_t GetTextIndexAtCursor();
-    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle) override;
+    void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false);
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     void OnAreaChangedInner() override;
     void CreateHandles() override;
@@ -184,6 +200,7 @@ public:
 
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CopySelectionMenuParams(SelectOverlayInfo& selectInfo);
 #ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
 #endif
@@ -200,18 +217,21 @@ public:
         }
         customKeyboardBulder_ = keyboardBuilder;
     }
+    void BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>& menuBuilder,
+        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
     bool IsDisabled() const;
 
 private:
-    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo)
+    void UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
     {
         auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
-        selectInfo.menuInfo.showCopy = hasValue;
-        selectInfo.menuInfo.showCut = hasValue;
-        selectInfo.menuInfo.showCopyAll = hasValue;
+        bool isShowItem = copyOption_ != CopyOptions::None;
+        selectInfo.menuInfo.showCopy = isShowItem && hasValue;
+        selectInfo.menuInfo.showCut = isShowItem && hasValue;
+        selectInfo.menuInfo.showCopyAll = !isCopyAll && hasValue;
         selectInfo.menuInfo.showPaste = hasData;
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
         selectMenuInfo_ = selectInfo.menuInfo;
@@ -325,6 +345,8 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
+    std::shared_ptr<SelectionMenuParams> selectionMenuParams_ = nullptr;
+
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

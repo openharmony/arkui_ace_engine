@@ -546,5 +546,11 @@ ACE_EXPORT extern const char SAVE_BUTTON_ETS_TAG[];
 
 // Keyboard
 ACE_EXPORT extern const char KEYBOARD_ETS_TAG[];
+// Particle
+ACE_EXPORT extern const char PARTICLE_COMPONENT_TAG[];
+ACE_EXPORT extern const char PARTICLE_ETS_TAG[];
+
+// SelectOverlay
+ACE_EXPORT extern const char SELECT_OVERLAY_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

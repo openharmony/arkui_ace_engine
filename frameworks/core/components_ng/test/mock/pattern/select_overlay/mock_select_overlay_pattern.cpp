@@ -45,6 +45,8 @@ void SelectOverlayPattern::OnAttachToFrameNode() {}
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* frameNode) {}
 
+void SelectOverlayPattern::BeforeCreateLayoutWrapper() {}
+
 void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper) {}
 
 bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

@@ -29,9 +29,10 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
+} // namespace
 
-void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode, bool isContextMenu,
-    const NG::OffsetF& offset, const MenuParam& menuParam = MenuParam())
+void ViewAbstractModelNG::CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
+    const MenuType& menuType, const NG::OffsetF& offset, const MenuParam& menuParam)
 {
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     if (!buildFunc) {
@@ -40,9 +41,8 @@ void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNo
     }
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset, menuParam);
+    NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, menuType, offset, menuParam);
 }
-} // namespace
 
 void ViewAbstractModelNG::BindMenu(
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
@@ -79,7 +79,7 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(targetNode);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            CreateCustomMenu(builderFunc, targetNode, false, menuPosition, menuParam);
+            CreateCustomMenu(builderFunc, targetNode, MenuType::MENU, menuPosition, menuParam);
         };
     } else {
         LOGE("empty param or null builder");
@@ -102,7 +102,7 @@ void ViewAbstractModelNG::BindMenu(
 }
 
 void ViewAbstractModelNG::BindContextMenu(
-    ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam)
+    ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam, const MenuType& menuType)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
@@ -113,7 +113,7 @@ void ViewAbstractModelNG::BindContextMenu(
     CHECK_NULL_VOID(hub);
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (type == ResponseType::RIGHT_CLICK) {
-        OnMouseEventFunc event = [builder = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
+        OnMouseEventFunc event = [builder = buildFunc, weakTarget, menuParam, menuType](MouseInfo& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
@@ -123,7 +123,7 @@ void ViewAbstractModelNG::BindContextMenu(
             auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
             menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                CreateCustomMenu(builder, targetNode, true, menuPosition, menuParam);
+                CreateCustomMenu(builder, targetNode, menuType, menuPosition, menuParam);
                 info.SetStopPropagation(true);
             }
         };
@@ -132,7 +132,7 @@ void ViewAbstractModelNG::BindContextMenu(
         inputHub->BindContextMenu(std::move(event));
     } else if (type == ResponseType::LONG_PRESS) {
         // create or show menu on long press
-        auto event = [builder = buildFunc, weakTarget, menuParam](const GestureEvent& info) mutable {
+        auto event = [builder = buildFunc, weakTarget, menuParam, menuType](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
@@ -141,7 +141,7 @@ void ViewAbstractModelNG::BindContextMenu(
             CHECK_NULL_VOID(pipelineContext);
             auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
             menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
-            CreateCustomMenu(builder, targetNode, true, menuPosition, menuParam);
+            CreateCustomMenu(builder, targetNode, menuType, menuPosition, menuParam);
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -153,7 +153,7 @@ void ViewAbstractModelNG::BindContextMenu(
         LOGE("The arg responseType is invalid.");
         return;
     }
-    RegisterContextMenuKeyEvent(targetNode, buildFunc, menuParam);
+    RegisterContextMenuKeyEvent(targetNode, buildFunc, menuParam, menuType);
     RegisterContextMenuDisappearCallback(menuParam);
 
     // delete menu when target node destroy
@@ -287,13 +287,13 @@ void ViewAbstractModelNG::RegisterContextMenuDisappearCallback(const MenuParam& 
     });
 }
 
-void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
-    const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam)
+void ViewAbstractModelNG::RegisterContextMenuKeyEvent(const RefPtr<FrameNode>& targetNode,
+    std::function<void()>& buildFunc, const MenuParam& menuParam, const MenuType& menuType)
 {
     auto focusHub = targetNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = AceType::WeakClaim(AceType::RawPtr(targetNode)), builder = buildFunc,
-                          param = menuParam](const KeyEvent& event) mutable -> bool {
+                          param = menuParam, type = menuType](const KeyEvent& event) mutable -> bool {
         if (event.action != KeyAction::DOWN) {
             return false;
         }
@@ -303,7 +303,7 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
             if (!param.placement.has_value()) {
                 param.placement = Placement::BOTTOM_LEFT;
             }
-            CreateCustomMenu(builder, targetNode, true, OffsetF(), param);
+            CreateCustomMenu(builder, targetNode, type, OffsetF(), param);
             return true;
         }
         return false;
