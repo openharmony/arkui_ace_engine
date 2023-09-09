@@ -173,6 +173,16 @@ export class TipsDialog extends ViewPU {
         moduleName: ''
       });
       Text.textAlign(TextAlign.Center);
+      Text.maxLines(2);
+      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+      Text.minFontSize(15);
+      Text.maxFontSize({
+        id: -1,
+        type: 10002,
+        params: ["sys.float.ohos_id_text_size_headline8"],
+        bundleName: "",
+        moduleName: ""
+      });
       o || Text.pop();
       ViewStackProcessor.StopGetAccessRecording();
     }));
@@ -216,6 +226,8 @@ export class TipsDialog extends ViewPU {
             bundleName: '',
             moduleName: ''
           });
+          Text.maxLines(2);
+          Text.textOverflow({ overflow: TextOverflow.Ellipsis });
           o || Text.pop();
           ViewStackProcessor.StopGetAccessRecording();
         }));
@@ -268,6 +280,7 @@ export class TipsDialog extends ViewPU {
       Text.maxLines(CONTENT_MAX_LINES);
       Text.layoutWeight(1);
       Text.focusOnTouch(!0);
+      Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.onClick((() => {
         this.isChecked = !this.isChecked;
       }));
@@ -523,13 +536,7 @@ export class SelectDialog extends ViewPU {
       });
       Text.fontWeight(FontWeight.Medium);
       Text.maxLines(CONTENT_MAX_LINES);
-      Text.minFontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_sub_title1'],
-        bundleName: '',
-        moduleName: ''
-      });
+      Text.minFontSize(15);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.fontColor({
         id: -1,
@@ -659,10 +666,6 @@ export class SelectDialog extends ViewPU {
               Radio.create({ value: 'item.title', group: 'radioGroup' });
               Radio.size({ width: 20, height:20});
               Radio.checked(this.selectedIndex === o);
-              Radio.onChange((() => {
-                t.action && t.action();
-                this.controller.close();
-              }));
               Radio.onClick((() => {
                 t.action && t.action();
                 this.controller.close();
@@ -738,11 +741,8 @@ export class SelectDialog extends ViewPU {
             this.observeComponentCreation(((e, r) => {
               ViewStackProcessor.StartGetAccessRecordingFor(e);
               Radio.create({ value: 'item.title', group: 'radioGroup' });
+              Radio.size({ width: 20, height: 20 });
               Radio.checked(this.selectedIndex === o);
-              Radio.onChange((() => {
-                t.action && t.action();
-                this.controller.close();
-              }));
               Radio.onClick((() => {
                 t.action && t.action();
                 this.controller.close();
@@ -960,13 +960,7 @@ export class ConfirmDialog extends ViewPU {
       });
       Text.fontWeight(FontWeight.Medium);
       Text.maxLines(CONTENT_MAX_LINES);
-      Text.minFontSize({
-        id: -1,
-        type: 10002,
-        params: ['sys.float.ohos_id_text_size_sub_title1'],
-        bundleName: '',
-        moduleName: ''
-      });
+      Text.minFontSize(15);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.fontColor({
         id: -1,

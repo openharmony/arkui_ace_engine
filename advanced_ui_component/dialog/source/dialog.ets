@@ -58,6 +58,10 @@ export struct TipsDialog{
           .fontWeight(FontWeight.Medium)
           .fontColor($r('sys.color.ohos_id_color_text_primary'))
           .textAlign(TextAlign.Center)
+          .maxLines(CONTENT_MAX_LINES)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .minFontSize(15)
+          .maxFontSize($r('sys.float.ohos_id_text_size_headline8'))
       }.padding({ left: 24, right: 24 })
       .margin({top: 16})
       if (this.content) {
@@ -68,6 +72,8 @@ export struct TipsDialog{
             .fontColor($r('sys.color.ohos_id_color_text_primary'))
             .textAlign(TextAlign.Center)
             .minFontSize($r('sys.float.ohos_id_text_size_body3'))
+            .maxLines(CONTENT_MAX_LINES)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
         }.padding({ left: 24, right: 24, top: 8, bottom: 8 })
         .width('100%')
       }
@@ -83,6 +89,7 @@ export struct TipsDialog{
           .maxLines(CONTENT_MAX_LINES)
           .layoutWeight(1)
           .focusOnTouch(true)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
           .onClick(() => {
             this.isChecked = !this.isChecked
           })
@@ -150,7 +157,7 @@ export struct SelectDialog{
             .fontSize($r('sys.float.ohos_id_text_size_dialog_tittle'))
             .fontWeight(FontWeight.Medium)
             .maxLines(CONTENT_MAX_LINES)
-            .minFontSize($r('sys.float.ohos_id_text_size_sub_title1'))
+            .minFontSize(15)
             .textOverflow({ overflow: TextOverflow.Ellipsis})
             .fontColor($r('sys.color.ohos_id_color_text_primary'))
             .textAlign(TextAlign.Start)
@@ -183,10 +190,6 @@ export struct SelectDialog{
                   Radio({ value: 'item.title', group: 'radioGroup'})
                     .size({ width : 20, height : 20})
                     .checked(this.selectedIndex == index)
-                    .onChange(() => {
-                      item.action && item.action()
-                      this.controller.close()
-                    })
                     .onClick(() => {
                       item.action && item.action()
                       this.controller.close()
@@ -247,7 +250,7 @@ export struct ConfirmDialog{
             .fontSize($r('sys.float.ohos_id_text_size_dialog_tittle'))
             .fontWeight(FontWeight.Medium)
             .maxLines(CONTENT_MAX_LINES)
-            .minFontSize($r('sys.float.ohos_id_text_size_sub_title1'))
+            .minFontSize(15)
             .textOverflow({ overflow: TextOverflow.Ellipsis})
             .fontColor($r('sys.color.ohos_id_color_text_primary'))
             .textAlign(TextAlign.Start)
@@ -279,6 +282,7 @@ export struct ConfirmDialog{
             .maxLines(CONTENT_MAX_LINES)
             .layoutWeight(1)
             .focusOnTouch(true)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
             .onClick(() => {
               this.isChecked = !this.isChecked
             })

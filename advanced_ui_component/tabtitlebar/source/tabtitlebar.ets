@@ -110,7 +110,7 @@ export struct TabTitleBar {
       } else {
         tabOffset += TabContentItem.paddingLeft
         tabOffset += px2vp(MeasureText.measureText({
-          textContent: tabItem.title,
+          textContent: tabItem.title.toString(),
           fontSize: 18,
           fontWeight: FontWeight.Medium,
         }))
@@ -162,15 +162,15 @@ export struct TabTitleBar {
 
         if (this.menuItems !== undefined && this.menuItems.length > 0) {
           CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ })
-          .height(TabTitleBar.totalHeight)
-          .onAreaChange((_oldValue: Area, newValue: Area) => {
-            this.menuSectionWidth = Number(newValue.width)
-          })
+            .height(TabTitleBar.totalHeight)
+            .onAreaChange((_oldValue, newValue) => {
+              this.menuSectionWidth = Number(newValue.width)
+            })
         }
       }
       .backgroundColor($r('sys.color.ohos_id_color_background'))
       .margin({ right: $r('sys.float.ohos_id_max_padding_end') })
-      .onAreaChange((_oldValue: Area, newValue: Area) => {
+      .onAreaChange((_oldValue, newValue) => {
         this.tabWidth = Number(newValue.width) - this.menuSectionWidth
       })
 
@@ -355,6 +355,9 @@ struct TabContentItem {
   @State isOnClick: boolean = false
   @State tabWidth: number = 0
 
+  @State imageWidth: number = 24
+  @State imageHeight: number = 24
+
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
   static readonly imageMagnificationFactor = 1.4
@@ -434,23 +437,38 @@ struct TabContentItem {
             Row() {
               Image(this.item.icon)
                 .alt(this.item.title)
+                .width(TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth)
                 .height(TabContentItem.imageSize)
-                .objectFit(ImageFit.ScaleDown)
+                .objectFit(ImageFit.Fill)
+                .scale({
+                  x: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1,
+                  y: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1
+                })
                 .focusable(true)
                 .onComplete((event) => {
-                  this.onImageComplete && this.onImageComplete(event.componentWidth)
+                  if (!this.onImageComplete) {
+                    return
+                  }
+                  this.imageWidth = event.width
+                  this.imageHeight = event.height
+                  this.onImageComplete(event.componentWidth
+                    + TabContentItem.paddingLeft + TabContentItem.paddingRight)
                 })
                 .onError((event) => {
-                  this.onImageComplete && this.onImageComplete(event.componentWidth)
+                  if (this.onImageComplete) {
+                    return
+                  }
+                  this.onImageComplete(event.componentWidth
+                    + TabContentItem.paddingLeft + TabContentItem.paddingRight)
                 })
             }
             .constraintSize({
               minWidth: TabContentItem.imageHotZoneWidth,
               minHeight: TabContentItem.imageHotZoneWidth
             })
-            .scale({
-              x: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1,
-              y: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1
+            .padding({
+              left: TabContentItem.paddingLeft,
+              right: TabContentItem.paddingRight,
             })
             .animation({ duration: 300 })
             .justifyContent(FlexAlign.Center)
@@ -496,7 +514,17 @@ struct TabContentItem {
           .height(TabTitleBar.totalHeight)
           .hitTestBehavior(HitTestMode.None)
           .borderRadius(TabContentItem.buttonBorderRadius)
-          .border(this.getBorderAttr())
+          .stateStyles({
+            focused: {
+              .border(this.getBorderAttr())
+            },
+            normal: {
+              .border({
+                radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+                width: 0
+              })
+            }
+          })
       }
     }
     .margin({

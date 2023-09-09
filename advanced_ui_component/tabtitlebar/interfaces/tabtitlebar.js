@@ -123,7 +123,7 @@ export class TabTitleBar extends ViewPU {
       else {
         e += TabContentItem.paddingLeft;
         e += px2vp(MeasureText.measureText({
-          textContent: t.title,
+          textContent: t.title.toString(),
           fontSize: 18,
           fontWeight: FontWeight.Medium
         }));
@@ -650,6 +650,8 @@ class TabContentItem extends ViewPU {
     this.__isOnHover = new ObservedPropertySimplePU(!1, this, "isOnHover");
     this.__isOnClick = new ObservedPropertySimplePU(!1, this, "isOnClick");
     this.__tabWidth = new ObservedPropertySimplePU(0, this, "tabWidth");
+    this.__imageWidth = new ObservedPropertySimplePU(24, this, "imageWidth");
+    this.__imageHeight = new ObservedPropertySimplePU(24, this, "imageHeight");
     this.setInitiallyProvidedValue(t)
   }
   setInitiallyProvidedValue(e) {
@@ -662,6 +664,8 @@ class TabContentItem extends ViewPU {
     void 0 !== e.isOnHover && (this.isOnHover = e.isOnHover);
     void 0 !== e.isOnClick && (this.isOnClick = e.isOnClick);
     void 0 !== e.tabWidth && (this.tabWidth = e.tabWidth)
+    void 0 !== e.imageWidth && (this.imageWidth = e.imageWidth);
+    void 0 !== e.imageHeight && (this.imageHeight = e.imageHeight)
   }
   updateStateVars(e) {
     this.__currentIndex.reset(e.currentIndex)
@@ -672,6 +676,8 @@ class TabContentItem extends ViewPU {
     this.__isOnHover.purgeDependencyOnElmtId(e);
     this.__isOnClick.purgeDependencyOnElmtId(e);
     this.__tabWidth.purgeDependencyOnElmtId(e)
+    this.__imageWidth.purgeDependencyOnElmtId(e);
+    this.__imageHeight.purgeDependencyOnElmtId(e)
   }
   aboutToBeDeleted() {
     this.__currentIndex.aboutToBeDeleted();
@@ -679,6 +685,8 @@ class TabContentItem extends ViewPU {
     this.__isOnHover.aboutToBeDeleted();
     this.__isOnClick.aboutToBeDeleted();
     this.__tabWidth.aboutToBeDeleted();
+    this.__imageWidth.aboutToBeDeleted();
+    this.__imageHeight.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal()
   }
@@ -712,6 +720,23 @@ class TabContentItem extends ViewPU {
   set tabWidth(e) {
     this.__tabWidth.set(e)
   }
+
+  get imageWidth() {
+    return this.__imageWidth.get()
+  }
+
+  set imageWidth(e) {
+    this.__imageWidth.set(e)
+  }
+
+  get imageHeight() {
+    return this.__imageHeight.get()
+  }
+
+  set imageHeight(e) {
+    this.__imageHeight.set(e)
+  }
+
   getBgColor() {
     return this.isOnClick ? {
       id: -1,
@@ -855,10 +880,7 @@ class TabContentItem extends ViewPU {
             minWidth: TabContentItem.imageHotZoneWidth,
             minHeight: TabContentItem.imageHotZoneWidth
           });
-          Row.scale({
-            x: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1,
-            y: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1
-          });
+          Row.padding({ left: TabContentItem.paddingLeft, right: TabContentItem.paddingRight });
           Context.animation(null);
           Row.justifyContent(FlexAlign.Center);
           Row.onFocus((() => this.isOnFocus = !0));
@@ -882,14 +904,23 @@ class TabContentItem extends ViewPU {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           Image.create(this.item.icon);
           Image.alt(this.item.title);
+          Image.width(TabContentItem.imageSize / Math.max(this.imageHeight, 1) * this.imageWidth);
           Image.height(TabContentItem.imageSize);
-          Image.objectFit(ImageFit.ScaleDown);
+          Image.objectFit(ImageFit.Fill);
+          Image.scale({
+            x: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1,
+            y: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1
+          });
           Image.focusable(!0);
           Image.onComplete((e => {
-            this.onImageComplete && this.onImageComplete(e.componentWidth)
+            if (this.onImageComplete) {
+              this.imageWidth = e.width;
+              this.imageHeight = e.height;
+              this.onImageComplete(e.componentWidth + TabContentItem.paddingLeft + TabContentItem.paddingRight)
+            }
           }));
           Image.onError((e => {
-            this.onImageComplete && this.onImageComplete(e.componentWidth)
+            this.onImageComplete || this.onImageComplete(e.componentWidth + TabContentItem.paddingLeft + TabContentItem.paddingRight)
           }));
           t || Image.pop();
           ViewStackProcessor.StopGetAccessRecording()
@@ -913,7 +944,20 @@ class TabContentItem extends ViewPU {
           Row.height(TabTitleBar.totalHeight);
           Row.hitTestBehavior(HitTestMode.None);
           Row.borderRadius(TabContentItem.buttonBorderRadius);
+          ViewStackProcessor.visualState("focused");
           Row.border(this.getBorderAttr());
+          ViewStackProcessor.visualState("normal");
+          Row.border({
+            radius: {
+              id: -1,
+              type: 10002,
+              params: ["sys.float.ohos_id_corner_radius_clicked"],
+              bundleName: "",
+              moduleName: ""
+            },
+            width: 0
+          });
+          ViewStackProcessor.visualState();
           t || Row.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));
