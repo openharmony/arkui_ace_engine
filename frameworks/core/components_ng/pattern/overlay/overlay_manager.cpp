@@ -821,6 +821,16 @@ void OverlayManager::HideMenuInSubWindow()
     }
 }
 
+RefPtr<FrameNode> OverlayManager::GetMenuNode(int32_t targetId)
+{
+    auto it = menuMap_.find(targetId);
+    if (it != menuMap_.end()) {
+        return it->second;
+    }
+    LOGW("menuNode doesn't exists %{public}d", targetId);
+    return nullptr;
+}
+
 void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, bool isMenuOnTouch)
 {
     LOGI("OverlayManager::HideMenuNode menu targetId is %{public}d", targetId);

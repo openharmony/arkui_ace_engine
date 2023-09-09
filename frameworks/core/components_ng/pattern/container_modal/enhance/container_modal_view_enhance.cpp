@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
@@ -23,6 +24,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/gestures/pan_gesture.h"
@@ -78,8 +80,10 @@ const Dimension MENU_ITEM_TEXT_HEIGHT = 22.0_vp;
 const Dimension MENU_ITEM_TEXT_PADDING = 8.0_vp;
 const Dimension MENU_FLOAT_X = 226.0_vp;
 const Dimension MENU_FLOAT_Y = 28.0_vp;
+const Dimension MENU_SAFETY_X = 8.0_vp;
+const Dimension MENU_SAFETY_Y = 96.0_vp;
 const int32_t MENU_ITEM_MAXLINES = 1;
-const int32_t MENU_TASK_DELAY_TIME = 1000;
+const int32_t MENU_TASK_DELAY_TIME = 600;
 const Color MENU_ITEM_HOVER_COLOR = Color(0x0c000000);
 const Color MENU_ITEM_PRESS_COLOR = Color(0x1a000000);
 const Color MENU_ITEM_COLOR = Color(0xffffff);
@@ -131,8 +135,13 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildTitle(RefPtr<FrameNode>& conta
     CHECK_NULL_RETURN(titleContainer, nullptr);
     auto eventHub = titleContainer->GetOrCreateGestureEventHub();
     auto tapGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
-    tapGesture->SetOnActionId([containerNode, windowManager](GestureEvent& info) {
+    tapGesture->SetOnActionId([weakContainerNode = AceType::WeakClaim(AceType::RawPtr(containerNode)),
+        weakWindowManager = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
         LOGI("container window double click.");
+        auto windowManager = weakWindowManager.Upgrade();
+        CHECK_NULL_VOID(windowManager);
+        auto containerNode = weakContainerNode.Upgrade();
+        CHECK_NULL_VOID(containerNode);
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
         if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
@@ -209,7 +218,10 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& max
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     // add click event
-    auto event = [containerNode, wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+    auto event = [weak = AceType::WeakClaim(AceType::RawPtr(containerNode)),
+        wk = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
+        auto containerNode = weak.Upgrade();
+        CHECK_NULL_VOID(containerNode);
         auto windowManager = wk.Upgrade();
         CHECK_NULL_VOID(windowManager);
         ResetHoverTimer();
@@ -228,12 +240,15 @@ void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(RefPtr<FrameNode>& max
     hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(std::move(event)));
 
     // add long press event
-    auto longPressCallback = [containerNode, maximizeBtn](GestureEvent& info) {
+    auto longPressCallback = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn))](GestureEvent& info) {
+        auto maximizeBtn = weakMaximizeBtn.Upgrade();
+        CHECK_NULL_VOID(maximizeBtn);
         LOGD("maximize btn long press,call showMaxMenu func");
         auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
         auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
         OffsetF menuPosition { menuPosX, menuPosY };
-        ShowMaxMenu(containerNode, maximizeBtn, menuPosition);
+        menuPosition = RecalculateMenuOffset(menuPosition);
+        ShowMaxMenu(maximizeBtn, menuPosition);
     };
     // diable mouse left!
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
@@ -252,18 +267,26 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     auto hub = maximizeBtn->GetOrCreateInputEventHub();
-    auto hoverMoveFuc = [containerNode, maximizeBtn, pipeline](MouseInfo& info) {
+    auto hoverMoveFuc = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn)),
+        weakPipeline = AceType::WeakClaim(AceType::RawPtr(pipeline))](MouseInfo& info) {
+        auto maximizeBtn = weakMaximizeBtn.Upgrade();
+        CHECK_NULL_VOID(maximizeBtn);
+        auto pipeline = weakPipeline.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+
         LOGD("container window on hover event action_ = %{public}d sIsMenuPending_ %{public}d", info.GetAction(),
             sIsMenuPending_);
         bool isLeftButtonPressed = info.GetButton() == MouseButton::LEFT_BUTTON;
         if (!sIsMenuPending_ && info.GetAction() == MouseAction::MOVE && !isLeftButtonPressed) {
-            auto&& callback = [containerNode, maximizeBtn, info]() {
+            auto&& callback = [weakMaximizeBtn = AceType::WeakClaim(AceType::RawPtr(maximizeBtn)), info]() {
+                auto maximizeBtn = weakMaximizeBtn.Upgrade();
                 auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() -
                     MENU_FLOAT_X.ConvertToPx();
                 auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() +
                     MENU_FLOAT_Y.ConvertToPx();
                 OffsetF menuPosition {menuPosX, menuPosY};
-                ShowMaxMenu(containerNode, maximizeBtn, menuPosition);
+                menuPosition = RecalculateMenuOffset(menuPosition);
+                ShowMaxMenu(maximizeBtn, menuPosition);
             };
             sContextTimer_.Reset(callback);
             ACE_SCOPED_TRACE("ContainerModalEnhance::PendingMaxMenu");
@@ -275,8 +298,7 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
     hub->AddOnMouseEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverMoveFuc)));
 
     // add hover in out event
-    auto hoverEventFuc = [maximizeBtn, pipeline](bool hover) {
-        // update container modal background
+    auto hoverEventFuc = [](bool hover) {
         if (hover) {
             sIsHovering = true;
         } else {
@@ -286,16 +308,13 @@ void ContainerModalViewEnhance::BondingMaxBtnInputEvent(RefPtr<FrameNode>& maxim
     hub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
 }
 
-RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>& containerNode,
-    const RefPtr<FrameNode>& targetNode, OffsetF menuPosition)
+RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>& targetNode, OffsetF menuPosition)
 {
     LOGI("ShowMaxMenu called");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    auto pattern = containerNode->GetPattern<ContainerModalPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
     // menu list
     auto menuList = FrameNode::CreateFrameNode(
         V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
@@ -315,7 +334,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::ShowMaxMenu(const RefPtr<FrameNode>
     if ((!subWindowManger->GetSubwindow(Container::CurrentId())
         || !subWindowManger->GetSubwindow(Container::CurrentId())->GetShown())) {
         ACE_SCOPED_TRACE("ContainerModalViewEnhance::ShowMaxMenu");
-        pattern->SetOnShowFloatingSubWindow(true);
         MenuParam menu {};
         menu.isAboveApps = true;
         menu.type = MenuType::CONTEXT_MENU;
@@ -574,5 +592,29 @@ void ContainerModalViewEnhance::ResetHoverTimer()
     LOGD("ContainerModalViewEnhance ResetHoverTimer sIsMenuPending_ %{public}d", sIsMenuPending_);
     sContextTimer_.Reset(nullptr);
     sIsMenuPending_ = false;
+}
+
+OffsetF ContainerModalViewEnhance::RecalculateMenuOffset(OffsetF currentOffset)
+{
+    auto screenWidth = SystemProperties::GetDeviceWidth();
+    auto screenHeight = SystemProperties::GetDeviceHeight();
+    auto offsetX = currentOffset.GetX();
+    auto offsetY = currentOffset.GetY();
+    auto menuWidth = MENU_CONTAINER_WIDTH.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;
+    auto menuHeight = MENU_CONTAINER_HEIGHT.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;
+    auto buttonWidth = TITLE_ICON_SIZE.ConvertToPx() + CONTENT_PADDING.ConvertToPx() * 2;
+    if (offsetX < MENU_SAFETY_X.ConvertToPx()) {
+        LOGI("ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen left");
+        offsetX = offsetX + menuWidth - buttonWidth;
+    }
+    if (offsetX > screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx()) {
+        LOGI("ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen right");
+        offsetX = screenWidth - menuWidth - MENU_SAFETY_X.ConvertToPx();
+    }
+    if (offsetY > screenHeight - menuHeight - MENU_SAFETY_Y.ConvertToPx()) {
+        LOGI("ContainerModalViewEnhance::RecalculateMenuOffset OffsetX cover screen bottom");
+        offsetY = offsetY - menuHeight - CONTAINER_TITLE_HEIGHT.ConvertToPx();
+    }
+    return {offsetX, offsetY};
 }
 } // namespace OHOS::Ace::NG
