@@ -241,6 +241,7 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren() const
         }
         for (auto& [index, item] : items) {
             if (item.second) {
+                const_cast<LazyForEachNode*>(this)->RemoveDisappearingChild(item.second);
                 children_.push_back(item.second);
             }
         }
