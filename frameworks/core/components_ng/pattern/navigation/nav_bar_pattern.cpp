@@ -267,6 +267,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_RETURN(menuNode, nullptr);
     menuNode->Clean();
+    menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     auto rowProperty = menuNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rowProperty, nullptr);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
