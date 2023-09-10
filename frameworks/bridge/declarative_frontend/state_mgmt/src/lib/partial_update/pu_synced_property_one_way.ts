@@ -97,6 +97,10 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
               it also lacks @Observed class decorator. Object property changes will not be observed. Application error!`);
         }
         stateMgmtConsole.debug(`${this.debugInfo()}: constructor: wrapping source in a new ObservedPropertyObjectPU`);
+
+        // FIXME create dependency;
+        // const x = (sourceValue as Object)[__OBSERVED_OBJECT_ID];
+
         this.source_ = new ObservedPropertyObjectPU<C>(sourceValue, this, this.getPropSourceObservedPropertyFakeName());
         this.sourceIsOwnObject = true;
       }
@@ -130,7 +134,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     return `@Prop (class SynchedPropertyOneWayPU)`;
   }
 
-  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedProperty : string | undefined) {
 
     if (this.source_ == undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
@@ -143,7 +147,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
       if (this.checkIsSupportedValue(newValue)) {
         stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', local value about to change.`);
         if (this.resetLocalValue(newValue, /* needCopyObject */ true)) {
-          this.notifyPropertyHasChangedPU();
+          this.notifyPropertyHasChangedPU(changedProperty);
         }
       }
     } else {
@@ -158,23 +162,13 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
    */
   public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName: string) {
     stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' of object value has changed.`);
-    this.notifyPropertyHasChangedPU();
+    this.notifyPropertyHasChangedPU(/* object property has changed */ changedPropertyName);
   }
-
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: property '${changedPropertyName}' of object value has been read.`);
-    this.notifyPropertyHasBeenReadPU();
-  }
-
-  public getUnmonitored(): C {
-    stateMgmtConsole.propertyAccess(`${this.debugInfo()}: getUnmonitored.`);
-    // unmonitored get access , no call to notifyPropertyRead !
-    return this.localCopyObservedObject_;
-  }
-
+  
   public get(): C {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get.`)
-    this.notifyPropertyHasBeenReadPU()
+    ObservedObject.setReadingProperty(this.localCopyObservedObject_, this);
+    this.recordObservedVariableDependency();
     return this.localCopyObservedObject_;
   }
 
@@ -188,7 +182,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
 
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value about to change.`);
     if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
-      this.notifyPropertyHasChangedPU();
+      this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
     }
   }
 
@@ -197,6 +191,10 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: reset (update from parent @Component).`);
     if (this.source_ !== undefined && this.checkIsSupportedValue(sourceChangedValue)) {
       // if this.source_.set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged method
+      if (ObservedObject.IsObservedObject(sourceChangedValue)) {
+        // FIXME create dependency;
+        const x = (sourceChangedValue as Object)[__OBSERVED_OBJECT_ID]; 
+      }
       this.source_.set(sourceChangedValue);
     }
   }

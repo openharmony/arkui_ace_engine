@@ -26,7 +26,7 @@ interface PeerChangeEventReceiverPU<T> {
      * @see  ObservedPropertyAbstractPU.notifyPropertryHasChangedPU()
      * @param eventSource The 
      */
-    syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<T>);
+    syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<T>, changedObjectProperty : string | undefined);
 }
 
 interface PropertyReadEventListener<T> {
@@ -34,7 +34,7 @@ interface PropertyReadEventListener<T> {
      * ObservedPropertyAbstractPU given as source has been read ('get')
      * @param eventSource 
      */
-    propertyHasBeenReadPU(eventSource: ObservedPropertyAbstractPU<T>);
+    propertyHasBeenReadPU(eventSource: ObservedPropertyAbstractPU<T>, readObjectProperty : string | undefined);
 }
 
 

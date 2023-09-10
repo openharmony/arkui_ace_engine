@@ -56,7 +56,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
   // flag for initgial rendering or re-render on-going.
-  private isRenderInProgress: boolean = false;
+  private isRenderInProgress_: boolean = false;
 
   // flag if active of inActive
   // inActive means updates are delayed
@@ -117,6 +117,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
     this.localStoragebackStore_ = instance;
   }
+
+  // map by property name of all state vars of this @Component
+  protected ownStateVariables_ = new Map<string, ObservedPropertyAbstractPU<any>>();
 
   /**
    * Create a View
@@ -367,7 +370,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
     return childWeakRef ? childWeakRef.deref() : undefined;
   }
 
-  protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
+  // returns true while inital or re-render is in progress
+  public isRenderInProgress(): boolean {
+    return this.isRenderInProgress_;
+  }
+
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
   protected abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
@@ -376,9 +383,25 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   protected initialRenderView(): void {
-    this.isRenderInProgress = true;
+      // populate ownStateVariables_ with all decorated variables owned by this @Component
+      stateMgmtConsole.debug(`${this.debugInfo()}: initialRenderView: populate ownStateVariables_`);
+      Object.getOwnPropertyNames(this)
+        .filter((propName) => {
+          stateMgmtConsole.debug(propName);
+          return propName.startsWith("__")
+        })
+        .forEach((propName) => {
+          const stateVar = Reflect.get(this, propName) as Object;
+      //    if (("notifyPropertyHasBeenReadPU" in stateVar)
+      //      && ("notifyPropertyHasChangedPU" in stateVar)) {
+            stateMgmtConsole.debug(`... add state variable ${propName}`)
+            this.ownStateVariables_.set(propName, stateVar as unknown as ObservedPropertyAbstractPU<any>);
+     //     }
+        });
+  
+    this.isRenderInProgress_ = true;
     this.initialRender();
-    this.isRenderInProgress = false;
+    this.isRenderInProgress_ = false;
   }
 
   private UpdateElement(elmtId: number): void {
@@ -396,13 +419,21 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
     } else {
       stateMgmtConsole.debug(`${this.debugInfo()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} start ...`);
-      this.isRenderInProgress = true;
+      this.isRenderInProgress_ = true;
+      
+      // purge all dependencies recorded earlier for this elmtId 
+      // these dependencies will be recorded and updated in the next steps
+      this.purgeVariableDependenciesOnElmtIdOwnFunc(elmtId);
+      
+      ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       updateFunc(elmtId, /* isFirstRender */ false);
       // continue in native JSView
       // Finish the Update in JSView::JsFinishUpdateFunc
-      // this function appends no longer used elmtIds (as receded by VSP) to the given allRmElmtIds array
+      // FIXME: This is outdated, investigate - this function appends no longer used elmtIds (as recorded by VSP) to the given allRmElmtIds array
       this.finishUpdateFunc(elmtId);
-      this.isRenderInProgress = false;
+      ViewStackProcessor.StopGetAccessRecording();
+
+      this.isRenderInProgress_ = false;
       stateMgmtConsole.debug(`${this.debugInfo()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} - DONE`);
     }
   }
@@ -471,7 +502,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtTrace.scopedTrace(() => {
-      if (this.isRenderInProgress) {
+      if (this.isRenderInProgress_) {
         stateMgmtConsole.applicationError(`${this.debugInfo()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
       }
 
@@ -712,13 +743,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtConsole.debug(`   ... remaining known child components and their elmtIds ${this.debugInfoRegisteredElmtIds()} .`);
   }
 
-    purgeVariableDependenciesOnElmtIdOwnFunc(elmtId : number) : void {
-      Object.getOwnPropertyNames(this).filter((varName => varName.startsWith("__"))).forEach((stateVarName) => {
-        let variable = Reflect.get(this, stateVarName) as Object;
-        if ("purgeDependencyOnElmtId" in variable) {
-          (variable as ObservedPropertyAbstractPU<any>).purgeDependencyOnElmtId(elmtId);
-        }
-      });
+    purgeVariableDependenciesOnElmtIdOwnFunc(removedElmtId : number) : void {
+      this.ownStateVariables_.forEach(stateVar => stateVar.purgeDependencyOnElmtId(removedElmtId));
     }
 
   // executed on first render only
@@ -878,7 +904,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     // purging these elmtIds from state mgmt will make sure no more update function on any deleted child wi;ll be executed
     stateMgmtConsole.debug(`ViewPU ifElseBranchUpdateFunction: elmtIds need unregister after if/else branch switch: ${JSON.stringify(removedChildElmtIds)}`);
-    this.purgeDeletedElmtIds(removedChildElmtIds);
+    this.purgeDeletedElmtIds();
 
     branchfunc();
   }

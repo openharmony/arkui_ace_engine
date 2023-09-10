@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-23 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,8 +34,11 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.source_) {
       // register to the parent property
       this.source_.addSubscriber(this);
+      if (typeof this.source_.getUnmonitored() === "object") {
+        ObservedObject.addOwningProperty(this.source_.getUnmonitored() as Object, this);
+      }
     } else {
-      throw new SyntaxError(`${this.debugInfo()}: constructor: source variable in parent/ancestor @Component must be defined. Application error!`);
+      throw new SyntaxError(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source variable in parent/ancestor @ Component must be defined. Application error!`);
     }
   }
 
@@ -76,12 +79,19 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value has changed.`);
 
-    if (this.checkIsSupportedValue(newValue)) {
-    // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
-    this.source_.set(newValue)
-    }
-  }
 
+    if (this.checkIsSupportedValue(newValue)) {
+      // the source_ ObservedProperty will call: this.syncPeerHasChanged(newValue);
+
+      // FIXME: memory leak when parent assigns new object, then we do nto get a chance to unsubscribe from old object
+      if (typeof this.source_.getUnmonitored() === "object") {
+        ObservedObject.removeOwningProperty(this.source_.getUnmonitored() as Object, this);
+      }
+      this.source_.set(newValue)
+    } else {
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: set: new value type unsupported. Leaving variable unchanged. Application error.`);
+    }
+    }
 
   /**
    * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has changed value
@@ -89,40 +99,24 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
    * that peer can be in either ancestor or descendant component if 'this' is used for a @Consume
    * @param eventSource 
    */
-  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) {
+  syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedProperty : string | undefined) {
     if (!this.changeNotificationIsOngoing_) {
-      stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}' .`)
-      this.notifyPropertyHasChangedPU();
+      stateMgmtConsole.debug(`${this.debugInfo()}: propertyHasChangedPU: contained ObservedObject '${eventSource.info()}' hasChanged'.`)
+      this.notifyPropertyHasChangedPU(changedProperty);
     }
   }
 
-  /**
-   * called when wrapped ObservedObject has changed poperty
-   * @param souceObject 
-   * @param changedPropertyName 
-   */
-  public objectPropertyHasChangedPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' of \
-    object value has changed.`)
-    
-    this.notifyPropertyHasChangedPU();
-  }
-
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: property '${changedPropertyName}' of object value has been read.`);
-    this.notifyPropertyHasBeenReadPU();
-  }
-
   public getUnmonitored(): C {
-    stateMgmtConsole.propertyAccess(`${this.debugInfo()}: getUnmonitored.`);
-    // unmonitored get access , no call to otifyPropertyRead !
+    stateMgmtConsole.propertyAccess(`${this.debugInfo}: getUnmonitored.`);
+    // unmonitored get access , no call to notifyPropertyRead !
     return (this.source_ ? this.source_.getUnmonitored() : undefined);
   }
 
   // get 'read through` from the ObservedProperty
   public get(): C {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`)
-    this.notifyPropertyHasBeenReadPU()
+    this.recordObservedVariableDependency();
+    ObservedObject.setReadingProperty(this.source_.getUnmonitored(), this);    
     return this.getUnmonitored();
   }
 
@@ -138,7 +132,8 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     // avoid circular notifications @Link -> source @State -> other but also back to same @Link
     this.changeNotificationIsOngoing_ = true;
     this.setObject(newValue);
-    this.notifyPropertyHasChangedPU();
+    ObservedObject.setReadingProperty(this.source_.getUnmonitored(), this);
+    this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
     this.changeNotificationIsOngoing_ = false;
   }
 }

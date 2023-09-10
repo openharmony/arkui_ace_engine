@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-23 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,23 +51,11 @@ class SynchedPropertyNestedObjectPU<C extends Object>
     ObservedObject.removeOwningProperty(this.obsObject_, this);
     super.aboutToBeDeleted();
   }
-
+  
   public debugInfoDecorator() : string {
     return `@ObjectLink (class SynchedPropertyNestedObjectPU)`;
   }
 
-  public objectPropertyHasChangedPU(eventSource: ObservedObject<C>, changedPropertyName: string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: property '${changedPropertyName}' \
-                                                                of object value has changed.`)
-    this.notifyPropertyHasChangedPU();
-  }
-
-
-  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<C>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: property '${changedPropertyName}' of object value has been read.`);
-    this.notifyPropertyHasBeenReadPU();
-  }
-  
   public getUnmonitored(): C {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: getUnmonitored.`);
     // unmonitored get access , no call to notifyPropertyRead !
@@ -77,7 +65,8 @@ class SynchedPropertyNestedObjectPU<C extends Object>
   // get 'read through` from the ObservedProperty
   public get(): C {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`)
-    this.notifyPropertyHasBeenReadPU()
+    this.recordObservedVariableDependency();
+    ObservedObject.setReadingProperty(this.getUnmonitored(), this);
     return this.obsObject_;
   }
 
@@ -90,11 +79,20 @@ class SynchedPropertyNestedObjectPU<C extends Object>
 
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value about to change.`);
 
+    const oldValue = this.getUnmonitored();
     if (this.setValueInternal(newValue)) {
+      // FIXME enable optimisation
       // notify value change to subscribing View
-      this.notifyPropertyHasChangedPU();
+      //   const changedPropertyNames : string | Set<string>= ObservedPropertyAbstractPU.findChangedObjectProperties(oldValue, newValue);
+      //     if (typeof changedPropertyNames == "string") {
+      stateMgmtConsole.debug(`${this.debugInfo()}: set: notifying object has changed.`);
+      this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
+      //     } else {
+      //       stateMgmtConsole.debug(`SynchedPropertyNestedObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set: notifying ${changedPropertyNames.size} individual class object property changes ...`);
+      //       (changedPropertyNames as Set<string>).forEach((changedPropertyName) => this.notifyPropertyHasChangedPU(changedPropertyName));
+      //     }
     }
-  }
+    }
 
 
   private setValueInternal(newValue: C): boolean {
@@ -121,6 +119,9 @@ class SynchedPropertyNestedObjectPU<C extends Object>
       } else if (ObservedObject.IsObservedObject(this.obsObject_)) {
         // register to the ObservedObject
         ObservedObject.addOwningProperty(this.obsObject_, this);
+                
+        // FIXME enable, create dependency;
+      //  const touch = this.obsObject_[__OBSERVED_OBJECT_ID]; 
       } else {
         stateMgmtConsole.applicationError(`${this.debugInfo()}: set/init (method setValueInternal): assigned value is neither ObservedObject nor SubscribableAbstract. \
       value changes will bot be observed and UI will not update. forgot @Observed class decorator? Application error.`);

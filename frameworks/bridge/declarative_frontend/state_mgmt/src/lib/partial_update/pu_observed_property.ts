@@ -32,7 +32,29 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
   constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
    
-    this.setValueInternal(localInitValue);
+    if (!this.checkIsSupportedValue(localInitValue)) {
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor: initial value type unsupported. Leaving variable uninitialized. Application error.`);
+      return;
+    }
+
+    if (!localInitValue || typeof localInitValue !== 'object') {
+      // undefined, null, simple type: 
+      // nothing to subscribe to in case of new value undefined || null || simple type 
+      this.wrappedValue_ = localInitValue;
+    } else if (localInitValue instanceof SubscribableAbstract) {
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor: initial value  is an SubscribableAbstract, subscribiung to it.`);
+      this.wrappedValue_ = localInitValue;
+      (this.wrappedValue_ as unknown as SubscribableAbstract).addOwningProperty(this);
+    } else if (ObservedObject.IsObservedObject(localInitValue)) {
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor: initial value  is an ObservedObject already`);
+      ObservedObject.addOwningProperty(localInitValue, this);
+      ObservedObject.setReadingProperty(localInitValue, this);
+      this.wrappedValue_ = localInitValue;
+    } else {
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: constructor: initial value is an Object, needs to be wrapped in an ObservedObject.`);
+      this.wrappedValue_ = ObservedObject.createNew(localInitValue, this);
+      ObservedObject.setReadingProperty(this.wrappedValue_, this);
+    }
   }
 
   aboutToBeDeleted(unsubscribeMe?: IPropertySubscriber) {
@@ -51,28 +73,10 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
    * Called by a SynchedPropertyObjectTwoWayPU (@Link, @Consume) that uses this as sync peer when it has changed
    * @param eventSource 
    */
-  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
+  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>, changedObjectProperty : string | undefined) {
     stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer \
-          '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}'.`);
-    this.notifyPropertyHasChangedPU();
-  }
-
-  /**
-   * Wraped ObservedObjectPU has changed
-   * @param souceObject 
-   * @param changedPropertyName 
-   */
-  public objectPropertyHasChangedPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: contained ObservedObject property \ 
-                                                '${changedPropertyName}' has changed.`)
-    this.notifyPropertyHasChangedPU();
-  }
-
-  public objectPropertyHasBeenReadPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: contained ObservedObject property \ 
-                            '${changedPropertyName}' has been read.`);
-
-    this.notifyPropertyHasBeenReadPU();
+          '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', property '${changedObjectProperty}'.`);
+    this.notifyPropertyHasChangedPU(changedObjectProperty);
   }
   
   private unsubscribeWrappedObject() {
@@ -81,49 +85,16 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
         (this.wrappedValue_ as SubscribableAbstract).removeOwningProperty(this);
       } else {
         ObservedObject.removeOwningProperty(this.wrappedValue_, this);
+        ObservedObject.unsetReadingProperty(this.wrappedValue_);
       }
     }
   }
 
-  /*
-    actually update this.wrappedValue_
-    called needs to do value change check
-    and also notify with this.aboutToChange();
-  */
-  private setValueInternal(newValue: T): boolean {
-    if (newValue === this.wrappedValue_) {
-      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] newValue unchanged`);
-      return false;
-    }
-
-    if (!this.checkIsSupportedValue(newValue)) {
-      return false;
-    }
-
-    this.unsubscribeWrappedObject();
-    if (!newValue || typeof newValue !== 'object') {
-      // undefined, null, simple type: 
-      // nothing to subscribe to in case of new value undefined || null || simple type 
-      this.wrappedValue_ = newValue;
-    } else if (newValue instanceof SubscribableAbstract) {
-      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: setValueInternal: new value is an SubscribableAbstract, subscribing to it.`);
-      this.wrappedValue_ = newValue;
-      (this.wrappedValue_ as unknown as SubscribableAbstract).addOwningProperty(this);
-    } else if (ObservedObject.IsObservedObject(newValue)) {
-      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: setValueInternal: new value is an ObservedObject already`);
-      ObservedObject.addOwningProperty(newValue, this);
-      this.wrappedValue_ = newValue;
-    } else {
-      stateMgmtConsole.propertyAccess(`${this.debugInfo()}: setValueInternal: new value is an Object, needs to be wrapped in an ObservedObject.`);
-      this.wrappedValue_ = ObservedObject.createNew(newValue, this);
-    }
-    return true;
-  }
-
   public get(): T {
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: get`);
-    this.notifyPropertyHasBeenReadPU();
-    return this.wrappedValue_;
+    ObservedObject.setReadingProperty(this.getUnmonitored(), this);
+    this.recordObservedVariableDependency();   
+     return this.wrappedValue_;
   }
 
   public getUnmonitored(): T {
@@ -137,9 +108,51 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
       stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
       return;
     }
-    stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value about to changed.`);
-    if (this.setValueInternal(newValue)) {
-      this.notifyPropertyHasChangedPU();
+
+    if (newValue === this.wrappedValue_) {
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: set: newValue unchanged`);
+      return;
+    }
+
+    if (!this.checkIsSupportedValue(newValue)) {
+      stateMgmtConsole.debug(`${this.debugInfo()}: set: new value type unsupported. Leaving variable unchanged. Application error.`);
+      return;
+    }
+
+    stateMgmtConsole.debug(`${this.debugInfo()}: set, value about to change ...`);
+
+    this.unsubscribeWrappedObject();
+    if (!newValue || typeof newValue !== 'object') {
+      // undefined, null, simple type: 
+      // nothing to subscribe to in case of new value undefined || null || simple type 
+      this.wrappedValue_ = newValue;
+      this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
+    } else if (newValue instanceof SubscribableAbstract) {
+      stateMgmtConsole.debug(`${this.debugInfo()}: set: new value is an SubscribableAbstract, subscribiung to it.`);
+      this.wrappedValue_ = newValue;
+      (this.wrappedValue_ as unknown as SubscribableAbstract).addOwningProperty(this);
+      this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
+    } else {
+      const oldValue = this.wrappedValue_;
+      if (ObservedObject.IsObservedObject(newValue)) {
+        stateMgmtConsole.debug(`${this.debugInfo()}: set: new value is an ObservedObject already`);
+        ObservedObject.addOwningProperty(newValue, this);
+        ObservedObject.setReadingProperty(newValue, this);
+        this.wrappedValue_ = newValue;
+      } else {
+        stateMgmtConsole.debug(`${this.debugInfo()}: set: new value is an Object, needs to be wrapped in an ObservedObject.`);
+        this.wrappedValue_ = ObservedObject.createNew(newValue, this);
+        ObservedObject.setReadingProperty(this.wrappedValue_, this);
+      }
+
+   //   const changedPropertyNames: string | Set<string> = ObservedPropertyAbstractPU.findChangedObjectProperties(oldValue, this.wrappedValue_);
+     // FIXME enable optimisation if (changedPropertyNames instanceof Set) {
+       // stateMgmtConsole.debug(`${this.debugInfo()}: set: notifying individual class object property changes ...`);
+    //    (changedPropertyNames as Set<string>).forEach((changedPropertyName) => this.notifyPropertyHasChangedPU(changedPropertyName));
+    //  } else {
+    //    stateMgmtConsole.debug(`${this.debugInfo()}: set: ${changedPropertyNames as string} .`);
+        this.notifyPropertyHasChangedPU(/* var value assignment */ undefined);
+      //}
     }
   }
 }

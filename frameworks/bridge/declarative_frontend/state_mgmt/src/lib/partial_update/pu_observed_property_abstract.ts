@@ -19,20 +19,72 @@
  * all definitions in this file are framework internal
  */
 
-
 abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T> 
 implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber, IMultiPropertiesReadSubscriber
 // these interfaces implementations are all empty functions, overwrite FU base class implementations.
 {
-  static readonly DelayedNotifyChangesEnum=class  {
+  static readonly DelayedNotifyChangesEnum = class {
     static readonly do_not_delay = 0;
     static readonly delay_none_pending = 1;
     static readonly delay_notification_pending = 2;
   };
   
-  private owningView_ : ViewPU = undefined;
-  
-  private dependentElementIds_: Set<number> = new Set<number>();
+  private owningView_: ViewPU = undefined;
+    
+  // elmtIds dependent of variable assignment
+  // inner Map for fine-rain dependencies on individual property changes
+  private dependentElmtIdsByProperty_ = new class PropertyDependencies {
+
+    private map_: Map<number, Set<string>> = new Map<number, Set<string>>();
+
+    public dumpInfoDependencies() : string {
+      let result = `dependent elmtIds: `;
+      let sepa = "";
+      this.map_.forEach((properties : Set<string>, elmtId : number) => {
+        result+= `${sepa}elmtId ${elmtId}: [${JSON.stringify(Array.from(properties))}]`;
+        sepa=", ";
+      });
+      return result;
+    }
+
+    public getDependentElmtIds(changedObjectProperty: string | undefined, debugInfo: string): Set<number> {
+      if (!changedObjectProperty) {
+        stateMgmtConsole.debug(`${debugInfo}: variable value assignment: returning affected elmtIds ${JSON.stringify(Array.from(this.map_.keys()))}`);
+        return new Set<number>(this.map_.keys());
+      }
+      let result = new Set<number>();
+      this.map_.forEach((properties: Set<string>, elmtId: number) => {
+        if (properties.has(changedObjectProperty)) {
+          result.add(elmtId);
+        }
+      });
+      stateMgmtConsole.debug(`${debugInfo}: changed object property '${changedObjectProperty}': returning affected elmtIds ${JSON.stringify(Array.from(result))}`);
+      return result;
+    }
+
+    public addDependency(elmtId: number, readProperty: string | undefined, debugInfo: string): void {
+      let propertyDependencies = this.map_.get(elmtId);
+      if (!propertyDependencies) {
+        propertyDependencies = new Set<string>();
+        this.map_.set(elmtId, propertyDependencies);
+        stateMgmtConsole.debug(`${debugInfo} - variable dependencies: add elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(Array.from(this.map_.keys()))} .`);
+      } else {
+        stateMgmtConsole.debug(`${debugInfo} - variable dependencies: elmtId ${elmtId} known already - unchanged list of dependent elmtIds: ${JSON.stringify(this.map_.keys())} .`);
+      }
+    
+      if (readProperty) {
+        /* record dependency on given property */
+        propertyDependencies.add(readProperty);
+        stateMgmtConsole.debug(`   ... for elmtId ${elmtId} added dependency for object property '${readProperty}' - updated dependent property list ${JSON.stringify(Array.from(propertyDependencies))} .`);
+      }
+    }
+
+    public unregisterDependenciesForElmtId(rmElmtId: number, debugInfo: string): boolean {
+      const removedOK = this.map_.delete(rmElmtId);
+      stateMgmtConsole.debug(`${debugInfo} - variable dependencies: removed dependency on elmtId ${rmElmtId} - resulting dependency list: ${JSON.stringify(Array.from(this.map_.keys()))} .`);
+      return removedOK;
+    }
+  }; // inner class PropertyDependencies
 
   // PU code stores object references to dependencies directly as class variable
   // SubscriberManager is not used for lookup in PU code path to speedup updates
@@ -40,13 +92,14 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   
   // when owning ViewPU is inActive, delay notifying changes
   private delayedNotification_: number = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
+  private elmtIdsNeedDelayedRerender_: Set<number> | undefined = undefined;
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
-    Object.defineProperty(this, 'owningView_', {writable: true, enumerable: false});
+    Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
     Object.defineProperty(this, 'subscriberRefs_',
-      {writable: true, enumerable: false, value: new Set<IPropertySubscriber>()});
-    if(subscriber) {
+    { writable: true, enumerable: false, value: new Set<IPropertySubscriber>() });
+    if (subscriber) {
       if (subscriber instanceof ViewPU) {
         this.owningView_ = subscriber;
       } else {
@@ -101,18 +154,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   public debugInfoDependentElmtIds(): string {
-    if (!this.dependentElementIds_.size) {
-      return `dependent components: no dependent elmtIds`;
-    }
-    let result: string = this.dependentElementIds_.size < 25
-      ? `dependent components: ${this.dependentElementIds_.size} elmtIds: `
-      : `WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
-    let sepa: string = "";
-    this.dependentElementIds_.forEach((elmtId: number) => {
-      result+=`${sepa}${this.owningView_.debugInfoElmtId(elmtId)}`;
-      sepa = ", ";
-    });
-    return result;
+    return  this.dependentElmtIdsByProperty_.dumpInfoDependencies();
   }
 
   /* for @Prop value from source we need to generate a @State
@@ -134,8 +176,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     Virtualized version of the subscription mechanism - add subscriber
     Overrides implementation in ObservedPropertyAbstract<T>
   */
-  public addSubscriber(subscriber: ISinglePropertyChangeSubscriber<T>):void {
-    if (subscriber) {
+    public addSubscriber(subscriber: ISinglePropertyChangeSubscriber<T>): void {
+      if (subscriber) {
       // ObservedPropertyAbstract will also add subscriber to
       // SubscriberManager map and to its own Set of subscribers as well
       // Something to improve in the future for PU path.
@@ -149,8 +191,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     Virtualized version of the subscription mechanism - remove subscriber
     Overrides implementation in ObservedPropertyAbstract<T>
   */
-  public removeSubscriber(subscriber: IPropertySubscriber, id?: number):void {
-    if (subscriber) {
+    public removeSubscriber(subscriber: IPropertySubscriber, id?: number): void {
+      if (subscriber) {
       this.subscriberRefs_.delete(subscriber);
       if (!id) {
         id = subscriber.id__();
@@ -164,9 +206,9 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    * put the property to delayed notification mode
    * feature is only used for @StorageLink/Prop, @LocalStorageLink/Prop
    */
-  public enableDelayedNotification() : void {
-  if (this.delayedNotification_ != ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) {
-      stateMgmtConsole.debug(`${this.constructor.name}: enableDelayedNotification.`);
+  public enableDelayedNotification(): void {
+    if (this.delayedNotification_ != ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) {
+      stateMgmtConsole.debug(`${this.debugInfo()}: enableDelayedNotification`);
       this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_none_pending;
     }
   }
@@ -180,8 +222,9 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     returns dependentElementIds_ Set if changed. This Set is empty if variable is not used to construct the UI
   */
   public moveElmtIdsForDelayedUpdate(): Set<number> | undefined {
+    /* TODO: further optimisation possibility: memorize which elmtIds actually need re-render instead of forcing all dependent elmtIds to render */
     const result = (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending)
-      ? this.dependentElementIds_
+      ? this.dependentElmtIdsByProperty_.getDependentElmtIds(/* like var value assignment */ undefined, "moveElmtIdsForDelayedUpdate")
       : undefined;
     stateMgmtConsole.debug(`${this.debugInfo()}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update \
                       ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);
@@ -190,33 +233,54 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   protected notifyPropertyRead() {
-    stateMgmtConsole.error(`${this.debugInfo()}: notifyPropertyRead, DO NOT USE with PU. Use \ 
-                      notifyPropertyHasBeenReadPU`);
-
+    stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+        notifyPropertyRead, DO NOT USE with PU. Use recordDependentUpdate`);
   }
 
-  protected notifyPropertyHasBeenReadPU() {
-    stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasBeenReadPU.`)
-    this.subscriberRefs_.forEach((subscriber) => {
-      if (subscriber) {
-        // TODO
-        // propertyHasBeenReadPU is not use in the code
-        // defined by interface that is not used either: PropertyReadEventListener
-        // Maybe compiler generated code has it?
-        if ('propertyHasBeenReadPU' in subscriber) {
-          (subscriber as unknown as PropertyReadEventListener<T>).propertyHasBeenReadPU(this);
-        }
-      }
-    });
-    this.recordDependentUpdate();
-  } 
 
-  protected notifyPropertyHasChangedPU() {
-    stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`)
+  /**
+ * Wrapped ObservedObjectPU has changed
+ * @param sourceObject 
+ * @param changedPropertyName 
+ */
+  public objectPropertyHasChangedPU(souceObject: ObservedObject<T>, changedPropertyName: string) {
+    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' (undefined ok for arrays) has changed.`)
+    // FIXME propName is allowed to be undefined for arrays
+    // because for arrays we still  notify on Array level , not on property level
+    this.notifyPropertyHasChangedPU(/* object property has changed */ changedPropertyName);
+  }
+
+  public objectPropertyHasBeenReadPU(sourceObject: ObservedObject<T>, changedPropertyName: string) {
+    if (this.owningView_ && !this.owningView_.isRenderInProgress()) {
+      // only notify read while owning ViewPU render is in progress
+      stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU render is not in progress`);
+      return;
+    }
+
+    stateMgmtConsole.debug(`${this.debugInfo()}: objectPropertyHasBeenReadPU: contained ObservedObject property '${changedPropertyName}' has been read.`);
+    //  FIXME
+    if (changedPropertyName) {
+      this.recordObjectPropertyDependency(sourceObject, changedPropertyName);
+    } else {
+      this.recordObservedVariableDependency();
+    }
+  }
+
+
+  /* notify a 'set' operation, three scenarios:
+  1- value assignment ':=' to this variable, either simple or object type
+  2- object property change
+  3- syncPeerHasChanged
+  */
+  protected notifyPropertyHasChangedPU(changedProperty: string | undefined /* undefined means new variable value assignment */) {
+    stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU, property '${changedProperty}' .`)
     if (this.owningView_) {
       if (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay) {
         // send viewPropertyHasChanged right away
-        this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElementIds_);
+        // if an object property has changed, only mark elmtIds dependent on this elmtId of needing update.
+        // if variable was assigned a new simple or object type value, then, changedProperty is undefined, implies dependentElementIds_ needs rerender.
+      let elmtIdsNeedRerender = this.dependentElmtIdsByProperty_.getDependentElmtIds(changedProperty, `${this.debugInfo()}: notifyPropertyHasChangedPU`);
+        this.owningView_.viewPropertyHasChanged(this.info_, elmtIdsNeedRerender);
       } else {
         // mark this @StorageLink/Prop or @LocalStorageLink/Prop variable has having changed and notification of viewPropertyHasChanged delivery pending
         this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending;
@@ -225,7 +289,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.subscriberRefs_.forEach((subscriber) => {
       if (subscriber) {
         if ('syncPeerHasChanged' in subscriber) {
-          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this);
+          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this, changedProperty);
         } else  {
           stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
         }
@@ -330,20 +394,74 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    * during 'get' access recording take note of the created component and its elmtId
    * and add this component to the list of components who are dependent on this property
    */
-  protected recordDependentUpdate() {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    if (elmtId < 0) {
+  
+  public recordObjectPropertyDependency(proxiedObject : Object, readProperty: string) {
+    let elmtId: number;
+    if ((this.owningView_ && !this.owningView_.isRenderInProgress())
+      || ((elmtId = ViewStackProcessor.GetElmtIdToAccountFor()) < 0)) {
       // not access recording 
       return;
     }
-    stateMgmtConsole.debug(`${this.debugInfo()}: recordDependentUpdate on elmtId ${elmtId}.`)
-    this.dependentElementIds_.add(elmtId);
+
+    if (this.getUnmonitored() === proxiedObject) {
+      stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+      recordObjectPropertyDependency: '${readProperty}' has been read.`);
+      this.dependentElmtIdsByProperty_.addDependency(elmtId, readProperty, "recordDependentUpdate");  
+    } else {
+      stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+      recordObjectPropertyDependency: some other object's property '${readProperty}' has been read. Internal error`);
+    }
+  }
+
+  public recordObservedVariableDependency() {
+    let elmtId: number;
+    if ((this.owningView_ && !this.owningView_.isRenderInProgress())
+      || ((elmtId = ViewStackProcessor.GetElmtIdToAccountFor()) < 0)) {
+      // not access recording 
+      return;
+    }
+    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+    recordObservedVariableDependency: state variable has been read.`);
+    this.dependentElmtIdsByProperty_.addDependency(elmtId, undefined, "recordDependentUpdate");
   }
 
   
   public purgeDependencyOnElmtId(rmElmtId: number): void {
-    stateMgmtConsole.debug(`${this.debugInfo()}: purgeDependencyOnElmtId ${rmElmtId}`);
-    this.dependentElementIds_.delete(rmElmtId);
+    // this.dependentElementIds_.delete(rmElmtId);
+    this.dependentElmtIdsByProperty_.unregisterDependenciesForElmtId(rmElmtId, "purgeDependencyOnElmtId");
+  }
+
+  
+  // helper function to find changes properties in two instances of the same class
+  // returns Set<string> of changed property names
+  // function returns (string) error message if objects are not class instances, or instances of different class
+  public static findChangedObjectProperties(o1 : Object, o2: Object) : Set<string> | string {
+    if (!(o1 && o2 
+      && (typeof o1 == "object") && (typeof o2=="object")
+      && o1.constructor && o1.constructor == o2.constructor)) {
+      return "notifyObjectPropertyChanges - object(s) are no class instances or objects instances of different classes.";
+    }
+
+    const o1Props = Object.getOwnPropertyNames(o1);
+    const o2Props = Object.getOwnPropertyNames(o2);
+    if (o1Props.length != o2Props.length) {
+      return "notifyObjectPropertyChanges - objects have different number of properties.";
+    }
+
+    const o1Set = new Set<string>(o1Props);
+    if (!o2Props.every((propName) => o1Set.has(propName))) {
+      return ("notifyObjectPropertyChanges - objects have different property/ies.");
+    }
+    let changedPropertyNames = new Set<string>();
+    o2Props.forEach((propName) => {
+      if (o1[propName] !== o2[propName]) {
+        stateMgmtConsole.debug(`   ... changed property '${propName}'`)
+        changedPropertyNames.add(propName);
+      } else {
+        stateMgmtConsole.debug(`   ... unchanged property '${propName}'`);
+      }
+    });
+    return changedPropertyNames;
   }
 
   public SetPropertyUnchanged(): void {
