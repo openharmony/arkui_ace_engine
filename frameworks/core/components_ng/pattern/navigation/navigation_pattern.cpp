@@ -162,7 +162,8 @@ void NavigationPattern::OnModifyDone()
     }
 
     navigationStack_->SetNavPathList(navPathList);
-    hostNode->UpdateNavDestinationNodeWithoutMarkDirty(preTopNavPath.has_value() ? preTopNavPath->second : nullptr);
+    hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
+        preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
     auto size = navigationStack_->Size();
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preSize > size);
