@@ -350,7 +350,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     float dy = AdjustTextAreaOffsetY();
     UpdateSelectionOffset();
     if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE) {
-        if (!NearZero(dx) || !NearZero(dy)) {
+        if ((!NearZero(dx) || !NearZero(dy)) && !isSingleHandle_) {
             UpdateOtherHandleOnMove(dx, dy);
         }
         // trigger selection box repaint
