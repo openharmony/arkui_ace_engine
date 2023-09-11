@@ -273,6 +273,9 @@ public:
     bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
+        if (itemConstraint && !canRunLongPredictTask) {
+            return false;
+        }
         auto count = OnGetTotalCount();
         std::unordered_map<std::string, LazyForEachCacheChild> cache;
         std::unordered_set<int32_t> idleIndexes;
