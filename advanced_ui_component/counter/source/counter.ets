@@ -269,6 +269,7 @@ export struct CounterComponent {
       return value.toString();
     }
   }
+
   aboutToAppear(): void {
     let dateTime = new Date();
     this.timeStamp = dateTime.getTime();
@@ -1608,6 +1609,7 @@ export struct CounterComponent {
               .height(CounterResource.COUNTER_INLINE_BUTTON_ICON_HEIGHT)
               .fillColor(CounterResource.BUTTON_ICON_COLOR)
               .opacity(this.addOpacity)
+
             Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect })
             .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
             .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
@@ -1648,9 +1650,11 @@ export struct CounterComponent {
           }
           .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
           .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
-          .borderColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+          .padding({top: '1vp'})
           .borderWidth({bottom: '1vp'})
+          .borderColor(CounterResource.COUNTER_BORDER_COLOR)
           .clip(true)
+
           Stack() {
             Rect()
               .width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH)
@@ -2171,9 +2175,11 @@ export struct CounterComponent {
             })
           }.width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
           .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
+          .padding({top: '1vp'})
           .borderWidth({bottom: '1vp'})
-          .borderColor(CounterResource.BUTTON_BACKGROUD_COLOR)
+          .borderColor(CounterResource.COUNTER_BORDER_COLOR)
           .clip(true)
+
           Stack() {
             Rect()
               .width(CounterResource.COUNTER_INLINE_FOCUS_BORDER_WIDTH)
