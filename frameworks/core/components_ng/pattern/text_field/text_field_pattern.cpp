@@ -519,12 +519,12 @@ bool TextFieldPattern::UpdateCaretByPressOrLongPress()
     // caret offset updated by gesture will not cause textRect to change offset
     UpdateCaretPositionByPressOffset();
     if (caretUpdateType_ == CaretUpdateType::PRESSED) {
+        UpdateSelection(textEditingValue_.caretPosition);
         if (!GetEditingValue().text.empty() && isFocusedBeforeClick_ && !isMousePressed_) {
             CreateSingleHandle(true, false);
         } else {
             StartTwinkling();
         }
-        UpdateSelection(textEditingValue_.caretPosition);
     } else if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         // in long press case, we have caret and one handle at pressed location and another handle at -1 or +1 position
         ProcessOverlay(true);
@@ -793,8 +793,9 @@ float TextFieldPattern::AdjustTextRectOffsetX()
     auto cursorWidth = caretRect_.Width();
     auto contentLeftBoundary = contentRect_.GetX();
     auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width() - unitWidth_;
-    if (IsTextArea()) {
-        caretRect_.SetLeft(std::clamp(caretRect_.GetX(), contentLeftBoundary, contentRightBoundary - cursorWidth));
+    if (IsTextArea() || textEditingValue_.text.empty()) {
+        caretRect_.SetLeft(std::clamp(
+            caretRect_.GetX(), contentLeftBoundary, std::max(contentLeftBoundary, contentRightBoundary - cursorWidth)));
         return 0.0f;
     }
     float textDx = 0.0f;
