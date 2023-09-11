@@ -921,7 +921,7 @@ void FocusHub::OnBlur()
 
 void FocusHub::OnFocusNode()
 {
-    LOGD("FocusHub: Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
+    LOGI("FocusHub: Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
     if (onFocusInternal_) {
         onFocusInternal_();
     }
@@ -942,12 +942,12 @@ void FocusHub::OnFocusNode()
 
 void FocusHub::OnBlurNode()
 {
-    LOGD("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
+    LOGI("FocusHub: Node(%{public}s/%{public}d) on blur", GetFrameName().c_str(), GetFrameId());
     if (onBlurInternal_) {
         onBlurInternal_();
     }
     if (onBlurReasonInternal_) {
-        LOGI("FocusHub: Node(%{public}s/%{public}d) 's blur reason is %{public}d", GetFrameName().c_str(), GetFrameId(),
+        LOGD("FocusHub: Node(%{public}s/%{public}d) 's blur reason is %{public}d", GetFrameName().c_str(), GetFrameId(),
             blurReason_);
         onBlurReasonInternal_(blurReason_);
     }
@@ -1564,30 +1564,30 @@ double FocusHub::GetProjectAreaOnRect(const RectF& rect, const RectF& projectRec
     float areaHeight = 0.0;
     switch (step) {
         case FocusStep::UP:
-            if (rect.Top() < projectRect.Top() && rect.Right() > projectRect.Left() &&
+            if (rect.Top() < projectRect.Bottom() && rect.Right() > projectRect.Left() &&
                 rect.Left() < projectRect.Right()) {
                 areaWidth = std::min(rect.Right(), projectRect.Right()) - std::max(rect.Left(), projectRect.Left());
-                areaHeight = std::min(rect.Bottom(), projectRect.Top()) - rect.Top();
+                areaHeight = std::min(rect.Bottom(), projectRect.Bottom()) - rect.Top();
             }
             break;
         case FocusStep::DOWN:
-            if (rect.Bottom() > projectRect.Bottom() && rect.Right() > projectRect.Left() &&
+            if (rect.Bottom() > projectRect.Top() && rect.Right() > projectRect.Left() &&
                 rect.Left() < projectRect.Right()) {
                 areaWidth = std::min(rect.Right(), projectRect.Right()) - std::max(rect.Left(), projectRect.Left());
-                areaHeight = rect.Bottom() - std::max(rect.Top(), projectRect.Bottom());
+                areaHeight = rect.Bottom() - std::max(rect.Top(), projectRect.Top());
             }
             break;
         case FocusStep::LEFT:
-            if (rect.Left() < projectRect.Left() && rect.Bottom() > projectRect.Top() &&
+            if (rect.Left() < projectRect.Right() && rect.Bottom() > projectRect.Top() &&
                 rect.Top() < projectRect.Bottom()) {
-                areaWidth = std::min(rect.Right(), projectRect.Left()) - rect.Left();
+                areaWidth = std::min(rect.Right(), projectRect.Right()) - rect.Left();
                 areaHeight = std::min(rect.Bottom(), projectRect.Bottom()) - std::max(rect.Top(), projectRect.Top());
             }
             break;
         case FocusStep::RIGHT:
-            if (rect.Right() > projectRect.Right() && rect.Bottom() > projectRect.Top() &&
+            if (rect.Right() > projectRect.Left() && rect.Bottom() > projectRect.Top() &&
                 rect.Top() < projectRect.Bottom()) {
-                areaWidth = rect.Right() - std::max(rect.Left(), projectRect.Right());
+                areaWidth = rect.Right() - std::max(rect.Left(), projectRect.Left());
                 areaHeight = std::min(rect.Bottom(), projectRect.Bottom()) - std::max(rect.Top(), projectRect.Top());
             }
             break;
@@ -1639,6 +1639,10 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         if (Positive(projectArea)) {
             OffsetF vec = frameRect.Center() - curFrameRect.Center();
             double val = (vec.GetX() * vec.GetX()) + (vec.GetY() * vec.GetY());
+            if ((step == FocusStep::TAB && Positive(vec.GetX())) ||
+                (step == FocusStep::SHIFT_TAB && Negative(vec.GetX()))) {
+                val *= -1.0;
+            }
             if ((!isTabStep && val < resDistance) || (isTabStep && val > resDistance)) {
                 resDistance = val;
                 nextNode = node;
