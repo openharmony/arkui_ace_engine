@@ -116,8 +116,6 @@ constexpr double HALF_DIMENSION = 50.0;
 constexpr double ROUND_UNIT = 360.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
-constexpr int32_t MIN_ROTATE_VECTOR_Z = 9;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t PARAMETER_LENGTH_FIRST = 1;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t PARAMETER_LENGTH_THIRD = 3;
@@ -232,17 +230,7 @@ void GetDefaultRotateVector(double& dx, double& dy, double& dz)
     dx = 0.0;
     dy = 0.0;
     dz = 0.0;
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGE("pipelineContext is null!");
-        return;
-    }
-    if (pipelineContext->GetMinPlatformVersion() >= MIN_ROTATE_VECTOR_Z) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_NINE)) {
         dz = 1.0;
     }
 }
@@ -1368,8 +1356,7 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return true;
     }
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
             return false;
@@ -1398,8 +1385,7 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return true;
     }
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
             return false;
@@ -1567,7 +1553,7 @@ void JSViewAbstract::JsConstraintSize(const JSCallbackInfo& info)
     CalcDimension minHeight;
     JSRef<JSVal> maxHeightValue = sizeObj->GetProperty("maxHeight");
     CalcDimension maxHeight;
-    bool version10OrLarger = PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
+    bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (ParseJsDimensionVp(minWidthValue, minWidth)) {
         ViewAbstractModel::GetInstance()->SetMinWidth(minWidth);
     } else if (version10OrLarger) {
@@ -1631,8 +1617,8 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsAlign", info, checkList) && PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+    if (!CheckJSCallbackInfo("JsAlign", info, checkList) &&
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         ViewAbstractModel::GetInstance()->SetAlign(Alignment::CENTER);
         return;
     }
@@ -1700,11 +1686,10 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
     }
 
     double value = 0.0;
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     if (!ParseJsDouble(info[0], value)) {
         // add version protection, undefined use default value
-        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsNull() || info[0]->IsUndefined())) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
+            (info[0]->IsNull() || info[0]->IsUndefined())) {
             ViewAbstractModel::GetInstance()->ResetAspectRatio();
             return;
         } else {
@@ -1714,7 +1699,7 @@ void JSViewAbstract::JsAspectRatio(const JSCallbackInfo& info)
 
     // negative use default value.
     if (LessOrEqual(value, 0.0)) {
-        if (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             ViewAbstractModel::GetInstance()->ResetAspectRatio();
             return;
         } else {
@@ -2530,11 +2515,7 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
     if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
@@ -6013,8 +5994,7 @@ bool JSViewAbstract::ParseJsonDimension(
 bool JSViewAbstract::ParseJsonDimensionVp(
     const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result, bool checkIllegal)
 {
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, true);
     }
     return ParseJsonDimension(jsonValue, result, DimensionUnit::VP, checkIllegal);
@@ -6244,8 +6224,7 @@ void JSViewAbstract::SetDirection(const std::string& dir)
         direction = TextDirection::RTL;
     } else if (dir == "Auto") {
         direction = TextDirection::AUTO;
-    } else if (dir == "undefined" && PipelineBase::GetCurrentContext() &&
-               PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    } else if (dir == "undefined" && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         direction = TextDirection::AUTO;
     }
     ViewAbstractModel::GetInstance()->SetLayoutDirection(direction);
@@ -6588,8 +6567,7 @@ bool JSViewAbstract::CheckLength(
     if (!jsValue->IsNumber() && !jsValue->IsString() && !jsValue->IsObject()) {
         return false;
     }
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         return ParseJsDimensionVpNG(jsValue, result);
     }
     // Correct type, incorrect value parsing
