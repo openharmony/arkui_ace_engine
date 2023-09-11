@@ -5434,6 +5434,11 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;
     }
+    // parse maskColor
+    Color parseMaskColor;
+    if (!maskColor->IsNull() && !maskColor->IsUndefined() && JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
+        sheetStyle.maskColor = std::move(parseMaskColor);
+    }
     CalcDimension sheetHeight;
     if (height->IsString()) {
         std::string heightStr = height->ToString();
@@ -5474,11 +5479,6 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     } else {
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
-    }
-    // parse maskColor
-    Color parseMaskColor;
-    if (!maskColor->IsNull() && !maskColor->IsUndefined() && JSViewAbstract::ParseJsColor(maskColor, parseMaskColor)) {
-        sheetStyle.maskColor = std::move(parseMaskColor);
     }
 }
 
