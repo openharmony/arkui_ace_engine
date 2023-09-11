@@ -205,9 +205,6 @@ void BorderImagePainter::PaintBorderImage(const OffsetF& offset, RSCanvas& canva
         FillBorderImageCenter(ceiledOffset, canvas);
     }
     canvas.Restore();
-#ifdef USE_ROSEN_DRAWING
-    canvas.DetachPen();
-#endif
 }
 
 void BorderImagePainter::FillBorderImageCenter(const OffsetF& offset, RSCanvas& canvas) const

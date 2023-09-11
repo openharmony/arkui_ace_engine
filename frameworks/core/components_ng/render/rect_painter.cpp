@@ -63,10 +63,6 @@ void RectPainter::DrawRect(RSCanvas& canvas, const RectF& rect, RectPaintPropert
     RSRoundRect rSRoundRect(
         RSRRect(rect.GetX(), rect.GetY(), rect.Width() + rect.GetX(), rect.Height() + rect.GetY()), radiusXY);
     canvas.DrawRoundRect(rSRoundRect);
-#ifdef USE_ROSEN_DRAWING
-    canvas.DetachBrush();
-    canvas.DetachPen();
-#endif
 }
 
 } // namespace OHOS::Ace::NG

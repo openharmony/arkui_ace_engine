@@ -1681,9 +1681,6 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     } else {
         return;
     }
-    CHECK_NULL_VOID(image);
-    RSImage rsImage(&image);
-    BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), rsImage, dipScale);
 #else
     std::shared_ptr<RSImage> image;
     if (InstanceOf<DrawingImage>(bdImage_)) {
@@ -1695,9 +1692,10 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     } else {
         return;
     }
-    CHECK_NULL_VOID(image);
-    BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), *image, dipScale);
 #endif
+    CHECK_NULL_VOID(image);
+    RSImage rsImage(&image);
+    BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), rsImage, dipScale);
     borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), canvas);
 }
 
