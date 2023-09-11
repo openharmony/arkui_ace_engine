@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
+#include "core/components_ng/pattern/stage/content_root_pattern.h"
 
 namespace OHOS::Ace::NG {
+void ContentRootPattern::BeforeCreateLayoutWrapper() {}
 } // namespace OHOS::Ace::NG

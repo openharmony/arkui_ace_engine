@@ -50,7 +50,6 @@ ace_unittest("gauge_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/menu/mock_menu_wrapper_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
     "gauge_test_ng.cpp",
   ]
