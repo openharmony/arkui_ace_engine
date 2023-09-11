@@ -4801,11 +4801,14 @@ HWTEST_F(TextFieldPatternTestNg, SetShowError, TestSize.Level2)
      */
     layoutProperty->UpdateShowUnderline(false);
     layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(Dimension(10.0));
+    pattern->passwordModeStyle_.borderwidth = borderWidth;
     pattern->SetShowError();
     EXPECT_EQ(pattern->GetUnderlineWidth(), 1.0);
     borderWithProperty = *(layoutProperty->GetBorderWidthProperty());
     ASSERT_TRUE(borderWithProperty.bottomDimen.has_value());
-    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 1.0);
+    EXPECT_EQ(borderWithProperty.bottomDimen.value().Value(), 10.0);
 
     /**
      * @tc.steps: step4. test scense - error text is invisible and in password mode and show underline.
@@ -4814,7 +4817,7 @@ HWTEST_F(TextFieldPatternTestNg, SetShowError, TestSize.Level2)
     layoutProperty->UpdateShowErrorText(false);
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
     layoutProperty->UpdateShowUnderline(true);
-    BorderWidthProperty borderWidth;
+
     borderWidth.SetBorderWidth(Dimension(5.0));
     pattern->passwordModeStyle_.borderwidth = borderWidth;
     pattern->SetShowError();

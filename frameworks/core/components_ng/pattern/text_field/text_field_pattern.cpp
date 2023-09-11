@@ -5440,6 +5440,13 @@ void TextFieldPattern::SetShowError()
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         preErrorState_ = false;
     }
+    if (visible && !passWordMode) {
+        layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
+        renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
+        renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
+        layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
+        preErrorState_ = true;
+    }
     UpdateErrorTextMargin();
 }
 
@@ -5474,11 +5481,6 @@ void TextFieldPattern::SavePasswordModeStates()
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     preErrorMargin_ = GetMarginBottom();
-    bool passWordMode =
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
-    if (!passWordMode) {
-        return;
-    }
     passwordModeStyle_.bgColor = renderContext->GetBackgroundColor().value_or(textFieldTheme->GetBgColor());
     passwordModeStyle_.textColor = layoutProperty->GetTextColorValue(textFieldTheme->GetTextColor());
     if (layoutProperty->GetBorderWidthProperty() != nullptr) {
