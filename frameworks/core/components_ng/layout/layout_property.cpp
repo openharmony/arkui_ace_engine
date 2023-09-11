@@ -527,17 +527,15 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // store the previous visibility value.
-    auto preVisible = host->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE);
+    auto preVisibility = propVisibility_;
 
     // update visibility value.
     propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
-    if (allowTransition) {
-        if (preVisible == VisibleType::VISIBLE && (visible == VisibleType::INVISIBLE || visible == VisibleType::GONE)) {
-            // only trigger transition when visibility changes between visible and invisible.
+    if (allowTransition && preVisibility) {
+        if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeDisappear(false);
-        } else if ((preVisible == VisibleType::INVISIBLE || preVisible == VisibleType::GONE) &&
-                   visible == VisibleType::VISIBLE) {
+        } else if (preVisibility.value() != VisibleType::VISIBLE && visible == VisibleType::VISIBLE) {
             host->GetRenderContext()->OnNodeAppear(false);
         }
     }
@@ -545,7 +543,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
     // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
-    if (preVisible != VisibleType::GONE && visible != VisibleType::GONE) {
+    if (preVisibility.value_or(VisibleType::VISIBLE) != VisibleType::GONE && visible != VisibleType::GONE) {
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();
         return;
