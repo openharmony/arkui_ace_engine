@@ -2339,9 +2339,7 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
             isFirstMouseSelect_ = false;
         } else {
             int32_t extend = paragraphs_.GetIndex(textOffset);
-            auto start = std::min(textSelector_.baseOffset, extend);
-            auto end = std::max(textSelector_.baseOffset, extend);
-            textSelector_.Update(start, end);
+            textSelector_.Update(textSelector_.baseOffset, extend);
             SetCaretPosition(std::max(textSelector_.baseOffset, extend));
         }
         isMouseSelect_ = true;
@@ -3316,7 +3314,7 @@ std::vector<RSTypographyProperties::TextBox> RichEditorPattern::GetTextBoxes()
 std::vector<RSTextRect> RichEditorPattern::GetTextBoxes()
 #endif
 {
-    auto selectedRects = paragraphs_.GetRects(textSelector_.GetStart(), textSelector_.GetEnd());
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> res;
 #else
@@ -3334,7 +3332,7 @@ std::vector<RSTextRect> RichEditorPattern::GetTextBoxes()
 
 float RichEditorPattern::GetLineHeight() const
 {
-    auto selectedRects = paragraphs_.GetRects(textSelector_.GetStart(), textSelector_.GetEnd());
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
     return selectedRects.front().Height();
 }
