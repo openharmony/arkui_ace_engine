@@ -61,7 +61,7 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
             backButtonWrapper->Measure(constraint);
             return;
         }
-        constraint.parentIdealSize = OptionalSizeF(static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()),
+        constraint.selfIdealSize = OptionalSizeF(static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()),
             static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()));
         backButtonWrapper->Measure(constraint);
         return;
@@ -69,18 +69,18 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
 
     // navBar title bar
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
-        constraint.parentIdealSize = OptionalSizeF(0.0f, 0.0f);
+        constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         backButtonWrapper->Measure(constraint);
         return;
     }
 
     if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
-        constraint.parentIdealSize = OptionalSizeF(0.0f, 0.0f);
+        constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         backButtonWrapper->Measure(constraint);
         return;
     }
 
-    constraint.parentIdealSize = OptionalSizeF(
+    constraint.selfIdealSize = OptionalSizeF(
         static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()), static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()));
     backButtonWrapper->Measure(constraint);
 }
