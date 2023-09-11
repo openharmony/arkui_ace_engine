@@ -331,7 +331,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     let proxiedObject = new ObservedObject<T>(rawObject,
       Array.isArray(rawObject) ? new class extends SubscribableHandler {
         // Array functions that modify the array
-        private readonly modifyingArrayFunctions: Set<string> = new Set<string>(["splice", "push", "pop", "shift", "unchift", ""]);
+        private readonly modifyingArrayFunctions: Set<string> = new Set<string>(["splice", "push", "pop", "shift", "unshift", ""]);
         // Array functions that modify the array and return the modified array
         private readonly modifyingArrayFunctionsReturnsSelf: Set<string> = new Set(["copyWithin", "fill", "reverse", "sort"]);
         constructor(owningProperty: IPropertySubscriber) {
