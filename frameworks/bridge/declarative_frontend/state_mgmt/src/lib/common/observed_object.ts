@@ -330,10 +330,10 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
     let proxiedObject = new ObservedObject<T>(rawObject,
       Array.isArray(rawObject) ? new class extends SubscribableHandler {
-        // In-place array modification functions
-        // splice is also in-place modifying function, but we need to handle separately
-        private readonly inPlaceModifications: Set<string> = new Set(["copyWithin", "fill", "reverse", "sort"]);
-
+        // Array functions that modify the array
+        private readonly modifyingArrayFunctions: Set<string> = new Set<string>(["splice", "push", "pop", "shift", "unchift", ""]);
+        // Array functions that modify the array and return the modified array
+        private readonly modifyingArrayFunctionsReturnsSelf: Set<string> = new Set(["copyWithin", "fill", "reverse", "sort"]);
         constructor(owningProperty: IPropertySubscriber) {
           super(owningProperty);
         }
@@ -344,7 +344,6 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
           // FIXME: why we do need to list forEach here ?
           if (!ret || (typeof ret !== "function")) {
-            // FIXME notify array object change ?
             stateMgmtConsole.debug(`ArrayHander: get item (not function)' ${propName}'`)
             return ret;
           }
@@ -352,10 +351,8 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
           // ret return value is an array function
           const self = this;
           // splice modifies array, its return is something else than the array itself / no chaining.
-          if (propName == "splice") {
-            // 'splice' self modifies the array, returns deleted array items
-            // means, alike other self-modifying functions, splice does not return the array itself.
-            stateMgmtConsole.debug(`ArrayHander: get: return self modifying function '${propName}'`);
+          if (this.modifyingArrayFunctions.has(propName)) {
+            stateMgmtConsole.debug(`ArrayHander: get: return self modifying function that returns self '${propName}'`);
             return function () {
               const result = ret.apply(target, arguments);
               self.notifyObjectPropertyHasChanged(undefined, target);
@@ -364,7 +361,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
           }
 
           // array functions that modify the array , these return the array to enable chained calls.
-          if (self.inPlaceModifications.has(propName)) {
+          if (this.modifyingArrayFunctionsReturnsSelf.has(propName)) {
             // in place modification function result == proxiedObject, return proxy is needed for chained calls and assignment
             stateMgmtConsole.debug(`ArrayHander: get: return self modifying function '${propName}'`);
             return function () {
@@ -383,11 +380,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
           // FIXME: case for functions that modify and for functions that do not modify !
           // other array functions
           stateMgmtConsole.debug(`ArrayHander: get: return non-modifying function '${propName}'`);
-          return function () {
-            const result = ret.apply(target, arguments);
-          //  self.notifyObjectPropertyHasChanged(undefined, result);
-            return result;
-          }.bind(proxiedObject);
+          return ret.bind(proxiedObject);
         }       
       }(owningProperty) // SubscribableArrayHandlerAnonymous
         : (rawObject instanceof Date)
