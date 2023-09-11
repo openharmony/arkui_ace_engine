@@ -158,11 +158,7 @@ void GaugePaintMethod::DrawGauge(RSCanvas& canvas, RenderRingInfo data) const
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
 
     canvas.AttachPen(pen);
-#ifndef USE_ROSEN_DRAWING
     RSPath path;
-#else
-    RSRecordingPath path;
-#endif
     RSRect rRect(data.center.GetX() - data.radius + thickness / 2.0f,
         data.center.GetY() - data.radius + thickness / 2.0f, data.center.GetX() + data.radius - thickness / 2.0f,
         data.center.GetY() + data.radius - thickness / 2.0f);
@@ -173,11 +169,7 @@ void GaugePaintMethod::DrawGauge(RSCanvas& canvas, RenderRingInfo data) const
 
 void GaugePaintMethod::DrawIndicator(RSCanvas& canvas, RenderRingInfo data) const
 {
-#ifndef USE_ROSEN_DRAWING
     RSPath path;
-#else
-    RSRecordingPath path;
-#endif
     float pathStartVertexX = data.center.GetX();
     float pathStartVertexY = data.center.GetY() - data.radius + (data.thickness / 2);
     path.MoveTo(pathStartVertexX, pathStartVertexY);

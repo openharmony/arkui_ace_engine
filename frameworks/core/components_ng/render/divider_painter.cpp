@@ -34,8 +34,5 @@ void DividerPainter::DrawLine(RSCanvas& canvas, const OffsetF& offset) const
     PointF end = vertical_ ? PointF(startPointX, startPointY + dividerLength_ - constrainStrokeWidth_)
                            : PointF(startPointX + dividerLength_ - constrainStrokeWidth_, startPointY);
     canvas.DrawLine(ToRSPoint(start), ToRSPoint(end));
-#ifdef USE_ROSEN_DRAWING
-    canvas.DetachPen();
-#endif
 }
 } // namespace OHOS::Ace::NG

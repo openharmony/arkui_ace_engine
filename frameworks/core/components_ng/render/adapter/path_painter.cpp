@@ -16,11 +16,7 @@
 #include "core/components_ng/render/path_painter.h"
 
 #include "core/components_ng/pattern/shape/path_paint_property.h"
-#ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/sk_painter.h"
-#else
-#include "core/components_ng/render/adapter/rosen/drawing_painter.h"
-#endif
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
@@ -30,20 +26,12 @@ void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& pathPaintP
     if (!pathPaintProperty.HasCommands()) {
         return;
     }
-#ifndef USE_ROSEN_DRAWING
     SkPainter::DrawPath(canvas, pathPaintProperty.GetCommandsValue(), pathPaintProperty);
-#else
-    DrawingPainter::DrawPath(canvas, pathPaintProperty.GetCommandsValue(), pathPaintProperty);
-#endif
 }
 
 void PathPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset)
 {
-#ifndef USE_ROSEN_DRAWING
     SkPainter::DrawPath(canvas, commands, offset);
-#else
-    DrawingPainter::DrawPath(canvas, commands, offset);
-#endif
 }
 
 SizeF PathPainter::GetPathSize(const std::string& commands)

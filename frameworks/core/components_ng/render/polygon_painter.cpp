@@ -34,11 +34,7 @@ void PolygonPainter::DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& p
     }
     ShapePainter::SetBrush(brush, polygonPaintProperty);
     canvas.AttachBrush(brush);
-#ifndef USE_ROSEN_DRAWING
     RSPath path;
-#else
-    RSRecordingPath path;
-#endif
     std::vector<RSPoint> points;
     for (auto point : polygonPaintProperty.GetPointsValue()) {
         points.emplace_back(RSPoint(
@@ -49,9 +45,5 @@ void PolygonPainter::DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& p
     }
     path.AddPoly(points, static_cast<int>(points.size()), isClose);
     canvas.DrawPath(path);
-#ifdef USE_ROSEN_DRAWING
-    canvas.DetachBrush();
-    canvas.DetachPen();
-#endif
 }
 } // namespace OHOS::Ace::NG
