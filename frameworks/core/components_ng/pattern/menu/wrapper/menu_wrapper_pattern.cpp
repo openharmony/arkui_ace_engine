@@ -135,7 +135,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(!info.GetTouches().empty());
     auto touch = info.GetTouches().front();
     // filter out other touch types
-    if (touch.GetTouchType() != TouchType::DOWN && touch.GetTouchType() != TouchType::UP) {
+    if (touch.GetTouchType() != TouchType::DOWN) {
         return;
     }
     if (IsHided()) {
