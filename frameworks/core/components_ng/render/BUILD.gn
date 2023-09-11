@@ -69,6 +69,7 @@ build_component_ng("render_ng") {
 
   if (ace_use_rosen_drawing) {
     sources -= [
+      "adapter/sk_painter.cpp",
       "adapter/skia_decoration_painter.cpp",
       "adapter/skia_image.cpp",
     ]
@@ -76,6 +77,7 @@ build_component_ng("render_ng") {
     rosen_sources += [
       "adapter/rosen/drawing_decoration_painter.cpp",
       "adapter/rosen/drawing_image.cpp",
+      "adapter/rosen/drawing_painter.cpp",
     ]
   }
 

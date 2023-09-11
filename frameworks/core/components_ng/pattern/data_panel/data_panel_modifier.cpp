@@ -178,10 +178,17 @@ void DataPanelModifier::PaintRainbowFilterMask(
     gradientPaint.SetAntiAlias(true);
     gradientPaint.SetAlpha(SHADOW_ALPHA);
     RSFilter filter;
+#ifndef USE_ROSEN_DRAWING
     filter.SetImageFilter(
         RSImageFilter::CreateBlurImageFilter(SHADOW_FILTER, SHADOW_FILTER, RSTileMode::DECAL, nullptr));
     gradientPaint.SetFilter(filter);
     RSPath path;
+#else
+    filter.SetImageFilter(
+        RSRecordingImageFilter::CreateBlurImageFilter(SHADOW_FILTER, SHADOW_FILTER, RSTileMode::DECAL, nullptr));
+    gradientPaint.SetFilter(filter);
+    RSRecordingPath path;
+#endif
     RSRect rRect(center.GetX() - radius + thickness * PERCENT_HALF, center.GetY() - radius + thickness * PERCENT_HALF,
         center.GetX() + radius - thickness * PERCENT_HALF, center.GetY() + radius - thickness * PERCENT_HALF);
     path.AddArc(rRect, startAngle, drawAngle);
@@ -199,9 +206,13 @@ void DataPanelModifier::PaintRainbowFilterMask(
     endCirclePaint.SetAlpha(SHADOW_ALPHA);
     endCirclePaint.SetFilter(filter);
 
+#ifndef USE_ROSEN_DRAWING
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
-
+#else
+    gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
+#endif
     RSRect edgeRect(center.GetX() - thickness * PERCENT_HALF, center.GetY() - radius,
         center.GetX() + thickness * PERCENT_HALF, center.GetY() - radius + thickness);
 
@@ -213,8 +224,13 @@ void DataPanelModifier::PaintRainbowFilterMask(
 
     canvas.Save();
     canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
+#ifndef USE_ROSEN_DRAWING
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
+#else
+    gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::DECAL, 0, drawAngle));
+#endif
     canvas.AttachPen(gradientPaint);
     canvas.DrawPath(path);
     canvas.DetachPen();
@@ -230,7 +246,11 @@ void DataPanelModifier::PaintRainbowFilterMask(
 
 void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, float date) const
 {
+#ifndef USE_ROSEN_DRAWING
     RSCanvas canvas = context.canvas;
+#else
+    RSCanvas& canvas = context.canvas;
+#endif
     canvas.Save();
     canvas.Translate(offset.GetX(), offset.GetY());
 
@@ -297,7 +317,11 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
 
 void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF offset) const
 {
+#ifndef USE_ROSEN_DRAWING
     auto canvas = context.canvas;
+#else
+    auto& canvas = context.canvas;
+#endif
     auto totalWidth = context.width;
     auto spaceWidth = SystemProperties::Vp2Px(FIXED_WIDTH);
     auto segmentWidthSum = 0.0f;
@@ -419,8 +443,13 @@ void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, const LinearData& se
     segmentEndPoint.SetY(rect.GetBottom());
     canvas.Save();
     RSBrush brush;
+#ifndef USE_ROSEN_DRAWING
     brush.SetShaderEffect(
         RSShaderEffect::CreateLinearGradient(segmentStartPoint, segmentEndPoint, colors, pos, RSTileMode::CLAMP));
+#else
+    brush.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(
+        segmentStartPoint, segmentEndPoint, colors, pos, RSTileMode::CLAMP));
+#endif
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(paintRect);
     canvas.DetachBrush();
@@ -464,11 +493,20 @@ void DataPanelModifier::PaintColorSegmentFilterMask(RSCanvas& canvas, const Line
     canvas.Save();
     RSBrush brush;
     RSFilter filter;
+#ifndef USE_ROSEN_DRAWING
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowRadiusFloat_->Get()));
+#else
+    filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, shadowRadiusFloat_->Get()));
+#endif
     brush.SetFilter(filter);
     brush.SetAlpha(SHADOW_ALPHA);
+#ifndef USE_ROSEN_DRAWING
     brush.SetShaderEffect(
         RSShaderEffect::CreateLinearGradient(segmentStartPoint, segmentEndPoint, colors, pos, RSTileMode::CLAMP));
+#else
+    brush.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(
+        segmentStartPoint, segmentEndPoint, colors, pos, RSTileMode::CLAMP));
+#endif
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(paintRect);
     canvas.DetachBrush();
@@ -489,7 +527,11 @@ void DataPanelModifier::PaintSpace(RSCanvas& canvas, OffsetF offset, float space
 void DataPanelModifier::PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const
 {
     RSPen backgroundTrackData;
+#ifndef USE_ROSEN_DRAWING
     RSPath backgroundTrackPath;
+#else
+    RSRecordingPath backgroundTrackPath;
+#endif
     auto center = arcData.center;
     float thickness = arcData.thickness;
     float radius = arcData.radius;
@@ -548,7 +590,11 @@ void DataPanelModifier::PaintProgress(
     RSPen gradientPaint;
     gradientPaint.SetWidth(thickness);
     gradientPaint.SetAntiAlias(true);
+#ifndef USE_ROSEN_DRAWING
     RSPath path;
+#else
+    RSRecordingPath path;
+#endif
     RSRect rRect(center.GetX() - radius + thickness * PERCENT_HALF, center.GetY() - radius + thickness * PERCENT_HALF,
         center.GetX() + radius - thickness * PERCENT_HALF, center.GetY() + radius - thickness * PERCENT_HALF);
     path.AddArc(rRect, startAngle, drawAngle);
@@ -561,8 +607,13 @@ void DataPanelModifier::PaintProgress(
     endCirclePaint.SetAntiAlias(true);
     endCirclePaint.SetColor(arcData.progressColors.GetColors().rbegin()->GetLinearColor().GetValue());
 
+#ifndef USE_ROSEN_DRAWING
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+#else
+    gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+#endif
 
     canvas.Save();
     canvas.AttachBrush(startCirclePaint);
@@ -574,8 +625,13 @@ void DataPanelModifier::PaintProgress(
 
     canvas.Save();
     canvas.Rotate(-QUARTER_CIRCLE, center.GetX(), center.GetY());
+#ifndef USE_ROSEN_DRAWING
     gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+#else
+    gradientPaint.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
+#endif
     canvas.AttachPen(gradientPaint);
     canvas.DrawPath(path);
     canvas.DetachPen();
