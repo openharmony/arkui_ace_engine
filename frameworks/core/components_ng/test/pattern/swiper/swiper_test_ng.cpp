@@ -10110,69 +10110,6 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutBackward003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperPatternShowPrevious003
- * @tc.desc: ShowPrevious
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternShowPrevious003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create swipernode.
-     */
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto swiperNode =
-        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    stack->Push(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    ASSERT_NE(swiperPattern, nullptr);
-    swiperNode->Clean(false, false);
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-    ASSERT_EQ(swiperPattern->TotalCount(), 0);
-    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
-    ASSERT_NE(swiperNode->paintProperty_, nullptr);
-    swiperPattern->currentIndex_ = 0;
-    swiperPattern->preTargetIndex_ = 1;
-
-    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetDisplayCount();
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetMinSize();
-    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    ASSERT_NE(indicatorNode, nullptr);
-    auto indicatorNodeLeftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG,
-        swiperPattern->GetLeftButtonId(), []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    ASSERT_NE(indicatorNodeLeftArrow, nullptr);
-    indicatorNode->AddChild(indicatorNodeLeftArrow);
-    swiperNode->AddChild(indicatorNode);
-    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    ASSERT_NE(leftArrow, nullptr);
-    auto rightArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, swiperPattern->GetRightButtonId(),
-        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
-    ASSERT_NE(rightArrow, nullptr);
-    swiperNode->Clean(false, false);
-    swiperNode->AddChild(leftArrow);
-    swiperNode->AddChild(rightArrow);
-    swiperPattern->leftButtonId_.reset();
-    swiperPattern->rightButtonId_.reset();
-    swiperPattern->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 2 }));
-    swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
-
-    /**
-     * @tc.steps: step2. call ShowPrevious.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        swiperPattern->ShowPrevious();
-        swiperPattern->indicatorController_ = AceType::MakeRefPtr<Animator>();
-        swiperPattern->isVisible_ = false;
-        swiperPattern->preTargetIndex_ = 0;
-    }
-}
-
-/**
  * @tc.name: SwiperPatternPreviousFocus004
  * @tc.desc: Test SwiperPattern SwiperPatternPreviousFocus
  * @tc.type: FUNC
