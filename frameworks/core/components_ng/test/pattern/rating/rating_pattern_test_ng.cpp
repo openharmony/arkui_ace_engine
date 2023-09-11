@@ -87,6 +87,7 @@ const std::string IMAGE_SOURCE_INFO_STRING = "empty source";
 const int32_t RATING_FOREGROUND_FLAG = 0b001;
 const int32_t RATING_SECONDARY_FLAG = 0b010;
 const int32_t RATING_BACKGROUND_FLAG = 0b100;
+const int32_t INVALID_IMAGE_FLAG = 0b111;
 const std::string RATING_IMAGE_LOAD_FAILED = "ImageDataFailed";
 const std::string RATING_IMAGE_LOAD_SUCCESS = "ImageDataSuccess";
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
@@ -297,6 +298,10 @@ HWTEST_F(RatingPatternTestNg, RatingPatternGetImageSourceFromThemeTest007, TestS
     const ImageSourceInfo foregroundImage = ratingPattern->GetImageSourceInfoFromTheme(RATING_FOREGROUND_FLAG);
     const ImageSourceInfo secondaryImage = ratingPattern->GetImageSourceInfoFromTheme(RATING_SECONDARY_FLAG);
     const ImageSourceInfo backgroundImage = ratingPattern->GetImageSourceInfoFromTheme(RATING_BACKGROUND_FLAG);
+    /**
+     * @tc.cases: case. cover branch switch imageFlag default branch.
+     */
+    const ImageSourceInfo groundImage = ratingPattern->GetImageSourceInfoFromTheme(INVALID_IMAGE_FLAG);
 
     EXPECT_EQ(foregroundImage.GetResourceId(), FOREGROUND_IMAGE_RESOURCE_ID);
     EXPECT_EQ(secondaryImage.GetResourceId(), SECONDARY_IMAGE_RESOURCE_ID);
@@ -311,6 +316,10 @@ HWTEST_F(RatingPatternTestNg, RatingPatternGetImageSourceFromThemeTest007, TestS
         ratingPattern->CheckImageInfoHasChangedOrNot(RATING_SECONDARY_FLAG, ImageSourceInfo(RATING_SECONDARY_URL), tag);
         ratingPattern->CheckImageInfoHasChangedOrNot(
             RATING_BACKGROUND_FLAG, ImageSourceInfo(RATING_BACKGROUND_URL), tag);
+        /**
+         * @tc.cases: case. cover branch switch imageFlag default branch.
+         */
+        ratingPattern->CheckImageInfoHasChangedOrNot(INVALID_IMAGE_FLAG, ImageSourceInfo(RATING_BACKGROUND_URL), tag);
     }
 
     /**
@@ -788,7 +797,6 @@ HWTEST_F(RatingPatternTestNg, RatingPatternTestNg002, TestSize.Level1)
     EXPECT_EQ(ratingAccessibilityProperty->GetText(), std::to_string(RATING_SCORE));
 }
 
-
 /**
  * @tc.name: RatingPaintMethodTest001
  * @tc.desc: Test Rating PaintMethod ShouldHighLight
@@ -881,5 +889,89 @@ HWTEST_F(RatingPatternTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     EXPECT_CALL(mockCanvas3, Restore()).Times(RATING_RESTORE_TIMES_1);
     EXPECT_CALL(mockCanvas3, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
     ratingPaintMethod->ratingModifier_->onDraw(context3);
+}
+
+/**
+ * @tc.name: RatingPatternOnKeyEvent001
+ * @tc.desc: Test Rating Pattern OnKeyEven()
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingPatternTestNg, RatingPatternOnKeyEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Rating pattern.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutProperty, nullptr);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(ratingPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Construct KeyEvent and call OnKeyEvent().
+     * @tc.expected: result is expected.
+     */
+    KeyEvent event;
+
+    /**
+     * @tc.cases: case. cover KeyAction is not DOWN.
+     */
+    event.action = KeyAction::UP;
+    event.code = KeyCode::KEY_TAB;
+    bool result = ratingPattern->OnKeyEvent(event);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.cases: case. cover branch event action is DOWN and KeyCode is KEY_DPAD_LEFT.
+     */
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_DPAD_LEFT;
+    result = ratingPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.cases: case. cover branch event action is DOWN and KeyCode is KEY_DPAD_RIGHT.
+     */
+    event.code = KeyCode::KEY_DPAD_RIGHT;
+    result = ratingPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.cases: case. cover branch event action is DOWN and KeyCode is KEY_MOVE_HOME.
+     */
+    event.code = KeyCode::KEY_MOVE_HOME;
+    result = ratingPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.cases: case. cover branch event action is DOWN and KeyCode is KEY_MOVE_END.
+     */
+    event.code = KeyCode::KEY_MOVE_END;
+    result = ratingPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.cases: case. cover branch event action is DOWN and KeyCode is KEY_ENTER.
+     */
+    event.code = KeyCode::KEY_ENTER;
+    result = ratingPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.cases: case. cover branch event action is DOWN and KeyCode is KEY_SPACE.
+     */
+    event.code = KeyCode::KEY_SPACE;
+    result = ratingPattern->OnKeyEvent(event);
+    EXPECT_TRUE(result);
+
+    /**
+     * @tc.cases: case. cover branch invalid event code.
+     */
+    event.code = KeyCode::KEY_MENU;
+    result = ratingPattern->OnKeyEvent(event);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG
