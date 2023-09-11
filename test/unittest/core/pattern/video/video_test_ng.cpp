@@ -113,7 +113,7 @@ const SizeF VIDEO_SIZE(VIDEO_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_GREATER_THAN_1(MAX_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_LESS_THAN_1(VIDEO_WIDTH, MAX_HEIGHT);
 const SizeF INVALID_SIZE(MAX_WIDTH, 0.0f);
-constexpr uint32_t VIDEO_CHILDREN_NUM = 2;
+constexpr uint32_t VIDEO_CHILDREN_NUM = 3;
 constexpr uint32_t DURATION = 100;
 constexpr uint32_t CURRENT_TIME = 100;
 constexpr int32_t SLIDER_INDEX = 2;
@@ -474,8 +474,8 @@ HWTEST_F(VideoTestNg, VideoPatternTest006, TestSize.Level1)
      */
     auto children = frameNode->GetChildren();
     auto childrenSize = static_cast<int32_t>(children.size());
-    EXPECT_EQ(childrenSize, 2);
-    auto image = frameNode->GetChildAtIndex(0);
+    EXPECT_EQ(childrenSize, VIDEO_CHILDREN_NUM);
+    auto image = frameNode->GetChildAtIndex(1);
     EXPECT_EQ(image->GetTag(), V2::IMAGE_ETS_TAG);
 }
 
@@ -501,8 +501,8 @@ HWTEST_F(VideoTestNg, VideoPatternTest007, TestSize.Level1)
      */
     auto children = frameNode->GetChildren();
     auto childrenSize = static_cast<int32_t>(children.size());
-    EXPECT_EQ(childrenSize, 2);
-    auto row = frameNode->GetChildAtIndex(1);
+    EXPECT_EQ(childrenSize, VIDEO_CHILDREN_NUM);
+    auto row = frameNode->GetChildAtIndex(2);
     EXPECT_EQ(row->GetTag(), V2::ROW_ETS_TAG);
 }
 
@@ -711,7 +711,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest010, TestSize.Level1)
     /**
      * @tc.steps: step2. Prepare the childNode & videoEvent
      */
-    auto controlBar = frameNode->GetChildAtIndex(1);
+    auto controlBar = frameNode->GetChildAtIndex(2);
     ASSERT_TRUE(controlBar);
 
     auto playBtn = AceType::DynamicCast<FrameNode>(controlBar->GetChildAtIndex(0));
@@ -2244,7 +2244,6 @@ HWTEST_F(VideoTestNg, VideoPatternTest028, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
         .Times(1)
         .WillOnce(Return(true));
-    EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(videoNode->renderContext_)), AddChild(_, _)).Times(1);
     videoPattern->OnRebuildFrame();
     videoPattern->renderSurface_ = nullptr;
     videoPattern->OnRebuildFrame();
