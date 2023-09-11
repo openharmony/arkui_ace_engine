@@ -172,12 +172,11 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
     }
     RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
         // add extra clip space for cases such as auto width
-        paintOffset.GetX() + contentSize_->Get().Width() + cursorWidth_->Get() * 2.0f, clipRectHeight);
+        paintOffset.GetX() + contentSize_->Get().Width() + cursorWidth_->Get() * 2.0f -
+        textFieldPattern->GetUnitWidth(), clipRectHeight);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetShowUnderlineValue(false)) {
-        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-    }
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto caretRect = textFieldPattern->GetCaretRect();
     canvas.DrawRect(RSRect(cursorOffset_->Get().GetX(), caretRect.GetY(),
         cursorOffset_->Get().GetX() + static_cast<float>(cursorWidth_->Get()), caretRect.GetY() + caretRect.Height()));
