@@ -167,7 +167,7 @@ JANK_STATS_APP:
   JANK_STATS_VER: {type: UINT32, desc: jank range version}
 
 INTERACTION_COMPLETED_LATENCY:
-  __BASE: {type: STATISTIC, level: MINOR, tag: performance, desc: interaction complete statistics}
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: performance, desc: interaction complete statistics}
   APP_PID: {type: INT32, desc: app pid}
   BUNDLE_NAME: {type: STRING, desc: package name}
   PROCESS_NAME: {type: STRING, desc: process name}
@@ -184,7 +184,7 @@ INTERACTION_COMPLETED_LATENCY:
   NOTE: {type: STRING, desc: extra infomation}
 
 INTERACTION_APP_JANK:
-  __BASE: {type: STATISTIC, level: MINOR, tag: performance, desc: interaction jank statistics}
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: performance, desc: interaction jank statistics}
   UNIQUE_ID: {type: INT32, desc: unique id}
   SCENE_ID: {type: STRING, desc: interaction scene id}
   PROCESS_NAME: {type: STRING, desc: process name}

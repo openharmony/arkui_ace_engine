@@ -54,6 +54,7 @@
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
@@ -1389,6 +1390,7 @@ bool UIContentImpl::ProcessBackPressed()
                 }
             } else {
                 LOGI("UIContentImpl::ProcessBackPressed AceContainer");
+                PerfMonitor::GetPerfMonitor()->RecordInputEvent(LAST_UP, UNKNOWN_SOURCE, 0);
                 if (Platform::AceContainer::OnBackPressed(instanceId_)) {
                     LOGI("UIContentImpl::ProcessBackPressed AceContainer return true");
                     ret = true;
