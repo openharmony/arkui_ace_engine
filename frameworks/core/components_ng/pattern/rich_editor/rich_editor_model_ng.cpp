@@ -38,6 +38,7 @@ void RichEditorModelNG::Create()
 
     richEditorPattern->InitSurfaceChangedCallback();
     richEditorPattern->InitSurfacePositionChangedCallback();
+    richEditorPattern->ClearSelectionMenu();
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

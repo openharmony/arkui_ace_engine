@@ -219,6 +219,10 @@ public:
     }
     void BindSelectionMenu(ResponseType type, RichEditorType richEditorType, std::function<void()>& menuBuilder,
         std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
+    void ClearSelectionMenu()
+    {
+        selectionMenuMap_.clear();
+    }
     void DumpInfo() override;
     void InitSelection(const Offset& pos);
     bool HasFocus() const;
@@ -236,6 +240,8 @@ private:
         selectInfo.menuInfo.menuIsShow = hasValue || hasData;
         selectMenuInfo_ = selectInfo.menuInfo;
     }
+    void UpdateSelectionType(RichEditorSelection& selection);
+    std::shared_ptr<SelectionMenuParams> GetMenuParams(bool usingMouse, RichEditorType type);
     void HandleOnPaste();
     void HandleOnCut();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -345,7 +351,8 @@ private:
 #endif // ENABLE_DRAG_FRAMEWORK
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBulder_;
-    std::shared_ptr<SelectionMenuParams> selectionMenuParams_ = nullptr;
+    std::map<std::pair<RichEditorType, ResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
+    std::optional<RichEditorType> selectedType_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
