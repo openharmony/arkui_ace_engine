@@ -3495,6 +3495,11 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest002, TestSize.Level1)
     ASSERT_NE(pickerPaintProperty, nullptr);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     ASSERT_NE(textPickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case. cover branch GetResizeFlag() is true.
+     */
+    textPickerPattern->SetResizeFlag(true);
     auto textPickerPaintMethod =
         AceType::MakeRefPtr<TextPickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(textPickerPattern)));
     textPickerPaintMethod->SetEnabled(false);
@@ -6105,5 +6110,80 @@ HWTEST_F(TextPickerTestNg, ChangeTextStyle001, TestSize.Level1)
     uint32_t showOptionCount1 = 1;
     textPickerLayoutAlgorithm.ChangeTextStyle(index, showOptionCount1, size, subLayoutWrapper, &layoutWrapper);
     EXPECT_EQ(100.0f, subLayoutWrapper->GetGeometryNode()->GetFrameSize().Width());
+}
+
+/**
+ * @tc.name: FlushAnimationTextProperties001
+ * @tc.desc: Test TextPickerColumnPattern FlushAnimationTextProperties
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, FlushAnimationTextProperties001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+
+    /**
+     * @tc.step: step1. create textpicker pattern.
+     */
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    /**
+     * @tc.step: step2. create textpicker cloumn pattern and call FlushAnimationTextProperties.
+     * @tc.expected: cover branch animationProperties_ size is 0.
+     */
+    columnPattern->FlushAnimationTextProperties(false);
+    EXPECT_EQ(0, columnPattern->animationProperties_.size());
+
+    /**
+     * @tc.step: step3. construct columnPattern animationProperties_ and call FlushAnimationTextProperties.
+     * @tc.expected: cover branch animationProperties_ size is 1 and fontSize meet expectation.
+     */
+    std::vector<TextProperties> animationProperties;
+    TextProperties properties1;
+    properties1.upFontSize = Dimension(FONT_SIZE_5);
+    properties1.fontSize = Dimension(FONT_SIZE_20);
+    properties1.downFontSize = Dimension(FONT_SIZE_5);
+    properties1.upColor = Color::RED;
+    properties1.currentColor = Color::RED;
+    properties1.downColor = Color::RED;
+    animationProperties.emplace_back(properties1);
+    columnPattern->animationProperties_ = animationProperties;
+
+    columnPattern->FlushAnimationTextProperties(false);
+    Dimension result = columnPattern->animationProperties_[0].fontSize;
+    EXPECT_EQ(Dimension(FONT_SIZE_10), result);
+    columnPattern->FlushAnimationTextProperties(true);
+    result = columnPattern->animationProperties_[0].fontSize;
+    EXPECT_EQ(Dimension(FONT_SIZE_5), result);
+
+    /**
+     * @tc.step: step4. add construct columnPattern animationProperties_ and call FlushAnimationTextProperties.
+     * @tc.expected: cover branch animationProperties_ size is more than 1 and fontSize meet expectation.
+     */
+    TextProperties properties2;
+    properties2.upFontSize = Dimension(FONT_SIZE_10);
+    properties2.fontSize = Dimension(FONT_SIZE_20);
+    properties2.downFontSize = Dimension(FONT_SIZE_10);
+    properties2.upColor = Color::RED;
+    properties2.currentColor = Color::RED;
+    properties2.downColor = Color::RED;
+    animationProperties.emplace_back(properties2);
+    columnPattern->animationProperties_ = animationProperties;
+
+    columnPattern->FlushAnimationTextProperties(false);
+    result = columnPattern->animationProperties_[0].fontSize;
+    EXPECT_EQ(Dimension(FONT_SIZE_10), result);
+    columnPattern->FlushAnimationTextProperties(true);
+    result = columnPattern->animationProperties_[0].fontSize;
+    EXPECT_EQ(Dimension(FONT_SIZE_20), result);
 }
 } // namespace OHOS::Ace::NG
