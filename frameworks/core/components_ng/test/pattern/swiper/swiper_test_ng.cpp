@@ -11173,4 +11173,86 @@ HWTEST_F(SwiperTestNg, SwiperFlushFocus002, TestSize.Level1)
     swiperPattern->isLastIndicatorFocused_ = true;
     swiperPattern->FlushFocus(curShowFrame);
 }
+
+/**
+ * @tc.name: SwiperIndicatorPatternHandleLongDragUpdate001
+ * @tc.desc: HandleLongDragUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorPatternHandleLongDragUpdate001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    std::list<TouchLocationInfo> infoList;
+    infoList.emplace_back(touchLocationInfo);
+    TouchEventInfo touchEventInfo("down");
+    touchEventInfo.touches_ = infoList;
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_.reset();
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    swiperLayoutProperty->UpdateDisplayCount(10);
+    indicatorPattern->HandleLongDragUpdate(touchEventInfo.GetTouches().front());
+}
+
+/**
+ * @tc.name: SwiperIndicatorPatternCheckIsTouchBottom001
+ * @tc.desc: CheckIsTouchBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    GestureEvent info;
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    std::list<TouchLocationInfo> infoList;
+    infoList.emplace_back(touchLocationInfo);
+    TouchEventInfo touchEventInfo("down");
+    touchEventInfo.touches_ = infoList;
+    swiperPattern->currentIndex_ = -5;
+    swiperLayoutProperty->UpdateLoop(false);
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_.reset();
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(info));
+    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
+}
 } // namespace OHOS::Ace::NG
