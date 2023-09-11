@@ -82,7 +82,11 @@ CheckBoxGroupModifier::CheckBoxGroupModifier(const Parameters& parameters)
 void CheckBoxGroupModifier::PaintCheckBox(
     DrawingContext& context, const OffsetF& paintOffset, const SizeF& contentSize) const
 {
+#ifndef USE_ROSEN_DRAWING
     auto canvas = context.canvas;
+#else
+    auto& canvas = context.canvas;
+#endif
     auto color = activeColor_;
 
     RSPen pen;
@@ -141,7 +145,11 @@ void CheckBoxGroupModifier::DrawCheck(
     if (checkMarkPaintSize_->Get() == CHECKBOX_GROUP_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_GROUP_LENGTH_ZERO) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     RSPath path;
+#else
+    RSRecordingPath path;
+#endif
     float originX = origin.GetX();
     float originY = origin.GetY();
     float strokeSize = checkMarkPaintSize_->Get();
@@ -164,6 +172,9 @@ void CheckBoxGroupModifier::DrawCheck(
     canvas.DrawPath(path);
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachPen();
+#endif
 }
 
 void CheckBoxGroupModifier::DrawUnselected(
@@ -177,6 +188,9 @@ void CheckBoxGroupModifier::DrawUnselected(
     auto rrect = RSRoundRect(rect, borderRadius_, borderRadius_);
     canvas.AttachPen(pen);
     canvas.DrawRoundRect(rrect);
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachPen();
+#endif
 }
 
 void CheckBoxGroupModifier::DrawActiveBorder(
@@ -203,6 +217,9 @@ void CheckBoxGroupModifier::DrawUnselectedBorder(
     auto rrect = RSRoundRect(rect, borderRadius_, borderRadius_);
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachBrush();
+#endif
 }
 
 void CheckBoxGroupModifier::DrawPart(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const
@@ -210,7 +227,11 @@ void CheckBoxGroupModifier::DrawPart(RSCanvas& canvas, const OffsetF& origin, RS
     if (checkMarkPaintSize_->Get() == CHECKBOX_GROUP_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_GROUP_LENGTH_ZERO) {
         return;
     }
+#ifndef USE_ROSEN_DRAWING
     RSPath path;
+#else
+    RSRecordingPath path;
+#endif
     RSPen shadowPen;
     float originX = origin.GetX();
     float originY = origin.GetY();
@@ -231,6 +252,9 @@ void CheckBoxGroupModifier::DrawPart(RSCanvas& canvas, const OffsetF& origin, RS
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachPen();
+#endif
 }
 
 void CheckBoxGroupModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& size, const OffsetF& offset) const
@@ -245,5 +269,8 @@ void CheckBoxGroupModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachBrush();
+#endif
 }
 } // namespace OHOS::Ace::NG
