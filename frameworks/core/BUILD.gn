@@ -931,6 +931,7 @@ template("ace_core_ng_source_set") {
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
       ]
       if (is_ohos) {
         external_deps += [ "graphic_2d:libtexgine" ]
