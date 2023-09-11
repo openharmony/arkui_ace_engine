@@ -33,5 +33,9 @@ void CirclePainter::DrawCircle(
     canvas.AttachBrush(brush);
     PointF centerPoint = PointF(radius + offset.GetX(), radius + offset.GetY());
     canvas.DrawCircle(ToRSPoint(centerPoint), radius);
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachBrush();
+    canvas.DetachPen();
+#endif
 }
 } // namespace OHOS::Ace::NG

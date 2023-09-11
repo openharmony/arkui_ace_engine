@@ -33,5 +33,8 @@ void LinePainter::DrawLine(RSCanvas& canvas, const LinePaintProperty& linePaintP
     PointF endPoint_ = PointF(linePaintProperty.GetEndPointValue().first.ConvertToPx(),
         linePaintProperty.GetEndPointValue().second.ConvertToPx());
     canvas.DrawLine(ToRSPoint(startPoint_ + offset), ToRSPoint(endPoint_ + offset));
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachPen();
+#endif
 }
 } // namespace OHOS::Ace::NG
