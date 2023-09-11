@@ -251,6 +251,21 @@ public:
         navigationModeChange_ = modeChange;
     }
 
+    void AddOnStateChangeItem(int32_t nodeId, std::function<void(bool)> callback)
+    {
+        onStateChangeMap_.emplace(nodeId, callback);
+    }
+
+    void DeleteOnStateChangeItem(int32_t nodeId)
+    {
+        onStateChangeMap_.erase(nodeId);
+    }
+
+    const std::map<int32_t, std::function<void(bool)>>& GetOnStateChangeMap()
+    {
+        return onStateChangeMap_;
+    }
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
@@ -289,6 +304,7 @@ private:
     Dimension minContentWidthValue_ = 0.0_vp;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     bool navigationModeChange_ = false;
+    std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
 };
 
 } // namespace OHOS::Ace::NG

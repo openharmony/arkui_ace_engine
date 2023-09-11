@@ -33,6 +33,11 @@ public:
         onStateChangeEvent_ = changeEvent;
     }
 
+    const OnStateChangeEvent& GetOnStateChange()
+    {
+        return onStateChangeEvent_;
+    }
+
     void FireChangeEvent(bool isActivated)
     {
         if (isActivated_ != isActivated) {

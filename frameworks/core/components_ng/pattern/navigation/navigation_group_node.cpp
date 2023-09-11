@@ -115,6 +115,14 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         SetBackButtonEvent(navDestination);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
+        if (!eventHub->GetOnStateChange()) {
+            auto onStateChangeMap = pattern->GetOnStateChangeMap();
+            auto iter = onStateChangeMap.find(uiNode->GetId());
+            if (iter != onStateChangeMap.end()) {
+                eventHub->SetOnStateChange(iter->second);
+                pattern->DeleteOnStateChangeItem(iter->first);
+            }
+        }
         if (i == navDestinationNodes.size() - 1) {
             // process shallow builder
             navDestination->ProcessShallowBuilder();
