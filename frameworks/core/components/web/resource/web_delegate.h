@@ -431,7 +431,7 @@ public:
     void InitWebViewWithWindow();
     void ShowWebView();
     void HideWebView();
-    void Resize(const double& width, const double& height);
+    void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
         return rosenWindowId_;
@@ -602,7 +602,7 @@ public:
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
     void GLContextInit(void* window);
     sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
-    void SetBoundsOrResize(const Size& drawSize, const Offset& offset);
+    void SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard = false);
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
