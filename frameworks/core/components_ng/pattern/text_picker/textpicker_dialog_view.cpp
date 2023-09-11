@@ -43,7 +43,7 @@ RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogPrope
 {
     if (settingData.rangeVector.empty() && settingData.options.empty()) {
         LOGI("Dialog input parameter range vector is empty, not display dialog.");
-        return dialogNode_;
+        return nullptr;
     }
     if (settingData.options.empty()) {
         return RangeShow(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
