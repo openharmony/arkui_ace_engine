@@ -398,7 +398,7 @@ void JSSearch::SetPlaceholderFont(const JSCallbackInfo& info)
         auto versionTenOrLarger = PipelineBase::GetCurrentContext() &&
                                   PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
         CalcDimension size;
-        if (versionTenOrLarger ? ParseJsDimensionVpNG(fontSize, size) : ParseJsDimensionVp(fontSize, size) &&
+        if ((versionTenOrLarger ? ParseJsDimensionVpNG(fontSize, size) : ParseJsDimensionVp(fontSize, size)) &&
             size.Unit() != DimensionUnit::PERCENT) {
             ParseJsDimensionFp(fontSize, size);
             font.fontSize = size;
