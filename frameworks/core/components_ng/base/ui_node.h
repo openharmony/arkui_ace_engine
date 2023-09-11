@@ -489,7 +489,7 @@ protected:
 
     virtual void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList)
     {
-        for (const auto& child : children_) {
+        for (const auto& child : GetChildren()) {
             child->OnGenerateOneDepthVisibleFrame(visibleList);
         }
     }
