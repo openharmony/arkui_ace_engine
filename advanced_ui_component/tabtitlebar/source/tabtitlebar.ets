@@ -139,7 +139,7 @@ export struct TabTitleBar {
                       currentIndex: this.currentIndex,
                       onCustomClick: (itemIndex) => this.currentIndex = itemIndex,
                       onImageComplete: (width) => {
-                        this.imageWidths[index] = px2vp(width)
+                        this.imageWidths[index] = width
                         this.loadOffsets()
                       }
                     })
@@ -389,6 +389,14 @@ struct TabContentItem {
     return { width: 0 }
   }
 
+  getImageScaleFactor(): number {
+    return this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1
+  }
+
+  getImageLayoutWidth(): number {
+    return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth
+  }
+
   build() {
     Stack() {
       Row() {
@@ -437,38 +445,38 @@ struct TabContentItem {
             Row() {
               Image(this.item.icon)
                 .alt(this.item.title)
-                .width(TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth)
+                .width(this.getImageLayoutWidth())
                 .height(TabContentItem.imageSize)
                 .objectFit(ImageFit.Fill)
                 .scale({
-                  x: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1,
-                  y: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1
+                  x: this.getImageScaleFactor(),
+                  y: this.getImageScaleFactor()
                 })
+                .animation({ duration: 300 })
+                .hitTestBehavior(HitTestMode.None)
                 .focusable(true)
                 .onComplete((event) => {
                   if (!this.onImageComplete) {
                     return
                   }
-                  this.imageWidth = event.width
-                  this.imageHeight = event.height
-                  this.onImageComplete(event.componentWidth
+                  this.imageWidth = px2vp(event.width)
+                  this.imageHeight = px2vp(event.height)
+                  this.onImageComplete(px2vp(event.componentWidth)
                     + TabContentItem.paddingLeft + TabContentItem.paddingRight)
                 })
                 .onError((event) => {
-                  if (this.onImageComplete) {
+                  if (!this.onImageComplete) {
                     return
                   }
-                  this.onImageComplete(event.componentWidth
+                  this.onImageComplete(px2vp(event.componentWidth)
                     + TabContentItem.paddingLeft + TabContentItem.paddingRight)
                 })
             }
+            .width(this.getImageLayoutWidth() * this.getImageScaleFactor()
+              + TabContentItem.paddingLeft + TabContentItem.paddingRight)
             .constraintSize({
               minWidth: TabContentItem.imageHotZoneWidth,
               minHeight: TabContentItem.imageHotZoneWidth
-            })
-            .padding({
-              left: TabContentItem.paddingLeft,
-              right: TabContentItem.paddingRight,
             })
             .animation({ duration: 300 })
             .justifyContent(FlexAlign.Center)
