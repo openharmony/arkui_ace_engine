@@ -211,8 +211,10 @@ RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
             if (!eventHub) {
                 continue;
             }
+            bool hasMoveFunction = eventHub->HasOnDragMove() || eventHub->HasOnItemDragMove()
+                || eventHub->HasOnDragLeave() || eventHub->HasOnDragEnter();
             if ((findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))
-                || (!findDrop && (eventHub->HasOnDrop() || eventHub->HasOnItemDrop()))) {
+                || (!findDrop && hasMoveFunction)) {
                 return parentFrameNode;
             }
             if (SystemProperties::GetDebugEnabled()) {
