@@ -49,6 +49,8 @@ constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr float FONTWEIGHT = 0.5f;
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
+constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
+constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
@@ -300,6 +302,15 @@ bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
 {
     CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
+        offset_ = offset;
+        size_ = size;
+        AddHotZoneRectToText();
+    }
     return true;
 }
 
@@ -1292,5 +1303,59 @@ void TimePickerColumnPattern::PlayRestAnimation()
     fromController_->ClearInterpolators();
     fromController_->AddInterpolator(curve);
     fromController_->Play();
+}
+
+void TimePickerColumnPattern::AddHotZoneRectToText()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
+    auto midSize = childSize / MIDDLE_CHILD_INDEX;
+    auto middleChildHeight = optionProperties_[midSize].height;
+    auto otherChildHeight = optionProperties_[midSize-1].height;
+    for (int32_t i = 0; i < childSize; i++) {
+        RefPtr<FrameNode> childNode = DynamicCast<FrameNode>(host->GetChildAtIndex(i));
+        CHECK_NULL_VOID(childNode);
+        float hotZoneHegiht = 0.0f;
+        float hotZoneOffsetY = 0.0f;
+        if (size_.Height() <= middleChildHeight) {
+            hotZoneHegiht = i == midSize ? size_.Height() : 0;
+        } else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight)) {
+            if (i == midSize) {
+                hotZoneHegiht = middleChildHeight;
+            } else if ((i == midSize + 1) || (i == midSize - 1)) {
+                hotZoneHegiht = (size_.Height() - middleChildHeight) / MIDDLE_CHILD_INDEX;
+                hotZoneOffsetY = (i == midSize - 1) ? (otherChildHeight - hotZoneHegiht) : 0;
+            }
+        }  else if (size_.Height() <= (middleChildHeight + HOT_ZONE_HEIGHT_DISAPPEAR * otherChildHeight)) {
+            if (i == midSize) {
+                hotZoneHegiht = middleChildHeight;
+            } else if ((i == midSize + 1) || (i == midSize - 1)) {
+                hotZoneHegiht = otherChildHeight;
+            } else if ((i == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
+                hotZoneHegiht = (size_.Height() - middleChildHeight - HOT_ZONE_HEIGHT_CANDIDATE * otherChildHeight)
+                                / MIDDLE_CHILD_INDEX;
+                hotZoneOffsetY = (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE) ? (otherChildHeight - hotZoneHegiht) : 0;
+            }
+        } else {
+            if (i == midSize) {
+                hotZoneHegiht = middleChildHeight;
+            } else if ((i == midSize + 1) || (i == midSize - 1)) {
+                hotZoneHegiht = otherChildHeight;
+            } else if ((i == midSize + HOT_ZONE_HEIGHT_CANDIDATE) || (i == midSize - HOT_ZONE_HEIGHT_CANDIDATE)) {
+                hotZoneHegiht = otherChildHeight;
+            }
+        }
+        OffsetF hotZoneOffset;
+        SizeF hotZoneSize;
+        hotZoneOffset.SetX(0.0f);
+        hotZoneOffset.SetY(hotZoneOffsetY);
+        hotZoneSize.SetWidth(size_.Width());
+        hotZoneSize.SetHeight(hotZoneHegiht);
+        DimensionRect hotZoneRegion;
+        hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+        hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+        childNode->AddHotZoneRect(hotZoneRegion);
+    }
 }
 } // namespace OHOS::Ace::NG
