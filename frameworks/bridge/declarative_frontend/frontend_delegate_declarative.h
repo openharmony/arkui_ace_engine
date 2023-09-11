@@ -252,9 +252,10 @@ public:
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
     void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override;
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback) override;
     void CreateSnapshot(std::function<void()>&& customBuilder,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override;
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        bool enableInspector) override;
 
     void RequestAnimationFrame(const std::string& callbackId) override;
 

@@ -18,7 +18,7 @@ var __decorate = this && this.__decorate || function(e, t, o, i) {
     r = n < 3 ? t : null === i ? i = Object.getOwnPropertyDescriptor(t, o) : i;
   if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) r = Reflect.decorate(e, t, o, i);
   else
-    for (var c = e.length - 1; c >= 0; c--)(s = e[c]) && (r = (n < 3 ? s(r) : n > 3 ? s(t, o, r) : s(t, o)) || r);
+    for (var a = e.length - 1; a >= 0; a--)(s = e[a]) && (r = (n < 3 ? s(r) : n > 3 ? s(t, o, r) : s(t, o)) || r);
   return n > 3 && r && Object.defineProperty(t, o, r), r
 };
 const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
@@ -123,7 +123,7 @@ export class TabTitleBar extends ViewPU {
       else {
         e += TabContentItem.paddingLeft;
         e += px2vp(MeasureText.measureText({
-          textContent: t.title,
+          textContent: t.title.toString(),
           fontSize: 18,
           fontWeight: FontWeight.Medium
         }));
@@ -231,7 +231,7 @@ export class TabTitleBar extends ViewPU {
                 currentIndex: this.currentIndex,
                 onCustomClick: e => this.currentIndex = e,
                 onImageComplete: e => {
-                  this.imageWidths[t] = px2vp(e);
+                  this.imageWidths[t] = e;
                   this.loadOffsets()
                 }
               }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {
@@ -253,7 +253,7 @@ export class TabTitleBar extends ViewPU {
                 currentIndex: this.currentIndex,
                 onCustomClick: e => this.currentIndex = e,
                 onImageComplete: e => {
-                  this.imageWidths[t] = px2vp(e);
+                  this.imageWidths[t] = e;
                   this.loadOffsets()
                 }
               }, void 0, e)) : this.updateStateVarsOfChildByElmtId(e, {
@@ -650,6 +650,8 @@ class TabContentItem extends ViewPU {
     this.__isOnHover = new ObservedPropertySimplePU(!1, this, "isOnHover");
     this.__isOnClick = new ObservedPropertySimplePU(!1, this, "isOnClick");
     this.__tabWidth = new ObservedPropertySimplePU(0, this, "tabWidth");
+    this.__imageWidth = new ObservedPropertySimplePU(24, this, "imageWidth");
+    this.__imageHeight = new ObservedPropertySimplePU(24, this, "imageHeight");
     this.setInitiallyProvidedValue(t)
   }
   setInitiallyProvidedValue(e) {
@@ -661,7 +663,9 @@ class TabContentItem extends ViewPU {
     void 0 !== e.isOnFocus && (this.isOnFocus = e.isOnFocus);
     void 0 !== e.isOnHover && (this.isOnHover = e.isOnHover);
     void 0 !== e.isOnClick && (this.isOnClick = e.isOnClick);
-    void 0 !== e.tabWidth && (this.tabWidth = e.tabWidth)
+    void 0 !== e.tabWidth && (this.tabWidth = e.tabWidth);
+    void 0 !== e.imageWidth && (this.imageWidth = e.imageWidth);
+    void 0 !== e.imageHeight && (this.imageHeight = e.imageHeight)
   }
   updateStateVars(e) {
     this.__currentIndex.reset(e.currentIndex)
@@ -671,7 +675,9 @@ class TabContentItem extends ViewPU {
     this.__isOnFocus.purgeDependencyOnElmtId(e);
     this.__isOnHover.purgeDependencyOnElmtId(e);
     this.__isOnClick.purgeDependencyOnElmtId(e);
-    this.__tabWidth.purgeDependencyOnElmtId(e)
+    this.__tabWidth.purgeDependencyOnElmtId(e);
+    this.__imageWidth.purgeDependencyOnElmtId(e);
+    this.__imageHeight.purgeDependencyOnElmtId(e)
   }
   aboutToBeDeleted() {
     this.__currentIndex.aboutToBeDeleted();
@@ -679,6 +685,8 @@ class TabContentItem extends ViewPU {
     this.__isOnHover.aboutToBeDeleted();
     this.__isOnClick.aboutToBeDeleted();
     this.__tabWidth.aboutToBeDeleted();
+    this.__imageWidth.aboutToBeDeleted();
+    this.__imageHeight.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal()
   }
@@ -711,6 +719,18 @@ class TabContentItem extends ViewPU {
   }
   set tabWidth(e) {
     this.__tabWidth.set(e)
+  }
+  get imageWidth() {
+    return this.__imageWidth.get()
+  }
+  set imageWidth(e) {
+    this.__imageWidth.set(e)
+  }
+  get imageHeight() {
+    return this.__imageHeight.get()
+  }
+  set imageHeight(e) {
+    this.__imageHeight.set(e)
   }
   getBgColor() {
     return this.isOnClick ? {
@@ -748,6 +768,12 @@ class TabContentItem extends ViewPU {
     } : {
       width: 0
     }
+  }
+  getImageScaleFactor() {
+    return this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1
+  }
+  getImageLayoutWidth() {
+    return TabContentItem.imageSize / Math.max(this.imageHeight, 1) * this.imageWidth
   }
   initialRender() {
     this.observeComponentCreation(((e, t) => {
@@ -851,13 +877,10 @@ class TabContentItem extends ViewPU {
           Context.animation({
             duration: 300
           });
+          Row.width(this.getImageLayoutWidth() * this.getImageScaleFactor() + TabContentItem.paddingLeft + TabContentItem.paddingRight);
           Row.constraintSize({
             minWidth: TabContentItem.imageHotZoneWidth,
             minHeight: TabContentItem.imageHotZoneWidth
-          });
-          Row.scale({
-            x: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1,
-            y: this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1
           });
           Context.animation(null);
           Row.justifyContent(FlexAlign.Center);
@@ -881,15 +904,29 @@ class TabContentItem extends ViewPU {
         this.observeComponentCreation(((e, t) => {
           ViewStackProcessor.StartGetAccessRecordingFor(e);
           Image.create(this.item.icon);
+          Context.animation({
+            duration: 300
+          });
           Image.alt(this.item.title);
+          Image.width(this.getImageLayoutWidth());
           Image.height(TabContentItem.imageSize);
-          Image.objectFit(ImageFit.ScaleDown);
+          Image.objectFit(ImageFit.Fill);
+          Image.scale({
+            x: this.getImageScaleFactor(),
+            y: this.getImageScaleFactor()
+          });
+          Context.animation(null);
+          Image.hitTestBehavior(HitTestMode.None);
           Image.focusable(!0);
           Image.onComplete((e => {
-            this.onImageComplete && this.onImageComplete(e.componentWidth)
+            if (this.onImageComplete) {
+              this.imageWidth = px2vp(e.width);
+              this.imageHeight = px2vp(e.height);
+              this.onImageComplete(px2vp(e.componentWidth) + TabContentItem.paddingLeft + TabContentItem.paddingRight)
+            }
           }));
           Image.onError((e => {
-            this.onImageComplete && this.onImageComplete(e.componentWidth)
+            this.onImageComplete && this.onImageComplete(px2vp(e.componentWidth) + TabContentItem.paddingLeft + TabContentItem.paddingRight)
           }));
           t || Image.pop();
           ViewStackProcessor.StopGetAccessRecording()
@@ -913,7 +950,20 @@ class TabContentItem extends ViewPU {
           Row.height(TabTitleBar.totalHeight);
           Row.hitTestBehavior(HitTestMode.None);
           Row.borderRadius(TabContentItem.buttonBorderRadius);
+          ViewStackProcessor.visualState("focused");
           Row.border(this.getBorderAttr());
+          ViewStackProcessor.visualState("normal");
+          Row.border({
+            radius: {
+              id: -1,
+              type: 10002,
+              params: ["sys.float.ohos_id_corner_radius_clicked"],
+              bundleName: "",
+              moduleName: ""
+            },
+            width: 0
+          });
+          ViewStackProcessor.visualState();
           t || Row.pop();
           ViewStackProcessor.StopGetAccessRecording()
         }));

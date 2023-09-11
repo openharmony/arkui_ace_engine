@@ -189,6 +189,7 @@ void Animator::Stop()
 {
     status_ = Status::STOPPED;
     isBothBackwards = false;
+    elapsedTime_ = 0;
 }
 
 void Animator::Finish() {}

@@ -71,7 +71,6 @@ const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::D
 const static int32_t DEFAULT_INTERVAL = 3000;
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
-const static int32_t PLATFORM_VERSION_TEN = 10;
 
 JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 {
@@ -196,9 +195,7 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (info[0]->IsString() && info[0]->ToString() == "auto") {
             SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
             SwiperModel::GetInstance()->ResetDisplayCount();
@@ -288,9 +285,7 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
         index = info[0]->ToNumber<int32_t>();
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         index = index < 0 ? 0 : index;
     }
 
@@ -336,9 +331,7 @@ void JSSwiper::SetLoop(const JSCallbackInfo& info)
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         SwiperModel::GetInstance()->SetLoop(info[0]->ToBoolean());
         return;
     }

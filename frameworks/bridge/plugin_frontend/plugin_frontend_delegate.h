@@ -202,10 +202,6 @@ public:
 
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
-    void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override
-    {}
-
     void RequestAnimationFrame(const std::string& callbackId) override;
 
     void CancelAnimationFrame(const std::string& callbackId) override;

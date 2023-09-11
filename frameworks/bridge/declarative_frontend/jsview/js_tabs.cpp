@@ -52,7 +52,6 @@ namespace {
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
-const static int32_t PLATFORM_VERSION_TEN = 10;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
 JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
@@ -238,8 +237,7 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
     }
 
     CalcDimension width = Dimension(-1.0, DimensionUnit::VP);
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ParseJsDimensionVpNG(info[0], width)) {
             width = Dimension(-1.0, DimensionUnit::VP);
             TabsModel::GetInstance()->SetTabBarWidth(width);
@@ -263,8 +261,7 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
         adaptiveHeight = true;
     } else {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             if (!ParseJsDimensionVpNG(info[0], height)) {
                 height = Dimension(-1.0, DimensionUnit::VP);
                 LOGD("The arg is wrong, fail to parse dimension");

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <vector>
 #include "gtest/gtest.h"
 
 #define private public
@@ -28,12 +29,14 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "frameworks/base/window/drag_window.h"
@@ -502,6 +505,31 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorDelete003
+ * @tc.desc: test delete backforward
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorDelete003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddImageSpan();
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_NE(richEditorNode_->GetChildren().size(), 0);
+    richEditorPattern->textSelector_ = TextSelector(0, 1);
+    richEditorPattern->caretPosition_ = 1;
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+    while (!richEditorPattern->spans_.empty()) {
+        richEditorPattern->spans_.pop_back();
+    }
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+}
+
+/**
  * @tc.name: RichEditorController001
  * @tc.desc: test add image span
  * @tc.type: FUNC
@@ -847,5 +875,78 @@ HWTEST_F(RichEditorTestNg, MoveCaretAfterTextChange001, TestSize.Level1)
     richEditorPattern->moveLength_ = 1;
     richEditorPattern->MoveCaretAfterTextChange();
     EXPECT_EQ(richEditorPattern->caretPosition_, 5);
+    richEditorPattern->isTextChange_ = true;
+    richEditorPattern->moveDirection_ = MoveDirection(-1);
+    richEditorPattern->moveLength_ = 1;
+    richEditorPattern->MoveCaretAfterTextChange();
+    EXPECT_EQ(richEditorPattern->caretPosition_, 5);
+}
+
+/**
+ * @tc.name: OnKeyEvent001
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    KeyEvent keyE;
+    keyE.action = KeyAction::UP;
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    
+    keyE.action = KeyAction::DOWN;
+    keyE.code = KeyCode::KEY_TAB;
+    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
+
+    keyE.code = KeyCode::KEY_DEL;
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+
+    keyE.code = KeyCode::KEY_FORWARD_DEL;
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+
+    keyE.code = KeyCode::KEY_ENTER;
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+
+    keyE.code = KeyCode::KEY_NUMPAD_ENTER;
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+
+    keyE.code = KeyCode::KEY_DPAD_CENTER;
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+
+    // 2012 2015
+    std::vector<KeyCode> cases = {
+        KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN,
+        KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT
+    };
+    for (int i = 0; i < 4; ++i) {
+        keyE.code = cases[i];
+        if (i == 2) {
+            EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
+        } else {
+            EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+        }
+    }
+
+    keyE.code = KeyCode::KEY_PRINT;
+    EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
+
+    keyE.code = KeyCode::KEY_2;
+    keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    keyE.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT };
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    keyE.pressedCodes = { KeyCode::KEY_ALT_LEFT };
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+
+    keyE.code = KeyCode::KEY_SPACE;
+    keyE.pressedCodes = { KeyCode::KEY_SHIFT_LEFT };
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    keyE.pressedCodes = { KeyCode::KEY_SHIFT_RIGHT };
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+    keyE.pressedCodes = { KeyCode::KEY_ALT_LEFT };
+    EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 }
 } // namespace OHOS::Ace::NG

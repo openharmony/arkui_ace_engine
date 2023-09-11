@@ -106,6 +106,9 @@ void ImagePainter::DrawObscuration(RSCanvas& canvas, const OffsetF& offset, cons
     RSRoundRect rSRoundRect(RSRect(offset.GetX(), offset.GetY(), contentSize.Width() + offset.GetX(),
                             contentSize.Height() + offset.GetY()), radiusXY);
     canvas.DrawRoundRect(rSRoundRect);
+#ifdef USE_ROSEN_DRAWING
+    canvas.DetachBrush();
+#endif
 }
 
 void ImagePainter::DrawImage(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const

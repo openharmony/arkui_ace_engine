@@ -315,10 +315,6 @@ public:
 
     SingleTaskExecutor GetUiTask() override;
 
-    void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override
-    {}
-
     void LoadResourceConfiguration(std::map<std::string, std::string>& sortedResourcePath,
         std::unique_ptr<JsonValue>& currentResourceData) override;
 

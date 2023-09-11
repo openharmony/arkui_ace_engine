@@ -310,7 +310,7 @@ void JSGridRow::ParseAlignItems(int32_t alignItem)
         alignItem == static_cast<int32_t>(FlexAlign::FLEX_END) ||
         alignItem == static_cast<int32_t>(FlexAlign::CENTER) || alignItem == static_cast<int32_t>(FlexAlign::STRETCH)) {
         GridRowModel::GetInstance()->SetAlignItems(static_cast<FlexAlign>(alignItem));
-    } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         GridRowModel::GetInstance()->SetAlignItems(FlexAlign::FLEX_START);
     }
 }

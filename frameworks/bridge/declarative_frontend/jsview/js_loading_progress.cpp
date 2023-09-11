@@ -48,9 +48,7 @@ LoadingProgressModel* LoadingProgressModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
-} // namespace
+namespace {} // namespace
 
 void JSLoadingProgress::JSBind(BindingTarget globalObj)
 {
@@ -77,9 +75,7 @@ void JSLoadingProgress::SetColor(const JSCallbackInfo& info)
 {
     Color progressColor;
     if (!ParseJsColor(info[0], progressColor)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             RefPtr<ProgressTheme> progressTheme = GetTheme<ProgressTheme>();
             CHECK_NULL_VOID(progressTheme);
             progressColor = progressTheme->GetLoadingColor();

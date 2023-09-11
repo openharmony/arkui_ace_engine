@@ -9329,8 +9329,8 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable005, TestSize.Level1)
     tabBarPattern->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
 
     /**
-     * @tc.steps: step2. Test function InitScrollable.
-     * @tc.expected: Related function runs ok.
+     * @tc.steps: step2. Test function InitScrollable in different conditons.
+     * @tc.expected: Related function is called.
      */
 
     tabBarPattern->InitScrollable(gestureHub);
@@ -9343,9 +9343,9 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable005, TestSize.Level1)
     tabBarPattern->controller_->status_ = Animator::Status::RUNNING;
     scrollable->callback_(0.1, SCROLL_FROM_NONE);
     EXPECT_EQ(tabBarPattern->controller_->IsRunning(), true);
-    tabBarPattern->scrollableEvent_ = nullptr;
+    tabBarPattern->scrollableEvent_->scrollable_ = nullptr;
     scrollable->callback_(0.1, SCROLL_FROM_NONE);
-    EXPECT_EQ(tabBarPattern->scrollableEvent_, nullptr);
+    EXPECT_EQ(tabBarPattern->scrollableEvent_->scrollable_, nullptr);
 }
 
 /**

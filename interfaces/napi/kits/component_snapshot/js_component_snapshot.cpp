@@ -42,21 +42,27 @@ struct SnapshotAsyncCtx {
     int32_t instanceId = -1;
 };
 
-void OnComplete(SnapshotAsyncCtx* asyncCtx)
+void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback)
 {
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     if (!container) {
         LOGW("container is null. %{public}d", asyncCtx->instanceId);
+        if (finishCallback) {
+            finishCallback();
+        }
         return;
     }
 
     auto taskExecutor = container->GetTaskExecutor();
     if (!taskExecutor) {
         LOGW("taskExecutor is null.");
+        if (finishCallback) {
+            finishCallback();
+        }
         return;
     }
     taskExecutor->PostTask(
-        [asyncCtx]() {
+        [asyncCtx, finishCallback]() {
             std::unique_ptr<SnapshotAsyncCtx> ctx(asyncCtx);
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(ctx->env, &scope);
@@ -91,6 +97,9 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx)
             }
 
             napi_close_handle_scope(ctx->env, scope);
+            if (finishCallback) {
+                finishCallback();
+            }
         },
         TaskExecutor::TaskType::JS);
 }
@@ -142,7 +151,7 @@ bool JsComponentSnapshot::CheckArgs(napi_valuetype firstArgType)
     return true;
 }
 
-std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)> JsComponentSnapshot::CreateCallback(napi_value* result)
+auto JsComponentSnapshot::CreateCallback(napi_value* result)
 {
     auto* asyncCtx = new SnapshotAsyncCtx;
     // parse JsCallback
@@ -159,10 +168,10 @@ std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)> JsComponentSnapsh
     asyncCtx->env = env_;
     asyncCtx->instanceId = Container::CurrentId();
 
-    return [asyncCtx](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode) {
+    return [asyncCtx](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode, std::function<void()> finishCallback) {
         asyncCtx->pixmap = std::move(pixmap);
         asyncCtx->errCode = errCode;
-        OnComplete(asyncCtx);
+        OnComplete(asyncCtx, finishCallback);
     };
 }
 
@@ -228,7 +237,7 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
     // create builder closure
     auto builder = [build = helper.GetArgv(0), env] { napi_call_function(env, nullptr, build, 0, nullptr, nullptr); };
     napi_value result = nullptr;
-    delegate->CreateSnapshot(builder, helper.CreateCallback(&result));
+    delegate->CreateSnapshot(builder, helper.CreateCallback(&result), true);
 
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);

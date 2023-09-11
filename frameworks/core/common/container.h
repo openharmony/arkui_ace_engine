@@ -353,6 +353,15 @@ public:
         return false;
     }
 
+    static bool GreatOrEqualAPIVersion(PlatformVersion version)
+    {
+        if (PipelineBase::GetCurrentContext() &&
+            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)) {
+            return true;
+        }
+        return false;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;

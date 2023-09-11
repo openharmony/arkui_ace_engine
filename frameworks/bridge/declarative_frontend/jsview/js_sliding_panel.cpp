@@ -65,8 +65,6 @@ const static bool DEFAULT_HASDRAGBAR = true;
 const static bool DEFAULT_SHOWCLOSEICON = false;
 const static PanelMode DEFAULT_PANELMODE = PanelMode::HALF;
 const static PanelType DEFAULT_PANELTYPE = PanelType::FOLDABLE_BAR;
-const static int32_t PLATFORM_VERSION_TEN = 10;
-
 } // namespace
 
 void JSSlidingPanel::Create(const JSCallbackInfo& info)
@@ -336,9 +334,8 @@ void JSSlidingPanel::SetShowCloseIcon(const JSCallbackInfo& info)
 
 void JSSlidingPanel::SetShow(const JSCallbackInfo& info)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN && (info[0]->IsUndefined() || info[0]->IsNull())) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
+        (info[0]->IsUndefined() || info[0]->IsNull())) {
         SlidingPanelModel::GetInstance()->SetIsShow(true);
     } else {
         SlidingPanelModel::GetInstance()->SetIsShow(info[0]->ToBoolean());

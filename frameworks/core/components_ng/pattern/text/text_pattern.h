@@ -323,7 +323,6 @@ protected:
     std::string textForDisplay_;
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
-    TextSelector textSelector_;
     float baselineOffset_ = 0.0f;
     int32_t imageCount_ = 0;
     SelectMenuInfo selectMenuInfo_;

@@ -256,6 +256,18 @@ void SwiperPattern::OnModifyDone()
     };
     swiperController_->SetAddSwiperEventCallback(std::move(addSwiperEventCallback));
 
+    auto updateCubicCurveCallback = [weak = WeakClaim(this)]() {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        auto host = swiperPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto swiperPaintProperty = host->GetPaintProperty<SwiperPaintProperty>();
+        CHECK_NULL_VOID(swiperPaintProperty);
+        auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+        swiperPaintProperty->UpdateCurve(curve);
+    };
+    swiperController_->SetUpdateCubicCurveCallback(std::move(updateCubicCurveCallback));
+
     if (IsAutoPlay()) {
         StartAutoPlay();
     } else {
