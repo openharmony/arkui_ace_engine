@@ -238,6 +238,7 @@ struct MultiFilterRow {
   @State arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover')
   @State isArrowBgHoverRow: boolean = false
   private filterColumnWidth: number = 0
+  private lastFilterColumnWidth: number = 0
   private rowIndex: number = 0
 
   private calcMultiFilterRowItemNum() {
@@ -255,7 +256,7 @@ struct MultiFilterRow {
       } else {
         itemWidth += vp2px(TEXT_HOT_AREA_WIDTH * 2)
       }
-      if (curLineRetainWidth - itemWidth > 0) {
+      if (curLineRetainWidth - itemWidth >= 0) {
         curLineRetainWidth -= itemWidth
         curLineSum += 1
       } else {
@@ -521,7 +522,9 @@ struct MultiFilterRow {
                 .tabIndex(-1)
             }
           })
-          this.DownAndUpArrow()
+          if (this.arrowShowStateRow.value) {
+            this.DownAndUpArrow()
+          }
         }.alignSelf(ItemAlign.Stretch)
       }.width(PERCENT_100)
       .padding({ right: $r('sys.float.ohos_id_max_padding_end') })
@@ -536,7 +539,22 @@ struct MultiFilterRow {
           } else {
             this.arrowShowStateRow.value = false
           }
+        }else if (this.filterColumnWidth !== this.lastFilterColumnWidth){
+          var curLineSum = this.calcMultiFilterRowItemNum()
+          if (curLineSum < this.filterRow.options.length - 1) {
+            if (!this.arrowShowStateRow.value || this.isArrowIconDown.value) {
+              this.arrowShowStateRow.value = true
+              this.isArrowIconDown.value = true
+              this.twoLineModeItemNumRow.value = curLineSum
+            }
+          } else {
+            this.arrowShowStateRow.value = false
+            this.isArrowIconDown.value = false
+            this.twoLineModeItemNumRow.value = curLineSum
+          }
+          this.twoLineModeItemNumRecordRow.value = curLineSum
         }
+        this.lastFilterColumnWidth = this.filterColumnWidth
       })
 
     }.width(PERCENT_100)
@@ -577,6 +595,7 @@ export struct Filter {
   @State twoLineModeItemNum: Array<ObservedNumber> = null
   @State twoLineModeItemNumRecord: Array<ObservedNumber> = null
   @State downArrowShowState: Array<ObservedBoolean> = null
+  @State floatFilterBarText: string = ''
 
   textColor(rowIndex: number, colIndex: number) {
     if (this.selectedFilters.length > rowIndex && this.selectedFilters[rowIndex].index === colIndex) {
@@ -599,7 +618,21 @@ export struct Filter {
       this.colorRefresh = !this.colorRefresh
       this.selectedFilters[rowIndex].value = selectedFilterValue
       this.selectedFilters[rowIndex].index = colIndex
-      this.onFilterChanged && this.onFilterChanged(this.selectedFilters);
+      this.onFilterChanged && this.onFilterChanged(this.selectedFilters)
+    }
+    this.refreshFloatFilterBarText()
+  }
+
+  private refreshFloatFilterBarText() {
+    this.floatFilterBarText = ''
+    for (let i = 0; i < this.selectedFilters.length; i++) {
+      if (this.selectedFilters[i].value !== null) {
+        if (i === 0) {
+          this.floatFilterBarText += this.selectedFilters[i].value
+        }else {
+          this.floatFilterBarText += '/' + this.selectedFilters[i].value
+        }
+      }
     }
   }
 
@@ -618,6 +651,7 @@ export struct Filter {
         var result: FilterResult = { name: this.additionFilters.name, index: -1, value: null }
         this.selectedFilters.push(result)
       }
+      this.refreshFloatFilterBarText();
     }
     if (!this.colorArr) {
       this.colorArr = []
@@ -758,6 +792,7 @@ export struct Filter {
     }
     this.onFilterChanged && this.onFilterChanged(this.selectedFilters)
     this.colorRefresh = !this.colorRefresh
+    this.refreshFloatFilterBarText()
   }
 
   @Builder AdditionFilterList() {
@@ -910,15 +945,20 @@ export struct Filter {
 
   @Builder FloatFilterHeader() {
     Column() {
-      if (this.filterType === FilterType.LIST_FILTER) {
-        this.ListFilter()
-      } else {
-        this.MultiLineFilter()
+      Scroll() {
+        Column() {
+          if (this.filterType === FilterType.LIST_FILTER) {
+            this.ListFilter()
+          } else {
+            this.MultiLineFilter()
+          }
+          this.AdditionFilterList()
+        }
       }
-      this.AdditionFilterList()
     }
     .padding({ top: FILTER_TOP_PADDING })
     .width(PERCENT_100)
+    .constraintSize({ maxHeight: '80%' })
     .clip(true)
     .backgroundColor($r('sys.color.ohos_id_color_background'))
     .opacity(FLOAT_OPACITY)
@@ -929,21 +969,18 @@ export struct Filter {
   }
 
   @Builder FloatFilterBar() {
+
     Row() {
       Column() {
         Row() {
-          ForEach(this.selectedFilters.slice(0, this.colorRefresh ? this.selectedFilters.length : this.selectedFilters.length), (selected, index?: number) => {
-            if (index != 0 && selected.value != null) {
-              Text('/')
-                .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
-                .fontSize($r('sys.float.ohos_id_text_size_body3'))
-            }
-            Text(selected.value)
+          Row() {
+            Text(this.floatFilterBarText)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
               .fontColor($r('sys.color.ohos_id_color_text_primary_activated'))
               .fontSize($r('sys.float.ohos_id_text_size_body3'))
-          })
+              .constraintSize({ maxWidth: '85%' })
+              .maxLines(1)
 
-          Row() {
             Image($r('sys.media.ohos_ic_public_arrow_down'))
               .width(ARROW_IMG_SIZE)
               .height(ARROW_IMG_SIZE)
