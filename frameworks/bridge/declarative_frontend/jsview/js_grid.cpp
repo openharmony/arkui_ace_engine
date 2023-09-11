@@ -368,7 +368,7 @@ void JSGrid::SetScrollBarWidth(const JSCallbackInfo& scrollWidth)
     }
     if (!ParseJsDimensionVp(scrollWidth[0], scrollBarWidth) || scrollWidth[0]->IsNull() ||
         scrollWidth[0]->IsUndefined() || (scrollWidth[0]->IsString() && scrollWidth[0]->ToString().empty()) ||
-        LessNotEqual(scrollBarWidth.Value(), 0.0)) {
+        LessNotEqual(scrollBarWidth.Value(), 0.0) || scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         scrollBarWidth = theme->GetNormalWidth();
     }
     GridModel::GetInstance()->SetScrollBarWidth(scrollBarWidth.ToString());
