@@ -493,6 +493,20 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
     EXPECT_FALSE(topSheetNode == nullptr);
     EXPECT_EQ(sheetNode->GetRenderContext()->GetBackgroundColorValue(), Color::GREEN);
     overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, nullptr, nullptr, targetId);
+
+    /**
+     * @tc.steps: step4. Change the maskColor.
+     * @tc.expected: the maskColor is create and updated successfully
+     */
+    sheetStyle.maskColor = Color::BLUE;
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(sheetNode == nullptr);
+    auto maskNode = overlayManager->GetSheetMask(sheetNode);
+    EXPECT_FALSE(maskNode == nullptr);
+    EXPECT_EQ(maskNode->GetTag(), V2::SHEET_MASK_TAG);
+    EXPECT_EQ(maskNode->GetRenderContext()->GetBackgroundColorValue(), Color::BLUE);
+    overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, nullptr, nullptr, targetId);
 }
 
 /**
@@ -554,11 +568,6 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
     overlayManager->DestroySheet(sheetNode, targetId);
     overlayManager->FindWindowScene(targetNode);
     overlayManager->DeleteModal(targetId);
-    overlayManager->DestroySheetMask(sheetNode);
-    EXPECT_TRUE(overlayManager->modalStack_.empty());
-    auto maskNode = FrameNode::CreateFrameNode
-        (V2::SHEET_MASK_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    overlayManager->DestroySheetMask(maskNode);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
 /**
