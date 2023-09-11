@@ -115,7 +115,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
                 textFieldPattern->GetCountHeight());
     }
     canvas.Save();
-    if (showErrorState_->Get() && errorParagraph) {
+    if (showErrorState_->Get() && errorParagraph && !textFieldPattern->IsDisabled()) {
         errorParagraph->Paint(&canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
     }
 
