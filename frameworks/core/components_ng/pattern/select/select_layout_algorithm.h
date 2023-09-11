@@ -31,6 +31,8 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 
 private:
+    SizeF MeasureAndGetSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, const LayoutConstraintF& constraint);
+
     ACE_DISALLOW_COPY_AND_MOVE(SelectLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG
