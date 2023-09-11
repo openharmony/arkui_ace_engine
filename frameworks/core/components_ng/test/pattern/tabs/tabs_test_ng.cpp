@@ -1480,6 +1480,9 @@ HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
     tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(config.skipMeasure, false);
     EXPECT_EQ(config.skipLayout, true);
+    tabBarPattern->isAnimating_ = true;
+    tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(tabBarPattern->isAnimating_, true);
 }
 
 /**
@@ -8915,10 +8918,17 @@ HWTEST_F(TabsTestNg, AddChildToGroup001, TestSize.Level1)
 
     tabsNode->AddChildToGroup(tabContentFrameNode, 1);
     EXPECT_NE(tabsNode, nullptr);
-    tabsNode->swiperChildren_.insert(0);
     tabsNode->swiperChildren_.insert(1);
+    tabsNode->swiperChildren_.insert(2);
     tabsNode->AddChildToGroup(tabContentFrameNode, 1);
     EXPECT_NE(tabsNode, nullptr);
+    auto tabBarNodeswiper =
+        FrameNode::GetOrCreateFrameNode("test", 2, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    tabsNode->children_.clear();
+    tabsNode->children_.push_back(tabBarNodeswiper);
+    tabContentFrameNode->nodeId_ = 0;
+    tabsNode->AddChildToGroup(tabContentFrameNode, 1);
+    EXPECT_NE(tabBarNodeswiper, nullptr);
 }
 
 /**
@@ -8937,10 +8947,31 @@ HWTEST_F(TabsTestNg, OnDetachFromMainTree001, TestSize.Level1)
     tabContentModel.SetLabelStyle(labelStyle);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(tabContentFrameNode, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto controller = AceType::MakeRefPtr<SwiperController>();
+    auto tabsNode =
+        TabsModelNG::GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarId = tabsNode->GetTabBarId();
+    auto tabBarNode = FrameNode::GetOrCreateFrameNode(
+        V2::TAB_BAR_ETS_TAG, tabBarId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
+    ASSERT_NE(tabBarNode, nullptr);
+    tabContentFrameNode->MountToParent(tabsNode);
+    auto tabBarNodeswiper =
+        FrameNode::GetOrCreateFrameNode("test", 1, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    tabsNode->children_.clear();
+    tabsNode->children_.push_back(tabBarNodeswiper);
+    auto swiper = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    auto swiperPattern = AceType::DynamicCast<SwiperPattern>(swiper->GetPattern());
     /**
      * @tc.steps: step2. Invoke OnDetachFromMainTree.
      */
 
+    tabContentFrameNode->OnDetachFromMainTree(true);
+    EXPECT_NE(tabContentFrameNode, nullptr);
+    swiperPattern->currentIndex_ = 1;
     tabContentFrameNode->OnDetachFromMainTree(true);
     EXPECT_NE(tabContentFrameNode, nullptr);
 }
@@ -9205,6 +9236,10 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick003, TestSize.Level1)
     tabBarPattern->indicator_ = 1;
     tabBarPattern->HandleClick(info);
     EXPECT_EQ(tabBarPattern->indicator_, 1);
+    info.deviceType_ = SourceType::NONE;
+    tabBarPattern->tabItemOffsets_ = { { 10.0f, 10.0f } };
+    tabBarPattern->HandleClick(info);
+    EXPECT_EQ(tabBarPattern->tabItemOffsets_.empty(), false);
 }
 
 /**
