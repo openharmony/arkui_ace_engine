@@ -300,9 +300,11 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [containerId, newComponent] {
+        [containerId, weakMenu = AceType::WeakClaim(AceType::RawPtr(newComponent))] {
             auto manager = SubwindowManager::GetInstance();
             CHECK_NULL_VOID(manager);
+            auto menu = weakMenu.Upgrade();
+            CHECK_NULL_VOID(menu);
             auto subwindow = manager->GetSubwindow(containerId);
             if (!subwindow) {
                 LOGI("Subwindow is null, add a new one.");
@@ -310,7 +312,7 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
                 subwindow->InitContainer();
                 manager->AddSubwindow(containerId, subwindow);
             }
-            subwindow->ShowMenu(newComponent);
+            subwindow->ShowMenu(menu);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
