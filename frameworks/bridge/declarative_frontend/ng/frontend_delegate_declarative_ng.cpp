@@ -966,7 +966,7 @@ std::string FrontendDelegateDeclarativeNG::GetContentInfo()
 }
 
 void FrontendDelegateDeclarativeNG::CreateSnapshot(
-    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback)
+    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     ViewStackModel::GetInstance()->NewScope();
@@ -974,7 +974,7 @@ void FrontendDelegateDeclarativeNG::CreateSnapshot(
     customBuilder();
     auto customNode = ViewStackModel::GetInstance()->Finish();
 
-    NG::ComponentSnapshot::Create(customNode, std::move(callback));
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector);
 #endif
 }
 
