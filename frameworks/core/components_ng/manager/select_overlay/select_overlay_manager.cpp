@@ -48,11 +48,22 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     auto taskExecutor = Container::CurrentTaskExecutor();
     taskExecutor->PostTask(
         [weakRoot = rootNodeWeak_, weakNode = AceType::WeakClaim(AceType::RawPtr(selectOverlayNode)), animation,
-        isUsingMouse = infoPtr->isUsingMouse] {
-            auto rootNode = weakRoot.Upgrade();
-            CHECK_NULL_VOID(rootNode);
+            isUsingMouse = infoPtr->isUsingMouse, weak = WeakClaim(this), weakCaller = infoPtr->callerFrameNode] {
+            auto selectOverlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(selectOverlayManager);
             auto selectOverlayNode = weakNode.Upgrade();
             CHECK_NULL_VOID(selectOverlayNode);
+            if (weakNode != selectOverlayManager->GetSelectOverlayItem()) {
+                LOGD("current selectOverlayItem not is %{public}d", selectOverlayNode->GetId());
+                return;
+            }
+            auto rootNode = weakRoot.Upgrade();
+            auto container = Container::Current();
+            if (container && container->IsScenceBoardWindow()) {
+                auto root = selectOverlayManager->FindWindowScene(weakCaller.Upgrade());
+                rootNode = DynamicCast<FrameNode>(root);
+            }
+            CHECK_NULL_VOID(rootNode);
 
             // get keyboard index to put selet_overlay before keyboard node
             int32_t slot = DEFAULT_NODE_SLOT;
@@ -78,6 +89,28 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
     selectOverlayItem_ = selectOverlayNode;
     return proxy;
+}
+
+// This function will be used in SceneBoard Thread only.
+// if need to show the select-overlay component,
+//   it expects to receive the target component bound by the select-overlay component to find the windowScene component.
+// if need to hide the select-overlay component,
+//   it expects to receive the the select-overlay component to return the parent component.
+//   And the parent component will be the windowScene component exactly.
+RefPtr<UINode> SelectOverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
+{
+    auto container = Container::Current();
+    if (!container || !container->IsScenceBoardWindow()) {
+        return rootNodeWeak_.Upgrade();
+    }
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto parent = targetNode->GetParent();
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, nullptr);
+    LOGI("FindWindowScene success");
+    return parent;
 }
 
 void SelectOverlayManager::DestroySelectOverlay(const RefPtr<SelectOverlayProxy>& proxy, bool animation)
@@ -133,7 +166,7 @@ void SelectOverlayManager::DestroyHelper(const RefPtr<FrameNode>& overlay, bool 
 
 void SelectOverlayManager::Destroy(const RefPtr<FrameNode>& overlay)
 {
-    auto rootNode = rootNodeWeak_.Upgrade();
+    auto rootNode = overlay->GetParent();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(overlay);
     rootNode->MarkNeedSyncRenderTree();
