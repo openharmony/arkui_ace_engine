@@ -82,6 +82,12 @@ public:
     {
         return GetChildFrameNode(frameNode, index)->GetAccessibilityProperty<T>();
     }
+
+    template<typename T>
+    RefPtr<T> GetChildEventHub(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        return GetChildFrameNode(frameNode, index)->GetEventHub<T>();
+    }
     
     const RectF& GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
