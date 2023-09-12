@@ -236,8 +236,18 @@ public:
         userSetNavBarWidthFlag_ = userSetNavBarWidthFlag;
     }
 
-    void UpdateContextRect(const RefPtr<NavDestinationGroupNode>& curDestination,
-        const RefPtr<NavigationGroupNode>& navigation);
+    void UpdateContextRect(
+        const RefPtr<NavDestinationGroupNode>& curDestination, const RefPtr<NavigationGroupNode>& navigation);
+
+    bool GetNavigationModeChange() const
+    {
+        return navigationModeChange_;
+    }
+
+    void SetNavigationModeChange(bool modeChange)
+    {
+        navigationModeChange_ = modeChange;
+    }
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
@@ -277,6 +287,7 @@ private:
     Dimension maxNavBarWidthValue_ = 0.0_vp;
     Dimension minContentWidthValue_ = 0.0_vp;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
+    bool navigationModeChange_ = false;
 };
 
 } // namespace OHOS::Ace::NG

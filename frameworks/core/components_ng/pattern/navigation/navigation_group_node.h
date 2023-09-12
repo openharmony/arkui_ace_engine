@@ -42,7 +42,7 @@ public:
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
 
     // remain child needs to keep to use pop animation
-    void UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild);
+    void UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild, bool modeChange = false);
     static RefPtr<NavigationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 

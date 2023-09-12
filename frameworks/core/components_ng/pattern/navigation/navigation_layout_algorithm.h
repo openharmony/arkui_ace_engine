@@ -92,10 +92,10 @@ private:
 
     void GetRange(const RefPtr<NavigationGroupNode>& hostNode);
 
-    void UpdateNavigationMode(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
+    void UpdateNavigationMode(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize,
+        const RefPtr<NavigationGroupNode>& hostNode);
 
-    void SizeCalculation(LayoutWrapper* layoutWrapper,
-        const RefPtr<NavigationGroupNode>& hostNode,
+    void SizeCalculation(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);
 
     void SizeCalculationSplit(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize);

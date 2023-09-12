@@ -94,7 +94,7 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
     contentNode->AddChild(child);
 }
 
-void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild)
+void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild, bool modeChange)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -177,7 +177,9 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             ++slot;
         }
     }
-    if (hasChanged) {
+    if (modeChange) {
+        navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    } else if (hasChanged) {
         navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 }
