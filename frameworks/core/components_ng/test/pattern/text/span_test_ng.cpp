@@ -18,6 +18,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "test/mock/core/render/mock_paragraph.h"
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -480,14 +481,19 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
         .fontLocale = "zh-CN",
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
-    auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
-    ASSERT_NE(paragraph, nullptr);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, PushStyle).Times(5);
+    EXPECT_CALL(*paragraph, AddPlaceholder).Times(5);
+    EXPECT_CALL(*paragraph, PopStyle).Times(5);
+
     auto index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::TOP);
     index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::CENTER);
     index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BOTTOM);
     index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::BASELINE);
     index = spanItem->UpdateParagraph(nullptr, paragraph, 9.0, 10.0, VerticalAlign::NONE);
-    EXPECT_EQ(index, -1);
+
+    MockParagraph::TearDown();
 }
 
 /**

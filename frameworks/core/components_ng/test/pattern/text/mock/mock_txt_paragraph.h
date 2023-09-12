@@ -19,7 +19,7 @@
 #include <vector>
 
 namespace OHOS::Ace::NG {
-class MockTxtParagraph {
+class [[deprecated]] MockTxtParagraph {
 public:
     static void SetCanConstruct(bool canConstruct = true);
     static void SetDidExceedMaxLines(const std::vector<bool>& didExceedMaxLines);

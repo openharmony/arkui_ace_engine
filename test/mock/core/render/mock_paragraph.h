@@ -54,9 +54,11 @@ public:
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
 
-    static RefPtr<MockParagraph> paragraph_;
     static RefPtr<MockParagraph> GetOrCreateMockParagraph();
     static void TearDown();
+
+    static RefPtr<MockParagraph> paragraph_;
+    static bool enabled_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_RENDER_MOCK_PARAGRAPH_H
