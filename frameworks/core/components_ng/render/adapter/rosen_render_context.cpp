@@ -445,9 +445,21 @@ void RosenRenderContext::PaintDebugBoundary()
     if (!debugBoundaryModifier_ && rsNode_->IsInstanceOf<Rosen::RSCanvasNode>()) {
         debugBoundaryModifier_ = std::make_shared<DebugBoundaryModifier>();
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
+        auto rect = GetPaintRectWithoutTransform();
+        auto marginOffset = geometryNode->GetMarginFrameOffset();
+        std::shared_ptr<Rosen::RectF> drawRect =
+            std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
+                geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
+        rsNode_->SetDrawRegion(drawRect);
         rsNode_->AddModifier(debugBoundaryModifier_);
     }
     if (debugBoundaryModifier_) {
+        auto rect = GetPaintRectWithoutTransform();
+        auto marginOffset = geometryNode->GetMarginFrameOffset();
+        std::shared_ptr<Rosen::RectF> drawRect =
+            std::make_shared<Rosen::RectF>(marginOffset.GetX() - rect.GetX(), marginOffset.GetY() - rect.GetY(),
+                geometryNode->GetMarginFrameSize().Width(), geometryNode->GetMarginFrameSize().Height());
+        rsNode_->SetDrawRegion(drawRect);
         debugBoundaryModifier_->SetCustomData(true);
     }
 }
