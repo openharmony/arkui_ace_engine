@@ -66,7 +66,7 @@ RefPtr<AcePage> JsonFrontend::GetPage(int32_t pageId) const
     return iter->second;
 }
 
-void JsonFrontend::RunPage(int32_t pageId, const std::string& content, const std::string& params)
+void JsonFrontend::RunPage(const std::string& content, const std::string& params)
 {
     if (!pipelineContext_) {
         LOGE("Not attached to pipeline context yet");

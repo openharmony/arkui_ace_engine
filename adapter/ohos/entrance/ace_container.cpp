@@ -849,7 +849,8 @@ OHOS::AppExecFwk::Ability* AceContainer::GetAbility(int32_t instanceId)
     return container->GetAbilityInner().lock().get();
 }
 
-bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& content, const std::string& params)
+bool AceContainer::RunPage(
+    int32_t instanceId, const std::string& content, const std::string& params, bool isNamedRouter)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, false);
@@ -857,7 +858,11 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, false);
     LOGD("RunPage content=[%{private}s]", content.c_str());
-    front->RunPage(pageId, content, params);
+    if (isNamedRouter) {
+        front->RunPageByNamedRouter(content);
+    } else {
+        front->RunPage(content, params);
+    }
     return true;
 }
 

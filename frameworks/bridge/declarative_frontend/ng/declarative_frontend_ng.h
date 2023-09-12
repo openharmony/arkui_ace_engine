@@ -44,7 +44,7 @@ public:
 
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
-    void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+    void RunPage(const std::string& url, const std::string& params) override;
 
     void ReplacePage(const std::string& url, const std::string& params) override;
 

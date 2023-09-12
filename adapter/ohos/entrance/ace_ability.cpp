@@ -513,8 +513,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         OnSizeChange(windowRect, OHOS::Rosen::WindowSizeChangeReason::UNDEFINED);
     }
     // run page.
-    Platform::AceContainer::RunPage(abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
-        parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
+    Platform::AceContainer::RunPage(abilityId_, parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
 
     if (!remoteData_.empty()) {
         Platform::AceContainer::OnRestoreData(abilityId_, remoteData_);

@@ -33,7 +33,7 @@ void PluginFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager) {
 
 void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor) {}
 
-void PluginFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params) {}
+void PluginFrontend::RunPage(const std::string& url, const std::string& params) {}
 void PluginFrontend::ReplacePage(const std::string& url, const std::string& params) {}
 
 void PluginFrontend::PushPage(const std::string& url, const std::string& params) {}

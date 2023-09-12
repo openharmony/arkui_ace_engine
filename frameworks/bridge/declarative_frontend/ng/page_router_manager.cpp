@@ -117,7 +117,16 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
         info.path = manifestParser_->GetRouter()->GetEntry();
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
-    LOGD("router.Push pagePath = %{private}s", info.url.c_str());
+    LOGD("router.RunPage pagePath = %{private}s", info.url.c_str());
+    RouterOptScope scope(this);
+    LoadPage(GenerateNextPageId(), info);
+}
+
+void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std::string& params)
+{
+    LOGD("router.RunPage pagePath = %{private}s", info.url.c_str());
+    RouterPageInfo info { name, params };
+    info.isNamedRouterMode = true;
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
 }

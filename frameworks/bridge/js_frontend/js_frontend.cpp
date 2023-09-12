@@ -481,7 +481,7 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
     }
 }
 
-void JsFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void JsFrontend::RunPage(const std::string& url, const std::string& params)
 {
     // Not use this pageId from backend, manage it in FrontendDelegateImpl.
     if (delegate_) {

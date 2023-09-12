@@ -393,7 +393,7 @@ void PluginFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& task
     }
 }
 
-void PluginFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void PluginFrontend::RunPage(const std::string& url, const std::string& params)
 {
     // Not use this pageId from backend, manage it in PluginFrontendDelegate.
     CHECK_NULL_VOID(delegate_);

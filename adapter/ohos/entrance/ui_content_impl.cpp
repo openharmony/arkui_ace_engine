@@ -338,30 +338,40 @@ void UIContentImpl::DestroyCallback() const
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
 
-void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
+void UIContentImpl::InitializeInner(
+    OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage, bool isNamedRouter)
 {
     if (window && StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
-        CommonInitialize(window, url, storage);
+        CommonInitialize(window, contentInfo, storage);
         return;
     }
     if (window) {
-        CommonInitialize(window, url, storage);
+        CommonInitialize(window, contentInfo, storage);
     }
 
     // ArkTSCard need no window : 梳理所有需要window和不需要window的场景
     if (isFormRender_ && !window) {
-        LOGI("CommonInitializeForm url = %{public}s", url.c_str());
-        CommonInitializeForm(window, url, storage);
+        LOGI("CommonInitializeForm url = %{public}s", contentInfo.c_str());
+        CommonInitializeForm(window, contentInfo, storage);
     }
 
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
     // run page.
-    Platform::AceContainer::RunPage(
-        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
     LOGD("Initialize UIContentImpl done.");
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+}
+
+void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
+{
+    InitializeInner(window, url, storage, false);
+}
+
+void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage)
+{
+    InitializeInner(window, name, storage, true);
 }
 
 void UIContentImpl::Initialize(
@@ -377,8 +387,7 @@ void UIContentImpl::Initialize(
 
     LOGI("UIExtension startUrl = %{public}s", startUrl_.c_str());
     // run page.
-    Platform::AceContainer::RunPage(
-        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
@@ -411,8 +420,7 @@ void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& cont
         LOGW("UIContent Restore start url is empty");
     }
     LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
-    Platform::AceContainer::RunPage(
-        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
     LOGI("Restore UIContentImpl done.");
 }
 
@@ -1300,8 +1308,7 @@ void UIContentImpl::ReloadForm(const std::string& url)
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
     container->UpdateResource();
-    Platform::AceContainer::RunPage(
-        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
 }
 
 void UIContentImpl::Focus()

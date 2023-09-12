@@ -394,8 +394,8 @@ public:
         isBundle_ = isBundle;
     }
 #endif
-    void AddToNamedRouterMap(panda::Global<panda::FunctionRef> pageGenerator, const std::string& namedRoute,
-        panda::Local<panda::ObjectRef> params);
+    static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
+        const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
 
 private:
@@ -433,7 +433,7 @@ private:
 #endif
     std::string pluginBundleName_;
     std::string pluginModuleName_;
-    std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap;
+    static std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
     bool isFirstCallShow_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };

@@ -456,7 +456,7 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params)
+bool AceContainer::RunPage(int32_t instanceId, const std::string& url, const std::string& params)
 {
     ACE_FUNCTION_TRACE();
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -470,7 +470,7 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
         auto type = front->GetType();
         if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
             (type == FrontendType::ETS_CARD)) {
-            front->RunPage(pageId, url, params);
+            front->RunPage(url, params);
             return true;
         } else {
             LOGE("Frontend type not supported when runpage");

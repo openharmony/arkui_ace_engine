@@ -346,7 +346,7 @@ bool DeclarativeFrontendNG::OnRestoreData(const std::string& data)
     return delegate_->OnRestoreData(data);
 }
 
-void DeclarativeFrontendNG::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void DeclarativeFrontendNG::RunPage(const std::string& url, const std::string& params)
 {
     auto container = Container::Current();
     auto isStageModel = container ? container->IsUseStageModel() : false;

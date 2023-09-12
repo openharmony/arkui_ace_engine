@@ -154,7 +154,8 @@ int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
     return manifestParser_->GetMinPlatformVersion();
 }
 
-void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::string& params, const std::string& profile)
+void FrontendDelegateDeclarative::RunPage(
+    const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarative::RunPage");
 
@@ -188,10 +189,14 @@ void FrontendDelegateDeclarative::RunPage(const std::string& url, const std::str
         CHECK_NULL_VOID(pageRouterManager_);
         pageRouterManager_->SetManifestParser(manifestParser_);
         taskExecutor_->PostTask(
-            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params]() {
+            [weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
                 auto pageRouterManager = weakPtr.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
-                pageRouterManager->RunPage(url, params);
+                if (isNamedRouter) {
+                    pageRouterManager->RunPageByNamedRouter(url, params);
+                } else {
+                    pageRouterManager->RunPage(url, params);
+                }
             },
             TaskExecutor::TaskType::JS);
         return;

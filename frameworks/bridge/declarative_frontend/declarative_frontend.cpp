@@ -534,7 +534,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
     }
 }
 
-void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void DeclarativeFrontend::RunPage(const std::string& url, const std::string& params)
 {
     auto container = Container::Current();
     auto isStageModel = container ? container->IsUseStageModel() : false;
@@ -551,7 +551,7 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
             },
             TaskExecutor::TaskType::JS);
     }
-    // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
+
     if (delegate_) {
         if (isFormRender_) {
             auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
@@ -559,6 +559,13 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
         } else {
             delegate_->RunPage(url, params, pageProfile_);
         }
+    }
+}
+
+void DeclarativeFrontend::RunPageByNamedRouter(const std::string& name)
+{
+    if (delegate_) {
+        delegate_->RunPage(name, "", pageProfile_, true);
     }
 }
 

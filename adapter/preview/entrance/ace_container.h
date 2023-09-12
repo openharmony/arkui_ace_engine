@@ -71,7 +71,7 @@ public:
         int32_t height, UIEnvCallback callback);
 #endif
 
-    static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params);
+    static bool RunPage(int32_t instanceId, const std::string& url, const std::string& params);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);
     static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
     static void NativeOnConfigurationUpdated(int32_t instanceId);

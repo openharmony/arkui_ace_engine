@@ -85,7 +85,7 @@ void CardFrontend::ParseManifest() const
     });
 }
 
-void CardFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void CardFrontend::RunPage(const std::string& url, const std::string& params)
 {
     std::string urlPath;
     if (GetFormSrc().empty()) {

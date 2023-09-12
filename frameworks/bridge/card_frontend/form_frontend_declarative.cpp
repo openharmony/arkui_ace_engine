@@ -46,7 +46,7 @@ std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, cons
     return "";
 }
 
-void FormFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void FormFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
 {
     LOGI("FormFrontendDeclarative::RunPage url = %{public}s", url.c_str());
     std::string urlPath = GetFormSrcPath(url, FILE_TYPE_BIN);

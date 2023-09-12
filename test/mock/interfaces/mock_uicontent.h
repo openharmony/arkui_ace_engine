@@ -28,6 +28,7 @@ public:
     MockUIContent() = default;
     ~MockUIContent() override = default;
     MOCK_METHOD3(Initialize, void(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage));
+    MOCK_METHOD3(InitializeByName, void(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage));
     MOCK_METHOD4(Initialize,
         void(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowID));
     MOCK_METHOD0(Foreground, void());

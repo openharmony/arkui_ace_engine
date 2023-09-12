@@ -875,6 +875,8 @@ NativeValue* JsiDeclarativeEngineInstance::GetContextValue()
     return nativeValue;
 }
 
+std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
+
 // -----------------------
 // Start JsiDeclarativeEngine
 // -----------------------
@@ -882,11 +884,6 @@ JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
     LOG_DESTROY();
-
-    for (auto item : namedRouterRegisterMap) {
-        item.second.pageGenerator.FreeGlobalHandleAddr();
-    }
-    namedRouterRegisterMap.clear();
 }
 
 void JsiDeclarativeEngine::Destroy()
@@ -1407,12 +1404,9 @@ bool JsiDeclarativeEngine::LoadPageSource(
     return ExecuteAbc(urlName.value());
 }
 
-void JsiDeclarativeEngine::AddToNamedRouterMap(panda::Global<panda::FunctionRef> pageGenerator,
+void JsiDeclarativeEngine::AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
     const std::string& namedRoute, panda::Local<panda::ObjectRef> params)
 {
-    CHECK_NULL_VOID(engineInstance_);
-    auto runtime = engineInstance_->GetJsRuntime();
-    auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
     auto bundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
     if (!bundleName->IsString()) {
         LOGW("bundleName need to be string type");
@@ -1430,19 +1424,19 @@ void JsiDeclarativeEngine::AddToNamedRouterMap(panda::Global<panda::FunctionRef>
     }
     NamedRouterProperty namedRouterProperty({ pageGenerator, bundleName->ToString(vm)->ToString(),
         moduleName->ToString(vm)->ToString(), pagePath->ToString(vm)->ToString() });
-    auto ret = namedRouterRegisterMap.insert(std::make_pair(namedRoute, namedRouterProperty));
+    auto ret = namedRouterRegisterMap_.insert(std::make_pair(namedRoute, namedRouterProperty));
     if (!ret.second) {
         ret.first->second.pageGenerator.FreeGlobalHandleAddr();
-        namedRouterRegisterMap[namedRoute] = namedRouterProperty;
+        namedRouterRegisterMap_[namedRoute] = namedRouterProperty;
     }
     LOGI("AddToNamedRouterMap name = %{public}s", namedRoute.c_str());
 }
 
 bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs)
 {
-    CHECK_NULL_RETURN(!namedRouterRegisterMap.empty(), false);
-    auto iter = namedRouterRegisterMap.find(namedRoute);
-    if (isTriggeredByJs && iter == namedRouterRegisterMap.end()) {
+    CHECK_NULL_RETURN(!namedRouterRegisterMap_.empty(), false);
+    auto iter = namedRouterRegisterMap_.find(namedRoute);
+    if (isTriggeredByJs && iter == namedRouterRegisterMap_.end()) {
         LOGW("namedRouter can not find target with name");
         return false;
     }
@@ -1472,13 +1466,13 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
 #endif
         LOGD("bundleName = %{public}s moduleName = %{public}s url = %{public}s", bundleName.c_str(), moduleName.c_str(),
             url.c_str());
-        iter = std::find_if(namedRouterRegisterMap.begin(), namedRouterRegisterMap.end(),
+        iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
             [&bundleName, &moduleName, &url](const auto& item) {
                 return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
                        item.second.pagePath == url;
             });
     }
-    if (iter == namedRouterRegisterMap.end()) {
+    if (iter == namedRouterRegisterMap_.end()) {
         LOGW("namedRouter can not find target with pagePath");
         return false;
     }

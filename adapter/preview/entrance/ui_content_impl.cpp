@@ -48,8 +48,6 @@ using namespace Platform;
 
 namespace {
 
-constexpr int32_t UNUSED_PAGE_ID = 1;
-
 #ifdef WINDOWS_PLATFORM
 constexpr char DELIMITER[] = "\\";
 constexpr char ASSET_PATH_SHARE_STAGE[] = "resources\\base\\profile";
@@ -228,7 +226,7 @@ void UIContentImpl::DestroyCallback() const
 void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage)
 {
     CommonInitialize(window, url, storage);
-    AceContainer::RunPage(instanceId_, UNUSED_PAGE_ID, url, "");
+    AceContainer::RunPage(instanceId_, url, "");
 }
 
 std::string UIContentImpl::GetContentInfo() const
