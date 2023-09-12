@@ -3596,6 +3596,14 @@ void WebDelegate::NotifyMemoryLevel(int32_t level)
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::SetAudioMuted(bool muted)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetAudioMuted(muted);
+    }
+}
+
 void WebDelegate::Zoom(float factor)
 {
     auto context = context_.Upgrade();
