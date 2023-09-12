@@ -2734,7 +2734,8 @@ void WebDelegate::Resize(const double& width, const double& height)
         [weak = WeakClaim(this), width, height]() {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_ && !delegate->window_) {
-                delegate->nweb_->Resize(width, height);
+                // Sur need int value, greater than this value in case show black line.
+                delegate->nweb_->Resize(std::ceil(width), std::ceil(height));
                 double offsetX = 0;
                 double offsetY = 0;
                 delegate->UpdateScreenOffSet(offsetX, offsetY);
