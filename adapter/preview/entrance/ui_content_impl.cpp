@@ -24,6 +24,8 @@
 #include "adapter/ohos/entrance/platform_event_callback.h"
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/entrance/ace_container.h"
+#include "adapter/preview/entrance/clipboard/clipboard_impl.h"
+#include "adapter/preview/entrance/clipboard/clipboard_proxy_impl.h"
 #include "adapter/preview/entrance/event_dispatcher.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "adapter/preview/external/multimodalinput/axis_event.h"
@@ -245,6 +247,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         u_setDataDirectory(icuPath.c_str());
 #endif
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+        ClipboardProxy::GetInstance()->SetDelegate(std::make_unique<Platform::ClipboardProxyImpl>());
     });
     rsWindow_ = window;
 
