@@ -18,6 +18,7 @@
 #include "configuration.h"
 #include "form_constants.h"
 #include "form_renderer_hilog.h"
+#include "event_handler.h"
 #include "refbase.h"
 
 #include "base/utils/utils.h"
@@ -29,6 +30,9 @@ constexpr char FORM_RENDERER_ALLOW_UPDATE[] = "allowUpdate";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
 } // namespace
+
+using EventHandler = OHOS::AppExecFwk::EventHandler;
+
 FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
     : context_(context), runtime_(runtime)
@@ -265,14 +269,23 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
     formRendererDelegate_ = renderRemoteObj;
 
     if (renderDelegateDeathRecipient_ == nullptr) {
-        renderDelegateDeathRecipient_ = new FormRenderDelegateRecipient([weak = weak_from_this()]() {
-            auto formRender = weak.lock();
-            if (!formRender) {
-                HILOG_ERROR("formRender is nullptr");
-                return;
-            }
-            formRender->ResetRenderDelegate();
-        });
+        renderDelegateDeathRecipient_ = new FormRenderDelegateRecipient(
+            [eventHandler = std::weak_ptr<EventHandler>(EventHandler::Current()), renderer = weak_from_this()]() {
+                auto handler = eventHandler.lock();
+                if (!handler) {
+                    HILOG_ERROR("eventHandler is nullptr");
+                    return;
+                }
+
+                handler->PostTask([weak = renderer]() {
+                    auto formRender = weak.lock();
+                    if (!formRender) {
+                        HILOG_ERROR("formRender is nullptr");
+                        return;
+                    }
+                    formRender->ResetRenderDelegate();
+                });
+            });
     }
     auto renderDelegate = formRendererDelegate_->AsObject();
     if (renderDelegate == nullptr) {

@@ -62,6 +62,7 @@ ohos_shared_library("ace_form_render") {
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "form_fwk:form_manager",
     "graphic_2d:librender_service_client",
     "graphic_2d:surface",
