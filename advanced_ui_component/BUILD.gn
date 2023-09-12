@@ -20,6 +20,7 @@ group("advanced_ui_component") {
     "editabletitlebar/interfaces:editabletitlebar",
     "filter/interfaces:filter",
     "progressbutton/interfaces:progressbutton",
+    "segmentbutton/interfaces:segmentbutton",
     "selecttitlebar/interfaces:selecttitlebar",
     "splitlayout/interfaces:splitlayout",
     "subheader/interfaces:subheader",
