@@ -378,8 +378,8 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
                 gestureHub->RemoveTouchEvent(scrollBar_->GetTouchEvent());
             }
             scrollBar_.Reset();
-            if (overlayModifier_) {
-                overlayModifier_->SetOpacity(0);
+            if (scrollBarOverlayModifier_) {
+                scrollBarOverlayModifier_->SetOpacity(0);
             }
         }
         return;
@@ -399,8 +399,8 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
 
     if (oldDisplayMode != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
-        if (overlayModifier_ && scrollBar_->IsScrollable()) {
-            overlayModifier_->SetOpacity(UINT8_MAX);
+        if (scrollBarOverlayModifier_ && scrollBar_->IsScrollable()) {
+            scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
         }
         scrollBar_->ScheduleDisapplearDelayTask();
     }
@@ -449,8 +449,8 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         bool scrollable = GreatNotEqual(estimatedHeight, mainSize) && IsScrollable();
         if (scrollBar_->IsScrollable() != scrollable) {
             scrollBar_->SetScrollable(scrollable);
-            if (overlayModifier_) {
-                overlayModifier_->SetOpacity(scrollable ? UINT8_MAX : 0);
+            if (scrollBarOverlayModifier_) {
+                scrollBarOverlayModifier_->SetOpacity(scrollable ? UINT8_MAX : 0);
             }
             if (scrollable) {
                 scrollBar_->ScheduleDisapplearDelayTask();
@@ -498,6 +498,14 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         std::move(scrollStartCallback), std::move(scrollEndCallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
+}
+
+void ScrollablePattern::CreateScrollBarOverlayModifier()
+{
+    CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedPaint());
+    CHECK_NULL_VOID(!scrollBarOverlayModifier_);
+    scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+    scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect(), scrollBar_->GetBarRect());
 }
 
 void ScrollablePattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)

@@ -171,6 +171,9 @@ public:
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
             paint->SetScrollBar(scrollBar);
+            if (scrollBar->NeedPaint()) {
+                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect(), scrollBar->GetBarRect());
+            }
         }
         return paint;
     }

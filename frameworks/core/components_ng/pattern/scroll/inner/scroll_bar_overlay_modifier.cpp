@@ -31,19 +31,20 @@ constexpr int32_t BAR_GROW_DURATION = 150;       // 150ms, scroll bar width expa
 constexpr int32_t BAR_SHRINK_DURATION = 250;     // 250ms, scroll bar width shrinks from 8dp to 4dp
 } // namespace
 
-ScrollBarOverlayModifier::ScrollBarOverlayModifier()
+ScrollBarOverlayModifier::ScrollBarOverlayModifier(
+    const OffsetF& fgOffset, const OffsetF& bgOffset, const SizeF& fgSize, const SizeF& bgSize)
 {
-    opacity_ = AceType::MakeRefPtr<AnimatablePropertyUint8>(UINT8_MAX);
-    AttachProperty(opacity_);
-    fgOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
+    fgOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(fgOffset);
     AttachProperty(fgOffset_);
-    fgSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
+    fgSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(fgSize);
     AttachProperty(fgSize_);
-    bgOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
+    bgOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(bgOffset);
     AttachProperty(bgOffset_);
-    bgSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
+    bgSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(bgSize);
     AttachProperty(bgSize_);
 
+    opacity_ = AceType::MakeRefPtr<AnimatablePropertyUint8>(UINT8_MAX);
+    AttachProperty(opacity_);
     fgColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
     AttachProperty(fgColor_);
     bgColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
@@ -129,7 +130,7 @@ void ScrollBarOverlayModifier::StopBarOpacityAnimation()
     }
 }
 
-void ScrollBarOverlayModifier::SetOffset(OffsetF fgOffset, OffsetF bgOffset)
+void ScrollBarOverlayModifier::SetOffset(const OffsetF& fgOffset, const OffsetF& bgOffset)
 {
     CHECK_NULL_VOID(fgOffset_);
     CHECK_NULL_VOID(bgOffset_);
@@ -137,7 +138,21 @@ void ScrollBarOverlayModifier::SetOffset(OffsetF fgOffset, OffsetF bgOffset)
     bgOffset_->Set(bgOffset);
 }
 
-void ScrollBarOverlayModifier::SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset,
+void ScrollBarOverlayModifier::SetSize(const SizeF& fgSize, const SizeF& bgSize)
+{
+    CHECK_NULL_VOID(fgSize_);
+    CHECK_NULL_VOID(bgSize_);
+    fgSize_->Set(fgSize);
+    bgSize_->Set(bgSize);
+}
+
+void ScrollBarOverlayModifier::SetRect(const Rect& fgRect, const Rect& bgRect)
+{
+    SetOffset(OffsetF(fgRect.Left(), fgRect.Top()), OffsetF(bgRect.Left(), bgRect.Top()));
+    SetSize(SizeF(fgRect.Width(), fgRect.Height()), SizeF(bgRect.Width(), bgRect.Height()));
+}
+
+void ScrollBarOverlayModifier::StartHoverAnimation(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset,
     const OffsetF& bgOffset, HoverAnimationType hoverAnimationType)
 {
     CHECK_NULL_VOID(fgSize_);
