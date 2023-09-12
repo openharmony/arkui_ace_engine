@@ -155,7 +155,6 @@ ohos_unittest("security_component_pattern_test_ng") {
     external_deps = [
       "ability_runtime:abilitykit_native",
       "access_token:libaccesstoken_sdk",
-      "c_utils:utils",
       "napi:ace_napi",
       "security_component_manager:libsecurity_component_framework",
       "security_component_manager:libsecurity_component_sdk",
