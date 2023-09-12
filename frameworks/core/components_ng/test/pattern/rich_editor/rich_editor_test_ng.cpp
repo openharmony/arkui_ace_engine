@@ -59,6 +59,8 @@ int32_t testOnDeleteComplete = 0;
 const std::string INIT_VALUE_1 = "hello1";
 const std::string INIT_VALUE_2 = "hello2";
 const std::string TEST_INSERT_VALUE = "s";
+const std::string TEST_INSERT_LINE_SEP = "\n";
+const std::string EXCEPT_VALUE = "h\n";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
@@ -438,6 +440,33 @@ HWTEST_F(RichEditorTestNg, RichEditorInsertValue004, TestSize.Level1)
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
     const std::string result1 = TEST_INSERT_VALUE;
     EXPECT_EQ(result1, it1->spanItem_->content);
+}
+
+/**
+ * @tc.name: RichEditorInsertValue005
+ * @tc.desc: test insert value if the insert char is line separator
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, RichEditorInsertValue005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->moveLength_ = 0;
+    richEditorPattern->InsertValue(TEST_INSERT_LINE_SEP);
+    auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
+    const std::string result1 = INIT_VALUE_1;
+    EXPECT_EQ(result1, it1->spanItem_->content);
+    ClearSpan();
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->caretPosition_ = 1;
+    richEditorPattern->moveLength_ = 0;
+    richEditorPattern->InsertValue(TEST_INSERT_LINE_SEP);
+    auto it2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
+    const std::string result2 = EXCEPT_VALUE;
+    EXPECT_EQ(result2, it2->spanItem_->content);
 }
 
 /**
