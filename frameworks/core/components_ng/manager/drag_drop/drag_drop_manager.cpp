@@ -511,8 +511,26 @@ void DragDropManager::RequireSummary()
     summaryMap_ = summary;
 }
 
+Rect DragDropManager::GetDragWindowRect(const Point& point)
+{
+    if (!previewRect_.IsValid()) {
+        int x = -1;
+        int y = -1;
+        int width = -1;
+        int height = -1;
+        int retOffset = InteractionManager::GetInstance()->GetShadowOffset(x, y, width, height);
+        if (retOffset == 0) {
+            previewRect_ = Rect(point.GetX() + x, point.GetY() + y, width, height);
+        } else if (SystemProperties::GetDebugEnabled()) {
+            LOGW("InteractionManager GetShadowOffset is failed:%{public}d", retOffset);
+        }
+    }
+    return previewRect_;
+}
+
 void DragDropManager::ClearSummary()
 {
+    previewRect_ = Rect(-1, -1, -1, -1);
     summaryMap_.clear();
 }
 #endif // ENABLE_DRAG_FRAMEWORK
@@ -553,6 +571,9 @@ void DragDropManager::FireOnDragEvent(
     event->SetScreenX((double)point.GetScreenX());
     event->SetScreenY((double)point.GetScreenY());
     event->SetVelocity(velocityTracker_.GetVelocity());
+#ifdef ENABLE_DRAG_FRAMEWORK
+    event->SetPreviewRect(GetDragWindowRect(point));
+#endif // ENABLE_DRAG_FRAMEWORK
 
     switch (type) {
         case DragEventType::ENTER:
@@ -877,6 +898,7 @@ void DragDropManager::DestroyDragWindow()
     LOGI("DestroyDragWindow");
     SetIsDragged(false);
     SetIsDragWindowShow(false);
+    previewRect_ = Rect(-1, -1, -1, -1);
     isMouseDragged_ = false;
     currentId_ = -1;
 }
@@ -924,11 +946,11 @@ void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const
     int height = -1;
     int retOffset = InteractionManager::GetInstance()->GetShadowOffset(x, y, width, height);
     if (retOffset == 0) {
-        Rect rect(point.GetX() + x, point.GetY() + y, width, height);
-        event->SetPreviewRect(rect);
+        previewRect_ = Rect(point.GetX() + x, point.GetY() + y, width, height);
+        event->SetPreviewRect(previewRect_);
     } else {
-        Rect rect(x, y, width, height);
-        event->SetPreviewRect(rect);
+        previewRect_ = Rect(x, y, width, height);
+        event->SetPreviewRect(previewRect_);
         LOGW("InteractionManager GetShadowOffset is failed:%{public}d", retOffset);
     }
 #endif // ENABLE_DRAG_FRAMEWORK
