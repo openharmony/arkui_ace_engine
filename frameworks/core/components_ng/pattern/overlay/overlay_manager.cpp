@@ -1228,6 +1228,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
         return RemoveDialog(overlay, false, false);
     }
     if (InstanceOf<BubblePattern>(pattern)) {
+        auto popupPattern = DynamicCast<BubblePattern>(pattern);
         overlay->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         for (const auto& popup : popupMap_) {
             auto targetId = popup.first;
@@ -1237,7 +1238,9 @@ bool OverlayManager::RemoveOverlayInSubwindow()
                 rootNode->RemoveChild(overlay);
                 rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
                 if (rootNode->GetChildren().empty()) {
-                    SubwindowManager::GetInstance()->HideSubWindowNG();
+                    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(popupPattern->GetContainerId());
+                    CHECK_NULL_RETURN(subwindow, false);
+                    subwindow->HideSubWindowNG();
                 }
                 return true;
             }
