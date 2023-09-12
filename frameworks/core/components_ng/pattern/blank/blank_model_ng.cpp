@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -34,7 +35,7 @@ void BlankModelNG::Create()
         V2::BLANK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BlankPattern>(); });
     stack->Push(blankNode);
     auto blankProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexGrow, 1.0f);
         ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexShrink, 0.0f);
         ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, AlignSelf, FlexAlign::STRETCH);
@@ -55,7 +56,7 @@ void BlankModelNG::SetBlankMin(const Dimension& blankMin)
         result = Dimension();
     }
     ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, MinSize, result);
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         ACE_UPDATE_LAYOUT_PROPERTY(BlankLayoutProperty, FlexBasis, result);
     }
 }

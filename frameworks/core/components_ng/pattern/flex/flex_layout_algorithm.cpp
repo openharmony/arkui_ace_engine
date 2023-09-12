@@ -25,6 +25,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/blank/blank_layout_property.h"
@@ -39,7 +40,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 /**
  * Get the main axis direction based on direction.
  */
@@ -259,7 +259,8 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
         node.layoutWrapper = child;
         node.layoutConstraint = childLayoutConstraint;
 
-        bool childGone = child && child->GetHostNode() && child->GetHostNode()->GetLayoutProperty() &&
+        bool childGone =
+            child && child->GetHostNode() && child->GetHostNode()->GetLayoutProperty() &&
             child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE;
         int32_t childDisplayPriority = 1;
         float childLayoutWeight = 0.0f;
@@ -534,8 +535,8 @@ bool FlexLayoutAlgorithm::HandleBlankFirstTimeMeasure(
     const MagicLayoutNode& child, FlexItemProperties& flexItemProperties)
 {
     const auto& childLayoutWrapper = child.layoutWrapper;
-    if (!(childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN)) {
+    if (!(childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG &&
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN))) {
         return false;
     }
 
@@ -647,10 +648,8 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
                 (*iter).needSecondMeasure = true;
             }
             if (LessOrEqual(totalFlexWeight_, 0.0f) &&
-                (!isInfiniteLayout_ ||
-                    (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
-                        PipelineBase::GetCurrentContext() &&
-                        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN))) {
+                (!isInfiniteLayout_ || (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
+                                           Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)))) {
                 float childMainAxisMargin = GetMainAxisMargin(childLayoutWrapper, direction_);
                 float itemFlex = getFlex(child.layoutWrapper);
                 float flexSize =
@@ -802,8 +801,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                      : layoutConstraint->maxSize.Height()) &&
         NearEqual(mainAxisSize_, -1.0f);
     if (NearEqual(mainAxisSize_, -1.0f)) {
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             mainAxisSize_ = direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
                                 ? layoutConstraint->maxSize.Width()
                                 : layoutConstraint->maxSize.Height();

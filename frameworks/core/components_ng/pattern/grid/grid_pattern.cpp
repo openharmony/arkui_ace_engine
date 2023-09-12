@@ -16,9 +16,10 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 #include "base/geometry/axis.h"
-#include "base/utils/utils.h"
-#include "base/perfmonitor/perf_monitor.h"
 #include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -1274,10 +1275,7 @@ void GridPattern::UpdateScrollBarOffset()
 RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
 {
     auto defaultDisplayMode = DisplayMode::OFF;
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         defaultDisplayMode = DisplayMode::AUTO;
     }
     auto property = MakeRefPtr<ScrollablePaintProperty>();
@@ -1355,10 +1353,10 @@ bool GridPattern::IsOutOfBoundary()
     bool outOfStart = gridLayoutInfo_.reachStart_ && Positive(gridLayoutInfo_.currentOffset_);
     float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
     bool outOfEnd = (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) &&
-        LessNotEqual(endPos, gridLayoutInfo_.lastMainSize_);
+                    LessNotEqual(endPos, gridLayoutInfo_.lastMainSize_);
     bool scrollable = (gridLayoutInfo_.startIndex_ > 0) ||
-        (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
-        GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
+                      (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
+                      GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
     return (outOfStart || outOfEnd) && scrollable;
 }
 

@@ -21,9 +21,7 @@
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const int32_t PLATFORM_VERSION_TEN = 10;
-}
+namespace {}
 DividerLayoutAlgorithm::DividerLayoutAlgorithm() = default;
 
 std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
@@ -37,7 +35,7 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     auto theme = pipeline->GetTheme<DividerTheme>();
     CHECK_NULL_RETURN(theme, std::nullopt);
     auto defaultStrokeWidth =
-        pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ? 1.0_px : theme->GetStokeWidth();
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) ? 1.0_px : theme->GetStokeWidth();
     Dimension strokeWidth = dividerLayoutProperty->GetStrokeWidth().value_or(defaultStrokeWidth);
     constrainStrokeWidth_ = Positive(strokeWidth.ConvertToPx()) ? static_cast<float>(strokeWidth.ConvertToPx())
                                                                 : static_cast<float>(defaultStrokeWidth.ConvertToPx());
