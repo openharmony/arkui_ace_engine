@@ -646,7 +646,11 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneSize.SetHeight(layoutAlgorithm->GetRealNavBarHeight());
     DimensionRect hotZoneRegion;
-    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+    if (navigationMode_ == NavigationMode::STACK) {
+        hotZoneRegion.SetSize(DimensionSize(Dimension(0.0f), Dimension(0.0f)));
+    } else {
+        hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+    }
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
 
     std::vector<DimensionRect> mouseRegion;
@@ -661,8 +665,12 @@ void NavigationPattern::AddDividerHotZoneRect(const RefPtr<NavigationLayoutAlgor
     auto dragRectOffset = layoutAlgorithm->GetNavBarOffset();
     dragRectOffset.SetX(-DEFAULT_DRAG_REGION.ConvertToPx());
     dragRect_.SetOffset(dragRectOffset);
-    dragRect_.SetSize(SizeF(
-        DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_HALF + realDividerWidth_, layoutAlgorithm->GetRealNavBarHeight()));
+    if (navigationMode_ == NavigationMode::STACK) {
+        dragRect_.SetSize(SizeF(0.0f, 0.0f));
+    } else {
+        dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_HALF + realDividerWidth_,
+            layoutAlgorithm->GetRealNavBarHeight()));
+    }
 
     std::vector<DimensionRect> responseRegion;
     DimensionOffset responseOffset(dragRectOffset);
