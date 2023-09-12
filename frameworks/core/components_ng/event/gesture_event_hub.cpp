@@ -615,8 +615,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto extraParams = eventHub->GetDragExtraParams(std::string(), info.GetGlobalPoint(), DragEventType::START);
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
+    g_getPixelMapSucc = false;
     if (dragDropInfo.customNode) {
-        g_getPixelMapSucc = false;
         auto callback = [pipeline, info, gestureEventHubPtr = AceType::Claim(this), frameNode, dragDropInfo, event](
                             std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
             if (pixelMap == nullptr) {
