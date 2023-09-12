@@ -186,7 +186,6 @@ template("ace_core_source_set") {
 
       # image
       "image/animated_image_player.cpp",
-      "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
       "image/image_compressor.cpp",
       "image/image_file_cache.cpp",
@@ -699,7 +698,6 @@ template("ace_core_ng_source_set") {
 
       # image
       "image/animated_image_player.cpp",
-      "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
       "image/image_compressor.cpp",
       "image/image_file_cache.cpp",

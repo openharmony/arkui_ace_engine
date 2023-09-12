@@ -30,7 +30,7 @@
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
 #include "core/components_ng/image_provider/image_utils.h"
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {

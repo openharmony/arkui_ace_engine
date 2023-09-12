@@ -24,14 +24,12 @@
 #include <utility>
 #include <vector>
 
-#include "base/image/pixel_map.h"
-#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
-
+    
 struct CachedImage;
 class ImageObject;
 
@@ -66,7 +64,6 @@ public:
 
     void CacheImgObj(const std::string& key, const RefPtr<ImageObject>& imgObj);
     RefPtr<ImageObject> GetCacheImgObj(const std::string& key);
-
 
     void SetCapacity(size_t capacity)
     {

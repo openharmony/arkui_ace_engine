@@ -44,7 +44,7 @@
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
 #include "core/components_ng/render/canvas_image.h"
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #include "core/image/image_object.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/rosen_render_context.h"

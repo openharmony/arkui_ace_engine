@@ -20,6 +20,7 @@
 
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
+
 namespace OHOS::Ace {
 ImageFileCache::ImageFileCache() = default;
 ImageFileCache::~ImageFileCache() = default;

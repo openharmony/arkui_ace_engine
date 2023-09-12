@@ -18,7 +18,7 @@
 
 #define private public
 #define protected public
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 
 namespace OHOS::Ace {
 

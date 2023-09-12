@@ -69,7 +69,7 @@
 #else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/rosen_render_context.h"
