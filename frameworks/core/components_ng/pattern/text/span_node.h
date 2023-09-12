@@ -169,6 +169,16 @@ public:
     virtual void EndDrag();
     virtual bool IsDragging();
 #endif // ENABLE_DRAG_FRAMEWORK
+    std::optional<TextStyle> GetTextStyle() const
+    {
+        return textStyle_;
+    }
+    void SetTextStyle(const std::optional<TextStyle>& textStyle)
+    {
+        textStyle_ = textStyle;
+    }
+private:
+    std::optional<TextStyle> textStyle_;
 };
 
 struct ImageSpanItem : public SpanItem {
