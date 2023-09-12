@@ -2762,6 +2762,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         pattern->CopySelectionMenuParams(selectInfo);
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
     };
+    CHECK_NULL_VOID(clipboard_);
     clipboard_->HasData(hasDataCallback);
 }
 

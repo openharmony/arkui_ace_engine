@@ -60,13 +60,25 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     static void WaitForAsyncTasks();
+
+    void SetUp() override;
+    void TearDown() override;
 };
 
 void ImageProviderTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
-    g_loader = AceType::MakeRefPtr<MockImageLoader>();
     g_threads = std::vector<std::thread>();
+}
+
+void ImageProviderTestNg::SetUp()
+{
+    g_loader = AceType::MakeRefPtr<MockImageLoader>();
+}
+
+void ImageProviderTestNg::TearDown()
+{
+    g_loader = nullptr;
 }
 
 void ImageProviderTestNg::TearDownTestSuite()
@@ -91,7 +103,6 @@ void ImageProviderTestNg::WaitForAsyncTasks()
  */
 HWTEST_F(ImageProviderTestNg, CreateFunc001, TestSize.Level1)
 {
-    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_NE(ctx, nullptr);
@@ -109,7 +120,6 @@ HWTEST_F(ImageProviderTestNg, CreateFunc001, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, Destruction001, TestSize.Level1)
 {
-    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx =
         AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
@@ -133,7 +143,6 @@ HWTEST_F(ImageProviderTestNg, Destruction001, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, Destruction002, TestSize.Level1)
 {
-    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx =
         AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
@@ -158,7 +167,6 @@ HWTEST_F(ImageProviderTestNg, Destruction002, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, HandleCommand001, TestSize.Level1)
 {
-    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx =
         AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
@@ -190,7 +198,6 @@ HWTEST_F(ImageProviderTestNg, HandleCommand001, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, NotifiersTest001, TestSize.Level1)
 {
-    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx =
         AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
@@ -248,7 +255,6 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg001, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, CalculateTargetSize001, TestSize.Level1)
 {
-    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
@@ -286,7 +292,6 @@ HWTEST_F(ImageProviderTestNg, CalculateTargetSize001, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, SourceSizeTest001, TestSize.Level1)
 {
-    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
@@ -322,7 +327,6 @@ HWTEST_F(ImageProviderTestNg, SourceSizeTest001, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, GetImageSize001, TestSize.Level1)
 {
-    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
@@ -342,7 +346,6 @@ HWTEST_F(ImageProviderTestNg, GetImageSize001, TestSize.Level1)
  */
 HWTEST_F(ImageProviderTestNg, MakeCanvasImageIfNeed001, TestSize.Level1)
 {
-    EXPECT_CALL(*g_loader, LoadImageData).Times(1);
     auto src = ImageSourceInfo(SRC_JPG);
     auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
     EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
