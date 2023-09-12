@@ -166,6 +166,11 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
         name = routeInfo->GetName();
         auto uiNode = navigationStack->CreateNodeByRouteInfo(routeInfo);
         navigationPattern->AddNavDestinationNode(name, uiNode, navRouteMode, routeInfo);
+        auto navRouterEventHub = GetEventHub<NavRouterEventHub>();
+        CHECK_NULL_VOID(navRouterEventHub);
+        if (uiNode) {
+            navigationPattern->AddOnStateChangeItem(uiNode->GetId(), navRouterEventHub->GetOnStateChange());
+        }
     } else if (navDestination) {
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
