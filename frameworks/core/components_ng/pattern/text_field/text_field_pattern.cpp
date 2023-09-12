@@ -3685,7 +3685,9 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
-    LOGD("Insert value '%{public}s'", insertValue.c_str());
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("Insert value '%{public}s'", insertValue.c_str());
+    }
     auto wideInsertValue = StringUtils::ToWstring(insertValue);
     LOGD("Insert length %{public}d", static_cast<int32_t>(wideInsertValue.length()));
     auto originLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
