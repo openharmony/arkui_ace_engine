@@ -641,7 +641,9 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->ClearChildren();
+    if (isDynamic) {
+        renderContext->ClearChildren();
+    }
     renderContext->AddChild(externalRenderContext, 0);
 
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
