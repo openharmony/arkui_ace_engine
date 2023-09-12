@@ -2087,6 +2087,10 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
     if (isOnAnimation_ || !hasPixelMap_) {
         return;
     }
+    if (startDrag) {
+        RemovePixelMap();
+        return;
+    }
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_VOID(columnNode);
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());

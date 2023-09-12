@@ -504,7 +504,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
     if (frameTag == V2::WEB_ETS_TAG) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
-    } else if (!NearEqual(scale, 1.0f)) {
+    } else if (!NearEqual(scale, DEFALUT_DRAG_PPIXELMAP_SCALE)) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else if (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
@@ -708,7 +708,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             pixelMap = pixelMap_->GetPixelMapSharedPtr();
         }
     }
-    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * DEFALUT_DRAG_PPIXELMAP_SCALE;
     pixelMap->scale(scale, scale);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
