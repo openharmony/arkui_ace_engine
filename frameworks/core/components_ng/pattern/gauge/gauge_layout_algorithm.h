@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_LAYOUT_ALGORITHM_H
 
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GaugeLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -23,6 +24,10 @@ class ACE_EXPORT GaugeLayoutAlgorithm : public BoxLayoutAlgorithm {
 
 public:
     GaugeLayoutAlgorithm();
+    explicit GaugeLayoutAlgorithm(const RefPtr<ImageLoadingContext>& indicatorIconLoadingCtx)
+        : indicatorIconLoadingCtx_(indicatorIconLoadingCtx)
+    {}
+
     ~GaugeLayoutAlgorithm() override = default;
 
     void OnReset() override;
@@ -39,6 +44,7 @@ private:
     void MeasureTitleChild(LayoutWrapper* layoutWrapper, const SizeF& parentSize);
     bool CheckDescriptionIsImageNode(const RefPtr<LayoutWrapper>& layoutWrapper) const;
 
+    RefPtr<ImageLoadingContext> indicatorIconLoadingCtx_;
     ACE_DISALLOW_COPY_AND_MOVE(GaugeLayoutAlgorithm);
 };
 

@@ -16,10 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GAUGE_GAUGE_PAINT_PROPERTY_H
 
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
+#include "core/components_ng/render/paint_property.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 using ColorStopArray = std::vector<std::pair<Color, Dimension>>;
@@ -62,6 +64,9 @@ public:
         paintProperty->propStrokeWidth_ = CloneStrokeWidth();
         paintProperty->propGaugeType_ = CloneGaugeType();
         paintProperty->propShadowOptions_ = CloneShadowOptions();
+        paintProperty->propIsShowIndicator_ = CloneIsShowIndicator();
+        paintProperty->propIndicatorIconSourceInfo_ = CloneIndicatorIconSourceInfo();
+        paintProperty->propIndicatorSpace_ = CloneIndicatorSpace();
         return paintProperty;
     }
 
@@ -79,6 +84,9 @@ public:
         ResetStrokeWidth();
         ResetGaugeType();
         ResetShadowOptions();
+        ResetIsShowIndicator();
+        ResetIndicatorIconSourceInfo();
+        ResetIndicatorSpace();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -94,17 +102,28 @@ public:
         } else {
             json->Put("strokeWidth", "");
         }
-        auto jsonColors = JsonUtil::CreateArray(true);
-        if (propColors_.has_value() && propColors_.has_value()) {
-            for (size_t i = 0; i < propValues_.value().size(); i++) {
-                auto jsonObject = JsonUtil::CreateArray(true);
-                jsonObject->Put("0", propColors_.value()[i].ColorToString().c_str());
-                jsonObject->Put("1", propValues_.value()[i]);
-                auto index = std::to_string(i);
-                jsonColors->Put(index.c_str(), jsonObject);
+
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            auto jsonColors = JsonUtil::CreateArray(true);
+            if (propColors_.has_value() && propColors_.has_value()) {
+                for (size_t i = 0; i < propValues_.value().size(); i++) {
+                    auto jsonObject = JsonUtil::CreateArray(true);
+                    jsonObject->Put("0", propColors_.value()[i].ColorToString().c_str());
+                    jsonObject->Put("1", propValues_.value()[i]);
+                    auto index = std::to_string(i);
+                    jsonColors->Put(index.c_str(), jsonObject);
+                }
             }
+            json->Put("colors", jsonColors->ToString().c_str());
+        } else {
+            ToJsonColor(json);
+            ToJsonIndicator(json);
+            ToJsonTrackShadow(json);
         }
-        json->Put("colors", jsonColors->ToString().c_str());
+    }
+
+    void ToJsonColor(std::unique_ptr<JsonValue>& json) const
+    {
         auto jsonGradientColors = JsonUtil::CreateArray(true);
         if (propGradientColors_.has_value() && propValues_.has_value() &&
             (propGradientColors_.value().size() == propValues_.value().size())) {
@@ -125,7 +144,55 @@ public:
                 jsonGradientColors->Put(index.c_str(), jsonObject);
             }
         }
-        json->Put("gradientColors", jsonGradientColors->ToString().c_str());
+        json->Put("colors", jsonGradientColors->ToString().c_str());
+    }
+
+    void ToJsonIndicator(std::unique_ptr<JsonValue>& json) const
+    {
+        if (!propIsShowIndicator_.value_or(true)) {
+            json->Put("indicator", "null");
+            return;
+        }
+        auto indicatorJsonValue = JsonUtil::Create(true);
+        if (propIndicatorIconSourceInfo_.has_value()) {
+            indicatorJsonValue->Put("icon", propIndicatorIconSourceInfo_.value().GetSrc().c_str());
+        } else {
+            indicatorJsonValue->Put("icon", "");
+        }
+
+        if (propIndicatorSpace_.has_value()) {
+            indicatorJsonValue->Put("space", propIndicatorSpace_.value().ToString().c_str());
+        } else {
+            indicatorJsonValue->Put("space", INDICATOR_DISTANCE_TO_TOP.ToString().c_str());
+        }
+        json->Put("indicator", indicatorJsonValue);
+    }
+
+    void ToJsonTrackShadow(std::unique_ptr<JsonValue>& json) const
+    {
+        GaugeShadowOptions trackShadow;
+        if (propShadowOptions_.has_value()) {
+            trackShadow.radius = propShadowOptions_.value().radius;
+            trackShadow.offsetX = propShadowOptions_.value().offsetX;
+            trackShadow.offsetY = propShadowOptions_.value().offsetY;
+            trackShadow.isShadowVisible = propShadowOptions_.value().isShadowVisible;
+        } else {
+            trackShadow.radius = DEFAULT_GAUGE_SHADOW_RADIUS;
+            trackShadow.offsetX = DEFAULT_GAUGE_SHADOW_OFFSETX;
+            trackShadow.offsetY = DEFAULT_GAUGE_SHADOW_OFFSETY;
+        }
+
+        if (!trackShadow.isShadowVisible) {
+            json->Put("trackShadow", "null");
+            return;
+        }
+
+        auto shadowOptionJson = JsonUtil::Create(true);
+        shadowOptionJson->Put("radius", std::to_string(trackShadow.radius).c_str());
+        shadowOptionJson->Put("offsetX", std::to_string(trackShadow.offsetX).c_str());
+        shadowOptionJson->Put("offsetY", std::to_string(trackShadow.offsetY).c_str());
+
+        json->Put("trackShadow", shadowOptionJson);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, float, PROPERTY_UPDATE_RENDER);
@@ -139,6 +206,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Values, std::vector<float>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShadowOptions, GaugeShadowOptions, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowIndicator, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorIconSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorSpace, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(GaugePaintProperty);
 };
 

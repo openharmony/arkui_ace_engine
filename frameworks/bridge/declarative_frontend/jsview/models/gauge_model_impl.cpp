@@ -89,14 +89,14 @@ void GaugeModelImpl::SetStrokeWidth(const Dimension& strokeWidth)
     gaugeComponent->SetTrackThickness(strokeWidth);
 }
 
-void GaugeModelImpl::SetLabelMarkedText(std::string labelTextString)
+void GaugeModelImpl::SetLabelMarkedText(const std::string labelTextString)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);
     gaugeComponent->SetLabelMarkedText(labelTextString);
 }
 
-void GaugeModelImpl::SetMarkedTextColor(const Color color)
+void GaugeModelImpl::SetMarkedTextColor(const Color& color)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto gaugeComponent = AceType::DynamicCast<ProgressComponent>(component);

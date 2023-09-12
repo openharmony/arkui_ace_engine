@@ -53,6 +53,12 @@ void GaugePattern::OnModifyDone()
             titleChildId_ = firstChild->GetId();
         }
 
+        auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
+        CHECK_NULL_VOID(gaugePaintProperty);
+        if (gaugePaintProperty->GetIsShowIndicatorValue(false) && gaugePaintProperty->HasIndicatorIconSourceInfo()) {
+            InitIndicatorImage();
+        }
+
         auto gaugeLayoutProperty = GetLayoutProperty<GaugeLayoutProperty>();
         CHECK_NULL_VOID(gaugeLayoutProperty);
 
@@ -145,5 +151,73 @@ Color GaugePattern::GetMaxValueColor(const RefPtr<GaugePaintProperty>& gaugePain
             break;
     }
     return color;
+}
+
+void GaugePattern::InitIndicatorImage()
+{
+    auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(gaugePaintProperty);
+
+    ImageSourceInfo sourceInfo = gaugePaintProperty->GetIndicatorIconSourceInfo().value_or(ImageSourceInfo(""));
+    LoadNotifier iconLoadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
+    indicatorIconLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(sourceInfo, std::move(iconLoadNotifier), true);
+    indicatorIconLoadingCtx_->LoadImageData();
+}
+
+LoadSuccessNotifyTask GaugePattern::CreateLoadSuccessCallback()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& /* sourceInfo */) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnImageLoadSuccess();
+    };
+    return task;
+}
+
+DataReadyNotifyTask GaugePattern::CreateDataReadyCallback()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& /* sourceInfo */) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnImageDataReady();
+    };
+    return task;
+}
+
+LoadFailNotifyTask GaugePattern::CreateLoadFailCallback()
+{
+    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& /* sourceInfo */, const std::string& msg) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnImageLoadFail();
+    };
+    return task;
+}
+
+void GaugePattern::OnImageLoadFail()
+{
+    LOGW("Image data load fail.");
+}
+
+void GaugePattern::OnImageDataReady()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void GaugePattern::OnImageLoadSuccess()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
+
+    LOGD("Load show icon successfully");
+    ImagePaintConfig config;
+    config.srcRect_ = indicatorIconLoadingCtx_->GetSrcRect();
+    config.dstRect_ = indicatorIconLoadingCtx_->GetDstRect();
+    config.isSvg_ = indicatorIconLoadingCtx_->GetSourceInfo().IsSvg();
+    indicatorIconCanvasImage_ = indicatorIconLoadingCtx_->MoveCanvasImage();
+    indicatorIconCanvasImage_->SetPaintConfig(config);
 }
 } // namespace OHOS::Ace::NG
