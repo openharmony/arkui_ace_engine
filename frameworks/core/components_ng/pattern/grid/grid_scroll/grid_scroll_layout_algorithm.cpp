@@ -42,9 +42,13 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = gridLayoutInfo_.axis_;
     auto idealSize = CreateIdealSize(
         gridLayoutProperty->GetLayoutConstraint().value(), axis, gridLayoutProperty->GetMeasureType(), true);
+    if (NearZero(GetMainAxisSize(idealSize, axis))) {
+        LOGW("size of main axis value is 0, please check");
+        return;
+    }
     if (GreatOrEqual(GetMainAxisSize(idealSize, axis), Infinity<float>())) {
         // TODO: use total height of all children as grid's main size when main size of ideal is infinite
-        LOGE("size of main axis value is infinity, please check");
+        LOGW("size of main axis value is infinity, please check");
         return;
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
