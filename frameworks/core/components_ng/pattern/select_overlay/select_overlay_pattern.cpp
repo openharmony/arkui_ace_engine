@@ -82,7 +82,7 @@ void SelectOverlayPattern::OnAttachToFrameNode()
     };
     panEvent_ =
         MakeRefPtr<PanEvent>(std::move(panStart), std::move(panUpdate), std::move(panEnd), std::move(panCancel));
-    gesture->SetPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
+    gesture->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
@@ -553,6 +553,7 @@ void SelectOverlayPattern::HiddenHandle()
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     host->GetOrCreateGestureEventHub()->RemoveClickEvent(clickEvent_);
+    host->GetOrCreateGestureEventHub()->RemovePanEvent(panEvent_);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
