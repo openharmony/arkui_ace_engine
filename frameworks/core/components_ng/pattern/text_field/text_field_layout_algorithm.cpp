@@ -296,7 +296,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
 
     // counterParagraph Layout.
-    if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength()) {
+    if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength() &&
+        !isInlineStyle) {
         auto textLength = showPlaceHolder ? 0 : StringUtils::ToWstring(textContent).length();
         auto maxLength = textFieldLayoutProperty->GetMaxLength().value();
         CreateCounterParagraph(textLength, maxLength, textFieldTheme);
@@ -323,6 +324,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
+    }
+    if (isInlineStyle && showPlaceHolder && !textContent.empty()) {
+        preferredHeight = static_cast<float>(paragraph_->GetHeight());
     }
 #ifndef USE_GRAPHIC_TEXT_GINE // support sigleline
     if (isInlineStyle && pattern->IsFocus()) {

@@ -107,8 +107,8 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
-    textFieldContentModifier_->SetShowCounter(
-        layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
+    textFieldContentModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false) &&
+        layoutProperty->HasMaxLength() && !textFieldPattern->IsNormalInlineState());
     textFieldContentModifier_->SetShowErrorState(layoutProperty->GetShowErrorTextValue(false) &&
         paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE);
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(""));
@@ -172,8 +172,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    textFieldOverlayModifier_->SetShowCounter(
-        layoutProperty->GetShowCounterValue(false) && layoutProperty->HasMaxLength());
+    textFieldOverlayModifier_->SetShowCounter(layoutProperty->GetShowCounterValue(false) &&
+        layoutProperty->HasMaxLength() && !textFieldPattern->IsNormalInlineState());
     if (textFieldPattern->GetSelectMode() != SelectionMode::NONE) {
         textFieldPattern->MarkRedrawOverlay();
     }
