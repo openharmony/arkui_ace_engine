@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
@@ -81,7 +82,7 @@ void BlankPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(parent);
     auto layoutProp = host->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() <= 9) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
     }
     auto& calcConstraint = layoutProp->GetCalcLayoutConstraint();

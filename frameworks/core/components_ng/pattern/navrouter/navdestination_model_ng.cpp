@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -45,8 +46,7 @@ void NavDestinationModelNG::Create()
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     if (!navDestinationNode->GetTitleBarNode()) {
-        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             CreateImageButton(navDestinationNode);
         } else {
             CreateBackButton(navDestinationNode);
@@ -176,8 +176,7 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
             return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
         });
     if (!navDestinationNode->GetTitleBarNode()) {
-        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             CreateImageButton(navDestinationNode);
         } else {
             CreateBackButton(navDestinationNode);

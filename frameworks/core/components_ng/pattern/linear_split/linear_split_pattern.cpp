@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/event/mouse_event.h"
@@ -30,8 +31,6 @@ namespace {
 
 constexpr std::size_t DEFAULT_DRAG_INDEX = -1;
 constexpr std::size_t SPLIT_INDEX_INC_TWO = 2;
-constexpr int32_t API10 = 10;
-
 } // namespace
 
 void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -68,7 +67,7 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         HandlePanStartBeforeAPI10(info);
         return;
     }
@@ -180,7 +179,7 @@ void LinearSplitPattern::ConstrainDragRange()
 {
     auto min = GetMinPosFromIndex(dragedSplitIndex_);
     auto max = GetMaxPosFromIndex(dragedSplitIndex_);
-    auto &offset = childrenDragPos_[dragedSplitIndex_ + 1];
+    auto& offset = childrenDragPos_[dragedSplitIndex_ + 1];
     if (offset < min) {
         offset = min;
     } else if (offset > max) {
@@ -226,7 +225,7 @@ void LinearSplitPattern::GetdragedSplitIndexOrIsMoving(const Point& point)
 
 void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         HandlePanUpdateBeforeAPI10(info);
         return;
     }
@@ -443,7 +442,7 @@ void LinearSplitPattern::HandleHoverEvent(bool isHovered)
 
 MouseFormat LinearSplitPattern::GetMouseFormat()
 {
-    if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < API10) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return GetMouseFormatBeforeAPI10();
     }
     MouseFormat format = MouseFormat::DEFAULT;

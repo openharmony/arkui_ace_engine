@@ -19,14 +19,13 @@
 
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
-namespace {
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
-} // namespace
+namespace {} // namespace
 
 namespace OHOS::Ace::NG {
 class RosenRenderContext;
@@ -61,16 +60,14 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
     if (config.contentSizeChange || config.frameSizeChange) {
-        if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             isCanvasInit_ = !config.frameSizeChange;
         } else {
             isCanvasInit_ = false;
         }
     } else if (config.frameOffsetChange || config.contentOffsetChange) {
-        if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             isCanvasInit_ = true;
         } else {
             isCanvasInit_ = false;

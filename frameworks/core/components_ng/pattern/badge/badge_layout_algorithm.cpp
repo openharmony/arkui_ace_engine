@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -241,15 +242,13 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         textOffset =
             OffsetF(offset.GetX() + badgePositionX->ConvertToPx(), offset.GetY() + badgePositionY->ConvertToPx());
     }
-    auto context = PipelineBase::GetCurrentContext();
-    if (context && context->GetMinPlatformVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
     } else {
         textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
     }
     auto textFrameSize = textGeometryNode->GetFrameSize();
-    if (GreatNotEqual(circleSize->ConvertToPx(), 0) && context &&
-        context->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (GreatNotEqual(circleSize->ConvertToPx(), 0) && Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         textFrameSize += SizeF(borderWidth.ConvertToPx() * 2, borderWidth.ConvertToPx() * 2);
     }
     textGeometryNode->SetFrameSize(textFrameSize);

@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -40,7 +41,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t MAX_MENU_ITEMS_NUM = 3;
 constexpr int32_t MENU_OFFSET_RATIO = 9;
-}
+} // namespace
 
 void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
@@ -54,10 +55,9 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
-        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             constraint.selfIdealSize = OptionalSizeF(static_cast<float>(BACK_BUTTON_ICON_SIZE.ConvertToPx()),
-            static_cast<float>(BACK_BUTTON_ICON_SIZE.ConvertToPx()));
+                static_cast<float>(BACK_BUTTON_ICON_SIZE.ConvertToPx()));
             backButtonWrapper->Measure(constraint);
             return;
         }
@@ -239,8 +239,7 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     if (isCustomTitle) {
         constraint.parentIdealSize.SetWidth(maxWidth);
         constraint.maxSize.SetWidth(maxWidth);
-        if (PipelineContext::GetCurrentContext() && (PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN))) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             constraint.parentIdealSize.SetHeight(titleBarSize.Height());
         } else {
             // if has menu, max height is single line height
@@ -274,10 +273,10 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
         constraint.parentIdealSize.SetHeight(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI &&
             !titleBarLayoutProperty->HasTitleHeight()) {
-                auto maxWidth = static_cast<float>(MENU_ITEM_SIZE.ConvertToPx()) * MAX_MENU_ITEMS_NUM +
-                    defaultPaddingStart_.ConvertToPx();
-                constraint.parentIdealSize.SetWidth(maxWidth);
-            }
+            auto maxWidth = static_cast<float>(MENU_ITEM_SIZE.ConvertToPx()) * MAX_MENU_ITEMS_NUM +
+                            defaultPaddingStart_.ConvertToPx();
+            constraint.parentIdealSize.SetWidth(maxWidth);
+        }
         menuWrapper->Measure(constraint);
         menuWidth_ = menuWrapper->GetGeometryNode()->GetFrameSize().Width();
         return;
@@ -308,8 +307,7 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
         if (!titleBarNode->GetBackButton()) {
             return;
         }
-        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             auto offsetY = ((menuHeight_ - BACK_BUTTON_ICON_SIZE) / 2).ConvertToPx();
             geometryNode->SetMarginFrameOffset(OffsetF { maxPaddingStart_.ConvertToPx(), offsetY });
             backButtonWrapper->Layout();
@@ -371,8 +369,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         CHECK_NULL_VOID(navDestination);
         auto isCustom = navDestination->GetPrevTitleIsCustomValue(false);
         // add sdk 9 compatible
-        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             if (GetNavigationBackButtonState(titleBarNode)) {
                 geometryNode->SetMarginFrameOffset(OffsetF {
                     static_cast<float>((maxPaddingStart_ + BACK_BUTTON_ICON_SIZE +
@@ -415,8 +412,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         }
     }
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
                 geometryNode->SetMarginFrameOffset(OffsetF { maxPaddingStart_.ConvertToPx(), offsetY });
                 titleWrapper->Layout();
@@ -446,10 +442,9 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     }
 
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
-        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
-            geometryNode->SetMarginFrameOffset(OffsetF { maxPaddingStart_.ConvertToPx(),
-                menuHeight_.ConvertToPx() + offsetY});
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            geometryNode->SetMarginFrameOffset(
+                OffsetF { maxPaddingStart_.ConvertToPx(), menuHeight_.ConvertToPx() + offsetY });
             titleWrapper->Layout();
             return;
         }
@@ -544,10 +539,9 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
         TitleBarParentType::NAV_DESTINATION) {
         // subtitle doesn't support custom title
         if (GetNavigationBackButtonState(titleBarNode)) {
-            if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
-                geometryNode->SetMarginFrameOffset(OffsetF { (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE
-                + NAV_HORIZONTAL_MARGIN_M).ConvertToPx(), offsetY });
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+                geometryNode->SetMarginFrameOffset(OffsetF {
+                    (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_M).ConvertToPx(), offsetY });
             } else {
                 geometryNode->SetMarginFrameOffset(OffsetF { (maxPaddingStart_ + BACK_BUTTON_ICON_SIZE
                 + NAV_HORIZONTAL_MARGIN_L).ConvertToPx(), offsetY });
@@ -607,8 +601,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     }
     Dimension occupiedWidth = Dimension(0.0f, DimensionUnit::PX);
     // mini mode + back button
-    if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         occupiedWidth = maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_M;
     } else {
         occupiedWidth = maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + NAV_HORIZONTAL_MARGIN_L;
@@ -639,8 +632,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
         auto offsetX = isCustomMenu ? maxWidth - menuWidth
                                     : (maxWidth - menuWidth - static_cast<float>(maxPaddingEnd_.ConvertToPx()) +
                                           BUTTON_PADDING.ConvertToPx());
-        if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             geometryNode->SetMarginFrameOffset(OffsetF { maxWidth - menuWidth - defaultPaddingStart_.ConvertToPx(),
                 static_cast<float>(menuOffsetY.ConvertToPx()) + overDragOffset / MENU_OFFSET_RATIO });
             menuWrapper->Layout();
@@ -651,8 +643,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
         menuWrapper->Layout();
         return;
     }
-    if (PipelineContext::GetCurrentContext() && (PipelineContext::GetCurrentContext()->GetMinPlatformVersion() <
-        static_cast<int32_t>(PlatformVersion::VERSION_TEN))) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         auto totalHeight = NearZero(subtitleHeight) ? SINGLE_LINE_TITLEBAR_HEIGHT : DOUBLE_LINE_TITLEBAR_HEIGHT;
         geometryNode->SetMarginFrameOffset(OffsetF { maxWidth - menuWidth - defaultPaddingStart_.ConvertToPx(),
             ((totalHeight - menuHeight_).ConvertToPx()) / 2 });

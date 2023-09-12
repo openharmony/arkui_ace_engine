@@ -45,7 +45,6 @@ constexpr uint32_t GRID_COUNTS_4 = 4;
 constexpr uint32_t GRID_COUNTS_6 = 6;
 constexpr uint32_t GRID_COUNTS_8 = 8;
 constexpr uint32_t GRID_COUNTS_12 = 12;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 2;
 
 const std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
@@ -1042,8 +1041,7 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
     auto maxHorizontalSpace = std::max(leftSpace_, rightSpace_) - 2.0f * padding.Width();
     auto maxWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
-    if (PipelineBase::GetCurrentContext() &&
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         maxWidth = std::min(maxHorizontalSpace, maxWidth);
     }
     maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
