@@ -18,9 +18,12 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/render/mock_paragraph.h"
+
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/string_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -28,6 +31,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
@@ -38,6 +42,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/touch_event.h"
+#include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "frameworks/base/window/drag_window.h"
 #include "frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
@@ -45,6 +51,7 @@
 #include "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #include "frameworks/core/components_ng/pattern/text/span_model_ng.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -977,5 +984,241 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
     keyE.pressedCodes = { KeyCode::KEY_ALT_LEFT };
     EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
+}
+
+/**
+ * @tc.name: GetLeftTextOfCursor001
+ * @tc.desc: test GetLeftTextOfCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetLeftTextOfCursor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->textForDisplay_ = "tesol";
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 1;
+    richEditorPattern->textSelector_.baseOffset = 2;
+    richEditorPattern->textSelector_.destinationOffset = 3;
+    auto ret = StringUtils::Str16ToStr8(richEditorPattern->GetLeftTextOfCursor(1));
+    EXPECT_EQ(ret, "e");
+
+    ret = StringUtils::Str16ToStr8(richEditorPattern->GetLeftTextOfCursor(2));
+    EXPECT_EQ(ret, "e");
+
+    richEditorPattern->textSelector_.baseOffset = 2;
+    richEditorPattern->textSelector_.destinationOffset = 2;
+    ret = StringUtils::Str16ToStr8(richEditorPattern->GetLeftTextOfCursor(1));
+    EXPECT_EQ(ret, "t");
+
+    richEditorPattern->textSelector_.baseOffset = 3;
+    richEditorPattern->textSelector_.destinationOffset = 2;
+    ret = StringUtils::Str16ToStr8(richEditorPattern->GetLeftTextOfCursor(1));
+    EXPECT_EQ(ret, "e");
+}
+
+/**
+ * @tc.name: GetRightTextOfCursor001
+ * @tc.desc: test GetRightTextOfCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetRightTextOfCursor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->textForDisplay_ = "tesol";
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 1;
+    richEditorPattern->textSelector_.baseOffset = 2;
+    richEditorPattern->textSelector_.destinationOffset = 3;
+    auto ret = StringUtils::Str16ToStr8(richEditorPattern->GetRightTextOfCursor(2));
+    EXPECT_EQ(ret, "ol");
+
+    richEditorPattern->textSelector_.baseOffset = 2;
+    richEditorPattern->textSelector_.destinationOffset = 2;
+    ret = StringUtils::Str16ToStr8(richEditorPattern->GetRightTextOfCursor(2));
+    EXPECT_EQ(ret, "es");
+}
+
+/**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleTouchEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->textForDisplay_ = "tesol";
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(-1);
+    TouchEventInfo touchInfo("");
+    richEditorPattern->isMousePressed_ = true;
+    richEditorPattern->HandleTouchEvent(touchInfo);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
+
+    richEditorPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(0);
+    richEditorPattern->HandleTouchEvent(touchInfo);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
+
+    TouchLocationInfo touchLocationinfo(0);
+    touchLocationinfo.touchType_ = TouchType::UP;
+    touchInfo.touches_.push_front(touchLocationinfo);
+    richEditorPattern->HandleTouchEvent(touchInfo);
+    EXPECT_FALSE(richEditorPattern->isMousePressed_);
+
+    richEditorPattern->isMousePressed_ = true;
+    touchLocationinfo.touchType_ = TouchType::DOWN;
+    touchInfo.touches_.push_front(touchLocationinfo);
+    richEditorPattern->HandleTouchEvent(touchInfo);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
+}
+
+/**
+ * @tc.name: HandleMouseLeftButton001
+ * @tc.desc: test HandleMouseLeftButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleMouseLeftButton001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    MouseInfo mouseInfo;
+    mouseInfo.action_ = MouseAction::MOVE;
+
+    std::vector<int> returnCases = {
+        0, 2, 3
+    };
+
+    for (auto& i : returnCases) {
+        richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+        richEditorPattern->blockPress_ = i >> 0 & 1;
+        richEditorPattern->leftMousePress_ = i >> 1 & 1;
+        richEditorPattern->HandleMouseLeftButton(mouseInfo);
+        EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::NONE);
+    }
+
+    RefPtr<Paragraph> paragraph = AceType::MakeRefPtr<MockParagraph>();
+    richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    richEditorPattern->blockPress_ = false;
+    richEditorPattern->leftMousePress_ = true;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::MOVE);
+
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    richEditorPattern->isFirstMouseSelect_ = true;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::MOVE);
+
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    richEditorPattern->isFirstMouseSelect_ = false;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::MOVE);
+
+    mouseInfo.action_ = MouseAction::PRESS;
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    mouseInfo.SetGlobalLocation(Offset(2, 5));
+    richEditorPattern->textSelector_.baseOffset = 3;
+    richEditorPattern->textSelector_.destinationOffset = 4;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::PRESSED);
+
+    mouseInfo.action_ = MouseAction::PRESS;
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    mouseInfo.SetGlobalLocation(Offset(2, 5));
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 8;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::PRESSED);
+
+    mouseInfo.action_ = MouseAction::RELEASE;
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::RELEASED);
+
+    mouseInfo.action_ = MouseAction::NONE;
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::NONE);
+}
+
+/**
+ * @tc.name: HandleMouseEvent001
+ * @tc.desc: test HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, HandleMouseEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    MouseInfo mouseInfo;
+
+    mouseInfo.action_ = MouseAction::PRESS;
+    mouseInfo.button_ = MouseButton::LEFT_BUTTON;
+    richEditorPattern->isMousePressed_ = false;
+    richEditorPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
+
+    mouseInfo.button_ = MouseButton::RIGHT_BUTTON;
+    richEditorPattern->isMousePressed_ = false;
+    richEditorPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
+
+    mouseInfo.button_ = MouseButton::BACK_BUTTON;
+    richEditorPattern->isMousePressed_ = false;
+    richEditorPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(richEditorPattern->isMousePressed_);
+}
+
+/**
+ * @tc.name: GetChildByIndex001
+ * @tc.desc: test GetChildByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetChildByIndex001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 0;
+    AddSpan(INIT_VALUE_1);
+    auto ret1 = richEditorPattern->GetChildByIndex(1);
+    EXPECT_EQ(ret1, nullptr);
+    auto ret2 = richEditorPattern->GetChildByIndex(-1);
+    EXPECT_EQ(ret2, nullptr);
+    auto ret3 = richEditorPattern->GetChildByIndex(0);
+    EXPECT_NE(ret3, nullptr);
+}
+
+/**
+ * @tc.name: GetSelectedSpanText001
+ * @tc.desc: test GetSelectedSpanText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetSelectedSpanText001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    std::string ori = "12345";
+    std::wstring value = StringUtils::ToWstring(ori);
+
+    std::vector<int> start = {
+        -1, 0, 15
+    };
+    std::vector<int> end = {
+        10, -3
+    };
+
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 2; ++j) {
+            auto ret = richEditorPattern->GetSelectedSpanText(value, start[i], end[j]);
+            EXPECT_EQ(ret, "");
+        }
+    }
+
+    auto ret = richEditorPattern->GetSelectedSpanText(value, 0, 1);
+    EXPECT_EQ(ret, "1");
 }
 } // namespace OHOS::Ace::NG

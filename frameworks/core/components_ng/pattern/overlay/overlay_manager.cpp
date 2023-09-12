@@ -1156,6 +1156,7 @@ bool OverlayManager::RemoveAllModalInOverlay()
     while (!modalStack_.empty()) {
         auto topModalNode = modalStack_.top().Upgrade();
         if (!topModalNode) {
+            modalStack_.pop();
             continue;
         }
         ModalPageLostFocus(topModalNode);
