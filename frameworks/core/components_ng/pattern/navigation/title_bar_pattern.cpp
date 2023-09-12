@@ -103,6 +103,8 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
+    auto currentFontSize = titleLayoutProperty->GetFontSizeValue(Dimension(0));
+    auto currentMaxLine = titleLayoutProperty->GetMaxLinesValue(0);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
         if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
             titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
@@ -123,7 +125,10 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
     } else {
         titleLayoutProperty->UpdateMaxLines(TITLEBAR_MAX_LINES);
     }
-
+    if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
+        currentMaxLine != titleLayoutProperty->GetMaxLinesValue(0)) {
+        titleLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    }
     titleNode->MarkModifyDone();
 }
 
