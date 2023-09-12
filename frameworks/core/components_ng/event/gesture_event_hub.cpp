@@ -717,7 +717,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
     Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragData dragData { shadowInfo, {}, udKey, static_cast<int32_t>(info.GetSourceDevice()), recordsSize,
-        info.GetPointerId(), info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(),
+        info.GetPointerId(), info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(),
         info.GetTargetDisplayId(), true };
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
         dragData, GetDragCallback(pipeline, eventHub));
