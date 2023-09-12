@@ -209,16 +209,20 @@ void ButtonPattern::OnTouchUp()
     if (toggleButtonPattern) {
         toggleButtonPattern->OnClick();
     }
-    if (buttonEventHub->GetStateEffect() && buttonEventHub->IsEnabled()) {
+    if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
         if (isSetClickedColor_) {
             renderContext->UpdateBackgroundColor(backgroundColor_);
             return;
         }
-        auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
-        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, isNeedToHandleHoverOpacity ? HOVER_OPACITY : 0.0,
-            isNeedToHandleHoverOpacity ? HOVER_TO_TOUCH_DURATION : TOUCH_DURATION,
-            isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
+        if (buttonEventHub->IsEnabled()) {
+            auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
+            AnimateTouchAndHover(renderContext, TOUCH_OPACITY, isNeedToHandleHoverOpacity ? HOVER_OPACITY : 0.0,
+                isNeedToHandleHoverOpacity ? HOVER_TO_TOUCH_DURATION : TOUCH_DURATION,
+                isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
+        } else {
+            AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0, TOUCH_DURATION, Curves::FRICTION);
+        }
     }
 }
 
