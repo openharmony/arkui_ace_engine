@@ -38,6 +38,7 @@ RosenRenderSurface::~RosenRenderSurface()
     } else {
         CHECK_NULL_VOID(producerSurface_);
         auto* surfaceUtils = SurfaceUtils::GetInstance();
+        CHECK_NULL_VOID(surfaceUtils);
         auto ret = surfaceUtils->Remove(producerSurface_->GetUniqueId());
         if (ret != SurfaceError::SURFACE_ERROR_OK) {
             LOGE("remove surface error: %{public}d", ret);
@@ -100,6 +101,7 @@ void RosenRenderSurface::UpdateXComponentConfig()
     CHECK_NULL_VOID(producerSurface_);
 
     auto* surfaceUtils = SurfaceUtils::GetInstance();
+    CHECK_NULL_VOID(surfaceUtils);
     auto ret = surfaceUtils->Add(producerSurface_->GetUniqueId(), producerSurface_);
     if (ret != SurfaceError::SURFACE_ERROR_OK) {
         LOGE("add surface error: %{public}d", ret);
@@ -145,6 +147,10 @@ void RosenRenderSurface::AdjustNativeWindowSize(uint32_t width, uint32_t height)
 
 std::string RosenRenderSurface::GetUniqueId() const
 {
+    if (!producerSurface_) {
+        LOGE("producerSurface_ is nullptr");
+        return "";
+    }
     return std::to_string(producerSurface_->GetUniqueId());
 }
 
