@@ -279,7 +279,7 @@ public:
 
     void SetOutBoundary(double outBoundary)
     {
-        inSpring_ = !NearEqual(outBoundary_, outBoundary, 0.000001f) && !NearZero(outBoundary_);
+        inSpring_ = !NearEqual(outBoundary_, outBoundary, 0.000001f);
         outBoundary_ = outBoundary;
     }
 
