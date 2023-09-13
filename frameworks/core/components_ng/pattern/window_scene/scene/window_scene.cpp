@@ -118,9 +118,14 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
         .width_ = std::round(bounds.z_),
         .height_ = std::round(bounds.w_),
     };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
 
     CHECK_NULL_VOID(session_);
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    if (session_->GetSessionRect() != windowRect || !IsMainWindow()) {
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    }
 }
 
 void WindowScene::BufferAvailableCallback()
