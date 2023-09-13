@@ -2699,15 +2699,15 @@ void TextFieldPattern::ShowSelectOverlay(
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
 
+        bool isHideSelectionMenu = layoutProperty->GetSelectionMenuHiddenValue(false);
         selectInfo.isUsingMouse = pattern->IsUsingMouse();
-
-        if (layoutProperty->GetSelectionMenuHiddenValue(false) && selectInfo.isUsingMouse) {
+        if (isHideSelectionMenu && selectInfo.isUsingMouse) {
             return;
         }
 
         selectInfo.rightClickOffset = pattern->GetRightClickOffset();
         selectInfo.singleLineHeight = pattern->PreferredLineHeight();
-        pattern->UpdateSelectMenuInfo(hasData);
+        pattern->UpdateSelectMenuInfo(hasData, isHideSelectionMenu);
         selectInfo.menuInfo = pattern->GetSelectMenuInfo();
         if (!isMenuShow) {
             selectInfo.menuInfo.menuIsShow = false;
@@ -2771,9 +2771,9 @@ void TextFieldPattern::ShowSelectOverlay(
         auto end = pattern->GetTextSelector().GetEnd();
         selectOverlay->SetSelectInfo(pattern->GetTextEditingValue().GetSelectedText(start, end));
         if (isMenuShow) {
-            selectOverlay->ShowOrHiddenMenu(layoutProperty->GetSelectionMenuHiddenValue(false));
+            selectOverlay->ShowOrHiddenMenu(isHideSelectionMenu);
         }
-        selectOverlay->DisableMenu(layoutProperty->GetSelectionMenuHiddenValue(false));
+        selectOverlay->DisableMenu(isHideSelectionMenu);
     };
     clipboard_->HasData(hasDataCallback);
 }
