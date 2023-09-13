@@ -72,6 +72,7 @@ public:
     }
 
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void Tick(uint64_t duration);
     void InitTextTimerController();
