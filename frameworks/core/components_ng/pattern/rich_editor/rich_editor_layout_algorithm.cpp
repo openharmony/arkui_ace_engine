@@ -51,8 +51,10 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, std::nullopt);
         auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+        CHECK_NULL_RETURN(richEditorTheme, std::nullopt);
         auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
-        return SizeF(contentConstraint.selfIdealSize.Width().value(), defaultCaretHeight);
+        auto width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
+        return SizeF(width, defaultCaretHeight);
     }
 
     SizeF res;
@@ -106,7 +108,7 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     const TextStyle& textStyle, const std::string& content) const
 {
     auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content);
-
+    style.fontSize = textStyle.GetFontSize().ConvertToPx();
     auto&& spanGroup = GetSpans();
     auto&& lineStyle = spanGroup.front()->textLineStyle;
     CHECK_NULL_RETURN(lineStyle, style);

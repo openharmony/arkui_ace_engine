@@ -54,6 +54,7 @@
 #include "base/log/ace_performance_check.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
@@ -61,6 +62,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/image/image_file_cache.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
 #endif
@@ -451,8 +453,8 @@ void UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
             CapabilityRegistry::Register();
-            ImageCache::SetImageCacheFilePath(context->GetCacheDir());
-            ImageCache::SetCacheFileInfo();
+            ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
+            ImageFileCache::GetInstance().SetCacheFileInfo();
         });
     }
 
@@ -742,7 +744,6 @@ void UIContentImpl::CommonInitializeForm(
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     }
 
-
     if (isFormRender_) {
         LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
             formHeight_);
@@ -884,8 +885,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         CapabilityRegistry::Register();
-        ImageCache::SetImageCacheFilePath(context->GetCacheDir());
-        ImageCache::SetCacheFileInfo();
+        ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
+        ImageFileCache::GetInstance().SetCacheFileInfo();
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
@@ -1389,6 +1390,7 @@ bool UIContentImpl::ProcessBackPressed()
                 }
             } else {
                 LOGI("UIContentImpl::ProcessBackPressed AceContainer");
+                PerfMonitor::GetPerfMonitor()->RecordInputEvent(LAST_UP, UNKNOWN_SOURCE, 0);
                 if (Platform::AceContainer::OnBackPressed(instanceId_)) {
                     LOGI("UIContentImpl::ProcessBackPressed AceContainer return true");
                     ret = true;

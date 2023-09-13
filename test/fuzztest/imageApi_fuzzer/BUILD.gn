@@ -91,7 +91,6 @@ ohos_fuzztest("ImageApiFuzzTest") {
     "$ace_root/frameworks/core/common/flutter/flutter_asset_manager.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/ace_trace_mock.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/event_report_mock.cpp",
-    "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
     "$ace_root/frameworks/core/image/image_compressor.cpp",
     "$ace_root/frameworks/core/image/image_object.cpp",

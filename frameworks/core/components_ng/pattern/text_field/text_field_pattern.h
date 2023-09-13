@@ -171,6 +171,9 @@ public:
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
             paint->SetScrollBar(scrollBar);
+            if (scrollBar->NeedPaint()) {
+                textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect(), scrollBar->GetBarRect());
+            }
         }
         return paint;
     }
@@ -936,13 +939,13 @@ public:
         return selectMenuInfo_;
     }
 
-    void UpdateSelectMenuInfo(bool hasData)
+    void UpdateSelectMenuInfo(bool hasData, bool isHideSelectionMenu)
     {
         selectMenuInfo_.showCopy = !GetEditingValue().text.empty() && AllowCopy() && IsSelected();
         selectMenuInfo_.showCut = selectMenuInfo_.showCopy && !GetEditingValue().text.empty() && IsSelected();
         selectMenuInfo_.showCopyAll = !GetEditingValue().text.empty() && !IsSelectAll();
         selectMenuInfo_.showPaste = hasData;
-        selectMenuInfo_.menuIsShow = !GetEditingValue().text.empty() || hasData;
+        selectMenuInfo_.menuIsShow = (!GetEditingValue().text.empty() || hasData) && !isHideSelectionMenu;
     }
 
     bool IsSearchParentNode() const;

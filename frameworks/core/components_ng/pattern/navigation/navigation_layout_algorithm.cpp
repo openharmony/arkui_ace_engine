@@ -249,8 +249,8 @@ void NavigationLayoutAlgorithm::GetRange(const RefPtr<NavigationGroupNode>& host
     userSetNavBarWidthFlag_ = navigationPattern->GetUserSetNavBarWidthFlag();
 }
 
-void NavigationLayoutAlgorithm::UpdateNavigationMode(
-    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& frameSize)
+void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty,
+    const SizeF& frameSize, const RefPtr<NavigationGroupNode>& hostNode)
 {
     auto usrNavigationMode = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -269,6 +269,10 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(
         } else {
             usrNavigationMode = NavigationMode::STACK;
         }
+    }
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    if (navigationPattern->GetNavigationMode() != usrNavigationMode) {
+        navigationPattern->SetNavigationModeChange(true);
     }
     SetNavigationMode(usrNavigationMode);
 }
@@ -453,7 +457,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     GetRange(hostNode);
-    UpdateNavigationMode(navigationLayoutProperty, size);
+    UpdateNavigationMode(navigationLayoutProperty, size, hostNode);
     SizeCalculation(layoutWrapper, hostNode, navigationLayoutProperty, size);
 
     MeasureNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize_);

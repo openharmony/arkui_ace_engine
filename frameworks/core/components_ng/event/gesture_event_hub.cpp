@@ -504,7 +504,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
     if (frameTag == V2::WEB_ETS_TAG) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
-    } else if (!NearEqual(scale, 1.0f)) {
+    } else if (!NearEqual(scale, DEFALUT_DRAG_PPIXELMAP_SCALE)) {
         result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
         result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
     } else if (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
@@ -617,8 +617,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #if defined(ENABLE_DRAG_FRAMEWORK) && defined(ENABLE_ROSEN_BACKEND) && defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.customNode) {
         g_getPixelMapSucc = false;
-        auto callback = [pipeline, info, gestureEventHubPtr = AceType::Claim(this), frameNode, dragDropInfo,
-                            event](std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg) {
+        auto callback = [pipeline, info, gestureEventHubPtr = AceType::Claim(this), frameNode, dragDropInfo, event](
+                            std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
             if (pixelMap == nullptr) {
                 LOGW("%{public}s: failed to get pixelmap, return nullptr", __func__);
                 g_getPixelMapSucc = false;
@@ -637,7 +637,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 TaskExecutor::TaskType::UI);
         };
         auto customNode = AceType::DynamicCast<FrameNode>(dragDropInfo.customNode);
-        NG::ComponentSnapshot::Create(customNode, std::move(callback), CREATE_PIXELMAP_TIME);
+        NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
         return;
     }
 #endif
@@ -708,7 +708,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             pixelMap = pixelMap_->GetPixelMapSharedPtr();
         }
     }
-    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
+    float scale = GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth()) * DEFALUT_DRAG_PPIXELMAP_SCALE;
     pixelMap->scale(scale, scale);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -720,7 +720,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
     Msdp::DeviceStatus::ShadowInfo shadowInfo { pixelMap, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragData dragData { shadowInfo, {}, udKey, static_cast<int32_t>(info.GetSourceDevice()), recordsSize,
-        info.GetPointerId(), info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(),
+        info.GetPointerId(), info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(),
         info.GetTargetDisplayId(), true };
     ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(
         dragData, GetDragCallback(pipeline, eventHub));

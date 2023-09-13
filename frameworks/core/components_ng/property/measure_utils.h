@@ -88,6 +88,9 @@ void SetCrossAxisSize(float value, Axis axis, OptionalSizeF& size);
 
 void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
 
+void UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
+    const std::optional<CalcSize>& calcLayoutConstraintMaxMinSize, const SizeT<float> percentReference, bool IsMaxSize);
+
 /**
  * @brief Create node IdealSize.
  *
@@ -131,6 +134,16 @@ OptionalSizeF CreateIdealSizeByPercentRef(
  * @param padding the padding property of this node.
  */
 void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding);
+
+/**
+ * @brief Calculate IdeaSize by maxSize and minSize, while keeping margin unaffected by margin.
+ *
+ * @param frameSize the current size of node.
+ * @param calcLayoutConstraint the calcLayoutConstraint of this node.
+ * @param percentReference the percentReference of this node.
+ */
+OptionalSizeF UpdateOptionSizeByCalcLayoutConstraint(const OptionalSize<float>& frameSize,
+    const std::unique_ptr<MeasureProperty>& calcLayoutConstraint, const SizeT<float> percentReference);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H

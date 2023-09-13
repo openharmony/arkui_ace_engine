@@ -147,6 +147,15 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 layoutConstraint->minSize.Width());
         frameSize.SetWidth(width);
     }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    } else {
+        auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
+            layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+            layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        frameSize.SetWidth(finalSize.Width());
+        frameSize.SetHeight(finalSize.Height());
+    }
     if (layoutConstraint->maxSize.Height() < layoutConstraint->minSize.Height()) {
         frameSize.SetHeight(layoutConstraint->minSize.Height());
     }
@@ -190,7 +199,14 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
     auto idealSize = SizeF { idealWidth, idealHeight };
-    idealSize.UpdateSizeWhenSmaller(contentConstraint.maxSize);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        idealSize.UpdateSizeWhenSmaller(contentConstraint.maxSize);
+    } else {
+        auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(static_cast<OptionalSize<float>>(idealSize),
+            layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+            layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+        idealSize.UpdateSizeWhenSmaller(finalSize.ConvertToSizeT());
+    }
     idealWidth = idealSize.Width();
     idealHeight = idealSize.Height();
     auto isInlineStyle = pattern->IsNormalInlineState();
@@ -280,7 +296,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
 
     // counterParagraph Layout.
-    if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength()) {
+    if (textFieldLayoutProperty->GetShowCounterValue(false) && textFieldLayoutProperty->HasMaxLength() &&
+        !isInlineStyle) {
         auto textLength = showPlaceHolder ? 0 : StringUtils::ToWstring(textContent).length();
         auto maxLength = textFieldLayoutProperty->GetMaxLength().value();
         CreateCounterParagraph(textLength, maxLength, textFieldTheme);
@@ -307,6 +324,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
     if (textContent.empty() || showPlaceHolder) {
         preferredHeight = pattern->PreferredLineHeight();
+    }
+    if (isInlineStyle && showPlaceHolder && !textContent.empty()) {
+        preferredHeight = static_cast<float>(paragraph_->GetHeight());
     }
 #ifndef USE_GRAPHIC_TEXT_GINE // support sigleline
     if (isInlineStyle && pattern->IsFocus()) {

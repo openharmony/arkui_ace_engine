@@ -29,22 +29,30 @@ namespace OHOS::Ace::NG {
 namespace {
 class CustomizedCallback : public Rosen::SurfaceCaptureCallback {
 public:
-    explicit CustomizedCallback(ComponentSnapshot::JsCallback&& jsCallback) : callback_(std::move(jsCallback)) {}
+    CustomizedCallback(ComponentSnapshot::JsCallback&& jsCallback, RefPtr<FrameNode> node)
+        : callback_(std::move(jsCallback)), node_(node)
+    {}
     ~CustomizedCallback() override = default;
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
-        CHECK_NULL_VOID(callback_);
+        if (callback_ == nullptr) {
+            Inspector::RemoveOffscreenNode(node_);
+            return;
+        }
         if (!pixelMap) {
             LOGW("snapshot creation failed");
-            callback_(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR);
+            callback_(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR,
+                [node = node_]() { Inspector::RemoveOffscreenNode(node); });
         } else {
             LOGI("snapshot created successfully");
-            callback_(pixelMap, Framework::ERROR_CODE_NO_ERROR);
+            callback_(
+                pixelMap, Framework::ERROR_CODE_NO_ERROR, [node = node_]() { Inspector::RemoveOffscreenNode(node); });
         }
     }
 
 private:
     ComponentSnapshot::JsCallback callback_;
+    RefPtr<FrameNode> node_;
 };
 } // namespace
 
@@ -62,21 +70,22 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
     auto node = Inspector::GetFrameNodeByKey(componentId);
     if (!node) {
         LOGW("node not found %{public}s", componentId.c_str());
-        callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR);
+        callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
     auto rsNode = GetRsNode(node);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     LOGI("TakeSurfaceCaptureForUI");
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback)));
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr));
 }
 
-void ComponentSnapshot::Create(const RefPtr<AceType>& customNode, JsCallback&& callback, const int32_t delayTime)
+void ComponentSnapshot::Create(
+    const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime)
 {
     auto node = AceType::DynamicCast<FrameNode>(customNode);
     if (!node) {
         LOGW("builder is invalid");
-        callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR);
+        callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
 
@@ -84,17 +93,22 @@ void ComponentSnapshot::Create(const RefPtr<AceType>& customNode, JsCallback&& c
     LOGD("ProcessOffscreenNode finished, root size = %{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str());
 
+    if (enableInspector) {
+        Inspector::AddOffscreenNode(node);
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
 
     executor->PostDelayedTask(
-        [callback, node]() mutable {
+        [callback, node, enableInspector]() mutable {
             auto rsNode = GetRsNode(node);
             LOGI("TakeSurfaceCaptureForUI rootNode = %{public}s", node->GetTag().c_str());
             auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-            rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback)));
+            rsInterface.TakeSurfaceCaptureForUI(
+                rsNode, std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr));
         },
         TaskExecutor::TaskType::UI, delayTime);
 }

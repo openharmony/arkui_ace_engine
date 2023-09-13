@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 #include "core/animation/spring_curve.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -60,8 +61,7 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         return;
     }
     RefPtr<ImageLayoutProperty> backButtonImageLayoutProperty;
-    if (PipelineContext::GetCurrentContext() && PipelineContext::GetCurrentContext()
-            ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     } else {
         auto buttonNode = backButtonNode->GetChildren().front();

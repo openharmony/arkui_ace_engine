@@ -23,6 +23,7 @@
 #include "base/utils/device_config.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -48,8 +49,6 @@ constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
 constexpr Dimension listPaddingHeight = 48.0_vp;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
-
 } // namespace
 
 void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -376,7 +375,7 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF
         }
         return true;
     }
-    bool version10OrLarger = PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN;
+    bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (version10OrLarger && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
             topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;

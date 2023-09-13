@@ -2836,7 +2836,7 @@ void FrontendDelegateDeclarative::GetSnapshot(
 }
 
 void FrontendDelegateDeclarative::CreateSnapshot(
-    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback)
+    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     ViewStackModel::GetInstance()->NewScope();
@@ -2844,7 +2844,7 @@ void FrontendDelegateDeclarative::CreateSnapshot(
     customBuilder();
     auto customNode = ViewStackModel::GetInstance()->Finish();
 
-    NG::ComponentSnapshot::Create(customNode, std::move(callback));
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector);
 #endif
 }
 } // namespace OHOS::Ace::Framework

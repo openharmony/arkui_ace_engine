@@ -235,9 +235,6 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     auto paraStyle = GetParagraphStyle(textStyle, content);
-    if (paragraph_) {
-        return true;
-    }
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph_, false);
     paragraph_->PushStyle(textStyle);
@@ -906,8 +903,7 @@ ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
-        .textOverflow = textStyle.GetTextOverflow(),
-        .fontSize = textStyle.GetFontSize().ConvertToPx()
+        .textOverflow = textStyle.GetTextOverflow()
     };
 }
 } // namespace OHOS::Ace::NG

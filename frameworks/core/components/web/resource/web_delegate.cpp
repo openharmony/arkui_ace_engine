@@ -47,7 +47,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
-#include "nweb_helper.h"
+#include "nweb_system_properties.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "transaction/rs_interfaces.h"
@@ -2520,7 +2520,7 @@ void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
     }
     surfaceOcclusion_ = occlusion;
 
-    if (!NWebHelper::GetWebOptimizationValue()) {
+    if (!NWebSystemProperties::GetWebOptimizationValue()) {
         LOGD("web optimization switch is closed.");
         return;
     }
@@ -2734,7 +2734,8 @@ void WebDelegate::Resize(const double& width, const double& height)
         [weak = WeakClaim(this), width, height]() {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_ && !delegate->window_) {
-                delegate->nweb_->Resize(width, height);
+                // Sur need int value, greater than this value in case show black line.
+                delegate->nweb_->Resize(std::ceil(width), std::ceil(height));
                 double offsetX = 0;
                 double offsetY = 0;
                 delegate->UpdateScreenOffSet(offsetX, offsetY);
@@ -3594,6 +3595,14 @@ void WebDelegate::NotifyMemoryLevel(int32_t level)
             }
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::SetAudioMuted(bool muted)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetAudioMuted(muted);
+    }
 }
 
 void WebDelegate::Zoom(float factor)

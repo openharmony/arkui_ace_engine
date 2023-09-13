@@ -89,7 +89,7 @@ public:
         auto focusColor = theme->GetGridItemFocusColor();
         FocusPaintParam focusPaintParam;
         focusPaintParam.SetPaintColor(focusColor);
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
+        return { FocusType::SCOPE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override

@@ -320,7 +320,7 @@ void EventReport::ReportEventComplete(DataBase& data)
     const auto& e2eLatency = animationStartLantency + animationEndLantency;
     const auto& note = data.baseInfo.note;
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_APP_PID, appPid,
         EVENT_KEY_BUNDLE_NAME, bundleName,
         EVENT_KEY_PROCESS_NAME, processName,
@@ -357,7 +357,7 @@ void EventReport::ReportEventJankFrame(DataBase& data)
     const auto& maxSeqMissedFrames = data.maxSuccessiveFrames;
     const auto& note = data.baseInfo.note;
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
-        OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_UNIQUE_ID, static_cast<int32_t>(uniqueId),
         EVENT_KEY_SCENE_ID, sceneId,
         EVENT_KEY_PROCESS_NAME, processName,

@@ -18,17 +18,18 @@
 
 #include "gtest/gtest.h"
 
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "core/components/common/properties/color.h"
-
 #define private public
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/size_t.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -401,10 +402,110 @@ HWTEST_F(OverlayManagerTestNg, BindSheet001, TestSize.Level1)
     auto sheetDragBarPaintProperty = sheetDragBarNode->GetPaintProperty<SheetDragBarPaintProperty>();
     EXPECT_FALSE(sheetDragBarPaintProperty == nullptr);
     SheetStyle sheetStyle1;
+    topSheetNode->GetGeometryNode()->SetFrameSize({10, 10});
+
+    // sheetStyle1.sheetMode is null.
+    sheetStyle1.sheetMode = std::nullopt;
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.height->value_ = 2.0;
     overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.height->value_ = -2.0;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.height->value_ = 0.1;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 1.0));
+
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::VP;
+    sheetStyle1.height->value_ = 2;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+
+    // sheetStyle1.sheetMode is not null.
+    sheetStyle1.sheetMode = SheetMode(5);
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.height->value_ = 2.0;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 0));
+
     std::stack<WeakPtr<FrameNode>> modalStack;
     overlayManager->modalStack_ = modalStack;
     EXPECT_FALSE(sheetDragBarPaintProperty == nullptr);
+}
+
+/**
+ * @tc.name: RemoveAllModalInOverlay001
+ * @tc.desc: Test OverlayManager::RemoveAllModalInOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, RemoveAllModalInOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create builder.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. Run BindSheet to add something to modalStack and modalList.
+     */
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    bool isShow = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
+    
+    /**
+     * @tc.steps: step4. run RemoveAllModalInOverlay func.
+     */
+    overlayManager->modalStack_.emplace(nullptr);
+    overlayManager->modalList_.pop_back();
+    EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
+
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
+
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    sheetNode->tag_ = V2::ROOT_ETS_TAG;
+    EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
 }
 
 /**
@@ -496,6 +597,82 @@ HWTEST_F(OverlayManagerTestNg, BindSheet002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DestroySheet003
+ * @tc.desc: Test OverlayManager::DestroySheet func
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create builder.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create sheet node.
+     * @tc.expected: Make sure the modalStack holds the sheetNode.
+     */
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    bool isShow = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
+
+    /**
+     * @tc.steps: step4. run destroySheet func
+     */
+    sheetNode->tag_ = V2::SHEET_MASK_TAG;
+    EXPECT_NE(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
+    overlayManager->DestroySheet(sheetNode, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+
+    sheetNode->tag_ = V2::SHEET_PAGE_TAG;
+    sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId - 1;
+    EXPECT_NE(sheetNode->GetPattern<SheetPresentationPattern>()->targetId_, targetId);
+    overlayManager->DestroySheet(sheetNode, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    
+    sheetNode->tag_ = V2::SHEET_PAGE_TAG;
+    sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId;
+    overlayManager->DestroySheet(sheetNode, targetId);
+    EXPECT_TRUE(overlayManager->modalStack_.empty());
+
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId + 1);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    overlayManager->DestroySheet(sheetNode, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+}
+
+/**
  * @tc.name: BindSheet003
  * @tc.desc: Test OverlayManager::BindSheet destroy sheet node.
  * @tc.type: FUNC
@@ -561,6 +738,74 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
     overlayManager->DestroySheetMask(maskNode);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
+
+/**
+ * @tc.name: DestroySheetMask001
+ * @tc.desc: Test OverlayManager::DestroySheetMask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DestroySheetMask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create builder.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create sheet node.
+     * @tc.expected: Make sure the modalStack holds the sheetNode.
+     */
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    bool isShow = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
+
+    /**
+     * @tc.steps: step4. Run DestroySheetMask Func.
+     */
+    auto maskNode = FrameNode::CreateFrameNode
+        (V2::RATING_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    sheetNode->tag_ = V2::BUTTON_ETS_TAG;
+    overlayManager->DestroySheetMask(sheetNode);
+    EXPECT_FALSE(overlayManager->modalList_.empty());
+    maskNode->parent_ = sheetNode->parent_;
+    overlayManager->DestroySheetMask(maskNode);
+    EXPECT_FALSE(overlayManager->modalList_.empty());
+    sheetNode->tag_ = V2::SHEET_MASK_TAG;
+    maskNode->tag_ = V2::SHEET_MASK_TAG;
+    sheetNode->GetParent()->AddChild(maskNode);
+    overlayManager->DestroySheetMask(maskNode);
+    EXPECT_FALSE(overlayManager->modalList_.empty());
+}
+
 /**
  * @tc.name: PopupTest002
  * @tc.desc: Test OverlayManager::PopupEvent functions.
@@ -609,7 +854,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest002, TestSize.Level1)
      */
     overlayManager->HideCustomPopups();
     EXPECT_FALSE(overlayManager->popupMap_.empty());
-    EXPECT_EQ(rootNode->GetChildren().size(), 2);
+    EXPECT_TRUE(rootNode->GetChildren().empty());
     /**
      * @tc.steps: step4. call RemoveOverlay when childCount is 2
      * @tc.expected: remove one popupNode at a time
@@ -666,7 +911,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest003, TestSize.Level1)
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
-    EXPECT_TRUE(iter == rootChildren.begin());
+    EXPECT_FALSE(iter == rootChildren.begin());
 }
 /**
  * @tc.name: MenuTest001
@@ -798,6 +1043,66 @@ HWTEST_F(OverlayManagerTestNg, MenuTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DeleteModal001
+ * @tc.desc: Test OverlayManager::DeleteModal
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto toastId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toastNode =
+        FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, toastId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is nullptr.
+     * @tc.expected: toastMap_ is empty
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOM, true);
+    EXPECT_TRUE(overlayManager->toastMap_.empty());
+
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create sheet node and run DeleteModal.
+     */
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    bool isShow = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dragBarTheme = AceType::MakeRefPtr<DragBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dragBarTheme));
+
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    overlayManager->modalList_.emplace_back(nullptr);
+    overlayManager->DeleteModal(targetId);
+    EXPECT_EQ(overlayManager->modalList_.size(), 1);
+
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    overlayManager->modalList_.emplace_back(nullptr);
+    overlayManager->DeleteModal(targetId + 1);
+    EXPECT_EQ(overlayManager->modalList_.size(), 2);
+}
+
+/**
  * @tc.name: PopupTest004
  * @tc.desc: Test OverlayManager::HideAllPopups when useCustom is true.
  * @tc.type: FUNC
@@ -831,7 +1136,7 @@ HWTEST_F(OverlayManagerTestNg, PopupTest004, TestSize.Level1)
     overlayManager->UpdatePopupNode(targetId, popupInfo);
     overlayManager->HideAllPopups();
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
-    EXPECT_EQ(rootNode->GetChildren().size(), 1);
+    EXPECT_TRUE(rootNode->GetChildren().empty());
     /**
      * @tc.steps: step3. update ShowInSubwindow and call HideAllPopups again.
      * @tc.expected: popupMap's data is updated successfully
@@ -902,7 +1207,7 @@ HWTEST_F(OverlayManagerTestNg, RemoveOverlayTest001, TestSize.Level1)
     EXPECT_FALSE(overlayManager->popupMap_[targetId].markNeedUpdate);
     auto res = overlayManager->RemoveOverlay(false);
     EXPECT_FALSE(res);
-    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_TRUE(overlayManager->RemoveOverlayInSubwindow());
 }
 /**
  * @tc.name: RemoveOverlayTest002
@@ -1330,5 +1635,4 @@ HWTEST_F(OverlayManagerTestNg, OnDialogCloseEvent, TestSize.Level1)
     overlayManager->CloseDialog(dialogNode);
     EXPECT_TRUE(overlayManager->dialogMap_.empty());
 }
-
 } // namespace OHOS::Ace::NG

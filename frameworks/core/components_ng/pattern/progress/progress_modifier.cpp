@@ -627,8 +627,6 @@ void ProgressModifier::SetLinearSweepEffect(bool value)
 
 void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto contentSize = contentSize_->Get();
     auto& canvas = context.canvas;
     if (progressType_->Get() == static_cast<int32_t>(ProgressType::LINEAR)) {
@@ -636,7 +634,7 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
     } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::RING)) {
         PaintRing(canvas, offset_->Get(), contentSize);
     } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::SCALE)) {
-        if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             PaintScaleRingForApiNine(canvas, offset_->Get(), contentSize);
         } else {
             PaintScaleRing(canvas, offset_->Get(), contentSize);
@@ -644,7 +642,7 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
     } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::MOON)) {
         PaintMoon(canvas, offset_->Get(), contentSize);
     } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::CAPSULE)) {
-        if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             if (contentSize.Width() >= contentSize.Height()) {
                 PaintCapsuleForApiNine(canvas, offset_->Get(), contentSize);
             } else {

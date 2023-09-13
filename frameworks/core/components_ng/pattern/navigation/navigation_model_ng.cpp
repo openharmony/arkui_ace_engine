@@ -709,6 +709,7 @@ void NavigationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
         }
         // update title content only without changing node
         titleProperty->UpdateContent(title);
+        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::NONE);
         navBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;

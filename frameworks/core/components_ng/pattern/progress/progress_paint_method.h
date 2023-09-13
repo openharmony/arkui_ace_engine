@@ -54,10 +54,8 @@ public:
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         CHECK_NULL_VOID(progressModifier_);
-        if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             GetThemeDataForApiNine();
         } else {
             GetThemeData();

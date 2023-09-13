@@ -749,9 +749,7 @@ HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
     EXPECT_FALSE(scrollBar->NeedPaint());
     auto modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
     auto scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
-    scrollPaint->UpdateOverlayModifier(&paintWrapper);
-    DrawingContext drawingContext = { canvas, DEVICE_WIDTH, DEVICE_HEIGHT};
-    scrollBarOverlayModifier->onDraw(drawingContext);
+    EXPECT_EQ(scrollBarOverlayModifier, nullptr);
 
     /**
      * @tc.steps: step2. Axis::Vertical
@@ -766,6 +764,7 @@ HWTEST_F(ScrollTestNg, PaintMethod001, TestSize.Level1)
     modifier = scrollPaint->GetOverlayModifier(&paintWrapper);
     scrollBarOverlayModifier = AceType::DynamicCast<ScrollBarOverlayModifier>(modifier);
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
+    DrawingContext drawingContext = { canvas, DEVICE_WIDTH, DEVICE_HEIGHT};
     scrollBarOverlayModifier->onDraw(drawingContext);
 
     CreateScroll([this](ScrollModelNG scrollModel) {

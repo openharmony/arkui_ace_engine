@@ -43,7 +43,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
-    if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return MeasureContentForApiNine(contentConstraint, layoutWrapper);
     }
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();

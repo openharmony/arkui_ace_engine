@@ -88,7 +88,7 @@ void ConvertToRsData(OHOS::Rosen::DataBaseRs &dataRs, DataBase& data)
     dataRs.eventType = static_cast<int32_t>(data.eventType);
     dataRs.sceneId = data.sceneId;
     dataRs.appPid = data.baseInfo.pid;
-    dataRs.uniqueId = data.inputTime / NS_TO_MS;
+    dataRs.uniqueId = data.beginVsyncTime / NS_TO_MS;
     dataRs.inputTime = data.inputTime;
     dataRs.beginVsyncTime = data.beginVsyncTime;
     dataRs.endVsyncTime = data.endVsyncTime;

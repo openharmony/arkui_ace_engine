@@ -19,10 +19,11 @@
 
 namespace OHOS::Ace::NG {
 RefPtr<MockParagraph> MockParagraph::paragraph_;
+bool MockParagraph::enabled_ = true;
 
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
-    return MockParagraph::paragraph_;
+    return MockParagraph::enabled_ ? MockParagraph::paragraph_ : nullptr;
 }
 
 RefPtr<MockParagraph> MockParagraph::GetOrCreateMockParagraph()

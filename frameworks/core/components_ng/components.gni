@@ -111,6 +111,11 @@ template("build_component_ng") {
           "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
           "$skia_root_new:skia_$platform",
         ]
+        if (enable_graphic_text_gine) {
+          deps -=
+              [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform" ]
+          deps += [ "$ace_flutter_engine_root:flutter_engine_fml_$platform" ]
+        }
       } else {
         deps += [
           "$ace_flutter_engine_root:third_party_flutter_engine_$platform",

@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
+#include <algorithm>
 #include <chrono>
 
 #include "base/geometry/ng/offset_t.h"
@@ -2761,6 +2762,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         pattern->CopySelectionMenuParams(selectInfo);
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
     };
+    CHECK_NULL_VOID(clipboard_);
     clipboard_->HasData(hasDataCallback);
 }
 
@@ -3313,7 +3315,7 @@ std::vector<RSTypographyProperties::TextBox> RichEditorPattern::GetTextBoxes()
 std::vector<RSTextRect> RichEditorPattern::GetTextBoxes()
 #endif
 {
-    auto selectedRects = paragraphs_.GetRects(textSelector_.GetStart(), textSelector_.GetEnd());
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::vector<RSTypographyProperties::TextBox> res;
 #else
@@ -3331,7 +3333,7 @@ std::vector<RSTextRect> RichEditorPattern::GetTextBoxes()
 
 float RichEditorPattern::GetLineHeight() const
 {
-    auto selectedRects = paragraphs_.GetRects(textSelector_.GetStart(), textSelector_.GetEnd());
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     CHECK_NULL_RETURN(selectedRects.size(), 0.0f);
     return selectedRects.front().Height();
 }

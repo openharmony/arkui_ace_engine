@@ -39,6 +39,7 @@
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #ifndef NEW_SKIA
 #include "core/components/common/painter/flutter_decoration_painter.h"
 #endif
@@ -54,7 +55,6 @@ namespace {
 constexpr double HANGING_PERCENT = 0.8;
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
-constexpr int32_t PLATFORM_VERSION_TEN = 10;
 const std::string UNSUPPORTED = "data:image/png";
 const std::string URL_PREFIX = "data:";
 const std::string URL_SYMBOL = ";base64,";
@@ -211,8 +211,8 @@ void OffscreenCanvasPaintMethod::DrawImage(
     }
 #else
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                        ? Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_, Size(width, height))
-                        : Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_);
+                     ? Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_, Size(width, height))
+                     : Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_);
     CHECK_NULL_VOID(image);
 
     const auto rsCanvas = rsCanvas_.get();
@@ -614,9 +614,7 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
 void OffscreenCanvasPaintMethod::PaintText(
     const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke, bool hasShadow)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    if (pipelineContext->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         paragraph_->Layout(FLT_MAX);
     } else {
         paragraph_->Layout(width_);
@@ -953,7 +951,7 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
 #else
     RSBitmap tempCache;
     tempCache.Build(width_, height_, { RSColorType::COLORTYPE_BGRA_8888,
-        (mimeType == IMAGE_JPEG) ? RSAlphaType::ALPHATYPE_OPAQUE : RSAlphaType::ALPHATYPE_UNPREMUL });
+            (mimeType == IMAGE_JPEG) ? RSAlphaType::ALPHATYPE_OPAQUE : RSAlphaType::ALPHATYPE_UNPREMUL });
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
     double viewScale = context->GetViewScale();

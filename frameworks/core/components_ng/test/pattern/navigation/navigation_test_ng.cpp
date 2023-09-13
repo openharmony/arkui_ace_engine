@@ -1612,7 +1612,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
     auto newNavDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
     ASSERT_NE(newNavDestinationPattern, nullptr);
     preNavDestinationPattern->isOnShow_ = true;
-    // newNavDestinationPattern->isOnShow_ = true;
     ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
 
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;

@@ -186,9 +186,9 @@ template("ace_core_source_set") {
 
       # image
       "image/animated_image_player.cpp",
-      "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
       "image/image_compressor.cpp",
+      "image/image_file_cache.cpp",
       "image/image_loader.cpp",
       "image/image_object.cpp",
       "image/image_object_animated.cpp",
@@ -698,9 +698,9 @@ template("ace_core_ng_source_set") {
 
       # image
       "image/animated_image_player.cpp",
-      "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
       "image/image_compressor.cpp",
+      "image/image_file_cache.cpp",
       "image/image_loader.cpp",
       "image/image_object.cpp",
       "image/image_object_animated.cpp",
@@ -931,6 +931,7 @@ template("ace_core_ng_source_set") {
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
         "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+        "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export",
       ]
       if (is_ohos) {
         external_deps += [ "graphic_2d:libtexgine" ]

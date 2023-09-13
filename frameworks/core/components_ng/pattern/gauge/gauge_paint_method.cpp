@@ -21,8 +21,10 @@
 #include "core/common/container.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/pattern/gauge/gauge_paint_property.h"
+#include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 
@@ -235,7 +237,7 @@ void GaugePaintMethod::NewPaint(RSCanvas& canvas, PaintWrapper* paintWrapper) co
     auto theme = pipelineContext->GetTheme<ProgressTheme>();
     data.thickness = theme->GetTrackThickness().ConvertToPx();
     CalculateStartAndSweepDegree(paintProperty, data);
-    switch (paintProperty->GetGaugeTypeValue()) {
+    switch (paintProperty->GetGaugeTypeValue(GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT)) {
         case GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT: {
             PaintMultiSegmentGradientCircular(canvas, data, paintProperty);
             break;
@@ -297,7 +299,7 @@ void GaugePaintMethod::PaintMonochromeCircular(
     canvas.DetachPen();
 
     data.sweepDegree = data.sweepDegree * ratio;
-    NewDrawIndicator(canvas, data);
+    NewDrawIndicator(canvas, paintProperty, data);
 }
 
 void GaugePaintMethod::PaintMonochromeCircularShadow(RSCanvas& canvas, const RenderRingInfo& data, const Color& color,
@@ -349,8 +351,7 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircular(
             pos.emplace_back(colorStop.second.Value());
         }
     } else {
-        colors.emplace_back((Color::BLACK).GetValue());
-        pos.emplace_back(1.0f);
+        CreateDefaultColor(colors, pos);
     }
 
     PaintSingleSegmentGradientCircularShadow(canvas, data, paintProperty, colors, pos);
@@ -377,7 +378,7 @@ void GaugePaintMethod::PaintSingleSegmentGradientCircular(
     auto ratio = GetValueRatio(paintProperty);
     data.startDegree = QUARTER_CIRCLE;
     data.sweepDegree = data.sweepDegree * ratio;
-    NewDrawIndicator(canvas, data);
+    NewDrawIndicator(canvas, paintProperty, data);
 }
 
 void GaugePaintMethod::PaintSingleSegmentGradientCircularShadow(RSCanvas& canvas, const RenderRingInfo& data,
@@ -469,9 +470,9 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircular(
         info.drawSweepDegree = (weights[index] / totalWeight) * sweepDegree;
         info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
         info.colorStopArray = colors.at(index);
-        DrawSingleSegmentGradient(canvas, data, info, index);
+        DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
     }
-    NewDrawIndicator(canvas, data);
+    NewDrawIndicator(canvas, paintProperty, data);
 }
 
 void GaugePaintMethod::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas, const RenderRingInfo& data,
@@ -503,13 +504,13 @@ void GaugePaintMethod::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas,
         info.drawSweepDegree = (weights[index] / totalWeight) * data.sweepDegree;
         info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
         info.colorStopArray = colors.at(index);
-        DrawSingleSegmentGradient(canvas, data, info, index);
+        DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
     }
     canvas.Restore();
 }
 
-void GaugePaintMethod::DrawSingleSegmentGradient(
-    RSCanvas& canvas, const RenderRingInfo& data, const SingleSegmentGradientInfo& info, const size_t index) const
+void GaugePaintMethod::DrawSingleSegmentGradient(RSCanvas& canvas, const RenderRingInfo& data,
+    const RefPtr<GaugePaintProperty>& paintProperty, const SingleSegmentGradientInfo& info, const size_t index) const
 {
     auto drawStartDegree = info.drawStartDegree;
     auto drawSweepDegree = info.drawSweepDegree;
@@ -536,7 +537,7 @@ void GaugePaintMethod::DrawSingleSegmentGradient(
         filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL, info.shadowRadius));
         pen.SetFilter(filter);
     } else {
-        NewDrawIndicator(canvas, data);
+        NewDrawIndicator(canvas, paintProperty, data);
     }
 
     if (index != 0) {
@@ -663,11 +664,22 @@ float GaugePaintMethod::GetValueRatio(const RefPtr<GaugePaintProperty>& paintPro
     return (value - min) / (max - min);
 }
 
-void GaugePaintMethod::NewDrawIndicator(RSCanvas& canvas, const RenderRingInfo& data) const
+void GaugePaintMethod::NewDrawIndicator(
+    RSCanvas& canvas, const RefPtr<GaugePaintProperty>& paintProperty, const RenderRingInfo& data) const
 {
-    RSPath path;
+    CHECK_NULL_VOID(paintProperty);
+    if (!(paintProperty->GetIsShowIndicatorValue(true))) {
+        return;
+    }
+    if (paintProperty->HasIndicatorIconSourceInfo()) {
+        NewDrawImageIndicator(canvas, paintProperty, data);
+        return;
+    }
+
+    Dimension indicatorToTop = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP);
     float pathStartVertexX = data.center.GetX();
-    float pathStartVertexY = data.center.GetY() - data.radius + INDICATOR_DISTANCE_TO_TOP.ConvertToPx();
+    float pathStartVertexY = data.center.GetY() - data.radius + indicatorToTop.ConvertToPx();
+    RSPath path;
     path.MoveTo(pathStartVertexX - CALC_INDICATOR_POINT_TOP_LEFT * data.radius,
                 pathStartVertexY + CALC_INDICATOR_POINT_TOP_LEFT * data.radius);
     path.LineTo(pathStartVertexX - CALC_INDICATOR_POINT_BOTTOM_LEFT_X * data.radius,
@@ -693,7 +705,7 @@ void GaugePaintMethod::NewDrawIndicator(RSCanvas& canvas, const RenderRingInfo& 
     canvas.Save();
     canvas.Rotate(data.startDegree + data.sweepDegree, data.center.GetX(), data.center.GetY());
     RSBrush paint;
-    paint.SetColor(Color::WHITE.GetValue());
+    paint.SetColor(INDICATOR_COLOR.GetValue());
     paint.SetBlendMode(RSBlendMode::SRC_OVER);
     canvas.AttachBrush(paint);
     canvas.DrawPath(path);
@@ -701,12 +713,51 @@ void GaugePaintMethod::NewDrawIndicator(RSCanvas& canvas, const RenderRingInfo& 
 
     RSPen pen;
     pen.SetBlendMode(RSBlendMode::SRC_OVER);
-    pen.SetColor(Color::BLACK.GetValue());
+    pen.SetColor(INDICATOR_BORDER_COLOR.GetValue());
     pen.SetAntiAlias(true);
     pen.SetWidth(INDICATOR_BORDER_WIDTH_RATIO * data.radius);
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
     canvas.DetachPen();
     canvas.Restore();
+}
+
+void GaugePaintMethod::NewDrawImageIndicator(
+    RSCanvas& canvas, const RefPtr<GaugePaintProperty>& paintProperty, const RenderRingInfo& data) const
+{
+    CHECK_NULL_VOID(paintProperty);
+    canvas.Save();
+    canvas.Rotate(data.startDegree + data.sweepDegree, data.center.GetX(), data.center.GetY());
+    auto gaugePattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(gaugePattern);
+    RefPtr<CanvasImage> indicatorIconCanvasImage = gaugePattern->GetIndicatorIconCanvasImage();
+    Dimension indicatorToTop = paintProperty->GetIndicatorSpaceValue(INDICATOR_DISTANCE_TO_TOP);
+
+    CHECK_NULL_VOID(indicatorIconCanvasImage);
+    auto&& config = indicatorIconCanvasImage->GetPaintConfig();
+    config.renderMode_ = ImageRenderMode::ORIGINAL;
+    config.imageInterpolation_ = ImageInterpolation::NONE;
+    config.imageRepeat_ = ImageRepeat::NO_REPEAT;
+    config.imageFit_ = ImageFit::FILL;
+    config.isSvg_ = true;
+    auto diameter = data.radius * RADIUS_TO_DIAMETER;
+    float pathStartVertexX = data.center.GetX();
+    float pathStartVertexY = data.center.GetY() - data.radius + indicatorToTop.ConvertToPx();
+
+    const ImagePainter indicatorIconImagePainter(indicatorIconCanvasImage);
+    indicatorIconImagePainter.DrawImage(canvas,
+        OffsetF(pathStartVertexX - INDICATOR_WIDTH_RADIO * data.radius, pathStartVertexY),
+        SizeF(INDICATOR_WIDTH_RADIO * diameter, INDICATOR_HEIGHT_RADIO * diameter));
+    canvas.Restore();
+}
+
+void GaugePaintMethod::CreateDefaultColor(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const
+{
+    float space = 0.0f;
+    for (const auto& color : GAUGE_DEFAULT_COLOR) {
+        colors.emplace_back(color.GetValue());
+        pos.emplace_back(space);
+        space += 0.5f;
+    }
 }
 } // namespace OHOS::Ace::NG

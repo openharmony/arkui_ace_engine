@@ -25,7 +25,7 @@
 #include "core/common/container_scope.h"
 #include "core/components/image/render_image.h"
 #include "core/components_ng/render/canvas_image.h"
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #include "core/image/image_compressor.h"
 
 #ifdef APNG_IMAGE_SUPPORT

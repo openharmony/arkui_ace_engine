@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 
+#include "core/common/container.h"
 #include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -56,9 +57,7 @@ void QRCodeModelNG::SetQRCodeColor(const Color& color)
 void QRCodeModelNG::SetQRBackgroundColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, color);
     }
 }

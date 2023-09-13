@@ -16,17 +16,23 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 
 namespace OHOS::Ace::NG {
-ScrollBarOverlayModifier::ScrollBarOverlayModifier() {}
+ScrollBarOverlayModifier::ScrollBarOverlayModifier(
+    const OffsetF& fgOffset, const OffsetF& bgOffset, const SizeF& fgSize, const SizeF& bgSize)
+{}
 
 void ScrollBarOverlayModifier::onDraw(DrawingContext& context) {}
 
 void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacityAnimationType) {}
 
-void ScrollBarOverlayModifier::SetRect(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset,
+void ScrollBarOverlayModifier::StartHoverAnimation(const SizeF& fgSize, const SizeF& bgSize, const OffsetF& fgOffset,
     const OffsetF& bgOffset, HoverAnimationType hoverAnimationType)
 {}
 
-void ScrollBarOverlayModifier::SetOffset(OffsetF fgOffset, OffsetF bgOffset) {}
+void ScrollBarOverlayModifier::SetOffset(const OffsetF& fgOffset, const OffsetF& bgOffset) {}
+
+void ScrollBarOverlayModifier::SetSize(const SizeF& fgSize, const SizeF& bgSize) {}
+
+void ScrollBarOverlayModifier::SetRect(const Rect& fgRect, const Rect& bgRect) {}
 
 void ScrollBarOverlayModifier::SetFgColor(Color fgColor) {}
 

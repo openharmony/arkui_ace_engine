@@ -35,10 +35,7 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
-// Min disable event api version.
-constexpr int32_t MIN_DISABLE_EVENT_VERSION = 10;
-} // namespace
+namespace {} // namespace
 
 #if !defined(PREVIEW)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
@@ -152,22 +149,7 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
 // When the api version >= 10, it is disable event version.
 bool IsDisableEventVersion()
 {
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return false;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGW("pipelineContext is null!");
-        return false;
-    }
-    if (pipelineContext->GetMinPlatformVersion() >= MIN_DISABLE_EVENT_VERSION) {
-        LOGD("The version supports disable event callback.");
-        return true;
-    }
-    LOGW("The version doesn't support disable event callback.");
-    return false;
+    return Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
 }
 
 #ifdef PIXEL_MAP_SUPPORTED

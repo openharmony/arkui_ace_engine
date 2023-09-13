@@ -83,6 +83,7 @@ std::vector<Rect> ParagraphManager::GetPlaceholderRects() const
 
 OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHeight) const
 {
+    CHECK_NULL_RETURN(!paragraphs_.empty(), {});
     auto it = paragraphs_.begin();
     float y = 0.0f;
     while (it != paragraphs_.end()) {

@@ -56,8 +56,7 @@ void JSRow::Create(const JSCallbackInfo& info)
         CalcDimension value;
         if (ParseJsDimensionVp(spaceVal, value)) {
             space = value;
-        } else if (PipelineBase::GetCurrentContext() &&
-                   PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
             space = Dimension();
         }
     }
@@ -84,7 +83,7 @@ void JSRow::SetAlignItems(int32_t value)
         (value == static_cast<int32_t>(FlexAlign::FLEX_END)) || (value == static_cast<int32_t>(FlexAlign::CENTER)) ||
         (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
         RowModel::GetInstance()->SetAlignItems(static_cast<FlexAlign>(value));
-    } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         RowModel::GetInstance()->SetAlignItems(FlexAlign::CENTER);
         // FIXME: we have a design issue here, setters return void, can not signal error to JS
         LOGE("invalid value for justifyContent");
@@ -99,7 +98,7 @@ void JSRow::SetJustifyContent(int32_t value)
         (value == static_cast<int32_t>(FlexAlign::SPACE_AROUND)) ||
         (value == static_cast<int32_t>(FlexAlign::SPACE_EVENLY))) {
         RowModel::GetInstance()->SetJustifyContent(static_cast<FlexAlign>(value));
-    } else if (PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+    } else if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         RowModel::GetInstance()->SetJustifyContent(FlexAlign::FLEX_START);
         LOGE("invalid value for justifyContent");
     }

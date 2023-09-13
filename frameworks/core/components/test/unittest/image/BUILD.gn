@@ -114,7 +114,6 @@ ohos_unittest("RenderImageTest") {
     "$ace_root/frameworks/core/gestures/drag_recognizer.cpp",
 
     # image
-    "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
 

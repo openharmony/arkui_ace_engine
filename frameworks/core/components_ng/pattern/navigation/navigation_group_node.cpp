@@ -93,7 +93,7 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
     contentNode->AddChild(child);
 }
 
-void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild)
+void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<UINode>& remainChild, bool modeChange)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -115,6 +115,14 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         SetBackButtonEvent(navDestination);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
+        if (!eventHub->GetOnStateChange()) {
+            auto onStateChangeMap = pattern->GetOnStateChangeMap();
+            auto iter = onStateChangeMap.find(uiNode->GetId());
+            if (iter != onStateChangeMap.end()) {
+                eventHub->SetOnStateChange(iter->second);
+                pattern->DeleteOnStateChangeItem(iter->first);
+            }
+        }
         if (i == navDestinationNodes.size() - 1) {
             // process shallow builder
             navDestination->ProcessShallowBuilder();
@@ -176,7 +184,9 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             ++slot;
         }
     }
-    if (hasChanged) {
+    if (modeChange) {
+        navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    } else if (hasChanged) {
         navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 }
@@ -357,7 +367,7 @@ void NavigationGroupNode::ExitTransitionWithPop(const RefPtr<FrameNode>& node)
             taskExecutor->PostTask(
                 [weakNode, weakTitle, weakNavigation, nodeWidth, nodeHeight]() {
                     LOGI("navigation animation end");
-                    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
+                    PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                     auto navigation = weakNavigation.Upgrade();
                     if (navigation) {
                         navigation->isOnAnimation_ = false;
@@ -457,7 +467,7 @@ void NavigationGroupNode::ExitTransitionWithPush(const RefPtr<FrameNode>& node, 
         // animation finish event should be posted to UI thread
         taskExecutor->PostTask(
             [weakNode, weakTitle, weakNavigation, isNavBar]() {
-                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 LOGI("navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 if (navigation) {
@@ -534,7 +544,7 @@ void NavigationGroupNode::EnterTransitionWithPush(const RefPtr<FrameNode>& node,
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
             [weakNavigation]() {
-                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 LOGI("navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
@@ -610,7 +620,7 @@ void NavigationGroupNode::EnterTransitionWithPop(const RefPtr<FrameNode>& node, 
         // animation finish event should be posted to UI thread.
         taskExecutor->PostTask(
             [weakNavigation]() {
-                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, false);
+                PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 LOGI("navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);

@@ -178,10 +178,13 @@ public:
     virtual void RequestAnimationFrame(const std::string& callbackId) = 0;
     virtual void CancelAnimationFrame(const std::string& callbackId) = 0;
 
-    virtual void GetSnapshot(
-        const std::string& componentId, std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) {}
+    virtual void GetSnapshot(const std::string& componentId,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback)
+    {}
     virtual void CreateSnapshot(std::function<void()>&& customBuilder,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) {}
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        bool enableInspector)
+    {}
 
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;

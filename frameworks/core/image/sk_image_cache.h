@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_FLUTTER_IMAGE_CACHE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_FLUTTER_IMAGE_CACHE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_SK_IMAGE_CACHE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_SK_IMAGE_CACHE_H
 
 #include <utility>
 
-#include "core/components_ng/render/canvas_image.h"
+#include "include/core/SkImage.h"
+
 #include "core/image/image_cache.h"
-#include "core/image/image_object.h"
 
 namespace OHOS::Ace {
 
@@ -35,15 +35,6 @@ struct CachedImage {
     uint32_t uniqueId = 0;
 };
 
-class FlutterImageCache : public ImageCache {
-    DECLARE_ACE_TYPE(FlutterImageCache, ImageCache);
-
-public:
-    FlutterImageCache() = default;
-    ~FlutterImageCache() override = default;
-    RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& filePath) override;
-};
-
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_FLUTTER_IMAGE_CACHE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_SK_IMAGE_CACHE_H

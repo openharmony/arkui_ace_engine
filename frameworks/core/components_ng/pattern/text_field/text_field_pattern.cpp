@@ -349,7 +349,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     float dy = AdjustTextAreaOffsetY();
     UpdateSelectionOffset();
     if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE) {
-        if (!NearZero(dx) || !NearZero(dy)) {
+        if ((!NearZero(dx) || !NearZero(dy)) && !isSingleHandle_) {
             UpdateOtherHandleOnMove(dx, dy);
         }
         // trigger selection box repaint
@@ -431,10 +431,7 @@ bool TextFieldPattern::UpdateCaretRect()
 
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
 
-    if (caretUpdateType_ == CaretUpdateType::NONE && !textRectWillChange_) {
-        return true;
-    }
-    return false;
+    return caretUpdateType_ == CaretUpdateType::NONE && !textRectWillChange_;
 }
 
 float TextFieldPattern::GetIconSize()
@@ -519,12 +516,12 @@ bool TextFieldPattern::UpdateCaretByPressOrLongPress()
     // caret offset updated by gesture will not cause textRect to change offset
     UpdateCaretPositionByPressOffset();
     if (caretUpdateType_ == CaretUpdateType::PRESSED) {
+        UpdateSelection(textEditingValue_.caretPosition);
         if (!GetEditingValue().text.empty() && isFocusedBeforeClick_ && !isMousePressed_) {
             CreateSingleHandle(true, false);
         } else {
             StartTwinkling();
         }
-        UpdateSelection(textEditingValue_.caretPosition);
     } else if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         // in long press case, we have caret and one handle at pressed location and another handle at -1 or +1 position
         ProcessOverlay(true);
@@ -793,8 +790,9 @@ float TextFieldPattern::AdjustTextRectOffsetX()
     auto cursorWidth = caretRect_.Width();
     auto contentLeftBoundary = contentRect_.GetX();
     auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width() - unitWidth_;
-    if (IsTextArea()) {
-        caretRect_.SetLeft(std::clamp(caretRect_.GetX(), contentLeftBoundary, contentRightBoundary - cursorWidth));
+    if (IsTextArea() || textEditingValue_.text.empty()) {
+        caretRect_.SetLeft(std::clamp(
+            caretRect_.GetX(), contentLeftBoundary, std::max(contentLeftBoundary, contentRightBoundary - cursorWidth)));
         return 0.0f;
     }
     float textDx = 0.0f;
@@ -2376,7 +2374,8 @@ void TextFieldPattern::OnModifyDone()
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
     }
-    if (barState_.has_value() && barState_.value() != layoutProperty->GetDisplayModeValue(DisplayMode::AUTO)) {
+    if (barState_.has_value() && barState_.value() != layoutProperty->GetDisplayModeValue(DisplayMode::AUTO) &&
+        HasFocus() && IsNormalInlineState()) {
         lastTextRectY_ = textRect_.GetY();
     }
     ProcessInnerPadding();
@@ -2813,15 +2812,15 @@ void TextFieldPattern::ShowSelectOverlay(
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
 
+        bool isHideSelectionMenu = layoutProperty->GetSelectionMenuHiddenValue(false);
         selectInfo.isUsingMouse = pattern->IsUsingMouse();
-
-        if (layoutProperty->GetSelectionMenuHiddenValue(false) && selectInfo.isUsingMouse) {
+        if (isHideSelectionMenu && selectInfo.isUsingMouse) {
             return;
         }
 
         selectInfo.rightClickOffset = pattern->GetRightClickOffset();
         selectInfo.singleLineHeight = pattern->PreferredLineHeight();
-        pattern->UpdateSelectMenuInfo(hasData);
+        pattern->UpdateSelectMenuInfo(hasData, isHideSelectionMenu);
         selectInfo.menuInfo = pattern->GetSelectMenuInfo();
         if (!isMenuShow) {
             selectInfo.menuInfo.menuIsShow = false;
@@ -2885,9 +2884,9 @@ void TextFieldPattern::ShowSelectOverlay(
         auto end = pattern->GetTextSelector().GetEnd();
         selectOverlay->SetSelectInfo(pattern->GetTextEditingValue().GetSelectedText(start, end));
         if (isMenuShow) {
-            selectOverlay->ShowOrHiddenMenu(layoutProperty->GetSelectionMenuHiddenValue(false));
+            selectOverlay->ShowOrHiddenMenu(isHideSelectionMenu);
         }
-        selectOverlay->DisableMenu(layoutProperty->GetSelectionMenuHiddenValue(false));
+        selectOverlay->DisableMenu(isHideSelectionMenu);
     };
     clipboard_->HasData(hasDataCallback);
 }
@@ -5539,7 +5538,8 @@ void TextFieldPattern::CheckScrollable()
     if (textEditingValue_.text.empty()) {
         scrollable_ = false;
     } else {
-        if (layoutProperty->GetShowCounterValue(false) && counterParagraph_ && !isCounterIdealheight_) {
+        if (layoutProperty->GetShowCounterValue(false) && counterParagraph_ && !isCounterIdealheight_ &&
+            !IsNormalInlineState()) {
             scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height() - counterParagraph_->GetHeight());
         } else {
             scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());

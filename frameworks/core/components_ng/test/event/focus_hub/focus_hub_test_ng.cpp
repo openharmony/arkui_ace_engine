@@ -2580,4 +2580,61 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0062, TestSize.Level1)
     focusHub->HandleParentScroll();
     ASSERT_TRUE(focusHub1->isFocusUnit_);
 }
+
+/**
+ * @tc.name: FocusHubTestNg063
+ * @tc.desc: Test the function HandleFocusByTabIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0063, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode1->GetOrCreateFocusHub();
+    auto focusHub1 = frameNode1->GetFocusHub();
+
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode2->GetOrCreateFocusHub();
+    auto focusHub2 = frameNode2->GetFocusHub();
+
+    auto frameNode3 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    frameNode3->GetOrCreateFocusHub();
+    auto focusHub3 = frameNode3->GetFocusHub();
+
+    focusHub1->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub2->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub3->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+
+    focusHub1->focusCallbackEvents_->tabIndex_ = 1;
+    focusHub2->focusCallbackEvents_->tabIndex_ = 2;
+    focusHub3->focusCallbackEvents_->tabIndex_ = 3;
+    ASSERT_NE(focusHub1->focusCallbackEvents_, nullptr);
+
+    focusHub3->focusable_ = true;
+    focusHub3->parentFocusable_ = true;
+    focusHub3->currentFocus_ = true;
+
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
+    focusHub->isFirstFocusInPage_ = false;
+    focusHub->focusType_ = FocusType::SCOPE;
+    frameNode->children_.push_back(frameNode1);
+    frameNode->children_.push_back(frameNode2);
+    frameNode->children_.push_back(frameNode3);
+
+    KeyEvent event(KeyCode::KEY_TAB, KeyAction::DOWN);
+
+    auto res = focusHub->HandleFocusByTabIndex(KeyEvent(KeyCode::KEY_TAB, KeyAction::DOWN), focusHub);
+    ASSERT_TRUE(res);
+    event.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB };
+    res = focusHub->HandleFocusByTabIndex(event, focusHub);
+    ASSERT_TRUE(res);
+}
 } // namespace OHOS::Ace::NG

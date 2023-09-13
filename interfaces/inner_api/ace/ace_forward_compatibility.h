@@ -26,7 +26,7 @@ class ACE_FORCE_EXPORT AceForwardCompatibility final {
 public:
     ~AceForwardCompatibility() = default;
 
-    static void Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool forceFullUpdate);
+    static void Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool deprecated);
     static bool Inited();
     static bool IsForceOldPipeline();
     static bool IsNewPipeline();

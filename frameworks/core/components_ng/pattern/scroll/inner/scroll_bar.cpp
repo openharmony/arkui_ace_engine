@@ -20,12 +20,13 @@
 #include "base/utils/utils.h"
 #include "core/animation/curve_animation.h"
 #include "core/animation/curves.h"
+#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BAR_DISAPPRAE_DELAY_DURATION = 2000; // 2000ms
-constexpr int32_t BAR_ADAPT_DURATION = 400;  // 400ms, scroll bar adapts to the size changes of components
+constexpr int32_t BAR_ADAPT_DURATION = 400;            // 400ms, scroll bar adapts to the size changes of components
 constexpr double BAR_ADAPT_EPSLION = 1.0;
 } // namespace
 
@@ -34,8 +35,7 @@ ScrollBar::ScrollBar()
     InitTheme();
 }
 
-ScrollBar::ScrollBar(DisplayMode displayMode,
-    ShapeMode shapeMode, PositionMode positionMode) : ScrollBar()
+ScrollBar::ScrollBar(DisplayMode displayMode, ShapeMode shapeMode, PositionMode positionMode) : ScrollBar()
 {
     displayMode_ = displayMode;
     shapeMode_ = shapeMode;
@@ -430,8 +430,8 @@ void ScrollBar::PlayAdaptAnimation(
         [weakBar = AceType::WeakClaim(this), inactiveMainOffset, activeMainOffset](double value) {
             auto scrollBar = weakBar.Upgrade();
             if (scrollBar) {
-                auto top = scrollBar->GetPositionMode() == PositionMode::BOTTOM ? scrollBar->activeRect_.Left() :
-                    scrollBar->activeRect_.Top();
+                auto top = scrollBar->GetPositionMode() == PositionMode::BOTTOM ? scrollBar->activeRect_.Left()
+                                                                                : scrollBar->activeRect_.Top();
                 if (NearEqual(top, activeMainOffset, 0.000001f) || NearEqual(top, inactiveMainOffset, 0.000001f)) {
                     scrollBar->UpdateActiveRectOffset(value);
                 } else {
@@ -454,8 +454,7 @@ void ScrollBar::CalcReservedHeight()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    const static int32_t PLATFORM_VERSION_TEN = 10;
-    if (pipelineContext->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
         CHECK_NULL_VOID(theme);
         startReservedHeight_ = Dimension(0.0, DimensionUnit::PX);
@@ -612,8 +611,8 @@ void ScrollBar::ProcessFrictionMotionStop()
     isDriving_ = false;
 }
 
-void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+void ScrollBar::OnCollectTouchTarget(
+    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
     if (panRecognizer_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));

@@ -25,6 +25,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
@@ -142,7 +143,7 @@ void PatternLockModifier::onDraw(DrawingContext& context)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         DrawForApiNine(context);
         return;
     }

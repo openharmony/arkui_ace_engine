@@ -1,19 +1,4 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,19 +117,6 @@ enum Flag {
   NONE = 2
 }
 
-/*
- * TreeListenType listen type.
- *
- * @since 10
- */
-export enum TreeListenType {
-  NODE_ADD = "NodeAdd",
-  NODE_DELETE = "NodeDelete",
-  NODE_MODIFY = "NodeModify",
-  NODE_MOVE = "NodeMove",
-  NODE_CLICK = 'NodeClick',
-}
-
 export enum NodeStatus {
   Expand = 0,
   Collapse
@@ -173,7 +145,7 @@ function findCurrentNodeIndex(this, currentNodeId: number): number {
 @Observed
 export class NodeInfo {
   private childNodeInfo: { isHasChildNode: boolean, childNum: number, allChildNum: number };
-  imageSource: Resource;
+  imageSource: Resource | string;
   private parentNodeId: number;
   private currentNodeId: number;
   fontColor: string | Resource;
@@ -194,7 +166,7 @@ export class NodeInfo {
   popUpText: string | Resource,
   popUpTextColor: Resource};
   private listItemHeight: number;
-  private menu: () => void;
+  private container: () => void;
   private isShowTitle: boolean;
   private isShowInputText: boolean;
   private isSelected: boolean;
@@ -208,7 +180,7 @@ export class NodeInfo {
     selectedIcon?: Resource,
     editIcon?: Resource,
     primaryTitle?: string,
-    menu?: () => void,
+    container?: () => void,
     secondaryTitle?: number | string
   };
   private node: TreeView.NodeItem;
@@ -231,7 +203,7 @@ export class NodeInfo {
     this.nodeItem.inputText = new TreeView.InputText();
     this.nodeItem.mainTitleNode = node.getNodeItem().mainTitleNode;
     this.nodeItem.imageCollapse = node.getNodeItem().imageCollapse;
-    this.menu = node.menu;
+    this.container = node.container;
     this.parentNodeId = node.parentNodeId;
     this.currentNodeId = node.currentNodeId;
     this.nodeHeight = NODE_HEIGHT;
@@ -311,7 +283,7 @@ export class NodeInfo {
   handleImageCollapseAfterAddNode(isAddImageCollapse: boolean) {
     // listTree this node already has ImageCollapse.
     if (isAddImageCollapse) {
-      this.nodeItem.imageCollapse = new TreeView.ImageNode($r('app.media.ic_public_arrow_down_0'), null, null,
+      this.nodeItem.imageCollapse = new TreeView.ImageNode(ARROW_DOWN, null, null,
         $r('sys.float.ohos_id_alpha_content_tertiary'),
         IMAGE_NODE_HEIGHT,
         IMAGE_NODE_WIDTH);
@@ -386,7 +358,7 @@ export class NodeInfo {
   }
 
   getMenu() {
-    return this.menu;
+    return this.container;
   }
 
   setIsSelected(isSelected: boolean) {
@@ -466,6 +438,19 @@ export class NodeInfo {
 }
 
 export namespace TreeView {
+
+  /*
+ * TreeListenType listen type.
+ *
+ * @since 10
+ */
+  export enum TreeListenType {
+    NODE_ADD = "NodeAdd",
+    NODE_DELETE = "NodeDelete",
+    NODE_MODIFY = "NodeModify",
+    NODE_MOVE = "NodeMove",
+    NODE_CLICK = 'NodeClick',
+  }
 
   export class TreeListener {
     _events = []
@@ -659,7 +644,7 @@ export namespace TreeView {
     fontColor?: Resource,
     imageCollapse?: ImageNode};
     private childNodeInfo: { isHasChildNode: boolean, childNum: number, allChildNum: number };
-    menu: () => void;
+    container: () => void;
     nodeLevel: number;
     parentNodeId: number;
     currentNodeId: number;
@@ -669,7 +654,7 @@ export namespace TreeView {
     selectedIcon?: Resource,
     editIcon?: Resource,
     primaryTitle?: string,
-    menu?: () => void,
+    container?: () => void,
     objectCount?: number | string }
 
     constructor(data: { isFolder?: boolean,
@@ -677,14 +662,14 @@ export namespace TreeView {
     selectedIcon?: Resource,
     editIcon?: Resource,
     primaryTitle?: string,
-    menu?: () => void,
+    container?: () => void,
     objectCount?: number | string }) {
       this.data = data;
       this.nodeLevel = -1;
       this.parentNodeId = -1;
       this.nodeItem = { imageNode: null, mainTitleNode: null, imageCollapse: null };
       this.childNodeInfo = { isHasChildNode: false, childNum: 0, allChildNum: 0 };
-      this.menu = data.menu;
+      this.container = data.container;
       if (data.icon) {
         this.nodeItem.imageNode = new ImageNode(data.icon, data.selectedIcon, data.editIcon,
           $r('sys.float.ohos_id_alpha_content_fourth'),
@@ -699,7 +684,7 @@ export namespace TreeView {
 
     addImageCollapse(isHasChildNode: boolean) {
       if (isHasChildNode) {
-        this.nodeItem.imageCollapse = new ImageNode($r('app.media.ic_public_arrow_right'), null, null,
+        this.nodeItem.imageCollapse = new ImageNode(ARROW_RIGHT, null, null,
           $r('sys.float.ohos_id_alpha_content_tertiary'),
           IMAGE_NODE_HEIGHT,
           IMAGE_NODE_WIDTH);
@@ -718,7 +703,7 @@ export namespace TreeView {
     }
 
     getMenu(): () => void {
-      return this.menu;
+      return this.container;
     }
 
     getCurrentNodeId() {
@@ -763,17 +748,17 @@ export namespace TreeView {
   }
 
   export class ImageNode extends NodeBaseInfo {
-    private imageSource: Resource;
-    private imageNormalSource: Resource;
-    private imageSelectedSource: Resource;
-    private imageEditSource: Resource;
+    private imageSource: Resource | string;
+    private imageNormalSource: Resource | string;
+    private imageSelectedSource: Resource | string;
+    private imageEditSource: Resource | string;
     private imageOpacity: Resource;
     private currentInteractionStatus: InteractionStatus;
     private imageCollapseSource: Resource | string;
     private imageCollapseDownSource: Resource | string;
     private isImageCollapse: boolean;
     private imageCollapseRightSource: Resource | string;
-    constructor(imageSource: Resource, itemSelectedIcon: Resource, itemEditIcon: Resource,
+    constructor(imageSource: Resource | string, itemSelectedIcon: Resource, itemEditIcon: Resource,
                 imageOpacity: Resource, itemWidth: number, itemHeight: number) {
       super();
       this.rightMargin = $r('sys.float.ohos_id_elements_margin_horizontal_m');
@@ -793,8 +778,8 @@ export namespace TreeView {
       this.itemWidth = itemWidth;
       this.itemHeight = itemHeight;
       this.imageCollapseSource = imageSource;
-      this.imageCollapseDownSource = $r('app.media.ic_public_arrow_down_0');
-      this.imageCollapseRightSource = $r('app.media.ic_public_arrow_right');
+      this.imageCollapseDownSource = ARROW_DOWN;
+      this.imageCollapseRightSource = ARROW_RIGHT;
       this.isImageCollapse = true;
     }
 
@@ -1088,7 +1073,7 @@ export namespace TreeView {
             editIcon?: Resource,
             primaryTitle?: string,
             secondaryTitle?: number | string,
-            menu?: () => void,
+            container?: () => void,
             }): ListNodeUtils {
       if (this._root === null) {
         this._root = new NodeItem({});
@@ -1194,20 +1179,20 @@ export namespace TreeView {
           return false;
         };
       this.contains(callback, this.traverseNodeBF);
-      let newNodeInfo: { isFolder: boolean, icon: Resource, selectedIcon: Resource, editIcon: Resource, menu: () => any, secondaryTitle: number | string } =
-        { isFolder: true, icon: null, selectedIcon: null, editIcon: null, menu: null, secondaryTitle: '' };
+      let newNodeInfo: { isFolder: boolean, icon: Resource, selectedIcon: Resource, editIcon: Resource, container: () => any, secondaryTitle: number | string } =
+        { isFolder: true, icon: null, selectedIcon: null, editIcon: null, container: null, secondaryTitle: '' };
       if (parent) {
         if (parent.children.length === 0) {
           if (parent.getNodeItem().imageNode != null) {
             newNodeInfo.icon = parent.getNodeItem().imageNode.normalSource;
             newNodeInfo.selectedIcon = parent.getNodeItem().imageNode.selectedSource;
             newNodeInfo.editIcon = parent.getNodeItem().imageNode.editSource;
-            newNodeInfo.menu = parent.getMenu();
+            newNodeInfo.container = parent.getMenu();
           } else {
             newNodeInfo.icon = null;
             newNodeInfo.selectedIcon = null;
             newNodeInfo.editIcon = null;
-            newNodeInfo.menu = parent.getMenu();
+            newNodeInfo.container = parent.getMenu();
           }
         } else if (parent.children.length > 0) {
           if (parent.getNodeItem().imageNode != null) {
@@ -1217,12 +1202,12 @@ export namespace TreeView {
             parent.children[0].getNodeItem().imageNode.selectedSource : null;
             newNodeInfo.editIcon = (parent.children[0].getNodeItem().imageNode != null) ?
             parent.children[0].getNodeItem().imageNode.editSource : null;
-            newNodeInfo.menu = parent.children[0].getMenu();
+            newNodeInfo.container = parent.children[0].getMenu();
           } else {
             newNodeInfo.icon = null;
             newNodeInfo.selectedIcon = null;
             newNodeInfo.editIcon = null;
-            newNodeInfo.menu = parent.children[0].getMenu();
+            newNodeInfo.container = parent.children[0].getMenu();
           }
         }
       }
@@ -1337,7 +1322,7 @@ export namespace TreeView {
                 selectedIcon?: Resource,
                 editIcon?: Resource,
                 primaryTitle?: string,
-                menu?: () => any,
+                container?: () => any,
                 objectCount?: number }): ListNodeUtils {
 
       if (this._root === null) {
@@ -1390,7 +1375,6 @@ export namespace TreeView {
         throw new Error('ListNodeUtils[addNode]: Parent node not found.');
       }
     }
-
   }
 
   export class ListNodeDataSource extends BasicDataSource {
@@ -1822,11 +1806,11 @@ export namespace TreeView {
           [backParamModify]);
       } else if (operation === MenuOperation.ADD_NODE)  {
         let addNodeInfo: NodeInfo = this.listNode[addNodeId];
-        let icon: Resource = (addNodeInfo.getNodeItem().imageNode != null) ?
+        let icon: Resource | string = (addNodeInfo.getNodeItem().imageNode != null) ?
         addNodeInfo.getNodeItem().imageNode.source : null;
-        let selectedIcon: Resource = (addNodeInfo.getNodeItem().imageNode != null) ?
+        let selectedIcon: Resource | string = (addNodeInfo.getNodeItem().imageNode != null) ?
         addNodeInfo.getNodeItem().imageNode.selectedSource : null;
-        let editIcon: Resource = (addNodeInfo.getNodeItem().imageNode != null) ?
+        let editIcon: Resource | string = (addNodeInfo.getNodeItem().imageNode != null) ?
         addNodeInfo.getNodeItem().imageNode.editSource : null;
         let callbackParam: CallbackParam = { currentNodeId: addNodeInfo.getNodeCurrentNodeId(),
           parentNodeId: addNodeInfo.getNodeParentNodeId() }
@@ -1939,9 +1923,6 @@ export namespace TreeView {
       this.modifyNodeIndex = index;
       if (this.listNode[index].getNodeItem().mainTitleNode != null) {
         this.listNode[index].getNodeItem().mainTitleNode.title = text;
-        // this.listNode index to lazyForEach index.
-        let lazyForEachIndex = this.loadedNodeIdAndIndexMap.get(this.listNode[index].getCurrentNodeId());
-        this.notifyDataChange(lazyForEachIndex);
       }
     }
 
@@ -2374,7 +2355,8 @@ export namespace TreeView {
       let isDownFlag: boolean = this.flag == Flag.DOWN_FLAG ? true : false;
 
       currentChildIndex = this.getChildIndex(dragParentNodeId, dragCurrentNodeId);
-      insertChildIndex = this.getChildIndex(rearParentNodeId, rearCurrentNodeId);
+
+      insertChildIndex = this.getChildIndex(rearParentNodeId, rearCurrentNodeId) + 1;
 
       if (rearParentNodeId != dragParentNodeId) {
         insertChildIndex = isDownFlag ? insertChildIndex + 1 : insertChildIndex;
@@ -2701,9 +2683,9 @@ export namespace TreeView {
       .backgroundColor(this.listNodeDataSource.getDragPopupPara().backgroundColor)
       .padding({ left: this.listNodeDataSource.getDragPopupPara().padding.left,
         right: this.listNodeDataSource.getDragPopupPara().padding.right })
-      .shadow({ radius: this.listNodeDataSource.getDragPopupPara().shadow.radius,
-        color: this.listNodeDataSource.getDragPopupPara().shadow.color,
-        offsetY: this.listNodeDataSource.getDragPopupPara().shadow.offsetY })
+      .shadow({ radius: $r('sys.float.ohos_id_corner_radius_default_m'),
+        color: SHADOW_COLOR,
+        offsetY: 0 })
       .borderRadius(this.listNodeDataSource.getDragPopupPara().borderRadius) // need to doubleCheck.
     }
 
@@ -2827,6 +2809,8 @@ export namespace TreeView {
               this.listNodeDataSource.setIsDrag(false);
               return;
             }
+
+            return this.draggingPopup(currentNodeInfo);
           })
         }, item => JSON.stringify(item))
       }
@@ -2843,7 +2827,7 @@ export namespace TreeView {
         let flag: Flag = Math.floor(event.getY() / (nodeHeight / FLAG_NUMBER)) % FLAG_NUMBER ? Flag.DOWN_FLAG : Flag.UP_FLAG;
 
         /* Record the node position to which the dragged node moves. */
-        let index: number = Math.floor(event.getY() / nodeHeight);
+        let index: number = Math.floor(event.getY() / LIST_ITEM_HEIGHT);
 
         /* Handle the situation where the focus(index) exceeds the list area. */
         let isOverBorder: boolean = false;
@@ -2877,7 +2861,7 @@ export namespace TreeView {
         this.listNodeDataSource.setLastPassIndex(index);
 
         /* Set the visibility of the flag line. */
-        this.listNodeDataSource.setVisibility(flag, index, isOverBorder);
+        this.listNodeDataSource.setVisibility(flag, index - 1, isOverBorder);
 
         /* Automatically HighLight one second delay and expand after two second delay. */
         if (currentNodeId != this.listNodeDataSource.getDraggingCurrentNodeId()) {
@@ -2914,7 +2898,7 @@ export namespace TreeView {
         this.listNodeDataSource.clearLastTimeoutExpand();
         let draggingNodeOpacity: number = DRAG_OPACITY_NONE;
         this.listNodeDataSource.setListItemOpacity(draggingNodeOpacity);
-        let insertNodeIndex: number = this.listNodeDataSource.getPassIndex();
+        let insertNodeIndex: number = JSON.parse(extraParams).insertIndex
         let currentNodeIndex: number = this.dropSelectedIndex;
 
         if (currentNodeIndex - 1 > this.listNodeDataSource.totalCount() || currentNodeIndex == undefined) {
@@ -2929,6 +2913,9 @@ export namespace TreeView {
         }
 
         let insertNodeInfo: NodeInfo = this.listNodeDataSource.getData(insertNodeIndex);
+        if (insertNodeInfo == null) {
+          return;
+        }
         let insertNodeCurrentNodeId: number = insertNodeInfo.getNodeCurrentNodeId();
 
         /* outer node is move in. */
@@ -2975,6 +2962,8 @@ export namespace TreeView {
             findCurrentNodeIndex.call(that, draggingCurrentNodeId));
         }
 
+        let flag: boolean = false;
+
         /* Expand insert node. */
         if (this.listNodeDataSource.getExpandAndCollapseInfo(insertNodeCurrentNodeId) == NodeStatus.Collapse) {
           let that = this;
@@ -2982,11 +2971,12 @@ export namespace TreeView {
           if (this.listNodeDataSource.ListNode[currentIndex].getIsHighLight()) {
             this.listNodeDataSource.expandAndCollapseNode(currentIndex);
           }
+          flag = true;
         }
 
         /* alter dragNode. */
         this.listNodeDataSource.setLastDelayHighLightId();
-        if (draggingCurrentNodeId != insertNodeCurrentNodeId) {
+        if (draggingCurrentNodeId != insertNodeCurrentNodeId){
           this.listNodeDataSource.alterDragNode(insertNodeParentNodeId, insertNodeCurrentNodeId, insertNodeInfo,
             draggingParentNodeId, draggingCurrentNodeId, currentNodeInfo);
           this.listNodeDataSource.hideLastLine();
@@ -3047,7 +3037,6 @@ export namespace TreeView {
     icon?: Resource,
     selectedIcon?: Resource,
     editIcon?: Resource,
-    //checkBox?: ,
     primaryTitle?: string,
     secondaryTitle?: number | string,
     container?: () => void,
@@ -3112,6 +3101,9 @@ export namespace TreeView {
      */
     public removeNode(): void {
       let clickNodeId = this.listNodeDataSource.getClickNodeId();
+      if (clickNodeId < 0) {
+        return;
+      }
       let parentNodeId = this.listNodeUtils.findParentNodeId(clickNodeId);
       let removeNodeIdList: number[] = this.listNodeUtils.removeNode(clickNodeId,
         parentNodeId, this.listNodeUtils.traverseNodeBF);
@@ -3151,15 +3143,15 @@ export namespace TreeView {
         return;
       }
       let newNodeInfo: { isFolder: boolean, icon: Resource, selectedIcon: Resource, editIcon: Resource,
-      menu: () =>any, secondaryTitle: number | string } =
-        { isFolder: true, icon: null, selectedIcon: null, editIcon: null, menu: null, secondaryTitle: '' };
+      container: () =>any, secondaryTitle: number | string } =
+        { isFolder: true, icon: null, selectedIcon: null, editIcon: null, container: null, secondaryTitle: '' };
       newNodeInfo = this.listNodeUtils.getNewNodeInfo(clickNodeId);
       this.nodeIdList.push(this.nodeIdList[this.nodeIdList.length - 1] + 1);
       let newNodeId: number = this.nodeIdList[this.nodeIdList.length - 1];
       this.listNodeUtils.addNewNodeId = newNodeId;
       this.listNodeUtils.addNode(clickNodeId, newNodeId,
         { isFolder: newNodeInfo.isFolder, icon: newNodeInfo.icon, selectedIcon: newNodeInfo.selectedIcon,
-          editIcon: newNodeInfo.editIcon, primaryTitle: '新建文件夹', menu: newNodeInfo.menu,
+          editIcon: newNodeInfo.editIcon, primaryTitle: '新建文件夹', container: newNodeInfo.container,
           secondaryTitle: newNodeInfo.secondaryTitle });
       this.listNodeDataSource.refreshData(this.listNodeUtils, MenuOperation.ADD_NODE, clickNodeId, [newNodeId]);
 
@@ -3253,8 +3245,10 @@ export namespace TreeView {
 
 @Component
 export struct TreeViewInner {
-  @ObjectLink item: NodeInfo
-  listNodeDataSource: TreeView.ListNodeDataSource
+  @ObjectLink item: NodeInfo;
+  listNodeDataSource: TreeView.ListNodeDataSource;
+  @State columnWidth: number = 0;
+  @State isFocused: boolean = false;
   @State index: number = -1;
   @State lastIndex: number = -1;
   @State count: number = 0;
@@ -3303,211 +3297,257 @@ export struct TreeViewInner {
   }
 
   @Builder builder() {
-    this.listTreeViewMenu()
+    if (this.listTreeViewMenu) {
+      this.listTreeViewMenu()
+    }
   }
 
   build(){
     if (this.item.getNodeIsShow()) {
-      Column() {
-        Stack({alignContent: Alignment.Bottom}) {
-          Divider()
-            .height(this.listNodeDataSource.getFlagLine().flagLineHeight)
-            .color(this.listNodeDataSource.getFlagLine().flagLineColor)
-            .visibility(this.listNodeDataSource.getVisibility(this.item))
-            .lineCap(LineCapStyle.Round)
-            .margin({ left: this.item.getFlagLineLeftMargin() })
-          Row({}) {
+      Stack() {
+        Column() {
+          Stack({alignContent: Alignment.Bottom}) {
+            Divider()
+              .height(this.listNodeDataSource.getFlagLine().flagLineHeight)
+              .color(this.listNodeDataSource.getFlagLine().flagLineColor)
+              .visibility(this.listNodeDataSource.getVisibility(this.item))
+              .lineCap(LineCapStyle.Round)
+              .margin({ left: this.item.getFlagLineLeftMargin() })
+              .focusable(true)
             Row({}) {
-              if (this.item.getNodeItem().imageNode) {
-                Row() {
-                  Image(this.item.imageSource)
-                    .objectFit(ImageFit.Contain)
-                    .height(this.item.getNodeItem().imageNode.itemHeight)
-                    .width(this.item.getNodeItem().imageNode.itemWidth)
-                    .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
-                    this.item.getNodeItem().imageNode.opacity : this.item.getNodeItem().imageNode.noOpacity)
-                    .focusable(this.item.getNodeItem().mainTitleNode != null ? false : true)
-                }
-                .backgroundColor(COLOR_IMAGE_ROW)
-                .margin({ right: this.item.getNodeItem().imageNode.itemRightMargin })
-                .height(this.item.getNodeItem().imageNode.itemHeight)
-                .width(this.item.getNodeItem().imageNode.itemWidth)
-              }
-              Row() {
-                if (this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle()) {
-                  Text(this.item.getNodeItem().mainTitleNode.title)
-                    .maxLines(1) // max line
-                    .fontSize(this.item.getNodeItem().mainTitleNode.size)
-                    .fontColor(this.item.fontColor)
-                    .margin({ right: this.item.getNodeItem().mainTitleNode.itemRightMargin })
-                    .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .fontWeight(this.item.getNodeItem().mainTitleNode.weight)
-                    .focusable(true)
-                }
-                if (this.item.getNodeItem().mainTitleNode &&
-                this.item.getNodeItem().inputText &&
-                this.item.getIsShowInputText()) {
+              Row({}) {
+                if (this.item.getNodeItem().imageNode) {
                   Row() {
-                    TextInput({ text: this.item.getNodeItem().mainTitleNode.title })
-                      .height(this.item.getNodeItem().inputText.itemHeight)
-                      .fontSize(this.item.getNodeItem().inputText.size)
-                      .fontColor(this.item.getNodeItem().inputText.color)
-                      .borderRadius(this.item.getNodeItem().inputText.borderRadius)
-                      .backgroundColor(this.item.getNodeItem().inputText.backgroundColor)
-                      .enterKeyType(EnterKeyType.Done)
-                      .padding({ left: this.textInputPadding.left, right: this.textInputPadding.right,
-                        top: this.textInputPadding.top, bottom: this.textInputPadding.bottom })
-                      .onChange((value: string) => {
-                        let that = this;
-                        var thisIndex = findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId());
-                        let res: string = '';
-                        let isInvalidError: boolean = false;
-                        let isLengthError: boolean = false;
-                        if (that.checkInvalidPattern(value)) {
-                          for (let i = 0; i < value.length; i++) {
-                            if (!that.checkInvalidPattern(value[i])) {
-                              res += value[i];
+                    Image(this.item.imageSource)
+                      .objectFit(ImageFit.Contain)
+                      .height(this.item.getNodeItem().imageNode.itemHeight)
+                      .width(this.item.getNodeItem().imageNode.itemWidth)
+                      .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
+                      this.item.getNodeItem().imageNode.opacity : this.item.getNodeItem().imageNode.noOpacity)
+                      .focusable(this.item.getNodeItem().mainTitleNode != null ? false : true)
+                  }
+                  .focusable(true)
+                  .backgroundColor(COLOR_IMAGE_ROW)
+                  .margin({ right: this.item.getNodeItem().imageNode.itemRightMargin })
+                  .height(this.item.getNodeItem().imageNode.itemHeight)
+                  .width(this.item.getNodeItem().imageNode.itemWidth)
+                }
+                Row() {
+                  if (this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle()) {
+                    Text(this.item.getNodeItem().mainTitleNode.title)
+                      .maxLines(1) // max line
+                      .fontSize(this.item.getNodeItem().mainTitleNode.size)
+                      .fontColor(this.item.fontColor)
+                      .margin({ right: this.item.getNodeItem().mainTitleNode.itemRightMargin })
+                      .textOverflow({ overflow: TextOverflow.Ellipsis })
+                      .fontWeight(this.item.getNodeItem().mainTitleNode.weight)
+                      .focusable(true)
+                  }
+                  if (this.item.getNodeItem().mainTitleNode &&
+                  this.item.getNodeItem().inputText &&
+                  this.item.getIsShowInputText()) {
+                    Row() {
+                      TextInput({ text: this.item.getNodeItem().mainTitleNode.title })
+                        .height(this.item.getNodeItem().inputText.itemHeight)
+                        .fontSize(this.item.getNodeItem().inputText.size)
+                        .fontColor(this.item.getNodeItem().inputText.color)
+                        .borderRadius(this.item.getNodeItem().inputText.borderRadius)
+                        .backgroundColor(this.item.getNodeItem().inputText.backgroundColor)
+                        .enterKeyType(EnterKeyType.Done)
+                        .focusable(true)
+                        .padding({ left: this.textInputPadding.left, right: this.textInputPadding.right,
+                          top: this.textInputPadding.top, bottom: this.textInputPadding.bottom })
+                        .onChange((value: string) => {
+                          let that = this;
+                          var thisIndex = findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId());
+                          let res: string = '';
+                          let isInvalidError: boolean = false;
+                          let isLengthError: boolean = false;
+                          if (that.checkInvalidPattern(value)) {
+                            for (let i = 0; i < value.length; i++) {
+                              if (!that.checkInvalidPattern(value[i])) {
+                                res += value[i];
+                              }
                             }
+                            isInvalidError = true;
+                            that.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS,
+                              InputError.INVALID_ERROR, true, thisIndex);
                           }
-                          isInvalidError = true;
-                          that.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS,
-                            InputError.INVALID_ERROR, true, thisIndex);
-                        } else {
-                          res = value;
-                          isInvalidError = false;
-                          that.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS,
-                            InputError.INVALID_ERROR, false, thisIndex);
-                        }
-                        if ((that.checkIsAllCN(res) && res.length > this.MAX_CN_LENGTH) ||
-                          (!that.checkIsAllCN(res) && res.length > this.MAX_EN_LENGTH)) {
-                          res = that.checkIsAllCN(res) ?
-                          res.substr(0, this.MAX_CN_LENGTH) : res.substr(0, this.MAX_EN_LENGTH);
-                          isLengthError = true;
-                          that.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS,
-                            InputError.LENGTH_ERROR, true, thisIndex);
-                        } else {
-                          isLengthError = false;
-                        }
-                        if (!isLengthError && !isInvalidError) {
-                          that.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS,
-                            InputError.LENGTH_ERROR, false, thisIndex);
-                          that.listNodeDataSource.setMainTitleNameOnEdit(thisIndex, res);
-                        }
+                          else {
+                            res = value;
+                            isInvalidError = false;
+                          }
+                          if ((that.checkIsAllCN(res) && res.length > this.MAX_CN_LENGTH) ||
+                            (!that.checkIsAllCN(res) && res.length > this.MAX_EN_LENGTH)) {
+                            res = that.checkIsAllCN(res) ?
+                            res.substr(0, this.MAX_CN_LENGTH) : res.substr(0, this.MAX_EN_LENGTH);
+                            isLengthError = true;
+                            that.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS,
+                              InputError.LENGTH_ERROR, true, thisIndex);
+                          }
+                          else {
+                            isLengthError = false;
+                          }
+                          if (!isLengthError && !isInvalidError) {
+                            that.listNodeDataSource.setMainTitleNameOnEdit(thisIndex, res);
+                          }
+                        })
+                        .onSubmit((enterKey: EnterKeyType) => {
+                          let that = this;
+                          var thisIndex = findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId());
+                          that.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, thisIndex);
+                          that.listNodeDataSource.setItemVisibilityOnEdit(thisIndex, MenuOperation.COMMIT_NODE);
+                        })
+                    }.backgroundColor(this.item.getNodeItem().inputText.backgroundColor)
+                    .borderRadius(this.item.getNodeItem().inputText.borderRadius)
+                    .margin({ right: this.item.getNodeItem().inputText.itemRightMargin })
+                  }
+                  Blank()
+                }
+                .layoutWeight(1)
+                .focusable(true)
 
+                if (this.listNodeDataSource.hasSubtitle(this.item.getCurrentNodeId())) {
+                  Row() {
+                    Text(this.listNodeDataSource.getSubtitle(this.item.getCurrentNodeId()))
+                      .fontSize(this.listNodeDataSource.getSubTitlePara().fontSize)
+                      .fontColor(this.listNodeDataSource.getSubTitleFontColor(this.item.getIsHighLight() || this.item.getIsModify()))
+                      .fontWeight(this.listNodeDataSource.getSubTitlePara().fontWeight)
+                  }
+                  .focusable(true)
+                  .margin({ left: this.listNodeDataSource.getSubTitlePara().margin.left,
+                    right: this.item.getNodeItem().imageCollapse ?
+                      0 : this.listNodeDataSource.getSubTitlePara().margin.right })
+                }
+
+                if (this.item.getNodeItem().imageCollapse) {
+                  Row() {
+                    Image(this.item.getNodeItem().imageCollapse.collapseSource)
+                      .fillColor(this.item.getNodeItem().imageCollapse.isCollapse ? COLOR_IMAGE_ROW : COLOR_IMAGE_EDIT)
+                      .align(Alignment.End)
+                      .objectFit(ImageFit.Contain)
+                      .height(this.item.getNodeItem().imageCollapse.itemHeight)
+                      .width(this.item.getNodeItem().imageCollapse.itemWidth)
+                      .opacity(!this.item.getIsHighLight() ?
+                      this.item.getNodeItem().imageCollapse.opacity : this.item.getNodeItem().imageCollapse.noOpacity)
+                      .onTouch((event: TouchEvent) => {
+                        if (event.type === TouchType.Down) {
+                          let that = this;
+                          that.listNodeDataSource.expandAndCollapseNode(findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId()));
+                          this.listNodeDataSource.setCurrentFocusNodeId(this.item.getCurrentNodeId());
+                        }
+                        event.stopPropagation();
                       })
-                      .onSubmit((enterKey: EnterKeyType) => {
-                        let that = this;
-                        var thisIndex = findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId());
-                        that.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, thisIndex);
-                        that.listNodeDataSource.setItemVisibilityOnEdit(thisIndex, MenuOperation.COMMIT_NODE);
-                      })
-                  }.backgroundColor(this.item.getNodeItem().inputText.backgroundColor)
-                  .borderRadius(this.item.getNodeItem().inputText.borderRadius)
-                  .margin({ right: this.item.getNodeItem().inputText.itemRightMargin })
+                      .focusable(true)
+                  }
+                  .focusable(true)
+                  .height(this.item.getNodeItem().imageCollapse.itemHeight)
+                  .width(this.item.getNodeItem().imageCollapse.itemWidth)
                 }
-                Blank()
-              }.layoutWeight(1)
-
-              if (this.listNodeDataSource.hasSubtitle(this.item.getCurrentNodeId())) {
-                Row() {
-                  Text(this.listNodeDataSource.getSubtitle(this.item.getCurrentNodeId()))
-                    .fontSize(this.listNodeDataSource.getSubTitlePara().fontSize)
-                    .fontColor(this.listNodeDataSource.getSubTitleFontColor(this.item.getIsHighLight() || this.item.getIsModify()))
-                    .fontWeight(this.listNodeDataSource.getSubTitlePara().fontWeight)
-                }
-                .margin({ left: this.listNodeDataSource.getSubTitlePara().margin.left,
-                  right: this.item.getNodeItem().imageCollapse ?
-                    0 : this.listNodeDataSource.getSubTitlePara().margin.right })
               }
+              .focusable(true)
+              .width('100%')
+              .gesture(
+                TapGesture({ count: 2 }) // doubleClick
+                  .onAction((event: GestureEvent) => {
+                    let that = this;
+                    that.listNodeDataSource.expandAndCollapseNode(
+                      findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId()));
+                  })
+              )
+              .height(this.item.getNodeHeight())
+              .padding({ left: this.item.getNodeLeftPadding() })
+              .bindContextMenu(this.builder, ResponseType.RightClick)
+            }.focusable(true)
+          }.focusable(true)
+        }
+        .opacity(this.listNodeDataSource.getListItemOpacity(this.item))
+        .onHover((isHover: boolean) => {
+          if (isHover) {
+            this.item.setNodeColor($r('sys.color.ohos_id_color_hover'))
+          } else {
+            this.item.setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
+          }
+        })
+        .onTouch((event) => {
+          this.count++;
+          if(this.count > 1) {
+            this.count--;
+            return;
+          }
 
-              if (this.item.getNodeItem().imageCollapse) {
-                Row() {
-                  Image(this.item.getNodeItem().imageCollapse.collapseSource).borderWidth(1)
-                    .fillColor(this.item.getNodeItem().imageCollapse.isCollapse ? COLOR_IMAGE_ROW : COLOR_IMAGE_EDIT)
-                    .align(Alignment.End)
-                    .objectFit(ImageFit.Contain)
-                    .height(this.item.getNodeItem().imageCollapse.itemHeight)
-                    .width(this.item.getNodeItem().imageCollapse.itemWidth)
-                    .opacity(!this.item.getIsHighLight() ?
-                    this.item.getNodeItem().imageCollapse.opacity : this.item.getNodeItem().imageCollapse.noOpacity)
-                    .onTouch((event: TouchEvent) => {
-                      if (event.type === TouchType.Down) {
-                        let that = this;
-                        that.listNodeDataSource.expandAndCollapseNode(findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId())); // this.index
-                        this.listNodeDataSource.setCurrentFocusNodeId(this.item.getCurrentNodeId());
-                      }
-                      event.stopPropagation();
-                    })
-                }
-                .height(this.item.getNodeItem().imageCollapse.itemHeight)
-                .width(this.item.getNodeItem().imageCollapse.itemWidth)
-              }
+          this.listNodeDataSource.setClickIndex(this.index);
+          let currentId = this.item.getNodeCurrentNodeId();
+
+          if (event.type === TouchType.Down) {
+            this.item.setNodeColor($r('sys.color.ohos_id_color_click_effect'));
+          }
+
+          else if (event.type === TouchType.Up) {
+            this.item.setNodeColor(COLOR_SELECT);
+            this.item.fontColor = $r('sys.color.ohos_id_color_text_primary_activated');
+            if (this.item.getNodeItem().imageNode != null) {
+              this.item.getNodeItem().imageNode.setImageSource(InteractionStatus.Selected);
+              this.listNodeDataSource.setImageSource(this.index, InteractionStatus.Selected);
+              this.item.imageSource = this.item.getNodeItem().imageNode.source;
             }
-            .width('100%')
-            .gesture(
-              TapGesture({ count: 2 }) // doubleClick
-                .onAction((event: GestureEvent) => {
-                  let that = this;
-                  that.listNodeDataSource.expandAndCollapseNode(
-                    findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId()));
-                })
-            )
-            .height(this.item.getNodeHeight())
-            .padding({ left: this.item.getNodeLeftPadding() })
-            .bindContextMenu(this.builder, ResponseType.RightClick)
+
+            this.item.getNodeItem().mainTitleNode.setMainTitleSelected(true)
+            this.lastIndex = this.index;
+
+            let callbackParam = { currentNodeId: currentId }
+            this.appEventBus.emit(TreeView.TreeListenType.NODE_CLICK, [callbackParam]);
           }
-        }
-      }
-      .opacity(this.listNodeDataSource.getListItemOpacity(this.item))
-      .onHover((isHover: boolean) => {
-        if (isHover) {
-          this.item.setNodeColor($r('sys.color.ohos_id_color_hover'))
-        } else {
-          this.item.setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
-        }
-      })
-      .onTouch((event) => {
-        this.count++;
-        if(this.count > 1) {
+
+          if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
+            this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
+            this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
+          }
           this.count--;
-          return;
-        }
-
-        this.listNodeDataSource.setClickIndex(this.index);
-        let currentId = this.item.getNodeCurrentNodeId();
-
-        if (event.type === TouchType.Down) {
-          this.item.setNodeColor($r('sys.color.ohos_id_color_click_effect'));
-        }
-
-        else if (event.type === TouchType.Up) {
-          this.item.setNodeColor(COLOR_SELECT);
-          this.item.fontColor = $r('sys.color.ohos_id_color_text_primary_activated');
-          if (this.item.getNodeItem().imageNode != null) {
-            this.item.getNodeItem().imageNode.setImageSource(InteractionStatus.Selected);
-            this.listNodeDataSource.setImageSource(this.index, InteractionStatus.Selected);
-            this.item.imageSource = this.item.getNodeItem().imageNode.source;
+        })
+        /* backgroundColor when editing and in other states. */
+        .backgroundColor((this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&
+        this.item.getIsShowInputText()) ? this.item.getNodeItem().inputText.editColor : this.item.getNodeColor())
+        .border({
+          width: this.item.getNodeBorder().borderWidth,
+          color: this.item.getNodeBorder().borderColor,
+          radius: this.item.getNodeBorder().borderRadius
+        })
+        .height(LIST_ITEM_HEIGHT)
+        .focusable(true)
+        .onMouse((event: MouseEvent) => {
+          let that = this;
+          let thisIndex = findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId());
+          if (event.button == MouseButton.Right) {
+            that.listNodeDataSource.handleEvent(Event.MOUSE_BUTTON_RIGHT,
+              findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId()));
+            this.listTreeViewMenu = this.item.getMenu();
+            that.listNodeDataSource.setClickIndex(thisIndex);
+            that.listNodeDataSource.setPopUpInfo(PopUpType.HINTS, InputError.NONE, false, thisIndex);
+            clearTimeout(this.item.getNodeItem().mainTitleNode.popUpTimeout);
           }
-
-          this.item.getNodeItem().mainTitleNode.setMainTitleSelected(true)
-          this.lastIndex = this.index;
-
-          let callbackParam = { currentNodeId: currentId }
-          this.appEventBus.emit(TreeListenType.NODE_CLICK, [callbackParam]);
-
-        }
-
-        if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
-          this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS, InputError.NONE, false, this.listNodeDataSource.getLastIndex());
-          this.listNodeDataSource.setItemVisibilityOnEdit(this.listNodeDataSource.getLastIndex(), MenuOperation.COMMIT_NODE);
-        }
-        this.count--;
-      })
+          event.stopPropagation();
+        })
+        .padding({ top: 0, bottom: 0 })
+        .bindPopup(this.item.getPopUpInfo().popUpIsShow, {
+          builder: this.popupForShowTitle(this.item.getPopUpInfo().popUpText, this.item.getPopUpInfo().popUpColor,
+            this.item.getPopUpInfo().popUpTextColor),
+          placement: Placement.BottomLeft,
+          placementOnTop: false,
+          popupColor: this.item.getPopUpInfo().popUpColor,
+          autoCancel: true,
+          enableArrow: this.item.getPopUpInfo().popUpEnableArrow
+        })
+        .onAreaChange((oldValue: Area, newValue: Area) => {
+          let columnWidthNum = Number(parseInt(newValue.width.toString(), 0))
+          this.columnWidth = columnWidthNum
+        })
+      }
       .stateStyles({
         focused: {
           .border({
-            radius: $r('sys.float.ohos_id_corner_radius_clicked'), // 8
-            width: 2,
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: FLAG_NUMBER,
             color: $r('sys.color.ohos_id_color_focused_outline'),
             style: BorderStyle.Solid
           })
@@ -3517,40 +3557,6 @@ export struct TreeViewInner {
             radius: $r('sys.float.ohos_id_corner_radius_clicked'),
             width: 0 })
         }
-      })
-      /* backgroundColor when editing and in other states. */
-      .backgroundColor((this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&
-      this.item.getIsShowInputText()) ? this.item.getNodeItem().inputText.editColor : this.item.getNodeColor())
-      .border({
-        width: this.item.getNodeBorder().borderWidth,
-        color: this.item.getNodeBorder().borderColor,
-        radius: this.item.getNodeBorder().borderRadius
-      })
-
-      .height(48)
-      .focusable(true)
-      .onMouse((event: MouseEvent) => {
-        let that = this;
-        let thisIndex = findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId());
-        if (event.button == MouseButton.Right) {
-          that.listNodeDataSource.handleEvent(Event.MOUSE_BUTTON_RIGHT,
-            findCurrentNodeIndex.call(that, this.item.getNodeCurrentNodeId()));
-          this.listTreeViewMenu = this.item.getMenu();
-          that.listNodeDataSource.setClickIndex(thisIndex);
-          that.listNodeDataSource.setPopUpInfo(PopUpType.HINTS, InputError.NONE, false, thisIndex);
-          clearTimeout(this.item.getNodeItem().mainTitleNode.popUpTimeout);
-        }
-        event.stopPropagation();
-      })
-      .padding({ top: 0, bottom: 0 })
-      .bindPopup(this.item.getPopUpInfo().popUpIsShow, {
-        builder: this.popupForShowTitle(this.item.getPopUpInfo().popUpText, this.item.getPopUpInfo().popUpColor,
-          this.item.getPopUpInfo().popUpTextColor),
-        placement: Placement.BottomLeft,
-        placementOnTop: false,
-        popupColor: this.item.getPopUpInfo().popUpColor,
-        autoCancel: true,
-        enableArrow: this.item.getPopUpInfo().popUpEnableArrow
       })
     }
   }

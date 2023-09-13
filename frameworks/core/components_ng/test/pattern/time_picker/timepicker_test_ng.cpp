@@ -83,6 +83,7 @@ const uint32_t MINUTE_59 = 59;
 const std::vector<int> DEFAULT_VALUE = { 0, 1, 2, 3, 4 };
 const double OFFSET_X = 6.0;
 const double OFFSET_Y = 8.0;
+const double OFFSET_Y_0 = 0.0;
 const double OFFSET_DISTANCE = 10.0;
 const int32_t DEFAULT_FINGER_ID = 1;
 const uint32_t INVALID_SHOW_COUNT = 1;
@@ -105,6 +106,9 @@ const double YOFFSET_END1 = 1000.0;
 const double TIME_PLUS = 1 * 100.0;
 const SizeF TEST_FRAME_SIZE { 20, 50 };
 constexpr double COLUMN_VELOCITY = 2000.0;
+const double FONT_SIZE_5 = 5.0;
+const double FONT_SIZE_10 = 10.0;
+const double FONT_SIZE_20 = 20.0;
 } // namespace
 class TimePickerPatternTestNg : public testing::Test {
 public:
@@ -2163,6 +2167,16 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level1)
     timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
     auto frameSize = layoutWrapper.geometryNode_->GetFrameSize();
     EXPECT_EQ(frameSize, TEST_FRAME_SIZE);
+
+    /**
+     * @tc.step: step3. set SetDeviceOrientation and call Measure.
+     * @tc.expected: call Measure and frameSize valus meet expectation.
+     */
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    timePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
+    timePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+    frameSize = layoutWrapper.geometryNode_->GetFrameSize();
+    EXPECT_EQ(frameSize, TEST_FRAME_SIZE);
 }
 
 /**
@@ -2233,5 +2247,232 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern017, TestSize.Level1)
     ASSERT_NE(controller, nullptr);
     auto isRunning = controller->IsRunning();
     EXPECT_TRUE(isRunning);
+}
+
+/**
+ * @tc.name: TimePickerColumnPattern018
+ * @tc.desc: Test OnAroundButtonClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TimePickerColumnNode.
+     */
+    CreateTimePickerColumnNode();
+
+    ASSERT_NE(columnNode_, nullptr);
+    auto childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(1));
+    ASSERT_NE(childNode, nullptr);
+    auto param = AceType::MakeRefPtr<TimePickerEventParam>();
+    param->instance_ = childNode;
+    param->itemIndex_ = 1;
+    param->itemTotalCounts_ = static_cast<int32_t>(columnNode_->GetChildren().size());
+    ASSERT_NE(columnPattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnAroundButtonClick.
+     * @tc.expected: cover branch clickBreak_ is true and expecte isRunning result is false.
+     */
+    columnPattern_->SetclickBreak(true);
+    columnPattern_->OnAroundButtonClick(param);
+    auto controller = columnPattern_->fromController_;
+    ASSERT_NE(controller, nullptr);
+    auto isRunning = controller->IsRunning();
+    EXPECT_FALSE(isRunning);
+
+    /**
+     * @tc.steps: step3. Call OnAroundButtonClick.
+     * @tc.expected: cover branch status_ is RUNNING and expecte isRunning result is true.
+     */
+    columnPattern_->fromController_->status_ = Animator::Status::RUNNING;
+    columnPattern_->OnAroundButtonClick(param);
+    isRunning = columnPattern_->fromController_->IsRunning();
+    EXPECT_TRUE(isRunning);
+
+    /**
+     * @tc.steps: step4. Call OnAroundButtonClick.
+     * @tc.expected: cover branch step  is 0 and expecte isRunning result is true.
+     */
+    param->itemIndex_ = 3;
+    columnPattern_->OnAroundButtonClick(param);
+    isRunning = columnPattern_->fromController_->IsRunning();
+    EXPECT_TRUE(isRunning);
+}
+
+/**
+ * @tc.name: TimePickerColumnPattern019
+ * @tc.desc: Test FlushAnimationTextProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern019, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.step: step1. create column pattern.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"];
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+
+    /**
+     * @tc.step: step2. create cloumn pattern and call FlushAnimationTextProperties.
+     * @tc.expected: cover branch animationProperties_ size is 0.
+     */
+    minuteColumnPattern->animationProperties_.clear();
+    minuteColumnPattern->FlushAnimationTextProperties(false);
+    EXPECT_EQ(0, minuteColumnPattern->animationProperties_.size());
+
+    /**
+     * @tc.step: step3. construct columnPattern animationProperties_ and call FlushAnimationTextProperties.
+     * @tc.expected: cover branch animationProperties_ size is 1 and fontSize meet expectation.
+     */
+    std::vector<TimeTextProperties> animationProperties;
+    TimeTextProperties properties1;
+    properties1.upFontSize = Dimension(FONT_SIZE_5);
+    properties1.fontSize = Dimension(FONT_SIZE_20);
+    properties1.downFontSize = Dimension(FONT_SIZE_5);
+    properties1.upColor = Color::RED;
+    properties1.currentColor = Color::RED;
+    properties1.downColor = Color::RED;
+    animationProperties.emplace_back(properties1);
+    minuteColumnPattern->animationProperties_ = animationProperties;
+
+    minuteColumnPattern->FlushAnimationTextProperties(false);
+    Dimension result = minuteColumnPattern->animationProperties_[0].fontSize;
+    EXPECT_EQ(Dimension(FONT_SIZE_10), result);
+    minuteColumnPattern->FlushAnimationTextProperties(true);
+    result = minuteColumnPattern->animationProperties_[0].fontSize;
+    EXPECT_EQ(Dimension(FONT_SIZE_5), result);
+
+    /**
+     * @tc.step: step4. add construct columnPattern animationProperties_ and call FlushAnimationTextProperties.
+     * @tc.expected: cover branch animationProperties_ size is more than 1 and fontSize meet expectation.
+     */
+    TimeTextProperties properties2;
+    properties2.upFontSize = Dimension(FONT_SIZE_10);
+    properties2.fontSize = Dimension(FONT_SIZE_20);
+    properties2.downFontSize = Dimension(FONT_SIZE_10);
+    properties2.upColor = Color::RED;
+    properties2.currentColor = Color::RED;
+    properties2.downColor = Color::RED;
+    animationProperties.emplace_back(properties2);
+    minuteColumnPattern->animationProperties_ = animationProperties;
+
+    minuteColumnPattern->FlushAnimationTextProperties(false);
+    result = minuteColumnPattern->animationProperties_[0].fontSize;
+    EXPECT_EQ(Dimension(FONT_SIZE_10), result);
+    minuteColumnPattern->FlushAnimationTextProperties(true);
+    result = minuteColumnPattern->animationProperties_[0].fontSize;
+    EXPECT_EQ(Dimension(FONT_SIZE_20), result);
+}
+
+/**
+ * @tc.name: TimePickerColumnPattern020
+ * @tc.desc: Test UpdateFinishToss.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern020, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.step: step1. create column pattern.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"];
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+
+    /**
+     * @tc.step: step2. call UpdateFinishToss.
+     * @tc.expected: call UpdateFinishToss and CanMove() meet expectation.
+     */
+    minuteColumnPattern->UpdateFinishToss(OFFSET_Y);
+    bool result = minuteColumnPattern->CanMove(false);
+    EXPECT_TRUE(result);
+    minuteColumnPattern->UpdateFinishToss(OFFSET_Y_0);
+    result = minuteColumnPattern->CanMove(false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: TimePickerColumnPattern021
+ * @tc.desc: Test PlayRestAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern021, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.step: step1. create column pattern.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    auto minuteColumn = allChildNode["minute"];
+    ASSERT_NE(minuteColumn, nullptr);
+    auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(minuteColumnPattern, nullptr);
+
+    /**
+     * @tc.step: step2. call UpdatPlayRestAnimation.
+     * @tc.expected: call UpdatPlayRestAnimation and scrollDelta_ valus meet expectation.
+     */
+    minuteColumnPattern->PlayRestAnimation();
+    EXPECT_EQ(0.0f, minuteColumnPattern->scrollDelta_);
+
+    /**
+     * @tc.step: step3. set scrollDelta_ value and call UpdatPlayRestAnimation.
+     * @tc.expected: call UpdatPlayRestAnimation and scrollDelta_ valus meet expectation.
+     */
+    minuteColumnPattern->scrollDelta_ = 20;
+    minuteColumnPattern->PlayRestAnimation();
+    EXPECT_EQ(5.0f, minuteColumnPattern->scrollDelta_);
+}
+
+/**
+ * @tc.name: TossAnimationControllerSetStart001
+ * @tc.desc: Test SetStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TossAnimationControllerSetStart001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TimePickerColumn.
+     */
+    CreateTimePickerColumnNode();
+
+    /**
+     * @tc.steps: step2. Set velocity and call SetStart .
+     */
+    ASSERT_NE(columnPattern_, nullptr);
+    columnPattern_->SetMainVelocity(COLUMN_VELOCITY);
+    columnPattern_->touchBreak_ = true;
+    auto toss = columnPattern_->GetToss();
+    ASSERT_NE(toss, nullptr);
+    toss->SetStart(YOFFSET_START1);
+    EXPECT_EQ(toss->yStart_, YOFFSET_START1);
 }
 } // namespace OHOS::Ace::NG

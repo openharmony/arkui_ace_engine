@@ -42,7 +42,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         return;
     }
     RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();

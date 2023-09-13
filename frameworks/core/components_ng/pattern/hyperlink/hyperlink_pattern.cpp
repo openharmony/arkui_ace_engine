@@ -108,6 +108,7 @@ void HyperlinkPattern::LinkToAddress()
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
     hyperlinkLayoutProperty->UpdateTextColor(theme->GetTextColor().BlendColor(theme->GetTextLinkedColor()));
+    hyperlinkLayoutProperty->UpdateTextDecoration(theme->GetTextUnSelectedDecoration());
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     pipeline->HyperlinkStartAbility(address_);
 #endif

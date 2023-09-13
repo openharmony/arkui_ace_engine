@@ -1156,6 +1156,7 @@ bool OverlayManager::RemoveAllModalInOverlay()
     while (!modalStack_.empty()) {
         auto topModalNode = modalStack_.top().Upgrade();
         if (!topModalNode) {
+            modalStack_.pop();
             continue;
         }
         ModalPageLostFocus(topModalNode);
@@ -2084,6 +2085,10 @@ void OverlayManager::RemovePixelMap()
 void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
 {
     if (isOnAnimation_ || !hasPixelMap_) {
+        return;
+    }
+    if (startDrag) {
+        RemovePixelMap();
         return;
     }
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
