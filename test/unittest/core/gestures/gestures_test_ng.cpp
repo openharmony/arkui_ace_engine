@@ -940,6 +940,229 @@ HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandleAcceptDisposalTest001, TestSiz
 }
 
 /**
+ * @tc.name: ExclusiveRecognizerHandlePendingDisposalTest002
+ * @tc.desc: Test ExclusiveRecognizer HandlePendingDisposal function
+ */
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandlePendingDisposalTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr2->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    recognizers.insert(recognizers.end(), clickRecognizerPtr2);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->HandlePendingDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerHandleAcceptDisposalTest002
+ * @tc.desc: Test ExclusiveRecognizer HandleAcceptDisposal function
+ */
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandleAcceptDisposalTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr2->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    recognizers.insert(recognizers.end(), clickRecognizerPtr2);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->HandleAcceptDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerHandleRejectDisposalTest008
+ * @tc.desc: Test ExclusiveRecognizer HandleRejectDisposal function
+ */
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandleRejectDisposalTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr2->refereeState_ = RefereeState::PENDING_BLOCKED;
+    recognizers.insert(recognizers.end(), clickRecognizerPtr2);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizerPtr->HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    clickRecognizerPtr2->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: ParallelRecognizerOnRejectedTest001
+ * @tc.desc: Test ParallelRecognizer function: OnAccepted OnRejected OnPending OnBlock
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, ParallelRecognizerOnRejectedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr2->refereeState_ = RefereeState::PENDING_BLOCKED;
+    recognizers.insert(recognizers.end(), clickRecognizerPtr2);
+    ParallelRecognizer parallelRecognizer = ParallelRecognizer(recognizers);
+
+    /**
+     * @tc.steps: step2. call OnRejected function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    parallelRecognizer.OnRejected();
+    EXPECT_EQ(parallelRecognizer.refereeState_, RefereeState::FAIL);
+
+    /**
+     * @tc.steps: step2. call OnRejected function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    parallelRecognizer.OnRejected();
+    clickRecognizerPtr2->refereeState_ = RefereeState::FAIL;
+    EXPECT_EQ(parallelRecognizer.refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: ParallelRecognizerOnRejectedTest002
+ * @tc.desc: Test ParallelRecognizer function: OnAccepted OnRejected OnPending OnBlock
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, ParallelRecognizerOnRejectedTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ParallelRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr2->refereeState_ = RefereeState::PENDING_BLOCKED;
+
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers2 = {};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers2);
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::PENDING_BLOCKED;
+    recognizers.insert(recognizers.end(), exclusiveRecognizerPtr);
+    ParallelRecognizer parallelRecognizer = ParallelRecognizer(recognizers);
+
+    /**
+     * @tc.steps: step2. call OnRejected function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    parallelRecognizer.OnRejected();
+    EXPECT_EQ(parallelRecognizer.refereeState_, RefereeState::FAIL);
+
+    /**
+     * @tc.steps: step2. call OnRejected function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    parallelRecognizer.OnRejected();
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    EXPECT_EQ(parallelRecognizer.refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: SequencedRecognizerBatchAdjudicateTest001
+ * @tc.desc: Test SequencedRecognizer function: BatchAdjudicate, and GestureDisposal
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SequencedRecognizerBatchAdjudicateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call GestureDisposal function and compare result.
+     * @tc.steps: case1: disposal: ACCEPT, refereeState: SUCCEED
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer.refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer.currentIndex_ = -9;
+    sequencedRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_NE(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+
+    /**
+     * @tc.steps: step2. call GestureDisposal function and compare result.
+     * @tc.steps: case2: disposal: ACCEPT, refereeState: PENDING, currentIndex = 0
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer.refereeState_ = RefereeState::PENDING;
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer.currentIndex_ = -10;
+    sequencedRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_NE(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+
+    /**
+     * @tc.steps: step2. call GestureDisposal function and compare result.
+     * @tc.steps: case3: disposal: REJECT, refereeState: FAIL
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer.refereeState_ = RefereeState::FAIL;
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer.currentIndex_ = -9;
+    sequencedRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::REJECT);
+    EXPECT_NE(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+
+    /**
+     * @tc.steps: step2. call GestureDisposal function and compare result.
+     * @tc.steps: case4: disposal: REJECT, refereeState: SUCCESS, refereeState_ = FAIL
+     * @tc.expected: step2. result equals.
+     */
+    sequencedRecognizer.refereeState_ = RefereeState::FAIL;
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    sequencedRecognizer.currentIndex_ = -10;
+    sequencedRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::REJECT);
+    EXPECT_NE(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+}
+
+/**
  * @tc.name: GestureRecognizerHandleTouchMoveEventTest001
  * @tc.desc: Test ClickRecognizer function: HandleTouchMoveEvent
  * @tc.type: FUNC
