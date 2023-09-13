@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <iterator>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
@@ -29,7 +30,6 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -909,47 +909,66 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
     return res;
 }
 
-std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start, int32_t end)
+std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start, int32_t end) const
 {
+    CHECK_NULL_RETURN(start != end, {});
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    int32_t spanStart = -1;
-    int32_t spanEnd = -1;
+    CHECK_NULL_RETURN(!host->GetChildren().empty(), {});
+
+    std::wstring content;
 
     // find paragraph head
     auto headIt = host->GetChildren().begin();
-    auto tailIt = host->GetChildren().rbegin();
+    int32_t spanEnd = -1;
     for (auto it = headIt; it != host->GetChildren().end(); ++it) {
         if (InstanceOf<SpanNode>(*it)) {
             auto spanNode = DynamicCast<SpanNode>(*it);
             auto&& info = spanNode->GetSpanItem();
-            info->GetIndex(spanStart, spanEnd);
-            if (start >= spanStart) {
-                break;
-            }
-            if (StringUtils::ToWstring(info->content).back() == L'\n') {
-                headIt = std::next(it);
-            }
+            spanEnd = info->position;
+            content = StringUtils::ToWstring(info->content);
+        } else {
+            // placeholder node
+            ++spanEnd;
+            content = L" ";
+        }
+
+        if (spanEnd > start) {
+            break;
+        }
+        if (content.back() == L'\n') {
+            headIt = std::next(it);
         }
     }
 
     // find paragraph tail
-    for (auto it = tailIt; it != host->GetChildren().rend(); ++it) {
+    auto tailIt = host->GetChildren().end();
+    int32_t spanStart = -1;
+    for (auto it = std::prev(tailIt);; --it) {
         if (InstanceOf<SpanNode>(*it)) {
             auto spanNode = DynamicCast<SpanNode>(*it);
             auto&& info = spanNode->GetSpanItem();
-            info->GetIndex(spanStart, spanEnd);
-            if (spanEnd < end) {
-                break;
-            }
-            if (StringUtils::ToWstring(info->content).back() == L'\n') {
-                tailIt = std::prev(it);
-            }
+            content = StringUtils::ToWstring(info->content);
+            spanStart = info->position - content.length();
+        } else {
+            // placeholder node
+            --spanStart;
+            content = L" ";
+        }
+
+        if (content.back() == L'\n') {
+            tailIt = std::next(it);
+        }
+        if (spanStart < end) {
+            break;
+        }
+        if (it == host->GetChildren().begin()) {
+            break;
         }
     }
 
     // filter illegal iterator
-    if (tailIt == host->GetChildren().rend() || headIt == host->GetChildren().end()) {
+    if (headIt == host->GetChildren().end()) {
         return {};
     }
 
@@ -962,7 +981,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
             res.emplace_back(spanNode);
         }
         ++headIt;
-    } while (headIt != host->GetChildren().end() && *headIt != *tailIt);
+    } while (headIt != host->GetChildren().end() && headIt != tailIt);
 
     return res;
 }

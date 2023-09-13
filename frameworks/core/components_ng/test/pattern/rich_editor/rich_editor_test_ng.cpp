@@ -153,9 +153,9 @@ void RichEditorTestNg::AddSpan(const std::string& content)
     spanNode->MountToParent(richEditorNode_, richEditorNode_->children_.size());
     richEditorPattern->spans_.emplace_back(spanNode->spanItem_);
     int32_t spanTextLength = 0;
-    for (auto child = richEditorPattern->spans_.begin(); child != richEditorPattern->spans_.end(); child++) {
-        spanTextLength += StringUtils::ToWstring((*child)->content).length();
-        (*child)->position = spanTextLength;
+    for (auto& span : richEditorPattern->spans_) {
+        spanTextLength += StringUtils::ToWstring(span->content).length();
+        span->position = spanTextLength;
     }
 }
 
@@ -177,9 +177,9 @@ void RichEditorTestNg::AddImageSpan()
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->spans_.emplace_back(spanItem);
     int32_t spanTextLength = 0;
-    for (auto child = richEditorPattern->spans_.begin(); child != richEditorPattern->spans_.end(); child++) {
-        spanTextLength += StringUtils::ToWstring((*child)->content).length();
-        (*child)->position = spanTextLength;
+    for (auto& span : richEditorPattern->spans_) {
+        spanTextLength += StringUtils::ToWstring(span->content).length();
+        span->position = spanTextLength;
     }
 }
 
@@ -1971,4 +1971,85 @@ HWTEST_F(RichEditorTestNg, GetSpanItemByIndex001, TestSize.Level1)
     ret = richEditorPattern->GetSpanItemByIndex(0);
     EXPECT_EQ(ret, richEditorPattern->spans_.front());
 }
+
+/**
+ * @tc.name: GetParagraphNodes001
+ * @tc.desc: test get paragraph nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetParagraphNodes001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto nodes = richEditorPattern->GetParagraphNodes(1, 5);
+    EXPECT_EQ(nodes.size(), 0);
+    nodes = richEditorPattern->GetParagraphNodes(0, INT_MAX);
+    EXPECT_EQ(nodes.size(), 0);
+
+    // add multiple paragraphs
+    AddSpan(INIT_VALUE_1 + "\n"); // length 7
+    AddImageSpan();               // length 1
+    AddSpan(INIT_VALUE_2 + "\n"); // length 7
+    AddSpan(INIT_VALUE_1);        // length 6
+    AddSpan(INIT_VALUE_2 + "\n");
+    AddSpan(INIT_VALUE_2);
+    AddSpan(INIT_VALUE_2 + "\n");
+    AddSpan(INIT_VALUE_2);
+    EXPECT_EQ(richEditorNode_->children_.size(), 8);
+
+    nodes = richEditorPattern->GetParagraphNodes(3, 5);
+    EXPECT_EQ(nodes.size(), 1);
+    EXPECT_EQ(nodes[0]->GetId(), richEditorNode_->GetChildAtIndex(0)->GetId());
+
+    nodes = richEditorPattern->GetParagraphNodes(0, INT_MAX);
+    EXPECT_EQ(nodes.size(), 7);
+
+    nodes = richEditorPattern->GetParagraphNodes(10, 15);
+    EXPECT_EQ(nodes.size(), 1);
+    EXPECT_EQ(nodes[0]->GetId(), richEditorNode_->GetChildAtIndex(2)->GetId());
+
+    nodes = richEditorPattern->GetParagraphNodes(6, 7);
+    EXPECT_EQ(nodes.size(), 1);
+    EXPECT_EQ(nodes[0]->GetId(), richEditorNode_->GetChildAtIndex(0)->GetId());
+
+    // selecting only the placeholder region
+    nodes = richEditorPattern->GetParagraphNodes(7, 8);
+    EXPECT_EQ(nodes.size(), 1);
+    EXPECT_EQ(nodes[0]->GetId(), richEditorNode_->GetChildAtIndex(1)->GetId());
+
+    nodes = richEditorPattern->GetParagraphNodes(2, 20);
+    EXPECT_EQ(nodes.size(), 4);
+    EXPECT_EQ(nodes[3]->GetId(), richEditorNode_->GetChildAtIndex(4)->GetId());
+}
+
+/**
+ * @tc.name: GetParagraphNodes002
+ * @tc.desc: test get paragraph nodes with multiple placeholders
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, GetParagraphNodes002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+
+    // add multiple paragraphs
+    AddImageSpan();               // length 1
+    AddImageSpan();               // length 1
+    AddImageSpan();               // length 1
+
+    EXPECT_EQ(richEditorNode_->children_.size(), 3);
+
+    auto nodes = richEditorPattern->GetParagraphNodes(1, 2);
+    EXPECT_TRUE(nodes.empty());
+
+    AddSpan(INIT_VALUE_2);
+
+    // selecting only placeholder, should return span in the same paragraph
+    nodes = richEditorPattern->GetParagraphNodes(1, 2);
+    EXPECT_EQ(nodes.size(), 1);
+
+    nodes = richEditorPattern->GetParagraphNodes(4, 6);
+    EXPECT_EQ(nodes.size(), 1);
+}
+
 } // namespace OHOS::Ace::NG

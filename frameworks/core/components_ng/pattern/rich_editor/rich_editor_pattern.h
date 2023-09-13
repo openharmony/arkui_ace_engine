@@ -297,7 +297,8 @@ private:
     }
 #endif // ENABLE_DRAG_FRAMEWORK
 
-    std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end);
+    // REQUIRES: 0 <= start < end
+    std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
     RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
