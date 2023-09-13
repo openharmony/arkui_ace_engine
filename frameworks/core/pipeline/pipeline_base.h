@@ -855,7 +855,11 @@ public:
 
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
+    void SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
+
     void RemoveSubWindowVsyncCallback(int32_t subWindowId);
+
+    void RemoveJsFormVsyncCallback(int32_t subWindowId);
 
     virtual void SetIsLayoutFullScreen(bool isLayoutFullScreen) {}
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
@@ -949,6 +953,7 @@ protected:
     bool isJsPlugin_ = false;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
+    std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;
     int32_t minPlatformVersion_ = 0;
     uint32_t windowId_ = 0;
     // UIExtensionAbility need component windowID

@@ -164,7 +164,6 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     if (onFormAcquiredCallback_) {
         onFormAcquiredCallback_(formId);
     }
-
     if (uiSyntax == FrontendType::ETS_CARD) {
         // ArkTSCard: 确认Acquired事件时序
         LOGI("Run Card in FRS");
@@ -183,7 +182,6 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
         LOGE("Run Card failed, card type unknown");
         return;
     }
-
     frontend_->Initialize(cardType_, taskExecutor_);
     frontend_->ResetPageLoadState();
     LOGI("run card path:%{private}s, module:%{private}s, data:%{private}s", path.c_str(), module.c_str(), data.c_str());
@@ -215,6 +213,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     frontend_->SetCardWindowConfig(GetWindowConfig());
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
     window->SetFormWindowId(nodeId_);
+    window->SetId(instanceId_);
     windowId_ = nodeId_;
     if (cardType_ == FrontendType::ETS_CARD) { // ETS Card : API9 only support New Pipeline
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
