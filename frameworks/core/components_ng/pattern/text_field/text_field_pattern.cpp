@@ -305,10 +305,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         StopTwinkling();
         needToRefreshSelectOverlay_ = false;
     }
-    if (setSelectionFlag_) {
-        SetTextSelection(selectionStart_, selectionEnd_);
-        setSelectionFlag_ = false;
-    }
     if (inlineSelectAllFlag_) {
         HandleOnSelectAll(false, true);
         inlineSelectAllFlag_ = false;
@@ -4951,11 +4947,9 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
     if (!HasFocus()) {
         return;
     }
-    setSelectionFlag_ = true;
     cursorVisible_ = false;
     MarkRedrawOverlay();
-    selectionStart_ = selectionStart;
-    selectionEnd_ = selectionEnd;
+    SetTextSelection(selectionStart, selectionEnd);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
