@@ -97,7 +97,7 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     const TextStyle& textStyle, const std::string& content) const
 {
     auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content);
-
+    style.fontSize = textStyle.GetFontSize().ConvertToPx();
     auto&& spanGroup = GetSpans();
     auto&& lineStyle = spanGroup.front()->textLineStyle;
     CHECK_NULL_RETURN(lineStyle, style);
