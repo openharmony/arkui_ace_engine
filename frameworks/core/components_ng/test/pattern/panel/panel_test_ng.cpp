@@ -3059,6 +3059,10 @@ HWTEST_F(PanelTestNg, PanelTestNg0058, TestSize.Level1)
     ElementRegister::GetInstance()->itemMap_.emplace(std::make_pair(5, AceType::WeakClaim(AceType::RawPtr(temp))));
     auto columnLayoutProperty = slidingPanelModelNG.GetOrCreateSlidingPanelNode(V2::PANEL_ETS_TAG, 5, patternCreator);
     EXPECT_NE(columnLayoutProperty, nullptr);
+    auto panelNode = ElementRegister::GetInstance()->GetSpecificItemById<SlidingPanelNode>(5);
+    panelNode->tag_ = V2::PANEL_ETS_TAG;
+    columnLayoutProperty = slidingPanelModelNG.GetOrCreateSlidingPanelNode(V2::PANEL_ETS_TAG, 5, patternCreator);
+    EXPECT_NE(columnLayoutProperty, nullptr);
 }
 
 /**
