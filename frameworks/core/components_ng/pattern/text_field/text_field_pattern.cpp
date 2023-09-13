@@ -1963,6 +1963,8 @@ void TextFieldPattern::InitDragDropEvent()
                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         if (extraParams.empty()) {
             pattern->dragStatus_ = DragStatus::ON_DROP;
             pattern->textFieldContentModifier_->ChangeDragStatus();
@@ -2004,6 +2006,7 @@ void TextFieldPattern::InitDragDropEvent()
             }
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
+            host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
     };
     eventHub->SetOnDrop(std::move(onDrop));
