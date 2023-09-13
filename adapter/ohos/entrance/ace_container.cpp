@@ -1452,7 +1452,7 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 {
     auto context = runtimeContext_.lock();
     CHECK_NULL_RETURN(context, nullptr);
-    return context->CreateModuleContext(bundle, module);
+    return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
 }
 
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
