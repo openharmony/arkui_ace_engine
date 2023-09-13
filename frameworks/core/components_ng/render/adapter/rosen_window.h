@@ -83,6 +83,8 @@ public:
 
     void SetKeepScreenOn(bool keepScreenOn) override;
 
+    int64_t GetVSyncPeriod() const override;
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

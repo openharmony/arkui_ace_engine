@@ -31,12 +31,8 @@
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
-
 #ifdef PREVIEW
-float GetDisplayRefreshRate()
-{
-    return 30.0f;
-}
+constexpr float PREVIEW_REFRESH_RATE = 30.0f;
 #endif
 } // namespace
 
@@ -45,21 +41,17 @@ namespace OHOS::Ace::NG {
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
-#ifdef PREVIEW
-    int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
-#else
-    int64_t refreshPeriod = window->GetVSyncPeriod();
-#endif
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
-    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
+    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();
-        auto onVsync = [id, timeStampNanos, refreshPeriod] {
+        auto onVsync = [id, timeStampNanos] {
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
             CHECK_NULL_VOID(container);
             auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
+            int64_t refreshPeriod = window->GetVSyncPeriod();
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), 0);
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
@@ -181,7 +173,7 @@ void RosenWindow::FlushTasks()
 float RosenWindow::GetRefreshRate() const
 {
 #ifdef PREVIEW
-    return GetDisplayRefreshRate();
+    return PREVIEW_REFRESH_RATE;
 #else
     return ONE_SECOND_IN_NANO / rsWindow_->GetVSyncPeriod();
 #endif
@@ -198,6 +190,15 @@ void RosenWindow::SetKeepScreenOn(bool keepScreenOn)
     }
 #else
     LOGD("Rosenwindow unsupports the SetKeepScreenOn");
+#endif
+}
+
+int64_t RosenWindow::GetVSyncPeriod() const
+{
+#ifdef PREVIEW
+    return static_cast<int64_t>(ONE_SECOND_IN_NANO / PREVIEW_REFRESH_RATE);
+#else
+    return rsWindow_->GetVSyncPeriod();
 #endif
 }
 
