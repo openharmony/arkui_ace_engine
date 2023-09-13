@@ -243,12 +243,12 @@ HWTEST_F(ImageCacheTest, FileCache002, TestSize.Level1)
      * @tc.steps: step2. call WriteCacheFile().
      * @tc.expected: file write into filePath and file info update right.
      */
-    ImageCache::WriteCacheFile(url, imageData.data(), imageData.size());
+    ImageFileCache::GetInstance().WriteCacheFile(url, imageData.data(), imageData.size());
     ASSERT_EQ(ImageCache::cacheFileSize_, static_cast<int32_t>(FILE_SIZE + imageData.size()));
     ASSERT_EQ(ImageCache::cacheFileInfo_.size(), TEST_COUNT + 1);
     auto iter = ImageCache::cacheFileInfo_.rbegin();
 
-    ASSERT_EQ(iter->filePath, ImageCache::GetImageCacheFilePath(url));
+    ASSERT_EQ(iter->filePath, ImageFileCache::GetInstance().GetImageCacheFilePath(url));
 }
 
 /**
@@ -291,7 +291,7 @@ HWTEST_F(ImageCacheTest, FileCache004, TestSize.Level1)
      */
     std::vector<uint8_t> imageData = { 1, 2, 3 };
     std::string url = "http:/testfilecache003/image";
-    ImageCache::WriteCacheFile(url, imageData.data(), imageData.size());
+    ImageFileCache::GetInstance().WriteCacheFile(url, imageData.data(), imageData.size());
     float ratio = ImageCache::clearCacheFileRatio_;
     ASSERT_EQ(ImageCache::cacheFileInfo_.size(), static_cast<size_t>((TEST_COUNT + 2) * ratio + 1));
     ASSERT_LE(ImageCache::cacheFileSize_, FILE_SIZE);

@@ -62,6 +62,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/image/image_file_cache.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
 #endif
@@ -452,8 +453,8 @@ void UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
             CapabilityRegistry::Register();
-            ImageCache::SetImageCacheFilePath(context->GetCacheDir());
-            ImageCache::SetCacheFileInfo();
+            ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
+            ImageFileCache::GetInstance().SetCacheFileInfo();
         });
     }
 
@@ -743,7 +744,6 @@ void UIContentImpl::CommonInitializeForm(
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     }
 
-
     if (isFormRender_) {
         LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
             formHeight_);
@@ -885,8 +885,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         CapabilityRegistry::Register();
-        ImageCache::SetImageCacheFilePath(context->GetCacheDir());
-        ImageCache::SetCacheFileInfo();
+        ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
+        ImageFileCache::GetInstance().SetCacheFileInfo();
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;

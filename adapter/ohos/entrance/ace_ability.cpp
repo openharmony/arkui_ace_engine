@@ -50,6 +50,7 @@
 #include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/plugin_utils.h"
+#include "core/image/image_file_cache.h"
 namespace OHOS {
 namespace Ace {
 namespace {
@@ -228,8 +229,8 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         AceApplicationInfo::GetInstance().SetAppVersionCode(abilityContext->GetApplicationInfo()->versionCode);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
-        ImageCache::SetImageCacheFilePath(cacheDir);
-        ImageCache::SetCacheFileInfo();
+        ImageFileCache::GetInstance().SetImageCacheFilePath(cacheDir);
+        ImageFileCache::GetInstance().SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();

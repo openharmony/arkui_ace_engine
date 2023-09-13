@@ -18,10 +18,11 @@
 #include <utility>
 
 #include "image_painter_utils.h"
+#include "include/core/SkGraphics.h"
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/render/drawing.h"
-#include "frameworks/core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
 #endif
@@ -235,3 +236,10 @@ bool SkiaImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArra
 #endif
 }
 } // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+void ImageCache::Purge()
+{
+    SkGraphics::PurgeResourceCache();
+}
+} // namespace OHOS::Ace

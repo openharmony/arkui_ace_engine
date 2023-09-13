@@ -53,7 +53,7 @@
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/rosen_render_context.h"

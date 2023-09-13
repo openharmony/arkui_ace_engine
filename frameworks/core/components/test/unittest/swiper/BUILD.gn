@@ -142,7 +142,6 @@ ohos_unittest("SwiperComponentTest") {
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # image
-    "$ace_root/frameworks/core/image/flutter_image_cache.cpp",
     "$ace_root/frameworks/core/image/image_cache.cpp",
 
     # layout
