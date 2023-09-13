@@ -602,6 +602,344 @@ HWTEST_F(GesturesTestNg, GestureRecognizerTest011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ClickRecognizerHandleTouchUpEventTest101
+ * @tc.desc: Test ClickRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, ClickRecognizerHandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case1: refereeState is SUCCESS,return
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    clickRecognizer.currentTouchPointsNum_ = 0;
+    clickRecognizer.refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case2: equalsToFingers = true, currentTouchPointsNum = 1, tap != count
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.refereeState_ = RefereeState::PENDING;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_TRUE(clickRecognizer.equalsToFingers_);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case3: equalsToFingers = true, currentTouchPointsNum = 1,
+     * @tc.steps: tap == count, useCatchMode_ = false
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.tappedCount_ = 0;
+    clickRecognizer.count_ = 0;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_TRUE(clickRecognizer.equalsToFingers_);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case3: equalsToFingers = true, currentTouchPointsNum = fingers,
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = FINGER_NUMBER;
+    clickRecognizer.fingers_ = FINGER_NUMBER;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.equalsToFingers_, true);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case4: equalsToFingers = false, currentTouchPointsNum = 1,
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = false;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.equalsToFingers_, false);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case5: equalsToFingers = false, currentTouchPointsNum = 0,
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 0;
+    clickRecognizer.equalsToFingers_ = false;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.equalsToFingers_, false);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case6: equalsToFingers = true, currentTouchPointsNum = 1,
+     * @tc.steps: tap == count, useCatchMode_ = false
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.tappedCount_ = -1;
+    clickRecognizer.count_ = 0;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.equalsToFingers_, true);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleTouchUpEventTest102
+ * @tc.desc: Test ClickRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, ClickRecognizerHandleTouchUpEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case1: refereeState is SUCCESS,return
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    clickRecognizer.currentTouchPointsNum_ = 0;
+    clickRecognizer.refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.refereeState_ = RefereeState::PENDING;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.tappedCount_ = 0;
+    clickRecognizer.count_ = 0;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case3: equalsToFingers = true, currentTouchPointsNum = fingers,
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = FINGER_NUMBER;
+    clickRecognizer.fingers_ = FINGER_NUMBER;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = false;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+
+    clickRecognizer.currentTouchPointsNum_ = 0;
+    clickRecognizer.equalsToFingers_ = false;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.equalsToFingers_, false);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case6: equalsToFingers = true, currentTouchPointsNum = 1,
+     * @tc.steps: tap == count, useCatchMode_ = false
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.tappedCount_ = -1;
+    clickRecognizer.count_ = 0;
+    clickRecognizer.currentFingers_ = FINGER_NUMBER;
+    clickRecognizer.currentTouchPointsNum_ = clickRecognizer.fingers_;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerHandleRejectDisposalTest002
+ * @tc.desc: Test ExclusiveRecognizer HandleRejectDisposal function
+ */
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandleRejectDisposalTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 0);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerHandleRejectDisposalTest003
+ * @tc.desc: Test ExclusiveRecognizer HandleRejectDisposal function
+ */
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandleRejectDisposalTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizerPtr->HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 0);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerHandleRejectDisposalTest005
+ * @tc.desc: Test ExclusiveRecognizer HandleRejectDisposal function
+ */
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandleRejectDisposalTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 0);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerHandleRejectDisposalTest006
+ * @tc.desc: Test ExclusiveRecognizer HandleRejectDisposal function
+ */
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandleRejectDisposalTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizerPtr->HandleRejectDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 0);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerHandlePendingDisposalTest001
+ * @tc.desc: Test ExclusiveRecognizer HandlePendingDisposal function
+ */
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandlePendingDisposalTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr2->refereeState_ = RefereeState::PENDING;
+    recognizers.insert(recognizers.end(), clickRecognizerPtr2);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->HandlePendingDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 1);
+}
+
+/**
+ * @tc.name: ExclusiveRecognizerHandleAcceptDisposalTest001
+ * @tc.desc: Test ExclusiveRecognizer HandleAcceptDisposal function
+ */
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerHandleAcceptDisposalTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureScope and clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizerPtr2->refereeState_ = RefereeState::PENDING;
+    recognizers.insert(recognizers.end(), clickRecognizerPtr2);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call Adjudicate function and compare result
+     * @tc.steps: case1: refereeState is FAIL
+     * @tc.steps: expected equal
+     */
+    clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    exclusiveRecognizerPtr->HandleAcceptDisposal(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizerPtr->recognizers_.size(), 1);
+}
+
+/**
  * @tc.name: GestureRecognizerHandleTouchMoveEventTest001
  * @tc.desc: Test ClickRecognizer function: HandleTouchMoveEvent
  * @tc.type: FUNC
@@ -4281,6 +4619,38 @@ HWTEST_F(GesturesTestNg, RecognizerGroupTest002, TestSize.Level1)
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
     exclusiveRecognizer.OnFinishGestureReferee(0);
     EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+}
+
+/**
+ * @tc.name: ClickRecognizerClickRecognizerTest101
+ * @tc.desc: Test ClickRecognizer function: ClickRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, ClickRecognizerClickRecognizerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr1 = AceType::MakeRefPtr<ClickRecognizer>(0, COUNT);
+    EXPECT_EQ(clickRecognizerPtr1->fingers_, 1);
+
+    /**
+     * @tc.steps: step1. create ClickRecognizer
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr2 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER_OVER_MAX, COUNT);
+    EXPECT_EQ(clickRecognizerPtr2->fingers_, 1);
+
+    /**
+     * @tc.steps: step1. create ClickRecognizer
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr3 = AceType::MakeRefPtr<ClickRecognizer>(10, COUNT);
+    EXPECT_EQ(clickRecognizerPtr3->fingers_, 10);
+
+    /**
+     * @tc.steps: step1. create ClickRecognizer
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr4 = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    EXPECT_EQ(clickRecognizerPtr4->fingers_, FINGER_NUMBER);
 }
 
 /**
