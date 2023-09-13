@@ -50,7 +50,7 @@ namespace {
 void AceForwardCompatibility::Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool deprecated)
 {
 #ifdef OHOS_PLATFORM
-    isForceOldPipeline_ = OHOS::system::GetBoolParameter("persist.arkui.libace.og", false);
+    isForceOldPipeline_ = OHOS::system::GetBoolParameter("persist.arkui.libace.og", true);
 #else
     isForceOldPipeline_ = true;
 #endif
@@ -69,7 +69,7 @@ bool AceForwardCompatibility::IsForceOldPipeline()
         return isForceOldPipeline_;
     }
 #ifdef OHOS_PLATFORM
-    return OHOS::system::GetBoolParameter("persist.arkui.libace.og", false);
+    return OHOS::system::GetBoolParameter("persist.arkui.libace.og", true);
 #else
     return true;
 #endif
