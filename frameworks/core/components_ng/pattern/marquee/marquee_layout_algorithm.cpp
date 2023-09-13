@@ -91,7 +91,7 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                        (size.Width() - child->GetGeometryNode()->GetMarginFrameSize().Width()) / MULTIPLE);
         translate.SetY((1.0 + align.GetVertical()) *
                        (size.Height() - child->GetGeometryNode()->GetMarginFrameSize().Height()) / MULTIPLE);
-        child->GetGeometryNode()->SetMarginFrameOffset(translate + paddingOffset);
+        child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
     }
 }
