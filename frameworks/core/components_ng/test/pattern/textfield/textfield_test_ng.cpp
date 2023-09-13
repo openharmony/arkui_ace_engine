@@ -3115,6 +3115,8 @@ HWTEST_F(TextFieldPatternTestNg, HandleFocusEvent, TestSize.Level1)
      * @tc.steps: step2. Set showUnderLine. Call function HandleFocusEvent.
      * @tc.expected: Check the showUnderLine set successfully.
      */
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     textFieldPattern->HandleFocusEvent();
     EXPECT_TRUE(layoutProperty->GetShowUnderlineValue(false));
     layoutProperty->UpdateShowUnderline(true);
