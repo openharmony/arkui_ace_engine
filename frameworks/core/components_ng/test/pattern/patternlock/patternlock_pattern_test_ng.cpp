@@ -230,7 +230,7 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest001, TestSize.Level1)
 
 /**
  * @tc.name: PatternLockEventTest002
- * @tc.desc: Test PatternLock onDotConnected event.
+ * @tc.desc: Test PatternLock onDotConnect event.
  * @tc.type: FUNC
  */
 HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest002, TestSize.Level1)
@@ -242,21 +242,21 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockEventTest002, TestSize.Level1)
     auto controller = patternLockModelNG.Create();
 
     /**
-     * @tc.steps: step2. Init dotConnected result data structure and onDotConnected function
+     * @tc.steps: step2. Init dotConnect result data structure and onDotConnect function
      */
     int32_t connectedDot = -1;
-    auto onDotConnected = [&connectedDot](int32_t currentIndex) { connectedDot = currentIndex; };
-    patternLockModelNG.SetDotConnected(onDotConnected);
+    auto onDotConnect = [&connectedDot](int32_t currentIndex) { connectedDot = currentIndex; };
+    patternLockModelNG.SetDotConnect(onDotConnect);
 
     /**
-     * @tc.steps: step3. Get event hub and call UpdateDotConnectedEvent function
+     * @tc.steps: step3. Get event hub and call UpdateDotConnectEvent function
      * @tc.expected: step3. Check the event result value
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::PatternLockEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    eventHub->UpdateDotConnectedEvent(1);
+    eventHub->UpdateDotConnectEvent(1);
     EXPECT_EQ(connectedDot, 1);
 }
 

@@ -83,7 +83,7 @@ void JSPatternLock::JSBind(BindingTarget globalObj)
     JSClass<JSPatternLock>::StaticMethod("circleRadius", &JSPatternLock::SetCircleRadius, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("sideLength", &JSPatternLock::SetSideLength, MethodOptions::NONE);
     JSClass<JSPatternLock>::StaticMethod("autoReset", &JSPatternLock::SetAutoReset, MethodOptions::NONE);
-    JSClass<JSPatternLock>::StaticMethod("onDotConnected", &JSPatternLock::SetDotConnected);
+    JSClass<JSPatternLock>::StaticMethod("onDotConnect", &JSPatternLock::SetDotConnect);
     JSClass<JSPatternLock>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSPatternLock>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSPatternLock>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -246,21 +246,21 @@ void JSPatternLock::SetPathStrokeWidth(const JSCallbackInfo& info)
 
     PatternLockModel::GetInstance()->SetStrokeWidth(lineWidth);
 }
-void JSPatternLock::SetDotConnected(const JSCallbackInfo& args)
+void JSPatternLock::SetDotConnect(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
         return;
     }
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
-    auto onConnected = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t code) {
+    auto onDotConnect = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t code) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
 
         JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(code));
         func->ExecuteJS(1, &newJSVal);
     };
 
-    PatternLockModel::GetInstance()->SetDotConnected(std::move(onConnected));
+    PatternLockModel::GetInstance()->SetDotConnect(std::move(onDotConnect));
 }
 void JSPatternLockController::JSBind(BindingTarget globalObj)
 {

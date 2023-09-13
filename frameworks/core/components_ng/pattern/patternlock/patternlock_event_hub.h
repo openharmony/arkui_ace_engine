@@ -43,21 +43,21 @@ public:
         }
     }
 
-    void SetOnDotConnected(std::function<void(int32_t)>&& connectedEvent)
+    void SetOnDotConnect(std::function<void(int32_t)>&& dotConnectEvent)
     {
-        connectedEvent_ = std::move(connectedEvent);
+        dotConnectEvent_ = std::move(dotConnectEvent);
     }
 
-    void UpdateDotConnectedEvent(int32_t code) const
+    void UpdateDotConnectEvent(int32_t code) const
     {
-        if (connectedEvent_) {
-            connectedEvent_(code);
+        if (dotConnectEvent_) {
+            dotConnectEvent_(code);
         }
     }
 
 private:
     PatternLockCompleteEvent completeEvent_;
-    std::function<void(int32_t)> connectedEvent_;
+    std::function<void(int32_t)> dotConnectEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(PatternLockEventHub);
 };
 
