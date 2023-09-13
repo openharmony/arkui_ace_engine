@@ -1126,6 +1126,27 @@ void ViewAbstract::BindPopup(
         if (popupNode) {
             popupId = popupNode->GetId();
         }
+        if (!showInSubWindow) {
+            // erase popup when target node destroy
+            auto destructor = [id = targetNode->GetId()]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                auto overlayManager = pipeline->GetOverlayManager();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ErasePopup(id);
+            };
+            targetNode->PushDestroyCallback(destructor);
+        } else {
+            // erase popup in subwindow when target node destroy
+            auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+                CHECK_NULL_VOID(subwindow);
+                auto overlayManager = subwindow->GetOverlayManager();
+                CHECK_NULL_VOID(overlayManager);
+                overlayManager->ErasePopup(id);
+            };
+            targetNode->PushDestroyCallback(destructor);
+        }
     } else {
         // use param to update PopupParm
         if (!isUseCustom) {
@@ -1167,12 +1188,6 @@ void ViewAbstract::BindPopup(
         }
         return;
     }
-    auto destroyCallback = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager)), targetId]() {
-        auto overlay = weakOverlayManger.Upgrade();
-        CHECK_NULL_VOID(overlay);
-        overlay->ErasePopup(targetId);
-    };
-    targetNode->PushDestroyCallback(destroyCallback);
     if (!popupInfo.isCurrentOnShow) {
         targetNode->OnAccessibilityEvent(
             AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
