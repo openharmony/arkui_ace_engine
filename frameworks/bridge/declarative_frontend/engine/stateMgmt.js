@@ -4658,8 +4658,15 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         // do not process an Element that has been marked to be deleted
         const updateFunc1 = this.updateFuncByElmtId.get(elmtId);
-        const updateFunc = updateFunc1 === null || updateFunc1 === void 0 ? void 0 : updateFunc1.updateFunc;
-        const componentName = updateFunc1 ? updateFunc1.componentName : "unknown component type";
+        let updateFunc;
+        if (typeof updateFunc1 === 'function') {
+            // adapt old toolchains
+            updateFunc = updateFunc1;
+        }
+        else {
+            updateFunc = updateFunc1 === null || updateFunc1 === void 0 ? void 0 : updateFunc1.updateFunc;
+        }
+        const componentName = updateFunc1 && updateFunc1.componentName ? updateFunc1.componentName : "unknown component type";
         if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
             stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
         }

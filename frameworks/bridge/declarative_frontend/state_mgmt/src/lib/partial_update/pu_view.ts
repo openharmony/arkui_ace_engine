@@ -388,9 +388,16 @@ abstract class ViewPU extends NativeViewPartialUpdate
       return;
     }
     // do not process an Element that has been marked to be deleted
-    const updateFunc1: { updateFunc: UpdateFunc, componentName: string } = this.updateFuncByElmtId.get(elmtId);
-    const updateFunc: UpdateFunc | undefined = updateFunc1?.updateFunc;
-    const componentName : string = updateFunc1 ? updateFunc1.componentName : "unknown component type";
+    const updateFunc1: { updateFunc: UpdateFunc, componentName: string } | UpdateFunc = this.updateFuncByElmtId.get(elmtId);
+    let updateFunc: UpdateFunc | undefined;
+
+    if (typeof updateFunc1 === 'function') {
+      // adapt old toolchains
+      updateFunc = updateFunc1
+    } else {
+      updateFunc = updateFunc1?.updateFunc
+    }
+    const componentName : string = updateFunc1 && updateFunc1.componentName ? updateFunc1.componentName : "unknown component type";
 
     if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
       stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
