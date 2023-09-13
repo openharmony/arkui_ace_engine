@@ -3210,12 +3210,11 @@ void JsiEngine::RegisterInitWorkerFunc()
 {
     auto weakInstance = AceType::WeakClaim(AceType::RawPtr(engineInstance_));
     bool debugVersion = IsDebugVersion();
-    bool debugMode = NeedDebugBreakPoint();
     std::string libraryPath = "";
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, debugMode, libraryPath](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath](NativeEngine* nativeEngine) {
         LOGI("WorkerCore RegisterInitWorkerFunc called");
         if (nativeEngine == nullptr) {
             LOGE("nativeEngine is nullptr");
@@ -3237,6 +3236,7 @@ void JsiEngine::RegisterInitWorkerFunc()
         auto workerPostTask = [nativeEngine](std::function<void()>&& callback) {
             nativeEngine->CallDebuggerPostTaskFunc(std::move(callback));
         };
+        bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = {libraryPath.c_str(), debugMode};
         panda::JSNApi::StartDebugger(vm, debugOption, gettid(), workerPostTask);
 #endif
