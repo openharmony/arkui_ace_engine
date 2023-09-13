@@ -106,7 +106,15 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
 
         // Here's what happens when the height or width is set at list one
-        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+            frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+        } else {
+            auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(frameSize,
+                layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+                layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
+            frameSize.SetWidth(finalSize.Width());
+            frameSize.SetHeight(finalSize.Height());
+        }
         if (layoutConstraint->maxSize.Height() < layoutConstraint->minSize.Height()) {
             frameSize.SetHeight(layoutConstraint->minSize.Height());
         }
