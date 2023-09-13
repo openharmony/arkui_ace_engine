@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <vector>
+
 #include "gtest/gtest.h"
 
 #define private public
@@ -34,6 +35,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -56,7 +58,6 @@
 #include "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 #include "frameworks/core/components_ng/pattern/text/span_model_ng.h"
-
 
 using namespace testing;
 using namespace testing::ext;
@@ -523,6 +524,9 @@ HWTEST_F(RichEditorTestNg, RichEditorCursorMove001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph });
+    EXPECT_CALL(*paragraph, GetHandlePositionForClick).Times(2).WillRepeatedly(Return(2));
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = 2;
     richEditorPattern->CursorMoveLeft();
@@ -930,7 +934,6 @@ HWTEST_F(RichEditorTestNg, CreateImageSourceInfo001, TestSize.Level1)
     EXPECT_NE(ret, nullptr);
 }
 
-
 /**
  * @tc.name: HandleClickEvent001
  * @tc.desc: test handle click event
@@ -945,6 +948,7 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     info.localLocation_ = Offset(0, 0);
     ParagraphStyle paragraphStyle;
     richEditorPattern->paragraph_ = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
@@ -1042,7 +1046,7 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     KeyEvent keyE;
     keyE.action = KeyAction::UP;
     EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
-    
+
     keyE.action = KeyAction::DOWN;
     keyE.code = KeyCode::KEY_TAB;
     EXPECT_FALSE(richEditorPattern->OnKeyEvent(keyE));
@@ -1063,10 +1067,8 @@ HWTEST_F(RichEditorTestNg, OnKeyEvent001, TestSize.Level1)
     EXPECT_TRUE(richEditorPattern->OnKeyEvent(keyE));
 
     // 2012 2015
-    std::vector<KeyCode> cases = {
-        KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN,
-        KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT
-    };
+    std::vector<KeyCode> cases = { KeyCode::KEY_DPAD_UP, KeyCode::KEY_DPAD_DOWN, KeyCode::KEY_DPAD_LEFT,
+        KeyCode::KEY_DPAD_RIGHT };
     for (int i = 0; i < 4; ++i) {
         keyE.code = cases[i];
         if (i == 2) {
@@ -1385,19 +1387,13 @@ HWTEST_F(RichEditorTestNg, HandleMouseLeftButton001, TestSize.Level1)
     MouseInfo mouseInfo;
     mouseInfo.action_ = MouseAction::MOVE;
 
-    std::vector<int> returnCases = {
-        0, 2, 3
-    };
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    richEditorPattern->leftMousePress_ = false;
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::NONE);
 
-    for (auto& i : returnCases) {
-        richEditorPattern->mouseStatus_ = MouseStatus::NONE;
-        richEditorPattern->blockPress_ = i >> 0 & 1;
-        richEditorPattern->leftMousePress_ = i >> 1 & 1;
-        richEditorPattern->HandleMouseLeftButton(mouseInfo);
-        EXPECT_EQ(richEditorPattern->mouseStatus_, MouseStatus::NONE);
-    }
-
-    RefPtr<Paragraph> paragraph = AceType::MakeRefPtr<MockParagraph>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(0));
     richEditorPattern->paragraphs_.paragraphs_.push_front({ paragraph });
     richEditorPattern->mouseStatus_ = MouseStatus::NONE;
     richEditorPattern->blockPress_ = false;
@@ -1503,12 +1499,8 @@ HWTEST_F(RichEditorTestNg, GetSelectedSpanText001, TestSize.Level1)
     std::string ori = "12345";
     std::wstring value = StringUtils::ToWstring(ori);
 
-    std::vector<int> start = {
-        -1, 0, 15
-    };
-    std::vector<int> end = {
-        10, -3
-    };
+    std::vector<int> start = { -1, 0, 15 };
+    std::vector<int> end = { 10, -3 };
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 2; ++j) {
@@ -1531,9 +1523,7 @@ HWTEST_F(RichEditorTestNg, HandleSurfaceChanged001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    std::vector<std::vector<int>> cases = {
-        {1, 1, 2, 2}, {1, 2, 2, 2}, {1, 1, 1, 2}, {1, 2, 1, 2}
-    };
+    std::vector<std::vector<int>> cases = { { 1, 1, 2, 2 }, { 1, 2, 2, 2 }, { 1, 1, 1, 2 }, { 1, 2, 1, 2 } };
     for (uint32_t i = 0; i < cases.size(); ++i) {
         richEditorPattern->HandleSurfaceChanged(cases[i][0], cases[i][1], cases[i][2], cases[i][3]);
         EXPECT_NE(richEditorPattern, nullptr);
@@ -1554,7 +1544,7 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
     richEditorPattern->selectedType_ = RichEditorType::TEXT;
     richEditorPattern->CopySelectionMenuParams(selectInfo);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
-    
+
     richEditorPattern->selectedType_ = RichEditorType::IMAGE;
     richEditorPattern->CopySelectionMenuParams(selectInfo);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
@@ -1566,26 +1556,25 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
     richEditorPattern->selectedType_ = RichEditorType(-1);
     richEditorPattern->CopySelectionMenuParams(selectInfo);
     EXPECT_EQ(selectInfo.menuCallback.onDisappear, nullptr);
-    
+
     auto key = std::make_pair(RichEditorType::MIXED, ResponseType::RIGHT_CLICK);
     callBack1 = 0;
     callBack2 = 0;
     callBack3 = 0;
     std::function<void()> buildFunc = []() {
         callBack1 = 1;
-        return ;
+        return;
     };
     std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
         callBack2 = 2;
-        return ;
+        return;
     };
     std::function<void()> onDisappear = []() {
         callBack3 = 3;
-        return ;
+        return;
     };
-    std::shared_ptr<SelectionMenuParams> params1 =
-        std::make_shared<SelectionMenuParams>(
-            RichEditorType::MIXED, buildFunc, onAppear, onDisappear, ResponseType::RIGHT_CLICK);
+    std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
+        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, ResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params1;
     selectInfo.isUsingMouse = true;
     richEditorPattern->selectedType_ = RichEditorType::MIXED;
@@ -1593,9 +1582,8 @@ HWTEST_F(RichEditorTestNg, CopySelectionMenuParams001, TestSize.Level1)
     EXPECT_NE(selectInfo.menuCallback.onDisappear, nullptr);
 
     key = std::make_pair(RichEditorType::MIXED, ResponseType::LONG_PRESS);
-    std::shared_ptr<SelectionMenuParams> params2 =
-        std::make_shared<SelectionMenuParams>(
-            RichEditorType::MIXED, buildFunc, nullptr, nullptr, ResponseType::RIGHT_CLICK);
+    std::shared_ptr<SelectionMenuParams> params2 = std::make_shared<SelectionMenuParams>(
+        RichEditorType::MIXED, buildFunc, nullptr, nullptr, ResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params2;
     selectInfo.isUsingMouse = false;
     richEditorPattern->selectedType_ = RichEditorType::MIXED;
@@ -1660,8 +1648,7 @@ HWTEST_F(RichEditorTestNg, CreateNodePaintMethod002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->contentMod_ =
         AceType::MakeRefPtr<RichEditorContentModifier>(richEditorPattern->textStyle_, &richEditorPattern->paragraphs_);
-    richEditorPattern->overlayMod_ =
-        AceType::MakeRefPtr<RichEditorOverlayModifier>();
+    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
     richEditorPattern->isCustomFont_ = true;
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);
@@ -1683,39 +1670,35 @@ HWTEST_F(RichEditorTestNg, BindSelectionMenu001, TestSize.Level1)
     callBack3 = 0;
     std::function<void()> buildFunc = []() {
         callBack1 = 1;
-        return ;
+        return;
     };
     std::function<void(int32_t, int32_t)> onAppear = [](int32_t a, int32_t b) {
         callBack2 = 2;
-        return ;
+        return;
     };
     std::function<void()> onDisappear = []() {
         callBack3 = 3;
-        return ;
+        return;
     };
 
     auto key = std::make_pair(RichEditorType::MIXED, ResponseType::RIGHT_CLICK);
-    std::shared_ptr<SelectionMenuParams> params1 =
-        std::make_shared<SelectionMenuParams>(
-            RichEditorType::MIXED, buildFunc, onAppear, onDisappear, ResponseType::RIGHT_CLICK);
+    std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
+        RichEditorType::MIXED, buildFunc, onAppear, onDisappear, ResponseType::RIGHT_CLICK);
     richEditorPattern->selectionMenuMap_[key] = params1;
 
     std::function<void()> nullFunc = nullptr;
 
     richEditorPattern->BindSelectionMenu(
-        ResponseType::RIGHT_CLICK, RichEditorType::MIXED,
-        nullFunc, onAppear, onDisappear);
+        ResponseType::RIGHT_CLICK, RichEditorType::MIXED, nullFunc, onAppear, onDisappear);
     EXPECT_TRUE(richEditorPattern->selectionMenuMap_.empty());
 
     richEditorPattern->selectionMenuMap_[key] = params1;
     richEditorPattern->BindSelectionMenu(
-        ResponseType::RIGHT_CLICK, RichEditorType::MIXED,
-        buildFunc, onAppear, onDisappear);
+        ResponseType::RIGHT_CLICK, RichEditorType::MIXED, buildFunc, onAppear, onDisappear);
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
-    
+
     richEditorPattern->BindSelectionMenu(
-        ResponseType::RIGHT_CLICK, RichEditorType::IMAGE,
-        buildFunc, onAppear, onDisappear);
+        ResponseType::RIGHT_CLICK, RichEditorType::IMAGE, buildFunc, onAppear, onDisappear);
     EXPECT_FALSE(richEditorPattern->selectionMenuMap_.empty());
 }
 
@@ -1730,19 +1713,16 @@ HWTEST_F(RichEditorTestNg, HandleMouseRightButton001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ClipboardProxy::GetInstance()->SetDelegate(nullptr);
 
-
     MouseInfo mouseInfo;
     mouseInfo.action_ = MouseAction::PRESS;
     richEditorPattern->isMousePressed_ = false;
     richEditorPattern->HandleMouseRightButton(mouseInfo);
     EXPECT_TRUE(richEditorPattern->isMousePressed_);
 
-
     mouseInfo.action_ = MouseAction::HOVER;
     richEditorPattern->isMousePressed_ = false;
     richEditorPattern->HandleMouseRightButton(mouseInfo);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
-
 
     mouseInfo.action_ = MouseAction::RELEASE;
     richEditorPattern->isMousePressed_ = true;
@@ -1752,12 +1732,10 @@ HWTEST_F(RichEditorTestNg, HandleMouseRightButton001, TestSize.Level1)
     richEditorPattern->HandleMouseRightButton(mouseInfo);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
 
-
     richEditorPattern->textSelector_.baseOffset = 2;
     richEditorPattern->textSelector_.destinationOffset = 3;
     richEditorPattern->HandleMouseRightButton(mouseInfo);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
-
 
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 9;

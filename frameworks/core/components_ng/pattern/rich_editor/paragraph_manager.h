@@ -51,11 +51,6 @@ public:
         paragraphs_.emplace_back(std::move(info));
     }
 
-    bool IsEmpty() const
-    {
-        return paragraphs_.empty();
-    }
-
 private:
     std::list<ParagraphInfo> paragraphs_;
 };
