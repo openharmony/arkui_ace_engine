@@ -20,10 +20,6 @@
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-namespace {
-constexpr int32_t SIZE_TWO = 2;
-} // namespace
-
 namespace OHOS::Ace::NG {
 
 void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -31,26 +27,10 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto childSize = layoutWrapper->GetTotalChildCount();
     std::list<RefPtr<LayoutWrapper>> children;
-    if (childSize > 0) {
-        auto child = layoutWrapper->GetOrCreateChildByIndex(childSize - 1);
-        auto destinationAlgorithm =
-            AceType::DynamicCast<NavDestinationLayoutAlgorithm>(child->GetLayoutAlgorithm()->GetLayoutAlgorithm());
-        if (destinationAlgorithm->IsOnShown()) {
-            // the incoming page in push case
-            child->Measure(layoutConstraint);
-            children.emplace_back(child);
-        }
-        // get the second child for animation
-        if (childSize > 1) {
-            auto child = layoutWrapper->GetOrCreateChildByIndex(childSize - SIZE_TWO);
-            auto destinationAlgorithm =
-                AceType::DynamicCast<NavDestinationLayoutAlgorithm>(child->GetLayoutAlgorithm()->GetLayoutAlgorithm());
-            if (destinationAlgorithm->IsOnShown()) {
-                // the incoming page in pop case
-                child->Measure(layoutConstraint);
-                children.emplace_back(child);
-            }
-        }
+    for (auto index = 0; index < childSize; index++) {
+        auto child = layoutWrapper->GetOrCreateChildByIndex(index);
+        child->Measure(layoutConstraint);
+        children.emplace_back(child);
     }
     PerformMeasureSelfWithChildList(layoutWrapper, { children });
 }
