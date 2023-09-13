@@ -112,6 +112,11 @@ public:
         return type_ == MenuType::MULTI_MENU;
     }
 
+    bool IsDesktopMenu() const
+    {
+        return type_ == MenuType::DESKTOP_MENU;
+    }
+
     bool IsMenu() const
     {
         return type_ == MenuType::MENU;
