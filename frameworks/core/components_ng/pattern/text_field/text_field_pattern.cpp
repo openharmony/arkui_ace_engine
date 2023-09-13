@@ -5537,7 +5537,8 @@ void TextFieldPattern::CheckScrollable()
     if (textEditingValue_.text.empty()) {
         scrollable_ = false;
     } else {
-        if (layoutProperty->GetShowCounterValue(false) && counterParagraph_ && !isCounterIdealheight_) {
+        if (layoutProperty->GetShowCounterValue(false) && counterParagraph_ && !isCounterIdealheight_ &&
+            !IsNormalInlineState()) {
             scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height() - counterParagraph_->GetHeight());
         } else {
             scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
