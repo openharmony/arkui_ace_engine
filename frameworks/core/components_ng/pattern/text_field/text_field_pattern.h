@@ -273,6 +273,7 @@ public:
     void UpdatePositionOfParagraph(int32_t pos);
     void UpdateCaretPositionByTouch(const Offset& offset);
     void UpdateCaretOffsetByEvent();
+    bool IsReachedBoundary(float offset);
 
     TextInputAction GetDefaultTextInputAction();
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
