@@ -3282,10 +3282,15 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             ? `dependent components: ${this.dependentElementIds_.size} elmtIds: `
             : `WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
         let sepa = "";
-        this.dependentElementIds_.forEach((elmtId) => {
-            result += `${sepa}${this.owningView_.debugInfoElmtId(elmtId)}`;
-            sepa = ", ";
-        });
+        if (this.owningView_) {
+            this.dependentElementIds_.forEach((elmtId) => {
+                result += `${sepa}${this.owningView_.debugInfoElmtId(elmtId)}`;
+                sepa = ", ";
+            });
+        }
+        else {
+            result += `no owning @Component`;
+        }
         return result;
     }
     /* for @Prop value from source we need to generate a @State
@@ -4513,7 +4518,8 @@ class ViewPU extends NativeViewPartialUpdate {
         let result = "";
         let sepa = "";
         this.updateFuncByElmtId.forEach((value, elmtId) => {
-            result += `${sepa}${value.componentName}[${elmtId}]`;
+            const compName = (typeof value == "object") ? `'${value.componentName}'` : `'unknown component type'`;
+            result += `${sepa}${compName}[${elmtId}]`;
             sepa = ", ";
         });
         return result;
@@ -4530,9 +4536,8 @@ class ViewPU extends NativeViewPartialUpdate {
         return result;
     }
     debugInfoElmtId(elmtId) {
-        var _a;
-        const compName = (_a = this.updateFuncByElmtId.get(elmtId)) === null || _a === void 0 ? void 0 : _a.componentName;
-        return `${compName ? compName : 'unknown component type'}[${elmtId}]`;
+        const updateFuncEntry = this.updateFuncByElmtId.get(elmtId);
+        return (typeof updateFuncEntry == "object") ? `'${updateFuncEntry.componentName}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
     }
     dumpStateVars() {
         
@@ -4656,18 +4661,12 @@ class ViewPU extends NativeViewPartialUpdate {
             // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
             return;
         }
+        
         // do not process an Element that has been marked to be deleted
         const updateFunc1 = this.updateFuncByElmtId.get(elmtId);
-        let updateFunc;
-        if (typeof updateFunc1 === 'function') {
-            // adapt old toolchains
-            updateFunc = updateFunc1;
-        }
-        else {
-            updateFunc = updateFunc1 === null || updateFunc1 === void 0 ? void 0 : updateFunc1.updateFunc;
-        }
-        const componentName = updateFunc1 && updateFunc1.componentName ? updateFunc1.componentName : "unknown component type";
-        if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
+        const updateFunc = ((typeof updateFunc1 == "object") ? (updateFunc1.updateFunc) : updateFunc1);
+        const componentName = (typeof updateFunc1 == "object") ? updateFunc1.componentName : "unknown component type";
+        if (typeof updateFunc !== "function") {
             stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
         }
         else {
@@ -5034,7 +5033,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.delete(oldElmtId);
         this.updateFuncByElmtId.set(newElmtId, {
             updateFunc: compilerAssignedUpdateFunc,
-            componentName: oldEntry ? oldEntry.componentName : "unknown"
+            componentName: (typeof oldEntry == "object") ? oldEntry.componentName : "unknown"
         });
         node.updateId(newElmtId);
         node.updateRecycleElmtId(oldElmtId, newElmtId);

@@ -84,8 +84,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // registry of update functions
   // the key is the elementId of the Component/Element that's the result of this function
-  protected updateFuncByElmtId: Map<number, { updateFunc: UpdateFunc, componentName: string }>
-    = new Map<number,{ updateFunc: UpdateFunc, componentName: string }>();
+  protected updateFuncByElmtId: Map<number, UpdateFunc | { updateFunc: UpdateFunc, componentName: string }>
+    = new Map<number, UpdateFunc | { updateFunc: UpdateFunc, componentName: string }>();
 
   // set of all @Local/StorageLink/Prop variables owned by this ViwPU
   private ownStorageLinksProps_ : Set<ObservedPropertyAbstractPU<any>> = new Set<ObservedPropertyAbstractPU<any>>();
@@ -225,8 +225,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   public debugInfoRegisteredElmtIds() : string {
     let result : string = "";
     let sepa : string ="";
-    this.updateFuncByElmtId.forEach((value: { updateFunc: UpdateFunc; componentName: string; }, elmtId: number) => {
-      result += `${sepa}${value.componentName}[${elmtId}]`;
+    this.updateFuncByElmtId.forEach((value: UpdateFunc | { updateFunc: UpdateFunc; componentName: string; }, elmtId: number) => {
+      const compName : string = (typeof value == "object") ? `'${value!.componentName}'` : `'unknown component type'`;
+      result += `${sepa}${compName}[${elmtId}]`;
       sepa=", ";
     });
     return result;
@@ -245,8 +246,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   public debugInfoElmtId(elmtId : number) : string {
-    const compName : string | undefined = this.updateFuncByElmtId.get(elmtId)?.componentName;
-    return `${compName ? compName : 'unknown component type'}[${elmtId}]`;
+    const updateFuncEntry : UpdateFunc | { updateFunc: UpdateFunc; componentName: string; } = this.updateFuncByElmtId.get(elmtId);
+    return (typeof updateFuncEntry == "object") ? `'${updateFuncEntry!.componentName}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
   }
 
   public dumpStateVars() : void {
@@ -387,19 +388,14 @@ abstract class ViewPU extends NativeViewPartialUpdate
       // a @Prop can add a dependency of the ViewPU onto itself. Ignore it.
       return;
     }
+    stateMgmtConsole.debug(`${this.debugInfo()}: bugg`);
+
     // do not process an Element that has been marked to be deleted
     const updateFunc1: { updateFunc: UpdateFunc, componentName: string } | UpdateFunc = this.updateFuncByElmtId.get(elmtId);
-    let updateFunc: UpdateFunc | undefined;
+    const updateFunc: UpdateFunc | undefined = ((typeof updateFunc1 == "object") ? (updateFunc1!.updateFunc) : updateFunc1) as UpdateFunc | undefined;
+    const componentName : string = (typeof updateFunc1 == "object") ? updateFunc1.componentName as string : "unknown component type";
 
-    if (typeof updateFunc1 === 'function') {
-      // adapt old toolchains
-      updateFunc = updateFunc1
-    } else {
-      updateFunc = updateFunc1?.updateFunc
-    }
-    const componentName : string = updateFunc1 && updateFunc1.componentName ? updateFunc1.componentName : "unknown component type";
-
-    if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
+    if (typeof updateFunc !== "function") {
       stateMgmtConsole.error(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
     } else {
       stateMgmtConsole.debug(`${this.debugInfo()}: updateDirtyElements: re-render of ${componentName} elmtId ${elmtId} start ...`);
@@ -814,11 +810,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const oldElmtId: number = node.id__();
     // store the current id and origin id, used for dirty element sort in {compareNumber}
     recycleUpdateFunc(newElmtId, /* is first render */ true, node);
-    const oldEntry: { updateFunc: UpdateFunc, componentName: string } | undefined = this.updateFuncByElmtId.get(oldElmtId);
+    const oldEntry: UpdateFunc | { updateFunc: UpdateFunc, componentName: string } | undefined = this.updateFuncByElmtId.get(oldElmtId);
     this.updateFuncByElmtId.delete(oldElmtId);
     this.updateFuncByElmtId.set(newElmtId, {
       updateFunc: compilerAssignedUpdateFunc,
-      componentName: oldEntry ? oldEntry.componentName : "unknown"
+      componentName: (typeof oldEntry == "object") ? oldEntry.componentName : "unknown"
     });
     node.updateId(newElmtId);
     node.updateRecycleElmtId(oldElmtId, newElmtId);
