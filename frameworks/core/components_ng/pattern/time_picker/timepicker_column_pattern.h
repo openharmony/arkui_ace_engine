@@ -365,6 +365,7 @@ private:
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void SetAccessibilityAction();
+    void AddHotZoneRectToText();
     double mainVelocity_ = 0.0;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -400,6 +401,8 @@ private:
     bool wheelModeEnabled_ = true;
     double scrollDelta_ = 0.0;
     bool animationCreated_ = false;
+    OffsetF offset_;
+    SizeF size_;
     RefPtr<Animator> toController_;
     RefPtr<Animator> fromController_;
     RefPtr<CurveAnimation<double>> fromBottomCurve_;
