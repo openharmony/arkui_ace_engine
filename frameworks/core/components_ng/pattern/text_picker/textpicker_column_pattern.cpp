@@ -711,6 +711,9 @@ void TextPickerColumnPattern::TextPropertiesLinearAnimation(
 
 void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
 {
+    if (scale > 1.0) {
+        return;
+    }
     if (columnkind_ == ICON) {
         return;
     }
@@ -821,6 +824,9 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
 
 void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
 {
+    if (event.GetFingerList().size() > 1) {
+        return;
+    }
     if (event.GetInputEventType() == InputEventType::AXIS) {
         int32_t step = LessNotEqual(event.GetDelta().GetY(), 0.0) ? 1 : -1;
         InnerHandleScroll(step);
