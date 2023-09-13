@@ -108,19 +108,14 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (isPinchEnd_) {
-        return;
-    }
-
     lastTouchEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED) {
+    if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
         SendCallbackMsg(onActionEnd_);
-        isPinchEnd_ = true;
     }
 }
 
@@ -253,21 +248,25 @@ double PinchRecognizer::ComputeAverageDeviation()
     double sumOfX = 0.0;
     double sumOfY = 0.0;
     for (auto& element : touchPoints_) {
-        sumOfX = sumOfX + element.second.x;
-        sumOfY = sumOfY + element.second.y;
+        if (element.first < fingers_) {
+            sumOfX = sumOfX + element.second.x;
+            sumOfY = sumOfY + element.second.y;
+        }
     }
-    double focalX = sumOfX / touchPoints_.size();
-    double focalY = sumOfY / touchPoints_.size();
+    double focalX = sumOfX / fingers_;
+    double focalY = sumOfY / fingers_;
 
     // compute average deviation
     double devX = 0.0;
     double devY = 0.0;
     for (auto& element : touchPoints_) {
-        devX = devX + fabs(element.second.x - focalX);
-        devY = devY + fabs(element.second.y - focalY);
+        if (element.first < fingers_) {
+            devX = devX + fabs(element.second.x - focalX);
+            devY = devY + fabs(element.second.y - focalY);
+        }
     }
-    double aveDevX = devX / touchPoints_.size();
-    double aveDevY = devY / touchPoints_.size();
+    double aveDevX = devX / fingers_;
+    double aveDevY = devY / fingers_;
 
     // compute zoom distance
     double zoomDistance = sqrt(pow(aveDevX, 2) + pow(aveDevY, 2));
