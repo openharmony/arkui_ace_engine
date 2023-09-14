@@ -79,6 +79,7 @@ constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
 constexpr Dimension ACTIVED_UNDERLINE_WIDTH = 2.0_px;
 constexpr Dimension TYPING_UNDERLINE_WIDTH = 2.0_px;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
+constexpr float ERROR_TEXT_BOUNDSRECT_MARGIN = 33.0f;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
@@ -174,6 +175,18 @@ public:
             if (scrollBar->NeedPaint()) {
                 textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect(), scrollBar->GetBarRect());
             }
+        }
+        auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, paint);
+        if (layoutProperty->GetShowErrorTextValue(false) && errorParagraph_) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, paint);
+            auto geometryNode = host->GetGeometryNode();
+            auto frameOffset = geometryNode->GetFrameOffset();
+            auto frameSize = geometryNode->GetFrameSize();
+            RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(),
+                frameSize.Height() + ERROR_TEXT_BOUNDSRECT_MARGIN);
+            textFieldOverlayModifier->SetBoundsRect(boundsRect);
         }
         return paint;
     }
