@@ -39,7 +39,7 @@ public:
 
 protected:
     static void SetPatternComplete(const JSCallbackInfo& info);
-    static void SetDotConnected(const JSCallbackInfo& info);
+    static void SetDotConnect(const JSCallbackInfo& info);
 
 private:
     static void SetDefaultTheme(OHOS::Ace::RefPtr<OHOS::Ace::V2::PatternLockComponent>& patternLock);

@@ -24,7 +24,7 @@ class ACE_EXPORT PatternLockModelImpl : public OHOS::Ace::PatternLockModel {
 public:
     RefPtr<V2::PatternLockController> Create() override;
     void SetPatternComplete(std::function<void(const BaseEventInfo* info)>&& onComplete) override;
-    void SetDotConnected(std::function<void(int32_t)>&& onConnected) override {};
+    void SetDotConnect(std::function<void(int32_t)>&& onDotConnect) override {};
     void SetSelectedColor(const Color& selectedColor) override;
     void SetAutoReset(bool isAutoReset) override;
     void SetPathColor(const Color& pathColor) override;

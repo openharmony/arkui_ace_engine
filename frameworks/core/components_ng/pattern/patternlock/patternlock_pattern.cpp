@@ -158,7 +158,7 @@ bool PatternLockPattern::AddChoosePoint(const OffsetF& offset, int32_t x, int32_
             CHECK_NULL_RETURN(host, false);
             auto eventHub = host->GetEventHub<PatternLockEventHub>();
             CHECK_NULL_RETURN(eventHub, false);
-            eventHub->UpdateDotConnectedEvent(choosePoint_.back().GetCode());
+            eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
         }
         return true;
     }
@@ -470,7 +470,7 @@ void PatternLockPattern::OnFocusClick()
     StartModifierConnectedAnimate(currentPoint_.first, currentPoint_.second);
     auto eventHub = host->GetEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->UpdateDotConnectedEvent(choosePoint_.back().GetCode());
+    eventHub->UpdateDotConnectEvent(choosePoint_.back().GetCode());
     isMoveEventValid_ = true;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
