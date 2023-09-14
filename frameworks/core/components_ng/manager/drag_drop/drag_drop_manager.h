@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 enum class DragDropMgrState : int32_t {
     IDLE,
     DRAGGING
-}
+};
 
 class ACE_EXPORT DragDropManager : public virtual AceType {
     DECLARE_ACE_TYPE(DragDropManager, AceType);
