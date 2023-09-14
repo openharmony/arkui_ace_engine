@@ -640,6 +640,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
 void SubwindowOhos::HideSubWindowNG()
 {
     LOGI("SubwindowOhos::HideDialogNG");
+    ContainerScope scope(childContainerId_);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     if (container->IsDialogContainer()) {
