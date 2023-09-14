@@ -108,10 +108,14 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       ? `dependent components: ${this.dependentElementIds_.size} elmtIds: `
       : `WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
     let sepa: string = "";
-    this.dependentElementIds_.forEach((elmtId: number) => {
-      result+=`${sepa}${this.owningView_.debugInfoElmtId(elmtId)}`;
-      sepa = ", ";
-    });
+    if (this.owningView_) {
+      this.dependentElementIds_.forEach((elmtId: number) => {
+        result+=`${sepa}${this.owningView_.debugInfoElmtId(elmtId)}`;
+        sepa = ", ";
+      });
+    } else {
+      result += `no owning @Component`;
+    }
     return result;
   }
 
