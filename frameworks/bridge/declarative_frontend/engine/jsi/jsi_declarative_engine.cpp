@@ -246,6 +246,12 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime_);
     arkRuntime->SetLanguage("ets");
     runtime_->StartDebugger();
+#else
+    if (usingSharedRuntime_) {
+        LOGI("usingSharedRuntime, InitTimerModule.");
+        auto global = runtime_->GetGlobal();
+        JsiTimerModule::GetInstance()->InitTimerModule(runtime_, global);
+    }
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
