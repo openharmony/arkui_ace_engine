@@ -264,7 +264,6 @@ ohos_source_set("ace_components_extra") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
-    "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
@@ -372,6 +371,7 @@ source_set("ace_components_mock") {
     "$ace_root/frameworks/base/test/mock/mock_socperf_client_impl.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
+    "$ace_root/frameworks/core/common/test/mock/mock_clipboard.cpp",
     "$ace_root/frameworks/core/components_ng/test/event/scrollable_event/mock_scrollable.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
