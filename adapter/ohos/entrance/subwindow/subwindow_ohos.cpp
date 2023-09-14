@@ -547,7 +547,7 @@ void SubwindowOhos::ClearMenuNG(bool inWindow)
     if (inWindow) {
         HideEventColumn();
     }
-    HidePixelMap();
+    HidePixelMap(false, 0, 0, false);
     HideFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
