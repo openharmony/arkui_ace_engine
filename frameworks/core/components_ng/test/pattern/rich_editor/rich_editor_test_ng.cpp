@@ -118,6 +118,8 @@ void RichEditorTestNg::SetUp()
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
     richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
+    richEditorNode_->GetGeometryNode()->SetContentSize({});
 }
 
 void RichEditorTestNg::TearDown()
@@ -390,7 +392,6 @@ HWTEST_F(RichEditorTestNg, RichEditorInsertValue001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
     TextInsertValueInfo info;
     richEditorPattern->CalcInsertValueObj(info);
     EXPECT_EQ(info.GetSpanIndex(), 0);
@@ -439,7 +440,7 @@ HWTEST_F(RichEditorTestNg, RichEditorInsertValue002, TestSize.Level1)
     ClearSpan();
     richEditorPattern->InsertValue(" ");
     auto it5 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
-    EXPECT_EQ(it5, nullptr);
+    EXPECT_TRUE(it5);
 }
 
 /**
@@ -948,7 +949,6 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     info.localLocation_ = Offset(0, 0);
     ParagraphStyle paragraphStyle;
     richEditorPattern->paragraph_ = Paragraph::Create(paragraphStyle, FontCollection::Current());
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
@@ -1210,7 +1210,6 @@ HWTEST_F(RichEditorTestNg, HandleLongPress001, TestSize.Level1)
     AddSpan(INIT_VALUE_1);
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
     richEditorPattern->caretVisible_ = true;
     richEditorPattern->HandleLongPress(info);
     EXPECT_FALSE(richEditorPattern->caretVisible_);
@@ -1299,7 +1298,6 @@ HWTEST_F(RichEditorTestNg, OnHandleMoveDone001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
     auto func = [](const BaseEventInfo* info) { testOnSelect = 1; };
     auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -1648,7 +1646,6 @@ HWTEST_F(RichEditorTestNg, CreateNodePaintMethod002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->contentMod_ =
         AceType::MakeRefPtr<RichEditorContentModifier>(richEditorPattern->textStyle_, &richEditorPattern->paragraphs_);
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>();
     richEditorPattern->isCustomFont_ = true;
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);
