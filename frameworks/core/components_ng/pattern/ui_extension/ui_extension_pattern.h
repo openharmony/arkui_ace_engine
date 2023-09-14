@@ -33,6 +33,7 @@
 namespace OHOS::Rosen {
 class Session;
 class ILifecycleListener;
+enum class WSError;
 } // namespace OHOS::Rosen
 
 namespace OHOS::MMI {
@@ -130,6 +131,10 @@ private:
     void RegisterVisibleAreaChange();
     void UpdateTextFieldManager(const Offset& offset, float height);
     bool IsCurrentFocus() const;
+
+    void ProcessUIExtensionSessionActivationResult(OHOS::Rosen::WSError errcode);
+    void ProcessUIExtensionSessionBackgroundResult(OHOS::Rosen::WSError errcode);
+    void ProcessUIExtensionSessionDestructionResult(OHOS::Rosen::WSError errcode);
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
