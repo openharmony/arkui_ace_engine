@@ -89,6 +89,9 @@ const SizeF TEST_FRAME_SIZE1 { 20, 50 };
 const SizeF TEST_FRAME_SIZE2 { 0, 0 };
 const std::string SELECTED_DATE_STRING = "{\"year\":2000,\"month\":5,\"day\":6,\"hour\":1,\"minute\":1,\"status\":-1}";
 constexpr double COLUMN_VELOCITY = 2000.0;
+constexpr double COLUMN_WIDTH = 200.0;
+constexpr double SECLECTED_TEXTNODE_HEIGHT = 84.0;
+constexpr double OTHER_TEXTNODE_HEIGHT = 54.0;
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -3348,5 +3351,74 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest019, TestSize.Level1)
     columnPattern_->optionProperties_.emplace_back(datePickerOptionProperty);
     columnPattern_->PlayRestAnimation();
     EXPECT_FLOAT_EQ(columnPattern_->scrollDelta_, OFFSET_X - 2.0);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest020
+ * @tc.desc: Test DatePickerColumnPattern AddHotZoneRectToText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnPattern and Set text node height.
+     */
+    CreateDatePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    ASSERT_NE(columnNode_, nullptr);
+    auto childSize = static_cast<int32_t>(columnNode_->GetChildren().size());
+    auto midSize = childSize / MIDDLE_OF_COUNTS;
+    columnPattern_->optionProperties_[midSize].height = SECLECTED_TEXTNODE_HEIGHT;
+    columnPattern_->optionProperties_[midSize-1].height = OTHER_TEXTNODE_HEIGHT;
+
+    /**
+     * @tc.steps: step2. Set height 50.0 for column and call AddHotZoneRectToText.
+     * @tc.expected: The middle textnode hot zone set is correct.
+     */
+    float height = 50.0f;
+    columnPattern_->size_.SetWidth(COLUMN_WIDTH);
+    columnPattern_->size_.SetHeight(height);
+    columnPattern_->AddHotZoneRectToText();
+    auto childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(midSize));
+    ASSERT_NE(childNode, nullptr);
+    auto gestureEventHub = childNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
+    auto responseRegion = gestureEventHub->GetResponseRegion().back();
+    EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
+    EXPECT_EQ(responseRegion.GetHeight().Value(), height);
+
+    /**
+     * @tc.steps: step3. Set height 100.0 for column and call AddHotZoneRectToText.
+     * @tc.expected: The candidate textnode hot zone set is correct.
+     */
+    height = 100.0f;
+    columnPattern_->size_.SetHeight(height);
+    columnPattern_->AddHotZoneRectToText();
+    childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(midSize - 1));
+    ASSERT_NE(childNode, nullptr);
+    gestureEventHub = childNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
+    responseRegion = gestureEventHub->GetResponseRegion().back();
+    EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
+    EXPECT_EQ(responseRegion.GetHeight().Value(), (height - SECLECTED_TEXTNODE_HEIGHT) / MIDDLE_OF_COUNTS);
+
+    /**
+     * @tc.steps: step4. Set height 200.0 for column and call AddHotZoneRectToText.
+     * @tc.expected: The disappear textnode hot zone set is correct.
+     */
+    height = 200.0f;
+    columnPattern_->size_.SetHeight(height);
+    columnPattern_->AddHotZoneRectToText();
+    childNode = AceType::DynamicCast<FrameNode>(columnNode_->GetChildAtIndex(midSize - MIDDLE_OF_COUNTS));
+    ASSERT_NE(childNode, nullptr);
+    gestureEventHub = childNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_TRUE(gestureEventHub->IsResponseRegion());
+    responseRegion = gestureEventHub->GetResponseRegion().back();
+    EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
+    EXPECT_EQ(responseRegion.GetHeight().Value(),
+        (height - SECLECTED_TEXTNODE_HEIGHT - MIDDLE_OF_COUNTS * OTHER_TEXTNODE_HEIGHT) / MIDDLE_OF_COUNTS);
 }
 } // namespace OHOS::Ace::NG
