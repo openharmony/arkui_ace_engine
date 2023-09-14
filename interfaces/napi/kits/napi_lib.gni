@@ -33,7 +33,7 @@ common_napi_libs = [
 ]
 
 if (!is_cross_platform_build) {
-  common_napi_libs += [ "performancemonitor" ]
+  common_napi_libs += [ "arkui/performancemonitor" ]
 }
 
 template("ace_napi_lib") {
