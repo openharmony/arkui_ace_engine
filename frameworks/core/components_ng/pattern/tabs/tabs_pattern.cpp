@@ -72,7 +72,10 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             tabBarPattern->SetIndicator(index);
         }
         tabBarPattern->UpdateIndicator(index);
-        tabBarPattern->UpdateTextColor(index);
+        if (tabBarPattern->GetTabBarStyle() != TabBarStyle::SUBTABBATSTYLE ||
+                tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) != Axis::HORIZONTAL) {
+            tabBarPattern->UpdateTextColor(index);
+        }
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
                 tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {

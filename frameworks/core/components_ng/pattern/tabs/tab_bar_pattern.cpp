@@ -630,7 +630,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     SetSwiperCurve(curve);
     TabBarClickEvent(index);
     if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
-        tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
+        tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
+        layoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         HandleSubTabBarClick(layoutProperty, index);
         return;
     }
@@ -947,6 +948,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
             targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
+    UpdateTextColor(index);
     swiperController_->SwipeTo(index);
     layoutProperty->UpdateIndicator(index);
 }
