@@ -323,6 +323,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
 
 void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode)
 {
+    dragDropState_ = DragDropMgrState::DRAGGING;
     CHECK_NULL_VOID(frameNode);
     preTargetFrameNode_ = frameNode;
     draggedFrameNode_ = preTargetFrameNode_;
@@ -418,6 +419,7 @@ DragResult TranslateDragResult(DragRet dragResult)
 
 void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo)
 {
+    dragDropState_ = DragDropMgrState::IDLE;
     preTargetFrameNode_ = nullptr;
 #ifdef ENABLE_DRAG_FRAMEWORK
     auto container = Container::Current();
@@ -514,6 +516,7 @@ void DragDropManager::ClearSummary()
 
 void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo)
 {
+    dragDropState_ = DragDropMgrState::IDLE;
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, DragType::TEXT, true);
     if (dragFrameNode) {
         auto textFieldPattern = dragFrameNode->GetPattern<TextFieldPattern>();
@@ -585,6 +588,7 @@ void DragDropManager::FireOnDragEvent(
 
 void DragDropManager::OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode)
 {
+    dragDropState_ = DragDropMgrState::DRAGGING;
     preGridTargetFrameNode_ = frameNode;
     draggedGridFrameNode_ = frameNode;
 }
@@ -634,6 +638,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
 
 void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
 {
+    dragDropState_ = DragDropMgrState::IDLE;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
