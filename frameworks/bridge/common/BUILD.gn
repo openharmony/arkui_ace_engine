@@ -149,7 +149,7 @@ template("bridge_common") {
 
     # advance components using web or native plugins
     if (defined(config.advance_components_support) &&
-        config.advance_components_support) {
+        config.advance_components_support && !is_cross_platform_build) {
       sources += [
         "dom/dom_rich_text.cpp",
         "dom/dom_web.cpp",
@@ -157,7 +157,7 @@ template("bridge_common") {
     }
 
     if (defined(config.web_components_support) &&
-        config.web_components_support) {
+        config.web_components_support && !is_cross_platform_build) {
       sources += [
         "dom/dom_rich_text.cpp",
         "dom/dom_web.cpp",
