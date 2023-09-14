@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.h"
 
 #include "base/utils/utils.h"
@@ -106,7 +105,7 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     const TextStyle& textStyle, const std::string& content) const
 {
     auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content);
-
+    style.fontSize = textStyle.GetFontSize().ConvertToPx();
     auto&& spanGroup = GetSpans();
     auto&& lineStyle = spanGroup.front()->textLineStyle;
     CHECK_NULL_RETURN(lineStyle, style);

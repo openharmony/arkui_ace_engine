@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 #include <limits>
@@ -906,8 +905,7 @@ ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
-        .textOverflow = textStyle.GetTextOverflow(),
-        .fontSize = textStyle.GetFontSize().ConvertToPx()
+        .textOverflow = textStyle.GetTextOverflow()
     };
 }
 } // namespace OHOS::Ace::NG
