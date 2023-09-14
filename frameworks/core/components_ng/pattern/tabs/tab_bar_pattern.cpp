@@ -513,6 +513,8 @@ void TabBarPattern::OnModifyDone()
     SetAccessibilityAction();
     UpdateSubTabBoard();
     needSetCentered_ = true;
+    FocusIndexChange(layoutProperty->GetIndicatorValue(0));
+    focusIndicator_ = layoutProperty->GetIndicatorValue(0);
 
     CHECK_NULL_VOID(swiperController_);
     auto removeEventCallback = [weak = WeakClaim(this)]() {
