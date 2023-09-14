@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_PATTERN_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_CORS_WEB_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_CORS_WEB_PATTERN_H
 
 #include <optional>
 #include <string>
@@ -23,7 +23,6 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/web/web_property.h"
@@ -36,24 +35,21 @@
 #include "core/components_ng/pattern/web/web_layout_algorithm.h"
 #include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
+#include "core/components_ng/pattern/web/web_delegate_interface.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/render/render_surface.h"
 
-namespace OHOS::Ace {
-class WebDelegateObserver;
-}
+#include "core/components_ng/pattern/web/web_delegate_interface.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-
 struct MouseClickInfo {
     double x = -1;
     double y = -1;
     TimeStamp start;
 };
 
-#ifdef OHOS_STANDARD_SYSTEM
 struct TouchInfo {
     double x = -1;
     double y = -1;
@@ -68,7 +64,6 @@ struct TouchHandleState {
 };
 
 enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
-#endif
 } // namespace
 
 class WebPattern : public Pattern, public SelectionHost {
@@ -167,7 +162,6 @@ public:
 
     void SetWebController(const RefPtr<WebController>& webController)
     {
-        // TODO: add web controller diff function.
         webController_ = webController;
     }
 
@@ -301,50 +295,17 @@ public:
     {
         return isFullScreen_;
     }
-    bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
-        std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
-    void OnQuickMenuDismissed();
-    void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
-    bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
-    void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
-        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
-    void OnDateTimeChooserPopup(
-        const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
-        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    void OnDateTimeChooserClose();
-    void UpdateTouchHandleForOverlay();
-    bool IsSelectOverlayDragging()
-    {
-        return selectOverlayDragging_;
-    }
-    void SetSelectOverlayDragging(bool selectOverlayDragging)
-    {
-        selectOverlayDragging_ = selectOverlayDragging;
-    }
     void UpdateLocale();
-    void SetSelectPopupMenuShowing(bool showing)
-    {
-        selectPopupMenuShowing_ = showing;
-    }
-    void SetCurrentStartHandleDragging(bool isStartHandle)
-    {
-        isCurrentStartHandleDragging_ = isStartHandle;
-    }
-    void UpdateSelectHandleInfo();
-    bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
     void OnResizeNotWork();
     bool OnBackPressed() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
+#ifdef ENABLE_DRAG_FRAMEWORK
     bool NotifyStartDragTask();
     bool IsImageDrag();
-#ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();
-#endif
     Offset GetDragOffset() const;
+#endif
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -361,7 +322,6 @@ private:
     void OnActive() override;
     void OnVisibleChange(bool isVisible) override;
     void OnAreaChangedInner() override;
-    void OnNotifyMemoryLevel(int32_t level) override;
 
     void OnWebSrcUpdate();
     void OnWebDataUpdate();
@@ -406,21 +366,10 @@ private:
     void OnScrollBarColorUpdate(const std::string& value);
 
     void InitEvent();
-    void InitFeatureParam();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
-    void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
-    void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragMove(const GestureEvent& event);
-    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleDragStart(int32_t x, int32_t y);
-    void HandleDragEnd(int32_t x, int32_t y);
-    void HandleDragCancel();
-    void ClearDragData();
-    bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
     bool HandleDoubleClickEvent(const MouseInfo& info);
@@ -432,13 +381,24 @@ private:
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
     void ResetDragAction();
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
+    void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
+    void HandleDragMove(const GestureEvent& event);
+    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleDragStart(int32_t x, int32_t y);
+    void HandleDragEnd(int32_t x, int32_t y);
+    void HandleDragCancel();
+    void ClearDragData();
+    bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
+#endif
     int onDragMoveCnt = 0;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
@@ -456,25 +416,7 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
-    bool IsTouchHandleValid(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
-    bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
-#ifdef OHOS_STANDARD_SYSTEM
-    WebOverlayType GetTouchHandleOverlayType(
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
-#endif
-    void RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
-        std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
-        std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
-    void RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo);
-    void CloseSelectOverlay();
-    RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     std::optional<OffsetF> GetCoordinatePoint();
-    void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
-        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback,
-        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params);
-    OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
 
     struct TouchInfo {
         float x = -1.0f;
@@ -485,16 +427,6 @@ private:
     void InitEnhanceSurfaceFlag();
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
-    DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
-    bool ShowDateTimeDialog(const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
-        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    bool ShowTimeDialog(const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
-        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
-    bool ShowDateTimeSuggestionDialog(const NWeb::DateTimeChooser& chooser,
-        const std::vector<NWeb::DateTimeSuggestion>& suggestions,
-        std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -504,17 +436,11 @@ private:
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
-    RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_ = nullptr;
-    RefPtr<SelectOverlayProxy> selectOverlayProxy_ = nullptr;
     RefPtr<WebPaintProperty> webPaintProperty_ = nullptr;
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
-    float selectHotZone_ = 10.0f;
     RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
@@ -533,11 +459,6 @@ private:
     bool isEnhanceSurface_ = false;
     bool isAllowWindowOpenMethod_ = false;
     OffsetF webOffset_;
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
-    SelectMenuInfo selectMenuInfo_;
-    bool selectOverlayDragging_ = false;
-    bool selectPopupMenuShowing_ = false;
-    bool isCurrentStartHandleDragging_ = false;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
     bool isInWindowDrag_ = false;
@@ -547,11 +468,11 @@ private:
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
-    RefPtr<WebDelegate> delegate_;
-    RefPtr<WebDelegateObserver> observer_;
-    std::set<OHOS::Ace::KeyCode> KeyCodeSet_;
+    RefPtr<WebDelegateInterface> delegate_ = nullptr;
+
+    bool selectPopupMenuShowing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_CORS_WEB_PATTERN_H

@@ -450,7 +450,7 @@ template("ace_core_source_set") {
     }
 
     if (defined(config.web_components_support) &&
-        config.web_components_support) {
+        config.web_components_support && !is_cross_platform_build) {
       deps += [
         "$ace_root/frameworks/core/components/text_overlay:ace_core_components_text_overlay_for_web_$platform",
         "$ace_root/frameworks/core/components/web:ace_core_components_web_$platform",
@@ -874,7 +874,37 @@ template("ace_core_ng_source_set") {
     }
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
+      if (!is_cross_platform_build) {
+        include_dirs += [
+          "$ability_runtime_path/interfaces/kits/native/appkit/app",
+          "//foundation/window/window_manager/interfaces/innerkits/wm",
+          "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
+        ]
+        deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
+        sources += [
+          "components/web/resource/web_client_impl.cpp",
+          "components/web/resource/web_configuration_observer.cpp",
+          "components/web/resource/web_delegate.cpp",
+          "components/web/resource/web_javascript_result_callback.cpp",
+          "components/web/resource/web_resource.cpp",
+          "components/web/web_component.cpp",
+        ]
+
+        external_deps += [
+          "ability_base:base",
+          "ability_base:configuration",
+          "ability_runtime:app_manager",
+          "ability_runtime:appkit_native",
+          "c_utils:utils",
+          "graphic_2d:surface",
+          "init:libbegetutil",
+          "ipc:ipc_core",
+          "webview:libnweb",
+          "window_manager:libwm",
+        ]
+      } else {
+        deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
+      }
     }
     if (defined(config.form_components_support) &&
         config.form_components_support) {

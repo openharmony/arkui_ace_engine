@@ -340,7 +340,10 @@ void JsBindViews(BindingTarget globalObj)
     JSPlugin::JSBind(globalObj);
 #endif
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     JSRichText::JSBind(globalObj);
+#endif
+    JSWeb::JSBind(globalObj);
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
     JSRemoteWindow::JSBind(globalObj);

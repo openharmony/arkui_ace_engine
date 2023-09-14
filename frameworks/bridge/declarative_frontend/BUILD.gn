@@ -447,13 +447,20 @@ template("declarative_js_engine") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      sources += [
-        "jsview/js_richtext.cpp",
-        "jsview/js_web.cpp",
-        "jsview/js_web_controller.cpp",
-        "jsview/models/richtext_model_impl.cpp",
-        "jsview/models/web_model_impl.cpp",
-      ]
+      if (is_cross_platform_build) {
+        sources += [
+          "jsview/js_web.cpp",
+          "jsview/models/web_model_impl.cpp",
+        ]
+      } else {
+        sources += [
+          "jsview/js_richtext.cpp",
+          "jsview/js_web.cpp",
+          "jsview/js_web_controller.cpp",
+          "jsview/models/richtext_model_impl.cpp",
+          "jsview/models/web_model_impl.cpp",
+        ]
+      }
     }
 
     if (defined(config.form_components_support) &&
@@ -785,7 +792,15 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.web_components_support) &&
         config.web_components_support) {
-      sources += [ "jsview/js_richtext.cpp" ]
+      if (!is_cross_platform_build) {
+        sources += [
+          "jsview/js_richtext.cpp",
+          "jsview/js_web.cpp",
+          "jsview/js_web_controller.cpp",
+        ]
+      } else {
+        sources += [ "jsview/js_web.cpp" ]
+      }
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {

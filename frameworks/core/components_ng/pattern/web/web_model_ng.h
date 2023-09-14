@@ -15,7 +15,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H
 
+#if !defined(IOS_PLATFORM) && defined(ANDROID_PLATFORM)
 #include "base/web/webview/ohos_nweb/include/nweb_helper.h"
+#endif
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_model.h"
