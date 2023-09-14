@@ -15,7 +15,6 @@
 #include <optional>
 #include <vector>
 #include "gtest/gtest.h"
-#include "base/geometry/ng/offset_t.h"
 
 #define private public
 #define protected public
@@ -23,6 +22,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -538,6 +538,46 @@ HWTEST_F(RichEditorTestNg, RichEditorCursorMove001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CursorMoveUp001
+ * @tc.desc: test CursorMoveUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, CursorMoveUp001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
+    AddSpan(INIT_VALUE_1);
+    EXPECT_FALSE(richEditorPattern->CursorMoveUp());
+    
+    richEditorPattern->caretPosition_ = 1;
+    EXPECT_TRUE(richEditorPattern->CursorMoveUp());
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
+ * @tc.name: CursorMoveDown001
+ * @tc.desc: test CursorMoveDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, CursorMoveDown001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
+    AddSpan(INIT_VALUE_1);
+    EXPECT_FALSE(richEditorPattern->CursorMoveDown());
+    
+    richEditorPattern->caretPosition_ = 1;
+    EXPECT_TRUE(richEditorPattern->CursorMoveDown());
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
  * @tc.name: RichEditorDelete001
  * @tc.desc: test delete forward
  * @tc.type: FUNC
@@ -666,6 +706,9 @@ HWTEST_F(RichEditorTestNg, RichEditorController002, TestSize.Level1)
     EXPECT_EQ(index1, 0);
     auto index2 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index2, 1);
+    options.value = "hello\n";
+    auto index3 = richEditorController->AddTextSpan(options);
+    EXPECT_EQ(index3, 1);
 }
 
 /**
@@ -949,6 +992,35 @@ HWTEST_F(RichEditorTestNg, HandleClickEvent001, TestSize.Level1)
     richEditorPattern->paragraph_ = Paragraph::Create(paragraphStyle, FontCollection::Current());
     richEditorPattern->HandleClickEvent(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+
+    richEditorPattern->textSelector_.baseOffset = -1;
+    richEditorPattern->textSelector_.destinationOffset = -1;
+    
+    richEditorPattern->isMouseSelect_ = true;
+    richEditorPattern->HandleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+
+    richEditorPattern->isMouseSelect_ = false;
+    richEditorPattern->HandleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+
+    richEditorPattern->isMouseSelect_ = true;
+    richEditorPattern->HandleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+
+    richEditorPattern->isMouseSelect_ = false;
+    richEditorPattern->HandleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
 }
 
 /**
@@ -1228,11 +1300,149 @@ HWTEST_F(RichEditorTestNg, HandleTouchEvent002, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
     TouchEventInfo info("INIT_VALUE_1");
+    richEditorPattern->isMousePressed_ = true;
     info.touches_.front().touchType_ = TouchType::DOWN;
     richEditorPattern->HandleTouchEvent(info);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
+    info.touches_.front().touchType_ = TouchType::MOVE;
+    richEditorPattern->HandleTouchEvent(info);
+    EXPECT_TRUE(richEditorPattern->isMousePressed_);
     info.touches_.front().touchType_ = TouchType::UP;
     richEditorPattern->HandleTouchEvent(info);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
+}
+
+/**
+ * @tc.name: InitSelection001
+ * @tc.desc: test InitSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, InitSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
+    richEditorPattern->textForDisplay_ = "test";
+    richEditorPattern->InitSelection(Offset(0, 0));
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+}
+
+/**
+ * @tc.name: InitSelection002
+ * @tc.desc: test InitSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, InitSelection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
+    richEditorPattern->textForDisplay_ = "test";
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->spans_.front()->position = 3;
+    richEditorPattern->InitSelection(Offset(0, 1));
+    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
+}
+
+/**
+* @tc.name: CalcInsertValueObj001
+* @tc.desc: test CalcInsertValueObj
+* @tc.type: FUNC
+*/
+HWTEST_F(RichEditorTestNg, CalcInsertValueObj001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test1");
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    auto it = richEditorPattern->spans_.front();
+    TextInsertValueInfo info;
+
+    it->content = "test";
+    it->position = 4;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->moveLength_ = 2;
+
+    richEditorPattern->CalcInsertValueObj(info);
+    EXPECT_EQ(info.spanIndex_, 0);
+
+    richEditorPattern->moveLength_ = -1;
+    richEditorPattern->CalcInsertValueObj(info);
+    EXPECT_EQ(info.spanIndex_, 2);
+
+    richEditorPattern->moveLength_ = 5;
+    richEditorPattern->CalcInsertValueObj(info);
+    EXPECT_EQ(info.spanIndex_, 2);
+}
+
+/**
+* @tc.name: CalcDeleteValueObj001
+* @tc.desc: test CalcDeleteValueObj
+* @tc.type: FUNC
+*/
+HWTEST_F(RichEditorTestNg, CalcDeleteValueObj001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test1");
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    auto it = richEditorPattern->spans_.front();
+    RichEditorDeleteValue delValue;
+
+    it->content = "test";
+    it->position = 4;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->moveLength_ = 2;
+
+    richEditorPattern->CalcDeleteValueObj(2, 1, delValue);
+    EXPECT_EQ(delValue.richEditorDeleteSpans_.size(), 1);
+
+    richEditorPattern->CalcDeleteValueObj(-1, 1, delValue);
+    EXPECT_EQ(delValue.richEditorDeleteSpans_.size(), 1);
+
+    richEditorPattern->CalcDeleteValueObj(5, 1, delValue);
+    EXPECT_EQ(delValue.richEditorDeleteSpans_.size(), 1);
+}
+
+/**
+* @tc.name: MouseRightFocus001
+* @tc.desc: test MouseRightFocus
+* @tc.type: FUNC
+*/
+HWTEST_F(RichEditorTestNg, MouseRightFocus001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan("test1");
+    AddImageSpan();
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+    auto it = richEditorPattern->spans_.front();
+    it->content = "test";
+    it->position = 4;
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->moveLength_ = 0;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    richEditorPattern->paragraphs_.paragraphs_.push_front({paragraph});
+    MouseInfo info;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->MouseRightFocus(info);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 /**
@@ -1847,8 +2057,6 @@ HWTEST_F(RichEditorTestNg, InsertValueByPaste001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan("test");
-    auto child  = richEditorPattern->GetChildByIndex(0);
-    auto spannode = AceType::DynamicCast<SpanNode>(child);
 
     richEditorPattern->typingStyle_ = std::nullopt;
     richEditorPattern->typingTextStyle_ = std::nullopt;
@@ -1911,6 +2119,35 @@ HWTEST_F(RichEditorTestNg, InsertValueByPaste003, TestSize.Level1)
     AddImageSpan();
     richEditorPattern->InsertValueByPaste("test");
     EXPECT_EQ(richEditorPattern->moveLength_, 4);
+}
+
+/**
+ * @tc.name: InsertValueByPaste004
+ * @tc.desc: test InsertValueByPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTestNg, InsertValueByPaste004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretSpanIndex_ = 0;
+    richEditorPattern->InsertValueByPaste("test");
+    EXPECT_EQ(richEditorPattern->moveLength_, 4);
+
+    AddSpan("test");
+    richEditorPattern->caretSpanIndex_ = 0;
+    richEditorPattern->InsertValueByPaste("test");
+    EXPECT_EQ(richEditorPattern->moveLength_, 8);
+
+    AddSpan("test");
+    richEditorPattern->InsertValueByPaste("test");
+    EXPECT_EQ(richEditorPattern->moveLength_, 12);
+
+    ClearSpan();
+    AddImageSpan();
+    richEditorPattern->InsertValueByPaste("test");
+    EXPECT_EQ(richEditorPattern->moveLength_, 16);
 }
 
 /**
