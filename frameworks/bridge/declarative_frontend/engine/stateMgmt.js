@@ -3282,10 +3282,14 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             ? `dependent components: ${this.dependentElementIds_.size} elmtIds: `
             : `WARNING: high number of dependent components (consider app redesign): ${this.dependentElementIds_.size} elmtIds: `;
         let sepa = "";
-        this.dependentElementIds_.forEach((elmtId) => {
-            result += `${sepa}${this.owningView_.debugInfoElmtId(elmtId)}`;
-            sepa = ", ";
-        });
+        if (this.owningView_) {
+            this.dependentElementIds_.forEach((elmtId) => {
+                result += `${sepa}${this.owningView_.debugInfoElmtId(elmtId)}`;
+                sepa = ", ";
+            });
+        } else {
+            result += `no owning @Component`;
+        }
         return result;
     }
     /* for @Prop value from source we need to generate a @State
