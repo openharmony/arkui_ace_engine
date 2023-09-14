@@ -82,7 +82,7 @@ public:
             CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
             auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
             paintMethod->SetAxis(swiperPattern->GetDirection());
-            paintMethod->SetCurrentIndex(swiperPattern->GetCurrentFirstIndex());
+            paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
             paintMethod->SetItemCount(swiperPattern->TotalCount());
             paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
             paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
@@ -90,6 +90,9 @@ public:
             paintMethod->SetIsHover(isHover_);
             paintMethod->SetIsPressed(isPressed_);
             paintMethod->SetHoverPoint(hoverPoint_);
+            if (mouseClickIndex_) {
+                mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
+            }
             paintMethod->SetMouseClickIndex(mouseClickIndex_);
             paintMethod->SetIsTouchBottom(touchBottomType_);
             paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
