@@ -792,6 +792,7 @@ void VideoPattern::UpdatePreviewImage()
     }
 
     if (image) {
+        image->SetDraggable(false);
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
         posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
