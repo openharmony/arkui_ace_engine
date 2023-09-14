@@ -47,7 +47,6 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
-#include "nweb_system_properties.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "transaction/rs_interfaces.h"
@@ -96,6 +95,11 @@ constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 static bool IsDeviceTabletOr2in1()
 {
     return OHOS::system::GetDeviceType() == "tablet" || OHOS::system::GetDeviceType() == "2in1";
+}
+
+static bool GetWebOptimizationValue()
+{
+    return OHOS::system::GetBoolParameter("web.optimization", true);
 }
 } // namespace
 
@@ -630,7 +634,7 @@ void WebDelegateObserver::NotifyDestory()
 WebDelegate::~WebDelegate()
 {
     ReleasePlatformResource();
-    if (IsDeviceTabletOr2in1()) {
+    if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
         OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
     }
     if (nweb_) {
@@ -2520,11 +2524,6 @@ void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
     }
     surfaceOcclusion_ = occlusion;
 
-    if (!NWebSystemProperties::GetWebOptimizationValue()) {
-        LOGD("web optimization switch is closed.");
-        return;
-    }
-
     if (surfaceOcclusion_) {
         nweb_->OnUnoccluded();
     } else {
@@ -2545,6 +2544,10 @@ void WebDelegate::SurfaceOcclusionCallback(bool occlusion)
 
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
+    if (!GetWebOptimizationValue()) {
+        LOGD("web optimization switch is closed.");
+        return;
+    }
     if (!IsDeviceTabletOr2in1()) {
         LOGD("only pad and pc will RegisterSurfaceOcclusionChangeCallback");
         return;
