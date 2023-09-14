@@ -88,10 +88,11 @@ void LazyForEachNode::PostIdleTask()
             auto preBuildResult = node->builder_->PreBuild(deadline, node->itemConstraint_, canRunLongPredictTask);
             if (!preBuildResult) {
                 node->PostIdleTask();
+            } else {
+                node->requestLongPredict_ = false;
+                node->itemConstraint_.reset();
             }
         }
-        node->requestLongPredict_ = false;
-        node->itemConstraint_.reset();
     });
 }
 
