@@ -220,18 +220,17 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
     Font font;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto fontSize = paramObject->GetProperty("size");
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto themeFontSize = theme->GetFontSize();
     if (fontSize->IsNull() || fontSize->IsUndefined()) {
-        font.fontSize = Dimension(-1);
+        font.fontSize = themeFontSize;
     } else {
         CalcDimension size;
-        if (fontSize->IsString()) {
-            auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
-            font.fontSize = result;
-        } else if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
-            font.fontSize = Dimension(-1);
-            LOGW("Parse to dimension FP failed.");
-        } else {
+        if (ParseJsDimensionFp(fontSize, size) && size.Unit() != DimensionUnit::PERCENT) {
             font.fontSize = size;
+        } else {
+            font.fontSize = themeFontSize;
         }
     }
 
