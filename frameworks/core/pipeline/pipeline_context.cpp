@@ -199,7 +199,6 @@ void PipelineContext::FlushMessages()
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
         rsUIDirector_->SendMessages();
     }
-    JankFrameReport::JsAnimationRecord();
 #endif
 }
 

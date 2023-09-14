@@ -58,7 +58,7 @@ private:
     static bool needReport_;
     static bool hasAnimationPrev_;
     static int64_t jsAnimationTime_;
-    static void jsAnimationDelayJank_;
+    static double jsAnimationDelayJank_;
 };
 } // namespace OHOS::Ace
 

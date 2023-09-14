@@ -169,6 +169,7 @@ void RosenWindow::FlushTasks()
     LOGD("Rosenwindow flush tasks");
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
+    JankFrameReport::JsAnimationRecord();
 }
 
 float RosenWindow::GetRefreshRate() const
