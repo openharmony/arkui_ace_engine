@@ -21,7 +21,11 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "core/components_ng/pattern/web/web_pattern.h"
+#else
+#include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
+#endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -792,6 +796,7 @@ void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)
 
 void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
 {
+#if !defined(IOS_PLATFORM) && defined(ANDROID_PLATFORM)
     if (webId != -1) {
         std::weak_ptr<OHOS::NWeb::NWeb> nwebWeak = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
         auto nwebSptr = nwebWeak.lock();
@@ -799,6 +804,7 @@ void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
             nwebSptr->NotifyPopupWindowResult(result);
         }
     }
+#endif
 }
 
 void WebModelNG::AddDragFrameNodeToManager()

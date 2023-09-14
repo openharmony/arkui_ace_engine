@@ -2586,7 +2586,7 @@ void JSWeb::JsEnabled(bool isJsEnabled)
 
 void JSWeb::ContentAccessEnabled(bool isContentAccessEnabled)
 {
-#ifndef NG_BUILD
+#if !defined(NG_BUILD) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     auto stack = ViewStackProcessor::GetInstance();
     auto webComponent = AceType::DynamicCast<WebComponent>(stack->GetMainComponent());
     if (!webComponent) {
@@ -2648,6 +2648,7 @@ void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
 
 void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
 {
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     LOGI("JSWeb add js interface");
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
@@ -2678,6 +2679,7 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     if (jsWebController) {
         jsWebController->SetJavascriptInterface(args);
     }
+#endif
 }
 
 void JSWeb::UserAgent(const std::string& userAgent)
