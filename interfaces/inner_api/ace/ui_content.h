@@ -162,6 +162,8 @@ public:
     virtual void SetResourcePaths(const std::vector<std::string>& resourcesPaths, const std::string& assetRootPath,
         const std::vector<std::string>& assetBasePaths) {};
 
+    virtual void UpdateResource() {}
+
     virtual NativeValue* GetUIContext()
     {
         return nullptr;
