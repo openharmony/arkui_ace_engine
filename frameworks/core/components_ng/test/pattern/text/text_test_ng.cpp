@@ -4627,6 +4627,31 @@ HWTEST_F(TextTestNg, GetDragUpperLeftCoordinates001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test on color configuration update
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto context = textFrameNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    context->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    auto theme = context->GetTheme<TextTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->textStyle_.textColor_ = Color::BLACK;
+    textPattern->OnColorConfigurationUpdate();
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
+}
+
+/**
  * @tc.name: GetCopyOptionString001
  * @tc.desc: Test if GetCopyOptionString is successful
  * @tc.type: FUNC

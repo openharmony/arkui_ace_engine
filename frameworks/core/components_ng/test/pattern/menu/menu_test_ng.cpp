@@ -5772,6 +5772,30 @@ HWTEST_F(MenuTestNg, MenuPaintMethodTestNg003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test on color configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
+    MneuModelInstance.Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    menuTheme->backgroundColor_ = Color::BLACK;
+    menuPattern->OnColorConfigurationUpdate();
+    auto renderContext = menuNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::BLACK);
+}
+
+/**
  * @tc.name: MenuPaintPropertyTestNg001
  * @tc.desc: Verify GetEnableArrow.
  * @tc.type: FUNC

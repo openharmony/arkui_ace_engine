@@ -1618,6 +1618,34 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest025, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test on color configuration update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    CheckBoxGroupModelNG CheckBoxGroupModelNG;
+    CheckBoxGroupModelNG.Create(GROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxGroupPattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(checkBoxGroupPattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    ASSERT_NE(checkBoxTheme, nullptr);
+    checkBoxTheme->activeColor_ = Color::BLACK;
+    checkBoxTheme->inactiveColor_ = Color::BLACK;
+    checkBoxTheme->pointColor_ = Color::BLACK;
+    checkBoxGroupPattern->OnColorConfigurationUpdate();
+    auto checkBoxGroupPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxGroupPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxGroupPaintProperty->GetCheckBoxGroupSelectedColor(), Color::BLACK);
+    EXPECT_EQ(checkBoxGroupPaintProperty->GetCheckBoxGroupUnSelectedColor(), Color::BLACK);
+    EXPECT_EQ(checkBoxGroupPaintProperty->GetCheckBoxGroupCheckMarkColor(), Color::BLACK);
+}
+
+/**
  * @tc.name: CheckBoxGroupPatternTest026
  * @tc.desc: Test CheckBoxGroupPattern UpdateModifierParam.
  * @tc.type: FUNC
