@@ -716,10 +716,13 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(int32_t position, float& s
             bool isTail = false;
             auto it = children.begin();
             if (position >= static_cast<int32_t>(children.size())) {
-                std::advance(it, (position - 1));
+                std::advance(it, (static_cast<int32_t>(children.size()) - 1));
                 isTail = true;
             } else {
                 std::advance(it, position);
+            }
+            if (it == children.end()) {
+                return startOffset;
             }
             auto imageNode = DynamicCast<FrameNode>(*it);
             if (imageNode) {
