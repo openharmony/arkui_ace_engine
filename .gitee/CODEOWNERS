@@ -252,9 +252,9 @@ frameworks/core/components_ng/animation/  @hehongyang9
 frameworks/core/event/  @zhaojian2021 @catpoison
 frameworks/core/focus/  @catpoison
 frameworks/core/components_ng/event/  @zhaojian2021 @catpoison
-frameworks/core/components_ng/event/drag_event.cpp  @echoorchid @LongLie
-frameworks/core/components_ng/event/gesture_event_hub.cpp  @echoorchid @LongLie
-frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp  @echoorchid @LongLie
+frameworks/core/components_ng/event/drag_event.cpp  @zhaojian2021
+frameworks/core/components_ng/event/gesture_event_hub.cpp  @zhaojian2021
+frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp  @zhaojian2021
 
 [Gestures source]
 frameworks/core/gestures/  @zheng-qiyi
