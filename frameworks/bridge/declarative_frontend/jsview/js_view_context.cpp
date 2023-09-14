@@ -18,6 +18,7 @@
 #include <functional>
 
 #include "base/utils/system_properties.h"
+#include "base/log/jank_frame_report.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -282,6 +283,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         option.SetAllowRunningAsynchronously(true);
     }
     ViewContextModel::GetInstance()->openAnimation(option);
+    JankFrameReport::ReportJSAnimation();
 }
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
