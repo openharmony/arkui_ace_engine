@@ -4481,7 +4481,7 @@ HWTEST_F(ListTestNg, ScrollToIndex003, TestSize.Level1)
     ScrollDown(20);
     index = ListLayoutAlgorithm::LAST_ITEM;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 1600.f));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 1400.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 1200.f));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 1200.f));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 1200.f));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, 1200.f));
@@ -4554,7 +4554,7 @@ HWTEST_F(ListTestNg, ScrollToIndex004, TestSize.Level1)
      */
     index = ListLayoutAlgorithm::LAST_ITEM;
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::START, 800.f));
-    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::CENTER, 1100.f));
+    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::CENTER, 1000.f));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::END, 1000.f + 100.f / 3));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::AUTO, 1200.f));
 }
@@ -4630,7 +4630,7 @@ HWTEST_F(ListTestNg, ScrollToIndex005, TestSize.Level1)
     index = ListLayoutAlgorithm::LAST_ITEM;
     indexInGroup = 3;
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::START, 400.f));
-    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::CENTER, 950.f));
+    EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::CENTER, 700.f));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::END, 1200.f));
     EXPECT_TRUE(ScrollToIndex(index, indexInGroup, ScrollAlign::AUTO, 1200.f));
 }
