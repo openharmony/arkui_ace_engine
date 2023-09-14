@@ -156,7 +156,6 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         auto geometryNode = host->GetGeometryNode();
         auto frameOffset = geometryNode->GetFrameOffset();
         auto frameSize = geometryNode->GetFrameSize();
-        CHECK_NULL_RETURN(!paragraphs_.IsEmpty(), ret);
         auto height = static_cast<float>(paragraphs_.GetHeight() + std::fabs(baselineOffset_));
         if (!context->GetClipEdge().value() && LessNotEqual(frameSize.Height(), height)) {
             RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
@@ -1059,7 +1058,6 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     contentRect.SetHeight(contentRect.Height() - std::max(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - contentRect.GetX(),
         info.GetLocalLocation().GetY() - contentRect.GetY() };
-    CHECK_NULL_VOID(!paragraphs_.IsEmpty());
     auto position = paragraphs_.GetIndex(textOffset);
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (focusHub) {
@@ -1383,7 +1381,6 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     auto contentRect = GetTextRect();
     contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
     Offset textOffset = { touchX - contentRect.GetX(), touchY - contentRect.GetY() };
-    CHECK_NULL_VOID(!paragraphs_.IsEmpty());
     auto position = paragraphs_.GetIndex(textOffset);
     float caretHeight = 0.0f;
     SetCaretPosition(position);
@@ -2050,7 +2047,6 @@ bool RichEditorPattern::CursorMoveUp()
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-        CHECK_NULL_RETURN(!paragraphs_.IsEmpty(), true);
         int32_t caretPosition = paragraphs_.GetIndex(Offset(caretOffset.GetX(), caretOffset.GetY() - caretHeight));
         caretPosition = std::clamp(caretPosition, 0, static_cast<int32_t>(GetTextContentLength()));
         if (caretPosition_ == caretPosition) {
@@ -2069,7 +2065,6 @@ bool RichEditorPattern::CursorMoveDown()
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-        CHECK_NULL_RETURN(!paragraphs_.IsEmpty(), true);
         int32_t caretPosition = paragraphs_.GetIndex(Offset(caretOffset.GetX(), caretOffset.GetY() + caretHeight));
         caretPosition = std::clamp(caretPosition, 0, static_cast<int32_t>(GetTextContentLength()));
         if (caretPosition_ == caretPosition) {
@@ -2348,7 +2343,6 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-        CHECK_NULL_VOID(!paragraphs_.IsEmpty());
 
         mouseStatus_ = MouseStatus::MOVE;
         if (isFirstMouseSelect_) {
@@ -2420,7 +2414,6 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     contentRect.SetHeight(contentRect.Height() - std::max(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - contentRect.GetX(),
         info.GetLocalLocation().GetY() - contentRect.GetY() };
-    CHECK_NULL_VOID(!paragraphs_.IsEmpty());
     InitSelection(textOffset);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
@@ -3258,7 +3251,6 @@ bool RichEditorPattern::IsDisabled() const
 
 void RichEditorPattern::InitSelection(const Offset& pos)
 {
-    CHECK_NULL_VOID(!paragraphs_.IsEmpty());
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
