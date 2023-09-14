@@ -1528,11 +1528,11 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest040, TestSize.Level1)
     wrapper->geometryNode_->SetFrameOffset({ RK356_WIDTH, RK356_HEIGHT });
 
     // recreate wrapper to simulate next layout
-    wrapper = AceType::MakeRefPtr<LayoutWrapperNode>(host, wrapper->geometryNode_, host->GetLayoutProperty());
-    wrapper->RestoreGeoState();
+    auto wrapper2 = AceType::MakeRefPtr<LayoutWrapperNode>(host, wrapper->geometryNode_, host->GetLayoutProperty());
+    wrapper2->RestoreGeoState();
     EXPECT_EQ(manager->GetGeoRestoreNodes().size(), 0UL);
-    EXPECT_FALSE(wrapper->geometryNode_->previousState_);
-    EXPECT_EQ(wrapper->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
+    EXPECT_FALSE(wrapper2->geometryNode_->previousState_);
+    EXPECT_EQ(wrapper2->geometryNode_->GetFrameOffset(), OffsetF(0, 0));
 }
 
 /**
