@@ -1154,7 +1154,7 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
 
     RectF rect = layoutProperty->GetIndicatorRect(indicator);
     paintProperty->UpdateIndicator(rect);
-    if (!isTouchingSwiper_) {
+    if (!isTouchingSwiper_ || tabBarStyles_[indicator] != TabBarStyle::SUBTABBATSTYLE) {
         currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
         tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
