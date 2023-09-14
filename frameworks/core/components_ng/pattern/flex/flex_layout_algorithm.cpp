@@ -271,8 +271,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
             if (childFlexItemProperty) {
                 childDisplayPriority = childFlexItemProperty->GetDisplayIndex().value_or(1);
                 if (!childrenHasAlignSelfBaseLine_ &&
-                    childFlexItemProperty->GetAlignSelf().value_or(FlexAlign::FLEX_START) == FlexAlign::BASELINE &&
-                    childGone) {
+                    childFlexItemProperty->GetAlignSelf().value_or(FlexAlign::FLEX_START) == FlexAlign::BASELINE) {
                     childrenHasAlignSelfBaseLine_ = true;
                 }
             }

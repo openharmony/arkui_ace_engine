@@ -80,6 +80,7 @@ private:
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
     bool CalculateTruthFingers(bool isDirectionUp) const;
+    void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     void ChangeFingers(int32_t fingers);

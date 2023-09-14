@@ -34,10 +34,11 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #ifdef USE_ROSEN_DRAWING
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
 #include "core/event/ace_event_helper.h"
+#include "core/image/image_file_cache.h"
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {
@@ -303,10 +304,8 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawDataFromFileCache(
     const std::string suffix)
 {
     ACE_FUNCTION_TRACE();
-    auto imageCache = context->GetImageCache();
-    if (imageCache) {
-        std::string cacheFilePath = ImageCache::GetImageCacheFilePath(key) + suffix;
-        auto data = imageCache->GetDataFromCacheFile(cacheFilePath);
+        std::string cacheFilePath = ImageFileCache::GetInstance().GetImageCacheFilePath(key) + suffix;
+        auto data = ImageFileCache::GetInstance().GetDataFromCacheFile(cacheFilePath);
         if (data) {
 #ifndef USE_ROSEN_DRAWING
             const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(data->GetDataWrapper());
@@ -315,7 +314,6 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawDataFromFileCache(
             return AceType::DynamicCast<NG::DrawingImageData>(data)->GetRsData();
 #endif
         }
-    }
     return nullptr;
 }
 
@@ -416,10 +414,8 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const std::shared_ptr<RSData>& d
 }
 
 #ifndef USE_ROSEN_DRAWING
-void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> context,
-    const sk_sp<SkImage>& image,
-    const sk_sp<SkData>& data,
-    const std::function<void(sk_sp<SkImage>, sk_sp<SkData>)>&& callback,
+void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> context, const sk_sp<SkImage>& image,
+    const sk_sp<SkData>& data, const std::function<void(sk_sp<SkImage>, sk_sp<SkData>)>&& callback,
     const std::string src)
 {
 #ifdef UPLOAD_GPU_DISABLED
@@ -431,7 +427,7 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
         callback(image, data);
         return;
     }
-    auto task = [context, image, callback, src] () {
+    auto task = [context, image, callback, src]() {
         ACE_DCHECK(!image->isTextureBacked());
         bool needRaster = ImageCompressor::GetInstance()->CanCompress();
         if (!needRaster) {
@@ -614,7 +610,7 @@ std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
                         LOGI("encode cache image into cache file failed.");
                         return;
                     }
-                    ImageCache::WriteCacheFile(srcKey, data->data(), data->size());
+                    ImageFileCache::GetInstance().WriteCacheFile(srcKey, data->data(), data->size());
                 },
                 BgTaskPriority::LOW);
         }
@@ -657,8 +653,8 @@ sk_sp<SkImage> ImageProvider::GetSkImage(const std::string& src, const WeakPtr<P
     return image;
 }
 #else
-std::shared_ptr<RSImage> ImageProvider::GetDrawingImage(const std::string& src,
-    const WeakPtr<PipelineBase> context, Size targetSize)
+std::shared_ptr<RSImage> ImageProvider::GetDrawingImage(
+    const std::string& src, const WeakPtr<PipelineBase> context, Size targetSize)
 {
     ImageSourceInfo info(src);
     auto imageLoader = ImageLoader::CreateImageLoader(info);
@@ -772,8 +768,7 @@ sk_sp<SkColorSpace> ImageProvider::ColorSpaceToSkColorSpace(const RefPtr<PixelMa
     return SkColorSpace::MakeSRGB(); // Media::PixelMap has not support wide gamut yet.
 }
 #else
-std::shared_ptr<RSColorSpace>
-    ImageProvider::ColorSpaceToDrawingColorSpace(const RefPtr<PixelMap>& pixmap)
+std::shared_ptr<RSColorSpace> ImageProvider::ColorSpaceToDrawingColorSpace(const RefPtr<PixelMap>& pixmap)
 {
     return RSColorSpace::CreateSRGB(); // Media::PixelMap has not support wide gamut yet.
 }

@@ -45,13 +45,13 @@ void PatternLockModelNG::SetPatternComplete(NG::PatternLockCompleteEvent&& onCom
     eventHub->SetOnComplete(std::move(onComplete));
 }
 
-void PatternLockModelNG::SetDotConnected(std::function<void(int32_t)>&& onConnected)
+void PatternLockModelNG::SetDotConnect(std::function<void(int32_t)>&& onDotConnect)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<PatternLockEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDotConnected(std::move(onConnected));
+    eventHub->SetOnDotConnect(std::move(onDotConnect));
 }
 
 void PatternLockModelNG::SetSelectedColor(const Color& selectedColor)

@@ -41,6 +41,10 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textEditingValue = pattern->GetTextEditingValue();
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("TextFieldModelNG::GetOrCreateNode with text %{public}s, current text %{public}s",
+            value.value_or("NA").c_str(), textEditingValue.text.c_str());
+    }
     if (value.has_value() && value.value() != textEditingValue.text) {
         pattern->InitEditingValueText(value.value());
     }

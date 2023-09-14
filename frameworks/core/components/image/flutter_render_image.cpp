@@ -32,7 +32,7 @@
 #include "core/components/image/image_event.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/components_ng/render/adapter/skia_image.h"
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 #include "core/image/image_object.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline/base/flutter_render_context.h"

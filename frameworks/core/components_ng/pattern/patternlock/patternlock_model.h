@@ -30,7 +30,7 @@ public:
 
     virtual RefPtr<V2::PatternLockController> Create();
     virtual void SetPatternComplete(std::function<void(const BaseEventInfo* info)>&& onComplete);
-    virtual void SetDotConnected(std::function<void(int32_t)>&& onConnected);
+    virtual void SetDotConnect(std::function<void(int32_t)>&& onDotConnect);
     virtual void SetSelectedColor(const Color& selectedColor);
     virtual void SetAutoReset(bool isAutoReset);
     virtual void SetPathColor(const Color& pathColor);

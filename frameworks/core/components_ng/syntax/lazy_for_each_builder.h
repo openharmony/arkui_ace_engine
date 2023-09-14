@@ -304,8 +304,9 @@ public:
         bool result = true;
         for (auto index : idleIndexes) {
             if (GetSysTimestamp() > deadline) {
-                result = false;
-                continue;
+                cache.merge(expiringItem_);
+                expiringItem_.swap(cache);
+                return false;
             }
             auto uiNode = CacheItem(index, cache, itemConstraint);
             if (!canRunLongPredictTask && itemConstraint) {

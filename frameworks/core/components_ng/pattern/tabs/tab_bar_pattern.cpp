@@ -513,6 +513,8 @@ void TabBarPattern::OnModifyDone()
     SetAccessibilityAction();
     UpdateSubTabBoard();
     needSetCentered_ = true;
+    FocusIndexChange(layoutProperty->GetIndicatorValue(0));
+    focusIndicator_ = layoutProperty->GetIndicatorValue(0);
 
     CHECK_NULL_VOID(swiperController_);
     auto removeEventCallback = [weak = WeakClaim(this)]() {
@@ -587,6 +589,9 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         UpdateIndicator(indicator);
     }
     UpdateGradientRegions();
+    if (isTouchingSwiper_ && layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        ApplyTurnPageRateToIndicator(turnPageRate_);
+    }
     return false;
 }
 
@@ -630,7 +635,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     SetSwiperCurve(curve);
     TabBarClickEvent(index);
     if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
-        tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
+        tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
+        layoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         HandleSubTabBarClick(layoutProperty, index);
         return;
     }
@@ -947,6 +953,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
             targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
+    UpdateTextColor(index);
     swiperController_->SwipeTo(index);
     layoutProperty->UpdateIndicator(index);
 }
@@ -1151,7 +1158,7 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
 
     RectF rect = layoutProperty->GetIndicatorRect(indicator);
     paintProperty->UpdateIndicator(rect);
-    if (!isTouchingSwiper_) {
+    if (!isTouchingSwiper_ || tabBarStyles_[indicator] != TabBarStyle::SUBTABBATSTYLE) {
         currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
         tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }

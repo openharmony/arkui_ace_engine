@@ -1203,6 +1203,10 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
             topModalNode->Clean(false, true);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+        auto maskNode = GetSheetMask(topModalNode);
+        if (maskNode) {
+            PlaySheetMaskTransition(maskNode, false);
+        }
         PlaySheetTransition(topModalNode, false);
         topModalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
     }
@@ -1228,6 +1232,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
         return RemoveDialog(overlay, false, false);
     }
     if (InstanceOf<BubblePattern>(pattern)) {
+        auto popupPattern = DynamicCast<BubblePattern>(pattern);
         overlay->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         for (const auto& popup : popupMap_) {
             auto targetId = popup.first;
@@ -1237,7 +1242,9 @@ bool OverlayManager::RemoveOverlayInSubwindow()
                 rootNode->RemoveChild(overlay);
                 rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
                 if (rootNode->GetChildren().empty()) {
-                    SubwindowManager::GetInstance()->HideSubWindowNG();
+                    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(popupPattern->GetContainerId());
+                    CHECK_NULL_RETURN(subwindow, false);
+                    subwindow->HideSubWindowNG();
                 }
                 return true;
             }
@@ -1685,6 +1692,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
             maskNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
             maskNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.maskColor.value());
             maskNode->MountToParent(rootNode);
+            PlaySheetMaskTransition(maskNode, true);
         }
         sheetNode->MountToParent(rootNode);
         modalList_.emplace_back(WeakClaim(RawPtr(sheetNode)));
@@ -1719,6 +1727,10 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
             topSheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         ModalPageLostFocus(topSheetNode);
+        auto maskNode = GetSheetMask(topSheetNode);
+        if (maskNode) {
+            PlaySheetMaskTransition(maskNode, false);
+        }
         PlaySheetTransition(topSheetNode, false);
         modalStack_.pop();
         if (!modalList_.empty()) {
@@ -1770,7 +1782,6 @@ void OverlayManager::PlaySheetTransition(
                         auto root = rootWeak.Upgrade();
                         CHECK_NULL_VOID(sheet && root);
                         ContainerScope scope(id);
-                        OverlayManager::DestroySheetMask(sheet);
                         root->RemoveChild(sheet);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     },
@@ -1784,6 +1795,40 @@ void OverlayManager::PlaySheetTransition(
                 }
             },
             option.GetOnFinishEvent());
+    }
+}
+
+void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn)
+{
+    AnimationOption option;
+    const RefPtr<InterpolatingSpring> curve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f);
+    option.SetCurve(curve);
+    option.SetFillMode(FillMode::FORWARDS);
+    auto context = maskNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    if (isTransitionIn) {
+        context->OpacityAnimation(option, 0.0, 1.0);
+    } else {
+        option.SetOnFinishEvent(
+            [rootWeak = rootNodeWeak_, maskNodeWK = WeakClaim(RawPtr(maskNode)), id = Container::CurrentId()] {
+                ContainerScope scope(id);
+                auto context = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID(context);
+                auto taskExecutor = context->GetTaskExecutor();
+                CHECK_NULL_VOID(taskExecutor);
+                // animation finish event should be posted to UI thread.
+                taskExecutor->PostTask(
+                    [rootWeak, maskNodeWK, id]() {
+                        auto mask = maskNodeWK.Upgrade();
+                        auto root = rootWeak.Upgrade();
+                        CHECK_NULL_VOID(mask);
+                        ContainerScope scope(id);
+                        root->RemoveChild(mask);
+                    },
+                    TaskExecutor::TaskType::UI);
+            }
+        );
+        context->OpacityAnimation(option, 1.0, 0.0);
     }
 }
 
@@ -1830,8 +1875,11 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_VOID(rootNode);
         auto root = DynamicCast<FrameNode>(rootNode);
-        OverlayManager::DestroySheetMask(sheetNode);
         ModalPageLostFocus(topSheetNode);
+        auto maskNode = GetSheetMask(sheetNode);
+        if (maskNode) {
+            root->RemoveChild(maskNode);
+        }
         root->RemoveChild(sheetNode);
         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         modalStack_.pop();
@@ -1881,21 +1929,22 @@ void OverlayManager::DeleteModal(int32_t targetId)
     }
 }
 
-void OverlayManager::DestroySheetMask(const RefPtr<FrameNode>& sheetNode)
+RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNode)
 {
-    // destory bindsheet masknode
+    // get bindsheet masknode
+    CHECK_NULL_RETURN(sheetNode, NULL);
     auto rootNode = sheetNode->GetParent();
-    CHECK_NULL_VOID(rootNode);
-    auto root = DynamicCast<FrameNode>(rootNode);
-    auto sheetChild = std::find(root->GetChildren().begin(), root->GetChildren().end(), sheetNode);
-    if (sheetChild == root->GetChildren().end()) {
-        return;
+    CHECK_NULL_RETURN(rootNode, NULL);
+    auto sheetChildIter = std::find(rootNode->GetChildren().begin(), rootNode->GetChildren().end(), sheetNode);
+    if (sheetChildIter == rootNode->GetChildren().end()) {
+        return NULL;
     }
-    --sheetChild;
-    if (DynamicCast<FrameNode>(*sheetChild)->GetTag() != V2::SHEET_MASK_TAG) {
-        return;
+    --sheetChildIter;
+    CHECK_NULL_RETURN((*sheetChildIter), NULL);
+    if (DynamicCast<FrameNode>(*sheetChildIter)->GetTag() != V2::SHEET_MASK_TAG) {
+        return NULL;
     }
-    root->RemoveChild(*sheetChild);
+    return DynamicCast<FrameNode>(*sheetChildIter);
 }
 
 void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn)

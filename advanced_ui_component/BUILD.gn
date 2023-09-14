@@ -13,6 +13,7 @@
 
 group("advanced_ui_component") {
   deps = [
+    "breadcrumb/interfaces:breadcrumb",
     "composelistitem/interfaces:composelistitem",
     "composetitlebar/interfaces:composetitlebar",
     "counter/interfaces:counter",

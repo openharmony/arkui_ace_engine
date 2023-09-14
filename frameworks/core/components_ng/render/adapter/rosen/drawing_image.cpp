@@ -19,7 +19,7 @@
 
 #include "base/image/pixel_map.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
-#include "frameworks/core/image/flutter_image_cache.h"
+#include "frameworks/core/image/sk_image_cache.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
 #endif

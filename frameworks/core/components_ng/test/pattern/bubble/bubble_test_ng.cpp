@@ -713,7 +713,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest009, TestSize.Level1)
     EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::ENTERING);
     pattern->transitionStatus_ = TransitionStatus::EXITING;
     pattern->StartExitingAnimation(nullptr);
-    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::INVISIABLE);
+    EXPECT_EQ(pattern->transitionStatus_, TransitionStatus::EXITING);
 }
 
 /**

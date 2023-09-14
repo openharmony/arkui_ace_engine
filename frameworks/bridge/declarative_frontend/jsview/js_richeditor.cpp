@@ -941,6 +941,15 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
     int32_t end = -1;
     JSContainerBase::ParseJsInt32(object->GetProperty("start"), start);
     JSContainerBase::ParseJsInt32(object->GetProperty("end"), end);
+    if (start < 0) {
+        start = 0;
+    }
+    if (end < 0) {
+        end = INT_MAX;
+    }
+    if (start > end) {
+        std::swap(start, end);
+    }
     return std::make_pair(start, end);
 }
 } // namespace
@@ -1023,6 +1032,9 @@ void JSRichEditorController::GetParagraphsInfo(const JSCallbackInfo& args)
         return;
     }
     auto [start, end] = ParseRange(JSRef<JSObject>::Cast(args[0]));
+    if (start == end) {
+        return;
+    }
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
         auto info = controller->GetParagraphsInfo(start, end);
@@ -1037,6 +1049,9 @@ void JSRichEditorController::UpdateParagraphStyle(const JSCallbackInfo& info)
     }
     auto object = JSRef<JSObject>::Cast(info[0]);
     auto [start, end] = ParseRange(object);
+    if (start == end) {
+        return;
+    }
     auto styleObj = JSRef<JSObject>::Cast(object->GetProperty("style"));
 
     if (styleObj->IsUndefined()) {

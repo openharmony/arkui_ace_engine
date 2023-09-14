@@ -111,7 +111,22 @@ void PanRecognizer::OnAccepted()
 void PanRecognizer::OnRejected()
 {
     LOGD("pan gesture has been rejected!");
-    refereeState_ = RefereeState::FAIL;
+    // fix griditem drag interrupted by click while pull moving
+    if (refereeState_ != RefereeState::SUCCEED) {
+        refereeState_ = RefereeState::FAIL;
+    }
+}
+
+void PanRecognizer::UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end)
+{
+    PointF originPoint(event.x, event.y);
+    PointF windowPoint = originPoint;
+    Transform(windowPoint, originPoint);
+
+    TouchEvent transformEvent = event;
+    transformEvent.x = windowPoint.GetX();
+    transformEvent.y = windowPoint.GetY();
+    velocityTracker_.UpdateTouchPoint(transformEvent, end);
 }
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
@@ -147,7 +162,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     if (fingerNum == fingers_) {
         velocityTracker_.Reset();
-        velocityTracker_.UpdateTouchPoint(event);
+        UpdateTouchPointInVelocityTracker(event);
         refereeState_ = RefereeState::DETECTING;
     }
 }
@@ -192,7 +207,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
-    velocityTracker_.UpdateTouchPoint(event, true);
+    UpdateTouchPointInVelocityTracker(event, true);
 
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -246,7 +261,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     delta_ =
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
     mainDelta_ = GetMainAxisDelta();
-    velocityTracker_.UpdateTouchPoint(event);
+    UpdateTouchPointInVelocityTracker(event);
     averageDistance_ += delta_;
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] += delta_;

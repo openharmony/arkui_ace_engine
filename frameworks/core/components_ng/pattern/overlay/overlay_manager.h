@@ -257,7 +257,7 @@ public:
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
 
-    static void DestroySheetMask(const RefPtr<FrameNode>& sheetNode);
+    RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
 
     void DeleteModal(int32_t targetId);
 
@@ -316,6 +316,7 @@ private:
 
     void PlaySheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition = true,
         bool isModeChangeToAuto = false);
+    void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn);
 
     void ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
     bool ModalExitProcess(const RefPtr<FrameNode>& topModalNode);

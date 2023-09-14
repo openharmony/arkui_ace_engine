@@ -331,6 +331,15 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
         return true;
 #endif
     }
+    // remove overlay through SubwindowManager if subwindow unfocused.
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+    if (subwindow) {
+        if (subwindow->GetShown()) {
+            auto overlayManager = subwindow->GetOverlayManager();
+            CHECK_NULL_RETURN(overlayManager, false);
+            return overlayManager->RemoveOverlayInSubwindow();
+        }
+    }
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
     CHECK_NULL_RETURN(context, false);
@@ -1452,7 +1461,7 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 {
     auto context = runtimeContext_.lock();
     CHECK_NULL_RETURN(context, nullptr);
-    return context->CreateModuleContext(bundle, module);
+    return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
 }
 
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)

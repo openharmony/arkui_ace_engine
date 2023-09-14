@@ -547,7 +547,7 @@ void SubwindowOhos::ClearMenuNG(bool inWindow)
     if (inWindow) {
         HideEventColumn();
     }
-    HidePixelMap();
+    HidePixelMap(false, 0, 0, false);
     HideFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
@@ -640,6 +640,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
 void SubwindowOhos::HideSubWindowNG()
 {
     LOGI("SubwindowOhos::HideDialogNG");
+    ContainerScope scope(childContainerId_);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     if (container->IsDialogContainer()) {

@@ -292,62 +292,67 @@ void UIExtensionPattern::RequestExtensionSessionActivation()
     CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
     LOGI("UIExtension request host windowId %{public}u", hostWindowId);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-    auto errcode = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
-        extensionSession, hostWindowId);
-    if (errcode != OHOS::Rosen::WSError::WS_OK) {
-        int32_t code = static_cast<int32_t>(errcode);
-        std::string name = "start_ability_fail";
-        std::string message = "Start ui extension ability failed, please check the want of UIextensionAbility.";
-        lastError_ = { code, name, message };
-        if (onErrorCallback_) {
-            ErrorMsg error;
-            std::swap(lastError_, error);
-            onErrorCallback_(error.code, error.name, error.message);
-        }
-    } else {
-        state_ = AbilityState::FOREGROUND;
-    }
+    auto&& resultCallback =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor] (OHOS::Rosen::WSError errcode) {
+        taskExecutor->PostTask([weak, instanceId, errcode] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessUIExtensionSessionActivationResult(errcode);
+        }, TaskExecutor::TaskType::UI);
+    };
+
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
+        extensionSession, hostWindowId, resultCallback);
 }
 
 void UIExtensionPattern::RequestExtensionSessionBackground()
 {
     LOGI("UIExtension request UIExtensionAbility background, AbilityState=%{public}d", static_cast<int>(state_));
-    if (state_ == AbilityState::FOREGROUND) {
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-        auto errcode =
-            Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession);
-        if (errcode != OHOS::Rosen::WSError::WS_OK) {
-            if (onErrorCallback_) {
-                int32_t code = static_cast<int32_t>(errcode);
-                std::string name = "background_fail";
-                std::string message = "background ui extension ability failed, please check AMS log.";
-                onErrorCallback_(code, name, message);
-            }
-        } else {
-            state_ = AbilityState::BACKGROUND;
-        }
+    if (state_ != AbilityState::FOREGROUND) {
+        return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto&& resultCallback =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor] (OHOS::Rosen::WSError errcode) {
+        taskExecutor->PostTask([weak, instanceId, errcode] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessUIExtensionSessionBackgroundResult(errcode);
+        }, TaskExecutor::TaskType::UI);
+    };
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession, resultCallback);
 }
 
 void UIExtensionPattern::RequestExtensionSessionDestruction()
 {
     LOGI("UIExtension request UIExtensionAbility destroy, AbilityState=%{public}d", static_cast<int>(state_));
-    if (state_ != AbilityState::DESTRUCTION && state_ != AbilityState::NONE) {
-        sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
-        auto errcode =
-            Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession);
-        if (errcode != OHOS::Rosen::WSError::WS_OK) {
-            if (onErrorCallback_) {
-                int32_t code = static_cast<int32_t>(errcode);
-                std::string name = "terminate_fail";
-                std::string message = "terminate ui extension ability failed, please check AMS log.";
-                onErrorCallback_(code, name, message);
-            }
-        } else {
-            state_ = AbilityState::DESTRUCTION;
-        }
+    if (state_ == AbilityState::DESTRUCTION || state_ == AbilityState::NONE) {
+        return;
     }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    auto&& resultCallback =
+        [weak = WeakClaim(this), instanceId = instanceId_, taskExecutor] (OHOS::Rosen::WSError errcode) {
+        taskExecutor->PostTask([weak, instanceId, errcode] {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessUIExtensionSessionDestructionResult(errcode);
+        }, TaskExecutor::TaskType::UI);
+    };
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession, resultCallback);
 }
 
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
@@ -772,5 +777,50 @@ void UIExtensionPattern::TransferFocusState(bool focusState)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusStateEvent(focusState);
+}
+
+void UIExtensionPattern::ProcessUIExtensionSessionActivationResult(OHOS::Rosen::WSError errcode)
+{
+    if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        int32_t code = static_cast<int32_t>(errcode);
+        std::string name = "start_ability_fail";
+        std::string message = "Start ui extension ability failed, please check the want of UIextensionAbility.";
+        lastError_ = { code, name, message };
+        if (onErrorCallback_) {
+            ErrorMsg error;
+            std::swap(lastError_, error);
+            onErrorCallback_(error.code, error.name, error.message);
+        }
+    } else {
+        state_ = AbilityState::FOREGROUND;
+    }
+}
+
+void UIExtensionPattern::ProcessUIExtensionSessionBackgroundResult(OHOS::Rosen::WSError errcode)
+{
+    if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        if (onErrorCallback_) {
+            int32_t code = static_cast<int32_t>(errcode);
+            std::string name = "background_fail";
+            std::string message = "background ui extension ability failed, please check AMS log.";
+            onErrorCallback_(code, name, message);
+        }
+    } else {
+        state_ = AbilityState::BACKGROUND;
+    }
+}
+
+void UIExtensionPattern::ProcessUIExtensionSessionDestructionResult(OHOS::Rosen::WSError errcode)
+{
+    if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        if (onErrorCallback_) {
+            int32_t code = static_cast<int32_t>(errcode);
+            std::string name = "terminate_fail";
+            std::string message = "terminate ui extension ability failed, please check AMS log.";
+            onErrorCallback_(code, name, message);
+        }
+    } else {
+        state_ = AbilityState::DESTRUCTION;
+    }
 }
 } // namespace OHOS::Ace::NG

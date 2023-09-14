@@ -115,7 +115,9 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         }
     }
     if (userCallback_) {
-        (*userCallback_)(event);
+        // actuator->userCallback_ may be overwritten in its invoke so we copy it first
+        auto userCallback = userCallback_;
+        (*userCallback)(event);
         if (event.IsStopPropagation()) {
             return false;
         }

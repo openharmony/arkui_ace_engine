@@ -14,8 +14,12 @@
  */
 
 #include "core/image/image_cache.h"
+#include "core/image/image_file_cache.h"
 
 namespace OHOS::Ace {
+ImageFileCache::ImageFileCache() = default;
+ImageFileCache::~ImageFileCache() = default;
+
 void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image) {}
 
 RefPtr<NG::ImageObject> ImageCache::GetCacheImgObjNG(const std::string& key)

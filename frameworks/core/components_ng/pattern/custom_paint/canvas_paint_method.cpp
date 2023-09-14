@@ -43,7 +43,7 @@
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/image/flutter_image_cache.h"
+#include "core/image/sk_image_cache.h"
 
 namespace OHOS::Ace::NG {
 namespace {

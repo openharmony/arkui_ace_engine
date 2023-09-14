@@ -62,6 +62,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/flutter/flutter_asset_manager.h"
+#include "core/image/image_file_cache.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
 #endif
@@ -183,10 +184,12 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override
     {
-        LOGI("UIContent::OnAvoidAreaChanged type:%{public}d, avoidArea:x:%{public}d, y:%{public}d, "
+        LOGI("UIContent::OnAvoidAreaChanged type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
+             "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d",
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
-            (int32_t)avoidArea.topRect_.height_);
+            (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
+            (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto pipeline = container->GetPipelineContext();
@@ -452,8 +455,8 @@ void UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
             CapabilityRegistry::Register();
-            ImageCache::SetImageCacheFilePath(context->GetCacheDir());
-            ImageCache::SetCacheFileInfo();
+            ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
+            ImageFileCache::GetInstance().SetCacheFileInfo();
         });
     }
 
@@ -743,7 +746,6 @@ void UIContentImpl::CommonInitializeForm(
         Platform::AceViewOhos::SurfaceCreated(aceView, window_);
     }
 
-
     if (isFormRender_) {
         LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
             formHeight_);
@@ -885,8 +887,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         CapabilityRegistry::Register();
-        ImageCache::SetImageCacheFilePath(context->GetCacheDir());
-        ImageCache::SetCacheFileInfo();
+        ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
+        ImageFileCache::GetInstance().SetCacheFileInfo();
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;

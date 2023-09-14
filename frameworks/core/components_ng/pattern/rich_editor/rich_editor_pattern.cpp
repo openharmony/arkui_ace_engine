@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <iterator>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
@@ -29,7 +30,6 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
@@ -156,7 +156,6 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         auto geometryNode = host->GetGeometryNode();
         auto frameOffset = geometryNode->GetFrameOffset();
         auto frameSize = geometryNode->GetFrameSize();
-        CHECK_NULL_RETURN(!paragraphs_.IsEmpty(), ret);
         auto height = static_cast<float>(paragraphs_.GetHeight() + std::fabs(baselineOffset_));
         if (!context->GetClipEdge().value() && LessNotEqual(frameSize.Height(), height)) {
             RectF boundsRect(frameOffset.GetX(), frameOffset.GetY(), frameSize.Width(), height);
@@ -909,47 +908,66 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
     return res;
 }
 
-std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start, int32_t end)
+std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start, int32_t end) const
 {
+    CHECK_NULL_RETURN(start != end, {});
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
-    int32_t spanStart = -1;
-    int32_t spanEnd = -1;
+    CHECK_NULL_RETURN(!host->GetChildren().empty(), {});
+
+    std::wstring content;
 
     // find paragraph head
     auto headIt = host->GetChildren().begin();
-    auto tailIt = host->GetChildren().rbegin();
+    int32_t spanEnd = -1;
     for (auto it = headIt; it != host->GetChildren().end(); ++it) {
         if (InstanceOf<SpanNode>(*it)) {
             auto spanNode = DynamicCast<SpanNode>(*it);
             auto&& info = spanNode->GetSpanItem();
-            info->GetIndex(spanStart, spanEnd);
-            if (start >= spanStart) {
-                break;
-            }
-            if (StringUtils::ToWstring(info->content).back() == L'\n') {
-                headIt = std::next(it);
-            }
+            spanEnd = info->position;
+            content = StringUtils::ToWstring(info->content);
+        } else {
+            // placeholder node
+            ++spanEnd;
+            content = L" ";
+        }
+
+        if (spanEnd > start) {
+            break;
+        }
+        if (content.back() == L'\n') {
+            headIt = std::next(it);
         }
     }
 
     // find paragraph tail
-    for (auto it = tailIt; it != host->GetChildren().rend(); ++it) {
+    auto tailIt = host->GetChildren().end();
+    int32_t spanStart = -1;
+    for (auto it = std::prev(tailIt);; --it) {
         if (InstanceOf<SpanNode>(*it)) {
             auto spanNode = DynamicCast<SpanNode>(*it);
             auto&& info = spanNode->GetSpanItem();
-            info->GetIndex(spanStart, spanEnd);
-            if (spanEnd < end) {
-                break;
-            }
-            if (StringUtils::ToWstring(info->content).back() == L'\n') {
-                tailIt = std::prev(it);
-            }
+            content = StringUtils::ToWstring(info->content);
+            spanStart = info->position - content.length();
+        } else {
+            // placeholder node
+            --spanStart;
+            content = L" ";
+        }
+
+        if (content.back() == L'\n') {
+            tailIt = std::next(it);
+        }
+        if (spanStart < end) {
+            break;
+        }
+        if (it == host->GetChildren().begin()) {
+            break;
         }
     }
 
     // filter illegal iterator
-    if (tailIt == host->GetChildren().rend() || headIt == host->GetChildren().end()) {
+    if (headIt == host->GetChildren().end()) {
         return {};
     }
 
@@ -962,7 +980,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
             res.emplace_back(spanNode);
         }
         ++headIt;
-    } while (headIt != host->GetChildren().end() && *headIt != *tailIt);
+    } while (headIt != host->GetChildren().end() && headIt != tailIt);
 
     return res;
 }
@@ -1040,7 +1058,6 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     contentRect.SetHeight(contentRect.Height() - std::max(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - contentRect.GetX(),
         info.GetLocalLocation().GetY() - contentRect.GetY() };
-    CHECK_NULL_VOID(!paragraphs_.IsEmpty());
     auto position = paragraphs_.GetIndex(textOffset);
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (focusHub) {
@@ -1364,7 +1381,6 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     auto contentRect = GetTextRect();
     contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
     Offset textOffset = { touchX - contentRect.GetX(), touchY - contentRect.GetY() };
-    CHECK_NULL_VOID(!paragraphs_.IsEmpty());
     auto position = paragraphs_.GetIndex(textOffset);
     float caretHeight = 0.0f;
     SetCaretPosition(position);
@@ -2031,7 +2047,6 @@ bool RichEditorPattern::CursorMoveUp()
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-        CHECK_NULL_RETURN(!paragraphs_.IsEmpty(), true);
         int32_t caretPosition = paragraphs_.GetIndex(Offset(caretOffset.GetX(), caretOffset.GetY() - caretHeight));
         caretPosition = std::clamp(caretPosition, 0, static_cast<int32_t>(GetTextContentLength()));
         if (caretPosition_ == caretPosition) {
@@ -2050,7 +2065,6 @@ bool RichEditorPattern::CursorMoveDown()
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-        CHECK_NULL_RETURN(!paragraphs_.IsEmpty(), true);
         int32_t caretPosition = paragraphs_.GetIndex(Offset(caretOffset.GetX(), caretOffset.GetY() + caretHeight));
         caretPosition = std::clamp(caretPosition, 0, static_cast<int32_t>(GetTextContentLength()));
         if (caretPosition_ == caretPosition) {
@@ -2329,7 +2343,6 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-        CHECK_NULL_VOID(!paragraphs_.IsEmpty());
 
         mouseStatus_ = MouseStatus::MOVE;
         if (isFirstMouseSelect_) {
@@ -2401,7 +2414,6 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     contentRect.SetHeight(contentRect.Height() - std::max(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - contentRect.GetX(),
         info.GetLocalLocation().GetY() - contentRect.GetY() };
-    CHECK_NULL_VOID(!paragraphs_.IsEmpty());
     InitSelection(textOffset);
     auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
     auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
@@ -3239,7 +3251,6 @@ bool RichEditorPattern::IsDisabled() const
 
 void RichEditorPattern::InitSelection(const Offset& pos)
 {
-    CHECK_NULL_VOID(!paragraphs_.IsEmpty());
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());

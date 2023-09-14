@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
@@ -115,6 +116,14 @@ bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const Siz
 {
     if (!hostNode->IsNavbarUseToolbarConfiguration() || hostNode->GetPrevMenuIsCustomValue(false)) {
         return false;
+    }
+
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
+    CHECK_NULL_RETURN(toolbarNode, false);
+    auto containerNode = toolbarNode->GetToolbarContainerNode();
+    CHECK_NULL_RETURN(containerNode, false);
+    if (containerNode->GetChildren().empty()) {
+        return true;
     }
 
     auto theme = NavigationGetTheme();
