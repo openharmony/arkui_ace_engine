@@ -731,20 +731,15 @@ HWTEST_F(OverlayManagerTestNg, BindSheet003, TestSize.Level1)
     overlayManager->DestroySheet(sheetNode, targetId);
     overlayManager->FindWindowScene(targetNode);
     overlayManager->DeleteModal(targetId);
-    overlayManager->DestroySheetMask(sheetNode);
-    EXPECT_TRUE(overlayManager->modalStack_.empty());
-    auto maskNode = FrameNode::CreateFrameNode
-        (V2::SHEET_MASK_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    overlayManager->DestroySheetMask(maskNode);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
 
 /**
- * @tc.name: DestroySheetMask001
- * @tc.desc: Test OverlayManager::DestroySheetMask.
+ * @tc.name: GetSheetMask001
+ * @tc.desc: Test OverlayManager::GetSheetMask.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestNg, DestroySheetMask001, TestSize.Level1)
+HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node.
@@ -789,21 +784,33 @@ HWTEST_F(OverlayManagerTestNg, DestroySheetMask001, TestSize.Level1)
     EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
 
     /**
-     * @tc.steps: step4. Run DestroySheetMask Func.
+     * @tc.steps: step4. Run GetSheetMask Func.
+     * @tc.expected: if the color is set, Make sure the maskNode is exist and it's color is right.
      */
-    auto maskNode = FrameNode::CreateFrameNode
-        (V2::RATING_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    sheetNode->tag_ = V2::BUTTON_ETS_TAG;
-    overlayManager->DestroySheetMask(sheetNode);
-    EXPECT_FALSE(overlayManager->modalList_.empty());
-    maskNode->parent_ = sheetNode->parent_;
-    overlayManager->DestroySheetMask(maskNode);
-    EXPECT_FALSE(overlayManager->modalList_.empty());
-    sheetNode->tag_ = V2::SHEET_MASK_TAG;
-    maskNode->tag_ = V2::SHEET_MASK_TAG;
-    sheetNode->GetParent()->AddChild(maskNode);
-    overlayManager->DestroySheetMask(maskNode);
-    EXPECT_FALSE(overlayManager->modalList_.empty());
+    auto maskNode = overlayManager->GetSheetMask(sheetNode);
+    EXPECT_TRUE(maskNode == nullptr);
+    auto onDisappear = []() {};
+    overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, nullptr, onDisappear, targetId);
+    sheetStyle.maskColor = Color::BLUE;
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc), sheetStyle, nullptr, nullptr, targetId);
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(sheetNode == nullptr);
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
+    maskNode = overlayManager->GetSheetMask(sheetNode);
+    EXPECT_FALSE(maskNode == nullptr);
+    EXPECT_EQ(maskNode->GetTag(), V2::SHEET_MASK_TAG);
+    EXPECT_EQ(maskNode->GetRenderContext()->GetBackgroundColorValue(), Color::BLUE);
+
+    /**
+     * @tc.steps: step5. destroy sheetNode.
+     * @tc.expected: Make sure the maskNode is destroyed.
+     */
+    overlayManager->BindSheet(!isShow, nullptr, nullptr, sheetStyle, nullptr, onDisappear, targetId);
+    overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(stageNode)));
+    overlayManager->DestroySheet(sheetNode, targetId);
+    overlayManager->FindWindowScene(targetNode);
+    overlayManager->DeleteModal(targetId);
+    EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
 
 /**
