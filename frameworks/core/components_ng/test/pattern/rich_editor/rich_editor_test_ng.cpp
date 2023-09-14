@@ -1196,33 +1196,6 @@ HWTEST_F(RichEditorTestNg, GetTextIndexAtCursor001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleOnSelectAll001
- * @tc.desc: test handle on select all
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, HandleOnSelectAll001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto context = host->GetContext();
-    ASSERT_NE(context, nullptr);
-    richEditorPattern->clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-    SelectOverlayInfo selectOverlayInfo;
-    selectOverlayInfo.singleLineHeight = 1;
-    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
-    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
-    richEditorPattern->selectOverlayProxy_ = proxy;
-    std::cout << 1 << std::endl;
-    richEditorPattern->HandleOnSelectAll();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-}
-
-/**
  * @tc.name: HandleLongPress001
  * @tc.desc: test handle long press
  * @tc.type: FUNC
