@@ -91,6 +91,15 @@ void ContainerModalPatternEnhance::ChangeTitle(const RefPtr<FrameNode>& titleNod
 void ContainerModalPatternEnhance::ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus)
 {
     CHECK_NULL_VOID(floatingNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+
+    if (windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
+        windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FULLSCREEN) {
+        windowManager->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_RECOVER);
+    }
 
     // update title label
     auto titleLabel = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(floatingNode, TITLE_LABEL_INDEX));
