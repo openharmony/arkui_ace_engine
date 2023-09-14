@@ -111,7 +111,10 @@ void PanRecognizer::OnAccepted()
 void PanRecognizer::OnRejected()
 {
     LOGD("pan gesture has been rejected!");
-    refereeState_ = RefereeState::FAIL;
+    // fix griditem drag interrupted by click while pull moving
+    if (refereeState_ != RefereeState::SUCCEED) {
+        refereeState_ = RefereeState::FAIL;
+    }
 }
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
