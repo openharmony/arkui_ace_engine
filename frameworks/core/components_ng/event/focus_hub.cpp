@@ -292,7 +292,7 @@ void FocusHub::SetFocusable(bool focusable)
         return;
     }
     focusable_ = focusable;
-    RefreshParentFocusable(IsFocusable());
+    RefreshParentFocusable(IsFocusableNode());
     RefreshFocus();
     MarkRootFocusNeedUpdate();
 }
@@ -975,6 +975,13 @@ void FocusHub::CheckFocusStateStyle(bool onFocus)
     }
 }
 
+bool FocusHub::HasFocusStateStyle()
+{
+    auto eventHub = eventHub_.Upgrade();
+    CHECK_NULL_RETURN(eventHub, false);
+    return eventHub->HasStateStyle(UI_STATE_FOCUSED);
+}
+
 void FocusHub::OnFocusScope()
 {
     std::list<RefPtr<FocusHub>> focusNodes;
@@ -1020,16 +1027,17 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
-    if (isNeedStateStyles && context->GetIsFocusActive()) {
-        // check focus state style.
-        CheckFocusStateStyle(true);
-    }
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
         return false;
+    }
+
+    if (isNeedStateStyles) {
+        // do focus state style.
+        CheckFocusStateStyle(true);
     }
 
     if (focusStyleType_ == FocusStyleType::CUSTOM_REGION) {
@@ -1163,7 +1171,7 @@ void FocusHub::ClearAllFocusState()
 
 bool FocusHub::IsNeedPaintFocusState()
 {
-    if (focusType_ == FocusType::DISABLE || focusStyleType_ == FocusStyleType::NONE) {
+    if (focusType_ == FocusType::DISABLE || (focusStyleType_ == FocusStyleType::NONE && !HasFocusStateStyle())) {
         return false;
     }
     if (focusType_ == FocusType::NODE) {
