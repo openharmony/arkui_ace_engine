@@ -4442,6 +4442,9 @@ void TextFieldPattern::ClearEditingValue()
 
 void TextFieldPattern::HandleCounterBorder()
 {
+    if (HasFocus() && IsNormalInlineState()) {
+        return;
+    }
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -4452,7 +4455,6 @@ void TextFieldPattern::HandleCounterBorder()
     CHECK_NULL_VOID(textFieldTheme);
     auto maxLength = GetMaxLength();
     auto currentLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
-
     BorderWidthProperty currentBorderWidth;
     if (layoutProperty->GetBorderWidthProperty() != nullptr) {
         currentBorderWidth = *(layoutProperty->GetBorderWidthProperty());
@@ -4461,7 +4463,6 @@ void TextFieldPattern::HandleCounterBorder()
     }
     BorderWidthProperty overCountBorderWidth;
     overCountBorderWidth.SetBorderWidth(OVER_COUNT_BORDER_WIDTH);
-
     BorderColorProperty currentBorderColor;
     auto renderContext = GetHost()->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -6000,6 +6001,9 @@ void TextFieldPattern::RestorePreInlineStates()
     renderContext->UpdateBorderRadius(inlineState_.radius);
     if (inlineState_.hasBorderColor) {
         renderContext->UpdateBorderColor(inlineState_.borderColor);
+    }
+    if (IsTextArea() && layoutProperty->HasMaxLength()) {
+        HandleCounterBorder();
     }
     selectionMode_ = SelectionMode::NONE;
 }
