@@ -48,6 +48,7 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr float FONTWEIGHT = 0.5f;
+constexpr float FONT_SIZE_PERCENT = 0.9f;
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
 constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
@@ -657,7 +658,11 @@ void TimePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
 Dimension TimePickerColumnPattern::LinearFontSize(
     const Dimension& startFontSize, const Dimension& endFontSize, double percent)
 {
-    return startFontSize + (endFontSize - startFontSize) * percent;
+    if (percent > FONT_SIZE_PERCENT) {
+        return startFontSize + (endFontSize - startFontSize);
+    } else {
+        return startFontSize + (endFontSize - startFontSize) * percent;
+    }
 }
 
 void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
