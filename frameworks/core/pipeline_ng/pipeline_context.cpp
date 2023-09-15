@@ -261,6 +261,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (hasAnimation) {
         RequestFrame();
     }
+    if (dragCleanTask_) {
+        dragCleanTask_();
+        dragCleanTask_ = nullptr;
+    }
     FlushMessages();
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {

@@ -464,9 +464,6 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
     CHECK_NULL_VOID(eventHub);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
-#ifdef ENABLE_DRAG_FRAMEWORK
-    InteractionManager::GetInstance()->SetDragWindowVisible(false);
-#endif // ENABLE_DRAG_FRAMEWORK
     UpdateDragEvent(event, point);
     eventHub->FireOnDrop(event, extraParams);
     ClearVelocityInfo();
@@ -476,10 +473,16 @@ void DragDropManager::OnDragEnd(const Point& point, const std::string& extraInfo
         LOGI("DragDropManager finish drop, start do drop animation. UseCustomAnimation is %{public}d.",
             event->IsUseCustomAnimation());
     }
-    InteractionManager::GetInstance()->SetDragWindowVisible(
-        isMouseDragged_ ? !isMouseDragged_ : !event->IsUseCustomAnimation());
-    InteractionManager::GetInstance()->StopDrag(
-        TranslateDragResult(event->GetResult()), isMouseDragged_ ? isMouseDragged_ : event->IsUseCustomAnimation());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragResult = TranslateDragResult(event->GetResult());
+    auto useCustomAnimation = event->IsUseCustomAnimation();
+    pipeline->SetDragCleanTask([dragResult, useCustomAnimation, isMouseDragged = isMouseDragged_]() {
+        InteractionManager::GetInstance()->SetDragWindowVisible(
+            isMouseDragged ? !isMouseDragged : !useCustomAnimation);
+        InteractionManager::GetInstance()->StopDrag(dragResult, isMouseDragged ? isMouseDragged : useCustomAnimation);
+    });
+    dragFrameNode->MarkDirtyNode();
     summaryMap_.clear();
 #endif // ENABLE_DRAG_FRAMEWORK
 }
