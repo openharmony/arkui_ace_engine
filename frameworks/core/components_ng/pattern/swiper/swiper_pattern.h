@@ -557,6 +557,7 @@ private:
     void OnLoopChange();
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
+    void MarkDirtyNodeSelf();
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -628,6 +629,7 @@ private:
     float endMainPos_ = 0.0f;
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
+    bool crossMatchChild_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;

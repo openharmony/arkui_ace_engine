@@ -158,6 +158,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                 ? contentCrossSize_
                                 : GetChildMaxSize(layoutWrapper, axis, false);
         contentIdealSize.SetCrossSize(contentCrossSize_, axis);
+        crossMatchChild_ = true;
     }
 
     if (!mainSizeIsDefined_ && isSingleCase) {
