@@ -48,17 +48,18 @@ void TxtParagraph::CreateBuilder()
     style.text_direction = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.text_align = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.max_lines = paraStyle_.maxLines;
+    style.font_size = paraStyle_.fontSize; // libtxt style.font_size
 #else
     Rosen::TypographyStyle style;
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
     style.maxLines = paraStyle_.maxLines;
+    style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
-    style.fontSize = paraStyle_.fontSize;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
 #ifndef USE_GRAPHIC_TEXT_GINE
