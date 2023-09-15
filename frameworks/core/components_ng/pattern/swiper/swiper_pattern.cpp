@@ -344,9 +344,9 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->itemPosition_.clear();
                 swiper->isVoluntarilyClear_ = true;
                 swiper->jumpIndex_ = swiper->currentIndex_;
+                swiper->MarkDirtyNodeSelf();
                 auto swiperNode = swiper->GetHost();
                 CHECK_NULL_VOID(swiperNode);
-                swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 for (const auto& child : swiperNode->GetChildren()) {
                     if (child->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG) {
                         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(child);
@@ -646,6 +646,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     endMainPos_ = swiperLayoutAlgorithm->GetEndPosition();
     startIndex_ = swiperLayoutAlgorithm->GetStartIndex();
     endIndex_ = swiperLayoutAlgorithm->GetEndIndex();
+    crossMatchChild_ = swiperLayoutAlgorithm->IsCrossMatchChild();
     oldIndex_ = currentIndex_;
     const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
@@ -698,10 +699,8 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 
     StopFadeAnimation();
     StopSpringAnimation();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     jumpIndex_ = index;
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkDirtyNodeSelf();
 }
 
 void SwiperPattern::StopSpringAnimationAndFlushImmediately()
@@ -712,9 +711,7 @@ void SwiperPattern::StopSpringAnimationAndFlushImmediately()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
             pipeline->FlushUITasks();
@@ -728,8 +725,6 @@ void SwiperPattern::SwipeTo(int32_t index)
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
     targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
     // If targetIndex_ has a value, means animation is still running, stop it before play new animation.
@@ -741,7 +736,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     if (springController_ && !springController_->IsStopped()) {
         springController_->Stop();
         jumpIndex_ = currentIndex_;
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
             pipeline->FlushUITasks();
@@ -764,7 +759,7 @@ void SwiperPattern::SwipeTo(int32_t index)
         return;
     }
 
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkDirtyNodeSelf();
 }
 
 void SwiperPattern::ShowNext()
@@ -774,8 +769,6 @@ void SwiperPattern::ShowNext()
         return;
     }
     indicatorDoingAnimation_ = false;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
     std::optional<int32_t> preIndex;
     if (preTargetIndex_.has_value()) {
@@ -809,7 +802,7 @@ void SwiperPattern::ShowNext()
     if (isVisible_) {
         targetIndex_ = currentIndex_ + 1;
         preTargetIndex_ = targetIndex_;
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
             pipeline->FlushUITasks();
@@ -828,8 +821,6 @@ void SwiperPattern::ShowPrevious()
         return;
     }
     indicatorDoingAnimation_ = false;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
     std::optional<int32_t> preIndex;
     if (preTargetIndex_.has_value()) {
@@ -862,7 +853,7 @@ void SwiperPattern::ShowPrevious()
     if (isVisible_) {
         targetIndex_ = currentIndex_ - 1;
         preTargetIndex_ = targetIndex_;
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
             pipeline->FlushUITasks();
@@ -1245,9 +1236,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkDirtyNodeSelf();
 }
 
 void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
@@ -1305,9 +1294,7 @@ void SwiperPattern::UpdateAnimationProperty(float velocity)
         velocity_ = velocity;
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkDirtyNodeSelf();
     moveDirection_ = velocity <= 0;
 }
 
@@ -1572,9 +1559,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(float translate, int32_t next
         }
         if (targetIndex) {
             targetIndex_ = targetIndex;
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            MarkDirtyNodeSelf();
             return;
         }
     }
@@ -2149,7 +2134,9 @@ int32_t SwiperPattern::CalculateDisplayCount() const
             swiperLayoutProperty->UpdateDisplayCount(displayCount);
             auto host = GetHost();
             CHECK_NULL_RETURN(host, 1);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_RENDER);
+            host->MarkDirtyNode(
+                (crossMatchChild_ ? PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD : PROPERTY_UPDATE_MEASURE_SELF) |
+                PROPERTY_UPDATE_RENDER);
         }
         return displayCount;
     } else {
@@ -2439,9 +2426,7 @@ void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorN
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(IsCustomSize_);
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkDirtyNodeSelf();
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -2506,9 +2491,7 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
                 return;
             }
             swiper->targetIndex_ = swiper->currentIndex_ + 1;
-            auto host = swiper->GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            swiper->MarkDirtyNodeSelf();
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
                 pipeline->FlushUITasks();
@@ -2646,7 +2629,7 @@ void SwiperPattern::TriggerEventOnFinish(int32_t nextIndex)
             itemPosition_.clear();
             isVoluntarilyClear_ = true;
             jumpIndex_ = nextIndex;
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            MarkDirtyNodeSelf();
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
                 pipeline->FlushUITasks();
@@ -2821,7 +2804,7 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
         CHECK_NULL_VOID(indicatorNode);
         if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
             indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            MarkDirtyNodeSelf();
         }
     }
 
@@ -3081,5 +3064,16 @@ int32_t SwiperPattern::TotalDisPlayCount() const
         }
     }
     return displayCount;
+}
+
+void SwiperPattern::MarkDirtyNodeSelf()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!crossMatchChild_) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    } else {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
 }
 } // namespace OHOS::Ace::NG

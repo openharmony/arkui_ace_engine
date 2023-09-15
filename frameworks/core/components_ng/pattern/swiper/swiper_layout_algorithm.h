@@ -191,6 +191,11 @@ public:
         return isNeedResetPrevMarginAndNextMargin_;
     }
 
+    bool IsCrossMatchChild() const
+    {
+        return crossMatchChild_;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void SetInactive(
@@ -223,6 +228,7 @@ private:
     bool canOverScroll_ = false;
 
     bool mainSizeIsMeasured_ = false;
+    bool crossMatchChild_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
