@@ -270,9 +270,10 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             int32_t width = asyncCtx->pixmap->GetWidth();
             int32_t height = asyncCtx->pixmap->GetHeight();
 
-            Msdp::DeviceStatus::DragData dragData { { asyncCtx->pixmap, width * PIXELMAP_WIDTH_RATE,
-                                                        height * PIXELMAP_HEIGHT_RATE },
-                {}, udKey, asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true };
+            Msdp::DeviceStatus::DragData dragData {
+                { asyncCtx->pixmap, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE }, {}, udKey, "", "",
+                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true
+            };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
                 napi_handle_scope scope = nullptr;
