@@ -288,14 +288,6 @@ bool ScrollPattern::ScrollPageCheck(float delta, int32_t source)
     return true;
 }
 
-void ScrollPattern::HandleScrollBarOutBoundary()
-{
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && scrollBar->NeedScrollBar()) {
-        scrollBar->SetOutBoundary(std::abs(GetScrollBarOutBoundaryExtent()));
-    }
-}
-
 void ScrollPattern::AdjustOffset(float& delta, int32_t source)
 {
     if (NearZero(delta) || NearZero(viewPortLength_) || source == SCROLL_FROM_ANIMATION ||
@@ -346,14 +338,13 @@ void ScrollPattern::ValidateOffset(int32_t source)
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         }
     } else {
+        float scrollBarOutBoundaryExtent = 0.0f;
         if (currentOffset_ > 0) {
-            SetScrollBarOutBoundaryExtent(currentOffset_);
+            scrollBarOutBoundaryExtent = currentOffset_;
         } else if ((-currentOffset_) >= (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_)) && ReachMaxCount()) {
-            SetScrollBarOutBoundaryExtent((-currentOffset_) - (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_)));
-        } else {
-            SetScrollBarOutBoundaryExtent(0.0f);
+            scrollBarOutBoundaryExtent = -currentOffset_ - (GetMainSize(viewPortExtent_) - GetMainSize(viewPort_));
         }
-        HandleScrollBarOutBoundary();
+        HandleScrollBarOutBoundary(scrollBarOutBoundaryExtent);
     }
 }
 
