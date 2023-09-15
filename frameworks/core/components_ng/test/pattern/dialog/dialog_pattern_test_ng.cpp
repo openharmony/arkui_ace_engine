@@ -754,4 +754,129 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest006, TestSize.Level1)
         EXPECT_EQ(dialogPattern->GetDialogProperties().buttonDirection, directions[i]);
     }
 }
+
+/**
+ * @tc.name: DialogPatternTest007
+ * @tc.desc: Test DialogPattern OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set properties
+     * @tc.expected: step1. Create Dialog and get DialogPattern successfully.
+     */
+    SetDialogTheme();
+    DialogProperties props;
+    props.type = DialogType::ALERT_DIALOG;
+    props.title = TITLE;
+    props.content = MESSAGE;
+    props.buttons = btnItems;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    /**
+     * @tc.steps: step2. Call OnColorConfigurationUpdate
+     * @tc.expected: step2. cover branch customStyle == false.
+     */
+    dialogPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(dialogTheme->GetBackgroundColor(), Color::BLACK);
+    /**
+     * @tc.steps: step3. set isMenu is true.
+     */
+    props.type = DialogType::ACTION_SHEET;
+    props.customStyle = true;
+    props.sheetsInfo = sheetItems;
+    props.isMenu = true;
+    dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    dialogPattern = dialog->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    /**
+     * @tc.steps: step4. Call OnColorConfigurationUpdate
+     * @tc.expected: step4. cover branch menuNode_ is not null.
+     */
+    dialogPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(dialogTheme->GetBackgroundColor(), Color::BLACK);
+}
+
+/**
+ * @tc.name: DialogPatternTest008
+ * @tc.desc: Test CreateDialogNode function with maskRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set maskRect width and height in positive number.
+     */
+    DialogProperties props;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(0.5, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(0.5, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect Rect(widthDimen, heightDimen, offsetDimen);
+    props.maskRect = Rect;
+    /**
+     * @tc.steps: step2. Create Dialog and get DialogPattern.
+     */
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    /**
+     * @tc.steps: step3. test GetMouseResponseRegion function.
+     * @tc.expected: step3. return width equal to widthDimen.
+     */
+    auto hub = dialog->GetEventHub<DialogEventHub>();
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    std::vector<DimensionRect> mouseResponseRegion;
+    mouseResponseRegion = gestureHub->GetMouseResponseRegion();
+    EXPECT_EQ(mouseResponseRegion[0].GetWidth().Value(), widthDimen.Value());
+    EXPECT_EQ(mouseResponseRegion[0].GetHeight().Value(), heightDimen.Value());
+}
+
+/**
+ * @tc.name: DialogPatternTest009
+ * @tc.desc: Test CreateDialogNode function with maskRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set maskRect width and height in negative number.
+     */
+    DialogProperties props;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(-1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(-1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect Rect(widthDimen, heightDimen, offsetDimen);
+    props.maskRect = Rect;
+    /**
+     * @tc.steps: step2. Create Dialog and get DialogPattern.
+     */
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto dialogPattern = dialog->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    ASSERT_NE(dialogPattern, nullptr);
+    /**
+     * @tc.steps: step3. test GetMouseResponseRegion function.
+     * @tc.expected: step3. return width equal to 100.0_pct.
+     */
+    auto hub = dialog->GetEventHub<DialogEventHub>();
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    std::vector<DimensionRect> mouseResponseRegion;
+    mouseResponseRegion = gestureHub->GetMouseResponseRegion();
+    EXPECT_EQ(mouseResponseRegion[0].GetWidth().Value(), Dimension(100.0_pct).Value());
+    EXPECT_EQ(mouseResponseRegion[0].GetHeight().Value(), Dimension(100.0_pct).Value());
+}
 } // namespace OHOS::Ace::NG
