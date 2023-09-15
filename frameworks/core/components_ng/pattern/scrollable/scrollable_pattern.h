@@ -121,10 +121,12 @@ public:
         return scrollBarOutBoundaryExtent_;
     }
 
-    void SetScrollBarOutBoundaryExtent(double scrollBarOutBoundaryExtent)
+    void SetScrollBarOutBoundaryExtent(float scrollBarOutBoundaryExtent)
     {
         scrollBarOutBoundaryExtent_ = scrollBarOutBoundaryExtent;
     }
+
+    void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
 
     double GetMainSize(const SizeF& size) const
     {

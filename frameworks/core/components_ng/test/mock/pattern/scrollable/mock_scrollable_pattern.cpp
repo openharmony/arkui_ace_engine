@@ -64,4 +64,6 @@ void ScrollablePattern::ClearInvisibleItemsSelectedStatus() {}
 void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selectedZone) {}
 
 void ScrollablePattern::CreateScrollBarOverlayModifier() {}
+
+void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent) {}
 } // namespace OHOS::Ace::NG

@@ -2027,8 +2027,7 @@ HWTEST_F(ScrollTestNg, Pattern003, TestSize.Level1)
      * @tc.steps: step1. When scrollBar is not OFF
      * @tc.expected: outBoundary_ would be set
      */
-    pattern_->SetScrollBarOutBoundaryExtent(100.f);
-    pattern_->HandleScrollBarOutBoundary();
+    pattern_->HandleScrollBarOutBoundary(100.f);
     auto scrollBar = pattern_->GetScrollBar();
     EXPECT_EQ(scrollBar->outBoundary_, 100.f);
 
@@ -2036,9 +2035,8 @@ HWTEST_F(ScrollTestNg, Pattern003, TestSize.Level1)
      * @tc.steps: step1. When scrollBar is OFF
      * @tc.expected: outBoundary_ would not be set
      */
-    pattern_->SetScrollBarOutBoundaryExtent(200.f);
     scrollBar->displayMode_ = DisplayMode::OFF;
-    pattern_->HandleScrollBarOutBoundary();
+    pattern_->HandleScrollBarOutBoundary(200.f);
     EXPECT_EQ(scrollBar->outBoundary_, 100.f);
 }
 
