@@ -736,6 +736,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("Drag window start for not in previewState, set DragWindowVisible true.");
         }
+        overlayManager->RemovePixelMap();
+        pipeline->FlushPipelineImmediately();
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON &&
                (dragDropInfo.pixelMap || dragDropInfo.customNode)) {
