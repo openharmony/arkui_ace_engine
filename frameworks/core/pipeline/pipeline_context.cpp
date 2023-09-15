@@ -20,7 +20,6 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/log/jank_frame_report.h"
 #include "base/utils/utils.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
