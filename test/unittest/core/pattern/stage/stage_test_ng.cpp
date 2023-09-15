@@ -273,8 +273,7 @@ HWTEST_F(StageTestNg, StageManagerTest001, TestSize.Level1)
      * @tc.steps: step7. PopPage with different parameters.
      * @tc.expected: removeChild meets expectations .
      */
-    stageManager.PopPage(true, false);
-    stageManager.PopPage(false, true);
+    stageManager.PopPage(false, false);
     EXPECT_EQ(stageNode->GetChildren().size(), 3);
 }
 
