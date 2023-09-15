@@ -519,7 +519,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                 UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
                 CheckSizeValidity(childLayoutWrapper);
                 CheckBaselineProperties(childLayoutWrapper);
-                if (!isInfiniteLayout_) {
+                if (!isInfiniteLayout_ || GreatNotEqual(MainAxisMinValue(containerLayoutWrapper), 0.0f)) {
                     UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
                 }
                 secondaryMeasureList_.emplace_back(child);
@@ -647,8 +647,9 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
                 (*iter).needSecondMeasure = true;
             }
             if (LessOrEqual(totalFlexWeight_, 0.0f) &&
-                (!isInfiniteLayout_ || (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
-                                           Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)))) {
+                (!isInfiniteLayout_ || GreatNotEqual(MainAxisMinValue(layoutWrapper), 0.0f) ||
+                    (childLayoutWrapper->GetHostTag() == V2::BLANK_ETS_TAG && !selfAdaptive_ &&
+                        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)))) {
                 float childMainAxisMargin = GetMainAxisMargin(childLayoutWrapper, direction_);
                 float itemFlex = getFlex(child.layoutWrapper);
                 float flexSize =
@@ -771,6 +772,15 @@ void FlexLayoutAlgorithm::UpdateLayoutConstraintOnCrossAxis(LayoutConstraintF& l
     }
 }
 
+float FlexLayoutAlgorithm::MainAxisMinValue(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    CHECK_NULL_RETURN(layoutWrapper->GetLayoutProperty(), 0.0f);
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, 0.0f);
+    return IsHorizontal(direction_) ? layoutConstraint->minSize.Width() : layoutConstraint->minSize.Height();
+}
+
 void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -864,26 +874,26 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         mainAxisSize_ = allocatedSize_;
     }
 
-    auto finialMainAxisSize = mainAxisSize_;
-    auto finialCrossAxisSize = crossAxisSize_;
+    auto finalMainAxisSize = mainAxisSize_;
+    auto finalCrossAxisSize = crossAxisSize_;
     if (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE) {
-        finialCrossAxisSize += verticalPadding;
-        finialMainAxisSize += horizontalPadding;
+        finalCrossAxisSize += verticalPadding;
+        finalMainAxisSize += horizontalPadding;
     } else {
-        finialCrossAxisSize += horizontalPadding;
-        finialMainAxisSize += verticalPadding;
+        finalCrossAxisSize += horizontalPadding;
+        finalMainAxisSize += verticalPadding;
     }
     auto mainAxisSizeMin = GetMainAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto mainAxisSizeMax = GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_);
     auto crossAxisSizeMin = GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto crossAxisSizeMax = GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_);
-    finialMainAxisSize = std::clamp(
-        finialMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
-    finialCrossAxisSize = std::clamp(finialCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax),
-        std::max(crossAxisSizeMin, crossAxisSizeMax));
+    finalMainAxisSize = std::clamp(
+        finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
+    finalCrossAxisSize = std::clamp(
+        finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax), std::max(crossAxisSizeMin, crossAxisSizeMax));
 
     realSize.UpdateIllegalSizeWithCheck(
-        GetCalcSizeHelper(finialMainAxisSize, finialCrossAxisSize, direction_).ConvertToSizeT());
+        GetCalcSizeHelper(finalMainAxisSize, finalCrossAxisSize, direction_).ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
 }
 
