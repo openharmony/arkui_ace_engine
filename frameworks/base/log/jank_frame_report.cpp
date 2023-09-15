@@ -168,7 +168,6 @@ void JankFrameReport::ClearFrameJankRecord()
     hasAnimationPrev_ = false;
     jsAnimationTime_ = 0;
     jsAnimationDelayJank_ = 0;
-
 }
 
 void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag)
