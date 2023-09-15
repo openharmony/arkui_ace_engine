@@ -435,6 +435,7 @@ public:
     void StartAutoPlay();
     void StopTranslateAnimation();
     void StopSpringAnimation();
+    int32_t GetLoopIndex(int32_t originalIndex) const;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -501,7 +502,6 @@ private:
     float GetPrevMargin() const;
     float GetNextMargin() const;
     float CalculateVisibleSize() const;
-    int32_t GetLoopIndex(int32_t originalIndex) const;
     int32_t CurrentIndex() const;
     int32_t GetDisplayCount() const;
     int32_t CalculateDisplayCount() const;
