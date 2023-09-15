@@ -938,6 +938,9 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
+
+    contentRect_ = dirty->GetGeometryNode()->GetContentRect();
+
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -947,10 +950,8 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         LOGD("on layout process, just return");
         return false;
     }
-    LOGD("on layout process, continue");
     paragraph_ = paragraph;
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
-    contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
     textStyle_ = textLayoutAlgorithm->GetTextStyle();
     return true;
