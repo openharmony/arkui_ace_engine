@@ -53,6 +53,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private parent_: ViewPU = undefined;
   private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
+  // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
+  private isDeleting_: boolean = false;
+
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
 
@@ -162,10 +165,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.updateFuncByElmtId.clear();
     this.watchedProps.clear();
     this.providedVars_.clear();
-    if (this.parent_) {
+    if (this.parent_ && !this.parent_.isDeleting_) {
       this.parent_.removeChild(this);
     }
     this.localStoragebackStore_ = undefined;
+    this.isDeleting_ = true;
   }
 
   private setParent(parent: ViewPU) {

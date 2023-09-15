@@ -3920,6 +3920,8 @@ class ViewPU extends NativeViewPartialUpdate {
         super();
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
+        // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
+        this.isDeleting_ = false;
         this.watchedProps = new Map();
         // Set of dependent elmtIds that need partial update
         // during next re-render
@@ -3990,10 +3992,11 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
-        if (this.parent_) {
+        if (this.parent_ && !this.parent_.isDeleting_) {
             this.parent_.removeChild(this);
         }
         this.localStoragebackStore_ = undefined;
+        this.isDeleting_ = true;
     }
     setParent(parent) {
         if (this.parent_ && parent) {
