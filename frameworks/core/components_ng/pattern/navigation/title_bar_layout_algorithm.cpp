@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
@@ -243,8 +244,11 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
             ->GetMinPlatformVersion() < static_cast<int32_t>(PlatformVersion::VERSION_TEN))) {
             constraint.parentIdealSize.SetHeight(titleBarSize.Height());
         } else {
-            // if has menu, max height is single line height
-            auto maxHeight = NearZero(menuWidth_) ? titleBarSize.Height() : SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx();
+            auto isCustomMenu = navBarNode->GetPrevMenuIsCustomValue(false);
+            // if has menu and menu is not custom, max height is single line height
+            auto maxHeight = NearZero(menuWidth_) ? titleBarSize.Height()
+                             : isCustomMenu       ? titleBarSize.Height() - menuHeight_.ConvertToPx()
+                                                  : SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx();
             constraint.parentIdealSize.SetHeight(maxHeight);
             constraint.maxSize.SetHeight(maxHeight);
         }
@@ -280,6 +284,7 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
             }
         menuWrapper->Measure(constraint);
         menuWidth_ = menuWrapper->GetGeometryNode()->GetFrameSize().Width();
+        menuHeight_ = Dimension(menuWrapper->GetGeometryNode()->GetFrameSize().Height(), DimensionUnit::PX);
         return;
     }
     auto menuItemNum = static_cast<int32_t>(menuNode->GetChildren().size());
@@ -658,7 +663,8 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
         menuWrapper->Layout();
         return;
     }
-    auto menuOffsetY =  (SINGLE_LINE_TITLEBAR_HEIGHT - menuHeight_) / 2;
+    // custom menu doesn't have top padding. if menu isn't custom, menu items has top padding
+    auto menuOffsetY =  isCustomMenu ? Dimension() : (SINGLE_LINE_TITLEBAR_HEIGHT - menuHeight_) / 2;
     auto menuOffsetX = maxWidth - menuWidth;
     // custom menu doesn't have right padding. if menu isn't custom, menu items has right padding
     menuOffsetX = isCustomMenu ? menuOffsetX : menuOffsetX - defaultPaddingStart_.ConvertToPx();
