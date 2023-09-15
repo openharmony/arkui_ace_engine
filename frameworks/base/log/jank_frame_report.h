@@ -37,7 +37,6 @@ public:
     static void FlushRecord();
     static void RecordFrameUpdate();
     static void ReportJSAnimation();
-    static void NotifyOnVsyncEnd();
     static void JsAnimationRecord();
 
 private:
@@ -56,7 +55,6 @@ private:
     static int64_t refreshPeriod_;
     static std::string pageUrl_;
     static bool needReport_;
-    static bool hasAnimationPrev_;
     static int64_t jsAnimationTime_;
     static double jsAnimationDelayJank_;
 };

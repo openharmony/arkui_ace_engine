@@ -103,7 +103,6 @@ int64_t JankFrameReport::prevEndTimeStamp_ = 0;
 int64_t JankFrameReport::refreshPeriod_ = 16666666;
 std::string JankFrameReport::pageUrl_;
 bool JankFrameReport::needReport_ = false;
-bool JankFrameReport::hasAnimationPrev_ = false;
 int64_t JankFrameReport::jsAnimationTime_ = 0;
 double JankFrameReport::jsAnimationDelayJank_ = 0;
 
@@ -128,16 +127,17 @@ void JankFrameReport::JsAnimationRecord()
 {
     ACE_FUNCTION_TRACE();
     int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
-    if (hasAnimationPrev_) {
+    if (jsAnimationTime_ != 0) {
         int64_t jsAnimationDuration = now - jsAnimationTime_;
         jsAnimationDelayJank_ = double(jsAnimationDuration) / refreshPeriod_;
+        jsAnimationTime_ = 0;
     }
 }
 
 void JankFrameReport::RecordJankStatus(double jank)
 {
     // on need to record
-    if (jank <= 1.0f || recordStatus_ == JANK_IDLE) {
+    if (jank <= 1.0f || (recordStatus_ == JANK_IDLE && jsAnimationTime_ != 0)) {
         return;
     }
     // skip first frame
@@ -165,7 +165,6 @@ void JankFrameReport::ClearFrameJankRecord()
     prevEndTimeStamp_ = 0;
     currentFrameUpdateCount_ = 0;
     needReport_ = false;
-    hasAnimationPrev_ = false;
     jsAnimationTime_ = 0;
     jsAnimationDelayJank_ = 0;
 }
@@ -215,16 +214,8 @@ void JankFrameReport::FlushRecord()
 void JankFrameReport::ReportJSAnimation()
 {
     ACE_FUNCTION_TRACE();
-    hasAnimationPrev_ = true;
-    jsAnimationTime_ = GetSteadyTimestamp<std::chrono::nanoseconds>();
-}
-
-void JankFrameReport::NotifyOnVsyncEnd()
-{
-    ACE_FUNCTION_TRACE();
-    if (hasAnimationPrev_) {
-        hasAnimationPrev_ = false;
+    if (jsAnimationTime_ == 0) {
+        jsAnimationTime_ = GetSteadyTimestamp<std::chrono::nanoseconds>();
     }
-    jsAnimationTime_ = 0;
 }
 } // namespace OHOS::Ace
