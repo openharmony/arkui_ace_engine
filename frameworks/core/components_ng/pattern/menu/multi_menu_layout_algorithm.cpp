@@ -55,7 +55,7 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
 
     float contentHeight = 0.0f;
-    float contentWidth = childConstraint.minSize.Width();
+    float contentWidth = childConstraint.selfIdealSize.Width().value();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(ResetLayoutConstraintMinWidth(child, childConstraint));
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
