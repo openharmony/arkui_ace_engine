@@ -165,6 +165,10 @@ void JankFrameReport::ClearFrameJankRecord()
     prevEndTimeStamp_ = 0;
     currentFrameUpdateCount_ = 0;
     needReport_ = false;
+    hasAnimationPrev_ = false;
+    jsAnimationTime_ = 0;
+    jsAnimationDelayJank_ = 0;
+
 }
 
 void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag)
@@ -219,7 +223,7 @@ void JankFrameReport::ReportJSAnimation()
 void JankFrameReport::NotifyOnVsyncEnd()
 {
     ACE_FUNCTION_TRACE();
-    IF (hasAnimationPrev_) {
+    if (hasAnimationPrev_) {
         hasAnimationPrev_ = false;
     }
     jsAnimationTime_ = 0;
