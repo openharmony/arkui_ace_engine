@@ -425,7 +425,7 @@ public:
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
-    void ReloadForm();
+    void UpdateResource();
 
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
     void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,

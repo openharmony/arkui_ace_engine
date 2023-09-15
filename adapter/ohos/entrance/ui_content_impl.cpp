@@ -1299,7 +1299,7 @@ void UIContentImpl::ReloadForm(const std::string& url)
     CHECK_NULL_VOID(container);
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
-    container->ReloadForm();
+    container->UpdateResource();
     Platform::AceContainer::RunPage(
         instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
 }
@@ -1798,6 +1798,19 @@ void UIContentImpl::SetIsFocusActive(bool isFocusActive)
             auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetIsFocusActive(isFocusActive);
+        },
+        TaskExecutor::TaskType::UI);
+}
+
+void UIContentImpl::UpdateResource()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container]() {
+            container->UpdateResource();
         },
         TaskExecutor::TaskType::UI);
 }

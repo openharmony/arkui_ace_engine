@@ -158,8 +158,8 @@ void WindowPattern::CreateStartingNode()
 
     std::string startupPagePath;
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    auto sessionInfo = session_->GetSessionInfo();
-    Rosen::SceneSessionManager::GetInstance().GetStartPage(sessionInfo, startupPagePath, backgroundColor);
+    const auto& sessionInfo = session_->GetSessionInfo();
+    Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startupPagePath, backgroundColor);
     LOGI("startup page path %{public}s, background color %{public}x", startupPagePath.c_str(), backgroundColor);
 
     startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));

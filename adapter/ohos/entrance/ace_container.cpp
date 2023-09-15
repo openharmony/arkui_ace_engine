@@ -1636,7 +1636,7 @@ void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExe
     }
 }
 
-void AceContainer::ReloadForm()
+void AceContainer::UpdateResource()
 {
     // Reload theme and resource
     CHECK_NULL_VOID(pipelineContext_);
