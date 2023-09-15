@@ -6789,6 +6789,201 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchUpEventTest002, TestSize.Leve
 }
 
 /**
+ * @tc.name: SwipeRecognizerHandleTouchCancelEventTest001
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchCancelEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchCancelEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUp function
+     * @tc.expected: step2. result equals.
+     */
+    AxisEvent axisEvent;
+    swipeRecognizer.refereeState_ = RefereeState::FAIL;
+    swipeRecognizer.HandleTouchCancelEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetX(), axisEvent.x);
+    EXPECT_EQ(swipeRecognizer.globalPoint_.GetY(), axisEvent.y);
+}
+
+/**
+ * @tc.name: SwipeRecognizerSendCallbackMsgTest001
+ * @tc.desc: Test SwipeRecognizer function: SendCallbackMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerSendCallbackMsgTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case1: onAction is no, *onAction is no
+     * @tc.expected: step2. result equals.
+     */
+    std::unique_ptr<GestureEventFunc> onAction;
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case2: onAction is yes, *onAction is no
+     * @tc.expected: step2. result equals.
+     */
+    onAction = std::make_unique<GestureEventFunc>();
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case3: onAction is yes, *onAction is yes, touchEvent is empty
+     * @tc.expected: step2. result equals.
+     */
+    onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: touchEvent is not empty, have no X and Y
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    swipeRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: touchEvent is not empty, have no X and Y
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.tiltX = 0.0f;
+    touchEvent.tiltY = 0.0f;
+    swipeRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 1);
+}
+
+/**
+ * @tc.name: SwipeRecognizerSendCallbackMsgTest002
+ * @tc.desc: Test SwipeRecognizer function: SendCallbackMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerSendCallbackMsgTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    std::unique_ptr<GestureEventFunc> onAction;
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case3: onAction is yes, *onAction is yes, touchEvent is empty
+     * @tc.expected: step2. result equals.
+     */
+    onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
+    swipeRecognizer.deviceType_ = SourceType::MOUSE;
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: touchEvent is not empty, have no X and Y
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    DimensionRect area;
+    DimensionOffset origin;
+    EventTarget target = {"", "", area, origin};
+    swipeRecognizer.recognizerTarget_ = std::make_optional(target);
+    swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
+    swipeRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: touchEvent is not empty, have no X and Y
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.tiltX = 0.0f;
+    touchEvent.tiltY = 0.0f;
+    TouchEvent touchEvent1;
+    swipeRecognizer.deviceType_ = SourceType::MOUSE;
+    swipeRecognizer.lastTouchEvent_ = touchEvent1;
+    swipeRecognizer.lastTouchEvent_.tiltX = std::make_optional(0.0f);
+    swipeRecognizer.lastTouchEvent_.tiltY = std::make_optional(0.0f);
+    swipeRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    swipeRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(swipeRecognizer.touchPoints_.size(), 1);
+}
+
+/**
+ * @tc.name: PanRecognizerSendCallbackMsgTest003
+ * @tc.desc: Test PanRecognizer function: SendCallbackMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PanRecognizerSendCallbackMsgTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+    std::unique_ptr<GestureEventFunc> onAction;
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case3: onAction is yes, *onAction is yes, touchEvent is empty, type is AXIS
+     * @tc.expected: step2. result equals.
+     */
+    onAction = std::make_unique<GestureEventFunc>([](GestureEvent) {});
+    panRecognizer.inputEventType_ = InputEventType::AXIS;
+    DimensionRect area;
+    DimensionOffset origin;
+    EventTarget target = {"", "", area, origin};
+    panRecognizer.recognizerTarget_ = std::make_optional(target);
+    panRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: touchEvent is not empty, have no X and Y, type is not AXIS
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    panRecognizer.lastTouchEvent_ = touchEvent;
+    panRecognizer.inputEventType_ = InputEventType::AXIS;
+    panRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case4: touchEvent is not empty, have no X and Y
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.tiltX = 0.0f;
+    touchEvent.tiltY = 0.0f;
+    panRecognizer.lastTouchEvent_ = touchEvent;
+    panRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    panRecognizer.inputEventType_ = InputEventType::AXIS;
+    panRecognizer.SendCallbackMsg(onAction);
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
+}
+
+/**
  * @tc.name: SwipeRecognizerHandleTouchMoveEventTest001
  * @tc.desc: Test SwipeRecognizer function: HandleTouchMove
  * @tc.type: FUNC
