@@ -307,7 +307,9 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         info.SetDisplayY(touchPoint.screenY);
         info.SetEnhanceData(touchPoint.enhanceData);
 #endif
-        (*onAction)(info);
+        // onAction may be overwritten in its invoke so we copy it first
+        auto onActionFunction = *onAction;
+        onActionFunction(info);
     }
 }
 

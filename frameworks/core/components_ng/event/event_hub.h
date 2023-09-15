@@ -132,7 +132,9 @@ public:
                     auto eventHub = weak.Upgrade();
                     CHECK_NULL_VOID(eventHub);
                     if (eventHub->onAppear_) {
-                        eventHub->onAppear_();
+                        // callback may be overwritten in its invoke so we copy it first
+                        auto onAppear = eventHub->onAppear_;
+                        onAppear();
                     }
                 },
                 TaskExecutor::TaskType::UI);
@@ -154,7 +156,9 @@ public:
     void FireOnDisappear()
     {
         if (onDisappear_) {
-            onDisappear_();
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDisappear = onDisappear_;
+            onDisappear();
         }
     }
 
@@ -173,7 +177,9 @@ public:
     void FireOnAreaChanged(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
     {
         if (onAreaChanged_) {
-            onAreaChanged_(oldRect, oldOrigin, rect, origin);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onAreaChanged = onAreaChanged_;
+            onAreaChanged(oldRect, oldOrigin, rect, origin);
         }
     }
 
@@ -216,7 +222,9 @@ public:
             LOGI("DragDropManager fire onDragEnter");
         }
         if (onDragEnter_) {
-            onDragEnter_(info, extraParams);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDragEnter = onDragEnter_;
+            onDragEnter(info, extraParams);
         }
     }
 
@@ -236,7 +244,9 @@ public:
             LOGI("DragDropManager fire onDragLeave");
         }
         if (onDragLeave_) {
-            onDragLeave_(info, extraParams);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDragLeave = onDragLeave_;
+            onDragLeave(info, extraParams);
         }
     }
 
@@ -251,7 +261,9 @@ public:
             LOGI("DragDropManager fire onDragMove");
         }
         if (onDragMove_) {
-            onDragMove_(info, extraParams);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDragMove = onDragMove_;
+            onDragMove(info, extraParams);
         }
     }
 
@@ -296,7 +308,9 @@ public:
             LOGI("DragDropManager fire onDrop");
         }
         if (onDrop_) {
-            onDrop_(info, extraParams);
+            // callback may be overwritten in its invoke so we copy it first
+            auto onDrop = onDrop_;
+            onDrop(info, extraParams);
         }
     }
 
