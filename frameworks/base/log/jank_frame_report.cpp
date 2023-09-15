@@ -113,7 +113,6 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
     if (refreshPeriod_ <= 0) {
         return;
     }
-    RecordPreviousEnd();
     int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
     int64_t duration = now - std::max(timeStampNanos, prevEndTimeStamp_);
     double jank = double(duration) / refreshPeriod_;
@@ -122,6 +121,7 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
     RecordJankStatus(jank + jsAnimationDelayJank_);
     prevFrameUpdateCount_ = currentFrameUpdateCount_;
     jsAnimationDelayJank_ = 0;
+    RecordPreviousEnd();
 }
 
 void JankFrameReport::JsAnimationRecord()
