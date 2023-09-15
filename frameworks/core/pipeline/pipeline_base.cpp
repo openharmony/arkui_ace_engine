@@ -588,6 +588,11 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         callback.second(nanoTimestamp, frameCount);
     }
 
+    decltype(jsFormVsyncCallbacks_) jsFormVsyncCallbacks(std::move(jsFormVsyncCallbacks_));
+    for (auto& callback : jsFormVsyncCallbacks) {
+        callback.second(nanoTimestamp, frameCount);
+    }
+
     if (onVsyncProfiler_) {
         AceTracker::Start();
     }
@@ -704,6 +709,13 @@ void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_
     }
 }
 
+void PipelineBase::SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId)
+{
+    if (callback) {
+        jsFormVsyncCallbacks_.try_emplace(subWindowId, std::move(callback));
+    }
+}
+
 void PipelineBase::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEventCallback&& callback)
 {
     if (!callback || pointId < 0) {
@@ -746,6 +758,11 @@ void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t pointId)
 void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
 {
     subWindowVsyncCallbacks_.erase(subWindowId);
+}
+
+void PipelineBase::RemoveJsFormVsyncCallback(int32_t subWindowId)
+{
+    jsFormVsyncCallbacks_.erase(subWindowId);
 }
 
 bool PipelineBase::MaybeRelease()

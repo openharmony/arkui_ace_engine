@@ -20,6 +20,9 @@
 namespace OHOS::Ace {
 void FormWindow::RequestFrame()
 {
+    if (instanceId_ == -1) {
+        return;
+    }
     auto context = outSidePipelineContext_.Upgrade();
     if (!context) {
         LOGE("form could not request frame due to null context");
@@ -31,16 +34,14 @@ void FormWindow::RequestFrame()
         return;
     }
 
+    auto vsyncCallback = callback_;
+    context->SetJsFormVsyncCallback(std::move(vsyncCallback), formWindowId_);
+
     window->RequestFrame();
 }
 
 void FormWindow::SetVsyncCallback(AceVsyncCallback&& callback)
 {
-    auto context = outSidePipelineContext_.Upgrade();
-    if (!context) {
-        LOGE("form set vsync callback fail due to null context");
-        return;
-    }
-    context->SetSubWindowVsyncCallback(std::move(callback), formWindowId_);
+    callback_ = std::move(callback);
 }
 } // namespace OHOS::Ace
