@@ -214,7 +214,8 @@ void SpanItem::UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::opti
 #ifdef ENABLE_DRAG_FRAMEWORK
     if (!IsDragging()) {
 #endif // ENABLE_DRAG_FRAMEWORK
-        updateTextAction(content, textStyle);
+        auto data = GetSpanContent();
+        updateTextAction(data, textStyle);
 #ifdef ENABLE_DRAG_FRAMEWORK
     } else {
         if (content.empty()) {
@@ -243,6 +244,17 @@ void SpanItem::UpdateTextStyle(const RefPtr<Paragraph>& builder, const std::opti
         }
     }
 #endif // ENABLE_DRAG_FRAMEWORK
+}
+
+std::string SpanItem::GetSpanContent()
+{
+    std::string data;
+    if (needRemoveNewLine) {
+        data = content.substr(0, content.length() - 1);
+    } else {
+        data = content;
+    }
+    return data;
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
