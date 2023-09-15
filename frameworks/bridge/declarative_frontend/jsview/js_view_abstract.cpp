@@ -5129,7 +5129,6 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
     ViewAbstractModel::GetInstance()->SetRestoreId(restoreId);
 }
 
-#if defined(PREVIEW)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
@@ -5139,7 +5138,6 @@ void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 
     ViewAbstractModel::GetInstance()->SetDebugLine(info[0]->ToString());
 }
-#endif
 
 void JSViewAbstract::JsOpacityPassThrough(const JSCallbackInfo& info)
 {
@@ -5734,9 +5732,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
-#if defined(PREVIEW)
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
-#endif
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("touchable", &JSInteractableView::JsTouchable);

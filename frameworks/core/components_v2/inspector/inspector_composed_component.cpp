@@ -354,10 +354,8 @@ RefPtr<Element> InspectorComposedComponent::CreateElement()
     if (generateFunc != CREATE_ELEMENT_MAP.end()) {
         auto composedElement = generateFunc->second(id_);
         composedElement->SetInspectorTag(GetName());
-#if defined(PREVIEW)
         composedElement->SetDebugLine(GetDebugLine());
         composedElement->SetViewId(viewId_);
-#endif
         auto inspectorElement = AceType::DynamicCast<InspectorComposedElement>(composedElement);
         inspectorElement->SetKey(GetInspectorKey());
         return composedElement;

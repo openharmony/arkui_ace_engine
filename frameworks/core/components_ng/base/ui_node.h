@@ -355,7 +355,6 @@ public:
     virtual void FastPreviewUpdateChildDone() {}
     virtual RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild);
 
-#ifdef PREVIEW
     void SetDebugLine(const std::string& line)
     {
         debugLine_ = line;
@@ -374,7 +373,6 @@ public:
     {
         return viewId_;
     }
-#endif
 
     void SetRestoreId(int32_t restoreId)
     {
@@ -555,10 +553,9 @@ private:
 
     std::list<std::function<void()>> attachToMainTreeTasks_;
 
-#ifdef PREVIEW
     std::string debugLine_;
     std::string viewId_;
-#endif
+
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
