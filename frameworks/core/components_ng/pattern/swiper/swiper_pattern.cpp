@@ -1195,6 +1195,7 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
+    offset = Round(offset);
     if (IsVisibleChildrenSizeLessThanSwiper() && !IsAutoFill()) {
         return;
     }

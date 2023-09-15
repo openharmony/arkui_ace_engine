@@ -321,6 +321,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
 
+    offset = Round(offset);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     // check edgeEffect is not springEffect
