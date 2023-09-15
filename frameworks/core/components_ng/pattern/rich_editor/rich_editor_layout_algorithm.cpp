@@ -58,6 +58,7 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     }
 
     SizeF res;
+    int32_t lastPlaceHolderIndex = 0;
     for (auto&& group : spans_) {
         // layout each paragraph
         SetSpans(group);
@@ -77,6 +78,13 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         pManager_->AddParagraph({ .paragraph = paragraph,
             .start = firstSpan->position - StringUtils::ToWstring(firstSpan->content).length(),
             .end = (*group.rbegin())->position });
+        std::for_each(group.begin(), group.end(), [&](RefPtr<SpanItem>& item) {
+            auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(item);
+            if (imageSpanItem && imageSpanItem->placeHolderIndex >= 0) {
+                imageSpanItem->placeHolderIndex = lastPlaceHolderIndex;
+                lastPlaceHolderIndex++;
+            }
+        });
     }
     if (!res.IsPositive()) {
         return std::nullopt;

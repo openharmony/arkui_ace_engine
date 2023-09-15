@@ -307,10 +307,10 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     size_t index = 0;
-    size_t imageSpanIndex = 0;
     std::vector<Rect> rectsForPlaceholders;
     GetPlaceholderRects(rectsForPlaceholders);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
+    // children only contains the image span.
     for (const auto& child : children) {
         if (!child) {
             ++index;
@@ -319,12 +319,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (index >= placeHolderIndex.size()) {
             return;
         }
-        imageSpanIndex = placeHolderIndex.at(index);
-        if (imageSpanIndex >= rectsForPlaceholders.size() || imageSpanIndex < 0) {
-            ++index;
-            continue;
-        }
-        auto rect = rectsForPlaceholders.at(imageSpanIndex);
+        auto rect = rectsForPlaceholders.at(index);
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             ++index;
