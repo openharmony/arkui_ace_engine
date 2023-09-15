@@ -4251,6 +4251,10 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     // the current executed update function
     observeComponentCreation(compilerAssignedUpdateFunc) {
+        if (this.isDeleting_) {
+            stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destrucion, will not execute observeComponentCreation `);
+            return;
+        }
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         
         compilerAssignedUpdateFunc(elmtId, /* is first rneder */ true);

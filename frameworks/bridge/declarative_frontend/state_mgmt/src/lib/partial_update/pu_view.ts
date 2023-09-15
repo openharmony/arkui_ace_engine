@@ -464,6 +464,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // the current executed update function
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
+    if (this.isDeleting_) {
+      stateMgmtConsole.error(`View ${this.constructor.name} elmtId ${this.id__()} is already in process of destrucion, will not execute observeComponentCreation `);
+      return;
+    }
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} start ....`);
     compilerAssignedUpdateFunc(elmtId, /* is first rneder */ true);
