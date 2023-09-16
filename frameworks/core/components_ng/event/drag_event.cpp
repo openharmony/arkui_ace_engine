@@ -114,6 +114,16 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
     CHECK_NULL_VOID(userCallback_);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    if (dragDropManager->IsDragging()) {
+        LOGD("not handle because of dragging now.");
+        return;
+    }
+#endif
     auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("DragEvent panRecognizer onActionStart.");

@@ -27,6 +27,10 @@
 #include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace::NG {
+enum class DragDropMgrState : int32_t {
+    IDLE,
+    DRAGGING
+};
 
 class ACE_EXPORT DragDropManager : public virtual AceType {
     DECLARE_ACE_TYPE(DragDropManager, AceType);
@@ -149,6 +153,11 @@ public:
         notifyInDraggedCallback_ = callback;
     }
 
+    bool IsDragging()
+    {
+        return dragDropState_ == DragDropMgrState::DRAGGING;
+    }
+
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(
@@ -192,6 +201,7 @@ private:
     bool isWindowConsumed_ = false;
     bool isDragWindowShow_ = false;
     VelocityTracker velocityTracker_;
+    DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
