@@ -72,7 +72,7 @@
 
 namespace OHOS::Ace {
 
-enum class AceLogTag : uint32_t {
+enum class AceLogTag : uint8_t {
     DEFAULT = 0,
 };
 
