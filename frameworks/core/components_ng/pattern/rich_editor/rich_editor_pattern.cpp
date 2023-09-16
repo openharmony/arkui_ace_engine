@@ -1130,7 +1130,6 @@ void RichEditorPattern::HandleBlurEvent()
 void RichEditorPattern::HandleFocusEvent()
 {
     UseHostToUpdateTextFieldManager();
-    SetCaretOffset(GetTextContentLength());
     StartTwinkling();
     if (!usingMouseRightButton_) {
         RequestKeyboard(false, true, true);
@@ -1383,7 +1382,8 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     auto touchY = event->GetY();
     auto contentRect = GetTextRect();
     contentRect.SetTop(contentRect.GetY() - std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { touchX - contentRect.GetX(), touchY - contentRect.GetY() };
+    Offset textOffset = { touchX - contentRect.GetX() - GetParentGlobalOffset().GetX(),
+        touchY - contentRect.GetY() - GetParentGlobalOffset().GetY() };
     auto position = paragraphs_.GetIndex(textOffset);
     float caretHeight = 0.0f;
     SetCaretPosition(position);
