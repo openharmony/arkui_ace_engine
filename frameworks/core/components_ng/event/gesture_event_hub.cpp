@@ -525,10 +525,17 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
         result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
         result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
     }
-    if (result.GetX() >= 0.0f || result.GetX() + size.Width() < 0.0f || result.GetY() >= 0.0f ||
-        result.GetY() + size.Height() < 0.0f) {
-        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
-        result.SetY(size.Height() * PIXELMAP_HEIGHT_RATE);
+    if (result.GetX() >= 0.0f) {
+        result.SetX(-1.0f);
+    }
+    if (result.GetX() + size.Width() <= 0.0f) {
+        result.SetX(1.0f - size.Width());
+    }
+    if (result.GetY() >= 0.0f) {
+        result.SetY(-1.0f);
+    }
+    if (result.GetY() + size.Height() <= 0.0f) {
+        result.SetY(1.0f - size.Height());
     }
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("Get pixelMap offset is %{public}f and %{public}f.",
