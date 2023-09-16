@@ -289,7 +289,9 @@ void LongPressRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
             info.SetTiltY(trackPoint.tiltY.value());
         }
         info.SetSourceTool(trackPoint.sourceTool);
-        (*callback)(info);
+        // callback may be overwritten in its invoke so we copy it first
+        auto callbackFunction = *callback;
+        callbackFunction(info);
     }
 }
 
