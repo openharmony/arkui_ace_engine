@@ -2069,6 +2069,12 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetPositionZ(static_cast<float>(value));
+    auto uiNode = GetHost();
+    CHECK_NULL_VOID(uiNode);
+    auto parent = uiNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    parent->MarkNeedSyncRenderTree();
+    parent->RebuildRenderContextTree();
 }
 
 void RosenRenderContext::ResetBlendBgColor()
