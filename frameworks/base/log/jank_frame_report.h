@@ -37,7 +37,7 @@ public:
     static void FlushRecord();
     static void RecordFrameUpdate();
     static void ReportJSAnimation();
-    static void JsAnimationRecord();
+    static void JsAnimationToRsRecord();
 
 private:
     static void ClearFrameJankRecord();
@@ -56,6 +56,7 @@ private:
     static std::string pageUrl_;
     static bool needReport_;
     static int64_t jsAnimationTime_;
+    static int64_t animatorEndTime_;
     static double jsAnimationDelayJank_;
 };
 } // namespace OHOS::Ace
