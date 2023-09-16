@@ -156,6 +156,9 @@ public:
     GestureEventFunc onClick;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     int32_t placeHolderIndex = -1;
+    // when paragraph ends with a \n, it causes the paragraph height to gain an extra line
+    // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
+    bool needRemoveNewLine = false;
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
@@ -180,6 +183,11 @@ public:
     {
         textStyle_ = textStyle;
     }
+    void MarkNeedRemoveNewLine(bool value)
+    {
+        needRemoveNewLine = value;
+    }
+    std::string GetSpanContent();
 private:
     std::optional<TextStyle> textStyle_;
 };

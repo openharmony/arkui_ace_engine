@@ -99,14 +99,14 @@ OffsetF ParagraphManager::ComputeCursorOffset(int32_t index, float& selectLineHe
         y -= it->paragraph->GetHeight();
     }
 
-    CHECK_NULL_RETURN(it != paragraphs_.end(), {});
+    CHECK_NULL_RETURN(it != paragraphs_.end(), OffsetF(0.0f, y));
 
     int32_t relativeIndex = index - it->start;
     auto&& paragraph = it->paragraph;
     CaretMetrics metrics;
     auto computeSuccess = paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics) ||
                           paragraph->ComputeOffsetForCaretUpstream(relativeIndex, metrics);
-    CHECK_NULL_RETURN(computeSuccess, {});
+    CHECK_NULL_RETURN(computeSuccess, OffsetF(0.0f, y));
 
     selectLineHeight = metrics.height;
     return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY() + y) };
