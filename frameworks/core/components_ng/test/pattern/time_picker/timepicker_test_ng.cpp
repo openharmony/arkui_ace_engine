@@ -1830,6 +1830,46 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TimePickerRowPattern014
+ * @tc.desc: Test OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern014, TestSize.Level1)
+{
+    const std::string language = "en";
+    const std::string countryOrRegion = "US";
+    std::string nodeInfo = "";
+    const std::string script = "Latn";
+    const std::string keywordsAndValues = "";
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto timePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::TIME_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TimePickerRowPattern>(); });
+    auto timePickerPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerPattern, nullptr);
+    timePickerNode->MountToParent(contentColumn);
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NG::ButtonPattern>(); });
+    auto timeConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(buttonConfirmNode, nullptr);
+    ASSERT_NE(timeConfirmNode, nullptr);
+    timeConfirmNode->MountToParent(buttonConfirmNode);
+    timePickerPattern->SetConfirmNode(buttonConfirmNode);
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonCancelNode, nullptr);
+    auto timeCancelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(timeCancelNode, nullptr);
+    timeCancelNode->MountToParent(buttonCancelNode);
+    timePickerPattern->SetCancelNode(buttonCancelNode);
+    timePickerPattern->OnLanguageConfigurationUpdate();
+    auto cancelNode = Localization::GetInstance()->GetEntryLetters("common.cancel");
+    EXPECT_EQ(cancelNode, nodeInfo);
+}
+
+/**
  * @tc.name: TimePickerFireChangeEventTest001
  * @tc.desc: Test SetSelectedDate.
  * @tc.type: FUNC

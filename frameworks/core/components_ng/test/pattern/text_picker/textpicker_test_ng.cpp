@@ -23,6 +23,7 @@
 #define protected public
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/measure_util.h"
@@ -5796,6 +5797,46 @@ HWTEST_F(TextPickerTestNg, TextPickerPatternTest016, TestSize.Level1)
      */
     pickerPattern->ChangeCurrentOptionValue(option, 17, 0, 1);
     EXPECT_EQ(pickerPattern->selecteds_[1], 17);
+}
+
+/**
+ * @tc.name: TextPickerPatternTest017
+ * @tc.desc: Test OnLanguageConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerPatternTest017, TestSize.Level1)
+{
+    const std::string language = "en";
+    const std::string countryOrRegion = "US";
+    const std::string script = "Latn";
+    const std::string keywordsAndValues = "";
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto textPickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    textPickerNode->MountToParent(contentColumn);
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NG::ButtonPattern>(); });
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(buttonConfirmNode);
+    CHECK_NULL_VOID(textConfirmNode);
+    textConfirmNode->MountToParent(buttonConfirmNode);
+    textPickerPattern->SetConfirmNode(buttonConfirmNode);
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonCancelNode);
+    auto textCancelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(textCancelNode);
+    textCancelNode->MountToParent(buttonCancelNode);
+    textPickerPattern->SetCancelNode(buttonCancelNode);
+    textPickerPattern->OnLanguageConfigurationUpdate();
+    AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
+    std::string nodeInfo = "";
+    auto cancel = Localization::GetInstance()->GetEntryLetters("common.cancel");
+    EXPECT_EQ(cancel, nodeInfo);
 }
 
 /**
