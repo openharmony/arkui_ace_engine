@@ -24,6 +24,7 @@
 #include "frameworks/core/components/refresh/refresh_theme.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
+#include "frameworks/core/components_ng/event/event_hub.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
@@ -103,6 +104,10 @@ void RefreshModelNG::Pop()
         auto loadingProgressChild = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
         CHECK_NULL_VOID(loadingProgressChild);
+        auto gestureHub = loadingProgressChild->GetEventHub<EventHub>();
+        if (gestureHub) {
+            gestureHub->SetEnabled(false);
+        }
         auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
         progressLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));

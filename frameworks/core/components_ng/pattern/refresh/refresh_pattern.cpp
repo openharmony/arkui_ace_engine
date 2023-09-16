@@ -24,6 +24,7 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
@@ -256,6 +257,10 @@ void RefreshPattern::ReplaceLoadingProgressNode()
 void RefreshPattern::LoadingProgressReset()
 {
     CHECK_NULL_VOID(progressChild_);
+    auto gestureHub = progressChild_->GetEventHub<EventHub>();
+    if (gestureHub) {
+        gestureHub->SetEnabled(false);
+    }
     UpdateLoadingProgress(STATE_PROGRESS_LOADING, 0.0f);
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
