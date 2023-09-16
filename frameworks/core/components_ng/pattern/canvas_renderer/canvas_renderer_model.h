@@ -100,8 +100,7 @@ public:
     virtual void StrokeRect(const BaseInfo& baseInfo, const Rect& rect) = 0;
     virtual void ClearRect(const BaseInfo& baseInfo, const Rect& rect) = 0;
     virtual void DrawBitmapMesh(const BitmapMeshInfo& bitmapMeshInfo) {}
-    virtual std::unique_ptr<OHOS::Media::PixelMap> GetPixelMap(
-        const BaseInfo& baseInfo, const ImageSize& imageSize) = 0;
+    virtual RefPtr<Ace::PixelMap> GetPixelMap(const BaseInfo& baseInfo, const ImageSize& imageSize) = 0;
     virtual void GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer) = 0;
 
     virtual TransformParam GetTransform(const BaseInfo& baseInfo)

@@ -468,14 +468,12 @@ protected:
 #ifdef NEW_SKIA
     SkSamplingOptions sampleOptions_;
 #endif
-    SkBitmap canvasCache_;
     std::shared_ptr<SkCanvas> skCanvas_;
 #else
     RSPath rsPath_;
     RSPath rsPath2d_;
     RSBrush imageBrush_;
     RSSamplingOptions sampleOptions_;
-    RSBitmap canvasCache_;
     std::shared_ptr<RSCanvas> rsCanvas_;
 #endif
 

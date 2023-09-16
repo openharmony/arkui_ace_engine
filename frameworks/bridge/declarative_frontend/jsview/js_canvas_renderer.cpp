@@ -1099,27 +1099,6 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     info.SetReturnValue(retObj);
 }
 
-std::unique_ptr<ImageData> JSCanvasRenderer::GetImageDataFromCanvas(
-    const double& left, const double& top, const double& width, const double& height)
-{
-    std::unique_ptr<ImageData> data;
-
-    BaseInfo baseInfo;
-    baseInfo.canvasPattern = canvasPattern_;
-    baseInfo.offscreenPattern = offscreenPattern_;
-    baseInfo.isOffscreen = isOffscreen_;
-
-    ImageSize imageSize;
-    imageSize.left = left;
-    imageSize.top = top;
-    imageSize.width = width;
-    imageSize.height = height;
-
-    data = CanvasRendererModel::GetInstance()->GetImageData(baseInfo, imageSize);
-
-    return data;
-}
-
 void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 {
 #ifdef PIXEL_MAP_SUPPORTED
@@ -1158,8 +1137,7 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     imageSize.top = top;
     imageSize.width = width;
     imageSize.height = height;
-    std::unique_ptr<OHOS::Media::PixelMap> pixelmap =
-        CanvasRendererModel::GetInstance()->GetPixelMap(baseInfo, imageSize);
+    auto pixelmap = CanvasRendererModel::GetInstance()->GetPixelMap(baseInfo, imageSize);
     CHECK_NULL_VOID(pixelmap);
 
     // 3 pixelmap to NapiValue
@@ -1170,8 +1148,8 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     }
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-    std::shared_ptr<OHOS::Media::PixelMap> sharedPixelmap(pixelmap.release());
-    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, sharedPixelmap);
+    auto pixelmapSharedPtr = pixelmap->GetPixelMapSharedPtr();
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelmapSharedPtr);
 
     // 4 NapiValue to JsValue
 #ifdef USE_ARK_ENGINE

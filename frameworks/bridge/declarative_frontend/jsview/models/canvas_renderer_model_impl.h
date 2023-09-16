@@ -90,7 +90,7 @@ public:
     void StrokeRect(const BaseInfo& baseInfo, const Rect& rect) override;
     void ClearRect(const BaseInfo& baseInfo, const Rect& rect) override;
     void DrawBitmapMesh(const BitmapMeshInfo& bitmapMeshInfo) override;
-    std::unique_ptr<OHOS::Media::PixelMap> GetPixelMap(const BaseInfo& baseInfo, const ImageSize& imageSize) override;
+    RefPtr<Ace::PixelMap> GetPixelMap(const BaseInfo& baseInfo, const ImageSize& imageSize) override;
     void GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer) override;
 };
 } // namespace OHOS::Ace::Framework

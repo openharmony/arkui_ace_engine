@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/canvas_renderer_model_impl.h"
 
+#include "base/image/pixel_map.h"
 #include "core/components/custom_paint/custom_paint_component.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
 
@@ -1110,7 +1111,7 @@ void CanvasRendererModelImpl::DrawBitmapMesh(const BitmapMeshInfo& bitmapMeshInf
     pool->DrawBitmapMesh(offscreenPattern, bitmapMeshInfo.mesh, bitmapMeshInfo.column, bitmapMeshInfo.row);
 }
 
-std::unique_ptr<OHOS::Media::PixelMap> CanvasRendererModelImpl::GetPixelMap(
+RefPtr<Ace::PixelMap> CanvasRendererModelImpl::GetPixelMap(
     const BaseInfo& baseInfo, const ImageSize& imageSize)
 {
 #ifdef PIXEL_MAP_SUPPORTED
@@ -1142,7 +1143,7 @@ std::unique_ptr<OHOS::Media::PixelMap> CanvasRendererModelImpl::GetPixelMap(
     options.size.width = static_cast<int32_t>(finalWidth);
     options.size.height = static_cast<int32_t>(finalHeight);
     options.editable = true;
-    std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
+    auto pixelmap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(data, length, options));
     delete[] data;
     return pixelmap;
 #else
@@ -1152,8 +1153,8 @@ std::unique_ptr<OHOS::Media::PixelMap> CanvasRendererModelImpl::GetPixelMap(
 
 void CanvasRendererModelImpl::GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer)
 {
-    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     std::unique_ptr<Ace::ImageData> data = GetImageData(baseInfo, imageSize);
 
     if (data != nullptr) {

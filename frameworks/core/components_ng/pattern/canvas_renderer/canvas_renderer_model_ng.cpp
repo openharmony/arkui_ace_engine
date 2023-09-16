@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/canvas_renderer/canvas_renderer_model_ng.h"
 
+#include "securec.h"
+
 #include "frameworks/core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
 #include "frameworks/core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
@@ -31,8 +33,8 @@ void CanvasRendererModelNG::SetFillText(const BaseInfo& baseInfo, const FillText
         if (!offscreenPattern->IsSucceed()) {
             return;
         }
-        offscreenPattern->FillText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y,
-            fillTextInfo.maxWidth, baseInfo.paintState);
+        offscreenPattern->FillText(
+            fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth, baseInfo.paintState);
         return;
     }
 
@@ -51,8 +53,8 @@ void CanvasRendererModelNG::SetStrokeText(const BaseInfo& baseInfo, const FillTe
         if (!offscreenPattern->IsSucceed()) {
             return;
         }
-        offscreenPattern->StrokeText(fillTextInfo.text, fillTextInfo.x, fillTextInfo.y,
-            fillTextInfo.maxWidth, baseInfo.paintState);
+        offscreenPattern->StrokeText(
+            fillTextInfo.text, fillTextInfo.x, fillTextInfo.y, fillTextInfo.maxWidth, baseInfo.paintState);
         return;
     }
 
@@ -856,8 +858,8 @@ void CanvasRendererModelNG::SetFillRuleForPath(const BaseInfo& baseInfo, const C
     }
 }
 
-void CanvasRendererModelNG::SetFillRuleForPath2D(const BaseInfo& baseInfo, const CanvasFillRule& fillRule,
-    const RefPtr<CanvasPath2D>& path)
+void CanvasRendererModelNG::SetFillRuleForPath2D(
+    const BaseInfo& baseInfo, const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
@@ -878,8 +880,8 @@ void CanvasRendererModelNG::SetFillRuleForPath2D(const BaseInfo& baseInfo, const
     }
 }
 
-void CanvasRendererModelNG::SetStrokeRuleForPath2D(const BaseInfo& baseInfo, const CanvasFillRule& fillRule,
-    const RefPtr<CanvasPath2D>& path)
+void CanvasRendererModelNG::SetStrokeRuleForPath2D(
+    const BaseInfo& baseInfo, const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
@@ -942,8 +944,8 @@ void CanvasRendererModelNG::SetClipRuleForPath(const BaseInfo& baseInfo, const C
     }
 }
 
-void CanvasRendererModelNG::SetClipRuleForPath2D(const BaseInfo& baseInfo, const CanvasFillRule& fillRule,
-    const RefPtr<CanvasPath2D>& path)
+void CanvasRendererModelNG::SetClipRuleForPath2D(
+    const BaseInfo& baseInfo, const CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
     if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
         auto offscreenPattern = AceType::DynamicCast<NG::OffscreenCanvasPattern>(baseInfo.offscreenPattern);
@@ -1347,71 +1349,75 @@ TransformParam CanvasRendererModelNG::GetTransform(const BaseInfo& baseInfo)
     return param;
 }
 
-std::unique_ptr<OHOS::Media::PixelMap> CanvasRendererModelNG::GetPixelMap(
-    const BaseInfo& baseInfo, const ImageSize& imageSize)
+RefPtr<Ace::PixelMap> CanvasRendererModelNG::GetPixelMap(const BaseInfo& baseInfo, const ImageSize& imageSize)
 {
 #ifdef PIXEL_MAP_SUPPORTED
     // 1 Get data from canvas
-    std::unique_ptr<Ace::ImageData> canvasData = GetImageData(baseInfo, imageSize);
-    CHECK_NULL_RETURN(canvasData, nullptr);
-
-    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
     if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
         LOGE("Integer Overflow!!!the product of finalHeight and finalWidth is too big.");
         return nullptr;
     }
-    uint32_t length = finalHeight * finalWidth;
-    uint32_t* data = new uint32_t[length];
-    for (uint32_t i = 0; i < finalHeight; i++) {
-        for (uint32_t j = 0; j < finalWidth; j++) {
-            uint32_t idx = i * finalWidth + j;
-            Color pixel = canvasData->data[idx];
-            data[idx] = pixel.GetValue();
-        }
-    }
 
     // 2 Create pixelmap
     OHOS::Media::InitializationOptions options;
-    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
     options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
     options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
     options.size.width = static_cast<int32_t>(finalWidth);
     options.size.height = static_cast<int32_t>(finalHeight);
     options.editable = true;
-    std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
-    delete[] data;
-    return pixelmap;
+    auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
+    if (pixelMap) {
+        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
+        imageData->pixelMap = pixelMap;
+        imageData->dirtyX = static_cast<int32_t>(imageSize.left);
+        imageData->dirtyY = static_cast<int32_t>(imageSize.top);
+        imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
+        imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
+        GetImageData(baseInfo, imageData);
+    }
+    return pixelMap;
 #else
     return nullptr;
 #endif
-    // // 2 Create pixelmap
-    // OHOS::Media::InitializationOptions options;
-    // options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
-    // options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
-    // options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    // options.size.width = static_cast<int32_t>(std::abs(width));
-    // options.size.height = static_cast<int32_t>(std::abs(height));
-    // options.editable = true;
-    // std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(options);
-    // std::shared_ptr<ImageData> imageData = std::make_shared<ImageData>();
-    // if (pixelmap) {
-    //     void* data = pixelmap->GetWritablePixels();
-    //     imageData->rawData = static_cast<void*>(data);
-    //     imageData->left = left;
-    //     imageData->top = top;
-    //     imageData->width = width;
-    //     imageData->height = height;
-    //     GetImageDataFromCanvas(imageData);
-    // }
-    // return pixelmap;
 }
 
 void CanvasRendererModelNG::GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer)
 {
-    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
-    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
-    std::unique_ptr<Ace::ImageData> data = CanvasRendererModel::GetInstance()->GetImageData(baseInfo, imageSize);
+#ifdef PIXEL_MAP_SUPPORTED
+    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        LOGE("Integer Overflow!!!the product of finalHeight and finalWidth is too big.");
+        return;
+    }
+    OHOS::Media::InitializationOptions options;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    options.size.width = static_cast<int32_t>(finalWidth);
+    options.size.height = static_cast<int32_t>(finalHeight);
+    options.editable = true;
+    auto pixelMap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(options));
+    if (pixelMap) {
+        std::shared_ptr<Ace::ImageData> imageData = std::make_shared<Ace::ImageData>();
+        imageData->pixelMap = pixelMap;
+        imageData->dirtyX = static_cast<int32_t>(imageSize.left);
+        imageData->dirtyY = static_cast<int32_t>(imageSize.top);
+        imageData->dirtyWidth = static_cast<int32_t>(imageSize.width);
+        imageData->dirtyHeight = static_cast<int32_t>(imageSize.height);
+        GetImageData(baseInfo, imageData);
+        auto pixelsSize = pixelMap->GetRowBytes() * pixelMap->GetHeight();
+        if (memcpy_s(buffer, pixelsSize, pixelMap->GetWritablePixels(), pixelsSize) != 0) {
+            LOGE("memcpy error");
+        }
+    }
+#else
+    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    std::unique_ptr<Ace::ImageData> data = GetImageData(baseInfo, imageSize);
 
     if (data != nullptr) {
         for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
@@ -1420,6 +1426,20 @@ void CanvasRendererModelNG::GetImageDataModel(const BaseInfo& baseInfo, const Im
             buffer[4 * idx + 2] = data->data[idx].GetBlue();
             buffer[4 * idx + 3] = data->data[idx].GetAlpha();
         }
+    }
+#endif
+}
+
+void CanvasRendererModelNG::GetImageData(const BaseInfo& baseInfo, const std::shared_ptr<Ace::ImageData>& imageData)
+{
+    if (baseInfo.isOffscreen && baseInfo.offscreenPattern) {
+        auto offscreenPattern = AceType::DynamicCast<OffscreenCanvasPattern>(baseInfo.offscreenPattern);
+        CHECK_NULL_VOID(offscreenPattern);
+        offscreenPattern->GetImageData(imageData);
+    } else if (!baseInfo.isOffscreen && baseInfo.canvasPattern) {
+        auto canvasPattern = AceType::DynamicCast<CustomPaintPattern>(baseInfo.canvasPattern);
+        CHECK_NULL_VOID(canvasPattern);
+        canvasPattern->GetImageData(imageData);
     }
 }
 } // namespace OHOS::Ace::NG
