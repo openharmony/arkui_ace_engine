@@ -1250,6 +1250,7 @@ void IndexerPattern::RemoveBubble()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemoveIndexerPopupById(host->GetId());
+    popupNode_ = nullptr;
 }
 
 bool IndexerPattern::IsMeasureBoundary() const
