@@ -777,7 +777,8 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
         double preLineFontSize = textStyle.GetFontSize().Value();
         if (preLinetLastSpan != spanContentLines.rend()) {
             currentRect = preLinetLastSpan->second.first;
-            if (preLinetLastSpan->second.second.back() && preLinetLastSpan->second.second.back()->fontStyle) {
+            if (preLinetLastSpan->second.second.back() && preLinetLastSpan->second.second.back()->fontStyle &&
+                preLinetLastSpan->second.second.back()->fontStyle->GetFontSize().has_value()) {
                 preLineFontSize = preLinetLastSpan->second.second.back()->fontStyle->GetFontSize().value().Value();
             }
         }
@@ -794,6 +795,7 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
                     continue;
                 }
                 if (NearEqual(rect.GetOffset().GetY(), currentRect.GetOffset().GetY()) && child->fontStyle &&
+                    child->fontStyle->GetFontSize().has_value() &&
                     NearEqual(preLineFontSize, child->fontStyle->GetFontSize().value().Value())) {
                     continue;
                 }
