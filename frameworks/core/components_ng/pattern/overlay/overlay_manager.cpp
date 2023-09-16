@@ -2137,7 +2137,6 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
         return;
     }
     if (startDrag) {
-        RemovePixelMap();
         return;
     }
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
