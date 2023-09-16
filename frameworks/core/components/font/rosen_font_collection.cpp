@@ -22,7 +22,9 @@
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "rosen_text/font_collection.h"
 #endif
+#ifndef USE_ROSEN_DRAWING
 #include "include/core/SkTypeface.h"
+#endif
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
@@ -53,7 +55,11 @@ std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
     return fontCollection_;
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<txt::DynamicFontManager> RosenFontCollection::GetDynamicFontManager()
+#else
+std::shared_ptr<RSFontMgr> RosenFontCollection::GetDynamicFontManager()
+#endif
 {
     return dynamicFontManager_;
 }
@@ -94,6 +100,7 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
 
     if (fontCollection_) {
 #ifndef USE_GRAPHIC_TEXT_GINE
+#ifndef USE_ROSEN_DRAWING
         std::unique_ptr<SkStreamAsset> font_stream = std::make_unique<SkMemoryStream>(fontData, length, true);
         sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(std::move(font_stream));
         txt::TypefaceFontAssetProvider& font_provider = dynamicFontManager_->font_provider();
@@ -103,6 +110,9 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
             font_provider.RegisterTypeface(typeface, familyName);
         }
         fontCollection_->ClearFontFamilyCache();
+#else
+        LOGE("Drawing is not supported");
+#endif
 #else
         fontCollection_->LoadFont(familyName, fontData, length);
 #endif

@@ -97,7 +97,7 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
 
 void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
 {
-    auto canvas = context.canvas;
+    auto& canvas = context.canvas;
     canvas.Save();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
@@ -162,7 +162,7 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
 
 void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
 {
-    auto canvas = context.canvas;
+    auto& canvas = context.canvas;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     if (!cursorVisible_->Get() || textFieldPattern->GetSelectMode() == SelectionMode::SELECT_ALL) {

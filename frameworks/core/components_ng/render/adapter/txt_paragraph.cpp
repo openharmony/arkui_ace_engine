@@ -228,12 +228,16 @@ size_t TxtParagraph::GetLineCount()
 #endif
 }
 
-void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
+void TxtParagraph::Paint(RSCanvas& canvas, float x, float y)
 {
     CHECK_NULL_VOID(paragraph_);
+#ifndef USE_ROSEN_DRAWING
     SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
+#else
+    paragraph_->Paint(&canvas, x, y);
+#endif
     if (paraStyle_.leadingMargin && paraStyle_.leadingMargin->pixmap) {
         auto canvasImage = PixelMapImage::Create(paraStyle_.leadingMargin->pixmap);
         auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
@@ -249,7 +253,11 @@ void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
 void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
 {
     CHECK_NULL_VOID(skCanvas);
+#ifndef USE_ROSEN_DRAWING
     paragraph_->Paint(skCanvas, x, y);
+#else
+    LOGE("Drawing is not supported");
+#endif
 }
 
 int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)

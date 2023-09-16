@@ -89,7 +89,7 @@ public:
     virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
 
     // interfaces for painting
-    virtual void Paint(const RSCanvas& canvas, float x, float y) = 0;
+    virtual void Paint(RSCanvas& canvas, float x, float y) = 0;
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 };
 

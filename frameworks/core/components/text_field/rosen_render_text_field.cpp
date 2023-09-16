@@ -1127,7 +1127,11 @@ void RosenRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::TypographySt
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::unique_ptr<txt::ParagraphBuilder> builder =
         txt::ParagraphBuilder::CreateTxtBuilder(*paragraphStyle, GetFontCollection());
+#ifndef USE_ROSEN_DRAWING
     txtStyle->has_foreground = true;
+#else
+    txtStyle->has_foreground_brush = true;
+#endif
 #else
     std::unique_ptr<Rosen::TypographyCreate> builder =
         Rosen::TypographyCreate::Create(*paragraphStyle, GetFontCollection());

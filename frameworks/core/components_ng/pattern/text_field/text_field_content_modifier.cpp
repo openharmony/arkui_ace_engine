@@ -60,7 +60,7 @@ TextFieldContentModifier::TextFieldContentModifier(const WeakPtr<OHOS::Ace::NG::
 
 void TextFieldContentModifier::onDraw(DrawingContext& context)
 {
-    auto canvas = context.canvas;
+    auto& canvas = context.canvas;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     auto offset = contentOffset_->Get();
