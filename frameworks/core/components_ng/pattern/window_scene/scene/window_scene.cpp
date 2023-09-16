@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
 #include "session_manager/include/scene_session_manager.h"
+#include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -123,7 +124,13 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     host->GetGeometryNode()->SetFrameSize(SizeF(windowRect.width_, windowRect.height_));
 
     CHECK_NULL_VOID(session_);
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+    if (transactionController && (session_->GetSessionRect() != windowRect)) {
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
+            transactionController->GetRSTransaction());
+    } else {
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    }
 }
 
 void WindowScene::BufferAvailableCallback()
