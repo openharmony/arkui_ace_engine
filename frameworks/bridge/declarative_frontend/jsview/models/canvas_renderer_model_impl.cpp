@@ -18,6 +18,10 @@
 #include "core/components/custom_paint/custom_paint_component.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
 
+#ifdef PIXEL_MAP_SUPPORTED
+#include "pixel_map.h"
+#endif
+
 namespace OHOS::Ace::Framework {
 void CanvasRendererModelImpl::SetFillText(const BaseInfo& baseInfo, const FillTextInfo& fillTextInfo)
 {
@@ -1104,5 +1108,61 @@ void CanvasRendererModelImpl::DrawBitmapMesh(const BitmapMeshInfo& bitmapMeshInf
     auto offscreenPattern = AceType::DynamicCast<OffscreenCanvas>(bitmapMeshInfo.offscreenPattern);
     CHECK_NULL_VOID(offscreenPattern);
     pool->DrawBitmapMesh(offscreenPattern, bitmapMeshInfo.mesh, bitmapMeshInfo.column, bitmapMeshInfo.row);
+}
+
+std::unique_ptr<OHOS::Media::PixelMap> CanvasRendererModelImpl::GetPixelMap(
+    const BaseInfo& baseInfo, const ImageSize& imageSize)
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    // 1 Get data from canvas
+    std::unique_ptr<ImageData> canvasData = GetImageData(baseInfo, imageSize);
+    CHECK_NULL_RETURN(canvasData, nullptr);
+
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        LOGE("Integer Overflow!!!the product of finalHeight and finalWidth is too big.");
+        return nullptr;
+    }
+    uint32_t length = finalHeight * finalWidth;
+    uint32_t* data = new uint32_t[length];
+    for (uint32_t i = 0; i < finalHeight; i++) {
+        for (uint32_t j = 0; j < finalWidth; j++) {
+            uint32_t idx = i * finalWidth + j;
+            Color pixel = canvasData->data[idx];
+            data[idx] = pixel.GetValue();
+        }
+    }
+
+    // 2 Create pixelmap
+    OHOS::Media::InitializationOptions options;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    options.size.width = static_cast<int32_t>(finalWidth);
+    options.size.height = static_cast<int32_t>(finalHeight);
+    options.editable = true;
+    std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
+    delete[] data;
+    return pixelmap;
+#else
+    return nullptr;
+#endif
+}
+
+void CanvasRendererModelImpl::GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer)
+{
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    std::unique_ptr<Ace::ImageData> data = GetImageData(baseInfo, imageSize);
+
+    if (data != nullptr) {
+        for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
+            buffer[4 * idx] = data->data[idx].GetRed();
+            buffer[4 * idx + 1] = data->data[idx].GetGreen();
+            buffer[4 * idx + 2] = data->data[idx].GetBlue();
+            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+        }
+    }
 }
 } // namespace OHOS::Ace::Framework

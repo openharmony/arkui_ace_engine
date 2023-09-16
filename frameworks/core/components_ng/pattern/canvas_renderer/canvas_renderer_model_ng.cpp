@@ -18,6 +18,10 @@
 #include "frameworks/core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
 #include "frameworks/core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
+#ifdef PIXEL_MAP_SUPPORTED
+#include "pixel_map.h"
+#endif
+
 namespace OHOS::Ace::NG {
 void CanvasRendererModelNG::SetFillText(const BaseInfo& baseInfo, const FillTextInfo& fillTextInfo)
 {
@@ -1341,5 +1345,81 @@ TransformParam CanvasRendererModelNG::GetTransform(const BaseInfo& baseInfo)
         param = canvasPattern->GetTransform();
     }
     return param;
+}
+
+std::unique_ptr<OHOS::Media::PixelMap> CanvasRendererModelNG::GetPixelMap(
+    const BaseInfo& baseInfo, const ImageSize& imageSize)
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    // 1 Get data from canvas
+    std::unique_ptr<Ace::ImageData> canvasData = GetImageData(baseInfo, imageSize);
+    CHECK_NULL_RETURN(canvasData, nullptr);
+
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        LOGE("Integer Overflow!!!the product of finalHeight and finalWidth is too big.");
+        return nullptr;
+    }
+    uint32_t length = finalHeight * finalWidth;
+    uint32_t* data = new uint32_t[length];
+    for (uint32_t i = 0; i < finalHeight; i++) {
+        for (uint32_t j = 0; j < finalWidth; j++) {
+            uint32_t idx = i * finalWidth + j;
+            Color pixel = canvasData->data[idx];
+            data[idx] = pixel.GetValue();
+        }
+    }
+
+    // 2 Create pixelmap
+    OHOS::Media::InitializationOptions options;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    options.size.width = static_cast<int32_t>(finalWidth);
+    options.size.height = static_cast<int32_t>(finalHeight);
+    options.editable = true;
+    std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
+    delete[] data;
+    return pixelmap;
+#else
+    return nullptr;
+#endif
+    // // 2 Create pixelmap
+    // OHOS::Media::InitializationOptions options;
+    // options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+    // options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    // options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    // options.size.width = static_cast<int32_t>(std::abs(width));
+    // options.size.height = static_cast<int32_t>(std::abs(height));
+    // options.editable = true;
+    // std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(options);
+    // std::shared_ptr<ImageData> imageData = std::make_shared<ImageData>();
+    // if (pixelmap) {
+    //     void* data = pixelmap->GetWritablePixels();
+    //     imageData->rawData = static_cast<void*>(data);
+    //     imageData->left = left;
+    //     imageData->top = top;
+    //     imageData->width = width;
+    //     imageData->height = height;
+    //     GetImageDataFromCanvas(imageData);
+    // }
+    // return pixelmap;
+}
+
+void CanvasRendererModelNG::GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer)
+{
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    std::unique_ptr<Ace::ImageData> data = CanvasRendererModel::GetInstance()->GetImageData(baseInfo, imageSize);
+
+    if (data != nullptr) {
+        for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
+            buffer[4 * idx] = data->data[idx].GetRed();
+            buffer[4 * idx + 1] = data->data[idx].GetGreen();
+            buffer[4 * idx + 2] = data->data[idx].GetBlue();
+            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

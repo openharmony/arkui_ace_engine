@@ -94,7 +94,8 @@ public:
     void StrokeRect(const BaseInfo& baseInfo, const Rect& rect) override;
     void ClearRect(const BaseInfo& baseInfo, const Rect& rect) override;
     TransformParam GetTransform(const BaseInfo& baseInfo) override;
-    
+    std::unique_ptr<OHOS::Media::PixelMap> GetPixelMap(const BaseInfo& baseInfo, const ImageSize& imageSize) override;
+    void GetImageDataModel(const BaseInfo& baseInfo, const ImageSize& imageSize, uint8_t* buffer) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CANVAS_RENDERER_CANVAS_RENDERER_MODEL_NG_H

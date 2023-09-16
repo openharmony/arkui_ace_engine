@@ -502,6 +502,10 @@ build_component_ng("pattern_ng") {
 
   if (is_ohos_standard_system) {
     external_deps = [ "graphic_2d:librender_service_client" ]
+    external_deps += [
+      "image_framework:image",
+      "image_framework:image_native",
+    ]
   } else if (is_cross_platform_build) {
     deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
   }

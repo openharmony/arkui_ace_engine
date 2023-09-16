@@ -1049,8 +1049,8 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     double fTop = 0.0;
     double fWidth = 0.0;
     double fHeight = 0.0;
-    uint32_t final_width = 0.0;
-    uint32_t final_height = 0.0;
+    uint32_t finalWidth = 0;
+    uint32_t finalHeight = 0;
     int32_t left = 0;
     int32_t top = 0;
     int32_t width = 0;
@@ -1071,27 +1071,30 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     width = SystemProperties::Vp2Px(width);
     height = SystemProperties::Vp2Px(height);
 
-    std::unique_ptr<ImageData> data;
-    data = GetImageDataFromCanvas(left, top, width, height);
-    final_height = (data == nullptr) ? static_cast<uint32_t>(height) : static_cast<uint32_t>(data->dirtyHeight);
-    final_width = (data == nullptr) ? static_cast<uint32_t>(width) : static_cast<uint32_t>(data->dirtyWidth);
-    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(final_height * final_width * 4);
+    finalHeight = static_cast<uint32_t>(std::abs(height));
+    finalWidth = static_cast<uint32_t>(std::abs(width));
+    int32_t length = finalHeight * finalWidth * 4;
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(length);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
-    if (data != nullptr) {
-        for (uint32_t idx = 0; idx < final_height * final_width; ++idx) {
-            buffer[4 * idx] = data->data[idx].GetRed();
-            buffer[4 * idx + 1] = data->data[idx].GetGreen();
-            buffer[4 * idx + 2] = data->data[idx].GetBlue();
-            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
-        }
-    }
+    
+    BaseInfo baseInfo;
+    baseInfo.canvasPattern = canvasPattern_;
+    baseInfo.offscreenPattern = offscreenPattern_;
+    baseInfo.isOffscreen = isOffscreen_;
+
+    ImageSize imageSize;
+    imageSize.left = left;
+    imageSize.top = top;
+    imageSize.width = width;
+    imageSize.height = height;
+    CanvasRendererModel::GetInstance()->GetImageDataModel(baseInfo, imageSize, buffer);
 
     JSRef<JSUint8ClampedArray> colorArray =
         JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
 
     auto retObj = JSRef<JSObject>::New();
-    retObj->SetProperty("width", final_width);
-    retObj->SetProperty("height", final_height);
+    retObj->SetProperty("width", finalWidth);
+    retObj->SetProperty("height", finalHeight);
     retObj->SetPropertyObject("data", colorArray);
     info.SetReturnValue(retObj);
 }
@@ -1129,8 +1132,6 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     int32_t top = 0;
     int32_t width = 0;
     int32_t height = 0;
-    uint32_t final_width = 0.0;
-    uint32_t final_height = 0.0;
 
     JSViewAbstract::ParseJsDouble(info[0], fLeft);
     JSViewAbstract::ParseJsDouble(info[1], fTop);
@@ -1147,39 +1148,19 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     width = round(fWidth);
     height = round(fHeight);
 
-    // 1 Get data from canvas
-    std::unique_ptr<ImageData> canvasData;
-    canvasData = GetImageDataFromCanvas(left, top, width, height);
+    BaseInfo baseInfo;
+    baseInfo.canvasPattern = canvasPattern_;
+    baseInfo.offscreenPattern = offscreenPattern_;
+    baseInfo.isOffscreen = isOffscreen_;
 
-    if (canvasData == nullptr) {
-        return;
-    }
-    final_height = static_cast<uint32_t>(canvasData->dirtyHeight);
-    final_width = static_cast<uint32_t>(canvasData->dirtyWidth);
-    if (final_height > 0 && final_width > (UINT32_MAX / final_height)) {
-        LOGE("Integer Overflow!!!the product of final_height and final_width is too big.");
-        return;
-    }
-    uint32_t length = final_height * final_width;
-    uint32_t* data = new uint32_t[length];
-    for (uint32_t i = 0; i < final_height; i++) {
-        for (uint32_t j = 0; j < final_width; j++) {
-            uint32_t idx = i * final_width + j;
-            Color pixel = canvasData->data[idx];
-            data[idx] = pixel.GetValue();
-        }
-    }
-
-    // 2 Create pixelmap
-    OHOS::Media::InitializationOptions options;
-    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
-    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
-    options.size.width = static_cast<int32_t>(final_width);
-    options.size.height = static_cast<int32_t>(final_height);
-    options.editable = true;
-    std::unique_ptr<OHOS::Media::PixelMap> pixelmap = OHOS::Media::PixelMap::Create(data, length, options);
-    delete[] data;
+    ImageSize imageSize;
+    imageSize.left = left;
+    imageSize.top = top;
+    imageSize.width = width;
+    imageSize.height = height;
+    std::unique_ptr<OHOS::Media::PixelMap> pixelmap =
+        CanvasRendererModel::GetInstance()->GetPixelMap(baseInfo, imageSize);
+    CHECK_NULL_VOID(pixelmap);
 
     // 3 pixelmap to NapiValue
     auto engine = EngineHelper::GetCurrentEngine();
@@ -2396,4 +2377,25 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
     }
 }
 
+void JSCanvasRenderer::SetCanvasPattern(const RefPtr<AceType>& canvas)
+{
+    canvasPattern_ = canvas;
+    isOffscreen_ = false;
+    BaseInfo baseInfo;
+    baseInfo.canvasPattern = canvasPattern_;
+    baseInfo.offscreenPattern = offscreenPattern_;
+    baseInfo.isOffscreen = isOffscreen_;
+    CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
+}
+
+void JSCanvasRenderer::SetOffscreenPattern(const RefPtr<AceType>& offscreenCanvas)
+{
+    offscreenPattern_ = offscreenCanvas;
+    isOffscreen_ = true;
+    BaseInfo baseInfo;
+    baseInfo.canvasPattern = canvasPattern_;
+    baseInfo.offscreenPattern = offscreenPattern_;
+    baseInfo.isOffscreen = isOffscreen_;
+    CanvasRendererModel::GetInstance()->SetShadowColor(baseInfo, Color::TRANSPARENT);
+}
 } // namespace OHOS::Ace::Framework
