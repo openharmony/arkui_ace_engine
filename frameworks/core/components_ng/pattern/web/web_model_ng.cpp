@@ -796,7 +796,7 @@ void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)
 
 void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
 {
-#if !defined(IOS_PLATFORM) && defined(ANDROID_PLATFORM)
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     if (webId != -1) {
         std::weak_ptr<OHOS::NWeb::NWeb> nwebWeak = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
         auto nwebSptr = nwebWeak.lock();
