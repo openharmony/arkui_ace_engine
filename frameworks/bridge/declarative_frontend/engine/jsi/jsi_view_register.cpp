@@ -259,13 +259,9 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
         return panda::JSValueRef::Undefined(vm);
     }
 
-    auto engine = EngineHelper::GetEngine(Container::CurrentId());
-    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
-    auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
-    CHECK_NULL_RETURN(jsiEngine, panda::JSValueRef::Undefined(vm));
-
-    jsiEngine->AddToNamedRouterMap(panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)),
-        secondArg->ToString(vm)->ToString(), thirdArg->ToObject(vm));
+    JsiDeclarativeEngine::AddToNamedRouterMap(vm,
+        panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)), secondArg->ToString(vm)->ToString(),
+        thirdArg->ToObject(vm));
 
     return panda::JSValueRef::Undefined(vm);
 }

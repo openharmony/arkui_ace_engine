@@ -57,6 +57,7 @@ public:
     ~PageRouterManager() override = default;
 
     void RunPage(const std::string& url, const std::string& params);
+    void RunPageByNamedRouter(const std::string& name, const std::string& params);
     void RunCard(const std::string& url, const std::string& params, int64_t cardId);
 
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)

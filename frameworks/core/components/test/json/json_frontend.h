@@ -46,7 +46,7 @@ public:
 
     RefPtr<AcePage> GetPage(int32_t pageId) const override;
 
-    void RunPage(int32_t pageId, const std::string& content, const std::string& params) override;
+    void RunPage(const std::string& content, const std::string& params) override;
 
     void PushPage(const std::string& content, const std::string& params) override;
 

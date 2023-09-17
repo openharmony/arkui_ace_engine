@@ -67,7 +67,7 @@ public:
         }
     }
 
-    void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+    void RunPage(const std::string& url, const std::string& params) override;
 
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void UpdateData(const std::string& dataList) override;

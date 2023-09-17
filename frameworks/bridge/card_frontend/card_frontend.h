@@ -53,7 +53,7 @@ public:
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
     void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
 
-    void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+    void RunPage(const std::string& url, const std::string& params) override;
     void ReplacePage(const std::string& url, const std::string& params) override {}
     void PushPage(const std::string& url, const std::string& params) override {}
     void AddPage(const RefPtr<AcePage>& page) override {}

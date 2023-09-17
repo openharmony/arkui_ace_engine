@@ -42,6 +42,7 @@ public:
 
     // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
+    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId) override;
     void Foreground() override;
@@ -159,6 +160,8 @@ public:
     void CloseModalUIExtension(int32_t sessionId) override;
 
 private:
+    void InitializeInner(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage, bool isNamedRouter);
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);

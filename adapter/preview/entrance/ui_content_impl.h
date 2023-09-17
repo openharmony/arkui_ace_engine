@@ -42,6 +42,7 @@ public:
 
     // UI content lifeCycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
+    void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, NativeValue* storage) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage, uint32_t focusWindowId) override {}
     void Foreground() override {}

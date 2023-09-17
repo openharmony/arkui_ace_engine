@@ -84,7 +84,7 @@ void CardFrontendDeclarative::SetAssetManager(const RefPtr<AssetManager>& assetM
     }
 }
 
-void CardFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, const std::string& params)
+void CardFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
 {
     std::string urlPath;
     if (GetFormSrc().empty()) {

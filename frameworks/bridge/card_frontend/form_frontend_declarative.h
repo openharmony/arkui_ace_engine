@@ -43,7 +43,7 @@ public:
     void UpdatePageData(const std::string& dataList);
     void OnMediaFeatureUpdate();
 
-    void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
+    void RunPage(const std::string& url, const std::string& params) override;
 
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;

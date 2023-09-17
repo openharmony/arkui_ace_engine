@@ -80,7 +80,8 @@ public:
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
     // JSFrontend delegate functions.
-    void RunPage(const std::string& url, const std::string& params, const std::string& profile);
+    void RunPage(
+        const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter = false);
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const;
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data);
     void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const;

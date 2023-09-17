@@ -308,7 +308,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
                 return;
             }
             pipelineContext->SetDrawDelegate(pattern->GetDrawDelegate());
-            frontend_->RunPage(0, "", data);
+            frontend_->RunPage("", data);
             return;
         } else {
             LOGE("ETS Card not support old pipeline");
@@ -320,7 +320,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
             pipelineContext_->SetDrawDelegate(pattern->GetDrawDelegate());
-            frontend_->RunPage(0, "", data);
+            frontend_->RunPage("", data);
             if (onFormLoadCallback_) {
                 onFormLoadCallback_();
             }
@@ -344,7 +344,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
         }
         pipelineContext_->SetDrawDelegate(formRender->GetDrawDelegate());
 
-        frontend_->RunPage(0, "", data);
+        frontend_->RunPage("", data);
     } else {
         LOGE("SubContainer::RunCard card type error");
     }

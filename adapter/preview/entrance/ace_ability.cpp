@@ -38,10 +38,6 @@
 namespace OHOS::Ace::Platform {
 namespace {
 
-// JS frontend maintain the page ID self, so it's useless to pass page ID from platform
-// layer, neither Android/OpenHarmony or Windows, we should delete here usage when Java delete it.
-constexpr int32_t UNUSED_PAGE_ID = 1;
-
 constexpr char ASSET_PATH_SHARE[] = "share";
 #ifdef WINDOWS_PLATFORM
 constexpr char DELIMITER[] = "\\";
@@ -234,9 +230,9 @@ void AceAbility::InitEnv()
     if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
         AceContainer::SetView(
             view, window, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, callback);
-        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+        AceContainer::RunPage(ACE_INSTANCE_ID, runArgs_.url, "");
     } else {
-        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+        AceContainer::RunPage(ACE_INSTANCE_ID, runArgs_.url, "");
         AceContainer::SetView(
             view, window, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, callback);
     }
