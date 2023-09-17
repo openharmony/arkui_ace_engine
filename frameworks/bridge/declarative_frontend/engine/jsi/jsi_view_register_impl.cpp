@@ -555,9 +555,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PluginComponent", JSPlugin::JSBind },
 #endif
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     { "RichText", JSRichText::JSBind },
-    { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
+#endif
+    { "Web", JSWeb::JSBind },
 #endif
 #ifdef REMOTE_WINDOW_SUPPORTED
     { "RemoteWindow", JSRemoteWindow::JSBind },
@@ -690,7 +692,9 @@ void RegisterAllModule(BindingTarget globalObj)
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     JSWebController::JSBind(globalObj);
+#endif
 #endif
     JSRichEditorController::JSBind(globalObj);
     for (auto& iter : bindFuncs) {
