@@ -93,6 +93,7 @@ public:
     {
         summaryMap_ = summaryMap;
     }
+    Rect GetDragWindowRect(const Point& point);
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
     void UpdatePixelMapPosition(int32_t globalX, int32_t globalY);
     std::string GetExtraInfo();
@@ -202,6 +203,7 @@ private:
     bool isDragWindowShow_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
+    Rect previewRect_ { -1, -1, -1, -1 };
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };
