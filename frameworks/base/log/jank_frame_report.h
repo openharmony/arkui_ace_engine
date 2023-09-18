@@ -55,7 +55,7 @@ private:
     static int64_t refreshPeriod_;
     static std::string pageUrl_;
     static bool needReport_;
-    static int64_t jsAnimationTime_;
+    static bool hasJsAnimation_;
     static int64_t animatorEndTime_;
     static double jsAnimationDelayJank_;
 };
