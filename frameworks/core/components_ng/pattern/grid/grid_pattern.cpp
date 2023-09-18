@@ -377,8 +377,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     // maybe no measure after last update
-    if (LessNotEqual(std::abs(gridLayoutInfo_.currentOffset_), gridLayoutInfo_.lastMainSize_)) {
+    if (!gridLayoutInfo_.offsetUpdated_) {
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+        gridLayoutInfo_.offsetUpdated_ = true;
     }
     gridLayoutInfo_.currentOffset_ += offset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
