@@ -115,6 +115,15 @@ constexpr char WEB_ATTRIBUTE_ZOOM_ACCESS[] = "zoomAccess";
 constexpr char NTC_ZOOM_ACCESS[] = "zoomAccess";
 constexpr char WEB_ATTRIBUTE_JAVASCRIPT_ACCESS[] = "javascriptAccess";
 constexpr char NTC_JAVASCRIPT_ACCESS[] = "javascriptAccess";
+
+const char WEB_PARAM_NONE[] = "";
+const char WEB_PARAM_AND[] = "#HWJS-&-#";
+const char WEB_PARAM_VALUE[] = "value";
+const char WEB_PARAM_EQUALS[] = "#HWJS-=-#";
+const char WEB_PARAM_BEGIN[] = "#HWJS-?-#";
+const char WEB_METHOD[] = "method";
+const char WEB_EVENT[] = "event";
+const char WEB_RESULT_FAIL[] = "fail";
 }
 
 std::map<std::string, std::string> WebResourceRequsetImpl::GetRequestHeader() const
