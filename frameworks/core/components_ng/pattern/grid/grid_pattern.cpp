@@ -152,10 +152,9 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto& children = host->GetFrameChildren();
-    for (const auto& weak : children) {
-        auto itemFrameNode = weak.Upgrade();
-        CHECK_NULL_VOID(itemFrameNode);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthVisibleFrame(children);
+    for (const auto& itemFrameNode : children) {
         auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(itemEvent);
         if (!itemEvent->IsEnabled()) {
@@ -179,12 +178,12 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
             iter = result.first;
             iter->second.onSelected = itemPattern->GetEventHub<GridItemEventHub>()->GetOnSelect();
             iter->second.selectChangeEvent = itemPattern->GetEventHub<GridItemEventHub>()->GetSelectChangeEvent();
-            auto startMainOffset = mouseStartOffset_.GetMainOffset(gridLayoutInfo_.axis_);
-            if (gridLayoutInfo_.axis_ == Axis::VERTICAL) {
-                iter->second.rect = itemRect + OffsetF(0, totalOffsetOfMousePressed_ - startMainOffset);
-            } else {
-                iter->second.rect = itemRect + OffsetF(totalOffsetOfMousePressed_ - startMainOffset, 0);
-            }
+        }
+        auto startMainOffset = mouseStartOffset_.GetMainOffset(gridLayoutInfo_.axis_);
+        if (gridLayoutInfo_.axis_ == Axis::VERTICAL) {
+            iter->second.rect = itemRect + OffsetF(0, totalOffsetOfMousePressed_ - startMainOffset);
+        } else {
+            iter->second.rect = itemRect + OffsetF(totalOffsetOfMousePressed_ - startMainOffset, 0);
         }
 
         if (!selectedZone.IsIntersectWith(itemRect)) {
