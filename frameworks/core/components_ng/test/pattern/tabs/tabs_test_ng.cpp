@@ -9716,4 +9716,217 @@ HWTEST_F(TabsTestNg, TabBarPatternOnModifyDone002, TestSize.Level1)
     tabBarPattern->OnModifyDone();
     EXPECT_NE(tabBarPattern, nullptr);
 }
+
+/**
+ * @tc.name: TabBarPatternIsAtBottom001
+ * @tc.desc: test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternIsAtBottom001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create TabBarPattern
+     */
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    tabBarNode->GetLayoutProperty<TabBarLayoutProperty>()->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test function IsAtBottom001.
+     * @tc.expected: Related functions run ok.
+     */
+
+    tabBarPattern->tabItemOffsets_.clear();
+    tabBarPattern->IsAtBottom();
+    EXPECT_EQ(tabBarPattern->IsAtBottom(), false);
+}
+
+/**
+ * @tc.name: TabBarPatternApplyTurnPageRateToIndicator002
+ * @tc.desc: test ApplyTurnPageRateToIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    BuildTabBar(tabsNode, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE);
+
+    /**
+     * @tc.steps: steps2. ApplyTurnPageRateToIndicator
+     * @tc.expected: steps2. Check the result of ApplyTurnPageRateToIndicator
+     */
+    tabBarPattern->swiperStartIndex_ = 0;
+    auto tabBarStyles1 = TabBarStyle::NOSTYLE;
+    auto tabBarStyles2 = TabBarStyle::SUBTABBATSTYLE;
+    auto selectedMode1 = SelectedMode::INDICATOR;
+    auto selectedMode2 = SelectedMode::BOARD;
+    tabBarPattern->tabBarStyles_.clear();
+    tabBarPattern->tabBarStyles_.push_back(tabBarStyles2);
+    tabBarPattern->selectedModes_.clear();
+    tabBarPattern->selectedModes_.push_back(selectedMode1);
+    tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, -1);
+    tabBarPattern->selectedModes_.clear();
+    tabBarPattern->selectedModes_.push_back(selectedMode2);
+    tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
+    tabBarPattern->swiperStartIndex_ = 1;
+    tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
+    tabBarPattern->tabBarStyles_.push_back(tabBarStyles1);
+    tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
+    tabBarPattern->swiperStartIndex_ = 2;
+    tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
+    tabBarPattern->swiperStartIndex_ = -1;
+    tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, -1);
+}
+
+/**
+ * @tc.name: TabBarPatternApplyTurnPageRateToIndicator003
+ * @tc.desc: test ApplyTurnPageRateToIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternApplyTurnPageRateToIndicator003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    BuildTabBar(tabsNode, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE);
+
+    /**
+     * @tc.steps: steps2. ApplyTurnPageRateToIndicator
+     * @tc.expected: steps2. Check the result of ApplyTurnPageRateToIndicator
+     */
+    tabBarPattern->swiperStartIndex_ = 0;
+    auto tabBarStyles1 = TabBarStyle::SUBTABBATSTYLE;
+    auto tabBarStyles2 = TabBarStyle::NOSTYLE;
+    auto selectedMode1 = SelectedMode::INDICATOR;
+    auto selectedMode2 = SelectedMode::BOARD;
+    tabBarPattern->tabBarStyles_.clear();
+    tabBarPattern->tabBarStyles_.push_back(tabBarStyles1);
+    tabBarPattern->selectedModes_.clear();
+    tabBarPattern->selectedModes_.push_back(selectedMode1);
+    tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, -1);
+    tabBarPattern->swiperStartIndex_ = 0;
+    tabBarPattern->tabBarStyles_.push_back(tabBarStyles2);
+    tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
+    tabBarPattern->swiperStartIndex_ = 0;
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 1);
+    tabBarPattern->selectedModes_.push_back(selectedMode2);
+    tabBarPattern->ApplyTurnPageRateToIndicator(0.0f);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, 0);
+
+    /**
+     * @tc.steps: steps3. ApplyTurnPageRateToIndicator
+     * @tc.expected: steps3. Check the result of ApplyTurnPageRateToIndicator
+     */
+
+    tabBarPattern->swiperStartIndex_ = 0;
+    auto tabBarStyles3 = TabBarStyle::SUBTABBATSTYLE;
+    auto selectedMode3 = SelectedMode::INDICATOR;
+    tabBarPattern->tabBarStyles_.clear();
+    tabBarPattern->tabBarStyles_.push_back(tabBarStyles3);
+    tabBarPattern->selectedModes_.clear();
+    tabBarPattern->selectedModes_.push_back(selectedMode3);
+    tabBarPattern->ApplyTurnPageRateToIndicator(-0.5f);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, -1);
+    tabBarPattern->swiperStartIndex_ = 0;
+    tabBarPattern->ApplyTurnPageRateToIndicator(-0.7f);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, -1);
+    tabBarPattern->swiperStartIndex_ = 0;
+    tabBarPattern->turnPageRate_ = 0.5f;
+    tabBarPattern->ApplyTurnPageRateToIndicator(-0.7f);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, -1);
+    tabBarPattern->swiperStartIndex_ = 0;
+    tabBarPattern->turnPageRate_ = 0.5f;
+    tabBarPattern->ApplyTurnPageRateToIndicator(-0.5f);
+    EXPECT_EQ(tabBarPattern->swiperStartIndex_, -1);
+}
+
+/**
+ * @tc.name: TabBarPatternInitTurnPageRateEvent001
+ * @tc.desc: test InitTurnPageRateEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternInitTurnPageRateEvent001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).Times(AnyNumber());
+
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    BuildTabBar(tabsNode, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE);
+
+    /**
+     * @tc.steps: steps2. InitTurnPageRateEvent
+     * @tc.expected: steps2. Check the result of InitTurnPageRateEvent
+     */
+
+    tabBarPattern->InitTurnPageRateEvent();
+    int32_t testswipingIndex = 1;
+    float testturnPageRate = 1.0f;
+    tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    AnimationCallbackInfo info;
+    eventHub->animationEndEvent_(testswipingIndex, info);
+    EXPECT_NE(eventHub, nullptr);
+    tabBarPattern->axis_ = Axis::HORIZONTAL;
+    tabBarPattern->isTouchingSwiper_ = true;
+    tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    EXPECT_NE(tabBarPattern, nullptr);
+    tabBarPattern->turnPageRate_ = 1.0f;
+    tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    tabBarPattern->turnPageRate_ = 0.5f;
+    tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    EXPECT_NE(tabBarPattern, nullptr);
+}
 } // namespace OHOS::Ace::NG
