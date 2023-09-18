@@ -9186,6 +9186,10 @@ HWTEST_F(TabsTestNg, SetOnChangeEvent002, TestSize.Level1)
     tabBarPattern->changeByClick_ = true;
     swiperPattern->FireChangeEvent();
     ASSERT_NE(tabspattern, nullptr);
+    tabspattern->SetOnTabBarClickEvent([](const BaseEventInfo* info) {});
+    auto onTabBarClickEvent = tabspattern->GetTabBarClickEvent();
+    (*onTabBarClickEvent)(1);
+    EXPECT_NE(tabspattern->onTabBarClickEvent_, nullptr);
 }
 
 /**
@@ -9715,6 +9719,20 @@ HWTEST_F(TabsTestNg, TabBarPatternOnModifyDone002, TestSize.Level1)
 
     tabBarPattern->OnModifyDone();
     EXPECT_NE(tabBarPattern, nullptr);
+    auto layoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarPattern->OnModifyDone();
+    tabBarNode->eventHub_ = AceType::MakeRefPtr<EventHub>();
+    tabBarNode->eventHub_->focusHub_ = AceType::MakeRefPtr<FocusHub>(tabBarNode->eventHub_);
+    ASSERT_NE(tabBarNode->eventHub_->focusHub_, nullptr);
+    tabsModel.Pop();
+    EXPECT_NE(tabBarNode->eventHub_->focusHub_, nullptr);
+    tabBarPattern->OnModifyDone();
+    EXPECT_NE(tabBarPattern, nullptr);
+    tabBarPattern->swiperController_->removeTabBarEventCallback_();
+    tabBarPattern->swiperController_->addTabBarEventCallback_();
+    EXPECT_NE(tabBarPattern->swiperController_, nullptr);
 }
 
 /**
@@ -9928,5 +9946,138 @@ HWTEST_F(TabsTestNg, TabBarPatternInitTurnPageRateEvent001, TestSize.Level1)
     tabBarPattern->turnPageRate_ = 0.5f;
     tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
     EXPECT_NE(tabBarPattern, nullptr);
+}
+
+/**
+ * @tc.name: TabBarPatternUpdateIndicator002
+ * @tc.desc: test UpdateIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternUpdateIndicator002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    bool fadingEdge = true;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    tabsModel.SetFadingEdge(fadingEdge);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    EXPECT_EQ(tabsFrameNode->GetTag(), V2::TABS_ETS_TAG);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    EXPECT_EQ(tabBarNode->GetTag(), V2::TAB_BAR_ETS_TAG);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    ASSERT_NE(tabBarPaintProperty, nullptr);
+    EXPECT_EQ(tabBarPaintProperty->GetFadingEdgeValue(), fadingEdge);
+
+    /**
+     * @tc.steps: steps2. UpdateIndicator
+     * @tc.expected: steps2. Check the result of UpdateIndicator
+     */
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    tabBarPattern->indicator_ = 0;
+    auto tabBarStyle1 = TabBarStyle::NOSTYLE;
+    tabBarPattern->tabBarStyles_.clear();
+    tabBarPattern->tabBarStyles_.push_back(tabBarStyle1);
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->isTouchingSwiper_ = true;
+    tabBarPattern->UpdateIndicator(0);
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
+    tabBarPattern->UpdateIndicator(0);
+    tabBarPattern->isTouchingSwiper_ = false;
+    tabBarPattern->UpdateIndicator(0);
+    EXPECT_NE(tabBarPattern, nullptr);
+}
+
+/**
+ * @tc.name: TabsModelPop001
+ * @tc.desc: test SetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelPop001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    BuildTabBar(tabsNode, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE);
+    tabBarNode->eventHub_ = AceType::MakeRefPtr<EventHub>();
+    tabBarNode->eventHub_->focusHub_ = AceType::MakeRefPtr<FocusHub>(tabBarNode->eventHub_);
+    ASSERT_NE(tabBarNode->eventHub_->focusHub_, nullptr);
+    tabsModel.Pop();
+    EXPECT_NE(tabBarNode->eventHub_->focusHub_, nullptr);
+    tabBarPattern->OnModifyDone();
+    EXPECT_NE(tabBarPattern, nullptr);
+    tabBarPattern->swiperController_->removeTabBarEventCallback_();
+    tabBarPattern->swiperController_->addTabBarEventCallback_();
+    EXPECT_NE(tabBarPattern->swiperController_, nullptr);
+}
+
+/**
+ * @tc.name: TabContentModelCreate2(std::function<void()>&& deepRenderFunc)
+ * @tc.desc: Test Create(std::function<void()>&& deepRenderFunc)
+ * @tc.type：FUNC
+ */
+HWTEST_F(TabsTestNg, TabContentModelCreate002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+
+    TabContentModelNG tabContentModel;
+    auto deepRenderFunc = []() { AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
+    tabContentModel.Create(deepRenderFunc);
+
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+    auto parentnode =
+        FrameNode::CreateFrameNode(V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    TabsModelNG Mode1NG;
+    Mode1NG.Create(BarPosition::END, 0, nullptr, nullptr);
+    EXPECT_NE(ViewStackProcessor::GetInstance()->Finish(), nullptr);
+    tabContentPattern->shallowBuilder_->deepRenderFunc_();
+    ASSERT_NE(tabContentPattern, nullptr);
+}
+
+/**
+ * @tc.name: TabsModelGetOrCreateTabsNode002
+ * @tc.desc: test GetOrCreateTabsNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsModelGetOrCreateTabsNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    MockPipelineContextGetTheme();
+    TabsModelNG tabsModel;
+    const std::string tag = "TabsID";
+    int32_t nodeId = 1;
+
+    /**
+     * @tc.steps: step2. Test function TabsModelGetOrCreateTabsNode.
+     * @tc.expected: Related function runs ok.
+     */
+    auto tabsNode = TabsModelNG::GetOrCreateTabsNode(tag, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabsNode2 =
+        TabsModelNG::GetOrCreateTabsNode("TabsID2", nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    ASSERT_NE(tabsNode2, nullptr);
 }
 } // namespace OHOS::Ace::NG
