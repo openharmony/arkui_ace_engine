@@ -1319,8 +1319,7 @@ void TextFieldPattern::HandleFocusEvent()
     eventHub->FireOnEditChanged(true);
     CloseSelectOverlay();
     auto visible = layoutProperty->GetShowErrorTextValue(false);
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         auto renderContext = GetHost()->GetRenderContext();
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -1490,8 +1489,7 @@ void TextFieldPattern::HandleBlurEvent()
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         auto renderContext = GetHost()->GetRenderContext();
         renderContext->UpdateBorderRadius(borderRadius_);
         underlineColor_ = textFieldTheme->GetUnderlineColor();
@@ -1855,8 +1853,7 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         underlineColor_ = textFieldTheme->GetUnderlineTypingColor();
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
     }
@@ -1898,8 +1895,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         CHECK_NULL_VOID(textFieldTheme);
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetShowUnderlineValue(false) &&
-            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+        if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
             auto radius = textFieldTheme->GetBorderRadiusSize();
             renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
         }
@@ -1919,12 +1915,10 @@ void TextFieldPattern::HandleTouchUp()
         if (!isOnHover_) {
             auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            if (layoutProperty->GetShowUnderlineValue(false) &&
-                layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+            if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
                 renderContext->UpdateBorderRadius(borderRadius_);
             }
-            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() &&
-                layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType()) {
                 auto pipeline = PipelineBase::GetCurrentContext();
                 CHECK_NULL_VOID(pipeline);
                 auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
@@ -2338,8 +2332,7 @@ void TextFieldPattern::OnModifyDone()
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     CheckIfNeedToResetKeyboard();
-    if (layoutProperty->GetShowUnderlineValue(false) &&
-        layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         underlineWidth_ = UNDERLINE_WIDTH;
         underlineColor_ =
             IsDisabled() ? textFieldTheme->GetDisableUnderlineColor() : textFieldTheme->GetUnderlineColor();
@@ -2473,9 +2466,7 @@ void TextFieldPattern::OnModifyDone()
         selectionMode_ = SelectionMode::NONE;
         preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
     }
-    if (layoutProperty->GetShowUnderlineValue(false) &&
-        (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
-            layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT)) {
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         ApplyUnderlineStates();
     }
     if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT &&
@@ -3180,8 +3171,7 @@ void TextFieldPattern::OnHover(bool isHover)
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         if (isOnHover_) {
-            if (layoutProperty->GetShowUnderlineValue(false) &&
-                layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+            if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
                 auto radius = textFieldTheme->GetBorderRadiusSize();
                 renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
             }
@@ -3190,12 +3180,10 @@ void TextFieldPattern::OnHover(bool isHover)
         }
         isOnHover_ = false;
         if (!isMousePressed_) {
-            if (layoutProperty->GetShowUnderlineValue(false) &&
-                layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+            if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
                 renderContext->UpdateBorderRadius(borderRadius_);
             }
-            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() &&
-                layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED) {
+            if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType()) {
                 auto radius = textFieldTheme->GetBorderRadiusSize();
                 renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
             }
@@ -5604,14 +5592,13 @@ void TextFieldPattern::SetShowError()
     auto renderContext = GetHost()->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto visible = layoutProperty->GetShowErrorTextValue(false);
-    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
 
-    if (visible && layoutProperty->GetShowUnderlineValue(false) && inputType == TextInputType::UNSPECIFIED) {
+    if (visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
         underlineWidth_ = ERROR_UNDERLINE_WIDTH;
         preErrorState_ = true;
     }
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) && inputType == TextInputType::UNSPECIFIED) {
+    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
         underlineColor_ = textFieldTheme->GetUnderlineColor();
         underlineWidth_ = UNDERLINE_WIDTH;
         preErrorState_ = false;
@@ -6027,6 +6014,17 @@ bool TextFieldPattern::IsNormalInlineState() const
     return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
            (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::UNSPECIFIED ||
                layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::TEXT);
+}
+
+bool TextFieldPattern::IsUnspecifiedOrTextType() const
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto inputType = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
+    if (inputType == TextInputType::UNSPECIFIED || inputType == TextInputType::TEXT) {
+        return true;
+    }
+    return false;
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
