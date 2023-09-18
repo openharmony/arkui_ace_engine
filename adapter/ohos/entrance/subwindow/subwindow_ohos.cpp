@@ -274,7 +274,6 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto popupInfo = overlayManager->GetPopupInfo(targetId == -1 ? popupTargetId_ : targetId);
-    popupInfo.popupId = -1;
     popupInfo.markNeedUpdate = true;
     ContainerScope scope(childContainerId_);
     overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);

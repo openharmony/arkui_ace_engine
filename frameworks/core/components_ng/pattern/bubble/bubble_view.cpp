@@ -436,7 +436,6 @@ RefPtr<FrameNode> BubbleView::CreateButton(
         CHECK_NULL_VOID(overlayManager);
         auto popupInfo = overlayManager->GetPopupInfo(targetId);
         popupInfo.markNeedUpdate = true;
-        popupInfo.popupId = -1;
         popupInfo.markNeedUpdate = isShow;
         overlayManager->UpdatePopupNode(targetId, popupInfo);
     };

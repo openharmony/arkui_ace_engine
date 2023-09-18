@@ -329,7 +329,6 @@ void BubblePattern::PopBubble()
         return;
     }
     popupInfo.markNeedUpdate = true;
-    popupInfo.popupId = -1;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
