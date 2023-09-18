@@ -115,7 +115,7 @@ size_t TxtParagraph::GetLineCount()
     return 1;
 }
 
-void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y) {}
+void TxtParagraph::Paint(RSCanvas& canvas, float x, float y) {}
 
 void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y) {}
 

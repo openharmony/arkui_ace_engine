@@ -2060,8 +2060,13 @@ bool RosenRenderCustomPaint::UpdateParagraph(
 #ifndef USE_GRAPHIC_TEXT_GINE
         txt::TextShadow txtShadow;
         txtShadow.color = shadow_.GetColor().GetValue();
+#ifndef USE_ROSEN_DRAWING
         txtShadow.offset.fX = shadow_.GetOffset().GetX();
         txtShadow.offset.fY = shadow_.GetOffset().GetY();
+#else
+        txtShadow.offset.SetX(shadow_.GetOffset().GetX());
+        txtShadow.offset.SetY(shadow_.GetOffset().GetY());
+#endif
 #ifndef NEW_SKIA
         txtShadow.blur_radius = shadow_.GetBlurRadius();
 #else

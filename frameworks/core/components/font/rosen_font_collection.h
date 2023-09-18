@@ -48,13 +48,21 @@ public:
     void SetIsZawgyiMyanmar(bool isZawgyiMyanmar);
 
 #ifndef USE_GRAPHIC_TEXT_GINE
+#ifndef USE_ROSEN_DRAWING
     sk_sp<txt::DynamicFontManager> GetDynamicFontManager();
+#else
+    std::shared_ptr<RSFontMgr> GetDynamicFontManager();
+#endif
 #endif
 
 private:
 #ifndef USE_GRAPHIC_TEXT_GINE
     std::shared_ptr<txt::FontCollection> fontCollection_;
+#ifndef USE_ROSEN_DRAWING
     sk_sp<txt::DynamicFontManager> dynamicFontManager_;
+#else
+    std::shared_ptr<RSFontMgr> dynamicFontManager_;
+#endif
 #else
     std::shared_ptr<Rosen::FontCollection> fontCollection_;
 #endif

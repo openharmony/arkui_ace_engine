@@ -187,7 +187,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     if (!ifPaintObscuration || ifHaveSpanItemChildren_) {
         CHECK_NULL_VOID(paragraph_);
-        auto canvas = drawingContext.canvas;
+        auto& canvas = drawingContext.canvas;
         canvas.Save();
         if (!textRacing_) {
             auto contentSize = contentSize_->Get();
@@ -225,7 +225,7 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 
 void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
 {
-    RSCanvas canvas = drawingContext.canvas;
+    RSCanvas& canvas = drawingContext.canvas;
     RSBrush brush;
     std::vector<RSPoint> radiusXY(POINT_COUNT);
     Dimension borderRadius = Dimension(2.0, DimensionUnit::VP);

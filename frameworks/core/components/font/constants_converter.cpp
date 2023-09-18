@@ -445,8 +445,13 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     for (auto& spanShadow : textStyle.GetTextShadows()) {
         txt::TextShadow txtShadow;
         txtShadow.color = spanShadow.GetColor().GetValue();
+#ifndef USE_ROSEN_DRAWING
         txtShadow.offset.fX = static_cast<SkScalar>(spanShadow.GetOffset().GetX());
         txtShadow.offset.fY = static_cast<SkScalar>(spanShadow.GetOffset().GetY());
+#else
+        txtShadow.offset.SetX(static_cast<SkScalar>(spanShadow.GetOffset().GetX()));
+        txtShadow.offset.SetY(static_cast<SkScalar>(spanShadow.GetOffset().GetY()));
+#endif
 #if defined (FLUTTER_2_5) || defined (NEW_SKIA)
         txtShadow.blur_sigma = spanShadow.GetBlurRadius();
 #else

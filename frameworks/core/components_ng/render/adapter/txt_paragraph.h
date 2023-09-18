@@ -69,7 +69,7 @@ public:
     float GetAlphabeticBaseline() override;
 
     // interfaces for painting
-    void Paint(const RSCanvas& canvas, float x, float y) override;
+    void Paint(RSCanvas& canvas, float x, float y) override;
     void Paint(SkCanvas* skCanvas, float x, float y) override;
 
     // interfaces for calculate the the specified paragraph position

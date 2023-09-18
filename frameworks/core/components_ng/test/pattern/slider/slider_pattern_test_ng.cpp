@@ -184,7 +184,7 @@ void SliderPatternTestNg::MockTipsCanvasFunction(Testing::MockCanvas& canvas)
 
 void SliderPatternTestNg::MockParagraphFunction(RefPtr<MockParagraph>& paragraph, Testing::MockCanvas& canvas)
 {
-    EXPECT_CALL(*paragraph, Paint(An<const RSCanvas&>(), _, _)).WillRepeatedly(Return());
+    EXPECT_CALL(*paragraph, Paint(An<RSCanvas&>(), _, _)).WillRepeatedly(Return());
     EXPECT_CALL(*paragraph, Layout(_)).WillRepeatedly(Return());
     EXPECT_CALL(*paragraph, PushStyle(_)).WillRepeatedly(Return());
     EXPECT_CALL(*paragraph, AddText(_)).WillRepeatedly(Return());

@@ -126,7 +126,7 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
         rectWidth -= widthChangeValue;
     }
     // Paint background
-    RSCanvas canvas = context.canvas;
+    RSCanvas& canvas = context.canvas;
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(contentProperty.backgroundColor));
@@ -137,7 +137,7 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
 
 void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty& contentProperty)
 {
-    RSCanvas canvas = context.canvas;
+    RSCanvas& canvas = context.canvas;
     OffsetF selectedCenter = {};
     for (size_t i = 0; i < contentProperty.vectorBlackPointCenterX.size(); ++i) {
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
@@ -243,7 +243,7 @@ void DotIndicatorModifier::PaintSelectedIndicator(RSCanvas& canvas, const Offset
 
 void DotIndicatorModifier::PaintMask(DrawingContext& context)
 {
-    RSCanvas canvas = context.canvas;
+    RSCanvas& canvas = context.canvas;
 
     RSBrush brush;
     brush.SetAntiAlias(true);
