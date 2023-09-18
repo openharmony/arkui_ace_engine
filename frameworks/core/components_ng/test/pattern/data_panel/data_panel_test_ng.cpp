@@ -74,6 +74,8 @@ constexpr float PERCENT = 1.0f;
 constexpr float ROOT_WIDTH = 1000.0f;
 constexpr float ROOT_HEIGHT = 1000.0f;
 constexpr float COLOR_SIZE = 2.0f;
+
+const std::string CREATE_VALUE = "Hello World";
 } // namespace
 
 class DataPanelTestNg : public testing::Test {
@@ -1243,7 +1245,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest016, TestSize.Level1)
     auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
     dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
         { Color::WHITE, Color::BLACK } };
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
@@ -1256,10 +1258,165 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest016, TestSize.Level1)
     dataPanelModifier.SetValues(VALUES);
     dataPanelModifier.PaintLinearProgress(context, OFFSET);
     LinearData segmentLinearData;
+
+    /**
+     * @tc.cases: case. cover isEndData is true.
+     */
+    segmentLinearData.isEndData = true;
     segmentLinearData.offset = OFFSET;
     segmentLinearData.xSegment = 5.0;
     segmentLinearData.segmentWidth = 5.0;
     segmentLinearData.height = 5.0;
     dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
+
+    /**
+     * @tc.cases: case. cover branch segmentLinearData isFirstData is true.
+     */
+    segmentLinearData.isFirstData = true;
+    dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+
+    /**
+     * @tc.cases: case. cover branch segmentLinearData isEndData is true.
+     */
+    segmentLinearData.isFirstData = false;
+    segmentLinearData.isEndData = true;
+    dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+}
+
+/**
+ * @tc.name: DataPanelPaintMethodTest017
+ * @tc.desc: Test DataPanel PaintMethod UpdateDate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest017, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataTheme));
+
+    /**
+     * @tc.cases: case. cover branch date_ is not null and  isFirstAnimate_ is true.
+     */
+    DataPanelModifier dataPanelModifier;
+    dataPanelModifier.date_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0);
+    dataPanelModifier.UpdateDate();
+    EXPECT_FALSE(dataPanelModifier.isFirstAnimate_);
+
+    /**
+     * @tc.cases: case. cover branch date_ is not null and  isFirstAnimate_ is false.
+     */
+    dataPanelModifier.date_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0);
+    dataPanelModifier.UpdateDate();
+    EXPECT_FALSE(dataPanelModifier.isFirstAnimate_);
+
+    /**
+     * @tc.cases: case. cover branch date_ is nullptr and  isFirstAnimate_ is false.
+     */
+    dataPanelModifier.date_ = nullptr;
+    dataPanelModifier.UpdateDate();
+    EXPECT_FALSE(dataPanelModifier.isFirstAnimate_);
+}
+
+/**
+ * @tc.name: DataPanelPaintMethodTest018
+ * @tc.desc: Test DataPanel PaintMethod onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelPaintMethodTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. statement dataPanelModifier.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dataTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataTheme));
+    DataPanelModifier dataPanelModifier;
+
+    /**
+     * @tc.steps: step2. construct context and call onDraw().
+     * @tc.expected: call onDraw and result is expected.
+     */
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 10.0f, 10.0f };
+
+    dataPanelModifier.onDraw(context);
+    EXPECT_EQ(0, dataPanelModifier.dataPanelType_);
+
+    dataPanelModifier.dataPanelType_ = 1;
+    dataPanelModifier.onDraw(context);
+    EXPECT_EQ(1, dataPanelModifier.dataPanelType_);
+}
+
+/**
+ * @tc.name: UpdateContentModifier001
+ * @tc.desc: Test DataPanel PaintMethod UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, UpdateContentModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create datapnel and get frameNode.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto dataPanelPattern = frameNode->GetPattern<DataPanelPattern>();
+    EXPECT_NE(dataPanelPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. construct paintWrapper and call UpdateContentModifier().
+     * @tc.expected: call UpdateContentModifier and HasShadowOption is expected.
+     */
+    auto dataPanelPaintMethod = AceType::DynamicCast<DataPanelPaintMethod>(dataPanelPattern->CreateNodePaintMethod());
+    ASSERT_NE(dataPanelPaintMethod, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    auto renderContext = frameNode->GetRenderContext();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, dataPanelPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    dataPanelPaintMethod->UpdateContentModifier(paintWrapper);
+    EXPECT_FALSE(dataPanelPaintProperty->HasShadowOption());
+
+    /**
+     * @tc.steps: step3. construct valueColors and call UpdateContentModifier().
+     * @tc.expected: call UpdateContentModifier and HasValueColors is expected.
+     */
+    int length = 3;
+    std::vector<Gradient> valueColors;
+    GradientColorSet(valueColors, length);
+    dataPanelPaintProperty->UpdateValueColors(valueColors);
+
+    DataPanelShadow shadowOption { true, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE,
+        valueColors };
+    dataPanel.SetShadowOption(shadowOption);
+    dataPanelPaintMethod->UpdateContentModifier(paintWrapper);
+    EXPECT_TRUE(dataPanelPaintProperty->HasValueColors());
+
+    /**
+     * @tc.steps: step4. construct paintWrapper2 and call UpdateContentModifier().
+     * @tc.expected: cover branch shadowOption colors size more than 0 and call UpdateContentModifier
+     */
+    DataPanelModelNG dataPanelModelNG2;
+    dataPanelModelNG2.Create(VALUES, MAX, TYPE_CYCLE);
+    std::vector<Gradient> valueColors2;
+    GradientColorSet(valueColors2, length);
+    DataPanelShadow shadowOption2 { true, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE,
+        valueColors2 };
+    dataPanelModelNG2.SetShadowOption(shadowOption2);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode2, nullptr);
+
+    auto renderContext2 = frameNode2->GetRenderContext();
+    auto dataPanelPaintProperty2 = frameNode2->GetPaintProperty<DataPanelPaintProperty>();
+    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper2 = new PaintWrapper(renderContext2, geometryNode2, dataPanelPaintProperty2);
+    ASSERT_NE(paintWrapper2, nullptr);
+    dataPanelPaintMethod->UpdateContentModifier(paintWrapper2);
+    EXPECT_EQ(dataPanelPaintProperty2->GetShadowOptionValue(), shadowOption2);
 }
 } // namespace OHOS::Ace::NG

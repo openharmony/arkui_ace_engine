@@ -59,6 +59,7 @@ const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
 const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 constexpr Color NORMAL_COLOR = Color(0xff0000ff);
 constexpr Color ERROR_COLOR = Color();
+const OHOS::Ace::NG::TouchHoverAnimationType INVALID_TOUCH_HOVER_ANIMARION_TYPE = TouchHoverAnimationType(100);
 } // namespace
 
 class RadioTestNg : public testing::Test {
@@ -345,6 +346,11 @@ HWTEST_F(RadioTestNg, RadioPatternTest006, TestSize.Level1)
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
+
+    /**
+     * @tc.cases: case. cover branch preCheck_ is true.
+     */
+    pattern->preCheck_ = true;
     pattern->UpdateUncheckStatus(frameNode);
     EXPECT_NE(radioPaintProperty->GetRadioCheckValue(), CHECKED);
 }
@@ -838,6 +844,13 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest005, TestSize.Level1)
     radioModifier->UpdateAnimatableProperty();
     EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
     radioModifier->touchHoverType_ = TouchHoverAnimationType::PRESS;
+    radioModifier->UpdateAnimatableProperty();
+    EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
+
+    /**
+     * @tc.cases: case. cover branch default touchHoverType_.
+     */
+    radioModifier->touchHoverType_ = INVALID_TOUCH_HOVER_ANIMARION_TYPE;
     radioModifier->UpdateAnimatableProperty();
     EXPECT_EQ(radioModifier->animateTouchHoverColor_->Get(), LinearColor(Color::BLUE));
 }
