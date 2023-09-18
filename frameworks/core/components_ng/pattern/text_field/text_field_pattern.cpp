@@ -2429,6 +2429,15 @@ bool TextFieldPattern::IsDisabled()
 {
     auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_RETURN(eventHub, true);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, true);
+    if (!eventHub->IsEnabled()) {
+        layoutProperty->UpdateTextColor(theme->GetDisableTextColor());
+    }
     return !eventHub->IsEnabled();
 }
 
