@@ -301,7 +301,7 @@ public:
     {
         return false;
     }
-    
+
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
     {
         if (SystemProperties::GetDebugEnabled()) {
@@ -331,6 +331,11 @@ public:
     bool IsEnabled() const
     {
         return enabled_;
+    }
+
+    bool IsDeveloperEnabled() const
+    {
+        return developerEnabled_;
     }
 
     void SetEnabled(bool enabled)

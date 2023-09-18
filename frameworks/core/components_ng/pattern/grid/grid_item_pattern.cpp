@@ -229,7 +229,7 @@ void GridItemPattern::InitDisableStyle()
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);
 
-    if (!eventHub->IsEnabled()) {
+    if (!eventHub->IsDeveloperEnabled()) {
         renderContext->UpdateOpacity(theme->GetGridItemDisabledAlpha());
     } else {
         renderContext->UpdateOpacity(theme->GetGridItemEnabledAlpha());
