@@ -27,6 +27,7 @@ using JankFrameFlag = uint32_t;
 inline constexpr JankFrameFlag JANK_IDLE = 0;
 inline constexpr JankFrameFlag JANK_RUNNING_SCROLL = 1;
 inline constexpr JankFrameFlag JANK_RUNNING_ANIMATOR = 1 << 1;
+inline constexpr JankFrameFlag JANK_RUNNING_SWIPER = 1 << 2;
 
 class ACE_FORCE_EXPORT JankFrameReport {
 public:

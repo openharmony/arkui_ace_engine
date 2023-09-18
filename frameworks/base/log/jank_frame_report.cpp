@@ -117,7 +117,7 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
     double jank = double(duration) / refreshPeriod_;
     // perf monitor jank frame
     PerfMonitor::GetPerfMonitor()->SetFrameTime(timeStampNanos, duration, jank);
-    RecordJankStatus(jank + jsAnimationDelayJank_);
+    RecordJankStatus(jank);
     prevFrameUpdateCount_ = currentFrameUpdateCount_;
     RecordPreviousEnd();
 }
@@ -134,6 +134,14 @@ void JankFrameReport::JsAnimationToRsRecord()
 
 void JankFrameReport::RecordJankStatus(double jank)
 {
+    if (jsAnimationDelayJank_ > 1.0f) {
+        jank += jsAnimationDelayJank_;
+    }
+    if (animatorEndTime_ != 0) {
+        hasJsAnimation_ = false;
+        animatorEndTime_ = 0;
+        jsAnimationDelayJank_ = 0;
+    }
     // on need to record
     if (jank <= 1.0f || (recordStatus_ == JANK_IDLE && animatorEndTime_ != 0)) {
         return;
@@ -147,11 +155,6 @@ void JankFrameReport::RecordJankStatus(double jank)
     if (jank >= 6.0f) {
         jankFrameCount_++;
         ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
-    }
-    if (animatorEndTime_ != 0) {
-        hasJsAnimation_ = false;
-        animatorEndTime_ = 0;
-        jsAnimationDelayJank_ = 0;
     }
 }
 
