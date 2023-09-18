@@ -422,7 +422,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
-            GetScrollBar()->ScheduleDisapplearDelayTask();
+            GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
     CheckRestartSpring();
@@ -536,7 +536,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
             }
             auto scrollBar = GetScrollBar();
             if (scrollBar) {
-                scrollBar->ScheduleDisapplearDelayTask();
+                scrollBar->ScheduleDisappearDelayTask();
             }
             StartScrollBarAnimatorByProxy();
         }

@@ -351,7 +351,7 @@ void ScrollBar::SetGestureEvent()
                 info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
-                    scrollBar->ScheduleDisapplearDelayTask();
+                    scrollBar->ScheduleDisappearDelayTask();
                 }
                 scrollBar->SetPressed(false);
             }
@@ -382,7 +382,7 @@ void ScrollBar::SetMouseEvent()
             scrollBar->SetHover(false);
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
-                scrollBar->ScheduleDisapplearDelayTask();
+                scrollBar->ScheduleDisappearDelayTask();
             }
         }
     });
@@ -398,7 +398,7 @@ void ScrollBar::SetHoverEvent()
             scrollBar->SetHover(false);
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
-                scrollBar->ScheduleDisapplearDelayTask();
+                scrollBar->ScheduleDisappearDelayTask();
             }
         }
     });
@@ -621,20 +621,20 @@ void ScrollBar::OnCollectTouchTarget(
     }
 }
 
-void ScrollBar::ScheduleDisapplearDelayTask()
+void ScrollBar::ScheduleDisappearDelayTask()
 {
     if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
-        disapplearDelayTask_.Cancel();
+        disappearDelayTask_.Cancel();
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        disapplearDelayTask_.Reset([weak = WeakClaim(this)] {
+        disappearDelayTask_.Reset([weak = WeakClaim(this)] {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
             scrollBar->PlayScrollBarEndAnimation();
         });
-        taskExecutor->PostDelayedTask(disapplearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION);
+        taskExecutor->PostDelayedTask(disappearDelayTask_, TaskExecutor::TaskType::UI, BAR_DISAPPRAE_DELAY_DURATION);
     }
 }
 } // namespace OHOS::Ace::NG

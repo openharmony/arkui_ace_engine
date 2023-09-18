@@ -156,7 +156,7 @@ bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
     }
     if (source == SCROLL_FROM_START) {
         SetParentScrollable();
-        GetParentNavigition();
+        GetParentNavigation();
         StopScrollBarAnimatorByProxy();
         AbortScrollAnimator();
     } else if (!AnimateStoped()) {
@@ -402,7 +402,7 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
         if (scrollBarOverlayModifier_ && scrollBar_->IsScrollable()) {
             scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
         }
-        scrollBar_->ScheduleDisapplearDelayTask();
+        scrollBar_->ScheduleDisappearDelayTask();
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -453,7 +453,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
                 scrollBarOverlayModifier_->SetOpacity(scrollable ? UINT8_MAX : 0);
             }
             if (scrollable) {
-                scrollBar_->ScheduleDisapplearDelayTask();
+                scrollBar_->ScheduleDisappearDelayTask();
             }
         }
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
@@ -556,7 +556,7 @@ RefPtr<ScrollablePattern> ScrollablePattern::GetParentScrollable()
     return nullptr;
 }
 
-void ScrollablePattern::GetParentNavigition()
+void ScrollablePattern::GetParentNavigation()
 {
     if (navBarPattern_) {
         return;
