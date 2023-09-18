@@ -160,6 +160,9 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
     float endX = backEnd.GetX();
     float startY = backStart.GetY();
     float endY = backEnd.GetY();
+    if (NearEqual(startX, endX) && NearEqual(startY, endY)) {
+        return;
+    }
     auto stepsLengthX = (endX - startX) * stepRatio;
     auto stepsLengthY = (endY - startY) * stepRatio;
 
