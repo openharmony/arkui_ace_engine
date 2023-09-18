@@ -132,7 +132,7 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(context);
     auto langTask = [weak = AceType::WeakClaim(this)]() {
         auto WebPattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(WebPattern);
+        CHECK_NULL_VOID(WebPattern);
         WebPattern->UpdateLocale();
     };
     context->SetConfigChangedCallback(std::move(langTask));
@@ -147,7 +147,7 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) { return; };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragMove(event);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) { return; };
@@ -222,7 +222,7 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleMouseEvent(info);
     };
 
@@ -238,7 +238,7 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
     auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         MouseInfo info;
         info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
         pattern->WebOnMouseEvent(info);
@@ -269,12 +269,12 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 void WebPattern::ResetDragAction()
 {
     auto frameNode = GetHost();
-    CHECK_NULL_VOID_NOLOG(frameNode);
+    CHECK_NULL_VOID(frameNode);
     frameNode->SetDraggable(false);
     auto eventHub = frameNode->GetEventHub<WebEventHub>();
-    CHECK_NULL_VOID_NOLOG(eventHub);
+    CHECK_NULL_VOID(eventHub);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID_NOLOG(gestureHub);
+    CHECK_NULL_VOID(gestureHub);
     gestureHub->ResetDragActionForWeb();
 
     if (!isDragging_) {
@@ -284,7 +284,7 @@ void WebPattern::ResetDragAction()
     isDragging_ = false;
     LOGI("need to cancel web kernel drag action");
     // cancel drag action to avoid web kernel can't process other input event
-    CHECK_NULL_VOID_NOLOG(delegate_);
+    CHECK_NULL_VOID(delegate_);
     delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
     gestureHub->CancelDragForWeb();
 }
@@ -367,7 +367,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
     NG::DragDropInfo dragDropInfo;
     if (GenerateDragDropInfo(dragDropInfo)) {
         auto frameNode = GetHost();
-        CHECK_NULL_RETURN_NOLOG(frameNode, dragDropInfo);
+        CHECK_NULL_RETURN(frameNode, dragDropInfo);
         // get drag pixel map successfully, disable next drag util received web kernel drag callback
         frameNode->SetDraggable(false);
 
@@ -551,11 +551,11 @@ bool WebPattern::NotifyStartDragTask()
     LOGI("notify to start web drag task");
     isDragging_ = true;
     auto frameNode = GetHost();
-    CHECK_NULL_RETURN_NOLOG(frameNode, false);
+    CHECK_NULL_RETURN(frameNode, false);
     auto eventHub = frameNode->GetEventHub<WebEventHub>();
-    CHECK_NULL_RETURN_NOLOG(eventHub, false);
+    CHECK_NULL_RETURN(eventHub, false);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN_NOLOG(gestureHub, false);
+    CHECK_NULL_RETURN(gestureHub, false);
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
@@ -593,7 +593,7 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
         int32_t y = info.GetGlobalPoint().GetY();
         LOGI("DragDrop event gestureHub actionStartTask x:%{public}d, y:%{public}d", x, y);
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(x, y);
     };
 
@@ -606,14 +606,14 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
         int32_t y = info.GetGlobalPoint().GetY();
         LOGI("DragDrop event gestureHub actionEndTask x:%{public}d, y:%{public}d", x, y);
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(x, y);
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         LOGI("DragDrop event gestureHub actionCancelTask ");
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleDragCancel();
     };
 
@@ -767,14 +767,14 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
     };
     focusHub->SetOnFocusInternal(focusTask);
 
     auto blurTask = [weak = WeakClaim(this)](const BlurReason& blurReason) {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
+        CHECK_NULL_VOID(pattern);
         pattern->HandleBlurEvent(blurReason);
     };
     focusHub->SetOnBlurReasonInternal(blurTask);
@@ -1199,11 +1199,11 @@ void WebPattern::RegistVirtualKeyBoardListener()
         return;
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetVirtualKeyBoardCallback(
         [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
             auto webPattern = weak.Upgrade();
-            CHECK_NULL_RETURN_NOLOG(webPattern, false);
+            CHECK_NULL_RETURN(webPattern, false);
             return webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
         });
     needUpdateWeb_ = false;
@@ -1480,7 +1480,7 @@ void WebPattern::ExitFullScreen()
 std::optional<OffsetF> WebPattern::GetCoordinatePoint()
 {
     auto frameNode = GetHost();
-    CHECK_NULL_RETURN_NOLOG(frameNode, std::nullopt);
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
     return frameNode->GetTransformRelativeOffset();
 }
 
