@@ -45,6 +45,8 @@ namespace {
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
+constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
+constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 }; // namespace
 
 void TextPattern::OnAttachToFrameNode()
@@ -156,7 +158,7 @@ void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     CHECK_NULL_VOID(pipeline);
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
-    auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    auto textPaintOffset = offset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
 
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
     float startSelectHeight = 0.0f;
@@ -203,7 +205,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
 #ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
 #endif
-    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
     InitSelection(textOffset);
@@ -221,7 +223,7 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     CHECK_NULL_VOID(pipeline);
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset() - rootOffset;
-    auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    auto textPaintOffset = offset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
 
     auto localOffset = handleRect.GetOffset();
 
@@ -440,6 +442,24 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
+    if (hasClicked_) {
+        hasClicked_ = false;
+        TimeStamp clickTimeStamp = info.GetTimeStamp();
+        std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout =
+            clickTimeStamp - lastClickTimeStamp_;
+        lastClickTimeStamp_ = info.GetTimeStamp();
+        if (timeout.count() < DOUBLECLICK_INTERVAL_MS) {
+            HandleDoubleClickEvent(info);
+            return;
+        }
+    }
+    HandleSingleClickEvent(info);
+}
+
+void TextPattern::HandleSingleClickEvent(GestureEvent& info)
+{
+    hasClicked_ = true;
+    lastClickTimeStamp_ = info.GetTimeStamp();
     if (textSelector_.IsValid()) {
         CloseSelectOverlay(true);
         ResetSelection();
@@ -473,6 +493,29 @@ void TextPattern::HandleClickEvent(GestureEvent& info)
     if (onClick_ && !isClickOnSpan) {
         onClick_(info);
     }
+}
+
+void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
+{
+    if (copyOption_ == CopyOptions::None) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
+    auto gestureHub = hub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    isDoubleClick_ = true;
+    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    InitSelection(textOffset);
+    CalculateHandleOffsetAndShowOverlay();
+    if (!isMousePressed_) {
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -515,7 +558,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
         return;
     }
     if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::PRESS) {
-        auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+        auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
             info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
         InitSelection(textOffset);
@@ -534,7 +577,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
                 return;
             }
             mouseStatus_ = MouseStatus::PRESSED;
-            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
             Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
                 info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
             CHECK_NULL_VOID(paragraph_);
@@ -547,7 +590,7 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
                 return;
             }
             mouseStatus_ = MouseStatus::MOVE;
-            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
             Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
                 info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
             CHECK_NULL_VOID(paragraph_);
@@ -560,12 +603,16 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
                 blockPress_ = false;
             }
             mouseStatus_ = MouseStatus::RELEASED;
-            auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-            Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-                info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-            CHECK_NULL_VOID(paragraph_);
-            auto end = paragraph_->GetHandlePositionForClick(textOffset);
-            textSelector_.Update(textSelector_.baseOffset, end);
+            if (isDoubleClick_) {
+                isDoubleClick_ = false;
+            } else {
+                auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+                Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+                    info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+                CHECK_NULL_VOID(paragraph_);
+                auto end = paragraph_->GetHandlePositionForClick(textOffset);
+                textSelector_.Update(textSelector_.baseOffset, end);
+            }
             isMousePressed_ = false;
         }
     }
@@ -675,7 +722,7 @@ bool TextPattern::IsDraggable(const Offset& offset)
         std::vector<Rect> selectedRects;
         paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
         auto panOffset = OffsetF(offset.GetX(), offset.GetY()) - contentRect_.GetOffset() +
-                         OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+                         OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         for (const auto& selectedRect : selectedRects) {
             if (selectedRect.IsInRegion(Point(panOffset.GetX(), panOffset.GetY()))) {
                 return true;
