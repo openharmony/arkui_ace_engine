@@ -6103,9 +6103,15 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
         shadow.SetOffsetY(offsetY.Value());
     }
-    auto jsObject = JSRef<JSObject>::Cast(jsValue);
     Color color;
-    if (ParseJsColor(jsObject->GetProperty("color"), color)) {
+    bool success = false;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        success = ParseJsonColor(argsPtrItem->GetValue("color"), color);
+    } else {
+        auto jsObject = JSRef<JSObject>::Cast(jsValue);
+        success = ParseJsColor(jsObject->GetProperty("color"), color);
+    }
+    if (success) {
         shadow.SetColor(color);
     }
     auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
