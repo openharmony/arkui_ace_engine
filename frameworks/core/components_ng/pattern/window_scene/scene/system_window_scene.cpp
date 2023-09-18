@@ -79,6 +79,8 @@ void SystemWindowScene::OnAttachToFrameNode()
         if (host != nullptr) {
             DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowMouseEvent(
                 host->GetId(), session, pointerEvent);
+            DelayedSingleton<WindowEventProcess>::GetInstance()->ProcessWindowDragEvent(
+                host->GetId(), session, pointerEvent);
         }
         session->TransferPointerEvent(pointerEvent);
     };

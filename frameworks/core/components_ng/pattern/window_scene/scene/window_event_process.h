@@ -30,14 +30,12 @@ public:
     DISALLOW_COPY_AND_MOVE(WindowEventProcess);
     void ProcessWindowMouseEvent(int32_t nodeId, sptr<Rosen::Session> session,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void ProcessWindowDragEvent(const RefPtr<WindowNode>& windowNode,
+    void ProcessWindowDragEvent(int32_t nodeId, sptr<Rosen::Session> session,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void CleanWindowDragEvent();
 
 private:
-    void DispatchPointerEvent(const RefPtr<WindowNode>& windowNode,
-        const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void UpdateWindowMouseRecord(const RefPtr<WindowNode>& windowNode,
+    void UpdateWindowMouseRecord(int32_t nodeId, sptr<Rosen::Session> session,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void CleanWindowMouseRecord();
     void ProcessEnterLeaveEvent(int32_t nodeId, sptr<Rosen::Session> session,
@@ -49,7 +47,8 @@ private:
     wptr<Rosen::Session> lastWeakSession_ { nullptr };
     std::shared_ptr<MMI::PointerEvent> lastPointEvent_ { nullptr };
 
-    WeakPtr<WindowNode> lastDragWindowNode_  { nullptr };
+    int32_t lastDragWindowNodeId_  { -1 };
+    wptr<Rosen::Session> lastDragSession_ { nullptr };
     std::shared_ptr<MMI::PointerEvent> lastDragPointEvent_ { nullptr };
 };
 } // namespace OHOS::Ace::NG
