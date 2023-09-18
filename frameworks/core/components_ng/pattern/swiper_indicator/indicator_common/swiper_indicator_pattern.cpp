@@ -355,7 +355,6 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
             if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
                 hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
                 mouseClickIndex_ = i;
-                swiperPattern->SetIndicatorDoingAnimation(true);
                 break;
             }
             centerX += itemWidth + space;
