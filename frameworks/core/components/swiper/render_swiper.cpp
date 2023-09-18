@@ -855,7 +855,7 @@ void RenderSwiper::HandleRemoteMessage(const ClickInfo& clickInfo)
 }
 
 void RenderSwiper::HandleDragStart(const DragStartInfo& info)
-{//
+{
     Point dragStartPoint = Point(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     GetIndicatorCurrentRect(swiperIndicatorData_);
     if (indicatorRect_.IsInRegion(dragStartPoint)) {
