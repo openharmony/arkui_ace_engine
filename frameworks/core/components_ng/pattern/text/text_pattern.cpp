@@ -471,7 +471,8 @@ void TextPattern::HandleClickEvent(GestureEvent& info)
         }
     }
     if (onClick_ && !isClickOnSpan) {
-        onClick_(info);
+        auto onClick = onClick_;
+        onClick(info);
     }
 }
 
