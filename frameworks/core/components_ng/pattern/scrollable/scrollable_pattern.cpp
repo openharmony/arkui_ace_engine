@@ -778,13 +778,16 @@ void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selected
     auto newRect = selectedZone;
     auto startMainOffset = mouseStartOffset_.GetMainOffset(axis_);
     auto endMainOffset = mouseEndOffset_.GetMainOffset(axis_);
+    SelectDirection oldDirection = selectDirection_;
     if (LessNotEqual(startMainOffset, endMainOffset)) {
+        selectDirection_ = SELECT_DOWN;
         if (axis_ == Axis::VERTICAL) {
             newRect.SetOffset(OffsetF(selectedZone.Left(), totalOffsetOfMousePressed_));
         } else {
             newRect.SetOffset(OffsetF(totalOffsetOfMousePressed_, selectedZone.Top()));
         }
     } else {
+        selectDirection_ = SELECT_UP;
         if (axis_ == Axis::VERTICAL) {
             newRect.SetOffset(
                 OffsetF(selectedZone.Left(), totalOffsetOfMousePressed_ - (startMainOffset - endMainOffset)));
@@ -793,9 +796,14 @@ void ScrollablePattern::HandleInvisibleItemsSelectedStatus(const RectF& selected
                 OffsetF(totalOffsetOfMousePressed_ - (startMainOffset - endMainOffset), selectedZone.Top()));
         }
     }
+    oldDirection = oldDirection == SELECT_NONE ? selectDirection_ : oldDirection;
 
     for (auto& item : itemToBeSelected_) {
         item.second.FireSelectChangeEvent(newRect.IsIntersectWith(item.second.rect));
+    }
+
+    if (oldDirection != selectDirection_) {
+        itemToBeSelected_.clear();
     }
 }
 
@@ -824,6 +832,7 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             ClearInvisibleItemsSelectedStatus();
         }
         mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        lastMouseStart_ = mouseStartOffset_;
         mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         totalOffsetOfMousePressed_ = mousePressOffset_.GetMainOffset(axis_) + GetTotalOffset();
@@ -837,6 +846,8 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
         auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
         if (Offset(delta.GetX(), delta.GetY()).GetDistance() > DEFAULT_PAN_DISTANCE.ConvertToPx()) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+            // avoid large select zone
+            LimitMouseEndOffset();
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
             MultiSelectWithoutKeyboard(selectedZone);
             HandleInvisibleItemsSelectedStatus(selectedZone);
@@ -882,8 +893,10 @@ void ScrollablePattern::SelectWithScroll()
             auto pattern = weakScroll.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
+            pattern->UpdateMouseStart(offset);
         });
     } else {
+        offset = GetOffsetWithLimit(mouseStartOffset_.GetMainOffset(axis_), offset);
         selectMotion_->Reset(offset);
     }
 
@@ -893,9 +906,11 @@ void ScrollablePattern::SelectWithScroll()
 void ScrollablePattern::OnMouseRelease()
 {
     mouseStartOffset_.Reset();
+    lastMouseStart_.Reset();
     mouseEndOffset_.Reset();
     mousePressed_ = false;
     ClearSelectedZone();
+    itemToBeSelected_.clear();
     lastMouseMove_.SetLocalLocation(Offset::Zero());
 }
 
@@ -962,31 +977,26 @@ bool ScrollablePattern::ShouldSelectScrollBeStopped()
         return true;
     }
 
-    // avoid start position move when offset is bigger then item height
-    auto currentMainStartOffset = mouseStartOffset_.GetMainOffset(axis_);
-    if (Positive(offset)) {
-        if (LessNotEqual(totalOffsetOfMousePressed_, currentMainStartOffset + offset)) {
-            offset = totalOffsetOfMousePressed_ - currentMainStartOffset;
-        }
-    } else {
-        auto hostSize = GetHostFrameSize();
-        CHECK_NULL_RETURN(hostSize.has_value(), true);
-        auto minStartOffset = -(GetTotalHeight() - totalOffsetOfMousePressed_ - hostSize->MainSize(axis_));
-        if (GreatNotEqual(minStartOffset, currentMainStartOffset + offset)) {
-            offset = minStartOffset - currentMainStartOffset;
-        }
-    }
-
+    offset = GetOffsetWithLimit(lastMouseStart_.GetMainOffset(axis_), offset);
     if (axis_ == Axis::VERTICAL) {
-        mouseStartOffset_.AddY(offset);
+        lastMouseStart_.AddY(offset);
     } else {
-        mouseStartOffset_.AddX(offset);
+        lastMouseStart_.AddX(offset);
     }
     if (selectMotion_) {
         selectMotion_->Reset(offset);
     }
     return false;
 };
+
+void ScrollablePattern::UpdateMouseStart(float offset)
+{
+    if (axis_ == Axis::VERTICAL) {
+        mouseStartOffset_.AddY(offset);
+    } else {
+        mouseStartOffset_.AddX(offset);
+    }
+}
 
 float ScrollablePattern::GetOutOfScrollableOffset() const
 {
@@ -1013,6 +1023,47 @@ float ScrollablePattern::GetOutOfScrollableOffset() const
         offset = mainTop - mouseMainOffset;
     }
     return offset;
+}
+
+// avoid start position move when offset is bigger then item height
+float ScrollablePattern::GetOffsetWithLimit(float position, float offset) const
+{
+    auto limitedOffset = offset;
+    if (Positive(offset)) {
+        if (LessNotEqual(totalOffsetOfMousePressed_, position + offset)) {
+            limitedOffset = totalOffsetOfMousePressed_ - position;
+        }
+    } else {
+        auto hostSize = GetHostFrameSize();
+        CHECK_NULL_RETURN(hostSize.has_value(), true);
+        auto minStartOffset = -(GetTotalHeight() - totalOffsetOfMousePressed_ - hostSize->MainSize(axis_));
+        if (GreatNotEqual(minStartOffset, position + offset)) {
+            limitedOffset = minStartOffset - position;
+        }
+    }
+    return limitedOffset;
+}
+
+void ScrollablePattern::LimitMouseEndOffset()
+{
+    float limitedOffset = -1.0f;
+    auto hostSize = GetHostFrameSize();
+    auto mainBottom = hostSize->MainSize(axis_);
+    auto mainOffset = mouseEndOffset_.GetMainOffset(axis_);
+    if (LessNotEqual(mainOffset, 0.0f)) {
+        limitedOffset = 0.0f;
+    }
+    if (GreatNotEqual(mainOffset, mainBottom)) {
+        limitedOffset = mainBottom;
+    }
+    if (LessNotEqual(limitedOffset, 0.0)) {
+        return;
+    }
+    if (axis_ == Axis::VERTICAL) {
+        mouseEndOffset_.SetY(limitedOffset);
+    } else {
+        mouseEndOffset_.SetX(limitedOffset);
+    }
 }
 
 void ScrollablePattern::ProcessAssociatedScroll(double offset, int32_t source)

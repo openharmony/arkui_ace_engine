@@ -260,6 +260,7 @@ public:
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
+    void UpdateMouseStart(float offset);
 
     // scrollSnap
     virtual std::optional<float> CalePredictSnapOffset(float delta)
@@ -369,6 +370,9 @@ private:
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
+    float GetOffsetWithLimit(float position, float offset) const;
+    void LimitMouseEndOffset();
+
     void ProcessAssociatedScroll(double offset, int32_t source);
 
     Axis axis_;
@@ -395,12 +399,16 @@ private:
     NestedScrollOptions nestedScroll_;
 
     // select with mouse
+    enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };
+    SelectDirection selectDirection_ = SELECT_NONE;
     bool mousePressed_ = false;
     OffsetF mouseEndOffset_;
     OffsetF mousePressOffset_;
+    OffsetF lastMouseStart_;
     MouseInfo lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<InputEvent> mouseEvent_;
+
     RefPtr<NavBarPattern> navBarPattern_;
 };
 } // namespace OHOS::Ace::NG
