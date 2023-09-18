@@ -57,14 +57,23 @@ void SecurityComponentLayoutAlgorithm::UpdateChildPosition(LayoutWrapper* layout
     childRenderContext->UpdatePosition(offset);
 }
 
+static LayoutConstraintF CreateDefaultChildConstraint(
+    RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty)
+{
+    auto constraint = securityComponentProperty->CreateChildConstraint();
+    SizeT<float> maxSize { Infinity<float>(), Infinity<float>() };
+    constraint.maxSize = maxSize;
+    return constraint;
+}
+
 void SecurityComponentLayoutAlgorithm::MeasureIcon(LayoutWrapper* layoutWrapper,
     RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty)
 {
     auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
     CHECK_NULL_VOID(iconWrapper);
 
-    auto iconConstraint = securityComponentProperty->GetContentLayoutConstraint();
-    iconWrapper->Measure(iconConstraint);
+    auto iconConstraint = CreateDefaultChildConstraint(securityComponentProperty);
+    iconWrapper->Measure(std::optional<LayoutConstraintF>(iconConstraint));
     iconSizeF_ = iconWrapper->GetGeometryNode()->GetFrameSize();
 }
 
@@ -75,11 +84,8 @@ void SecurityComponentLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper,
     CHECK_NULL_VOID(textWrapper);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    auto textConstraint = securityComponentProperty->GetContentLayoutConstraint();
-
-    SizeT<float> maxSize { Infinity<float>(), Infinity<float>() };
-    textConstraint->maxSize = maxSize;
-    textWrapper->Measure(textConstraint);
+    auto textConstraint = CreateDefaultChildConstraint(securityComponentProperty);
+    textWrapper->Measure(std::optional<LayoutConstraintF>(textConstraint));
     textSizeF_ = textWrapper->GetGeometryNode()->GetFrameSize();
 }
 
@@ -90,17 +96,16 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
     CHECK_NULL_VOID(buttonWrapper);
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(buttonWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
+    auto buttonConstraint = CreateDefaultChildConstraint(securityComponentProperty);
+
     if (buttonType_ == static_cast<int32_t>(ButtonType::CIRCLE)) {
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(NG::CalcLength(std::max(componentWidth_, componentHeight_)),
-            NG::CalcLength(std::max(componentWidth_, componentHeight_))));
+        buttonConstraint.selfIdealSize.SetSize(SizeF(std::max(componentWidth_, componentHeight_),
+            std::max(componentWidth_, componentHeight_)));
     } else {
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(componentWidth_),
-            NG::CalcLength(componentHeight_)));
+        buttonConstraint.selfIdealSize.SetSize(SizeF(componentWidth_, componentHeight_));
     }
 
-    auto buttonConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
-    buttonWrapper->Measure(buttonConstraint);
+    buttonWrapper->Measure(std::optional<LayoutConstraintF>(buttonConstraint));
     buttonSizeF_ = buttonWrapper->GetGeometryNode()->GetFrameSize();
 }
 
