@@ -72,6 +72,8 @@ private:
     std::optional<double> prevAngle_;
 
     double resultSpeed_ = 0.0;
+
+    std::set<int32_t> matchedTouch_;
 };
 
 } // namespace OHOS::Ace::NG
