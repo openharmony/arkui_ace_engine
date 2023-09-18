@@ -134,8 +134,7 @@ void JankFrameReport::JsAnimationToRsRecord()
 
 void JankFrameReport::RecordJankStatus(double jank)
 {
-    // on need to record
-    if (jank <= 1.0f || (recordStatus_ == JANK_IDLE && animatorEndTime_ == 0)) {
+    if (recordStatus_ == JANK_IDLE && animatorEndTime_ == 0) {
         return;
     }
     if (jsAnimationDelayJank_ > 1.0f) {
@@ -145,6 +144,10 @@ void JankFrameReport::RecordJankStatus(double jank)
         hasJsAnimation_ = false;
         animatorEndTime_ = 0;
         jsAnimationDelayJank_ = 0;
+    }
+    // on need to record
+    if (jank <= 1.0f) {
+        return;
     }
     // skip first frame
     if (prevFrameUpdateCount_ == 0 && (currentFrameUpdateCount_ >= 0)) {
