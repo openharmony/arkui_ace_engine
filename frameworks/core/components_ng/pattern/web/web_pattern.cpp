@@ -830,7 +830,16 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     isDragging_ = false;
     isW3cDragEvent_ = false;
     ClearDragData();
-    delegate_->HandleDragEvent(0, 0, DragAction::DRAG_CANCEL);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto viewScale = pipelineContext->GetViewScale();
+    auto offset = GetCoordinatePoint();
+    int32_t localX = static_cast<int32_t>(x - offset.value_or(OffsetF()).GetX()) * viewScale;
+    int32_t localY = static_cast<int32_t>(y - offset.value_or(OffsetF()).GetY()) * viewScale;
+    delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
 }
 
 void WebPattern::HandleDragCancel()
