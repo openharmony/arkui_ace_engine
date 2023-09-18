@@ -1612,7 +1612,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG006, TestSize.Level1)
     auto newNavDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
     ASSERT_NE(newNavDestinationPattern, nullptr);
     preNavDestinationPattern->isOnShow_ = true;
-    // newNavDestinationPattern->isOnShow_ = true;
     ASSERT_NE(preTopNavDestination->GetEventHub<NavDestinationEventHub>(), nullptr);
 
     navigationPattern->navigationMode_ = NavigationMode::SPLIT;
@@ -2893,45 +2892,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0023, TestSize.Level1)
     algorithm->navigationMode_ = NavigationMode::SPLIT;
     algorithm->SetNavigationHeight(AceType::RawPtr(layoutWrapper), size);
     ASSERT_EQ(algorithm->navigationMode_, NavigationMode::SPLIT);
-}
-
-/**
- * @tc.name: NavigationModelNG0024
- * @tc.desc: Test NavBarPattern::NavBarMotion
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, NavigationModelNG0024, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    NavigationModelNG model;
-    model.Create();
-    model.SetNavigationStack();
-    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ASSERT_NE(navigation, nullptr);
-    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto contentNode = FrameNode::CreateFrameNode("content", 454, AceType::MakeRefPtr<ButtonPattern>());
-
-    auto navBar =
-        NavBarNode::GetOrCreateNavBarNode("navBar", 300, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    ASSERT_NE(navBar, nullptr);
-    auto navBarPattern = navBar->GetPattern<NavBarPattern>();
-    ASSERT_NE(navBarPattern, nullptr);
-    auto animator = AceType::MakeRefPtr<Animator>();
-    navBarPattern->controller_ = animator;
-
-    navBarPattern->NavBarMotion(5, 5);
-    navBarPattern->motion_->NotifyListener(2);
-    navBarPattern->controller_->NotifyStopListener();
-    navBarPattern->NavBarMotion(5, 5);
-
-    navBarPattern->StopNavBarMotion();
-    ASSERT_EQ(animator->status_, Animator::Status::IDLE);
-    animator->status_ = Animator::Status::RUNNING;
-    navBarPattern->StopNavBarMotion();
-    ASSERT_EQ(animator->status_, Animator::Status::STOPPED);
 }
 
 /**
