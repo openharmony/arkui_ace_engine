@@ -827,12 +827,27 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
     if (!IsTextArea()) {
         return 0.0f;
     }
+    float textDy = 0.0f;
+    auto contentBottomBoundary = contentRect_.GetY() + contentRect_.GetSize().Height();
+    if (textRect_.Height() > contentRect_.Height()) {
+        if (textRect_.GetY() + textRect_.Height() < contentBottomBoundary) {
+            textDy = contentBottomBoundary - textRect_.GetY() + textRect_.Height();
+            caretRect_.SetTop(caretRect_.GetY() + textDy);
+            textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + textDy));
+        }
+    } else {
+        if (textRect_.GetY() < contentRect_.GetY()) {
+            textDy = contentRect_.GetY() - textRect_.GetY();
+            caretRect_.SetTop(caretRect_.GetY() + textDy);
+            textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + textDy));
+        }
+    }
 
     if (caretRect_.GetY() < contentRect_.GetY()) {
         auto dy = contentRect_.GetY() - caretRect_.GetY();
         caretRect_.SetTop(caretRect_.GetY() + dy);
         textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
-        return dy;
+        return dy + textDy;
     }
     auto dy = contentRect_.GetY() + GetBorderTop() + contentRect_.Height() - (caretRect_.Height() + caretRect_.GetY());
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -840,11 +855,11 @@ float TextFieldPattern::AdjustTextAreaOffsetY()
     }
     // caret does not exceed bottom boundary, still need to check against safeArea
     if (GreatOrEqual(dy, 0.0f)) {
-        return FitCursorInSafeArea();
+        return FitCursorInSafeArea() + textDy;
     }
     caretRect_.SetTop(caretRect_.GetY() + dy - BOX_EPSILON * 2);
     textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy - BOX_EPSILON * 2));
-    return dy;
+    return dy + textDy;
 }
 
 bool TextFieldPattern::CursorInContentRegion()
