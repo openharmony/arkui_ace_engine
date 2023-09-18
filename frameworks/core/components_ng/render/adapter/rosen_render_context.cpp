@@ -321,19 +321,20 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (force && !parentPosition.has_value()) {
-        rsNode_->SetSandBox(std::nullopt);
-    }
     if (parentPosition.has_value()) {
-        sandBoxCount_++;
+        if (!force) {
+            sandBoxCount_++;
+        }
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
         rsNode_->SetSandBox(value);
     } else {
-        sandBoxCount_--;
-        if (sandBoxCount_ > 0) {
-            return;
+        if (!force) {
+            sandBoxCount_--;
+            if (sandBoxCount_ > 0) {
+                return;
+            }
+            sandBoxCount_ = 0;
         }
-        sandBoxCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }
