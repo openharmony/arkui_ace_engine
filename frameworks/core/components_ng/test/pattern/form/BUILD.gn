@@ -36,7 +36,6 @@ ace_unittest("form_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/menu/mock_menu_wrapper_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/pattern/popup/mock_popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
 
     #mock

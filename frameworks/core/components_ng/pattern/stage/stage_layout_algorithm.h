@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 // not in use
 // Stage using default BoxLayoutAlgorithm
-class StageLayoutAlgorithm : public BoxLayoutAlgorithm {
+class [[deprecated]] StageLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(StageLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:

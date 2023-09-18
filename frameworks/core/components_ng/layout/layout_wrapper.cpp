@@ -125,10 +125,6 @@ void LayoutWrapper::ExpandSafeArea()
         ExpandIntoKeyboard();
     }
 
-    if (!(opts->type & SAFE_AREA_TYPE_SYSTEM) && !(opts->type & SAFE_AREA_TYPE_CUTOUT)) {
-        return;
-    }
-    // expand System and Cutout safeArea
     // get frame in global offset
     auto parentGlobalOffset = host->GetParentGlobalOffsetDuringLayout();
     auto geometryNode = GetGeometryNode();

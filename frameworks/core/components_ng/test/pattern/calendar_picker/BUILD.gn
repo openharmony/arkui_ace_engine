@@ -57,7 +57,6 @@ ace_unittest("calendar_picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/list/list_item_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/overlay/popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scroll/scroll_layout_algorithm.cpp",

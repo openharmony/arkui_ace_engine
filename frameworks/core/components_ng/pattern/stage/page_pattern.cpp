@@ -271,16 +271,17 @@ void PagePattern::BeforeCreateLayoutWrapper()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    // SafeArea already applied to AppBar
+    // SafeArea already applied to AppBar (AtomicServicePattern)
     if (pipeline->GetInstallationFree()) {
         return;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto safeArea = pipeline->GetSafeArea();
-    auto props = host->GetLayoutProperty();
-    if (safeArea.IsValid() || props->GetSafeAreaInsets()) {
-        props->UpdateSafeAreaInsets(safeArea);
-    }
+    ContentRootPattern::BeforeCreateLayoutWrapper();
+}
+
+bool PagePattern::AvoidKeyboard() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
 }
 } // namespace OHOS::Ace::NG

@@ -125,7 +125,7 @@ public:
     void OnColorConfigurationUpdate() override;
 
 private:
-    bool ShouldAvoidKeyboard() const override
+    bool AvoidKeyboard() const override
     {
         return false;
     }

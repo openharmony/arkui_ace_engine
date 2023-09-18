@@ -22,7 +22,6 @@ ace_unittest("checkbox_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stage/page_event_hub.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/stage/page_pattern.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/checkbox/checkbox_accessibility_property.cpp",
@@ -37,6 +36,7 @@ ace_unittest("checkbox_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/stage/mock_page_pattern.cpp",
     "checkbox_test_ng.cpp",
     "mock_stage_manager.cpp",
   ]

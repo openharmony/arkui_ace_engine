@@ -58,6 +58,9 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
         res = res.Combine(systemSafeArea_);
     }
+    if (keyboardSafeAreaEnabled_ && (opts.type & SAFE_AREA_TYPE_KEYBOARD)) {
+        res.bottom_ = res.bottom_.Combine(keyboardInset_);
+    }
     return res;
 }
 
@@ -101,5 +104,13 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
         return {};
     }
     return systemSafeArea_.Combine(cutoutSafeArea_);
+}
+
+float SafeAreaManager::GetKeyboardOffset() const
+{
+    if (keyboardSafeAreaEnabled_) {
+        return 0.0f;
+    }
+    return keyboardOffset_;
 }
 } // namespace OHOS::Ace::NG

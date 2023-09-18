@@ -36,7 +36,7 @@ void PagePattern::OnHide()
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
 {
     return false;
-}
+} 
 
 bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
 {
@@ -60,5 +60,10 @@ void PagePattern::AddJsAnimator(const std::string& animatorId, const RefPtr<Fram
 RefPtr<Framework::AnimatorInfo> PagePattern::GetJsAnimator(const std::string& animatorId)
 {
     return AceType::MakeRefPtr<Framework::AnimatorInfo>();
+}
+
+bool PagePattern::AvoidKeyboard() const
+{
+    return false;
 }
 } // namespace OHOS::Ace::NG
