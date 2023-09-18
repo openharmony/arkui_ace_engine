@@ -148,7 +148,7 @@ void JankFrameReport::RecordJankStatus(double jank)
         jankFrameCount_++;
         ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
     }
-    if (jsAnimationDelayJank_ != 0) {
+    if (animatorEndTime_ != 0) {
         hasJsAnimation_ = false;
         animatorEndTime_ = 0;
         jsAnimationDelayJank_ = 0;
