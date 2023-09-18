@@ -342,7 +342,9 @@ void DatePickerDialogView::CreateTitleIconNode(const RefPtr<FrameNode>& titleNod
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     auto spinnerNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(spinnerNode);
