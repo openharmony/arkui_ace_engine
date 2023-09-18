@@ -345,7 +345,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg011, TestSize.Level1)
      * frameNode.
      * @tc.expected: check whether the sideBarContainer node's children is not empty.
      */
-    SideBarContainerModelNG SideBarContainerModelInstance;
     auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
     ASSERT_NE(pattern, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
@@ -358,7 +357,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg011, TestSize.Level1)
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
 
-    SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+    pattern->CreateAndMountControlButton(frameNode);
 
     auto children = frameNode->GetChildren();
     ASSERT_FALSE(children.empty());
@@ -957,7 +956,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg031, TestSize.Level1)
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
 
     SideBarContainerModelInstance.SetShowSideBar(false);
-    SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+    pattern->CreateAndMountControlButton(frameNode);
 
     auto children = frameNode->GetChildren();
     ASSERT_FALSE(children.empty());
@@ -988,7 +987,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg032, TestSize.Level1)
     /**
      * @tc.steps: step1. create control button.
      */
-    SideBarContainerModelNG SideBarContainerModelInstance;
     auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
     ASSERT_NE(pattern, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1001,7 +999,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg032, TestSize.Level1)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
-    SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+    pattern->CreateAndMountControlButton(frameNode);
 
     /**
      * @tc.steps: step2. Set showControlButton's value to false, then execute OnUpdateShowControlButton.
@@ -1312,7 +1310,6 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg040, TestSize.Level1)
  */
 HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg041, TestSize.Level1)
 {
-    SideBarContainerModelNG SideBarContainerModelInstance;
     auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
     ASSERT_NE(pattern, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1323,7 +1320,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg041, TestSize.Level1)
     auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SideBarTheme>()));
-    SideBarContainerModelInstance.CreateAndMountControlButton(frameNode);
+    pattern->CreateAndMountControlButton(frameNode);
     auto children = frameNode->GetChildren();
     ASSERT_FALSE(children.empty());
     auto sideBarTheme = AceType::MakeRefPtr<SideBarTheme>();

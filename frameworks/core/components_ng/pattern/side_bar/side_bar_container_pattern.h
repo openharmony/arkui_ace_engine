@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_event_hub.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
+#include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -145,6 +146,12 @@ private:
     void CreateAnimation();
     void FireChangeEvent(bool isShow);
     void UpdateControlButtonIcon();
+    void CreateAndMountNodes();
+    void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode);
+    void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode);
+    RefPtr<FrameNode> CreateControlButton(const RefPtr<SideBarTheme>& sideBarTheme);
+    RefPtr<FrameNode> CreateControlImage(const RefPtr<SideBarTheme>& sideBarTheme,
+        const RefPtr<FrameNode>& parentNode);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);

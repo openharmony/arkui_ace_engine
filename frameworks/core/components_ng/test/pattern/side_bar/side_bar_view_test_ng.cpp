@@ -119,7 +119,6 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg002, TestSize.Level1)
     row->MountToParent(frameNode);
     row2->MountToParent(frameNode);
     ViewStackProcessor::GetInstance()->Push(frameNode);
-    SideBarContainerModelInstance.Pop();
     frameNode->MarkModifyDone();
 }
 
@@ -571,71 +570,6 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg011, TestSize.Level1)
     clone.Reset();
     auto json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json);
-}
-
-/**
- * @tc.name: SideBarViewTestNg012
- * @tc.desc: Test SideBar Pop
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarViewTestNg, SideBarViewTestNg012, TestSize.Level1)
-{
-     /**
-     * @tc.steps: step1. create sideBar ,then get sideBarContainerNode.
-     * @tc.expected: check whether the children.empty() is true.
-     */
-    SideBarContainerModelNG SideBarContainerModelInstance;
-    SideBarContainerModelInstance.Create();
-    SideBarContainerModelInstance.SetDividerStrokeWidth(STROKE_WIDTH);
-    SideBarContainerModelInstance.SetDividerColor(Color::BLUE);
-    SideBarContainerModelInstance.SetDividerStartMargin(START_MARGIN);
-    SideBarContainerModelInstance.SetDividerEndMargin(END_MARGIN);
-    
-    auto sideBarContainerNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(sideBarContainerNode, nullptr);
-    auto children = sideBarContainerNode->GetChildren();
-    SideBarContainerModelInstance.Pop();
-    EXPECT_TRUE(children.empty());
-}
-
-/**
- * @tc.name: SideBarViewTestNg013
- * @tc.desc: Test SideBar Pop_2
- * @tc.type: FUNC
- */
-HWTEST_F(SideBarViewTestNg, SideBarViewTestNg013, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create sideBar ,then get frameNode and pattern.
-     */
-    SideBarContainerModelNG SideBarContainerModelInstance;
-    SideBarContainerModelInstance.Create();
-    SideBarContainerModelInstance.SetDividerStrokeWidth(STROKE_WIDTH);
-    SideBarContainerModelInstance.SetDividerColor(Color::BLUE);
-    SideBarContainerModelInstance.SetDividerStartMargin(START_MARGIN);
-    SideBarContainerModelInstance.SetDividerEndMargin(END_MARGIN);
-    
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-
-    auto row = FrameNode::CreateFrameNode(
-        V2::SIDE_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SideBarContainerPattern>());
-    ASSERT_NE(row, nullptr);
-    row->MountToParent(frameNode);
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-
-    auto sideBarContainerNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(sideBarContainerNode, nullptr);
-    auto pattern = sideBarContainerNode->GetPattern<SideBarContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    /**
-     * @tc.steps: step2. make pattern->SetHasControlButton(true).
-     * @tc.expected: check whether the pattern->HasControlButton() is true.
-     */
-    pattern->SetHasControlButton(true);
-    SideBarContainerModelInstance.Pop();
-    EXPECT_TRUE(pattern->HasControlButton());
 }
 
 /**

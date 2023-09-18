@@ -44,7 +44,6 @@ public:
     static void JsSideBarPosition(const JSCallbackInfo& info);
     static void CreateForNG(const JSCallbackInfo& info);
     static void JsControlButtonForNG(const JSCallbackInfo& info);
-    static void Pop();
 private:
     static void SetControlButtonIcon(SideBarControlButtonType iconType, JSRef<JSVal> icon);
     static void ParseControlButtonOG(JSRef<JSObject> value);

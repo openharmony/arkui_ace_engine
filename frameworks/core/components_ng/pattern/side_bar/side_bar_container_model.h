@@ -37,7 +37,6 @@ public:
     virtual ~SideBarContainerModel() = default;
 
     virtual void Create();
-    virtual void Pop();
     virtual void SetSideBarContainerType(SideBarContainerType type);
     virtual void SetShowSideBar(bool isShow);
     virtual void SetShowControlButton(bool showControlButton);
@@ -70,8 +69,6 @@ private:
     static std::unique_ptr<SideBarContainerModel> instance_;
     static std::mutex mutex_;
 
-    virtual void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode);
-    virtual void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode);
     virtual void MarkNeedInitRealSideBarWidth();
 };
 } // namespace OHOS::Ace::NG
