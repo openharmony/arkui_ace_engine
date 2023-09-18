@@ -73,7 +73,10 @@ template("js_engine_ark") {
       "jsi_stepper_bridge.cpp",
     ]
 
-    include_dirs = [ "$flutter_root/engine" ]
+    include_dirs = [
+      "$flutter_root/engine",
+      "$c_utils_root/base/include",
+    ]
     cflags_cc = [ "-Wno-thread-safety-attributes" ]
 
     # xcomponent components supports phone, TV and wearable except PC Preview
@@ -92,7 +95,7 @@ template("js_engine_ark") {
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [
         ":gen_obj_src_abc_strip_native_min",
-        "//foundation/arkui/napi/native_engine/impl/ark:ace_napi_impl_ark",
+        "//foundation/arkui/napi:ace_napi_static",
       ]
     } else if (defined(config.build_for_android) && config.build_for_android) {
       deps += [
@@ -102,7 +105,7 @@ template("js_engine_ark") {
     } else if (defined(config.build_for_ios) && config.build_for_ios) {
       deps += [
         ":gen_obj_src_abc_strip_native_min",
-        "//foundation/arkui/napi/native_engine/impl/ark:ace_napi_impl_ark",
+        "//foundation/arkui/napi:ace_napi_static",
       ]
       deps += [ "//third_party/jsframework:ark_build" ]
       external_deps += [ "napi:ace_napi" ]
@@ -119,7 +122,6 @@ template("js_engine_ark") {
     } else if (target_cpu == "arm") {
       defines += [ "APP_USE_ARM" ]
     }
-    external_deps += [ "napi:ace_napi_ark" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {

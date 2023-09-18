@@ -78,7 +78,6 @@ template("js_pa_engine_ark") {
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
       "napi:ace_napi",
-      "napi:ace_napi_ark",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
       "resource_management:global_resmgr",
