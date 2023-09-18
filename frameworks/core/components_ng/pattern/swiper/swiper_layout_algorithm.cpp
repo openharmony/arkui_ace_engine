@@ -307,7 +307,9 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             targetIsSameWithStartFlag_ = true;
             LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
             if (Positive(prevMargin_)) {
-                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
+                float startPosition =
+                    itemPosition_.empty() ? 0.0f : itemPosition_.begin()->second.startPos - spaceWidth_;
+                LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, startPosition);
             }
         }
     } else {
