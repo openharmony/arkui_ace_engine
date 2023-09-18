@@ -520,12 +520,12 @@ Rect DragDropManager::GetDragWindowRect(const Point& point)
         int height = -1;
         int retOffset = InteractionManager::GetInstance()->GetShadowOffset(x, y, width, height);
         if (retOffset == 0) {
-            previewRect_ = Rect(point.GetX() + x, point.GetY() + y, width, height);
+            previewRect_ = Rect(x, y, width, height);
         } else if (SystemProperties::GetDebugEnabled()) {
             LOGW("InteractionManager GetShadowOffset is failed:%{public}d", retOffset);
         }
     }
-    return previewRect_;
+    return previewRect_ + Offset(point.GetX(), point.GetY());
 }
 
 void DragDropManager::ClearSummary()
