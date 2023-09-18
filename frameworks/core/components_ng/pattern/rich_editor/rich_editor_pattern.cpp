@@ -724,6 +724,10 @@ void RichEditorPattern::SetTypingStyle(struct UpdateSpanStyle typingStyle, TextS
 {
     typingStyle_ = typingStyle;
     typingTextStyle_ = textStyle;
+    if (typingStyle_.has_value() && !typingStyle_->updateFontSize.has_value()) {
+        typingStyle_->updateFontSize = Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP);
+        typingTextStyle_->SetFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
+    }
 }
 
 void RichEditorPattern::UpdateTextStyle(
