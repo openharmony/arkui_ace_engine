@@ -1227,7 +1227,7 @@ void WebPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-#if !defined(IOS_PLATFORM) && defined(ANDROID_PLATFORM)
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     RegistVirtualKeyBoardListener();
 #endif
     if (!delegate_) {
