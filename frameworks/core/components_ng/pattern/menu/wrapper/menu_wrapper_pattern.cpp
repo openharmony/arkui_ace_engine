@@ -103,6 +103,7 @@ void MenuWrapperPattern::HideSubMenu()
     if (menuPattern) {
         menuPattern->RemoveParentHoverStyle();
         auto frameNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+        CHECK_NULL_VOID(frameNode);
         auto menuItem = frameNode->GetPattern<MenuItemPattern>();
         if (menuItem) {
             menuItem->SetIsSubMenuShowed(false);
