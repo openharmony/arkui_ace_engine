@@ -183,7 +183,6 @@ void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag)
 {
     recordStatus_++;
     if (recordStatus_ == 1) {
-        ACE_FUNCTION_TRACE();
         animatorEndTime_ = 0;
         hasJsAnimation_ = false;
     }
@@ -193,7 +192,6 @@ void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag)
 {
     if (recordStatus_ > 0) {
         if (recordStatus_ == 1) {
-            ACE_FUNCTION_TRACE();
             animatorEndTime_ = GetSteadyTimestamp<std::chrono::nanoseconds>();
         }
         recordStatus_--;
@@ -233,7 +231,6 @@ void JankFrameReport::FlushRecord()
 void JankFrameReport::ReportJSAnimation()
 {
     if (animatorEndTime_ != 0) {
-        ACE_FUNCTION_TRACE();
         hasJsAnimation_ = true;
     }
 }
