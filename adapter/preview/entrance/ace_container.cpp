@@ -29,7 +29,9 @@
 #include "core/common/rosen/rosen_asset_manager.h"
 #endif
 
+#include "jsapp/rich/external/StageContext.h"
 #include "native_engine/native_engine.h"
+#include "previewer/include/window.h"
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/stage_card_parser.h"
@@ -43,6 +45,7 @@
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_engine.h"
@@ -60,7 +63,6 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "previewer/include/window.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -231,6 +233,36 @@ void AceContainer::InitializeStageAppConfig(const std::string& assetPath, const 
     formFrontend->SetBundleName(bundleName);
     formFrontend->SetModuleName(moduleName);
     formFrontend->SetIsBundle(isBundle);
+}
+
+void AceContainer::SetHspBufferTrackerCallback()
+{
+    if (GetSettings().usingSharedRuntime) {
+        LOGI("The callback has been set by ability in the light simulator.");
+        return;
+    }
+    auto frontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+    CHECK_NULL_VOID(frontend);
+    auto weak = WeakPtr(frontend->GetJsEngine());
+    taskExecutor_->PostTask(
+        [weak, instanceId = instanceId_]() {
+            ContainerScope scope(instanceId);
+            auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(weak.Upgrade());
+            CHECK_NULL_VOID(jsEngine);
+            jsEngine->SetHspBufferTrackerCallback(
+                [](const std::string& inputPath, uint8_t** buff, size_t* buffSize) -> bool {
+                    if (!buff || !buffSize || inputPath.empty()) {
+                        LOGI("The pointer of buff or buffSize is null or inputPath is empty.");
+                        return false;
+                    }
+                    auto data = OHOS::Ide::StageContext::GetInstance().GetModuleBuffer(inputPath);
+                    CHECK_NULL_RETURN(data, false);
+                    *buff = data->data();
+                    *buffSize = data->size();
+                    return true;
+                });
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl)
@@ -879,6 +911,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceViewPreview* vi
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         flutterTaskExecutor->InitJsThread(false);
         InitializeFrontend();
+        SetHspBufferTrackerCallback();
         auto front = AceType::DynamicCast<DeclarativeFrontend>(GetFrontend());
         if (front) {
             front->UpdateState(Frontend::State::ON_CREATE);
