@@ -43,6 +43,8 @@ const INTER_POLATING_SPRING = curves.interpolatingSpring(0, 1, 328, 34);
 const FRICTION_CUBIC_BEZIER = curves.cubicBezierCurve(.2, 0, .2, 1);
 const TRANS_COLOR = "#00FFFFFF";
 const GRADIENT_WIDTH = 16;
+const ARROW_DOWN = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA8JJREFUeNrt3bFro3Ucx/E+eQK94SoiDjcEB3G4IcNtOhzSyQhtB+E2hyM0loMOHvgHmFEHRcFy1qclkyg4heR6iBwiODjcH6DQwSGFGxxEHFopjd9wPbjBSi9NQ578Xi8ISe7SwJN83mlDS7uwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAsyubp4PZ2dm5nWXZalysD4fDw7i8H+dftlqth57qySmKohaP7ftx8Y041eIx3o/rv+R5/kmz2fxTAFPW6XSunZycFPFErJ5xk2+Pjo7e29zc/Nt8L2Z3d/fdeJy/iIsv/sd/D+J5aG1sbHxfluPJy/6EtNvt6tLSUjcuvvU/N6tXq9U3G43Gd3t7e/+Y8difYUev+l/F6coZN3khPhPcWl1dvd/r9R6X4ZgqZX9SarXaZpwtn+OmNxcXFx9sbW1dNeWxx//ZOW56pVKpdMpyXKUPIF5x7jzHzUVwueN/6kZ8zGsCmIL4evT6c36ICC53/E9fmF4XwOwSwSWO//SF6aoApuORCGZr/KcB/CaA6bwH6PtMMFvjD/sHBwc/C2AaB1CpfBwR/CqCmRn/yJ12u31chuMt/fcBut3u8crKysMI4VZcHXfEr/g+wcTGf7fVan1TlmPO5+GJ6/f7f0QE90UwE+P/vEzHnc/LEygC4086ABEYf/IBiMD4kw9ABMaffAAiMP7kAxCB8ScfgAiMP/kARGD8yQeQegTGL4BkIzB+ASQbgfELINkIjF8AyUZg/AJINgLjF0CyERi/AJKNwPgFkGwExi+AZCMwfgEkG4HxCyDZCIxfAMlGYPwCSDYC4xdAshEYvwCSjcD4BZBsBMYvgGQjMH4BzG0Ea2trP/R6vb/OulFRFB9kWfap8V+ezEMwnu3t7et5nv8YF69d4G5Gf1L07mAw+PrZ36Ycr/r1OLsXp5vGL4B5j2DkcOHJH/oY/RnXGxO4P+MXQOkimCTj9x6gVO8JjF8AIjB+AYjA+AUgAuMXgAiMXwAiMH4BiMD4BSAC4xdAuSN4O66+dMG7O86ybCPGf88jK4BSRdBoNDrVavXVuFof8272Y/zvrK+vdz2ik+NHIaasKIrlGPKHcXH5nB/yOE4f5Xm+3Ww2Dz2CApgLo5/4HA6HjfjSaDnO66fvEV6O0+9xGsS/PYpQ+oPB4Kdnf1IUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ74F12fuBmTNpsqAAAAAElFTkSuQmCC";
+const ARROW_UP = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAA7ZJREFUeNrt3TFonHUcx+Hem0sQ6SBSJEMomUSoFBEHhyAKYigpcSlo6fQOdxkyHTgIIkTqKi4uyWt4RxErmBDjVJpBUDcpHYp0CCSDQ5EMQfoG787fDdkMSnM5783/eeDl3qPXI33z/YQ7EpoLFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADqquESjEZRFDNZls33+/25uDsbx0wch3EcxPGo0WjsxJ/fzfP8d1dLAOdp+G/GzUcx8Lf/41/5rtfrfdJut3919QRQW2VZTseQi/iKf/0pn+LLqqo6y8vLh67m2ZlwCYZvbW3tlbi5F8drp3iaV5vN5uLCwsK9ra2tx66qAGphfX19Ll7u3I3TS0N4uhfifcGNiOB7EQigFuOPlzw/xOnFIT7tRREIINXxi0AAyY9fBAJIfvwiEEDy4xeBAJIfvwgEkPz4RSCA5McvAgHUfvy7cQxG+7wI/j9+Fmi04x/8pOeHVVV9e/wzPqurq5cmJiZuxemnp33ubrf71tLS0kOfLQGM3fgbjcad+ErdyvP84J/+vCzL2RjwV3H6ugi8BDp349/b27vZ6XT+POkxGxsbB/Pz8183m8034u5lL4cEcK7Gv7Ky8te/PXZ7e/soIvhGBAJIbvwiEEDy4xeBAJIfvwgEkPz4RSCA5McvAgEkP34RCCD58YtAAMmPXwQCSH78IhBA8uMXgQCSH78IBJD8+EUggOTHLwIBJD9+EQgg+fGLQADJj18EAkh+/CIQQPLjF4EAkh+/CBIOwPhFkGwAxi+CZAMwfhEkG4DxiyDZAIxfBMkGYPwiSDYA4xdBsgEURTETNz8Z/9hEcD2eZ33wfHW8DlntPuAs+9z4h2PwX7RXVXUtTn88xdPMTk1N3a7rNahVAGVZTsdLnxvGP14RxHV9XwAj0O12rxj/WEYwPfj9BgIYU8Z/9hEcHR09I4AzFp+gX4x/LCN4Eu8DdgUwgk9Q3OwY/9hFcCfP8ycCGI1WHIfGPzYR7Md7s05d/621+z7A5ubmH4uLi/fj9J04nj3hYV/s7++3jP/pHX+fYHJy8mrcffGEh+32+/332u32b7V9f1jXD3zw60WzLLsdX+nn4u7LcTyO8597vd5nrVZrx4SHpyiKd+PafhCnL8XxXBwPYvg78cb34+Nf9woAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAzf37i54rxOGvUjAAAAAElFTkSuQmCC";
 
 export var FilterType;
 !function(t){
@@ -598,21 +600,9 @@ class MultiFilterRow extends ViewPU {
       }))
     }), Row);
     this.observeComponentCreation2(((t, e) => {
-      Image.create(this.isArrowIconDown.value ? {
-        id: -1,
-        type: 2e4,
-        params: ["sys.media.ohos_ic_public_arrow_down"],
-        bundleName: "",
-        moduleName: ""
-      } : {
-        id: -1,
-        type: 2e4,
-        params: ["sys.media.ohos_ic_public_arrow_up"],
-        bundleName: "",
-        moduleName: ""
-      });
+      Image.create(this.isArrowIconDown.value ? ARROW_DOWN : ARROW_UP);
       Image.width(24);
-      Image.height(40);
+      Image.height(24);
       Image.fillColor({
         id: -1,
         type: 10001,
@@ -959,6 +949,7 @@ export class Filter extends ViewPU {
     this.__floatFilterBarHeight = new ObservedPropertySimplePU(0, this, "floatFilterBarHeight");
     this.__floatFilterBarPosition = new ObservedPropertySimplePU(0, this, "floatFilterBarPosition");
     this.filterDynamicHeight = 0;
+    this.filterStackHeight = 0;
     this.__twoLineModeItemNum = new ObservedPropertyObjectPU(null, this, "twoLineModeItemNum");
     this.__twoLineModeItemNumRecord = new ObservedPropertyObjectPU(null, this, "twoLineModeItemNumRecord");
     this.__downArrowShowState = new ObservedPropertyObjectPU(null, this, "downArrowShowState");
@@ -993,6 +984,7 @@ export class Filter extends ViewPU {
     void 0 !== t.floatFilterBarHeight && (this.floatFilterBarHeight = t.floatFilterBarHeight);
     void 0 !== t.floatFilterBarPosition && (this.floatFilterBarPosition = t.floatFilterBarPosition);
     void 0 !== t.filterDynamicHeight && (this.filterDynamicHeight = t.filterDynamicHeight);
+    void 0 !== t.filterStackHeight && (this.filterStackHeight = t.filterStackHeight);
     void 0 !== t.twoLineModeItemNum && (this.twoLineModeItemNum = t.twoLineModeItemNum);
     void 0 !== t.twoLineModeItemNumRecord && (this.twoLineModeItemNumRecord = t.twoLineModeItemNumRecord);
     void 0 !== t.downArrowShowState && (this.downArrowShowState = t.downArrowShowState);
@@ -1419,6 +1411,7 @@ export class Filter extends ViewPU {
       Column.onAreaChange(((t, e) => {
         if (!this.isFloatShowAllFilterWithoutAnimation && !this.isFloatBarShowWithoutAnimation) {
           null != this.additionFilters ? this.filterDynamicHeight = parseInt(e.height.toString(), 0) + 40 + 8 : this.filterDynamicHeight = parseInt(e.height.toString(), 0) + 8;
+          this.filterDynamicHeight > .8 * this.filterStackHeight && (this.filterDynamicHeight = .8 * this.filterStackHeight);
           this.floatFilterPosition = -this.filterDynamicHeight
         }
       }))
@@ -1456,7 +1449,9 @@ export class Filter extends ViewPU {
       Column.create();
       Column.width("100%");
       Column.onAreaChange(((t, e) => {
+        console.log("filter height:" + parseInt(e.height.toString(), 0));
         null != this.additionFilters ? this.filterDynamicHeight = parseInt(e.height.toString(), 0) + 40 + 8 : this.filterDynamicHeight = parseInt(e.height.toString(), 0) + 8;
+        this.filterDynamicHeight > .8 * this.filterStackHeight && (this.filterDynamicHeight = .8 * this.filterStackHeight);
         this.isFloatBarShowWithoutAnimation || this.isFloatShowAllFilterWithoutAnimation || (this.floatFilterPosition = -this.filterDynamicHeight)
       }))
     }), Column);
@@ -1972,13 +1967,7 @@ export class Filter extends ViewPU {
     }), Text);
     Text.pop();
     this.observeComponentCreation2(((t, e) => {
-      Image.create({
-        id: -1,
-        type: 2e4,
-        params: ["sys.media.ohos_ic_public_arrow_down"],
-        bundleName: "",
-        moduleName: ""
-      });
+      Image.create(ARROW_DOWN);
       Image.width(24);
       Image.height(24);
       Image.fillColor({
@@ -1999,7 +1988,11 @@ export class Filter extends ViewPU {
   initialRender() {
     this.observeComponentCreation2(((t, e) => {
       Stack.create({ alignContent: Alignment.Top });
-      Stack.clip(!0)
+      Stack.clip(!0);
+      Stack.onAreaChange(((t, e) => {
+        console.log("stack height:" + parseInt(e.height.toString(), 0));
+        this.filterStackHeight = parseInt(e.height.toString(), 0)
+      }))
     }), Stack);
     this.FloatFilterBar.bind(this)();
     this.FloatFilterHeader.bind(this)();
