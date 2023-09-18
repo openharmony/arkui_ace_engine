@@ -83,6 +83,44 @@ enum {
     ACTION_AUTOFILL,
 };
 
+const wchar_t UPPER_CASE_A = L'A';
+const std::wstring NUM_SYMBOLS = L")!@#$%^&*(";
+const std::unordered_map<KeyCode, wchar_t> KEYBOARD_SYMBOLS = {
+    { KeyCode::KEY_GRAVE, L'`' },
+    { KeyCode::KEY_MINUS, L'-' },
+    { KeyCode::KEY_EQUALS, L'=' },
+    { KeyCode::KEY_LEFT_BRACKET, L'[' },
+    { KeyCode::KEY_RIGHT_BRACKET, L']' },
+    { KeyCode::KEY_BACKSLASH, L'\\' },
+    { KeyCode::KEY_SEMICOLON, L';' },
+    { KeyCode::KEY_APOSTROPHE, L'\'' },
+    { KeyCode::KEY_COMMA, L',' },
+    { KeyCode::KEY_PERIOD, L'.' },
+    { KeyCode::KEY_SLASH, L'/' },
+    { KeyCode::KEY_SPACE, L' ' },
+    { KeyCode::KEY_NUMPAD_DIVIDE, L'/' },
+    { KeyCode::KEY_NUMPAD_MULTIPLY, L'*' },
+    { KeyCode::KEY_NUMPAD_SUBTRACT, L'-' },
+    { KeyCode::KEY_NUMPAD_ADD, L'+' },
+    { KeyCode::KEY_NUMPAD_DOT, L'.' },
+    { KeyCode::KEY_NUMPAD_COMMA, L',' },
+    { KeyCode::KEY_NUMPAD_EQUALS, L'=' },
+};
+
+static const std::unordered_map<KeyCode, wchar_t> SHIFT_KEYBOARD_SYMBOLS = {
+    { KeyCode::KEY_GRAVE, L'~' },
+    { KeyCode::KEY_MINUS, L'_' },
+    { KeyCode::KEY_EQUALS, L'+' },
+    { KeyCode::KEY_LEFT_BRACKET, L'{' },
+    { KeyCode::KEY_RIGHT_BRACKET, L'}' },
+    { KeyCode::KEY_BACKSLASH, L'|' },
+    { KeyCode::KEY_SEMICOLON, L':' },
+    { KeyCode::KEY_APOSTROPHE, L'\"' },
+    { KeyCode::KEY_COMMA, L'<' },
+    { KeyCode::KEY_PERIOD, L'>' },
+    { KeyCode::KEY_SLASH, L'?' },
+};
+
 class RenderTextField : public RenderNode, public TextInputClient, public ValueChangeObserver {
     DECLARE_ACE_TYPE(RenderTextField, RenderNode, TextInputClient, ValueChangeObserver);
 
@@ -157,6 +195,10 @@ public:
     std::u16string GetRightTextOfCursor(int32_t number);
     int32_t GetTextIndexAtCursor();
     bool IsSelected() const;
+    void DeleteLeft();
+    void DeleteRight();
+    bool HandleShiftPressedEvent(const KeyEvent& event);
+    void InsertValueDone(const std::string& appendElement);
 
     void SetInputFilter(const std::string& inputFilter)
     {
