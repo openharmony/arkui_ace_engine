@@ -16,6 +16,7 @@
 #include "base/log/log_wrapper.h"
 
 #include <cstring>
+#include <unordered_map>
 
 #include "hilog/log.h"
 
@@ -39,8 +40,8 @@ const ::LogLevel LOG_LEVELS[] = {
     LOG_FATAL,
 };
 
-const char* LOG_DOMAIN_CONTENTS[] = {
-    "Ace",
+const std::unordered_map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
+    { AceLogTag::DEFAULT, "Ace" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";
@@ -68,8 +69,7 @@ char LogWrapper::GetSeparatorCharacter()
 void LogWrapper::PrintLog(LogDomain domain, LogLevel level, AceLogTag tag, const char* fmt, va_list args)
 {
     uint32_t hilogDomain = LOG_DOMAINS[static_cast<uint32_t>(domain)] + static_cast<uint32_t>(tag);
-    const char* domainContent =
-        domain == LogDomain::FRAMEWORK ? LOG_DOMAIN_CONTENTS[static_cast<uint32_t>(tag)] : APP_DOMAIN_CONTENT;
+    const char* domainContent = domain == LogDomain::FRAMEWORK ? DOMAIN_CONTENTS_MAP.at(tag) : APP_DOMAIN_CONTENT;
 #ifdef ACE_PRIVATE_LOG
     std::string newFmt(fmt);
     ReplaceFormatString("{private}", "{public}", newFmt);
