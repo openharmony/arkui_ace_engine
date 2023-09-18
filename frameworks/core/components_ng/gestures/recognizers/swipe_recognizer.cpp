@@ -135,8 +135,10 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         auto seconds = duration.count();
         resultSpeed_ = offset.GetDistance() / seconds;
         if (resultSpeed_ < speed_) {
-            LOGI("the result speed %{public}f is less than duration %{public}f", resultSpeed_, speed_);
-            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            if (currentFingers_ - 1 + matchedTouch_.size() < fingers_) {
+                LOGI("the result speed %{public}f is less than duration %{public}f", resultSpeed_, speed_);
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            }
         } else {
             matchedTouch_.insert(event.id);
             if (matchedTouch_.size() == fingers_) {
