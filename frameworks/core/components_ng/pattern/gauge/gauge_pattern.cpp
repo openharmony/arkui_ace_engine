@@ -14,7 +14,6 @@
  */
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 
-#include "core/common/container.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
 #include "core/components_ng/pattern/gauge/gauge_theme.h"

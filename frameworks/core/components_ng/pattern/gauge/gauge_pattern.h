@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_GAUGE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GAUGE_GAUGE_PATTERN_H
 
+#include "core/common/container.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/gauge/gauge_accessibility_property.h"
 #include "core/components_ng/pattern/gauge/gauge_layout_algorithm.h"
@@ -34,7 +35,7 @@ public:
 
     bool IsAtomicNode() const override
     {
-        return false;
+        return Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ? true : false;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
