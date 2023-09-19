@@ -986,7 +986,13 @@ void ViewAbstract::SetPosition(const OffsetT<Dimension>& value)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(Position, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdatePosition(value);
+        target->SyncGeometryProperties(AceType::RawPtr(frameNode->GetGeometryNode()), true);
+    }
 }
 
 void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
@@ -995,7 +1001,13 @@ void ViewAbstract::SetOffset(const OffsetT<Dimension>& value)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(Offset, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateOffset(value);
+        target->SyncGeometryProperties(AceType::RawPtr(frameNode->GetGeometryNode()), true);
+    }
 }
 
 void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)
@@ -1004,7 +1016,13 @@ void ViewAbstract::MarkAnchor(const OffsetT<Dimension>& value)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(Anchor, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateAnchor(value);
+        target->SyncGeometryProperties(AceType::RawPtr(frameNode->GetGeometryNode()), true);
+    }
 }
 
 void ViewAbstract::SetZIndex(int32_t value)

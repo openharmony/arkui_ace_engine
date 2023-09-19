@@ -10733,11 +10733,11 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset002, TestSize.Level1)
     swiperPattern->currentOffset_ = 0;
     swiperPattern->isDragging_ = true;
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.712f);
-    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 1.0f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.0f);
     swiperPattern->isDragging_ = false;
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.288f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.0f);
 }
 
 /**
@@ -10783,10 +10783,10 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset003, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.9f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 1.0f);
     swiperNode->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.8f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 1.0f);
 }
 
 /**
@@ -10859,16 +10859,16 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset004, TestSize.Level1)
         swiperPattern->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
         swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
     }
-    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.6f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 1.0f);
     swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
-    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.1f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.0f);
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.2f);
-    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.5f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.0f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 1.0f);
     swiperPattern->isDragging_ = false;
     swiperPattern->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 0.4f);
-    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.3f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentDelta_, 1.0f);
+    EXPECT_FLOAT_EQ(swiperPattern->currentIndexOffset_, 1.0f);
 }
 
 /**
