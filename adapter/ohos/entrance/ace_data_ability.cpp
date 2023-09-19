@@ -65,7 +65,7 @@ REGISTER_AA(AceDataAbility)
 void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     Ability::OnStart(want, sessionInfo);
-    LOGI("AceDataAbility::OnStart called");
+    LOGI("AceDataAbility OnStart called");
 
     // get url
     std::string parsedUrl;
@@ -97,11 +97,11 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionI
 
     AceEngine::InitJsDumpHeadSignal();
     if (abilityInfo != nullptr && !abilityInfo->srcPath.empty()) {
-        LOGI("AceDataAbility::OnStart assetBasePathStr: %{public}s, parsedUrl: %{public}s",
+        LOGD("AceDataAbility OnStart assetBasePathStr: %{public}s, parsedUrl: %{public}s",
             abilityInfo->srcPath.c_str(), parsedUrl.c_str());
         assetBasePathStr = { "assets/js/" + abilityInfo->srcPath + "/", std::string("assets/js/") };
     } else {
-        LOGI("AceDataAbility::OnStart parsedUrl: %{public}s", parsedUrl.c_str());
+        LOGD("AceDataAbility OnStart parsedUrl: %{public}s", parsedUrl.c_str());
         assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
     }
     workerPath->assetBasePathStr = assetBasePathStr;
@@ -118,23 +118,19 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want, sptr<AAFwk::SessionI
 
     // run data ability
     Platform::PaContainer::RunPa(abilityId_, parsedUrl, want);
-
-    LOGI("AceDataAbility::OnStart called End");
 }
 
 void AceDataAbility::OnStop()
 {
-    LOGI("AceDataAbility::OnStop called");
+    LOGI("AceDataAbility OnStop called");
     Ability::OnStop();
     Platform::PaContainer::DestroyContainer(abilityId_);
-    LOGI("AceDataAbility::OnStop called End");
 }
 
 int32_t AceDataAbility::Insert(const Uri& uri, const NativeRdb::ValuesBucket& value)
 {
-    LOGI("AceDataAbility::Insert called");
+    LOGI("AceDataAbility Insert called");
     int32_t ret = Platform::PaContainer::Insert(abilityId_, uri, value);
-    LOGI("AceDataAbility::Insert called End");
     return ret;
 }
 
@@ -142,89 +138,79 @@ std::shared_ptr<NativeRdb::AbsSharedResultSet> AceDataAbility::Query(
     const Uri& uri, const std::vector<std::string>& columns,
     const NativeRdb::DataAbilityPredicates& predicates)
 {
-    LOGI("AceDataAbility::Query called");
+    LOGI("AceDataAbility Query called");
     auto resultSet = Platform::PaContainer::Query(abilityId_, uri, columns, predicates);
-    LOGI("AceDataAbility::Query called End");
     return resultSet;
 }
 
 int32_t AceDataAbility::Update(const Uri& uri, const NativeRdb::ValuesBucket& value,
     const NativeRdb::DataAbilityPredicates& predicates)
 {
-    LOGI("AceDataAbility::Update called");
+    LOGI("AceDataAbility Update called");
     int32_t ret = Platform::PaContainer::Update(abilityId_, uri, value, predicates);
-    LOGI("AceDataAbility::Update called End");
     return ret;
 }
 
 int32_t AceDataAbility::Delete(const Uri& uri, const NativeRdb::DataAbilityPredicates& predicates)
 {
-    LOGI("AceDataAbility::Delete called");
+    LOGI("AceDataAbility Delete called");
     int32_t ret = Platform::PaContainer::Delete(abilityId_, uri, predicates);
-    LOGI("AceDataAbility::Delete called End");
     return ret;
 }
 
 int32_t AceDataAbility::BatchInsert(const Uri& uri, const std::vector<NativeRdb::ValuesBucket>& values)
 {
-    LOGI("AceDataAbility::BatchInsert called");
+    LOGI("AceDataAbility BatchInsert called");
     int32_t ret = Platform::PaContainer::BatchInsert(abilityId_, uri, values);
-    LOGI("AceDataAbility::BatchInsert called End");
     return ret;
 }
 
 std::string AceDataAbility::GetType(const Uri& uri)
 {
-    LOGI("AceDataAbility::GetType called");
+    LOGI("AceDataAbility GetType called");
     std::string ret = Platform::PaContainer::GetType(abilityId_, uri);
-    LOGI("AceDataAbility::GetType called End");
     return ret;
 }
 
 std::vector<std::string> AceDataAbility::GetFileTypes(const Uri& uri, const std::string& mimeTypeFilter)
 {
-    LOGI("AceDataAbility::GetFileTypes called");
+    LOGI("AceDataAbility GetFileTypes called");
     std::vector<std::string> ret = Platform::PaContainer::GetFileTypes(abilityId_, uri, mimeTypeFilter);
-    LOGI("AceDataAbility::GetFileTypes called End");
     return ret;
 }
 
 int32_t AceDataAbility::OpenFile(const Uri& uri, const std::string& mode)
 {
-    LOGI("AceDataAbility::OpenFile called");
+    LOGI("AceDataAbility OpenFile called");
     int32_t ret = Platform::PaContainer::OpenFile(abilityId_, uri, mode);
-    LOGI("AceDataAbility::OpenFile called End");
     return ret;
 }
 
 int32_t AceDataAbility::OpenRawFile(const Uri& uri, const std::string& mode)
 {
-    LOGI("AceDataAbility::OpenRawFile called");
+    LOGI("AceDataAbility OpenRawFile called");
     int32_t ret = Platform::PaContainer::OpenRawFile(abilityId_, uri, mode);
-    LOGI("AceDataAbility::OpenRawFile called End");
     return ret;
 }
 
 Uri AceDataAbility::NormalizeUri(const Uri& uri)
 {
-    LOGI("AceDataAbility::NormalizeUri called");
+    LOGI("AceDataAbility NormalizeUri called");
     Uri ret = Platform::PaContainer::NormalizeUri(abilityId_, uri);
-    LOGI("AceDataAbility::NormalizeUri called End");
     return ret;
 }
 
 Uri AceDataAbility::DenormalizeUri(const Uri& uri)
 {
-    LOGI("AceDataAbility::DenormalizeUri called");
+    LOGI("AceDataAbility DenormalizeUri called");
     Uri ret = Platform::PaContainer::DenormalizeUri(abilityId_, uri);
-    LOGI("AceDataAbility::DenormalizeUri called End");
     return ret;
 }
 
 std::shared_ptr<AppExecFwk::PacMap> AceDataAbility::Call(const Uri& uri,
     const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap)
 {
-    LOGD("AceDataAbility::Call called");
+    LOGD("AceDataAbility Call called");
     std::shared_ptr<AppExecFwk::PacMap> ret = Platform::PaContainer::Call(abilityId_, uri, method, arg, pacMap);
     return ret;
 }

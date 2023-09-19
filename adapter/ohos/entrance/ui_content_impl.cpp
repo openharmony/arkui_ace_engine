@@ -30,6 +30,8 @@
 #include "service_extension_context.h"
 #include "wm_common.h"
 
+#include "base/log/log_wrapper.h"
+
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -135,13 +137,13 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* 
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateFormContent(void* context, void* runtime, bool isCard)
 {
-    LOGI("Ace lib loaded, CreateFormUIContent.");
+    TAG_LOGI(AceLogTag::ACE_FORM, "Ace lib loaded, CreateFormUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime, isCard);
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* ability)
 {
-    LOGI("Ace lib loaded, Create SubWindowUIContent.");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Ace lib loaded, Create SubWindowUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AppExecFwk::Ability*>(ability));
 }
 
@@ -156,7 +158,7 @@ public:
         auto rect = info->rect_;
         auto type = info->type_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        LOGI("UIContent::OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
         if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
@@ -184,7 +186,7 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override
     {
-        LOGI("UIContent::OnAvoidAreaChanged type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
+        LOGI("UIContent OnAvoidAreaChanged type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d",
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
@@ -219,7 +221,7 @@ public:
     ~DragWindowListener() = default;
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     {
-        LOGI("DragWindowListener::OnDrag called.");
+        TAG_LOGI(AceLogTag::ACE_DRAG, "DragWindowListener::OnDrag called.");
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         int32_t instanceId = instanceId_;
@@ -301,7 +303,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     SetConfiguration(context->GetConfiguration());
     context_ = context->weak_from_this();
-    LOGI("Create form UIContentImpl successfully.");
+    TAG_LOGI(AceLogTag::ACE_FORM, "Create form UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
@@ -324,8 +326,6 @@ void UIContentImpl::DestroyUIDirector()
     LOGI("Destroying old rsUIDirectory");
     rsUIDirector->Destroy();
 #endif
-#else
-    LOGE("Destroy RSUIDirector not supported in new pipeline");
 #endif
 }
 
@@ -421,7 +421,6 @@ void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& cont
     }
     LOGI("Restore startUrl = %{public}s", startUrl_.c_str());
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
-    LOGI("Restore UIContentImpl done.");
 }
 
 std::string UIContentImpl::GetContentInfo() const
@@ -434,7 +433,7 @@ std::string UIContentImpl::GetContentInfo() const
 void UIContentImpl::CommonInitializeForm(
     OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
-    LOGI("Initialize CommonInitializeForm start.");
+    TAG_LOGI(AceLogTag::ACE_FORM, "Initialize CommonInitializeForm start.");
     ACE_FUNCTION_TRACE();
     window_ = window;
     startUrl_ = contentInfo;
@@ -454,7 +453,7 @@ void UIContentImpl::CommonInitializeForm(
     static std::once_flag onceFlag;
     if (!isFormRender_) {
         std::call_once(onceFlag, [&context]() {
-            LOGI("Initialize for current process.");
+            LOGD("Initialize for current process.");
             SetHwIcuDirectory();
             Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
             AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
@@ -477,7 +476,7 @@ void UIContentImpl::CommonInitializeForm(
         density = defaultDisplay->GetVirtualPixelRatio();
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
-        LOGI("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
+        LOGD("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
             deviceHeight, density);
     }
 
@@ -536,7 +535,7 @@ void UIContentImpl::CommonInitializeForm(
     std::string pageProfile;
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
     if (isFormRender_) {
-        LOGI("Initialize UIContent form assetProvider");
+        TAG_LOGD(AceLogTag::ACE_FORM, "Initialize UIContent form assetProvider");
         std::vector<std::string> basePaths;
         basePaths.emplace_back("assets/js/" + moduleName_ + "/");
         basePaths.emplace_back("assets/js/share/");
@@ -551,7 +550,7 @@ void UIContentImpl::CommonInitializeForm(
     } else {
         if (isModelJson) {
             std::string hapPath = info != nullptr ? info->hapPath : "";
-            LOGI("hapPath:%{public}s", hapPath.c_str());
+            LOGD("hapPath:%{public}s", hapPath.c_str());
             // first use hap provider
             if (flutterAssetManager && !hapPath.empty()) {
                 auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
@@ -575,7 +574,7 @@ void UIContentImpl::CommonInitializeForm(
             }
 
             // second use file provider, will remove later
-            LOGI("In stage mode, resPath:%{private}s", resPath.c_str());
+            LOGD("In stage mode, resPath:%{private}s", resPath.c_str());
             auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
             if (flutterAssetManager && !resPath.empty()) {
                 auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
@@ -591,7 +590,7 @@ void UIContentImpl::CommonInitializeForm(
                 if (pageProfile.compare(0, profilePrefix.size(), profilePrefix) == 0) {
                     pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
                 }
-                LOGI("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
+                LOGD("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
             } else {
                 LOGE("In stage mode, can't get hap info.");
             }
@@ -639,7 +638,7 @@ void UIContentImpl::CommonInitializeForm(
             auto pos = moduleHapPath.find_last_of('/');
             if (pos != std::string::npos) {
                 hapPath = LOCAL_BUNDLE_CODE_PATH + moduleHapPath.substr(pos + 1);
-                LOGI("In Stage mode, hapPath:%{private}s", hapPath.c_str());
+                LOGD("In Stage mode, hapPath:%{private}s", hapPath.c_str());
             }
         }
     }
@@ -722,7 +721,8 @@ void UIContentImpl::CommonInitializeForm(
         resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
         hapPath = hapPath_;
     }
-    LOGI("CommonInitializeForm resPath = %{public}s hapPath = %{public}s", resPath.c_str(), hapPath.c_str());
+    TAG_LOGI(AceLogTag::ACE_FORM, "CommonInitializeForm resPath = %{public}s hapPath = %{public}s", resPath.c_str(),
+        hapPath.c_str());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
@@ -734,7 +734,7 @@ void UIContentImpl::CommonInitializeForm(
 
     if (window_) {
         if (window_->IsDecorEnable()) {
-            LOGI("Container modal is enabled.");
+            LOGD("Container modal is enabled.");
             container->SetWindowModal(WindowModal::CONTAINER_MODAL);
         }
 
@@ -755,7 +755,7 @@ void UIContentImpl::CommonInitializeForm(
     }
 
     if (isFormRender_) {
-        LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
+        LOGD("Platform AceContainer SetViewNew is card formWidth=%{public}f, formHeight=%{public}f", formWidth_,
             formHeight_);
         Platform::AceContainer::SetViewNew(aceView, density, formWidth_, formHeight_, window_);
         auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
@@ -770,7 +770,7 @@ void UIContentImpl::CommonInitializeForm(
 
     // after frontend initialize
     if (window_ && window_->IsFocused()) {
-        LOGI("UIContentImpl: focus again");
+        LOGD("UIContentImpl: focus again");
         Focus();
     }
 
@@ -794,7 +794,7 @@ void UIContentImpl::CommonInitializeForm(
     if (isModelJson) {
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
-            LOGI("SetMinPlatformVersion code is %{public}d", appInfo->minCompatibleVersionCode);
+            LOGD("SetMinPlatformVersion code is %{public}d", appInfo->minCompatibleVersionCode);
             pipeline->SetMinPlatformVersion(appInfo->minCompatibleVersionCode);
         }
     }
@@ -803,7 +803,7 @@ void UIContentImpl::CommonInitializeForm(
         if (!storage) {
             container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
         } else {
-            LOGI("SetLocalStorage %{public}d", storage->TypeOf());
+            LOGD("SetLocalStorage %{public}d", storage->TypeOf());
             container->SetLocalStorage(
                 nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
         }
@@ -813,7 +813,7 @@ void UIContentImpl::CommonInitializeForm(
 void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
     if (config == nullptr) {
-        LOGI("config is nullptr, set localeInfo to default");
+        LOGW("config is nullptr, set localeInfo to default");
         UErrorCode status = U_ZERO_ERROR;
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
@@ -826,7 +826,7 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
     auto deviceAccess = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     auto languageTag = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     if (!colorMode.empty()) {
-        LOGI("SetConfiguration colorMode: %{public}s", colorMode.c_str());
+        LOGD("SetConfiguration colorMode: %{public}s", colorMode.c_str());
         if (colorMode == "dark") {
             SystemProperties::SetColorMode(ColorMode::DARK);
         } else {
@@ -836,12 +836,12 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
 
     if (!deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
-        LOGI("SetConfiguration deviceAccess: %{public}s", deviceAccess.c_str());
+        LOGD("SetConfiguration deviceAccess: %{public}s", deviceAccess.c_str());
         SystemProperties::SetDeviceAccess(deviceAccess == "true");
     }
 
     if (!languageTag.empty()) {
-        LOGI("SetConfiguration languageTag: %{public}s", languageTag.c_str());
+        LOGD("SetConfiguration languageTag: %{public}s", languageTag.c_str());
         std::string language;
         std::string script;
         std::string region;
@@ -874,10 +874,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
     auto context = context_.lock();
     CHECK_NULL_VOID(context);
-    LOGI("Initialize UIContentImpl start.");
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [&context]() {
-        LOGI("Initialize for current process.");
+        LOGD("Initialize for current process.");
         SetHwIcuDirectory();
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
         auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
@@ -943,7 +942,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         density = defaultDisplay->GetVirtualPixelRatio();
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
-        LOGI("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
+        LOGD("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
             deviceHeight, density);
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
@@ -967,10 +966,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
         if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
             SystemProperties::SetColorMode(ColorMode::DARK);
-            LOGI("UIContent set dark mode");
+            LOGD("UIContent set dark mode");
         } else {
             SystemProperties::SetColorMode(ColorMode::LIGHT);
-            LOGI("UIContent set light mode");
+            LOGD("UIContent set light mode");
         }
         SystemProperties::SetDeviceAccess(
             resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
@@ -1004,7 +1003,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
     if (isModelJson) {
         std::string hapPath = info != nullptr ? info->hapPath : "";
-        LOGI("hapPath:%{public}s", hapPath.c_str());
+        LOGD("hapPath:%{public}s", hapPath.c_str());
         // first use hap provider
         if (flutterAssetManager && !hapPath.empty()) {
             auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
@@ -1027,7 +1026,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
 
         // second use file provider, will remove later
-        LOGI("In stage mode, resPath:%{private}s", resPath.c_str());
+        LOGD("In stage mode, resPath:%{private}s", resPath.c_str());
         auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
         if (flutterAssetManager && !resPath.empty()) {
             auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
@@ -1043,7 +1042,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             if (pageProfile.compare(0, profilePrefix.size(), profilePrefix) == 0) {
                 pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
             }
-            LOGI("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
+            LOGD("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
         } else {
             LOGE("In stage mode, can't get hap info.");
         }
@@ -1089,7 +1088,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             auto pos = moduleHapPath.find_last_of('/');
             if (pos != std::string::npos) {
                 hapPath = LOCAL_BUNDLE_CODE_PATH + moduleHapPath.substr(pos + 1);
-                LOGI("In Stage mode, hapPath:%{private}s", hapPath.c_str());
+                LOGD("In Stage mode, hapPath:%{private}s", hapPath.c_str());
             }
         }
     }
@@ -1188,7 +1187,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     if (window_->IsDecorEnable()) {
-        LOGI("Container modal is enabled.");
+        LOGD("Container modal is enabled.");
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
     dragWindowListener_ = new DragWindowListener(instanceId_);
@@ -1265,8 +1264,6 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     InitializeSafeArea(container);
 
     LayoutInspector::SetCallback(instanceId_);
-
-    LOGI("Initialize UIContentImpl end.");
 }
 
 void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& container)
@@ -1361,7 +1358,7 @@ uint32_t UIContentImpl::GetBackgroundColor()
         },
         TaskExecutor::TaskType::UI);
 
-    LOGI("UIContentImpl::GetBackgroundColor, value is %{public}u", bgColor);
+    LOGI("UIContentImpl GetBackgroundColor, value is %{public}u", bgColor);
     return bgColor;
 }
 
@@ -1394,32 +1391,30 @@ bool UIContentImpl::ProcessBackPressed()
         [container, this, &ret]() {
             if (AceType::InstanceOf<Platform::DialogContainer>(container)) {
                 if (Platform::DialogContainer::OnBackPressed(instanceId_)) {
-                    LOGI("UIContentImpl::ProcessBackPressed DialogContainer return true");
+                    LOGI("UIContentImpl ProcessBackPressed DialogContainer return true");
                     ret = true;
                 }
             } else {
-                LOGI("UIContentImpl::ProcessBackPressed AceContainer");
+                LOGI("UIContentImpl ProcessBackPressed AceContainer");
                 PerfMonitor::GetPerfMonitor()->RecordInputEvent(LAST_UP, UNKNOWN_SOURCE, 0);
                 if (Platform::AceContainer::OnBackPressed(instanceId_)) {
-                    LOGI("UIContentImpl::ProcessBackPressed AceContainer return true");
+                    LOGI("UIContentImpl ProcessBackPressed AceContainer return true");
                     ret = true;
                 }
             }
         },
         TaskExecutor::TaskType::UI);
-    LOGI("ProcessBackPressed: Platform::AceContainer::OnBackPressed return false");
     return ret;
 }
 
 bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    LOGD("UIContentImpl::ProcessPointerEvent begin");
+    LOGD("UIContentImpl ProcessPointerEvent begin");
     auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
     CHECK_NULL_RETURN(container, false);
     container->SetCurPointerEvent(pointerEvent);
     auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
-    LOGD("UIContentImpl::ProcessPointerEvent end");
     return true;
 }
 
@@ -1775,7 +1770,6 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
                 LOGD("new FileAssetProvider, assetRootPath: %{private}s", assetRootPath.c_str());
                 auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
                 if (assetProvider->Initialize(assetRootPath, assetBasePaths)) {
-                    LOGD("Push file AssetProvider to queue.");
                     flutterAssetManager->PushBack(std::move(assetProvider));
                 }
                 return;
@@ -1785,7 +1779,6 @@ void UIContentImpl::SetResourcePaths(const std::vector<std::string>& resourcesPa
                 LOGD("new HapAssetProvider, iter: %{private}s", iter->c_str());
                 auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
                 if (assetProvider->Initialize(*iter, assetBasePaths)) {
-                    LOGD("Push hap AssetProvider to queue.");
                     flutterAssetManager->PushBack(std::move(assetProvider));
                 }
             }
@@ -1815,17 +1808,12 @@ void UIContentImpl::UpdateResource()
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container]() {
-            container->UpdateResource();
-        },
-        TaskExecutor::TaskType::UI);
+    taskExecutor->PostTask([container]() { container->UpdateResource(); }, TaskExecutor::TaskType::UI);
 }
 
 int32_t UIContentImpl::CreateModalUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config)
 {
-    LOGI("UIExtension create modal page start");
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, 0);
     ContainerScope scope(instanceId_);

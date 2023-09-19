@@ -49,7 +49,6 @@ const char TASK_RUNNER[] = "PaEngineRunner";
 
 bool UnwrapRawImageDataMap(NativeEngine* engine, NativeValue* argv, std::map<std::string, int>& rawImageDataMap)
 {
-    LOGI("%{public}s called.", __func__);
     auto env = reinterpret_cast<napi_env>(engine);
     auto param = reinterpret_cast<napi_value>(argv);
 
@@ -71,12 +70,12 @@ bool UnwrapRawImageDataMap(NativeEngine* engine, NativeValue* argv, std::map<std
     for (uint32_t index = 0; index < jsProCount; index++) {
         NAPI_CALL_BASE(env, napi_get_element(env, jsProNameList, index, &jsProName), false);
         std::string strProName = AppExecFwk::UnwrapStringFromJS(env, jsProName);
-        LOGI("%{public}s called. Property name=%{public}s.", __func__, strProName.c_str());
+        LOGD("%{public}s called. Property name=%{public}s.", __func__, strProName.c_str());
         NAPI_CALL_BASE(env, napi_get_named_property(env, param, strProName.c_str(), &jsProValue), false);
         NAPI_CALL_BASE(env, napi_typeof(env, jsProValue, &jsValueType), false);
         int natValue = AppExecFwk::UnwrapInt32FromJS(env, jsProValue);
         rawImageDataMap.emplace(strProName, natValue);
-        LOGI("%{public}s called. Property value=%{public}d.", __func__, natValue);
+        LOGD("%{public}s called. Property value=%{public}d.", __func__, natValue);
     }
     return true;
 }
@@ -362,7 +361,6 @@ JsiPaEngine::~JsiPaEngine()
         })) {
         LOGE("Post sync task failed.");
     }
-    LOGI("JsiPaEngine destructor finished.");
 }
 
 bool JsiPaEngine::Initialize(BackendType type, SrcLanguage language)
@@ -958,8 +956,6 @@ std::string JsiPaEngine::IncludeTag(const std::string& jsonString, const std::st
 std::shared_ptr<AppExecFwk::PacMap> JsiPaEngine::Call(
     const std::string& method, const std::string& arg, const AppExecFwk::PacMap& pacMap, const CallingInfo& callingInfo)
 {
-    LOGD("JsiPaEngine Call");
-
     std::string pacString = const_cast<AppExecFwk::PacMap&>(pacMap).ToString();
     std::string params = ExcludeTag(pacString, "pacmap");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
@@ -1183,7 +1179,6 @@ std::string JsiPaEngine::GetType(const Uri& uri, const CallingInfo& callingInfo)
 std::vector<std::string> JsiPaEngine::GetFileTypes(
     const Uri& uri, const std::string& mimeTypeFilter, const CallingInfo& callingInfo)
 {
-    LOGD("JsiPaEngine GetFileTypes");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     std::vector<shared_ptr<JsValue>> argv;
     argv.push_back(runtime->NewString(uri.ToString()));
@@ -1335,7 +1330,6 @@ void JsiPaEngine::OnCommand(const OHOS::AAFwk::Want& want, int startId)
 void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
 {
     ContainerScope scope(instanceId_);
-    LOGI("JsiPaEngine OnCreate");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
 
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
@@ -1354,7 +1348,7 @@ void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
         LOGE("JsiPaEngine StartForm GetPropertyNames error");
         return;
     }
-    LOGD("JsiPaEngine onCreate return property num %{public}d", len);
+    LOGI("JsiPaEngine onCreate return property num %{public}d", len);
 
     std::string jsonStr;
     shared_ptr<JsValue> formJsonData = arkJSValue->GetProperty(runtime, "data");
@@ -1418,8 +1412,6 @@ void JsiPaEngine::OnCastTemptoNormal(const int64_t formId)
 
 void JsiPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap)
 {
-    LOGI("JsiPaEngine OnVisibilityChanged");
-
     std::string strJsonResult("{");
     for (auto item = formEventsMap.begin(); item != formEventsMap.end(); item++) {
         strJsonResult.append(ToJSONStringInt(std::to_string(item->first), std::to_string(item->second)));
@@ -1437,14 +1429,13 @@ void JsiPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
 
 int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want& want)
 {
-    LOGI("JsiPaEngine OnAcquireFormState");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
 
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
     auto func = GetPaFunc("onAcquireFormState");
 
     if (func == nullptr) {
-        LOGI("no OnAcquireFormState!");
+        LOGW("no OnAcquireFormState!");
         return (int32_t)AppExecFwk::FormState::DEFAULT;
     }
 
@@ -1519,8 +1510,6 @@ bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
         LOGE("%{public}s OnShare UnwrapWantParams failed, return false", __func__);
         return false;
     }
-
-    LOGD("JsiPaEngine OnShare, end");
     return true;
 }
 

@@ -74,6 +74,9 @@ namespace OHOS::Ace {
 
 enum class AceLogTag : uint8_t {
     DEFAULT = 0,
+    ACE_SUB_WINDOW,
+    ACE_FORM,
+    ACE_DRAG,
 };
 
 enum class LogDomain : uint32_t {
