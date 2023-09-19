@@ -396,48 +396,34 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
 {
     auto frontend = weakFrontend_.Upgrade();
     CHECK_NULL_VOID(frontend);
-    CHECK_NULL_VOID(taskExecutor_);
-    auto jsTask = [&] {
-        auto& wc = frontend->GetWindowConfig();
-        if (wc.designWidth <= 0) {
-            LOGE("the frontend design width <= 0");
-            return;
-        }
-        if (GetIsDeclarative()) {
-            viewScale_ = DEFAULT_VIEW_SCALE;
-            designWidthScale_ = static_cast<double>(width) / wc.designWidth;
-            wc.designWidthScale = designWidthScale_;
-        } else {
-            viewScale_ = wc.autoDesignWidth ? density_ : static_cast<double>(width) / wc.designWidth;
-        }
-        if (NearZero(viewScale_)) {
-            LOGW("the view scale is zero");
-            return;
-        }
-        dipScale_ = density_ / viewScale_;
-        rootHeight_ = height / viewScale_;
-        rootWidth_ = width / viewScale_;
-    };
-    if (!taskExecutor_->PostSyncTaskTimeout(jsTask, TaskExecutor::TaskType::JS, 10)) { // 10ms
-        // JS thread maybe blocked on waiting UI thread, so try again directly
-        LOGW("UpdateRootSizeAndScale directly");
-        jsTask();
+    auto lock = frontend->GetLock();
+    auto& windowConfig = frontend->GetWindowConfig();
+    if (windowConfig.designWidth <= 0) {
+        LOGE("the frontend design width <= 0");
+        return;
     }
+    if (GetIsDeclarative()) {
+        viewScale_ = DEFAULT_VIEW_SCALE;
+        designWidthScale_ = static_cast<double>(width) / windowConfig.designWidth;
+        windowConfig.designWidthScale = designWidthScale_;
+    } else {
+        viewScale_ = windowConfig.autoDesignWidth ? density_ : static_cast<double>(width) / windowConfig.designWidth;
+    }
+    if (NearZero(viewScale_)) {
+        LOGW("the view scale is zero");
+        return;
+    }
+    dipScale_ = density_ / viewScale_;
+    rootHeight_ = height / viewScale_;
+    rootWidth_ = width / viewScale_;
 }
 
 void PipelineBase::DumpFrontend() const
 {
     auto frontend = weakFrontend_.Upgrade();
     CHECK_NULL_VOID(frontend);
-    CHECK_NULL_VOID(taskExecutor_);
-    auto jsTask = [&] {
-        frontend->DumpFrontend();
-    };
-    if (!taskExecutor_->PostSyncTaskTimeout(jsTask, TaskExecutor::TaskType::JS, 10)) { // 10ms
-        // JS thread maybe blocked on waiting UI thread, so try again directly
-        LOGW("DumpFrontend directly");
-        jsTask();
-    }
+    auto lock = frontend->GetLock();
+    frontend->DumpFrontend();
 }
 
 bool PipelineBase::Dump(const std::vector<std::string>& params) const
@@ -675,17 +661,8 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
         EventReport::SendAppStartException(AppStartExcepType::PIPELINE_CONTEXT_ERR);
         return nullptr;
     }
-    CHECK_NULL_RETURN(taskExecutor_, nullptr);
-    RefPtr<AccessibilityManager> am;
-    auto jsTask = [&] {
-        am = frontend->GetAccessibilityManager();
-    };
-    if (!taskExecutor_->PostSyncTaskTimeout(jsTask, TaskExecutor::TaskType::JS, 10)) { // 10ms
-        // JS thread maybe blocked on waiting UI thread, so try again directly
-        LOGW("GetAccessibilityManager directly");
-        jsTask();
-    }
-    return am;
+    auto lock = frontend->GetLock();
+    return frontend->GetAccessibilityManager();
 }
 
 void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibilityEvent)
