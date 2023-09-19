@@ -410,6 +410,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
 {
     int32_t startIndex = 0;
     int32_t endIndex = 0;
+    int32_t midIndex = 0;
+    float midItemMidPos = 0.0f;
     float startPos = 0.0f;
     float endPos = 0.0f;
     if (jumpIndex_) {
@@ -439,6 +441,12 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 itemHeight = endPos - itemPosition_.rbegin()->second.startPos;
                 contentEndOffset_ = (contentMainSize_ - itemHeight) / 2.0f;
             }
+        }
+        if (IsScrollSnapAlignCenter(layoutWrapper)) {
+            midIndex = GetMidIndex(layoutWrapper, true);
+            midItemMidPos = (itemPosition_[midIndex].startPos + itemPosition_[midIndex].endPos) / 2.0f -
+                prevContentMainSize_ / 2.0f + contentMainSize_ / 2.0f;
+            midIndex = std::min(midIndex, totalItemCount_ - 1);
         }
         OffScreenLayoutDirection();
         itemPosition_.clear();
@@ -493,10 +501,19 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             startIndex, currentOffset_, startMainPos_, endMainPos_);
         bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
+        float midItemHeight = 0.0f;
+        if (IsScrollSnapAlignCenter(layoutWrapper)) {
+            midItemHeight = MeasureAndGetChildHeight(layoutWrapper, midIndex);
+        }
         if ((!overScrollFeature_ && NonNegative(currentOffset_)) ||
             (overScrollFeature_ && overScrollTop)) {
-            startIndex = GetLanesFloor(layoutWrapper, startIndex);
-            LayoutForward(layoutWrapper, startIndex, startPos);
+            if (IsScrollSnapAlignCenter(layoutWrapper)) {
+                midIndex = GetLanesFloor(layoutWrapper, midIndex);
+                LayoutForward(layoutWrapper, midIndex, midItemMidPos - midItemHeight / 2.0f);
+            } else {
+                startIndex = GetLanesFloor(layoutWrapper, startIndex);
+                LayoutForward(layoutWrapper, startIndex, startPos);
+            }
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, GetStartIndex() - 1, GetStartPosition());
             }
@@ -504,7 +521,11 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             if (overScrollFeature_ && !overScrollTop && !NearZero(prevContentMainSize_)) {
                 endPos += contentMainSize_ - prevContentMainSize_;
             }
-            LayoutBackward(layoutWrapper, endIndex, endPos);
+            if (IsScrollSnapAlignCenter(layoutWrapper)) {
+                LayoutBackward(layoutWrapper, midIndex, midItemMidPos + midItemHeight / 2.0f);
+            } else {
+                LayoutBackward(layoutWrapper, endIndex, endPos);
+            }
             if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
             }
@@ -1084,16 +1105,17 @@ void ListLayoutAlgorithm::OffScreenLayoutDirection()
     }
 }
 
-int32_t ListLayoutAlgorithm::GetMidIndex(LayoutWrapper* layoutWrapper)
+int32_t ListLayoutAlgorithm::GetMidIndex(LayoutWrapper* layoutWrapper, bool usePreContentMainSize)
 {
-    float midPos = contentMainSize_ / 2.0f;
+    float contentSize = usePreContentMainSize ? prevContentMainSize_ : contentMainSize_;
+    float midPos = contentSize / 2.0f;
     if (GetStartIndex() == 0 && !IsScrollSnapAlignCenter(layoutWrapper) &&
         GreatNotEqual(GetStartPosition(), startMainPos_)) {
-        midPos = GetStartPosition() + contentMainSize_ / 2.0f;
+        midPos = GetStartPosition() + contentSize / 2.0f;
     } else if (GetEndIndex() == totalItemCount_ - 1 && !IsScrollSnapAlignCenter(layoutWrapper) &&
         LessNotEqual(GetEndPosition(), endMainPos_) &&
         (GetStartIndex() != 0 || !NearEqual(GetStartPosition(), startMainPos_))) {
-        midPos = GetEndPosition() - contentMainSize_ / 2.0f;
+        midPos = GetEndPosition() - contentSize / 2.0f;
     }
     for (auto & pos : itemPosition_) {
         if (midPos <= pos.second.endPos + spaceWidth_ / 2) { /* 2:half */
