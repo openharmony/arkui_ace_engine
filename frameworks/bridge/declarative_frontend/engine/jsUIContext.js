@@ -171,7 +171,7 @@ class ComponentUtils {
      */
     constructor(instanceId) {
         this.instanceId_ = instanceId;
-        this.ohos_componentUtils = globalThis.requireNapi('componentUtils');
+        this.ohos_componentUtils = globalThis.requireNapi('arkui.componentUtils');
     }
     getRectangleById(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
