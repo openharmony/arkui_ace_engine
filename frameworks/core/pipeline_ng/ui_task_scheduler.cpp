@@ -64,15 +64,8 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             continue;
         }
         time = GetSysTimestamp();
-        auto task = node->CreateLayoutTask(forceUseMainThread);
-        if (task) {
-            if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
-                (*task)();
-                time = GetSysTimestamp() - time;
-            } else {
-                LOGW("need to use multithread feature");
-            }
-        }
+        node->CreateLayoutTask(forceUseMainThread);
+        time = GetSysTimestamp() - time;
         if (frameInfo_ != nullptr) {
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }

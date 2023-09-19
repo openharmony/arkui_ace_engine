@@ -956,10 +956,10 @@ void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
     geometryNode_ = node;
 }
 
-std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
+void FrameNode::CreateLayoutTask(bool forceUseMainThread)
 {
     if (!isLayoutDirtyMarked_) {
-        return std::nullopt;
+        return;
     }
     SetRootMeasureNode(true);
     UpdateLayoutPropertyFlag();
@@ -973,7 +973,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         Layout();
     }
     SetRootMeasureNode(false);
-    return std::nullopt;
+    return;
 }
 
 std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
