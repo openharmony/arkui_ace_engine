@@ -1455,7 +1455,7 @@ class SegmentButton extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(t);
             Stack.create();
             Stack.onFocus((() => {
-                this.focusIndex = 0
+                    0 !== this.selectedIndexes.length ? this.options.multiply ? this.focusIndex = Math.min(...this.selectedIndexes) : this.focusIndex = this.selectedIndexes[0] : this.focusIndex = 0
             }));
             Stack.onBlur((() => {
                 this.focusIndex = -1
@@ -1650,4 +1650,4 @@ class SegmentButton extends ViewPU {
     }
 }
 
-export default { SegmentButtonItemOptionsArray, SegmentButtonOptions, SegmentButton }
+export default { SegmentButton, SegmentButtonOptions, SegmentButtonItemOptionsArray };

@@ -34,7 +34,7 @@ interface SegmentButtonIconTextItem {
   text: ResourceStr
 }
 
-type CommonSegmentButtonOptions = {
+interface CommonSegmentButtonOptions {
   fontColor?: ResourceColor
   selectedFontColor?: ResourceColor
   fontSize?: Dimension
@@ -48,20 +48,30 @@ type CommonSegmentButtonOptions = {
   textMargin?: Margin | Dimension
 }
 
-type ItemRestriction<T> = [T, T, T?, T?, T?]
-type SegmentButtonItemTuple = ItemRestriction<SegmentButtonTextItem> | ItemRestriction<SegmentButtonIconItem> | ItemRestriction<SegmentButtonIconTextItem>
 type SegmentButtonItemArray = Array<SegmentButtonTextItem> | Array<SegmentButtonIconItem> | Array<SegmentButtonIconTextItem>
 
-export type TabSegmentButtonOptions = {
-  type: "tab",
-  buttons: ItemRestriction<SegmentButtonTextItem>
-} & CommonSegmentButtonOptions
+export interface TabSegmentButtonConstructionOptions extends CommonSegmentButtonOptions {
+  buttons: Array<SegmentButtonTextItem>
+}
 
-export type CapsuleSegmentButtonOptions = {
-  type: "capsule"
-  buttons: SegmentButtonItemTuple
+export interface CapsuleSegmentButtonConstructionOptions extends CommonSegmentButtonOptions {
+  buttons: SegmentButtonItemArray
   multiply?: boolean
-} & CommonSegmentButtonOptions
+}
+
+export interface TabSegmentButtonOptions extends TabSegmentButtonConstructionOptions {
+  type: "tab",
+}
+
+export interface CapsuleSegmentButtonOptions extends CapsuleSegmentButtonConstructionOptions {
+  type: "capsule"
+}
+
+interface SegmentButtonItemOptionsConstructorOptions {
+  icon?: ResourceStr
+  selectedIcon?: ResourceStr
+  text?: ResourceStr
+}
 
 @Observed
 class SegmentButtonItemOptions {
@@ -69,11 +79,7 @@ class SegmentButtonItemOptions {
   selectedIcon?: ResourceStr
   text?: ResourceStr
 
-  constructor(options: {
-    icon?: ResourceStr,
-    selectedIcon?: ResourceStr,
-    text?: ResourceStr
-  }) {
+  constructor(options: SegmentButtonItemOptionsConstructorOptions) {
     this.icon = options.icon
     this.selectedIcon = options.selectedIcon
     this.text = options.text
@@ -86,7 +92,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
   deleteCount: number = void 0
   addLength: number = void 0
 
-  constructor(elements: SegmentButtonItemTuple) {
+  constructor(elements: SegmentButtonItemArray) {
     super()
     if (elements.length < MIN_ITEM_COUNT) {
       throw new RangeError("Below the minimum number of elements (2).")
@@ -149,7 +155,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
     return super.splice(start, deleteCount, ...items)
   }
 
-  static create(elements: SegmentButtonItemTuple): SegmentButtonItemOptionsArray {
+  static create(elements: SegmentButtonItemArray): SegmentButtonItemOptionsArray {
     return new SegmentButtonItemOptionsArray(elements)
   }
 }
@@ -210,11 +216,11 @@ export class SegmentButtonOptions {
     }
   }
 
-  static tab(options: Omit<TabSegmentButtonOptions, "type">): SegmentButtonOptions {
+  static tab(options: TabSegmentButtonConstructionOptions): SegmentButtonOptions {
     return new SegmentButtonOptions({ type: "tab", ...options })
   }
 
-  static capsule(options: Omit<CapsuleSegmentButtonOptions, "type">): SegmentButtonOptions {
+  static capsule(options: CapsuleSegmentButtonConstructionOptions): SegmentButtonOptions {
     return new SegmentButtonOptions({ type: "capsule", ...options })
   }
 }
@@ -709,7 +715,15 @@ export struct SegmentButton {
       })
     }
     .onFocus(() => {
-      this.focusIndex = 0
+      if (this.selectedIndexes.length === 0) {
+        this.focusIndex = 0
+        return
+      }
+      if (!this.options.multiply) {
+        this.focusIndex = this.selectedIndexes[0]
+      } else {
+        this.focusIndex = Math.min(...this.selectedIndexes)
+      }
     })
     .onBlur(() => {
       this.focusIndex = -1
