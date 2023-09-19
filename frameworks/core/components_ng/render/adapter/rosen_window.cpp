@@ -50,7 +50,6 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
 #else
     int64_t refreshPeriod = window->GetVSyncPeriod();
 #endif
-    JankFrameReport::SetRefreshPeriod(refreshPeriod);
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_, refreshPeriod](int64_t timeStampNanos) {
         auto taskExecutor = weakTask.Upgrade();
@@ -66,7 +65,6 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID_NOLOG(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
             JankFrameReport::JankFrameRecord(timeStampNanos);
-            JankFrameReport::RecordPreviousEnd();
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -178,6 +176,7 @@ void RosenWindow::FlushTasks()
     LOGD("Rosenwindow flush tasks");
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
+    JankFrameReport::JsAnimationToRsRecord();
 }
 
 float RosenWindow::GetRefreshRate() const
