@@ -11581,7 +11581,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchUp002, TestSize.Level1)
     swiperPattern->springController_ = AceType::MakeRefPtr<Animator>();
     ASSERT_NE(swiperPattern->springController_, nullptr);
     swiperPattern->isDragging_ = false;
-    swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1.0f, 2.0f}));
+    swiperPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1.0f, 2.0f }));
     swiperPattern->velocity_ = 1.0f;
 
     /**
@@ -12551,20 +12551,20 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward005, TestSize.Level1)
     swiperLayoutProperty->UpdateMinSize(Dimension(1));
     swiperLayoutProperty->UpdateDisplayCount(1);
     swiperLayoutProperty->UpdateDisplayMode(SwiperDisplayMode::STRETCH);
+    float currentEndPos = startPos;
+    float currentStartPos = 0.0f;
+    auto currentIndex = startIndex - 1;
+    auto result = swiperLayoutAlgorithm->LayoutForwardItem(
+        &layoutWrapper, layoutConstraint, axis, currentIndex, currentStartPos, currentEndPos);
+    EXPECT_TRUE(result);
 
     /**
      * @tc.steps: step2. call LayoutForward.
      * @tc.expected: Related function runs ok.
      */
     for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
-            if (i == 1) {
-                break;
-            }
-            startIndex = 2;
-        }
-        swiperLayoutAlgorithm->targetIsSameWithStartFlag_ = true;
+        swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+        startIndex = 2;
     }
 }
 
@@ -12607,7 +12607,7 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward006, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
     Axis axis = Axis::HORIZONTAL;
     int32_t startIndex = 1;
-    float startPos = -1.0f;
+    float startPos = 0.0f;
     swiperLayoutAlgorithm->targetIndex_ = 1;
     swiperLayoutAlgorithm->SetTotalItemCount(1);
     swiperLayoutAlgorithm->SetIsLoop(true);
@@ -12617,6 +12617,7 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward006, TestSize.Level1)
     swiperLayoutProperty->UpdateDisplayMode(SwiperDisplayMode::STRETCH);
     swiperLayoutAlgorithm->jumpIndex_ = 1;
     swiperLayoutAlgorithm->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 0.0f, 1.0f }));
+    swiperLayoutAlgorithm->endMainPos_ = 1.0f;
 
     /**
      * @tc.steps: step2. call LayoutForward.
@@ -12625,6 +12626,7 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward006, TestSize.Level1)
     for (int i = 0; i <= 1; i++) {
         for (int j = 0; j <= 1; j++) {
             swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            swiperLayoutAlgorithm->endMainPos_ = 1.0f;
             if (i == 1) {
                 swiperLayoutAlgorithm->canOverScroll_ = false;
                 continue;
@@ -12693,5 +12695,32 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward007, TestSize.Level1)
      */
     swiperLayoutAlgorithm->LayoutForward(&layoutWrapper, layoutConstraint, axis, startIndex, startPos);
     EXPECT_TRUE(swiperLayoutAlgorithm->itemPosition_.empty());
+}
+
+/**
+ * @tc.name: SwiperPatternStopSpringAnimationAndFlushImmediately001
+ * @tc.desc: StopSpringAnimationAndFlushImmediately
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternStopSpringAnimationAndFlushImmediately001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->springController_ = AceType::MakeRefPtr<Animator>();
+    swiperPattern->springController_->status_ = Animator::Status::IDLE;
+
+    /**
+     * @tc.steps: step2. call PlaySpringAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    swiperPattern->StopSpringAnimationAndFlushImmediately();
+    EXPECT_TRUE(swiperPattern->isVoluntarilyClear_);
 }
 } // namespace OHOS::Ace::NG
