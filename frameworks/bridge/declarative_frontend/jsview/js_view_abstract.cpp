@@ -6058,7 +6058,14 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
         result = Color(ColorAlphaAdapt(jsonValue->GetUInt()));
         return true;
     }
-    if (jsonValue->IsString()) {
+
+    bool isSetColor = false;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        isSetColor = jsonValue->IsString();
+    } else {
+        isSetColor = jsonValue->IsString() && jsonValue->GetString() != "";
+    }
+    if (isSetColor) {
         result = Color::FromString(jsonValue->GetString());
         return true;
     }
@@ -6104,14 +6111,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
         shadow.SetOffsetY(offsetY.Value());
     }
     Color color;
-    bool success = false;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        success = ParseJsonColor(argsPtrItem->GetValue("color"), color);
-    } else {
-        auto jsObject = JSRef<JSObject>::Cast(jsValue);
-        success = ParseJsColor(jsObject->GetProperty("color"), color);
-    }
-    if (success) {
+    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
         shadow.SetColor(color);
     }
     auto type = argsPtrItem->GetInt("type", static_cast<int32_t>(ShadowType::COLOR));
