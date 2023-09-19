@@ -1029,6 +1029,7 @@ public:
     }
 
     bool IsNormalInlineState() const;
+    bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
     void TextAreaInputRectUpdate(RectF& rect);
     void UpdateRectByAlignment(RectF& rect);
