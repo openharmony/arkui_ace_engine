@@ -126,7 +126,6 @@ void JankFrameReport::JsAnimationToRsRecord()
 {
     int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
     if (hasJsAnimation_ && animatorEndTime_ != 0) {
-        ACE_FUNCTION_TRACE();
         int64_t jsAnimationDuration = now - animatorEndTime_;
         jsAnimationDelayJank_ = double(jsAnimationDuration) / refreshPeriod_;
     }
