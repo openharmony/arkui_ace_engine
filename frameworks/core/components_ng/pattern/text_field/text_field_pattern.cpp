@@ -2513,8 +2513,8 @@ void TextFieldPattern::OnModifyDone()
     if (!IsNormalInlineState() && !IsDisabled()) {
         SetShowError();
     }
-    if (IsTextArea() && layoutProperty->HasMaxLength()) {
-        if (setBorderFlag_) {
+    if (IsTextArea()) {
+        if (setBorderFlag_ && layoutProperty->HasMaxLength()) {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto themeManager = pipeline->GetThemeManager();
