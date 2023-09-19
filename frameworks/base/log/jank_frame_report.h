@@ -27,6 +27,7 @@ using JankFrameFlag = uint32_t;
 inline constexpr JankFrameFlag JANK_IDLE = 0;
 inline constexpr JankFrameFlag JANK_RUNNING_SCROLL = 1;
 inline constexpr JankFrameFlag JANK_RUNNING_ANIMATOR = 1 << 1;
+inline constexpr JankFrameFlag JANK_RUNNING_SWIPER = 1 << 2;
 
 class ACE_FORCE_EXPORT JankFrameReport {
 public:
@@ -36,6 +37,8 @@ public:
     static void StartRecord(const std::string& pageUrl);
     static void FlushRecord();
     static void RecordFrameUpdate();
+    static void ReportJSAnimation();
+    static void JsAnimationToRsRecord();
 
 private:
     static void ClearFrameJankRecord();
@@ -53,6 +56,9 @@ private:
     static int64_t refreshPeriod_;
     static std::string pageUrl_;
     static bool needReport_;
+    static bool hasJsAnimation_;
+    static int64_t animatorEndTime_;
+    static double jsAnimationDelayJank_;
 };
 } // namespace OHOS::Ace
 

@@ -103,6 +103,9 @@ int64_t JankFrameReport::prevEndTimeStamp_ = 0;
 int64_t JankFrameReport::refreshPeriod_ = 16666666;
 std::string JankFrameReport::pageUrl_;
 bool JankFrameReport::needReport_ = false;
+bool JankFrameReport::hasJsAnimation_ = false;
+int64_t JankFrameReport::animatorEndTime_ = 0;
+double JankFrameReport::jsAnimationDelayJank_ = 0;
 
 void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
 {
@@ -119,10 +122,30 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
     RecordPreviousEnd();
 }
 
+void JankFrameReport::JsAnimationToRsRecord()
+{
+    int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
+    if (hasJsAnimation_ && animatorEndTime_ != 0) {
+        int64_t jsAnimationDuration = now - animatorEndTime_;
+        jsAnimationDelayJank_ = double(jsAnimationDuration) / refreshPeriod_;
+    }
+}
+
 void JankFrameReport::RecordJankStatus(double jank)
 {
+    if (recordStatus_ == JANK_IDLE && animatorEndTime_ == 0) {
+        return;
+    }
+    if (jsAnimationDelayJank_ > 1.0f) {
+        jank += jsAnimationDelayJank_;
+    }
+    if (animatorEndTime_ != 0) {
+        hasJsAnimation_ = false;
+        animatorEndTime_ = 0;
+        jsAnimationDelayJank_ = 0;
+    }
     // on need to record
-    if (jank <= 1.0f || recordStatus_ == JANK_IDLE) {
+    if (jank <= 1.0f) {
         return;
     }
     // skip first frame
@@ -150,16 +173,26 @@ void JankFrameReport::ClearFrameJankRecord()
     prevEndTimeStamp_ = 0;
     currentFrameUpdateCount_ = 0;
     needReport_ = false;
+    hasJsAnimation_ = false;
+    jsAnimationDelayJank_ = 0;
+    animatorEndTime_ = 0;
 }
 
 void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag)
 {
     recordStatus_++;
+    if (recordStatus_ == 1) {
+        animatorEndTime_ = 0;
+        hasJsAnimation_ = false;
+    }
 }
 
 void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag)
 {
     if (recordStatus_ > 0) {
+        if (recordStatus_ == 1) {
+            animatorEndTime_ = GetSteadyTimestamp<std::chrono::nanoseconds>();
+        }
         recordStatus_--;
     }
     if (recordStatus_ == JANK_IDLE) {
@@ -192,5 +225,12 @@ void JankFrameReport::FlushRecord()
         EventReport::JankFrameReport(startTime_, SteadyTimeRecorder::End(), frameJankRecord_, pageUrl_);
     }
     ClearFrameJankRecord();
+}
+
+void JankFrameReport::ReportJSAnimation()
+{
+    if (animatorEndTime_ != 0) {
+        hasJsAnimation_ = true;
+    }
 }
 } // namespace OHOS::Ace
