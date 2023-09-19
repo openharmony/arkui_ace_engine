@@ -74,6 +74,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     auto iconRect = textFieldPattern->GetImageRect();
     auto counterParagraph = textFieldPattern->GetCounterParagraph();
     auto errorParagraph = textFieldPattern->GetErrorParagraph();
+    auto contentRect = textFieldPattern->GetContentRect();
     auto clipRectHeight = 0.0f;
     auto errorMargin = 0.0f;
     auto errorViewHeight = 0.0f;
@@ -96,17 +97,17 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
         errorViewHeight = textFrameRect.Bottom() - textFrameRect.Top() + errorMargin;
     }
     if (showCounter_->Get() && counterParagraph && !textFieldPattern->GetIsCounterIdealHeight()) {
-        clipRectHeight = contentOffset.GetY() + contentSize.Height() - textFieldPattern->GetCountHeight();
+        clipRectHeight = contentRect.GetY() + contentRect.Height() - textFieldPattern->GetCountHeight();
     } else {
-        clipRectHeight = contentOffset.GetY() + contentSize.Height() + errorViewHeight;
+        clipRectHeight = contentRect.GetY() + contentRect.Height() + errorViewHeight;
     }
     canvas.Save();
-    RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(), contentSize.Width() + contentOffset.GetX() -
-        textFieldPattern->GetUnitWidth() + textFieldPattern->GetInlinePadding(), clipRectHeight);
+    RSRect clipInnerRect = RSRect(contentRect.GetX(), contentRect.GetY(), contentRect.Width() + contentRect.GetX()
+        - textFieldPattern->GetUnitWidth() + textFieldPattern->GetInlinePadding(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
-        paragraph->Paint(
-            &canvas, textRectX_->Get(), textFieldPattern->IsTextArea() ? textRectY_->Get() : contentOffset.GetY());
+        paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(),
+            textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
     }
     canvas.Restore();
     if (showCounter_->Get() && counterParagraph) {

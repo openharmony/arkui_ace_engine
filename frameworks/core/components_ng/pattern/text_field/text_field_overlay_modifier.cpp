@@ -112,7 +112,8 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(selectedColor_->Get()));
     canvas.AttachBrush(brush);
-    auto paintOffset = contentOffset_->Get() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
+    auto contentOffset = textFieldPattern->GetContentRect().GetOffset();
+    auto paintOffset = contentOffset - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
     auto textBoxes = textFieldPattern->GetTextBoxes();
     auto textRect = textFieldPattern->GetTextRect();
     bool isTextArea = textFieldPattern->IsTextArea();
@@ -137,22 +138,22 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     // for default style, selection height is equal to the content height
     for (const auto& textBox : textBoxes) {
 #ifndef USE_GRAPHIC_TEXT_GINE
-        canvas.DrawRect(RSRect(textBox.rect_.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+        canvas.DrawRect(RSRect(textBox.rect_.GetLeft() + (isTextArea ? contentOffset.GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset.GetY()))
                 : 0.0f,
-            textBox.rect_.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+            textBox.rect_.GetRight() + (isTextArea ? contentOffset.GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset.GetY()))
                 : textFieldPattern->GetFrameRect().Height()));
 #else
-        canvas.DrawRect(RSRect(textBox.rect.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+        canvas.DrawRect(RSRect(textBox.rect.GetLeft() + (isTextArea ? contentOffset.GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect.GetTop() + (isTextArea ? textRect.GetY() : contentOffset.GetY()))
                 : 0.0f,
-            textBox.rect.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+            textBox.rect.GetRight() + (isTextArea ? contentOffset.GetX() : textRect.GetX()),
             inputStyle_ == InputStyle::DEFAULT || isTextArea
-                ? (textBox.rect.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()))
+                ? (textBox.rect.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset.GetY()))
                 : textFieldPattern->GetFrameRect().Height()));
 #endif
     }
