@@ -55,6 +55,7 @@ constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr int32_t MINDDLE_CHILD_INDEX = 2;
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
 constexpr float FONTWEIGHT = 0.5f;
+constexpr float FONT_SIZE_PERCENT = 0.9f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
@@ -653,7 +654,11 @@ void DatePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
 Dimension DatePickerColumnPattern::LinearFontSize(
     const Dimension& startFontSize, const Dimension& endFontSize, double percent)
 {
-    return startFontSize + (endFontSize - startFontSize) * percent;
+    if (percent > FONT_SIZE_PERCENT) {
+        return startFontSize + (endFontSize - startFontSize);
+    } else {
+        return startFontSize + (endFontSize - startFontSize) * percent;
+    }
 }
 
 bool DatePickerColumnPattern::InnerHandleScroll(
