@@ -121,7 +121,7 @@ private:
     double disabledAlpha_ = 0.4;
     double enabledAlpha_ = 1.0;
     Dimension focusRadius_;
-    Dimension focusPaintPadding_ = 4.0_vp;
+    Dimension focusPaintPadding_ = 2.0_vp;
     Color focusColor_;
     Dimension borderRadiusValue_;
     NG::BorderRadiusProperty borderRadius_;

@@ -228,11 +228,17 @@ void GridItemPattern::InitDisableStyle()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);
+    auto userDefineOpacity = renderContext->GetOpacityValue(1.0);
 
     if (!eventHub->IsDeveloperEnabled()) {
+        enableOpacity_ = renderContext->GetOpacityValue(1.0);
         renderContext->UpdateOpacity(theme->GetGridItemDisabledAlpha());
     } else {
-        renderContext->UpdateOpacity(theme->GetGridItemEnabledAlpha());
+        if (enableOpacity_.has_value()) {
+            renderContext->UpdateOpacity(enableOpacity_.value());
+        } else {
+            renderContext->UpdateOpacity(userDefineOpacity);
+        }
     }
 }
 
