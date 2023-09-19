@@ -75,6 +75,11 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
         LOGD("Unregister surface change callback with id %{public}d", surfaceChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
+    if (HasSurfacePositionChangedCallback()) {
+        LOGD("Unregister surface position change callback with id %{public}d",
+            surfacePositionChangedCallbackId_.value_or(-1));
+        pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionChangedCallbackId_.value_or(-1));
+    }
     auto frameNode = WeakClaim(node);
     pipeline->RemoveFontNodeNG(frameNode);
     auto fontManager = pipeline->GetFontManager();
