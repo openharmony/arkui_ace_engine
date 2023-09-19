@@ -121,7 +121,6 @@ void RichEditorPattern::HandleEnabled()
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
-    paragraphs_.Reset();
     TextPattern::BeforeCreateLayoutWrapper();
 }
 
