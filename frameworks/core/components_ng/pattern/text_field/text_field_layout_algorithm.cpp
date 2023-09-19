@@ -299,8 +299,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
         // for text area, max width is content width without scroll bar.
-        paragraph_->Layout(
-            idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+        paragraph_->Layout(idealWidth);
     }
 
     // counterParagraph Layout.
@@ -310,8 +309,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         auto maxLength = textFieldLayoutProperty->GetMaxLength().value();
         CreateCounterParagraph(textLength, maxLength, textFieldTheme);
         if (counterParagraph_) {
-            counterParagraph_->Layout(
-                idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx());
+            counterParagraph_->Layout(idealWidth);
         }
     }
     // errorParagraph  Layout.
@@ -370,8 +368,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
             idealHeight = idealHeight - counterParagraph_->GetHeight();
         }
         textRect_.SetSize(
-            SizeF(idealWidth - scrollBarTheme->GetActiveWidth().ConvertToPx() - SCROLL_BAR_LEFT_WIDTH.ConvertToPx(),
-                paragraph_->GetHeight()));
+            SizeF(idealWidth, paragraph_->GetHeight()));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
     // check password image size.
