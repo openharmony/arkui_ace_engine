@@ -878,6 +878,7 @@ private:
     void ScrollToLastFocusIndex() const;
 
     void CheckFocusStateStyle(bool onFocus);
+    bool HasFocusStateStyle();
 
     bool IsNeedPaintFocusState();
 
