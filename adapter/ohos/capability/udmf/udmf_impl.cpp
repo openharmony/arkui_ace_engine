@@ -229,10 +229,16 @@ void UdmfClientImpl::GetHtmlRecord(
     }
 }
 
-void UdmfClientImpl::AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data)
+void UdmfClientImpl::AddPixelMapRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<uint8_t>& data,
+    PixelMapRecordDetails& details)
 {
     auto record = std::make_shared<UDMF::SystemDefinedPixelMap>(data);
-
+    UDMF::UDDetails uDetails = {
+        { "width", details.width },
+        { "height", details.height },
+        { "pixel-format", static_cast<int32_t>(details.pixelFormat) },
+        { "alpha-type", static_cast<int32_t>(details.alphaType) } };
+    record->SetDetails(uDetails);
     auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
     CHECK_NULL_VOID(udData);
     CHECK_NULL_VOID(udData->GetUnifiedData());

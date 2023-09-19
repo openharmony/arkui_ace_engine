@@ -1319,7 +1319,13 @@ NG::DragDropInfo RichEditorPattern::OnDragStart(const RefPtr<OHOS::Ace::DragEven
                 CHECK_NULL_VOID(pixels);
                 int32_t length = result.valuePixelMap->GetByteCount();
                 std::vector<uint8_t> data(pixels, pixels + length);
-                UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data);
+                PixelMapRecordDetails details = {
+                    result.valuePixelMap->GetWidth(),
+                    result.valuePixelMap->GetHeight(),
+                    result.valuePixelMap->GetPixelFormat(),
+                    result.valuePixelMap->GetAlphaType()
+                };
+                UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
             } else {
                 UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
             }

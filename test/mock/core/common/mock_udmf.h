@@ -44,8 +44,8 @@ public:
         const std::string& htmlContent, const std::string& plainContent), (override));
     MOCK_METHOD(void, GetHtmlRecord,
         (const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent), (override));
-    MOCK_METHOD(
-        void, AddPixelMapRecord, (const RefPtr<UnifiedData>& unifiedData, (std::vector<uint8_t>& data)), (override));
+    MOCK_METHOD(void, AddPixelMapRecord, (const RefPtr<UnifiedData>& unifiedData, (std::vector<uint8_t> & data),
+        PixelMapRecordDetails& details), (override));
     MOCK_METHOD(void, AddImageRecord, (const RefPtr<UnifiedData>& unifiedData, const std::string& uri), (override));
     MOCK_METHOD(
         void, AddPlainTextRecord, (const RefPtr<UnifiedData>& unifiedData, const std::string& selectedStr), (override));
