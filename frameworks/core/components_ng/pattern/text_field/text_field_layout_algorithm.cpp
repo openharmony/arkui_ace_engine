@@ -667,7 +667,10 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     paraStyle.locale = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType = ToRSWordBreakType(textStyle.GetWordBreak());
     paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
-    paraStyle.fontFamily = textStyle.GetFontFamilies().at(0);
+    auto fontFamilies = textStyle.GetFontFamilies();
+    if (!fontFamilies.empty()) {
+        paraStyle.fontFamily = fontFamilies.at(0);
+    }
 #endif
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
 #ifndef USE_GRAPHIC_TEXT_GINE
