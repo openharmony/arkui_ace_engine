@@ -879,6 +879,7 @@ public:
     bool OnBackPressed();
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
+    void HandleDoubleClickEvent(GestureEvent& info);
 
     void HandleSelectionUp();
     void HandleSelectionDown();
@@ -1135,6 +1136,8 @@ private:
     bool UpdateCaretByPressOrLongPress();
     void UpdateTextSelectorByHandleMove(bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning);
     void UpdateCaretByRightClick();
+    void UpdateSelectionByDoubleClick();
+    void UpdateSelectionByMouseDoubleClick();
 
     void AfterSelection();
 
@@ -1377,6 +1380,9 @@ private:
     bool isTouchAtLeftOffset_ = true;
     bool isCustomFont_ = false;
     bool textRectWillChange_ = false;
+    bool hasClicked_ = false;
+    bool isDoubleClick_ = false;
+    TimeStamp lastClickTimeStamp_;
 };
 } // namespace OHOS::Ace::NG
 

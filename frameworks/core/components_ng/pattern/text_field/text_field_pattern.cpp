@@ -86,7 +86,9 @@ constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
+constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
+constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
 constexpr uint32_t FIND_TEXT_ZERO_INDEX = 1;
@@ -226,11 +228,17 @@ TextFieldPattern::~TextFieldPattern()
 
 void TextFieldPattern::BeforeCreateLayoutWrapper()
 {
-    if (caretUpdateType_ == CaretUpdateType::PRESSED || caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+    if (caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK) {
+        UpdateSelectionByDoubleClick();
+        MarkRedrawOverlay();
+    } else if (caretUpdateType_ == CaretUpdateType::PRESSED || caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
         UpdateCaretByPressOrLongPress();
         MarkRedrawOverlay();
     } else if (caretUpdateType_ == CaretUpdateType::EVENT) {
-        if (isMousePressed_) {
+        if (isDoubleClick_) {
+            // handle double click event only
+            UpdateSelectionByMouseDoubleClick();
+        } else if (isMousePressed_) {
             // handle mouse event only
             UpdateCaretPositionByMouseMovement();
         }
@@ -589,6 +597,28 @@ bool TextFieldPattern::UpdateCaretPositionByMouseMovement()
     selectionMode_ =
         textSelector_.destinationOffset == textSelector_.baseOffset ? SelectionMode::NONE : SelectionMode::SELECT;
     return needToShiftCaretAndTextRect;
+}
+
+void TextFieldPattern::UpdateSelectionByDoubleClick()
+{
+    isDoubleClick_ = false;
+    UpdateCaretPositionByPressOffset();
+    ProcessOverlay(true);
+    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+}
+
+void TextFieldPattern::UpdateSelectionByMouseDoubleClick()
+{
+    isDoubleClick_ = false;
+    if (GetEditingValue().text.empty()) {
+        selectionMode_ = SelectionMode::NONE;
+        UpdateSelection(0, 0);
+        return;
+    }
+    UpdateCaretPositionByLastTouchOffset();
+    UpdateSelectorByPosition(textEditingValue_.caretPosition);
+    selectionMode_ = SelectionMode::SELECT;
+    GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
 }
 
 void TextFieldPattern::UpdateCaretOffsetByEvent()
@@ -2180,59 +2210,89 @@ void TextFieldPattern::InitClickEvent()
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
     LOGI("TextFieldPattern::HandleClickEvent");
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    // emulate clicking bottom of the textField
-    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-    auto focusHub = host->GetOrCreateFocusHub();
+    if (hasClicked_) {
+        hasClicked_ = false;
+        TimeStamp clickTimeStamp = info.GetTimeStamp();
+        std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout =
+            clickTimeStamp - lastClickTimeStamp_;
+        lastClickTimeStamp_ = info.GetTimeStamp();
+        if (timeout.count() < DOUBLECLICK_INTERVAL_MS) {
+            lastTouchOffset_ = info.GetLocalLocation();
+            HandleDoubleClickEvent(info);
+        } else {
+            HandleClickEvent(info);
+        }
+    } else {
+        hasClicked_ = true;
+        lastClickTimeStamp_ = info.GetTimeStamp();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+        // emulate clicking bottom of the textField
+        UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
+        auto focusHub = host->GetOrCreateFocusHub();
 
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-        focusHub = parentFrameNode->GetOrCreateFocusHub();
-    }
+        if (IsSearchParentNode()) {
+            auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+            focusHub = parentFrameNode->GetOrCreateFocusHub();
+        }
 
-    if (!focusHub->IsFocusable()) {
-        LOGI("Textfield %{public}d is not focusable ,cannot request keyboard", host->GetId());
-        return;
-    }
-    lastTouchOffset_ = info.GetLocalLocation();
-    isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
-    caretUpdateType_ = CaretUpdateType::PRESSED;
-    isFocusedBeforeClick_ = HasFocus();
-    selectionMode_ = SelectionMode::NONE;
-    isUsingMouse_ = false;
-    CloseSelectOverlay(true);
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetIconRightOffset() &&
-        NeedShowPasswordIcon()) {
-        LOGI("Password Icon pressed, change text to be shown only");
-        textObscured_ = !textObscured_;
-        ProcessPasswordIcon();
+        if (!focusHub->IsFocusable()) {
+            LOGI("Textfield %{public}d is not focusable ,cannot request keyboard", host->GetId());
+            return;
+        }
+        lastTouchOffset_ = info.GetLocalLocation();
+        isTouchAtLeftOffset_ = IsTouchAtLeftOffset(lastTouchOffset_.GetX());
+        caretUpdateType_ = CaretUpdateType::PRESSED;
+        isFocusedBeforeClick_ = HasFocus();
+        selectionMode_ = SelectionMode::NONE;
+        isUsingMouse_ = false;
+        CloseSelectOverlay(true);
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetIconRightOffset() &&
+            NeedShowPasswordIcon()) {
+            LOGI("Password Icon pressed, change text to be shown only");
+            textObscured_ = !textObscured_;
+            ProcessPasswordIcon();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
+            return;
+        }
+        ResetObscureTickCountDown();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
-        return;
-    }
-    ResetObscureTickCountDown();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    StartTwinkling();
+        StartTwinkling();
 
-    if (isMousePressed_) {
-        LOGI("TextFieldPattern::HandleTouchUp of mouse");
-        isMousePressed_ = false;
-        return;
+        if (isMousePressed_) {
+            LOGI("TextFieldPattern::HandleTouchUp of mouse");
+            isMousePressed_ = false;
+            return;
+        }
+        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
+            LOGW("Request focus failed, cannot open input method");
+            StopTwinkling();
+            return;
+        }
+        if (RequestKeyboard(false, true, true)) {
+            auto eventHub = host->GetEventHub<TextFieldEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireOnEditChanged(true);
+        }
     }
-    if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
-        LOGE("Request focus failed, cannot open input method");
-        StopTwinkling();
-        return;
-    }
-    if (RequestKeyboard(false, true, true)) {
-        auto eventHub = host->GetEventHub<TextFieldEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnEditChanged(true);
+}
+
+void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
+{
+    LOGI("TextFieldPattern::HandleDoubleClickEvent");
+    isDoubleClick_ = true;
+    StopTwinkling();
+    if (!IsUsingMouse()) {
+        caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+        isSingleHandle_ = false;
+        isUsingMouse_ = false;
+        CloseSelectOverlay(true);
+        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
 
@@ -2708,7 +2768,7 @@ void TextFieldPattern::ProcessOverlay(bool animation)
         CreateSingleHandle(animation);
         return;
     }
-    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED || caretUpdateType_ == CaretUpdateType::DOUBLE_CLICK) {
         // When the content length is 1, you need to use the TextBox and pressing coordinates to determine whether it is
         // selected
         if (textEditingValue_.text.length() == 1) {
@@ -3283,6 +3343,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
             return;
         }
         isMousePressed_ = true;
+        isUsingMouse_ = true;
         mouseStatus_ = MouseStatus::PRESSED;
         StartTwinkling();
         lastTouchOffset_ = info.GetLocalLocation();
@@ -3294,7 +3355,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         CHECK_NULL_VOID(paintProperty);
         if (paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
             (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately())) {
-            LOGE("Request focus failed, cannot open input method");
+            LOGW("Request focus failed, cannot open input method");
             StopTwinkling();
             return;
         }
@@ -3306,18 +3367,26 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         if (blockPress_) {
             blockPress_ = false;
         }
-        CloseSelectOverlay(true);
-        caretUpdateType_ = CaretUpdateType::NONE;
-        isMousePressed_ = false;
-        mouseStatus_ = MouseStatus::RELEASED;
-        if (!focusHub->IsCurrentFocus()) {
-            return;
-        }
-        if (RequestKeyboard(false, true, true)) {
-            auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireOnEditChanged(true);
+        if (isDoubleClick_) {
+            caretUpdateType_ = CaretUpdateType::EVENT;
+            isMousePressed_ = false;
+            mouseStatus_ = MouseStatus::RELEASED;
+            MarkRedrawOverlay();
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        } else {
+            CloseSelectOverlay(true);
+            caretUpdateType_ = CaretUpdateType::NONE;
+            isMousePressed_ = false;
+            mouseStatus_ = MouseStatus::RELEASED;
+            if (!focusHub->IsCurrentFocus()) {
+                return;
+            }
+            if (RequestKeyboard(false, true, true)) {
+                auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireOnEditChanged(true);
+                GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            }
         }
     }
 

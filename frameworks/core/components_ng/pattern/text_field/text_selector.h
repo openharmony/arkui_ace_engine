@@ -37,7 +37,8 @@ enum class CaretUpdateType {
     INPUT,
     NONE,
     RIGHT_CLICK,
-    VISIBLE_PASSWORD_ICON
+    VISIBLE_PASSWORD_ICON,
+    DOUBLE_CLICK
 };
 /**
  * Stands for selection indexes
