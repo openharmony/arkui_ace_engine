@@ -991,15 +991,12 @@ double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection 
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0);
     int32_t optionCounts = theme->GetShowOptionCount();
-
+    if (optionCounts == 0) {
+        return 0.0;
+    }
     int32_t nextIndex = 0;
     auto isDown = dir == ScrollDirection::DOWN;
-    if (isDown && optionCounts != 0) {
-        nextIndex = (optionCounts + index + 1) % optionCounts; // index add one
-    } else {
-        nextIndex = (optionCounts + index - 1) % optionCounts; // index reduce one
-    }
-
+    nextIndex = isDown ? (optionCounts + index + 1) % optionCounts : (optionCounts + index - 1) % optionCounts;
     double distance = 0.0;
     double val = 0.0;
     switch (static_cast<OptionIndex>(index)) {
@@ -1049,15 +1046,12 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, 0.0);
     int32_t optionCounts = theme->GetShowOptionCount();
-
+    if (optionCounts == 0) {
+        return 0.0;
+    }
     int32_t nextIndex = 0;
     auto isDown = dir == ScrollDirection::DOWN;
-    if (isDown && optionCounts != 0) {
-        nextIndex = (optionCounts + index + 1) % optionCounts;
-    } else {
-        nextIndex = (optionCounts + index - 1) % optionCounts;
-    }
-
+    nextIndex = isDown ? (optionCounts + index + 1) % optionCounts : (optionCounts + index - 1) % optionCounts;
     double distance = 0.0;
     double val = 0.0;
     switch (static_cast<OptionIndex>(index)) {
