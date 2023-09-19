@@ -208,7 +208,7 @@ if (defined(global_parts_info)) {
 }
 
 if (!defined(global_parts_info) ||
-    defined(global_parts_info.security_security_component)) {
+    defined(global_parts_info.security_security_component_manager)) {
   security_component_enable = true
   ace_common_defines += [ "SECURITY_COMPONENT_ENABLE" ]
 } else {

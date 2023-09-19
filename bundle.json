@@ -68,7 +68,7 @@
                 "imf",
                 "device_status",
                 "soc_perf",
-                "security_component",
+                "security_component_manager",
                 "camera_framework",
                 "previewer",
                 "media_library",
