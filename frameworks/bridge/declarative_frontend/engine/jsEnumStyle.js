@@ -1824,3 +1824,23 @@ var DialogButtonDirection;
   DialogButtonDirection[DialogButtonDirection["HORIZONTAL"] = 1] = "HORIZONTAL";
   DialogButtonDirection[DialogButtonDirection["VERTICAL"] = 2] = "VERTICAL";
 })(DialogButtonDirection || (DialogButtonDirection = {}));
+
+var ParticleType;
+(function (ParticleType) {
+  ParticleType[ParticleType["POINT"] = 0] = "POINT";
+  ParticleType[ParticleType["IMAGE"] = 1] = "IMAGE";
+})(ParticleType || (ParticleType = {}));
+
+var ParticleEmitterShape;
+(function (ParticleEmitterShape) {
+  ParticleEmitterShape[ParticleEmitterShape["RECTANGLE"] = 0] = "RECTANGLE";
+  ParticleEmitterShape[ParticleEmitterShape["CIRCLE"] = 1] = "CIRCLE";
+  ParticleEmitterShape[ParticleEmitterShape["ELLIPSE"] = 2] = "ELLIPSE";
+})(ParticleEmitterShape || (ParticleEmitterShape = {}));
+
+var ParticleUpdater;
+(function (ParticleUpdater) {
+  ParticleUpdater[ParticleUpdater["NONE"] = 0] = "NONE";
+  ParticleUpdater[ParticleUpdater["RANDOM"] = 1] = "RANDOM";
+  ParticleUpdater[ParticleUpdater["CURVE"] = 2] = "CURVE";
+})(ParticleUpdater || (ParticleUpdater = {}));

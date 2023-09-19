@@ -19,10 +19,12 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <utility>
 
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
+#include "render_service_client/core/animation/rs_particle_params.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "base/geometry/dimension_offset.h"
@@ -146,6 +148,8 @@ public:
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
     void OnLightUpEffectUpdate(double radio) override;
+    void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
+
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
@@ -354,6 +358,22 @@ private:
     void PaintGraphics();
     void PaintOverlayText();
     void PaintBorderImage();
+    float ConvertDimensionToPx(Dimension& src, float size);
+    Rosen::ParticleParams ConvertParticleOptionToParams(const ParticleOption& particleOption, const RectF& rect);
+    Rosen::EmitterConfig ConvertParticleEmitterOption(const EmitterOption& emitterOption, const RectF& rect);
+    Rosen::ParticleVelocity ConvertParticleVelocityOption(const VelocityProperty& velocity);
+    Rosen::ParticleVelocity ConvertParticleDefaultVelocityOption();
+    Rosen::ParticleAcceleration ConvertParticleAccelerationOption(const AccelerationProperty& acceleration);
+    Rosen::ParticleAcceleration ConvertParticleDefaultAccelerationOption();
+    Rosen::ParticleColorParaType ConvertParticleColorOption(const ParticleColorPropertyOption& colorOption);
+    Rosen::ParticleColorParaType ConvertParticleDefaultColorOption(
+        std::optional<OHOS::Rosen::Range<OHOS::Rosen::RSColor>> rsInitRangeOpt);
+    Rosen::ParticleParaType<float> ConvertParticleFloatOption(const ParticleFloatPropertyOption& floatOption);
+    Rosen::ParticleParaType<float> ConvertParticleDefaultFloatOption(OHOS::Rosen::Range<float>& rsInitRange);
+    bool NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect);
+    void LoadParticleImage(const std::string& src, Dimension& width, Dimension& height);
+    void OnParticleImageLoaded(const std::string& src, const RefPtr<CanvasImage> canvas);
+    void SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource);
 #ifndef USE_ROSEN_DRAWING
     void PaintSkBgImage();
 #else
@@ -418,9 +438,13 @@ private:
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;
     bool hasDefaultTransition_ = false;
+    bool measureTriggered_ = false;
+    bool particleAnimationPlaying_ = false;
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
+    std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
+    std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
