@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
-constexpr float SINGLE_FRAME_TIME = 16.6;
+constexpr float SINGLE_FRAME_TIME = 16600000;
 
 static int64_t GetCurrentRealTimeNs()
 {
