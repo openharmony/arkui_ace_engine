@@ -2145,6 +2145,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerAlgorithmTest001, TestSize.Level1)
      */
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
+    /**
+     * @tc.cases: case. cover branch DeviceOrientation is LANDSCAPE.
+     */
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_TRUE(frameNode);
     frameNode->MarkModifyDone();
@@ -2495,7 +2500,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern022, TestSize.Level1)
     auto childSize = static_cast<int32_t>(columnNode_->GetChildren().size());
     auto midSize = childSize / MIDDLE_OF_COUNTS;
     columnPattern_->optionProperties_[midSize].height = SECLECTED_TEXTNODE_HEIGHT;
-    columnPattern_->optionProperties_[midSize-1].height = OTHER_TEXTNODE_HEIGHT;
+    columnPattern_->optionProperties_[midSize - 1].height = OTHER_TEXTNODE_HEIGHT;
 
     /**
      * @tc.steps: step2. Set height 50.0 for column and call AddHotZoneRectToText.
@@ -2546,5 +2551,100 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern022, TestSize.Level1)
     EXPECT_EQ(responseRegion.GetWidth().Value(), COLUMN_WIDTH);
     EXPECT_EQ(responseRegion.GetHeight().Value(),
         (height - SECLECTED_TEXTNODE_HEIGHT - MIDDLE_OF_COUNTS * OTHER_TEXTNODE_HEIGHT) / MIDDLE_OF_COUNTS);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test TimePickerRowPattern OnColorConfigurationUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+
+    /**
+     * @tc.cases: case. cover branch dialogTheme pass non null check .
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(pickerTheme))
+        .WillOnce(Return(dialogTheme))
+        .WillRepeatedly(Return(pickerTheme));
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+
+    /**
+     * @tc.cases: case. cover branch isPicker_ == false.
+     */
+    pickerPattern->SetPickerTag(false);
+
+    /**
+     * @tc.cases: case. cover branch contentRowNode_ is not null.
+     */
+    pickerPattern->OnColorConfigurationUpdate();
+    ASSERT_EQ(Color::BLACK, dialogTheme->GetBackgroundColor());
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test TimePickerRowPattern OnColorConfigurationUpdate().
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->contentConstraint_ = pickerProperty->CreateContentConstraint();
+
+    /**
+     * @tc.cases: case. cover branch dialogTheme pass non null check .
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillOnce(Return(pickerTheme))
+        .WillOnce(Return(dialogTheme))
+        .WillRepeatedly(Return(pickerTheme));
+
+    auto pickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+
+    /**
+     * @tc.cases: case. cover branch isPicker_ == true.
+     */
+    pickerPattern->SetPickerTag(true);
+
+    pickerPattern->OnColorConfigurationUpdate();
+    ASSERT_EQ(Color::BLACK, dialogTheme->GetBackgroundColor());
 }
 } // namespace OHOS::Ace::NG
