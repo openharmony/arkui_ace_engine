@@ -57,7 +57,7 @@ void JSSecButtonBase::SetFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID_NOLOG(theme);
 
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
+    if (!ParseJsDimensionFp(info[0], value)) {
         SecurityComponentModelNG::SetFontSize(theme->GetFontSize());
     } else {
         SecurityComponentModelNG::SetFontSize(value);
