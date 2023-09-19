@@ -78,16 +78,9 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         auto paint = MakeRefPtr<ScrollPaintMethod>();
-        auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
-        if (!scrollBarOverlayModifier) {
-            scrollBarOverlayModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
-            SetScrollBarOverlayModifier(scrollBarOverlayModifier);
-        }
-        paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier);
-        auto scrollBar = GetScrollBar();
-        if (scrollBar) {
-            paint->SetScrollBar(scrollBar);
-        }
+        paint->SetScrollBar(GetScrollBar());
+        CreateScrollBarOverlayModifier();
+        paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
         auto scrollEffect = GetScrollEdgeEffect();
         if (scrollEffect && scrollEffect->IsFadeEffect()) {
             paint->SetEdgeEffect(scrollEffect);

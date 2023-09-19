@@ -78,12 +78,8 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
     auto paint = MakeRefPtr<GridPaintMethod>(GetScrollBar());
     CHECK_NULL_RETURN(paint, nullptr);
-    auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
-    if (!scrollBarOverlayModifier) {
-        scrollBarOverlayModifier = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
-        SetScrollBarOverlayModifier(scrollBarOverlayModifier);
-    }
-    paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier);
+    CreateScrollBarOverlayModifier();
+    paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
