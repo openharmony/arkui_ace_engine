@@ -2062,7 +2062,7 @@ HWTEST_F(ProgressTestNg, RingProgressModifier001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. In sweeping, set value.
-     * @tc.expected: step3. The sweepingDate_ is not zero.
+     * @tc.expected: step3. The dateUpdated_ is true.
      */
     value = 70.0f;
     progressModifier->sweepingDate_->Set(0.0f);
@@ -2071,7 +2071,7 @@ HWTEST_F(ProgressTestNg, RingProgressModifier001, TestSize.Level1)
     progressModifier->SetValue(value);
     progressModifier->onDraw(context);
     EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
-    EXPECT_NE(progressModifier->sweepingDate_->Get(), 0.0f);
+    EXPECT_TRUE(progressModifier->dateUpdated_);
 
     /**
      * @tc.steps: step4. In sweeping, set value to 0.
@@ -2421,7 +2421,7 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Set value for the vertical linear progress.
-     * @tc.expected: step4. Start sweeping.
+     * @tc.expected: step4. The dateUpdated_ is true.
      */
     SizeF ContentSize3(50.0f, 100.0f);
     progressModifier->SetContentSize(ContentSize3);
@@ -2432,11 +2432,11 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     progressModifier->SetValue(value);
     progressModifier->onDraw(context);
     EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
-    EXPECT_NE(progressModifier->sweepingDate_->Get(), 0);
+    EXPECT_TRUE(progressModifier->dateUpdated_);
 
     /**
-     * @tc.steps: step4. Set invisible.
-     * @tc.expected: step4. The sweeping animation is stopped.
+     * @tc.steps: step5. Set invisible.
+     * @tc.expected: step5. The sweeping animation is stopped.
      */
     value = 0.0f;
     progressModifier->SetContentSize(ContentSize3);
@@ -2450,8 +2450,8 @@ HWTEST_F(ProgressTestNg, LinearProgressModifier001, TestSize.Level1)
     EXPECT_EQ(progressModifier->isVisible_, false);
 
     /**
-     * @tc.steps: step5. Set value while invisible.
-     * @tc.expected: step5. The value is set but the sweepingDate is not set.
+     * @tc.steps: step6. Set value while invisible.
+     * @tc.expected: step6. The value is set but the sweepingDate is not set.
      */
     value = 10.0f;
     progressModifier->SetValue(value);
