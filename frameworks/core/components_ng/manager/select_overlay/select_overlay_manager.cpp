@@ -44,6 +44,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     }
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    selectOverlayItem_ = selectOverlayNode;
 
     auto taskExecutor = Container::CurrentTaskExecutor();
     taskExecutor->PostTask(
@@ -87,7 +88,6 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
         TaskExecutor::TaskType::UI);
 
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
-    selectOverlayItem_ = selectOverlayNode;
     return proxy;
 }
 
