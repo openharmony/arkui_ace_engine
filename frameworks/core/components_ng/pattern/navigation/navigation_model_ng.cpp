@@ -399,7 +399,7 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     auto toolBarItemLayoutProperty = toolBarItemNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(toolBarItemLayoutProperty, nullptr);
     toolBarItemLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth().ConvertToPx())));
+        CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth())));
     toolBarItemLayoutProperty->UpdateType(ButtonType::NORMAL);
     toolBarItemLayoutProperty->UpdateBorderRadius(theme->GetToolBarItemBorderRadius());
     auto renderContext = toolBarItemNode->GetRenderContext();
@@ -410,10 +410,10 @@ RefPtr<FrameNode> CreateToolbarItemInContainer(
     toolBarItemLayoutProperty->UpdateMargin(margin);
 
     PaddingProperty padding;
-    padding.left = CalcLength(theme->GetToolbarItemLeftOrRightPadding().ConvertToPx());
-    padding.right = CalcLength(theme->GetToolbarItemLeftOrRightPadding().ConvertToPx());
-    padding.top = CalcLength(theme->GetToolbarItemTopPadding().ConvertToPx());
-    padding.bottom = CalcLength(theme->GetToolbarItemBottomPadding().ConvertToPx());
+    padding.left = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
+    padding.right = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
+    padding.top = CalcLength(theme->GetToolbarItemTopPadding());
+    padding.bottom = CalcLength(theme->GetToolbarItemBottomPadding());
     toolBarItemLayoutProperty->UpdatePadding(padding);
 
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -484,7 +484,7 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     auto menuItemLayoutProperty = toolBarItemNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(menuItemLayoutProperty, nullptr);
     menuItemLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth().ConvertToPx())));
+        CalcSize(std::nullopt, CalcLength(theme->GetToolbarItemHeigth())));
     menuItemLayoutProperty->UpdateType(ButtonType::NORMAL);
     menuItemLayoutProperty->UpdateBorderRadius(theme->GetToolBarItemBorderRadius());
 
@@ -497,10 +497,10 @@ RefPtr<FrameNode> CreateToolbarMoreMenuNode(const RefPtr<BarItemNode>& barItemNo
     menuItemLayoutProperty->UpdateMargin(menuButtonMargin);
 
     PaddingProperty padding;
-    padding.left = CalcLength(theme->GetToolbarItemLeftOrRightPadding().ConvertToPx());
-    padding.right = CalcLength(theme->GetToolbarItemLeftOrRightPadding().ConvertToPx());
-    padding.top = CalcLength(theme->GetToolbarItemTopPadding().ConvertToPx());
-    padding.bottom = CalcLength(theme->GetToolbarItemBottomPadding().ConvertToPx());
+    padding.left = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
+    padding.right = CalcLength(theme->GetToolbarItemLeftOrRightPadding());
+    padding.top = CalcLength(theme->GetToolbarItemTopPadding());
+    padding.bottom = CalcLength(theme->GetToolbarItemBottomPadding());
     menuItemLayoutProperty->UpdatePadding(padding);
 
     barItemNode->MountToParent(toolBarItemNode);
@@ -837,7 +837,7 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
         CHECK_NULL_VOID(backButtonLayoutProperty);
         backButtonLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(BACK_BUTTON_SIZE.ConvertToPx()), CalcLength(BACK_BUTTON_SIZE.ConvertToPx())));
+            CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
         backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
         backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS));
         backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -849,10 +849,10 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         CHECK_NULL_VOID(eventHub);
 
         PaddingProperty padding;
-        padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
-        padding.right = CalcLength(BUTTON_PADDING.ConvertToPx());
-        padding.top = CalcLength(BUTTON_PADDING.ConvertToPx());
-        padding.bottom = CalcLength(BUTTON_PADDING.ConvertToPx());
+        padding.left = CalcLength(BUTTON_PADDING);
+        padding.right = CalcLength(BUTTON_PADDING);
+        padding.top = CalcLength(BUTTON_PADDING);
+        padding.bottom = CalcLength(BUTTON_PADDING);
         backButtonLayoutProperty->UpdatePadding(padding);
 
         auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
