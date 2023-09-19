@@ -265,6 +265,9 @@ frameworks/core/image/  @zhoutianer
 frameworks/core/components_ng/image_provider/  @zhoutianer
 frameworks/core/components_ng/svg/  @zhoutianer
 
+[Advanced UI Components]
+advanced_ui_component/ @youzhi92
+
 [Build configs]
 build/ @sunfei2021
 ace_config.gni @sunfei2021
