@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_MODEL_NG_H
 
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/blank/blank_model.h"
 
 namespace OHOS::Ace::NG {
@@ -24,6 +25,7 @@ public:
     void Create() override;
     void SetBlankMin(const Dimension& blankMin) override;
     void SetHeight(const Dimension& height) override;
+    void SetColor(const Color& color) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_MODEL_NG_H

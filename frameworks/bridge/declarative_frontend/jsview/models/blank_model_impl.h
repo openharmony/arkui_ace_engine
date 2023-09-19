@@ -24,6 +24,7 @@ public:
     void Create() override;
     void SetBlankMin(const Dimension& blankMin) override;
     void SetHeight(const Dimension& height) override;
+    void SetColor(const Color& color) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_BLANK_MODEL_IMPL_H

@@ -28,6 +28,7 @@ build_component_ng("pattern_ng") {
     "badge/badge_model_ng.cpp",
     "badge/badge_pattern.cpp",
     "blank/blank_model_ng.cpp",
+    "blank/blank_paint_method.cpp",
     "blank/blank_pattern.cpp",
     "bubble/bubble_layout_algorithm.cpp",
     "bubble/bubble_paint_method.cpp",

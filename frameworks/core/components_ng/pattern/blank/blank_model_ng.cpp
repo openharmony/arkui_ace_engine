@@ -22,6 +22,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/blank/blank_layout_property.h"
+#include "core/components_ng/pattern/blank/blank_paint_property.h"
 #include "core/components_ng/pattern/blank/blank_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -68,5 +69,14 @@ void BlankModelNG::SetHeight(const Dimension& height)
     auto layoutProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateHeight(height);
+}
+
+void BlankModelNG::SetColor(const Color& color)
+{
+    auto blankNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(blankNode);
+    auto paintProperty = blankNode->GetPaintProperty<BlankPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateColor(color);
 }
 } // namespace OHOS::Ace::NG
