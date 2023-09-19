@@ -1339,4 +1339,236 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg041, TestSize.Level1)
     auto imgSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
     EXPECT_EQ(imgSourceInfo.GetFillColor()->GetValue(), controlButtonColor.GetValue());
 }
+
+/**
+ * @tc.name: SideBarPatternTestNg042
+ * @tc.desc: Test SideBar ConvertPxToPercent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern and frameNode.
+     * @tc.expected: check whether the pattern->sideBarStatus_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    pattern->frameNode_ = frameNode;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+    pattern->maxSideBarWidth_ = MAX_SIDE_BAR;
+    pattern->minSideBarWidth_ = MIN_SIDE_BAR;
+    pipeline->minPlatformVersion_ = TEST_VALUE;
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto geometryNode = host->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    pattern->ConvertPxToPercent(CURRENT_OFFSET_VALUE);
+    geometryNode->SetFrameSize(SizeF(1.0f, 1.0f));
+    pattern->ConvertPxToPercent(CURRENT_OFFSET_VALUE);
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::SHOW);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg043
+ * @tc.desc: Test SideBar InitDividerMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar and controlbutton node,then register inputEvent to InitDividerMouseEvent.
+     * @tc.expected: check whether the controlButtonHoverEvent_ is nullptr.
+     */
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto imgNode = FrameNode::GetOrCreateFrameNode(
+        OHOS::Ace::V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imgNode, nullptr);
+    auto imgHub = imgNode->GetEventHub<EventHub>();
+    ASSERT_NE(imgHub, nullptr);
+    auto gestureHub = imgHub->GetOrCreateInputEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    pattern->SetHasControlButton(true);
+    EXPECT_EQ(pattern->controlButtonHoverEvent_, nullptr);
+    pattern->InitDividerMouseEvent(gestureHub);
+    EXPECT_EQ(pattern->controlButtonClickEvent_, nullptr);
+    pattern->hoverEvent_->onHoverCallback_(true);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg044
+ * @tc.desc: Test SideBar OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar ,then get pattern, frameNode, sideBarLayoutProperty
+        layoutWrapper .
+     * @tc.expected: check whether the pattern->needInitRealSideBarWidth_ is correct.
+     */
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+
+    WeakPtr<FrameNode> hostNode = frameNode;
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(hostNode, geometryNode, layoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithmWrapper =
+        AceType::MakeRefPtr<LayoutAlgorithmWrapper>(AceType::MakeRefPtr<SideBarContainerLayoutAlgorithm>());
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+    auto algorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(algorithmWrapper, nullptr);
+    auto algorithm = AceType::DynamicCast<SideBarContainerLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(algorithm, nullptr);
+
+    DirtySwapConfig config;
+    pattern->needInitRealSideBarWidth_ = false;
+    pattern->isControlButtonClick_ = true;
+    EXPECT_FALSE(pattern->needInitRealSideBarWidth_);
+    pattern->autoHide_ = true;
+    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_FALSE(pattern->needInitRealSideBarWidth_);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg045
+ * @tc.desc: Test SideBar DoSideBarAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get pattern and frameNode, modify sideBarStatus_.
+     * @tc.expected: check whether the showSideBar_ is correct.
+     */
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->CreateAnimation();
+    pattern->controller_->status_ = Animator::Status::STOPPED;
+    pattern->DoSideBarAnimation();
+    EXPECT_EQ(pattern->showSideBar_, true);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg046
+ * @tc.desc: Test SideBar DoAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg046, TestSize.Level1)
+{
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    stack->Push(frameNode);
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    SideBarContainerModelInstance.SetSideBarPosition(SideBarPosition::START);
+    pattern->UpdateAnimDir();
+    auto layoutProperty = pattern->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    pattern->GetSideBarPositionWithRtl(layoutProperty);
+    pattern->autoHide_ = true;
+    pattern->DoAnimation();
+    EXPECT_EQ(pattern->sideBarStatus_, SideBarStatus::CHANGING);
+    pattern->animDir_ = SideBarAnimationDirection::RTL;
+    EXPECT_EQ(pattern->currentOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg047
+ * @tc.desc: Test SideBar OnUpdateSideBarAndContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg047, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton1 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton3 = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto customNode = CustomNode::CreateCustomNode(1, "CustomNode");
+    frameNode->children_.push_back(backButton);
+    frameNode->children_.push_back(backButton1);
+    frameNode->children_.push_back(backButton2);
+    frameNode->children_.push_back(backButton3);
+    pattern->CreateAndMountNodes();
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto children = host->GetChildren();
+    auto sideBarNode = children.front();
+    ASSERT_NE(sideBarNode, nullptr);
+    auto sideBarFrameNode = AceType::DynamicCast<FrameNode>(sideBarNode);
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto renderContext = sideBarFrameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    pattern->CreateAndMountNodes();
+    pattern->hasControlButton_ = false;
+    auto color = Color();
+    renderContext->UpdateBackgroundColor(color);
+    ASSERT_TRUE(renderContext->HasBackgroundColor());
+    pattern->CreateAndMountNodes();
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg048
+ * @tc.desc: Test SideBar CreateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get pattern and frameNode, modify sideBarStatus_.
+     * @tc.expected: check whether the showSideBar_ is correct.
+     */
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->rightToLeftAnimation_ = nullptr;
+    pattern->CreateAnimation();
+    pattern->rightToLeftAnimation_->callbacks_.begin()->second(1.0f);
+    pattern->leftToRightAnimation_ = nullptr;
+    pattern->CreateAnimation();
+    pattern->leftToRightAnimation_->callbacks_.begin()->second(1.0f);
+}
 } // namespace OHOS::Ace::NG
