@@ -111,6 +111,7 @@ private:
     Gradient CreateCapsuleGradient() const;
     bool PostTask(const TaskExecutor::Task& task);
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
+    bool IsSweepEffectOn();
 
     // Animatable
     RefPtr<AnimatablePropertyFloat> strokeWidth_; // After adjusting to the content width and height
@@ -145,7 +146,7 @@ private:
     bool isLoading_ = false;
     bool isSweeping_ = false;
     float sweepingDateBackup_ = 0.0f;
-    uint32_t continuousSweepingCounter_ = 0;
+    bool dateUpdated_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };

@@ -176,11 +176,7 @@ void ProgressModifier::StartCapsuleSweepingAnimation(float value)
     } else if (!sweepEffect_->Get() || !isVisible_) {
         StopSweepingAnimation();
     } else {
-        if (!NearEqual(sweepingDateBackup_, date)) {
-            float currentDate = sweepingDate_->Get();
-            StopSweepingAnimation(currentDate);
-            StartContinuousSweepingAnimation(currentDate, date, sweepSpeed);
-        }
+        dateUpdated_ = !NearEqual(sweepingDateBackup_, date);
     }
     sweepingDateBackup_ = date;
 }
@@ -208,6 +204,26 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value, float spee
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
             modifier->sweepingDate_->Set(value);
+        },
+        nullptr,
+        [id = Container::CurrentId(), weak = WeakClaim(this), speed]() {
+            ContainerScope scope(id);
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            float currentDate = modifier->sweepingDate_->Get();
+            if (modifier->dateUpdated_) {
+                modifier->dateUpdated_ = false;
+                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
+                    currentDate, speed]() {
+                    ContainerScope scope(id);
+                    auto modifier = weak.Upgrade();
+                    CHECK_NULL_VOID(modifier);
+                    modifier->StopSweepingAnimation(currentDate);
+                    modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
+                    auto context = PipelineBase::GetCurrentContext();
+                    context->RequestFrame();
+                });
+            }
         });
 }
 
@@ -378,18 +394,14 @@ void ProgressModifier::StartRingSweepingAnimation(float value)
     float date = value / maxValue * ANGLE_360 + ANGLE_45;
     float additionalAngle = CalcRingProgressAdditionalAngle();
     date += additionalAngle * 2;
-    float sweepSpeed = float(ANGLE_360) / TIME_4000; // It takes 3 seconds to sweep a circle
+    float sweepSpeed = float(ANGLE_360) / TIME_4000; // It takes 4 seconds to sweep a circle
 
     if (!isSweeping_ && ringSweepEffect_->Get()) {
         StartRingSweepingAnimationImpl(date, sweepSpeed);
-    } else if (!ringSweepEffect_->Get()) {
+    } else if (!ringSweepEffect_->Get() || NearEqual(valueBackup_, maxValue_->Get())) {
         StopSweepingAnimation();
     } else {
-        if (!NearEqual(sweepingDateBackup_, date)) {
-            float currentDate = sweepingDate_->Get();
-            StopSweepingAnimation(currentDate);
-            StartContinuousSweepingAnimation(currentDate, date, sweepSpeed);
-        }
+        dateUpdated_ = !NearEqual(sweepingDateBackup_, date);
     }
 
     sweepingDateBackup_ = date;
@@ -416,11 +428,43 @@ void ProgressModifier::StartRingSweepingAnimationImpl(float date, float speed)
     option.SetCurve(motion);
     option.SetIteration(isFormRender ? 1 : -1);
     option.SetDuration(time);
-    AnimationUtils::Animate(option, [&]() { sweepingDate_->Set(date); });
+    AnimationUtils::Animate(
+        option,
+        [&]() { sweepingDate_->Set(date); },
+        nullptr,
+        [weak = WeakClaim(this), id = Container::CurrentId(), speed]() {
+            ContainerScope scope(id);
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            if (modifier->dateUpdated_) {
+                modifier->dateUpdated_ = false;
+                float currentDate = modifier->sweepingDate_->Get();
+                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
+                    currentDate, speed]() {
+                    ContainerScope scope(id);
+                    auto modifier = weak.Upgrade();
+                    CHECK_NULL_VOID(modifier);
+                    modifier->StopSweepingAnimation(currentDate);
+                    modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
+                    auto context = PipelineBase::GetCurrentContext();
+                    context->RequestFrame();
+                });
+            }
+        });
 }
 
 void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float newDate, float speed)
 {
+    if (!isVisible_ || !IsSweepEffectOn()) {
+        return;
+    }
+
+    if (NearEqual(valueBackup_, maxValue_->Get()) &&
+        (ProgressType(progressType_->Get()) == ProgressType::LINEAR ||
+        ProgressType(progressType_->Get()) == ProgressType::RING)) {
+        return;
+    }
+
     isSweeping_ = true;
     speed = NearZero(speed) ? 1.0f : speed;
     int32_t time = (newDate - currentDate) / speed;
@@ -428,7 +472,6 @@ void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float
     auto motion = AceType::MakeRefPtr<LinearCurve>();
     option.SetCurve(motion);
     option.SetDuration(time);
-    continuousSweepingCounter_++;
     AnimationUtils::Animate(
         option,
         [&]() { sweepingDate_->Set(newDate); },
@@ -436,10 +479,12 @@ void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float
             ContainerScope scope(id);
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
-            modifier->continuousSweepingCounter_--;
-            if (!modifier->continuousSweepingCounter_) {
-                modifier->PostTask([modifier, id, speed]() {
+            if (!modifier->dateUpdated_) {
+                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
+                    speed]() {
                     ContainerScope scope(id);
+                    auto modifier = weak.Upgrade();
+                    CHECK_NULL_VOID(modifier);
                     modifier->sweepingDate_->Set(0.0f);
                     switch (ProgressType(modifier->progressType_->Get())) {
                         case ProgressType::LINEAR:
@@ -457,14 +502,41 @@ void ProgressModifier::StartContinuousSweepingAnimation(float currentDate, float
                     auto context = PipelineBase::GetCurrentContext();
                     context->RequestFrame();
                 });
+            } else {
+                modifier->dateUpdated_ = false;
+                float currentDate = modifier->sweepingDate_->Get();
+                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
+                    currentDate, speed]() {
+                    ContainerScope scope(id);
+                    auto modifier = weak.Upgrade();
+                    CHECK_NULL_VOID(modifier);
+                    modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
+                    auto context = PipelineBase::GetCurrentContext();
+                    context->RequestFrame();
+                });
             }
         });
+}
+
+bool ProgressModifier::IsSweepEffectOn()
+{
+    switch (ProgressType(progressType_->Get())) {
+        case ProgressType::LINEAR:
+            return linearSweepEffect_;
+        case ProgressType::CAPSULE:
+            return sweepEffect_;
+        case ProgressType::RING:
+            return ringSweepEffect_;
+        default:
+            return false;
+    }
 }
 
 void ProgressModifier::StopSweepingAnimation(float date)
 {
     if (isSweeping_) {
         isSweeping_ = false;
+        dateUpdated_ = false;
         AnimationOption option = AnimationOption();
         option.SetDuration(0);
         AnimationUtils::Animate(option, [&]() { sweepingDate_->Set(date); });
@@ -512,14 +584,10 @@ void ProgressModifier::StartLinearSweepingAnimation(float value)
     float sweepSpeed = barLength / TIME_2000; // It takes 2 seconds to sweep the whole bar length
     if (!isSweeping_ && linearSweepEffect_->Get()) {
         StartLinearSweepingAnimationImpl(date, sweepSpeed);
-    } else if (!linearSweepEffect_->Get()) {
+    } else if (!linearSweepEffect_->Get() || NearEqual(valueBackup_, maxValue_->Get())) {
         StopSweepingAnimation();
     } else {
-        if (!NearEqual(sweepingDateBackup_, date)) {
-            float currentDate = sweepingDate_->Get();
-            StopSweepingAnimation(currentDate);
-            StartContinuousSweepingAnimation(currentDate, date, sweepSpeed);
-        }
+        dateUpdated_ = !NearEqual(sweepingDateBackup_, date);
     }
 
     sweepingDateBackup_ = date;
@@ -547,7 +615,29 @@ void ProgressModifier::StartLinearSweepingAnimationImpl(float date, float speed)
     option.SetCurve(motion);
     option.SetIteration(isFormRender ? 1 : -1);
     option.SetDuration(time);
-    AnimationUtils::Animate(option, [&]() { sweepingDate_->Set(date); });
+    AnimationUtils::Animate(
+        option,
+        [&]() { sweepingDate_->Set(date); },
+        nullptr,
+        [weak = WeakClaim(this), id = Container::CurrentId(), speed]() {
+            ContainerScope scope(id);
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            if (modifier->dateUpdated_) {
+                modifier->dateUpdated_ = false;
+                float currentDate = modifier->sweepingDate_->Get();
+                modifier->PostTask([id = Container::CurrentId(), weak = AceType::WeakClaim(AceType::RawPtr(modifier)),
+                    currentDate, speed]() {
+                    ContainerScope scope(id);
+                    auto modifier = weak.Upgrade();
+                    CHECK_NULL_VOID(modifier);
+                    modifier->StopSweepingAnimation(currentDate);
+                    modifier->StartContinuousSweepingAnimation(currentDate, modifier->sweepingDateBackup_, speed);
+                    auto context = PipelineBase::GetCurrentContext();
+                    context->RequestFrame();
+                });
+            }
+        });
 }
 
 void ProgressModifier::SetMaxValue(float value)
