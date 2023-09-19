@@ -725,11 +725,7 @@ void JSSwiper::SetItemSpace(const JSCallbackInfo& info)
     }
 
     CalcDimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-
-    if (LessNotEqual(value.Value(), 0.0)) {
+    if (!ParseJsDimensionVp(info[0], value) || LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
 

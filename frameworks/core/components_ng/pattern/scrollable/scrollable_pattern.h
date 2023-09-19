@@ -183,7 +183,7 @@ public:
 
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
     RefPtr<ScrollablePattern> GetParentScrollable();
-    void GetParentNavigition();
+    void GetParentNavigation();
 
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
@@ -279,7 +279,7 @@ public:
         if (scrollSource == SCROLL_FROM_JUMP) {
             if (scrollBar_ && scrollBarOverlayModifier_) {
                 scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
-                scrollBar_->ScheduleDisapplearDelayTask();
+                scrollBar_->ScheduleDisappearDelayTask();
             }
             StopScrollBarAnimatorByProxy();
             StartScrollBarAnimatorByProxy();

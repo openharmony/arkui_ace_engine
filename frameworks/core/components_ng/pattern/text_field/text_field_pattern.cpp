@@ -342,7 +342,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     UpdateScrollBarOffset();
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
-            GetScrollBar()->ScheduleDisapplearDelayTask();
+            GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
     if (textRectNotNeedToChange) {
@@ -937,7 +937,7 @@ void TextFieldPattern::OnScrollEndCallback()
 {
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
-        scrollBar->ScheduleDisapplearDelayTask();
+        scrollBar->ScheduleDisappearDelayTask();
     }
     auto selectOverlayProxy = GetSelectOverlay();
     CHECK_NULL_VOID(selectOverlayProxy);

@@ -329,7 +329,7 @@ public:
     void PlayScrollBarStartAnimation()
     {
         if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
-            disapplearDelayTask_.Cancel();
+            disappearDelayTask_.Cancel();
             opacityAnimationType_ = OpacityAnimationType::APPEAR;
             MarkNeedRender();
         }
@@ -468,7 +468,7 @@ public:
     void CalcReservedHeight();
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
-    void ScheduleDisapplearDelayTask();
+    void ScheduleDisappearDelayTask();
 
 protected:
     void InitTheme();
@@ -549,7 +549,7 @@ private:
     ScrollEndCallback scrollEndCallback_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
-    CancelableCallback<void()> disapplearDelayTask_;
+    CancelableCallback<void()> disappearDelayTask_;
 };
 
 } // namespace OHOS::Ace::NG
