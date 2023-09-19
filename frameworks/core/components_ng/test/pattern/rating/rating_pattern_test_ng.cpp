@@ -17,7 +17,6 @@
 #include <cmath>
 
 #include "gtest/gtest.h"
-#include "third_party/libpng/png.h"
 #define private public
 #define protected public
 #include "base/geometry/offset.h"
