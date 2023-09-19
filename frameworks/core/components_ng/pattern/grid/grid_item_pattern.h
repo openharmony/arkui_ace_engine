@@ -135,6 +135,7 @@ private:
     bool isHover_ = false;
     bool isPressed_ = false;
     GridItemStyle gridItemStyle_ = GridItemStyle::NONE;
+    std::optional<double> enableOpacity_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridItemPattern);
 };
