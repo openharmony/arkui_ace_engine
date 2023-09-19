@@ -117,6 +117,11 @@ public:
         return result;
     }
 
+    void RemoveBuilderByContentId(int32_t tabContentId)
+    {
+        builderNode_.erase(tabContentId);
+    }
+
     RefPtr<UINode> GetTabBar()
     {
         return GetChildAtIndex(TAB_BAR_INDEX);

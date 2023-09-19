@@ -327,6 +327,7 @@ void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabConten
 
     auto tabsNode = FindTabsNode(tabContentNode);
     CHECK_NULL_VOID(tabsNode);
+    tabsNode->RemoveBuilderByContentId(tabContentNode->GetId());
     auto tabBar = tabsNode->GetTabBar();
     CHECK_NULL_VOID(tabBar);
     auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBar);
