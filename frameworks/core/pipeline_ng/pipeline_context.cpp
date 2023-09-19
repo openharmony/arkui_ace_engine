@@ -1852,6 +1852,11 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action)
         manager->ClearExtraInfo();
     }
 #endif // ENABLE_DRAG_FRAMEWORK
+    if (manager->IsDragged() && action != DragEventAction::DRAG_EVENT_END &&
+        action != DragEventAction::DRAG_EVENT_START) {
+        LOGI("current context is the source of drag");
+        return;
+    }
 
     std::string extraInfo;
 

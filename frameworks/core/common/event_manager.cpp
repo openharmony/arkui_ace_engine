@@ -265,12 +265,10 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
 #ifdef ENABLE_DRAG_FRAMEWORK
-    if (isDragging_ && point.type == TouchType::PULL_MOVE) {
-        isDragging_ = false;
-        point.type = TouchType::CANCEL;
+    if (point.type == TouchType::PULL_MOVE) {
+        point.type = TouchType::MOVE;
     }
-    if (point.type == TouchType::PULL_UP || point.type == TouchType::UP) {
-        isDragging_ = false;
+    if (point.type == TouchType::PULL_UP) {
         point.type = TouchType::UP;
     }
 #endif // ENABLE_DRAG_FRAMEWORK
