@@ -50,6 +50,32 @@ int64_t GetSteadyTimestamp()
     return duration_cast<T>(steady_clock::now().time_since_epoch()).count();
 }
 
+uint32_t GetJankRange(double jank)
+{
+    if (jank < 6.0f) {
+        return JANK_FRAME_6_FREQ;
+    }
+    if (jank < 15.0f) {
+        return JANK_FRAME_15_FREQ;
+    }
+    if (jank < 20.0f) {
+        return JANK_FRAME_20_FREQ;
+    }
+    if (jank < 36.0f) {
+        return JANK_FRAME_36_FREQ;
+    }
+    if (jank < 48.0f) {
+        return JANK_FRAME_48_FREQ;
+    }
+    if (jank < 60.0f) {
+        return JANK_FRAME_60_FREQ;
+    }
+    if (jank < 120.0f) {
+        return JANK_FRAME_120_FREQ;
+    }
+    return JANK_FRAME_180_FREQ;
+}
+
 class SteadyTimeRecorder {
 public:
     static steady_clock::time_point begin;
@@ -68,13 +94,18 @@ steady_clock::time_point SteadyTimeRecorder::begin {};
 } // namespace
 
 std::vector<uint16_t> JankFrameReport::frameJankRecord_(JANK_SIZE, 0);
-int32_t OHOS::Ace::JankFrameReport::jankFrameCount_ = 0;
+int32_t JankFrameReport::jankFrameCount_ = 0;
+int32_t JankFrameReport::prevFrameUpdateCount_ = 0;
+int32_t JankFrameReport::currentFrameUpdateCount_ = 0;
 JankFrameFlag JankFrameReport::recordStatus_ = JANK_IDLE;
 int64_t JankFrameReport::startTime_ = 0;
 int64_t JankFrameReport::prevEndTimeStamp_ = 0;
-int64_t JankFrameReport::refreshPeriod_ = 0;
+int64_t JankFrameReport::refreshPeriod_ = 16666666;
 std::string JankFrameReport::pageUrl_;
 bool JankFrameReport::needReport_ = false;
+bool JankFrameReport::hasJsAnimation_ = false;
+int64_t JankFrameReport::animatorEndTime_ = 0;
+double JankFrameReport::jsAnimationDelayJank_ = 0;
 
 void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
 {
@@ -86,46 +117,47 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
     double jank = double(duration) / refreshPeriod_;
     // perf monitor jank frame
     PerfMonitor::GetPerfMonitor()->SetFrameTime(timeStampNanos, duration, jank);
-    if (jank <= 1.0f || recordStatus_ == JANK_IDLE) {
-        return;
-    }
-    needReport_ = true;
-    if (jank < 6.0f) {
-        frameJankRecord_[JANK_FRAME_6_FREQ]++;
-        return;
-    }
-    jankFrameCount_++;
-    ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
-    if (jank < 15.0f) {
-        frameJankRecord_[JANK_FRAME_15_FREQ]++;
-        return;
-    }
-    if (jank < 20.0f) {
-        frameJankRecord_[JANK_FRAME_20_FREQ]++;
-        return;
-    }
-    if (jank < 36.0f) {
-        frameJankRecord_[JANK_FRAME_36_FREQ]++;
-        return;
-    }
-    if (jank < 48.0f) {
-        frameJankRecord_[JANK_FRAME_48_FREQ]++;
-        return;
-    }
-    if (jank < 60.0f) {
-        frameJankRecord_[JANK_FRAME_60_FREQ]++;
-        return;
-    }
-    if (jank < 120.0f) {
-        frameJankRecord_[JANK_FRAME_120_FREQ]++;
-        return;
-    }
-    frameJankRecord_[JANK_FRAME_180_FREQ]++;
+    RecordJankStatus(jank);
+    prevFrameUpdateCount_ = currentFrameUpdateCount_;
+    RecordPreviousEnd();
 }
 
-void JankFrameReport::SetRefreshPeriod(int64_t refreshPeriod)
+void JankFrameReport::JsAnimationToRsRecord()
 {
-    refreshPeriod_ = refreshPeriod;
+    int64_t now = GetSteadyTimestamp<std::chrono::nanoseconds>();
+    if (hasJsAnimation_ && animatorEndTime_ != 0) {
+        int64_t jsAnimationDuration = now - animatorEndTime_;
+        jsAnimationDelayJank_ = double(jsAnimationDuration) / refreshPeriod_;
+    }
+}
+
+void JankFrameReport::RecordJankStatus(double jank)
+{
+    if (recordStatus_ == JANK_IDLE && animatorEndTime_ == 0) {
+        return;
+    }
+    if (jsAnimationDelayJank_ > 1.0f) {
+        jank += jsAnimationDelayJank_;
+    }
+    if (animatorEndTime_ != 0) {
+        hasJsAnimation_ = false;
+        animatorEndTime_ = 0;
+        jsAnimationDelayJank_ = 0;
+    }
+    // on need to record
+    if (jank <= 1.0f) {
+        return;
+    }
+    // skip first frame
+    if (prevFrameUpdateCount_ == 0 && (currentFrameUpdateCount_ >= 0)) {
+        return;
+    };
+    needReport_ = true;
+    frameJankRecord_[GetJankRange(jank)]++;
+    if (jank >= 6.0f) {
+        jankFrameCount_++;
+        ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
+    }
 }
 
 void JankFrameReport::RecordPreviousEnd()
@@ -138,19 +170,40 @@ void JankFrameReport::ClearFrameJankRecord()
     std::fill(frameJankRecord_.begin(), frameJankRecord_.end(), 0);
     jankFrameCount_ = 0;
     recordStatus_ = JANK_IDLE;
+    prevEndTimeStamp_ = 0;
+    currentFrameUpdateCount_ = 0;
     needReport_ = false;
+    hasJsAnimation_ = false;
+    jsAnimationDelayJank_ = 0;
+    animatorEndTime_ = 0;
 }
 
 void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag)
 {
     recordStatus_++;
+    if (recordStatus_ == 1) {
+        animatorEndTime_ = 0;
+        hasJsAnimation_ = false;
+    }
 }
 
 void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag)
 {
     if (recordStatus_ > 0) {
+        if (recordStatus_ == 1) {
+            animatorEndTime_ = GetSteadyTimestamp<std::chrono::nanoseconds>();
+        }
         recordStatus_--;
     }
+    if (recordStatus_ == JANK_IDLE) {
+        prevEndTimeStamp_ = 0;
+        currentFrameUpdateCount_ = 0;
+    }
+}
+
+void JankFrameReport::RecordFrameUpdate()
+{
+    currentFrameUpdateCount_++;
 }
 
 void JankFrameReport::ResetFrameJankClock()
@@ -172,5 +225,12 @@ void JankFrameReport::FlushRecord()
         EventReport::JankFrameReport(startTime_, SteadyTimeRecorder::End(), frameJankRecord_, pageUrl_);
     }
     ClearFrameJankRecord();
+}
+
+void JankFrameReport::ReportJSAnimation()
+{
+    if (animatorEndTime_ != 0) {
+        hasJsAnimation_ = true;
+    }
 }
 } // namespace OHOS::Ace

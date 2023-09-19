@@ -15,6 +15,7 @@
 
 #include "core/components/swiper/render_swiper.h"
 
+#include "base/log/jank_frame_report.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
@@ -868,6 +869,7 @@ void RenderSwiper::HandleDragStart(const DragStartInfo& info)
     ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
 #endif
     // for swiper item
+    JankFrameReport::SetFrameJankFlag(JANK_RUNNING_SWIPER);
     hasDragAction_ = true;
     scrollOffset_ = fmod(scrollOffset_, nextItemOffset_);
     if (onFocus_) {
@@ -903,6 +905,7 @@ void RenderSwiper::HandleDragUpdate(const DragUpdateInfo& info)
         return;
     }
 
+    JankFrameReport::RecordFrameUpdate();
     if (touchContentType_ == TouchContentType::TOUCH_CONTENT || rotationStatus_ == RotationStatus::ROTATION_UPDATE) {
         EdgeEffect edgeEffect = swiper_->GetEdgeEffect();
         if (edgeEffect == EdgeEffect::SPRING && (!loop_) && currentIndex_ == targetIndex_
@@ -1008,7 +1011,7 @@ void RenderSwiper::HandleDragEnd(const DragEndInfo& info)
     if (SpringItems(info)) {
         return;
     }
-
+    JankFrameReport::ClearFrameJankFlag(JANK_RUNNING_SWIPER);
     isIndicatorAnimationStart_ = false;
     MoveItems(info.GetMainVelocity());
 }
