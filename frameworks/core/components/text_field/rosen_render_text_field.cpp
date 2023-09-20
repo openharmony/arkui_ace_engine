@@ -420,19 +420,11 @@ void RosenRenderTextField::PaintTextAndPlaceholder(RSCanvas* canvas) const
     Offset textAreaOffset = innerRect_.GetOffset();
     if (showPlaceholder_) {
         textAreaOffset += ComputeVerticalOffsetForCenter(innerRect_.Height(), placeholderParagraph_->GetHeight());
-#ifndef USE_ROSEN_DRAWING
         placeholderParagraph_->Paint(canvas, textAreaOffset.GetX(), textAreaOffset.GetY());
-#else
-        // Drawing is not supported
-#endif
     } else {
         textAreaOffset += ComputeVerticalOffsetForCenter(innerRect_.Height(), paragraph_->GetHeight());
         Offset textOffset = textOffsetForShowCaret_ + textAreaOffset;
-#ifndef USE_ROSEN_DRAWING
         paragraph_->Paint(canvas, textOffset.GetX(), textOffset.GetY());
-#else
-        // Drawing is not supported
-#endif
     }
 }
 
@@ -463,11 +455,7 @@ void RosenRenderTextField::PaintErrorText(RSCanvas* canvas) const
         }
         errorOffset += Offset(0.0, innerRect_.Height() + bottomPadding + NormalizeToPx(COUNT_SPACING));
     }
-#ifndef USE_ROSEN_DRAWING
     errorParagraph_->Paint(canvas, errorOffset.GetX(), errorOffset.GetY());
-#else
-    // Drawing is not supported
-#endif
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -494,11 +482,7 @@ void RosenRenderTextField::PaintCountText(RSCanvas* canvas) const
             }
             countOffset += Offset(0.0, bottomPadding + NormalizeToPx(COUNT_SPACING));
         }
-#ifndef USE_ROSEN_DRAWING
         countParagraph_->Paint(canvas, countOffset.GetX(), countOffset.GetY());
-#else
-        // Drawing is not supported
-#endif
     }
 }
 
