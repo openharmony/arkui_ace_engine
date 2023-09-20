@@ -676,6 +676,7 @@ void NavigationPattern::OnWindowHide()
     CHECK_NULL_VOID(curTopNavPath->second);
     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
+    CHECK_NULL_VOID(curTopNavDestination);
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(curTopNavDestination->GetPattern());
     CHECK_NULL_VOID(navDestinationPattern);
     CHECK_NULL_VOID_NOLOG(navDestinationPattern->GetIsOnShow());
@@ -692,6 +693,7 @@ void NavigationPattern::OnWindowShow()
     CHECK_NULL_VOID(curTopNavPath->second);
     auto curTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(curTopNavPath->second));
+    CHECK_NULL_VOID(curTopNavDestination);
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(curTopNavDestination->GetPattern());
     CHECK_NULL_VOID(navDestinationPattern);
     CHECK_NULL_VOID_NOLOG(!(navDestinationPattern->GetIsOnShow()));
