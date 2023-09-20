@@ -460,6 +460,26 @@ public:
         return scrollEndCallback_;
     }
 
+    void SetCalePredictSnapOffsetCallback(CalePredictSnapOffsetCallback&& calePredictSnapOffsetCallback)
+    {
+        calePredictSnapOffsetCallback_ = std::move(calePredictSnapOffsetCallback);
+    }
+
+    const CalePredictSnapOffsetCallback& GetCalePredictSnapOffsetCallback() const
+    {
+        return calePredictSnapOffsetCallback_;
+    }
+
+    void SetStartScrollSnapMotionCallback(StartScrollSnapMotionCallback&& startScrollSnapMotionCallback)
+    {
+        startScrollSnapMotionCallback_ = std::move(startScrollSnapMotionCallback);
+    }
+
+    const StartScrollSnapMotionCallback& GetStartScrollSnapMotionCallback() const
+    {
+        return startScrollSnapMotionCallback_;
+    }
+
     void SetGestureEvent();
     void SetMouseEvent();
     void SetHoverEvent();
@@ -547,6 +567,8 @@ private:
     std::function<void()> markNeedRenderFunc_;
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
+    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
+    StartScrollSnapMotionCallback startScrollSnapMotionCallback_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
     CancelableCallback<void()> disappearDelayTask_;
