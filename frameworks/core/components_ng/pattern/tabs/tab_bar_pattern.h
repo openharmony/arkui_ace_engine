@@ -37,7 +37,7 @@
 
 namespace OHOS::Ace::NG {
 
-const auto TabBarPhysicalCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 288.0f, 30.f);
+const auto TabBarPhysicalCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.f);
 
 using TabBarBuilderFunc = std::function<void()>;
 class TabBarParam : public virtual Referenced {
