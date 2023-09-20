@@ -1387,4 +1387,40 @@ HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
     GestureEvent gestureEvent;
     pattern->clickListener_->GetGestureEventFunc()(gestureEvent);
 }
+
+    /**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test Oncolorconfigurationupdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern014, TestSize.Level1)
+{
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineBase::GetCurrent()->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    SearchModelNG searchModelInstance;
+    SetThemeInCreate();
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetThemeManager(themeManager);
+    auto textFieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    auto searchTheme = AceType::MakeRefPtr<SearchTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(textFieldTheme)).WillOnce(Return(searchTheme));
+    textFieldTheme->bgColor_ = Color::RED;
+    searchTheme->searchButtonTextColor_ = Color::RED;
+    searchTheme->placeholderColor_ = Color::RED;
+    pattern->OnColorConfigurationUpdate();
+    ASSERT_NE(pattern->cancelButtonNode_, nullptr);
+    auto textFieldLayoutProperty = pattern->textField_->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderTextColor(), Color::RED);
+    auto cancelButtonTextNode = AceType::DynamicCast<FrameNode>(pattern->cancelButtonNode_->GetChildren().front());
+    ASSERT_NE(cancelButtonTextNode, nullptr);
+    auto cancelButtonTextLayout = cancelButtonTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(cancelButtonTextLayout, nullptr);
+    EXPECT_EQ(cancelButtonTextLayout->GetTextColor(), Color::RED);
+}
 } // namespace OHOS::Ace::NG

@@ -2336,6 +2336,78 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DatePickerPatternTest017
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerTest017, TestSize.Level1)
+{
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto pipeline = MockPipelineBase::GetCurrent();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->disappearOptionStyle_.textColor_ = Color::RED;
+    pickerTheme->normalOptionStyle_.textColor_ = Color::RED;
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto datePickerNode = DatePickerDialogView::CreateDateNode(dateNodeId, settingData.datePickerProperty,
+        settingData.properties, settingData.isLunar, false);
+    ASSERT_NE(datePickerNode, nullptr);
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    auto monthDaysNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto monthDaysNode = DatePickerDialogView::CreateDateNode(
+        monthDaysNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, true);
+    datePickerNode->MountToParent(pickerStack);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto contentRow = DatePickerDialogView::CreateButtonNode(monthDaysNode, datePickerNode,
+        dialogEvent, std::move(dialogCancelEvent));
+    contentRow->AddChild(DatePickerDialogView::CreateDividerNode(datePickerNode), 1);
+    auto buttonTitleNode = DatePickerDialogView::CreateTitleButtonNode(datePickerNode);
+    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
+    buttonTitleNode->MountToParent(contentColumn);
+    datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
+    datePickerPattern->SetContentRowNode(contentRow);
+    contentRow->MountToParent(contentColumn);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PickerTheme>()));
+    auto context = datePickerNode->GetContext();
+    ASSERT_NE(context, nullptr);
+    datePickerPattern->OnColorConfigurationUpdate();
+    auto pickerProperty = datePickerNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    EXPECT_EQ(pickerProperty->GetColor(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetDisappearColor(), Color::RED);
+}
+
+/**
  * @tc.name: PerformActionTest001
  * @tc.desc: DatePicker Accessibility PerformAction test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
