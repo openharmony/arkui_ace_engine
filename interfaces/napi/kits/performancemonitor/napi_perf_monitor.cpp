@@ -178,7 +178,7 @@ static napi_value PerfMonitorInit(napi_env env, napi_value exports)
     napi_create_uint32(env, FIRST_MOVE, &prop);
     napi_set_named_property(env, actionType, "FIRST_MOVE", prop);
 
-    static napi_property_descriptor desc[] = {
+    napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("begin", JSSceneStart),
         DECLARE_NAPI_FUNCTION("end", JSSceneEnd),
         DECLARE_NAPI_PROPERTY("ActionType", actionType),
