@@ -10615,6 +10615,107 @@ HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchUpEventTest003, TestSize.Leve
     EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
 }
 
+
+/**
+ * @tc.name: SwipeRecognizerHandleTouchUpEventTest006
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchUpEventTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+        swipeDirection, SWIPE_SPEED);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+    swipeRecognizer->OnResetStatus();
+    touchEvent.time = swipeRecognizer->touchDownTime_;
+
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+
+    swipeRecognizer->refereeState_ = RefereeState::READY;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+
+    swipeRecognizer->refereeState_ = RefereeState::PENDING;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+
+    swipeRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), touchEvent.x);
+}
+
+/**
+ * @tc.name: PanRecognizerHandleTouchDownEventTest003
+ * @tc.desc: Test PanRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchDownEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    panRecognizerPtr->direction_.type = PanDirection::NONE;
+    panRecognizerPtr->isAllowMouse_ = false;
+    panRecognizerPtr->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), 0);
+}
+
+
+/**
+ * @tc.name: PanRecognizerHandleTouchCancelEventTest003
+ * @tc.desc: Test PanRecognizer function: HandleTouchCancelEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchCancelEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+    AxisEvent axisEvent;
+
+    panRecognizerPtr->refereeState_ = RefereeState::PENDING_BLOCKED;
+    panRecognizerPtr->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), 0);
+
+    panRecognizerPtr->refereeState_ = RefereeState::PENDING_BLOCKED;
+    panRecognizerPtr->HandleTouchCancelEvent(axisEvent);
+    EXPECT_EQ(panRecognizerPtr->globalPoint_.GetX(), 0);
+}
+
 /**
  * @tc.name: SwipeRecognizerHandleTouchUpEventTest005
  * @tc.desc: Test SwipeRecognizer function: HandleTouchUpEvent
