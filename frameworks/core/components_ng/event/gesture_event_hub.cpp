@@ -124,12 +124,12 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
             if (!recognizerGroup && newIdx >= idx) {
                 recognizer->SetTransInfo(host->GetId());
             }
-            newIdx++; // 检查子手势是否都查询到
             recognizer->BeginReferee(touchId);
             innerRecognizers.push_back(std::move(recognizer));
         } else {
             finalResult.push_back(eventTarget);
         }
+        newIdx++; // not process previous recognizers
     }
 
     ProcessTouchTestHierarchy(coordinateOffset, touchRestrict, innerRecognizers, finalResult, touchId);
