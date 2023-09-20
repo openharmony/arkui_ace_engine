@@ -104,14 +104,14 @@ frameworks/core/components_ng/pattern/security_component/  @
 frameworks/core/components_ng/pattern/select/  @cheng-feiwang
 frameworks/core/components_ng/pattern/select_overlay/  @lijuan124
 frameworks/core/components_ng/pattern/shape/  @sunbees
-frameworks/core/components_ng/pattern/side_bar/  @xuzhidan
+frameworks/core/components_ng/pattern/side_bar/  @tsj_2020
 frameworks/core/components_ng/pattern/slider/  @cheng-feiwang
 frameworks/core/components_ng/pattern/stack/  @nickyjd
 frameworks/core/components_ng/pattern/stage/  @yan-shuifeng
-frameworks/core/components_ng/pattern/stepper/  @xuzhidan
-frameworks/core/components_ng/pattern/swiper/  @xuzhidan @zhou-chaobo
-frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan @zhou-chaobo
-frameworks/core/components_ng/pattern/tabs/  @zhou-chaobo
+frameworks/core/components_ng/pattern/stepper/  @tsj_2020
+frameworks/core/components_ng/pattern/swiper/  @xuzhidan
+frameworks/core/components_ng/pattern/swiper_indicator/  @xuzhidan
+frameworks/core/components_ng/pattern/tabs/  @xuzhidan
 frameworks/core/components_ng/pattern/text/  @lijuan124
 frameworks/core/components_ng/pattern/text_clock/  @lijuan124
 frameworks/core/components_ng/pattern/text_drag/  @zhaojian2021
@@ -209,15 +209,15 @@ frameworks/core/components/shadow/  @
 frameworks/core/components/shape/  @sunbees
 frameworks/core/components/shared_transition/  @hehongyang9
 frameworks/core/components/sheet/  @cheng-feiwang
-frameworks/core/components/side_bar/  @xuzhidan
+frameworks/core/components/side_bar/  @tsj_2020
 frameworks/core/components/slider/  @cheng-feiwang
 frameworks/core/components/split_container/  @
 frameworks/core/components/stack/  @nickyjd
 frameworks/core/components/stage/  @yan-shuifeng
-frameworks/core/components/stepper/  @xuzhidan
+frameworks/core/components/stepper/  @tsj_2020
 frameworks/core/components/svg/  @zhoutianer
 frameworks/core/components/swiper/  @xuzhidan
-frameworks/core/components/tab_bar/  @zhou-chaobo
+frameworks/core/components/tab_bar/  @xuzhidan
 frameworks/core/components/text/  @lijuan124
 frameworks/core/components/text_clock/  @lijuan124
 frameworks/core/components/text_field/  @xiexiyun
@@ -378,14 +378,14 @@ frameworks/core/components_ng/test/pattern/security_component/ @
 frameworks/core/components_ng/test/pattern/select/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/select_overlay/   @cheng-feiwang
 frameworks/core/components_ng/test/pattern/shape/  @sunbees
-frameworks/core/components_ng/test/pattern/side_bar/  @xuzhidan
+frameworks/core/components_ng/test/pattern/side_bar/  @tsj_2020
 frameworks/core/components_ng/test/pattern/slider/  @cheng-feiwang
 frameworks/core/components_ng/test/pattern/stack/  @nickyjd
 frameworks/core/components_ng/test/pattern/stage/  @yan-shuifeng
-frameworks/core/components_ng/test/pattern/stepper/  @xuzhidan
+frameworks/core/components_ng/test/pattern/stepper/  @tsj_2020
 frameworks/core/components_ng/test/pattern/swiper/  @xuzhidan
 frameworks/core/components_ng/test/pattern/swiper_indicator/  @xuzhidan
-frameworks/core/components_ng/test/pattern/tabs/  @zhou-chaobo
+frameworks/core/components_ng/test/pattern/tabs/  @xuzhidan
 frameworks/core/components_ng/test/pattern/text/  @lijuan124
 frameworks/core/components_ng/test/pattern/text_clock/  @lijuan124
 frameworks/core/components_ng/test/pattern/text_drag/  @zhaojian2021
