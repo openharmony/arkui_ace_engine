@@ -185,6 +185,16 @@ public:
         return isDragging_;
     }
 
+    void SetLastMoveBeforeUp(bool isLastMoveBeforeUp)
+    {
+        isLastMoveBeforeUp_ = isLastMoveBeforeUp;
+    }
+
+    bool IsLastMoveBeforeUp() const
+    {
+        return isLastMoveBeforeUp_;
+    }
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -205,6 +215,7 @@ private:
     uint32_t lastHoverDispatchLength_ = 0;
     bool inSelectedRect_ = false;
     bool isDragging_ = false;
+    bool isLastMoveBeforeUp_ = false;
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
