@@ -852,6 +852,9 @@ void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 
 void ScrollablePattern::SelectWithScroll()
 {
+    if (!IsScrollable()) {
+        return;
+    }
     auto offset = GetOutOfScrollableOffset();
     if (NearZero(offset)) {
         return;
