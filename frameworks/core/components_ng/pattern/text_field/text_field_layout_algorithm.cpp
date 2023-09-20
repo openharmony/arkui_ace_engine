@@ -373,7 +373,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     OffsetF contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
     if (pattern->IsTextArea()) {
         if (hasAlign) {
-            content->SetOffset(OffsetF(pattern->GetUtilPadding().Offset().GetX(), contentOffset.GetY()));
+            content->SetOffset(OffsetF(pattern->GetUtilPadding().Offset().GetX() + pattern->GetBorderLeft(),
+                contentOffset.GetY() + pattern->GetBorderTop()));
             OffsetF textRectOffSet = Alignment::GetAlignPosition(size, textRect_.GetSize(), align);
             if (LessOrEqual(textRect_.Height(), content->GetRect().Height())) {
                 textRect_.SetOffset(OffsetF(pattern->GetTextRect().GetOffset().GetX(), textRectOffSet.GetY()));
@@ -381,7 +382,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 textRect_.SetOffset(pattern->GetTextRect().GetOffset());
             }
         } else {
-            content->SetOffset(pattern->GetUtilPadding().Offset());
+            content->SetOffset(OffsetF(pattern->GetUtilPadding().Offset().GetX() + pattern->GetBorderLeft(),
+                pattern->GetUtilPadding().Offset().GetY() + pattern->GetBorderTop()));
             textRect_.SetOffset(pattern->GetTextRect().GetOffset());
         }
         return;
