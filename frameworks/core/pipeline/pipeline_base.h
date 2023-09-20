@@ -448,7 +448,9 @@ public:
 
     int32_t GetMinPlatformVersion() const
     {
-        return minPlatformVersion_;
+        // Since API10, the platform version data format has changed.
+        // Use the last three digits of data as platform version. For example (4000000010).
+        return minPlatformVersion_ % 1000;
     }
 
     void SetMinPlatformVersion(int32_t minPlatformVersion)
