@@ -115,8 +115,10 @@ void ScrollSpringMotion::Move(float offsetTime)
     // change millisecond to second.
     float offsetTimeInSecond = offsetTime / UNIT_CONVERT;
     currentPosition_ = endPosition_ + model_->Position(offsetTimeInSecond);
+    currentVelocity_ = model_->Velocity(offsetTimeInSecond);
     if (IsCompleted()) {
         currentPosition_ = endPosition_;
+        currentVelocity_ = 0.0;
     }
 }
 
