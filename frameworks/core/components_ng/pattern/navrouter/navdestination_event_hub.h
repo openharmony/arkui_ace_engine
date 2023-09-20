@@ -56,7 +56,8 @@ public:
     void FireOnShownEvent() const
     {
         if (onShownEvent_) {
-            onShownEvent_();
+            auto onShownEvent = onShownEvent_;
+            onShownEvent();
         }
     }
 
