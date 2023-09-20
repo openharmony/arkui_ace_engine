@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float HTMBLOCK_VELOCITY = 20;
+constexpr float HTMBLOCK_VELOCITY = 200;
 }
 
 class GestureEventHub;
