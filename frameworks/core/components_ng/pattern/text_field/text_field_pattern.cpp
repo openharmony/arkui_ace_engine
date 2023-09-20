@@ -328,7 +328,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         updateSelectionAfterObscure_ = false;
     }
     if (textRectWillChange_) {
-        GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+        if (!textSelector_.StartEqualToDest()) {
+            GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
+        }
         textRectWillChange_ = false;
     }
     if (mouseStatus_ == MouseStatus::RELEASED) {
@@ -4721,6 +4723,8 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
     if (HasFocus() && isSingleHandle_) {
         StartTwinkling();
     }
+    textRectWillChange_ = true;
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     UpdateCaretInfoToController();
 }
 
