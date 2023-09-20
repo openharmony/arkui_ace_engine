@@ -85,7 +85,6 @@ constexpr Dimension UNDERLINE_NORMAL_PADDING = 12.0_vp;
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
-constexpr float ERROR_TEXT_CAPSULE_MARGIN = 33.0f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
@@ -5721,9 +5720,12 @@ void TextFieldPattern::UpdateErrorTextMargin()
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
     MarginProperty errorMargin;
-    if (layoutProperty->GetShowErrorTextValue(false) && (preErrorMargin_ < ERROR_TEXT_CAPSULE_MARGIN)) {
-        errorMargin.bottom = CalcLength(ERROR_TEXT_CAPSULE_MARGIN);
+    auto errorTextCapsuleMargin = theme->GetErrorTextCapsuleMargin();
+    if (layoutProperty->GetShowErrorTextValue(false) && (preErrorMargin_ < errorTextCapsuleMargin.ConvertToPx())) {
+        errorMargin.bottom = CalcLength(errorTextCapsuleMargin);
         layoutProperty->UpdateMargin(errorMargin);
         restoreMarginState_ = true;
     } else if (restoreMarginState_ == true) {
