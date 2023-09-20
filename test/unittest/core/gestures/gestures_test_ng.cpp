@@ -10332,6 +10332,408 @@ HWTEST_F(GesturesTestNg, PinchRecognizerHandleTouchMoveEventTest001, TestSize.Le
 }
 
 /**
+ * @tc.name: PinchRecognizerHandleTouchMoveEventTest002
+ * @tc.desc: Test PinchRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, PinchRecognizerHandleTouchMoveEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    RefPtr<PinchRecognizer> pinchRecognizer = AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER,
+                                                                                   PINCH_GESTURE_DISTANCE);
+
+    /**
+     * @tc.steps: step2. test HandleTouchMoveEvent(TouchEvent).
+     */
+    pinchRecognizer->refereeState_ = RefereeState::DETECTING;
+    std::vector<TouchEvent> touchEvents;
+    for (std::size_t i = 0; i < 5; ++i) {
+        TouchEvent touchEvent;
+        touchEvent.x = 100.0 * (i + 1);
+        touchEvent.y = 100.0 * (i + 1);
+        pinchRecognizer->touchPoints_[i] = touchEvent;
+    }
+    pinchRecognizer->initialDev_ = 1.0;
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+
+    /**
+     * @tc.steps: step2.1. test HandleTouchMoveEvent(TouchEvent) with fabs(currentDev_ - initialDev_) >= distance_.
+     * @tc.expect: scale_ = pinchRecognizer->ComputeAverageDeviation() / initialDev_.
+     */
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchMoveEvent(touchEvent);
+    pinchRecognizer->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer->initialDev_ = 2.0;
+    pinchRecognizer->OnFlushTouchEventsEnd();
+
+    /**
+     * @tc.steps: step3. test HandleTouchMoveEvent(AxisEvent).
+     */
+    AxisEvent axisEvent;
+    pinchRecognizer->isPinchEnd_ = false;
+
+    /**
+     * @tc.steps: step3.1. axisEvent NearZero and IsCtrlBeingPressed() is false.
+     * @tc.expect: pinchRecognizer->disposal_ is equal to GestureDisposal::REJECT.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    context->eventManager_ = nullptr;
+    pinchRecognizer->isPinchEnd_ = false;
+    axisEvent.pinchAxisScale = 1.0;
+    pinchRecognizer->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer->currentFingers_ = FINGER_NUMBER;
+    pinchRecognizer->HandleTouchMoveEvent(axisEvent);
+    pinchRecognizer->refereeState_ = RefereeState::FAIL;
+    pinchRecognizer->HandleTouchMoveEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer->scale_, axisEvent.pinchAxisScale);
+
+    axisEvent.pinchAxisScale = 0;
+    pinchRecognizer->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizer->HandleTouchCancelEvent(axisEvent);
+    pinchRecognizer->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizer->HandleTouchCancelEvent(touchEvent);
+    pinchRecognizer->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizer->currentFingers_ = pinchRecognizer->fingers_;
+    pinchRecognizer->HandleTouchUpEvent(touchEvent);
+    pinchRecognizer->refereeState_ = RefereeState::FAIL;
+    pinchRecognizer->isPinchEnd_ = false;
+    pinchRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(pinchRecognizer->scale_, 1);
+}
+
+/**
+ * @tc.name: LongPressRecognizerHandleTouchUpEventTest009
+ * @tc.desc: Test LongPressRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerHandleTouchUpEventTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PinchRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+
+    longPressRecognizer->refereeState_ = RefereeState::DETECTING;
+    longPressRecognizer->currentFingers_ = longPressRecognizer->fingers_;
+    longPressRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->repeat_, false);
+}
+
+/**
+ * @tc.name: LongPressRecognizerHandleTouchCancelEventTest001
+ * @tc.desc: Test LongPressRecognizer function: HandleTouchCancelEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerHandleTouchCancelEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+
+    longPressRecognizer->refereeState_ = RefereeState::DETECTING;
+    longPressRecognizer->currentFingers_ = longPressRecognizer->fingers_;
+    longPressRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->repeat_, false);
+}
+
+/**
+ * @tc.name: LongPressRecognizerHandleTouchDownEventTest001
+ * @tc.desc: Test LongPressRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerHandleTouchDownEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    longPressRecognizer->refereeState_ = RefereeState::DETECTING;
+    longPressRecognizer->isDisableMouseLeft_ = true;
+    longPressRecognizer->currentFingers_ = longPressRecognizer->fingers_;
+    longPressRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->repeat_, false);
+}
+
+/**
+ * @tc.name: LongPressRecognizerHandleTouchMoveEventTest001
+ * @tc.desc: Test LongPressRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerHandleTouchMoveEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    longPressRecognizer->refereeState_ = RefereeState::DETECTING;
+    longPressRecognizer->isDisableMouseLeft_ = true;
+    longPressRecognizer->currentFingers_ = longPressRecognizer->fingers_;
+    longPressRecognizer->isForDrag_ = true;
+    longPressRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->repeat_, false);
+
+    longPressRecognizer->refereeState_ = RefereeState::DETECTING;
+    longPressRecognizer->isDisableMouseLeft_ = false;
+    longPressRecognizer->currentFingers_ = longPressRecognizer->fingers_;
+    longPressRecognizer->isForDrag_ = false;
+    longPressRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->repeat_, false);
+}
+
+/**
+ * @tc.name: LongPressRecognizerHandleOverdueDeadlineTest001
+ * @tc.desc: Test LongPressRecognizer function: HandleOverdueDeadline
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, LongPressRecognizerHandleOverdueDeadlineTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    longPressRecognizer->refereeState_ = RefereeState::DETECTING;
+    longPressRecognizer->HandleOverdueDeadline(true);
+    EXPECT_EQ(longPressRecognizer->repeat_, false);
+}
+
+/**
+ * @tc.name: SwipeRecognizerHandleTouchDownEventTest001
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchDownEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+        swipeDirection, SWIPE_SPEED);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->fingers_ = 11;
+    swipeRecognizer->direction_.type = SwipeDirection::NONE;
+    swipeRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->fingers_ = FINGER_NUMBER;
+    swipeRecognizer->direction_.type = SwipeDirection::NONE;
+    swipeRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+}
+
+/**
+ * @tc.name: SwipeRecognizerHandleTouchDownEventTest002
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchDownEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+        swipeDirection, SWIPE_SPEED);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    AxisEvent axisEvent;
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->fingers_ = 11;
+    swipeRecognizer->direction_.type = SwipeDirection::NONE;
+    swipeRecognizer->HandleTouchDownEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->fingers_ = FINGER_NUMBER;
+    swipeRecognizer->direction_.type = SwipeDirection::NONE;
+    swipeRecognizer->HandleTouchDownEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+}
+
+/**
+ * @tc.name: SwipeRecognizerHandleTouchUpEventTest003
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchUpEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+        swipeDirection, SWIPE_SPEED);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED;
+    swipeRecognizer->fingers_ = 11;
+    swipeRecognizer->direction_.type = SwipeDirection::NONE;
+    swipeRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+}
+
+/**
+ * @tc.name: SwipeRecognizerHandleTouchUpEventTest005
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchUpEventTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+        swipeDirection, SWIPE_SPEED);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    AxisEvent axisEvent;
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::READY;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::PENDING;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->HandleTouchUpEvent(axisEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+}
+
+/**
+ * @tc.name: SwipeRecognizerHandleTouchCancelEventTest005
+ * @tc.desc: Test SwipeRecognizer function: HandleTouchCancelEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, SwipeRecognizerHandleTouchCancelEventTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SwipeRecognizer.
+     */
+    SwipeDirection swipeDirection;
+    RefPtr<SwipeRecognizer> swipeRecognizer = AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER,
+        swipeDirection, SWIPE_SPEED);
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED;
+    swipeRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::DETECTING;
+    swipeRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::READY;
+    swipeRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::PENDING;
+    swipeRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+    swipeRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    swipeRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+
+    swipeRecognizer->refereeState_ = RefereeState::FAIL;
+    swipeRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(swipeRecognizer->globalPoint_.GetX(), 0);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleTouchDownEventTest003
+ * @tc.desc: Test ClickRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GesturesTestNg, ClickRecognizerHandleTouchDownEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0;
+    touchEvent.y = 100.0;
+    touchEvent.sourceType = SourceType::MOUSE;
+
+    clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
+    clickRecognizerPtr->fingers_ = 0;
+    clickRecognizerPtr->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::FAIL);
+}
+
+/**
  * @tc.name: PinchRecognizerHandleTouchCancelEventTest001
  * @tc.desc: Test PinchRecognizer function: HandleTouchCancelEvent
  * @tc.type: FUNC
