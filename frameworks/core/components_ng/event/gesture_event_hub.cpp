@@ -602,6 +602,14 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(pipeline);
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && eventManager->IsLastMoveBeforeUp()) {
+        if (SystemProperties::GetDebugEnabled()) {
+            LOGI("Drag stop because user release mouse button");
+        }
+        return;
+    }
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
         LOGI("web on drag start");
