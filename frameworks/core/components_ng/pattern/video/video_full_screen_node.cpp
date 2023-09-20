@@ -14,16 +14,25 @@
  */
 
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
+
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 
 namespace OHOS::Ace::NG {
 void VideoFullScreenNode::InitVideoFullScreenNode(const RefPtr<VideoNode>& video)
 {
+    if (video->HasMediaColumnNode()) {
+        auto mediaColumnId = GetMediaColumnId();
+        auto mediaColumNode = FrameNode::GetOrCreateFrameNode(
+            V2::COLUMN_ETS_TAG, mediaColumnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        CHECK_NULL_VOID(mediaColumNode);
+        AddChild(mediaColumNode);
+    }
     if (video->HasPreviewImageNode()) {
         int32_t imageId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto previewNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, imageId,
-            []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        auto previewNode = FrameNode::GetOrCreateFrameNode(
+            V2::IMAGE_ETS_TAG, imageId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
         CHECK_NULL_VOID(previewNode);
         AddChild(previewNode);
     }
@@ -36,12 +45,12 @@ void VideoFullScreenNode::InitVideoFullScreenNode(const RefPtr<VideoNode>& video
     }
 }
 
-RefPtr<VideoFullScreenNode> VideoFullScreenNode::CreateFullScreenNode(const std::string& tag,
-    int32_t nodeId, const RefPtr<Pattern>& pattern)
+RefPtr<VideoFullScreenNode> VideoFullScreenNode::CreateFullScreenNode(
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
     auto fullScreenNode = AceType::MakeRefPtr<VideoFullScreenNode>(tag, nodeId, pattern, false);
     ElementRegister::GetInstance()->AddUINode(fullScreenNode);
     fullScreenNode->InitializePatternAndContext();
     return fullScreenNode;
 }
-}
+} // namespace OHOS::Ace::NG
