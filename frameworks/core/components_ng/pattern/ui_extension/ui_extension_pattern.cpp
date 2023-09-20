@@ -304,7 +304,7 @@ void UIExtensionPattern::RequestExtensionSessionActivation()
             pattern->ProcessUIExtensionSessionActivationResult(errcode);
         }, TaskExecutor::TaskType::UI);
     };
-
+    state_ = AbilityState::FOREGROUND;
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         extensionSession, hostWindowId, resultCallback);
 }
@@ -329,6 +329,7 @@ void UIExtensionPattern::RequestExtensionSessionBackground()
             pattern->ProcessUIExtensionSessionBackgroundResult(errcode);
         }, TaskExecutor::TaskType::UI);
     };
+    state_ = AbilityState::BACKGROUND;
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession, resultCallback);
 }
 
@@ -352,6 +353,7 @@ void UIExtensionPattern::RequestExtensionSessionDestruction()
             pattern->ProcessUIExtensionSessionDestructionResult(errcode);
         }, TaskExecutor::TaskType::UI);
     };
+    state_ = AbilityState::DESTRUCTION;
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession, resultCallback);
 }
 
@@ -786,41 +788,38 @@ void UIExtensionPattern::ProcessUIExtensionSessionActivationResult(OHOS::Rosen::
         std::string name = "start_ability_fail";
         std::string message = "Start ui extension ability failed, please check the want of UIextensionAbility.";
         lastError_ = { code, name, message };
+        state_ = AbilityState::NONE;
         if (onErrorCallback_) {
             ErrorMsg error;
             std::swap(lastError_, error);
             onErrorCallback_(error.code, error.name, error.message);
         }
-    } else {
-        state_ = AbilityState::FOREGROUND;
     }
 }
 
 void UIExtensionPattern::ProcessUIExtensionSessionBackgroundResult(OHOS::Rosen::WSError errcode)
 {
     if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        state_ = AbilityState::NONE;
         if (onErrorCallback_) {
             int32_t code = static_cast<int32_t>(errcode);
             std::string name = "background_fail";
             std::string message = "background ui extension ability failed, please check AMS log.";
             onErrorCallback_(code, name, message);
         }
-    } else {
-        state_ = AbilityState::BACKGROUND;
     }
 }
 
 void UIExtensionPattern::ProcessUIExtensionSessionDestructionResult(OHOS::Rosen::WSError errcode)
 {
     if (errcode != OHOS::Rosen::WSError::WS_OK) {
+        state_ = AbilityState::NONE;
         if (onErrorCallback_) {
             int32_t code = static_cast<int32_t>(errcode);
             std::string name = "terminate_fail";
             std::string message = "terminate ui extension ability failed, please check AMS log.";
             onErrorCallback_(code, name, message);
         }
-    } else {
-        state_ = AbilityState::DESTRUCTION;
     }
 }
 } // namespace OHOS::Ace::NG
