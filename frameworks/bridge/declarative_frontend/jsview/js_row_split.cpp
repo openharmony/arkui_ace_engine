@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
@@ -28,6 +30,24 @@ void JSRowSplit::Create()
 void JSRowSplit::JsResizeable(bool resizeable)
 {
     LinearSplitModel::GetInstance()->SetResizeable(NG::SplitType::ROW_SPLIT, resizeable);
+}
+
+void JSRowSplit::JsClip(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(true);
+        return;
+    }
+    if (info[0]->IsObject()) {
+        JSShapeAbstract* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            LOGD("clipShape is null");
+            return;
+        }
+        ViewAbstractModel::GetInstance()->SetClipShape(clipShape->GetBasicShape());
+    } else if (info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetClipEdge(info[0]->ToBoolean());
+    }
 }
 
 void JSRowSplit::JSBind(BindingTarget globalObj)

@@ -28,6 +28,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void JsResizeable(bool resizeable);
     static void JsDivider(const JSCallbackInfo& args);
+    static void JsClip(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
