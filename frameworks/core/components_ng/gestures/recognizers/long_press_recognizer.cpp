@@ -145,7 +145,9 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
     }
     if (refereeState_ == RefereeState::SUCCEED) {
         SendCallbackMsg(onActionUpdate_, false);
-        SendCallbackMsg(onActionEnd_, false);
+        if (currentFingers_ == fingers_) {
+            SendCallbackMsg(onActionEnd_, false);
+        }
     } else {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
