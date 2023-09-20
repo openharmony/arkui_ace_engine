@@ -291,7 +291,7 @@ void TitleBarPattern::HandleDragEnd(double dragVelocity)
     }
 }
 
-void TitleBarPattern::ProcessTittleDragStart(float offset)
+void TitleBarPattern::ProcessTitleDragStart(float offset)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
@@ -337,11 +337,8 @@ void TitleBarPattern::ProcessTittleDragStart(float offset)
     dragScrolling_ = true;
 }
 
-void TitleBarPattern::ProcessTittleDragUpdate(float offset)
+void TitleBarPattern::ProcessTitleDragUpdate(float offset, float dragOffsetY)
 {
-    if (NearZero(offset)) {
-        return;
-    }
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
@@ -351,7 +348,7 @@ void TitleBarPattern::ProcessTittleDragUpdate(float offset)
     }
     SetTitleStyleByOffset(offset);
     if (CanOverDrag_) {
-        overDragOffset_ = offset + defaultTitleBarHeight_ - maxTitleBarHeight_;
+        overDragOffset_ = dragOffsetY + defaultTitleBarHeight_ - maxTitleBarHeight_;
     } else {
         overDragOffset_ = 0.0f;
     }
@@ -364,6 +361,12 @@ void TitleBarPattern::ProcessTittleDragUpdate(float offset)
 void TitleBarPattern::SetTitleStyleByOffset(float offset)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+        return;
+    }
     SetTempTitleBarHeight(offset);
     titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
     SetTempTitleOffsetY();
@@ -380,7 +383,7 @@ void TitleBarPattern::SetTitleStyleByOffset(float offset)
     UpdateSubTitleOpacity(tempOpacity);
 }
 
-void TitleBarPattern::ProcessTittleDragEnd()
+void TitleBarPattern::ProcessTitleDragEnd()
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
@@ -395,7 +398,6 @@ void TitleBarPattern::ProcessTittleDragEnd()
     if (Positive(overDragOffset_)) {
         SpringAnimation(overDragOffset_, 0);
         enableAssociatedScroll_ = false;
-        return;
     }
 
     auto titleMiddleValue =
@@ -790,7 +792,8 @@ void TitleBarPattern::UpdateAssociatedScrollOffset(float offset)
 
     if (Positive(offset) && GreatNotEqual(tempTitleBarHeight, maxTitleBarHeight_)) {
         associatedScrollOverSize_ = true;
-        CanOverDrag_ = true;
+        CanOverDrag_ = false;
+        isOverDrag_ = true;
     }
 
     float titleBarOffset = associatedScrollOffset_;
@@ -812,6 +815,27 @@ void TitleBarPattern::UpdateAssociatedScrollOffset(float offset)
         }
     }
 
-    ProcessTittleDragUpdate(titleBarOffset);
+    ProcessTitleAssociatedUpdate(titleBarOffset);
+}
+void TitleBarPattern::ProcessTitleAssociatedUpdate(float offset)
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
+        return;
+    }
+    SetTitleStyleByOffset(offset);
+    if (isOverDrag_) {
+        overDragOffset_ = offset + defaultTitleBarHeight_ - maxTitleBarHeight_;
+    } else {
+        overDragOffset_ = 0.0f;
+    }
+    if (Positive(overDragOffset_)) {
+        UpdateScaleByDragOverDragOffset(overDragOffset_);
+    } else {
+        overDragOffset_ = 0.0f;
+    }
 }
 } // namespace OHOS::Ace::NG

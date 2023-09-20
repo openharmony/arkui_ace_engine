@@ -407,7 +407,7 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern002, TestSize.Level1)
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
     frameNode_->GetSubtitle();
-    titleBarPattern_->ProcessTittleDragStart(offset);
+    titleBarPattern_->ProcessTitleDragStart(offset);
     EXPECT_EQ(titleBarPattern_->GetTempTitleBarHeight(), titleBarPattern_->maxTitleBarHeight_);
 }
 
@@ -424,9 +424,9 @@ HWTEST_F(TitleBarTestNg, TitleBarPattern003, TestSize.Level1)
     auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    titleBarPattern_->ProcessTittleDragUpdate(offset);
+    titleBarPattern_->ProcessTitleDragUpdate(offset, 0.0f);
     titleBarPattern_->SetTitleStyleByOffset(offset);
-    titleBarPattern_->ProcessTittleDragEnd();
+    titleBarPattern_->ProcessTitleDragEnd();
     titleBarPattern_->SetTempTitleOffsetY();
     EXPECT_EQ(titleBarPattern_->GetTempTitleOffsetY(), titleBarPattern_->maxTitleOffsetY_);
     titleBarPattern_->SetTempSubTitleOffsetY();

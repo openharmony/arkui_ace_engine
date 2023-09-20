@@ -350,7 +350,7 @@ private:
     bool OnScrollPosition(double offset, int32_t source);
     void SetParentScrollable();
     void ProcessNavBarReactOnStart();
-    bool ProcessNavBarReactOnUpdate(bool isDraggedDown, float offset);
+    bool ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
 
     void OnAttachToFrameNode() override;

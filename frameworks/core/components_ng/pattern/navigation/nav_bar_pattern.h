@@ -104,12 +104,11 @@ public:
     }
 
     void OnCoordScrollStart();
-    void OnCoordScrollUpdate(float offset);
+    void OnCoordScrollUpdate(float offset, float dragOffsetY);
     void OnCoordScrollEnd();
     bool GetDraggedDown();
     bool GetFullStatus();
     bool GetIsMinTitle() const;
-    void StopNavBarMotion();
 
     bool GetToolbarHideStatus()
     {
@@ -131,7 +130,6 @@ private:
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
-    RefPtr<FrameNode> FindScrollableChild();
     float offset_ = 0.0f;
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
