@@ -12723,4 +12723,73 @@ HWTEST_F(SwiperTestNg, SwiperPatternStopSpringAnimationAndFlushImmediately001, T
     swiperPattern->StopSpringAnimationAndFlushImmediately();
     EXPECT_TRUE(swiperPattern->isVoluntarilyClear_);
 }
+
+/**
+ * @tc.name: SwiperPatternOnTranslateFinish002
+ * @tc.desc: OnTranslateFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swipernode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode =
+        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    stack->Push(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    int32_t nextIndex = 1;
+    bool restartAutoPlay = true;
+    bool forceStop = true;
+    swiperNode->Clean(false, false);
+    auto leftArrow = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, swiperPattern->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    ASSERT_NE(leftArrow, nullptr);
+    auto indicatorNode1 = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, swiperPattern->GetIndicatorId(),
+        []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode1, nullptr);
+    swiperNode->paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
+    ASSERT_NE(swiperNode->paintProperty_, nullptr);
+    swiperNode->layoutProperty_ = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    ASSERT_NE(swiperNode->layoutProperty_, nullptr);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetDisplayCount();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->ResetMinSize();
+    swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    swiperPattern->currentIndex_ = 1;
+    swiperNode->AddChild(leftArrow);
+    swiperNode->AddChild(indicatorNode1);
+    swiperPattern->leftButtonId_.reset();
+    swiperPattern->rightButtonId_.reset();
+    swiperPattern->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
+    swiperPattern->indicatorId_ = 542;
+    swiperPattern->isVisible_ = true;
+    swiperPattern->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
+    swiperPattern->isIndicatorLongPress_ = false;
+    auto host = swiperPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    EXPECT_EQ(host->GetChildren().size(), 2);
+    auto indicatorNode = AceType::DynamicCast<FrameNode>(
+        host->GetChildAtIndex(host->GetChildIndexById(swiperPattern->GetIndicatorId())));
+    EXPECT_NE(indicatorNode, nullptr);
+    EXPECT_EQ(host->GetChildIndexById(swiperPattern->GetIndicatorId()), 1);
+
+    /**
+     * @tc.steps: step2. call OnTranslateFinish.
+     * @tc.expected: Related function runs ok.
+     */
+    for (int i = 0; i <= 1; i++) {
+        for (int j = 0; j <= 1; j++) {
+            swiperPattern->OnTranslateFinish(nextIndex, restartAutoPlay, forceStop);
+            if (i == 1) {
+                swiperPattern->isUserFinish_ = true;
+                continue;
+            }
+            swiperPattern->isUserFinish_ = false;
+        }
+        swiperPattern->isVisible_ = false;
+    }
+}
 } // namespace OHOS::Ace::NG
