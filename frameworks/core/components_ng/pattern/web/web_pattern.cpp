@@ -566,6 +566,8 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
         if (pattern) {
             LOGI("DragDrop event WebEventHub onDragStartId, x:%{public}d, y:%{public}d, webId:%{public}d",
                 (int)info->GetX(), (int)info->GetY(), pattern->GetWebId());
+            pattern->dropX_ = 0;
+            pattern->dropY_ = 0;
             return pattern->HandleOnDragStart(info);
         }
         return dragDropInfo;
@@ -579,6 +581,8 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
             (int)info->GetX(), (int)info->GetY(), pattern->GetWebId());
         pattern->isW3cDragEvent_ = true;
         pattern->isDragging_ = true;
+        pattern->dropX_ = 0;
+        pattern->dropY_ = 0;
         return pattern->HandleOnDragEnter(info);
     };
 
@@ -619,6 +623,8 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
             LOGI("DragDrop event WebEventHub onDragDropId, isDragging_ false return");
             return;
         }
+        pattern->dropX_ = info->GetX();
+        pattern->dropY_ = info->GetY();
         pattern->HandleOnDragDrop(info);
     };
 
@@ -636,7 +642,7 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
         CHECK_NULL_VOID(pattern);
         LOGI("DragDrop event WebEventHub onDragEndId, x:%{public}d, y:%{public}d, webId:%{public}d",
             (int)info->GetX(), (int)info->GetY(), pattern->GetWebId());
-        pattern->HandleDragEnd(info->GetX(), info->GetY());
+        pattern->HandleDragEnd(pattern->dropX_, pattern->dropY_);
     };
     // set custom OnDragStart function
     eventHub->SetOnDragEnd(std::move(onDragEndId));
@@ -844,7 +850,7 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 
 void WebPattern::HandleDragEnd(int32_t x, int32_t y)
 {
-    LOGI("DragDrop event gestureHub END");
+    LOGI("DragDrop event gestureHub END, x:%{public}d, y:%{public}d", x, y);
     CHECK_NULL_VOID(delegate_);
 
     isDragging_ = false;
@@ -859,7 +865,11 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(x - offset.value_or(OffsetF()).GetX()) * viewScale;
     int32_t localY = static_cast<int32_t>(y - offset.value_or(OffsetF()).GetY()) * viewScale;
-    delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
+    if (x == 0 && y == 0) {
+        delegate_->HandleDragEvent(0, 0, DragAction::DRAG_END);
+    } else {
+        delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
+    }
 }
 
 void WebPattern::HandleDragCancel()
