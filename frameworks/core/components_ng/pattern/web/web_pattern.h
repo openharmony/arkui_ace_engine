@@ -437,6 +437,9 @@ private:
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
+    int32_t dropX_ = 0;
+    int32_t dropY_ = 0;
+    int GetWebId();
     int onDragMoveCnt = 0;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
