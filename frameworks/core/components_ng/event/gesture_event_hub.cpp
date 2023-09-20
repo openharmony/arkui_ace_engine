@@ -1059,6 +1059,9 @@ OnDragCallback GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& cont
             case DragResult::DRAG_FAIL:
                 result = DragRet::DRAG_FAIL;
                 break;
+            case DragResult::DRAG_CANCEL:
+                result = DragRet::DRAG_CANCEL;
+                break;
             default:
                 break;
         }
