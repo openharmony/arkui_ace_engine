@@ -263,4 +263,14 @@ void Animator::UpdateIteration(int32_t iteration)
 }
 
 void Animator::Copy(const RefPtr<Animator>& controller) {}
+
+FillMode Animator::GetFillMode() const
+{
+    return fillMode_;
+}
+
+int32_t Animator::GetIteration() const
+{
+    return iteration_;
+}
 } // namespace OHOS::Ace

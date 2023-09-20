@@ -14,12 +14,11 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("navrouter_test_ng") {
-  ace_animation = true
+  render = true
   flutter_skia = true
   sources = [
     # custom
     "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
-    "$ace_root/frameworks/core/animation/friction_motion.cpp",
     "$ace_root/frameworks/core/common/ime/text_input_proxy.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",

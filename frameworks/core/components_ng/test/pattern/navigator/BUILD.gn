@@ -18,7 +18,6 @@ import(
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("navigator_event_hub_test_ng") {
-  ace_animation = true
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/navigator/navigator_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigator/navigator_model_ng.cpp",

@@ -14,7 +14,6 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("custom_test_ng") {
-  ace_animation = true
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node_base.cpp",

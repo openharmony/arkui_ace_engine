@@ -38,12 +38,6 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "core/components_ng/render/font_collection.h"
-#else
-#include "core/common/font_manager.h"
-#include "core/components_ng/render/adapter/txt_font_collection.h"
-#endif
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

@@ -37,7 +37,6 @@ config("config_shape_test") {
 }
 
 ace_unittest("circle_pattern_test_ng") {
-  ace_animation = true
   flutter_skia = true
   render = true
   sources = [
@@ -56,7 +55,6 @@ ace_unittest("circle_pattern_test_ng") {
 }
 
 ace_unittest("ellipse_pattern_test_ng") {
-  ace_animation = true
   flutter_skia = true
   render = true
   sources = [
@@ -75,7 +73,6 @@ ace_unittest("ellipse_pattern_test_ng") {
 }
 
 ace_unittest("line_pattern_test_ng") {
-  ace_animation = true
   flutter_skia = true
   render = true
   sources = [
@@ -95,7 +92,6 @@ ace_unittest("line_pattern_test_ng") {
 }
 
 ace_unittest("rect_pattern_test_ng") {
-  ace_animation = true
   flutter_skia = true
   render = true
   sources = [
@@ -114,7 +110,6 @@ ace_unittest("rect_pattern_test_ng") {
 }
 
 ace_unittest("path_pattern_test_ng") {
-  ace_animation = true
   flutter_skia = true
   render = true
   sources = [
@@ -135,7 +130,6 @@ ace_unittest("path_pattern_test_ng") {
 }
 
 ace_unittest("polygon_pattern_test_ng") {
-  ace_animation = true
   flutter_skia = true
   render = true
   sources = [
@@ -155,7 +149,6 @@ ace_unittest("polygon_pattern_test_ng") {
 }
 
 ace_unittest("polyline_pattern_test_ng") {
-  ace_animation = true
   flutter_skia = true
   render = true
   sources = [
@@ -175,7 +168,6 @@ ace_unittest("polyline_pattern_test_ng") {
 }
 
 ace_unittest("shape_pattern_test_ng") {
-  ace_animation = true
   flutter_skia = true
   render = true
   sources = [
@@ -194,7 +186,6 @@ ace_unittest("shape_pattern_test_ng") {
 }
 
 ace_unittest("shape_container_pattern_test_ng") {
-  ace_animation = true
   flutter_skia = true
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",

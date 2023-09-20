@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("event_manager_test_ng") {
@@ -47,8 +45,6 @@ ohos_unittest("event_manager_test_ng") {
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/scroll/render_scroll.cpp",
     "$ace_root/frameworks/core/components/scroll/render_single_child_scroll.cpp",
-    "$ace_root/frameworks/core/components/text_overlay/text_overlay_component.cpp",
-    "$ace_root/frameworks/core/components/text_overlay/text_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
