@@ -128,11 +128,6 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
          "%{public}d, %{public}d",
         event.id, equalsToFingers_, currentTouchPointsNum_);
 
-    if (currentTouchPointsNum_ >= fingers_) {
-        LOGI("current down finger is larger than defined, %{public}d, %{public}d", currentTouchPointsNum_, fingers_);
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-    }
-
     // The last recognition sequence has been completed, reset the timer.
     if (tappedCount_ > 0 && currentTouchPointsNum_ == 0) {
         tapDeadlineTimer_.Cancel();
