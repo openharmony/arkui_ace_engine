@@ -1509,7 +1509,10 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
     CHECK_NULL_VOID(frameNode);
     auto rect = frameNode->GetGeometryNode()->GetFrameRect();
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
-    delegate_->SetBoundsOrResize(drawSize_, offset);
+
+    // Scroll focused node into view when keyboard show or hide, so set isKeyboard to true here.
+    delegate_->SetBoundsOrResize(drawSize_, offset, true);
+
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

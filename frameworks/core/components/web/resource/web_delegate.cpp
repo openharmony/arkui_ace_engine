@@ -2723,7 +2723,7 @@ void WebDelegate::UpdateInitialScale(float scale)
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void WebDelegate::Resize(const double& width, const double& height)
+void WebDelegate::Resize(const double& width, const double& height, bool isKeyboard)
 {
     if (width <= 0 || height <= 0) {
         return;
@@ -2734,11 +2734,11 @@ void WebDelegate::Resize(const double& width, const double& height)
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), width, height]() {
+        [weak = WeakClaim(this), width, height, isKeyboard]() {
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_ && !delegate->window_) {
                 // Sur need int value, greater than this value in case show black line.
-                delegate->nweb_->Resize(std::ceil(width), std::ceil(height));
+                delegate->nweb_->Resize(std::ceil(width), std::ceil(height), isKeyboard);
                 double offsetX = 0;
                 double offsetY = 0;
                 delegate->UpdateScreenOffSet(offsetX, offsetY);
@@ -5175,7 +5175,7 @@ sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
     return surfaceDelegate_;
 }
 
-void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset)
+void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard)
 {
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
         LOGE("WebDelegate::SetBoundsOrResize width and height error");
@@ -5188,14 +5188,14 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset)
                 (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
             if (needResizeAtFirst_) {
                 LOGI("WebDelegate::SetBounds: resize at first");
-                Resize(drawSize.Width(), drawSize.Height());
+                Resize(drawSize.Width(), drawSize.Height(), isKeyboard);
                 needResizeAtFirst_ = false;
             }
             Size webSize = GetEnhanceSurfaceSize(drawSize);
             surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), webSize.Width(), webSize.Height());
         }
     } else {
-        Resize(drawSize.Width(), drawSize.Height());
+        Resize(drawSize.Width(), drawSize.Height(), isKeyboard);
     }
 }
 
