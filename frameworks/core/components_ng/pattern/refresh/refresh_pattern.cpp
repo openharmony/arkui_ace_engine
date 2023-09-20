@@ -87,7 +87,7 @@ void RefreshPattern::OnModifyDone()
     } else if (!progressChild_) {
         progressChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 1));
     }
-    if (isRefreshing_ != refreshingProp) {
+    if (isCustomBuilderExist_ || isRefreshing_ != refreshingProp) {
         if (refreshingProp) {
             QuickStartFresh();
         } else {
