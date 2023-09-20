@@ -141,17 +141,6 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     // slider track length
     sliderLength_ = length >= borderBlank_ ? length - borderBlank_ : 1;
     borderBlank_ = (length - sliderLength_) * HALF;
-    auto children = dirty->GetAllChildrenWithBuild();
-    if (!children.empty()) {
-        CHECK_NULL_RETURN(imageFrameNode_, true);
-        auto child = children.front();
-        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        OffsetF childOffset(
-            circleCenter_.GetX() - childSize.Width() * HALF, circleCenter_.GetY() - childSize.Height() * HALF);
-        child->GetGeometryNode()->SetMarginFrameOffset(childOffset);
-        imageFrameNode_->MarkModifyDone();
-        imageFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
 
     return true;
 }
