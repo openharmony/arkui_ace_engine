@@ -508,6 +508,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
 
   private performDelayedUpdate(): void {
+    if (!this.ownStorageLinksProps_.size) {
+      return;
+    }
     stateMgmtTrace.scopedTrace(() => {
     stateMgmtConsole.debug(`${this.debugInfo()}: performDelayedUpdate start ...`);
     this.syncInstanceId();

@@ -4766,6 +4766,9 @@ class ViewPU extends NativeViewPartialUpdate {
         }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
     }
     performDelayedUpdate() {
+        if (!this.ownStorageLinksProps_.size) {
+            return;
+        }
         stateMgmtTrace.scopedTrace(() => {
             
             this.syncInstanceId();
