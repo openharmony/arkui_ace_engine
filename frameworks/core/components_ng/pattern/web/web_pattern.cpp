@@ -141,6 +141,7 @@ constexpr int32_t DOUBLE_CLICK_NUM = 2;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5;
 constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
+constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 // web feature params
@@ -552,21 +553,28 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
 {
     auto onDragStartId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) -> NG::DragDropInfo {
-        LOGI("DragDrop event WebEventHub onDragStartId, x:%{public}d, y:%{public}d",
-            (int)info->GetX(), (int)info->GetY());
+        NG::DragDropInfo dragDropInfo;
         auto pattern = weak.Upgrade();
-        return pattern->HandleOnDragStart(info);
+        if (pattern) {
+            LOGI("DragDrop event WebEventHub onDragStartId, x:%{public}d, y:%{public}d, webId:%{public}d",
+                (int)info->GetX(), (int)info->GetY(), pattern->GetWebId());
+            pattern->dropX_ = 0;
+            pattern->dropY_ = 0;
+            return pattern->HandleOnDragStart(info);
+        }
+        return dragDropInfo;
     };
 
     auto onDragEnterId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
-        LOGI("DragDrop event WebEventHub onDragEnterId, x:%{public}d, y:%{public}d",
-            (int)info->GetX(), (int)info->GetY());
-
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        LOGI("DragDrop event WebEventHub onDragEnterId, x:%{public}d, y:%{public}d, webId:%{public}d",
+            (int)info->GetX(), (int)info->GetY(), pattern->GetWebId());
         pattern->isW3cDragEvent_ = true;
         pattern->isDragging_ = true;
+        pattern->dropX_ = 0;
+        pattern->dropY_ = 0;
         return pattern->HandleOnDragEnter(info);
     };
 
@@ -574,6 +582,11 @@ void WebPattern::InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHu
                              const std::string& extraParams) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        static uint32_t dragMoveCnt = 0;
+        if ((dragMoveCnt++ % DEBUG_DRAGMOVEID_TIMER) == 0) {
+            LOGD("DragDrop event WebEventHub onDragMoveId, x:%{public}d, y:%{public}d, webId:%{public}d",
+                (int)info->GetX(), (int)info->GetY(), pattern->GetWebId());
+        }
         if (!pattern->isDragging_) {
             return;
         }
@@ -594,32 +607,34 @@ void WebPattern::InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub)
 {
     auto onDragDropId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
-        LOGI("DragDrop event WebEventHub onDragDropId, x:%{public}d, y:%{public}d",
-            (int)info->GetX(), (int)info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        LOGI("DragDrop event WebEventHub onDragDropId, x:%{public}d, y:%{public}d, webId:%{public}d",
+            (int)info->GetX(), (int)info->GetY(), pattern->GetWebId());
         if (!pattern->isDragging_) {
             LOGI("DragDrop event WebEventHub onDragDropId, isDragging_ false return");
             return;
         }
+        pattern->dropX_ = info->GetX();
+        pattern->dropY_ = info->GetY();
         pattern->HandleOnDragDrop(info);
     };
 
     auto onDragLeaveId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info,
                              const std::string& extraParams) {
-        LOGI("DragDrop event WebEventHub onDragLeaveId, x:%{public}d, y:%{public}d",
-            (int)info->GetX(), (int)info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        LOGI("DragDrop event WebEventHub onDragLeaveId, x:%{public}d, y:%{public}d, webId:%{public}d",
+            (int)info->GetX(), (int)info->GetY(), pattern->GetWebId());
         pattern->HandleOnDragLeave(info->GetX(), info->GetY());
     };
 
     auto onDragEndId = [weak = WeakClaim(this)](const RefPtr<OHOS::Ace::DragEvent>& info) {
-        LOGI("DragDrop event WebEventHub onDragEndId, x:%{public}d, y:%{public}d",
-            (int)info->GetX(), (int)info->GetY());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleDragEnd(info->GetX(), info->GetY());
+        LOGI("DragDrop event WebEventHub onDragEndId, x:%{public}d, y:%{public}d, webId:%{public}d",
+            (int)info->GetX(), (int)info->GetY(), pattern->GetWebId());
+        pattern->HandleDragEnd(pattern->dropX_, pattern->dropY_);
     };
     // set custom OnDragStart function
     eventHub->SetOnDragEnd(std::move(onDragEndId));
@@ -696,9 +711,10 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         int32_t x = info.GetGlobalPoint().GetX();
         int32_t y = info.GetGlobalPoint().GetY();
-        LOGI("DragDrop event gestureHub actionStartTask x:%{public}d, y:%{public}d", x, y);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
+        LOGI("DragDrop event gestureHub actionStartTask x:%{public}d, y:%{public}d, webId:%{public}d",
+            x, y, pattern->GetWebId());
         pattern->HandleDragStart(x, y);
     };
 
@@ -709,16 +725,18 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         int32_t x = info.GetGlobalPoint().GetX();
         int32_t y = info.GetGlobalPoint().GetY();
-        LOGI("DragDrop event gestureHub actionEndTask x:%{public}d, y:%{public}d", x, y);
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
+        LOGI("DragDrop event gestureHub actionEndTask x:%{public}d, y:%{public}d, webId:%{public}d",
+            x, y, pattern->GetWebId());
         pattern->HandleDragEnd(x, y);
     };
 
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        LOGI("DragDrop event gestureHub actionCancelTask ");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
+        LOGI("DragDrop event gestureHub actionCancelTask  webId:%{public}d",
+            pattern->GetWebId());
         pattern->HandleDragCancel();
     };
 
@@ -824,7 +842,7 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 
 void WebPattern::HandleDragEnd(int32_t x, int32_t y)
 {
-    LOGI("DragDrop event gestureHub END");
+    LOGI("DragDrop event gestureHub END, x:%{public}d, y:%{public}d", x, y);
     CHECK_NULL_VOID(delegate_);
 
     isDragging_ = false;
@@ -839,7 +857,11 @@ void WebPattern::HandleDragEnd(int32_t x, int32_t y)
     auto offset = GetCoordinatePoint();
     int32_t localX = static_cast<int32_t>(x - offset.value_or(OffsetF()).GetX()) * viewScale;
     int32_t localY = static_cast<int32_t>(y - offset.value_or(OffsetF()).GetY()) * viewScale;
-    delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
+    if (x == 0 && y == 0) {
+        delegate_->HandleDragEvent(0, 0, DragAction::DRAG_END);
+    } else {
+        delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_END);
+    }
 }
 
 void WebPattern::HandleDragCancel()
@@ -2281,6 +2303,14 @@ bool WebPattern::OnBackPressed() const
 void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler)
 {
     fullScreenExitHandler_ = fullScreenExitHandler;
+}
+
+int WebPattern::GetWebId()
+{
+    if (delegate_) {
+        return delegate_->GetWebId();
+    }
+    return -1;
 }
 
 void WebPattern::OnInActive()

@@ -571,6 +571,7 @@ public:
     bool OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData> dragData);
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
     bool IsImageDrag();
+    int GetWebId();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
     void UpdateDragCursor(NWeb::NWebDragData::DragOperation op)
     {
@@ -659,7 +660,6 @@ private:
     int GetHitTestResult();
     void GetHitTestValue(HitTestResult& result);
     int GetPageHeight();
-    int GetWebId();
     std::string GetTitle();
     std::string GetDefaultUserAgent();
     bool SaveCookieSync();
