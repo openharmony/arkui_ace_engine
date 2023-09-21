@@ -37,6 +37,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
@@ -892,6 +893,52 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest004, TestSize.Level1)
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->FireChangeEvent(true);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest019
+ * @tc.desc: Test OnLanguageConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPatternTest019, TestSize.Level1)
+{
+    const std::string language = "en";
+    const std::string countryOrRegion = "US";
+    const std::string script = "Latn";
+    const std::string keywordsAndValues = "";
+    auto pickerStack = DatePickerDialogView::CreateStackNode();
+    ASSERT_NE(pickerStack, nullptr);
+    auto datePickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
+    datePickerNode->MountToParent(pickerStack);
+    auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NG::ButtonPattern>(); });
+    auto textConfirmNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textConfirmNode->MountToParent(buttonConfirmNode);
+    auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->SetConfirmNode(buttonConfirmNode);
+
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonCancelNode, nullptr);
+    auto textCancelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textCancelNode, nullptr);
+    auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
+    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    ASSERT_NE(textCancelLayoutProperty, nullptr);
+    textCancelNode->MountToParent(buttonCancelNode);
+    datePickerPattern->SetCancelNode(buttonCancelNode);
+    datePickerPattern->OnLanguageConfigurationUpdate();
+    AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
+    std::string nodeInfo = "";
+    auto cancel = Localization::GetInstance()->GetEntryLetters("common.cancel");
+    EXPECT_EQ(cancel, nodeInfo);
 }
 
 /**
