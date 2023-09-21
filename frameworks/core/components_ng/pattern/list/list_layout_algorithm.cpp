@@ -522,6 +522,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 endPos += contentMainSize_ - prevContentMainSize_;
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
+                midIndex = GetLanesFloor(layoutWrapper, midIndex) + GetLanes() - 1;
                 LayoutBackward(layoutWrapper, midIndex, midItemMidPos + midItemHeight / 2.0f);
             } else {
                 LayoutBackward(layoutWrapper, endIndex, endPos);
